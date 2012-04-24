@@ -2,7 +2,7 @@
 /* App Controllers */
 
 function colorController() {
-    var colors = ["#0000ff", "#0099ff", "#0000ff", "#00ff00",
+    /*var colors = ["#0000ff", "#0099ff", "#0000ff", "#00ff00",
         "#990000", "#cc9900", "#660099", "#ff00ff", "#663300", "#000000"];
     var colorIndex = 0;
     var routeColors = [];
@@ -18,7 +18,7 @@ function colorController() {
             if (obj.routeId == routeId)
                 return obj.color;
         }
-        routeColors.push(new RouteColor(routeId, colors[colorIndex]));
+        routeColors.push(new routeColor(routeId, colors[colorIndex]));
         return colors[colorIndex];
 
         colorIndex++;
@@ -26,8 +26,8 @@ function colorController() {
             colorIndex = 0;
     }
 
-    function RouteColor(routeId, color) {
+    function routeColor(routeId, color) {
         this.color = color;
         this.routeId = routeId;
-    }
+    }*/
 }
