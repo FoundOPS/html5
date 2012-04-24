@@ -1,130 +1,195 @@
-﻿function mapController($scope, employeesDataSource) {
-    //var CurrentDate = new Date();
-    //var SelectedRouteId;
-    //var SelectedRouteLayer;
-    var employees = employeesDataSource.data;
+﻿'use strict';
+angular.module("foundOPS").controller('mapController', function ($scope, $defer, resourcesStore) {
+    //the map instance
+    var map;
 
-    function clearMap() {
-    }
+    //the current date
+    //var currentDate = new Date();
 
-    function drawCalculatedRoutes() {
-    }
+    //the current resources
+    var resources;
 
-    function drawHistoricalTrackPoints(routeId) {
-    }
+    //keep track of the resources group so it can be removed from the map when the resources are redrawn
+    var resourcesGroup;
 
-    function drawResources() {
-        var map = new L.Map("map");
-        var cloudmade = new L.TileLayer('http://{s}.tile.cloudmade.com/57cbb6ca8cac418dbb1a402586df4528/997/256/{z}/{x}/{y}.png', {
+    //keeps track of the initial load, to only center the map once
+    var initialLoad = true;
+
+    //var selectedRouteId;
+    //var selectedRouteLayer;
+
+    var setupMap = function () {
+        // initialize the map on the "map" div with a given center and zoom
+        map = new window.L.Map('map', {
+            center: new window.L.LatLng(40, -89),
+            zoom: 4
+        });
+        // create a CloudMade tile layer
+        var cloudmade = new window.L.TileLayer('http://{s}.tile.cloudmade.com/57cbb6ca8cac418dbb1a402586df4528/997/256/{z}/{x}/{y}.png', {
             maxZoom: 18
         });
-        //an array to hold the lat and lng of every point used
-        var totalLatLngs = [];
-        //create a polyline that includes every point(necessary for correct bounds)
-        var allPoints = new L.Polyline(totalLatLngs, {
-            weight: 0
-        });
+        // add the CloudMade layer to the map
+        map.addLayer(cloudmade);
+    };
 
-        for (var emp in employees) {
-            var name = employees[emp].Name;
-            var lat = employees[emp].Latitude;
-            var lng = employees[emp].Longitude;
-            var rotateDegrees = employees[emp].Heading;
+    setupMap();
+
+    var clearHistoricalTrackPoints = function () {
+    };
+
+    var clearMap = function () {
+        if (resourcesGroup != null)
+            map.removeLayer(resourcesGroup);
+        //map.removeLayer(routesGroup);
+        //map.removeLayer(trackpointsGroup);
+    };
+
+    var drawCalculatedRoutes = function () {
+    };
+
+    var drawHistoricalTrackPoints = function (routeId) {
+    };
+
+    //center on the latitudes and longitudes
+    //resourcesToCenterOn is an array to hold the lat and lng of every point used
+    var center = function (resourcesToCenterOn) {
+        //gets the total area used
+        var bounds = new window.L.LatLngBounds(resourcesToCenterOn);
+
+        //center the map on the bounds
+        map.setView(bounds.getCenter(), 12);
+
+        //sets the best view(position and zoom level) to fit all the resources
+        map.fitBounds(bounds);
+    };
+
+    var drawResources = function () {
+        //remove the previous resources
+        if (resourcesGroup != null)
+            map.removeLayer(resourcesGroup);
+
+        //track the resources so they can be removed when they are redrawn
+        resourcesGroup = new window.L.LayerGroup();
+
+        //store the resourceLatLongs to center on (if this is the initial load)
+        var resourceLatLongs = [];
+
+        //go through and draw each resource on the map
+        for (var r in resources) {
+            var resource = resources[r];
+            var name = resource.EntityName;
+            var lat = resource.Latitude;
+            var lng = resource.Longitude;
+            var rotateDegrees = resource.CompassHeading;
+
             //get the location of the destination
-            var location = new L.LatLng(lat, lng);
-            var url = "";
-            if (employees[emp].Source == "iPhone") {
+            var location = new window.L.LatLng(lat, lng);
+
+            //include this location into the bounds to center on
+            resourceLatLongs.push(location);
+
+            var url = "../img/truck.png";
+            if (resource.TrackSource == "iPhone") {
                 url = "../img/apple.png";
-            } else {
+            } else if (resource.TrackSource == "Android") {
                 url = "../img/android.png";
             }
             //create a point at the current location
-            var employeeIcon = L.Icon.extend({
+            var employeeIcon = window.L.Icon.extend({
                 iconUrl: url,
-                iconSize: new L.Point(14, 14),
-                iconAnchor: new L.Point(7, 7),
-                shadowSize: new L.Point(0, 0),
-                popupAnchor: new L.Point(10, 0)
+                iconSize: point(14, 14),
+                iconAnchor: point(7, 7),
+                shadowSize: point(0, 0),
+                popupAnchor: point(0, -5)
             });
             var icon = new employeeIcon();
-            var marker = new L.Marker(location, {
+            var marker = new window.L.Marker(location, {
                 icon: icon
             });
-            var arrowIcon = L.Icon.extend({
+            //Create the icon for the direction arrow
+            var arrowIcon = window.L.Icon.extend({
                 iconUrl: "../img/arrow.png",
-                iconSize: new L.Point(26, 26),
-                iconAnchor: new L.Point(12, 12),
-                shadowSize: new L.Point(0, 0)
+                iconSize: point(26, 26),
+                iconAnchor: point(12, 12),
+                shadowSize: point(0, 0)
             });
             icon = new arrowIcon();
-            var arrow = new L.Marker(location, {
-                icon: icon
-            });
-
-            var ArrowMarker = L.Marker.extend({
+            var arrow;
+            //Create the marker for the direction arrow
+            var arrowMarker = window.L.Marker.extend({
                 _reset: function () {
                     var pos = this._map.latLngToLayerPoint(this._latlng).round();
 
-                    L.DomUtil.setPosition(this._icon, pos);
+                    window.L.DomUtil.setPosition(this._icon, pos);
 
-                    this._icon.style.WebkitTransform = this._icon.style.WebkitTransform + ' rotate(' + this.options.iconAngle + 'deg)';
-                    this._icon.style.MozTransform = 'rotate(' + this.options.iconAngle + 'deg)';
-                    this._icon.style.MsTransform = 'rotate(' + this.options.iconAngle + 'deg)';
-                    this._icon.style.OTransform = 'rotate(' + this.options.iconAngle + 'deg)';
+                    this._icon.style.WebkitTransform += ' rotate(' + this.options.angle + 'deg)';
+                    this._icon.style.MozTransform = 'rotate(' + this.options.angle + 'deg)';
+                    this._icon.style.msTransform = 'rotate(' + this.options.angle + 'deg)';
+                    this._icon.style.OTransform = 'rotate(' + this.options.angle + 'deg)';
                 }
             });
+            arrow = new arrowMarker(location, { icon: icon, angle: rotateDegrees });
 
-            arrow = new ArrowMarker(location, { icon: icon, iconAngle: rotateDegrees });
+            marker.bindPopup("<b>" + name + "</b><br/> Current Speed: " + resource.Speed + " mph").openPopup();
 
-            //$(marker._icon).css({
-            //    '-moz-transform': 'rotate(' + rotateDegrees + 'deg)',
-            //    '-webkit-transform': 'rotate(' + rotateDegrees + 'deg)',
-            //    '-o-transform': 'rotate(' + rotateDegrees + 'deg)',
-            //    '-ms-transform': 'rotate(' + rotateDegrees + 'deg)'
-            //});
-
-            marker.bindPopup("<b>" + name + "</b><br/> Current Speed: " + employees[emp].Speed + " mph ").openPopup();
-            //include this location into the bounds
-            allPoints.addLatLng(location);
             //add current marker to the map
-            map.addLayer(arrow);
-            map.addLayer(marker);//gets the total area used
+            resourcesGroup.addLayer(arrow);
+            resourcesGroup.addLayer(marker);
         }
-        var bounds = new L.LatLngBounds(totalLatLngs);
-        //get the center of the area used
-        var mapCenter = bounds.getCenter();
-        map.setView(mapCenter, 12).addLayer(cloudmade);
-        //sets the best view(position and zoom level) to fit all the routes
-        map.fitBounds(bounds);
-    }
 
-    function getHistoricalTrackPoints(date) {
-    }
+        //add the resources to the map
+        map.addLayer(resourcesGroup);
 
-    function getResourcesWithLatestPoint() {
-    }
+        //if this is the initial load, center on the current resources
+        if (initialLoad)
+            center(resourceLatLongs);
 
-    function getRoutes(date) {
-    }
+        //reset the initial load flag
+        initialLoad = false;
+    };
 
-    function setDate(date) {
-        //CurrentDate = date;
-        //clearMap();
-        //getRoutes(date, drawCalculatedRoutes());
-        //getHistoricalTrackPoints(date, drawHistoricalTrackPoints(SelectedRouteId));
-        //if (date == DateTime.today()) {
-            getResourcesWithLatestPoint(drawResources());
+    var getHistoricalTrackPoints = function (date) {
+        drawHistoricalTrackPoints(selectedRouteId);
+    };
+
+    var getResourcesWithLatestPoint = function () {
+        resourcesStore.read().then(function(data) {
+            if (!data) {
+                data = [];
+            }
+            resources = data;
+            drawResources();
+        });
+        $defer(getResourcesWithLatestPoint, 100000);
+    };
+
+    var getRoutes = function (date) {
+        drawCalculatedRoutes();
+    };
+
+    var point = function (pointA, pointB) {
+        return new window.L.Point(pointA, pointB);
+    };
+
+    var setDate = function (date) {
+        //var month = date.month() + 1;
+        //var day = date.day();
+        //var year = date.year();
+        //var newDate = month + "-" + day + "-" + year;
+        clearMap();
+        //getRoutes(newDate);
+        //getHistoricalTrackPoints(newDate);
+        //if (date.date() == DateTime.utcNow().date()) {
+        getResourcesWithLatestPoint();
         //}
-    }
+    };
 
-    function setSelectedRoute(routeId) {
-        //clearHistoricalTrackPoints();
-        //SelectedRouteId = routeId;
-        //drawHistoricalTrackPoints(routeId);
-    }
+    //var setSelectedRoute = function (routeId) {
+    //    clearHistoricalTrackPoints();
+    //    selectedRouteId = routeId;
+    //    drawHistoricalTrackPoints(routeId);
+    //};
 
     setDate(DateTime.utcNow());
-}
 
-function MyCtrl2() {
-}
+});

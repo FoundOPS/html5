@@ -8,23 +8,19 @@
     <!--[if lte IE 8]>
     <link rel="stylesheet" href="http://code.leafletjs.com/leaflet-0.3.1/leaflet.ie.css" />
     <![endif]-->
-    <script src="http://code.leafletjs.com/leaflet-0.3.1/leaflet.js"></script>
 </head>
-<body>
-    <!--<ul class="menu">
-        <li><a href="#/routesmap">Routes Map</a></li>
-        <li><a href="#/view2">view2</a></li>
-    </ul>-->
-    <div ng-view></div>
-    <script src="http://code.jquery.com/jquery.min.js"></script>
-    <script src="lib/angular/angular.js"></script>
-    <script src="js/datetime.1-1.js"></script>
-    <script src="js/app.js"></script>
-    <script src="js/services.js"></script>
-    <script src="js/mapController.js"></script>
-    <script src="js/colorController.js"></script>
-    <script src="js/filters.js"></script>
-    <script src="js/directives.js"></script>
-    <script src="js/common.js"></script>
+<body ng-controller="mapController">
+    <div id="map"></div>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+    <script type="text/javascript" src="lib/angular/angular.js"></script>
+    <script type="text/javascript" src="http://code.leafletjs.com/leaflet-0.3.1/leaflet.js"></script>
+    <script type="text/javascript" src="js/common.js"></script>
+    <script type="text/javascript" src="js/datetime.js"></script>
+    <script type="text/javascript" src="js/app.js"></script>
+    <script type="text/javascript" src="js/directives.js"></script>
+    <script type="text/javascript" src="js/mapController.js"></script>
+    <script type="text/javascript" src="js/colorController.js"></script>
+    <script type="text/javascript" src="js/filters.js"></script>
+    <script type="text/javascript" src="js/services.js"></script>
 </body>
 </html>
