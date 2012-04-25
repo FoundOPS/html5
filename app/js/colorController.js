@@ -1,18 +1,25 @@
-﻿'use strict';
-/* App Controllers */
-
-function colorController() {
-    /*var colors = ["#0000ff", "#0099ff", "#0000ff", "#00ff00",
-        "#990000", "#cc9900", "#660099", "#ff00ff", "#663300", "#000000"];
+﻿function colorController() {
+    var colors = [
+        "#0099ff", //light blue
+        "#FF9900", //orange
+        "#00ff00", //lime green
+        "#990000", //dark red
+        "#FFEE00", //yellow
+        "#660099", //purple
+        "#ff0000", //red
+        "#663300", //brown
+        "#FF00CC", //pink
+        "#006600"  //dark green
+    ];
     var colorIndex = 0;
     var routeColors = [];
     var minOpacity = .3;
     var maxOpacity = .8;
 
-    function getOpacity(index) {
-    }
+    var getOpacity = function(index) {
+    };
 
-    function getRouteColor(routeId) {
+    var getRouteColor = function(routeId) {
         //check if routeId is in RouteColors
         for (var obj in routeColors) {
             if (obj.routeId == routeId)
@@ -24,10 +31,10 @@ function colorController() {
         colorIndex++;
         if (colorIndex > 9)
             colorIndex = 0;
-    }
+    };
 
-    function routeColor(routeId, color) {
+    var routeColor = function(routeId, color) {
         this.color = color;
         this.routeId = routeId;
-    }*/
+    };
 }

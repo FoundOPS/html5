@@ -5,7 +5,7 @@ module.factory('resourcesStore', function ($http) {
     var readUrl = APIURL + "api/trackpoint/GetResourcesWithLatestPoints";
     readUrl = readUrl + '?callback=JSON_CALLBACK';
 
-    function read() {
+    function read(date) {
     	/// <summary>
         /// Performs an HTTP GET to get the resources for the given date.
     	/// </summary>
@@ -13,7 +13,52 @@ module.factory('resourcesStore', function ($http) {
         return $http({
             method: 'JSONP',
             url: readUrl,
-            params: { roleId: '48DBE99F-098E-404D-9550-628B6EAAB95A', serviceDate: '4-23-2012' }
+            params: { roleId: 'CD877F56-C4FA-4CF2-8534-393E101C56A5', serviceDate: date }
+        }).then(function (response) {
+            return response.data;
+        });
+    }
+
+    return {
+        read: read
+    };
+});
+
+module.factory('routesStore', function ($http) {
+    var readUrl = APIURL + "api/routes/GetRoutes";
+    readUrl = readUrl + '?callback=JSON_CALLBACK';
+
+    function read(date) {
+        /// <summary>
+        /// Performs an HTTP GET to get the trackpoints for the given date.
+        /// </summary>
+        /// <returns>The trackpoints.</returns>
+        return $http({
+            method: 'JSONP',
+            url: readUrl
+        }).then(function (response) {
+            return response.data;
+        });
+    }
+
+    return {
+        read: read
+    };
+});
+
+module.factory('trackPointsStore', function ($http) {
+    var readUrl = APIURL + "api/trackpoint/GetTrackPoints";
+    readUrl = readUrl + '?callback=JSON_CALLBACK';
+
+    function read(date) {
+        /// <summary>
+        /// Performs an HTTP GET to get the trackpoints for the given date.
+        /// </summary>
+        /// <returns>The trackpoints.</returns>
+        return $http({
+            method: 'JSONP',
+            url: readUrl,
+            params: { roleId: 'CD877F56-C4FA-4CF2-8534-393E101C56A5', serviceDate: date }
         }).then(function (response) {
             return response.data;
         });
