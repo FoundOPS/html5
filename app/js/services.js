@@ -13,7 +13,7 @@ module.factory('resourcesStore', function ($http) {
         return $http({
             method: 'JSONP',
             url: readUrl,
-            params: { roleId: 'CD877F56-C4FA-4CF2-8534-393E101C56A5', serviceDate: date }
+            params: { roleId: '8528E50D-E2B9-4779-9B29-759DBEA53B61', serviceDate: date }
         }).then(function (response) {
             return response.data;
         });
@@ -28,14 +28,15 @@ module.factory('routesStore', function ($http) {
     var readUrl = APIURL + "api/routes/GetRoutes";
     readUrl = readUrl + '?callback=JSON_CALLBACK';
 
-    function read(date) {
+    function read() {
         /// <summary>
         /// Performs an HTTP GET to get the trackpoints for the given date.
         /// </summary>
         /// <returns>The trackpoints.</returns>
         return $http({
             method: 'JSONP',
-            url: readUrl
+            url: readUrl,
+            params: { roleId: '8528E50D-E2B9-4779-9B29-759DBEA53B61'}
         }).then(function (response) {
             return response.data;
         });
@@ -58,7 +59,7 @@ module.factory('trackPointsStore', function ($http) {
         return $http({
             method: 'JSONP',
             url: readUrl,
-            params: { roleId: 'CD877F56-C4FA-4CF2-8534-393E101C56A5', serviceDate: date }
+            params: { roleId: '8528E50D-E2B9-4779-9B29-759DBEA53B61', serviceDate: date }
         }).then(function (response) {
             return response.data;
         });

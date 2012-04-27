@@ -1,8 +1,9 @@
 ﻿window.L.ArrowIcon = window.L.Icon.extend({
-    iconUrl: "../img/arrow.png",
-    iconSize: new window.L.Point(26, 26),
-    iconAnchor: new window.L.Point(12, 12),
-    shadowSize: new window.L.Point(0, 0)
+    iconUrl: "../img/outerCircle.png",
+    iconSize: new window.L.Point(18, 18),
+    iconAnchor: new window.L.Point(9, 9),
+    shadowSize: new window.L.Point(0, 0),
+    popupAnchor: new window.L.Point(0, -7)
 });
 
 window.L.ArrowMarker = window.L.Marker.extend({
@@ -19,12 +20,9 @@ window.L.ArrowMarker = window.L.Marker.extend({
 });
 
 window.L.DivIcon = window.L.Icon.extend({
+    popupAnchor: new window.L.Point(0, -7),
     options: {
         number: '',
-        iconSize: new window.L.Point(0, 0),
-        iconAnchor: new window.L.Point(0, 0),
-        popupAnchor: new window.L.Point(30, 0),
-        shadowSize: new window.L.Point(0, 0),
         className: 'leaflet-div-icon'
     },
     createIcon: function () {
@@ -47,12 +45,6 @@ window.L.DivIcon = window.L.Icon.extend({
         var options = this.options,
 			            size = options[name + 'Size'],
 			            anchor = options.iconAnchor;
-        if (!anchor && size) {
-            anchor = size.divideBy(2, true);
-        }
-        if (name === 'shadow' && anchor && options.shadowOffset) {
-            anchor._add(options.shadowOffset);
-        }
         img.className = 'leaflet-marker-' + name + ' ' + options.className;
         if (anchor) {
             img.style.marginLeft = (-anchor.x) + 'px';

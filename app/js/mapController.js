@@ -12,9 +12,9 @@
     //the current resources
     var trackPoints;
     //Set the rate to refresh resources on the map.
-    var resourcesRefreshRate = 100000;
+    var resourcesRefreshRate = 10000;
     //Set the rate to refresh routes on the map.
-    var routesRefreshRate = 300000;
+    var routesRefreshRate = 30000;
     //keep track of the resources group so it can be removed from the map when the resources are redrawn
     var resourcesGroup;
     //keep track of the routes group so it can be removed from the map when the routes are redrawn
@@ -83,13 +83,14 @@
         /// </summary>
         //keep track of all the locations of destinations and resources to center the map on
         var routeLatLngs = [];
+        //Remove the previous routes
+        if (routesGroup != null)
+            map.removeLayer(routesGroup);
+        
+        //track the resources so they can be removed when they are redrawn
+        routesGroup = new window.L.LayerGroup();
         
         for (var r in routes) {
-            //Remove the previous routes
-            if (routesGroup != null)
-                map.removeLayer(routesGroup);
-            //track the resources so they can be removed when they are redrawn
-            routesGroup = new window.L.LayerGroup();
             //iterate through the destinations
             var destinations = routes[r].RouteDestinations;
             for (var d in destinations) {
@@ -114,7 +115,7 @@
                 //create a popup for the marker
                 numMarker.bindPopup("<b>" + name + "</b>");
                 numMarker.on('click', function () {
-                    setSelectedRoute(routes[r].Id);
+                    setSelectedRoute(routes[r].Id); //TODO: fix: always uses the last route
                 });
                 //marker.on('mouseover', function (e) {
                     //e.target.setRadius(8);
@@ -134,6 +135,7 @@
         }
         map.addLayer(routesGroup);
 
+        //TODO: check if initial load. Or move to set date?
         //Center the map on the current resources
         center(routeLatLngs);
     };
@@ -156,37 +158,48 @@
             var lat = resource.Latitude;
             var lng = resource.Longitude;
             var rotateDegrees = resource.CompassHeading;
+            var color = getRouteColor(resource.RouteId);
 
             //get the location of the destination
             var location = new window.L.LatLng(lat, lng);
 
-            var url = "../img/truck.png";
+            var url = "../img/truckWhite.png";
             if (resource.TrackSource == "iPhone") {
-                url = "../img/apple.png";
+                url = "../img/appleWhite.png";
             } else if (resource.TrackSource == "Android") {
-                url = "../img/android.png";
+                url = "../img/androidWhite.png";
             }
             //create a point at the current location
             window.L.ResourceIcon = window.L.Icon.extend({
                 iconUrl: url,
-                iconSize: new window.L.Point(14, 14),
+                iconSize: new window.L.Point(13, 13),
                 iconAnchor: new window.L.Point(7, 7),
                 shadowSize: new window.L.Point(0, 0),
-                popupAnchor: new window.L.Point(0, -5)
+                popupAnchor: new window.L.Point(0, -7)
             });
             var icon = new window.L.ResourceIcon();
+            
+            var popoupContent = "<p class='speed'><b>" + name + "</b><br />Speed: " + resource.Speed + " mph</p>";
+            //TODO:ability to click on a resource to set selected route
             var marker = new window.L.Marker(location, {
                 icon: icon
-            });
+            }).bindPopup(popoupContent).openPopup();
             //Create the icon for the direction arrow
             icon = new window.L.ArrowIcon();
-            var arrow;
             //Create the marker for the direction arrow
-            arrow = new window.L.ArrowMarker(location, { icon: icon, angle: rotateDegrees });
+            var arrow = new window.L.ArrowMarker(location, { icon: icon, angle: rotateDegrees }).bindPopup(popoupContent).openPopup();
 
-            marker.bindPopup("<b>" + name + "</b><br/> Current Speed: " + resource.Speed + " mph").openPopup();
-
+            var circle = new window.L.CircleMarker(location, {
+                radius: 10.5,
+                weight: 1,
+                opacity: 1,
+                color: color,
+                fillOpacity: 1,
+                fillColor: color
+            });
+            
             //add current marker to the map
+            resourcesGroup.addLayer(circle);
             resourcesGroup.addLayer(arrow);
             resourcesGroup.addLayer(marker);
         }
@@ -212,25 +225,27 @@
 
         //go through and draw each resource on the map
         for (var t in trackPoints) {
-            var trackPoint = trackPoints[t];
-            var lat = trackPoint.Latitude;
-            var lng = trackPoint.Longitude;
+            if(trackPoints[t].routeId == routeId) {
+                var trackPoint = trackPoints[t];
+                var lat = trackPoint.Latitude;
+                var lng = trackPoint.Longitude;
 
-            //get the location of the destination
-            var location = new window.L.LatLng(lat, lng);
+                //get the location of the destination
+                var location = new window.L.LatLng(lat, lng);
 
-            //include this location into the bounds to center on
-            trackPointsLatLongs.push(location);
+                //include this location into the bounds to center on
+                trackPointsLatLongs.push(location);
 
-            //create a point at the current location
-            var marker = new window.L.CircleMarker(location, {
-                radius: 20,
-                stroke: 0,
-                fillOpacity: 1
-            });
+                //create a point at the current location
+                var marker = new window.L.CircleMarker(location, {
+                    radius: 20,
+                    stroke: 0,
+                    fillOpacity: 1
+                });
 
-            //add current marker to the map
-            trackPointsGroup.addLayer(marker);
+                //add current marker to the map
+                trackPointsGroup.addLayer(marker);
+            }
         }
 
         //add the resources to the map
@@ -247,7 +262,6 @@
                 data = [];
             }
             trackPoints = data;
-            drawHistoricalTrackPoints(selectedRouteId);
         });
     };
 
@@ -295,7 +309,7 @@
         var newDate = month + "-" + day + "-" + year;
         clearMap();
         getRoutes(newDate);
-        //getHistoricalTrackPoints(newDate);
+        getHistoricalTrackPoints(newDate);
         //if (date.date() == DateTime.utcNow().date()) {
         getResourcesWithLatestPoint(newDate);
         //}
@@ -315,7 +329,7 @@
         //Update the selected route
         selectedRouteId = routeId;
         //Draw the trackpoints on the map
-        //drawHistoricalTrackPoints(routeId);
+        drawHistoricalTrackPoints(routeId);
     };
     
     var colors = [
@@ -341,15 +355,17 @@
     var getRouteColor = function (routeId) {
         //check if routeId is in RouteColors
         for (var obj in routeColors) {
-            if (obj.Id == routeId)
-                return obj.color;
+            if (routeColors[obj].routeId == routeId)
+                return routeColors[obj].color;
         }
         routeColors.push(new routeColor(routeId, colors[colorIndex]));
-        return colors[colorIndex];
+        var color = colors[colorIndex];
 
         colorIndex++;
         if (colorIndex > 9)
             colorIndex = 0;
+
+        return color;
     };
 
     var routeColor = function (routeId, color) {
