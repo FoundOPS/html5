@@ -3,7 +3,13 @@
     iconSize: new window.L.Point(18, 18),
     iconAnchor: new window.L.Point(9, 9),
     shadowSize: new window.L.Point(0, 0),
-    popupAnchor: new window.L.Point(0, -7)
+    popupAnchor: new window.L.Point(0, -7),
+    options: {
+         routeId: ''
+    },
+    initialize: function (options) {
+        window.L.Util.setOptions(this, options);
+    }
 });
 
 window.L.ArrowMarker = window.L.Marker.extend({
@@ -23,6 +29,7 @@ window.L.DivIcon = window.L.Icon.extend({
     popupAnchor: new window.L.Point(0, -7),
     options: {
         number: '',
+        routeId: '',
         className: 'leaflet-div-icon'
     },
     createIcon: function () {
