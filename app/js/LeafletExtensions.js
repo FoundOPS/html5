@@ -1,4 +1,5 @@
-﻿window.L.ArrowIcon = window.L.Icon.extend({
+﻿/** Add routeId to the icon so it can be accessed from the click event(to set selected route) */
+window.L.ArrowIcon = window.L.Icon.extend({
     iconUrl: "../img/outerCircle.png",
     iconSize: new window.L.Point(18, 18),
     iconAnchor: new window.L.Point(9, 9),
@@ -12,6 +13,7 @@
     }
 });
 
+/** Add the rotate functionality to the marker */
 window.L.ArrowMarker = window.L.Marker.extend({
     _reset: function () {
         var pos = this._map.latLngToLayerPoint(this._latlng).round();
@@ -25,6 +27,7 @@ window.L.ArrowMarker = window.L.Marker.extend({
     }
 });
 
+/** Add text functionality to the icon */
 window.L.DivIcon = window.L.Icon.extend({
     popupAnchor: new window.L.Point(0, -7),
     options: {
@@ -34,7 +37,7 @@ window.L.DivIcon = window.L.Icon.extend({
     },
     createIcon: function () {
         var div = document.createElement('div');
-        //Next 4 lines were custom added
+        /** Next 4 lines were custom added */
         var numdiv = document.createElement('div');
         numdiv.setAttribute("class", "number");
         numdiv.innerHTML = this.options['number'] || '';

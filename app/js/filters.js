@@ -1,5 +1,5 @@
 'use strict';
-/* http://docs-next.angularjs.org/api/angular.module.ng.$filter */
+/** http://docs-next.angularjs.org/api/angular.module.ng.$filter */
 
 angular.module('foundOPS.filters', []).
     filter('interpolate', ['version', function (version) {
