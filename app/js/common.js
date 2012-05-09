@@ -62,17 +62,52 @@ F.ITEM_OPACITIES = [
 //endregion
 
 var colorIndex = 0;
+F.opacityIndex = 0;
 var routeColors = [];
-F.OPACITY_INDEX = 0;
 var resourceOpacities = [];
 
 //region Methods
+
+/** Change UTC format to "m-dd-yyyy" format */
+F.formatDate = function (date) {
+    var month = date.getUTCMonth() + 1,
+        day = date.getUTCDate(),
+        year = date.getUTCFullYear();
+    return month + "-" + day + "-" + year;
+};
+
+/** Gets the color assigned to a route (or assigns a color if none is assigned)
+ * @param {string} routeId
+ * @return {string} color
+ */
+F.getColor = function (routeId) {
+    /** Iterate through routeColors and check for the routeId*/
+    for (var obj in routeColors) {
+        if (routeColors[obj].routeId == routeId)
+        /** return the color of the route if it exists */
+            return routeColors[obj].color;
+    }
+
+    /** Add a new routeColor object to routeColors */
+    routeColors.push(new F.routeColor(routeId, F.ITEM_COLORS[colorIndex]));
+    /** Get the next color from the list
+     * @type {string}
+     */
+    var color = F.ITEM_COLORS[colorIndex];
+
+    /** reset the color index to 0 when the counter gets to 10 */
+    colorIndex++;
+    if (colorIndex > 9)
+        colorIndex = 0;
+
+    return color;
+};
 
 /** Generates a compass direction from rotation degrees
  * @param {number} deg
  * @return {string} dir
  */
-F.GET_DIRECTION = function (deg) {
+F.getDirection = function (deg) {
     var dir;
     /** Account for negaive degrees(convert to number between 0 and 360) */
     while (deg < 0) {
@@ -118,77 +153,46 @@ F.GET_DIRECTION = function (deg) {
     return dir;
 };
 
-/** An object to assign colors to routeId's
- * @constructor
+/** Gets the color assigned to a route (or assigns a color if none is assigned)
+ * @param {string} resourceId
+ * @return {number} opacity
  */
-F.ROUTE_COLOR = function (routeId, color) {
-    this.color = color;
-    this.routeId = routeId;
+F.getOpacity = function (resourceId) {
+    /** Iterate through resourceOpacities and check for the resourceId*/
+    for (var obj in resourceOpacities) {
+        if (resourceOpacities[obj].resourceId == resourceId)
+        /** return the opacity of the resource if it exists */
+            return resourceOpacities[obj].opacity;
+    }
+    /** Add a new resourceOpacity object to resourceOpacities */
+    resourceOpacities.push(new F.resourceOpacity(resourceId, F.ITEM_OPACITIES[F.opacityIndex]));
+    /** Get the next opacity from the list
+     * @type {number}
+     */
+    var opacity = F.ITEM_OPACITIES[F.opacityIndex];
+
+    /** reset the opacity index to 0 when the counter gets to 10 */
+    F.opacityIndex++;
+    if (F.opacityIndex > 10)
+        F.opacityIndex = 0;
+
+    return opacity;
 };
 
 /** An object to assign opacities to resourceId's
  * @constructor
  */
-F.RESOURCE_OPACITY = function (resourceId, opacity) {
+F.resourceOpacity = function (resourceId, opacity) {
     this.opacity = opacity;
     this.resourceId = resourceId;
 };
 
-/** Change UTC format to "m-dd-yyyy" format */
-F.FORMAT_DATE = function (date) {
-    var month = date.getUTCMonth() + 1,
-        day = date.getUTCDate(),
-        year = date.getUTCFullYear();
-    return month + "-" + day + "-" + year;
-};
-
-/** Gets the color assigned to a route (or assigns a color if none is assigned)
- * @param {string} resourceId
- * @return {number} opacity
+/** An object to assign colors to routeId's
+ * @constructor
  */
-F.GET_OPACITY = function (resourceId) {
-    /** Iterate through resourceOpacities and check for the resourceId*/
-    for (var obj in resourceOpacities) {
-        if (resourceOpacities[obj].Id == resourceId)
-        /** return the opacity of the resource if it exists */
-            return resourceOpacities[obj].opacity;
-    }
-    /** Add a new resourceOpacity object to resourceOpacities */
-    resourceOpacities.push(new F.RESOURCE_OPACITY(resourceId, F.ITEM_OPACITIES[F.OPACITY_INDEX]));
-    /** Get the next opacity from the list */
-    var opacity = F.ITEM_OPACITIES[F.OPACITY_INDEX];
-
-    /** reset the opacity index to 0 when the counter gets to 10 */
-    F.OPACITY_INDEX++;
-    if (F.OPACITY_INDEX > 10)
-        F.OPACITY_INDEX = 0;
-
-    return opacity;
-};
-
-/** Gets the color assigned to a route (or assigns a color if none is assigned)
- * @param {string} routeId
- * @return {string} color
- */
-F.GET_COLOR = function (routeId) {
-    /** Iterate through routeColors and check for the routeId*/
-    for (var obj in routeColors) {
-        if (routeColors[obj].routeId == routeId)
-        /** return the color of the route if it exists */
-            return routeColors[obj].color;
-    }
-
-    /** Add a new routeColor object to routeColors */
-    routeColors.push(new F.ROUTE_COLOR(routeId, F.ITEM_COLORS[colorIndex]));
-    /** Get the next color from the list */
-    var color = F.ITEM_COLORS[colorIndex];
-
-    /** reset the color index to 0 when the counter gets to 10 */
-    colorIndex++;
-    if (colorIndex > 9)
-        colorIndex = 0;
-
-    return color;
+F.routeColor = function (routeId, color) {
+    this.color = color;
+    this.routeId = routeId;
 };
 
 //endregion

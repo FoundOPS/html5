@@ -1,6 +1,6 @@
 var module = angular.module('foundOPS.services', []).
     value('version', '0.1');
-var roleId = "D1CABCCD-CCA2-476A-B472-99EE62AD9C96";
+var roleId = "862C50D7-3884-41C2-AE39-80AB17923B1E";
 
 /** Performs an HTTP GET to get the depot */
 module.factory('depotsStore', function ($http) {

@@ -5,43 +5,61 @@ angular.module("foundOPS").controller('mapController', function ($scope, $defer,
 
 //region Constants
 
-//Rate of refreshing resources on the map (in milliseconds)
+/** Rate of refreshing resources on the map (in milliseconds)
+ * @type {number}
+ */
     var RESOURCES_REFRESH_RATE = 10000;
 
-//Rate of refreshing routes on the map (in milliseconds)
+/** Rate of refreshing routes on the map (in milliseconds)
+ * @type {number}
+ */
     var ROUTES_REFRESH_RATE = 30000;
 
 //endregion
 
 //region Loaded data
 
-//keep track of if initial load
+    /** keep track of if initial load */
     var isInitialLoad = true;
-//the business's depots
+    /** the business's depots
+     * @type {Array.<Object>}
+     */
     var depots;
-//the resources (employees and vehicles)
+    /** the resources (employees and vehicles)
+     * @type {Array.<Object>}
+     */
     var resources;
-//the routes
+    /** the routes
+     * @type {Array.<Object>}
+     */
     var routes;
-//the historical track points
-    var trackPoints;
+    /** the historical track points
+     * @type {Array.<Object>}
+     */
+    var mapTrackPoints = [];
 
 //endregion
 
 //region Map variables
 
-//the map instance
+/** the map instance */
     var map;
-//keep a reference to the layer groups so they can be cleared from the map
-//when they are redrawn
+/** keep a reference to the layer groups so they can be cleared from the map
+    when they are redrawn */
     var resourcesGroup;
     var routesGroup;
     var trackPointsGroup;
 
 //endregion
 
-    /** The Id of the selected route */
+    /** The Id of the selected route
+     * @type {string}
+     */
     var selectedRouteId;
+    /** A list to keep track of which routes have been selected
+     * @type {Array.<string>}
+     */
+    var selectedRoutes;
 
 //endregion
 
@@ -90,7 +108,19 @@ angular.module("foundOPS").controller('mapController', function ($scope, $defer,
         /** Remove the trackpointsGroup if it exists */
         if (trackPointsGroup != null)
             map.removeLayer(trackPointsGroup);
+        /** Clear list of trackpoints */
+        mapTrackPoints = [];
+        /** Clear list of selected routes */
+        selectedRoutes = [];
     };
+
+    /** Disselect selectedRoute on map click */
+    map.on('click', function () {
+        selectedRouteId = "";
+        /** Remove the trackpointsGroup if it exists */
+        if (trackPointsGroup != null)
+            map.removeLayer(trackPointsGroup);
+    });
 
 //endregion
 
@@ -126,7 +156,7 @@ angular.module("foundOPS").controller('mapController', function ($scope, $defer,
                     opacity: 1,
                     weight: 1,
                     color: "#ffffff",
-                    fillColor: F.GET_COLOR(routes[r].Id),
+                    fillColor: F.getColor(routes[r].Id),
                     fillOpacity: 1,
                     clickable: false
                 });
@@ -210,10 +240,10 @@ angular.module("foundOPS").controller('mapController', function ($scope, $defer,
             var lng = resource.Longitude;
             var rotateDegrees = resource.CompassHeading;
             /** Get the color of the route */
-            var color = F.GET_COLOR(resource.RouteId);
+            var color = F.getColor(resource.RouteId);
             /** Get the location of the destination */
             var location = new window.L.LatLng(lat, lng);
-            var url = "../img/truck.png";
+            var url = "../img/android.png";
             if (resource.TrackSource == "iPhone") {
                 url = "../img/apple.png";
             } else if (resource.TrackSource == "Android") {
@@ -223,23 +253,19 @@ angular.module("foundOPS").controller('mapController', function ($scope, $defer,
             window.L.ResourceIcon = window.L.Icon.extend({
                 iconUrl: url,
                 iconSize: new window.L.Point(14, 14),
-                iconAnchor: new window.L.Point(7.5, 7.6),
+                iconAnchor: new window.L.Point(7.2, 7.4),
                 shadowSize: new window.L.Point(0, 0),
                 popupAnchor: new window.L.Point(0, -7),
                 routeId: resource.RouteId
             });
             var icon = new window.L.ResourceIcon();
             /** Set the text for the popup */
-            var popoupContent = "<p class='speed'><b>" + name + "</b><br />Speed: " + Math.round(resource.Speed) + " mph " + F.GET_DIRECTION(rotateDegrees) + "</p>";
+            var popoupContent = "<p class='speed'><b>" + name + "</b><br />Speed: " + Math.round(resource.Speed) + " mph " + F.getDirection(rotateDegrees) + "</p>";
             var marker = new window.L.Marker(location, {
                 icon: icon
             }).bindPopup(popoupContent, {
                     closeButton: false
                 });
-            /** Set selected route on mouse click */
-            marker.on('click', function (e) {
-                setSelectedRoute(e.target.options.icon.routeId);
-            });
             /** Open the popup on mouseover */
             marker.on('mouseover', function (e) {
                 e.target.openPopup();
@@ -252,8 +278,9 @@ angular.module("foundOPS").controller('mapController', function ($scope, $defer,
             var arrow = new window.L.ArrowMarker(location, { icon: icon, angle: rotateDegrees }).bindPopup(popoupContent, {
                 closeButton: false
             });
+            /** Set selected route on mouse click */
             arrow.on('click', function (e) {
-                setSelectedRoute(e.target.options.icon.routeId);
+                setSelectedRoute(e.target.options.icon.options.routeId);
             });
             arrow.on('mouseover', function (e) {
                 e.target.openPopup();
@@ -261,7 +288,6 @@ angular.module("foundOPS").controller('mapController', function ($scope, $defer,
             arrow.on('mouseout', function (e) {
                 e.target.closePopup();
             });
-
             /** Create the "route-colored" circle */
             var circle = new window.L.CircleMarker(location, {
                 radius: 10.5,
@@ -272,13 +298,11 @@ angular.module("foundOPS").controller('mapController', function ($scope, $defer,
                 fillColor: color,
                 clickable: false
             });
-
             /** Add current marker to the map */
             resourcesGroup.addLayer(circle);
             resourcesGroup.addLayer(arrow);
             resourcesGroup.addLayer(marker);
         }
-
         /** Add the resources to the map */
         map.addLayer(resourcesGroup);
     };
@@ -294,27 +318,52 @@ angular.module("foundOPS").controller('mapController', function ($scope, $defer,
         /** track the resources so they can be removed when they are redrawn */
         trackPointsGroup = new window.L.LayerGroup();
 
-        /** go through and draw each resource on the map */
-        for (var t in trackPoints) {
-            if (trackPoints[t].RouteId == routeId) {
-                var trackPoint = trackPoints[t];
-                var lat = trackPoint.Latitude;
-                var lng = trackPoint.Longitude;
-                /** get the location of the destination */
-                var location = new window.L.LatLng(lat, lng);
-                /** create a point at the current location */
-                var marker = new window.L.CircleMarker(location, {
-                    clickable: false,
-                    radius: 3,
-                    stroke: 0,
-                    fillOpacity: F.GET_OPACITY(trackPoints[t].Id),
-                    fillColor: F.GET_COLOR(trackPoints[t].RouteId)
+        /** Loop through all the resources */
+        for (var r in resources) {
+            /** Check if the resource is on the selected route*/
+            if(resources[r].RouteId == routeId){
+                /** Get the Id of the resource */
+                var resourceId;
+                if(resources[r].EmployeeId != null){
+                    resourceId = resources[r].EmployeeId;
+                }else{
+                    resourceId = resources[r].VehicleId;
+                }
+                /** creates an empty array(necessary for the polyline to initiate) */
+                var latlngs = [];
+                /** create a polyline to connect the trackpoints */
+                var polyline = new window.L.Polyline(latlngs, {
+                    color: F.getColor(routeId),
+                    weight: 2,
+                    opacity: F.getOpacity(resourceId),
+                    clickable: false
                 });
-                /** add current marker to the map */
-                trackPointsGroup.addLayer(marker);
+                /** Loop through every trackpoint */
+                for (var t in mapTrackPoints) {
+                    /** Check if trackpoint is for the current resource and route*/
+                    if ((mapTrackPoints[t].Id == resourceId) && (mapTrackPoints[t].RouteId == routeId)) {
+                        var trackPoint = mapTrackPoints[t];
+                        var lat = trackPoint.Latitude;
+                        var lng = trackPoint.Longitude;
+                        /** get the location of the destination */
+                        var location = new window.L.LatLng(lat, lng);
+                        /** create a point at the current location */
+                        /*var marker = new window.L.CircleMarker(location, {
+                            clickable: false,
+                            radius: 3,
+                            stroke: 0,
+                            fillOpacity: F.GET_OPACITY(mapTrackPoints[t].Id),
+                            fillColor: F.GET_COLOR(mapTrackPoints[t].RouteId)
+                        });*/
+                        /** add current marker to the map */
+                        /*trackPointsGroup.addLayer(marker);*/
+                        /** add current location to the polyline */
+                        polyline.addLatLng(location);
+                    }
+                }
+                trackPointsGroup.addLayer(polyline);
             }
         }
-
         /** add the resources to the map */
         map.addLayer(trackPointsGroup);
     };
@@ -344,9 +393,7 @@ angular.module("foundOPS").controller('mapController', function ($scope, $defer,
             if (!data) {
                 data = [];
             }
-            trackPoints = data;
-            /** Draw the trackpoints on the map */
-            drawHistoricalTrackPoints(routeId);
+            addTrackpoints(data);
         });
     };
 
@@ -359,9 +406,12 @@ angular.module("foundOPS").controller('mapController', function ($scope, $defer,
             resources = data;
             /** Draw the resources on the map */
             drawResources();
+            saveNewTrackpoints();
         });
         /** Reload the resources */
-        $defer(getResourcesWithLatestPoint, RESOURCES_REFRESH_RATE);
+        $defer(function() {
+            getResourcesWithLatestPoint(date);
+        }, RESOURCES_REFRESH_RATE);
     };
 
     /** Gets the routes for the specified date
@@ -376,16 +426,59 @@ angular.module("foundOPS").controller('mapController', function ($scope, $defer,
             routes = data;
             /** Draw the routes and route Destinations on the map */
             drawCalculatedRoutes();
-            /** TODO: get trackpoints here(for each route) */
         });
         /** Reload the routes */
         $defer(getRoutes, ROUTES_REFRESH_RATE);
     };
 
-    /** Add the depot to the map */
+    /** Add the depot(s) to the map */
     getDepots();
 
 //endregion
+
+    /** Adds trackpoints to the list of historical trackpoints
+     * @param {Array.<object>} trackpoints
+     */
+    var addTrackpoints = function (trackpoints) {
+        /** Add given trackpoints to the list of trackpoints */
+        for(var t in trackpoints){
+            mapTrackPoints.push(trackpoints[t]);
+        }
+        /** Order the trackpoints by time */
+        mapTrackPoints = Enumerable.From(mapTrackPoints).OrderBy(function(item){ return item.CollectedTimeStamp; }).ToArray();
+        /** Check if a route is selected */
+        if(selectedRouteId){
+            /** Draw the trackpoints on the map */
+            drawHistoricalTrackPoints(selectedRouteId);
+        }
+    };
+
+    var saveNewTrackpoints = function(){
+        /** An array of trackpoints
+         * @type {Array.<Object>}
+         */
+        var trackPointCollection = [];
+        for(var r in resources){
+            var resourceId;
+            if(resources[r].EmployeeId != null){
+                resourceId = resources[r].EmployeeId;
+            }else{
+                resourceId = resources[r].VehicleId;
+            }
+            /** Create a trackpoint object
+             * @type {Object.<string, number>}
+             */
+            var trackpoint = new Object({
+                Latitude: resources[r].Latitude,
+                Longitude: resources[r].Longitude,
+                RouteId: resources[r].RouteId,
+                Id :resourceId,
+                CollectedTimeStamp: "/Date(" + new Date().getTime() + ")/"
+            });
+            trackPointCollection.push(trackpoint);
+        }
+        addTrackpoints(trackPointCollection);
+    };
 
     /** Sets the date to the specified date and regenerates the map objects
      * @param {Object} date
@@ -393,19 +486,20 @@ angular.module("foundOPS").controller('mapController', function ($scope, $defer,
     var setDate = function (date) {
         /** reset the initial load(so the map gets re-centered) */
         isInitialLoad = true;
-        var newDate = F.FORMAT_DATE(date);
+        var newDate = F.formatDate(date);
         /** Remove all objects from the map */
         clearMap();
+        /** Clear the list of trackpoints */
+        mapTrackPoints = [];
         getRoutes(newDate);
-
-        /** Get resources if today */
+        /** Get resources only if current day is today */
         if (newDate == currentDate) {
             getResourcesWithLatestPoint(newDate);
         }
     };
 
     /** Set the current date to today */
-    var currentDate = F.FORMAT_DATE(new Date());
+    var currentDate = F.formatDate(new Date());
 
     /** Set the date to today. */
     setDate(new Date());
@@ -417,12 +511,28 @@ angular.module("foundOPS").controller('mapController', function ($scope, $defer,
         /** Remove the previous trackpoints */
         if (trackPointsGroup != null)
             map.removeLayer(trackPointsGroup);
+        /** Reset the opacity index to 0 */
+        F.opacityIndex = 0;
         /** Update the selected route */
         selectedRouteId = routeId;
-        /** Reset the opacity index to 0 */
-        F.OPACITY_INDEX = 0;
-        /** Get the trackpoints on the map */
-        getHistoricalTrackPoints(currentDate, routeId);
+        /** Keeps track of whether or not the routeId has already been selected
+         * @type {boolean}
+         */
+        var isRouteLoaded;
+        for(var r in selectedRoutes){
+            /** Check if the selected route has already been loaded */
+            if(selectedRoutes[r] == routeId){
+                /** Draw the trackpoints on the map */
+                drawHistoricalTrackPoints(selectedRouteId);
+                isRouteLoaded = true;
+            }
+        }
+        if(!isRouteLoaded){
+            /** Get the trackpoints on the map */
+            getHistoricalTrackPoints(currentDate, selectedRouteId);
+            /** Add the selected RouteId the the list of selected routes */
+            selectedRoutes.push(selectedRouteId);
+        }
     };
 
 //endregion
