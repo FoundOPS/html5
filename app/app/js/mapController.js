@@ -243,7 +243,7 @@ angular.module("foundOPS").controller('mapController', function ($scope, $defer,
             var color = F.getColor(resource.RouteId);
             /** Get the location of the destination */
             var location = new window.L.LatLng(lat, lng);
-            var url = "../img/android.png";
+            var url = "../img/truck.png";
             if (resource.TrackSource == "iPhone") {
                 url = "../img/apple.png";
             } else if (resource.TrackSource == "Android") {
