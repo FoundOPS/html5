@@ -5,14 +5,14 @@ angular.module("foundOPS").controller('mapController', function ($scope, $defer,
 
 //region Constants
 
-/** Rate of refreshing resources on the map (in milliseconds)
- * @type {number}
- */
+    /** Rate of refreshing resources on the map (in milliseconds)
+     * @type {number}
+     */
     var RESOURCES_REFRESH_RATE = 10000;
 
-/** Rate of refreshing routes on the map (in milliseconds)
- * @type {number}
- */
+    /** Rate of refreshing routes on the map (in milliseconds)
+     * @type {number}
+     */
     var ROUTES_REFRESH_RATE = 30000;
 
 //endregion
@@ -42,10 +42,10 @@ angular.module("foundOPS").controller('mapController', function ($scope, $defer,
 
 //region Map variables
 
-/** the map instance */
+    /** the map instance */
     var map;
-/** keep a reference to the layer groups so they can be cleared from the map
-    when they are redrawn */
+    /** keep a reference to the layer groups so they can be cleared from the map
+     when they are redrawn */
     var resourcesGroup;
     var routesGroup;
     var trackPointsGroup;
@@ -71,12 +71,12 @@ angular.module("foundOPS").controller('mapController', function ($scope, $defer,
     var setupMap = function () {
         /** initialize the map on the "map" div with a given center and zoom */
         map = new window.L.Map('map', {
-            center: new window.L.LatLng(40, -89),
-            zoom: 4
+            center:new window.L.LatLng(40, -89),
+            zoom:4
         });
         /** create a CloudMade tile layer */
         var cloudmade = new window.L.TileLayer('http://{s}.tile.cloudmade.com/57cbb6ca8cac418dbb1a402586df4528/997/256/{z}/{x}/{y}.png', {
-            maxZoom: 18
+            maxZoom:18
         });
         /** add the CloudMade layer to the map */
         map.addLayer(cloudmade);
@@ -146,25 +146,25 @@ angular.module("foundOPS").controller('mapController', function ($scope, $defer,
                 /** get the location of the destination */
                 var location = new window.L.LatLng(lat, lng);
                 var numMarker = new window.L.Marker(location, {
-                    icon: new window.L.DivIcon({
-                        number: destinations[d].OrderInRoute,
-                        routeId: routes[r].Id
+                    icon:new window.L.DivIcon({
+                        number:destinations[d].OrderInRoute,
+                        routeId:routes[r].Id
                     })
                 });
                 var marker = new window.L.CircleMarker(location, {
-                    radius: 7,
-                    opacity: 1,
-                    weight: 1,
-                    color: "#ffffff",
-                    fillColor: F.getColor(routes[r].Id),
-                    fillOpacity: 1,
-                    clickable: false
+                    radius:7,
+                    opacity:1,
+                    weight:1,
+                    color:"#ffffff",
+                    fillColor:F.getColor(routes[r].Id),
+                    fillOpacity:1,
+                    clickable:false
                 });
                 /** include this location into the bounds to center on */
                 routeLatLngs.push(location);
                 /** create a popup for the marker */
                 numMarker.bindPopup("<b>" + name + "</b>", {
-                    closeButton: false
+                    closeButton:false
                 });
                 /** Set selected route on mouse click */
                 numMarker.on('click', function (e) {
@@ -201,17 +201,17 @@ angular.module("foundOPS").controller('mapController', function ($scope, $defer,
             /** Get the location of the destination */
             var location = new window.L.LatLng(lat, lng);
             var icon = window.L.Icon.extend({
-                iconUrl: "../img/depot.png",
-                iconSize: new window.L.Point(24, 18),
-                iconAnchor: new window.L.Point(12, 9),
-                shadowSize: new window.L.Point(0, 0),
-                popupAnchor: new window.L.Point(0, -10)
+                iconUrl:"../img/depot.png",
+                iconSize:new window.L.Point(24, 18),
+                iconAnchor:new window.L.Point(12, 9),
+                shadowSize:new window.L.Point(0, 0),
+                popupAnchor:new window.L.Point(0, -10)
             });
             var depotIcon = new icon();
             var marker = new window.L.Marker(location, {
-                icon: depotIcon
+                icon:depotIcon
             }).bindPopup("<b>" + name + "</b>", {
-                    closeButton: false
+                    closeButton:false
                 });
             marker.on('mouseover', function (e) {
                 e.target.openPopup();
@@ -251,20 +251,20 @@ angular.module("foundOPS").controller('mapController', function ($scope, $defer,
             }
             /** Create a point at the current location */
             window.L.ResourceIcon = window.L.Icon.extend({
-                iconUrl: url,
-                iconSize: new window.L.Point(14, 14),
-                iconAnchor: new window.L.Point(7.2, 7.4),
-                shadowSize: new window.L.Point(0, 0),
-                popupAnchor: new window.L.Point(0, -7),
-                routeId: resource.RouteId
+                iconUrl:url,
+                iconSize:new window.L.Point(14, 14),
+                iconAnchor:new window.L.Point(7.2, 7.4),
+                shadowSize:new window.L.Point(0, 0),
+                popupAnchor:new window.L.Point(0, -7),
+                routeId:resource.RouteId
             });
             var icon = new window.L.ResourceIcon();
             /** Set the text for the popup */
             var popoupContent = "<p class='speed'><b>" + name + "</b><br />Speed: " + Math.round(resource.Speed) + " mph " + F.getDirection(rotateDegrees) + "</p>";
             var marker = new window.L.Marker(location, {
-                icon: icon
+                icon:icon
             }).bindPopup(popoupContent, {
-                    closeButton: false
+                    closeButton:false
                 });
             /** Open the popup on mouseover */
             marker.on('mouseover', function (e) {
@@ -272,11 +272,11 @@ angular.module("foundOPS").controller('mapController', function ($scope, $defer,
             });
             /** Create the icon for the direction arrow */
             icon = new window.L.ArrowIcon({
-                routeId: resource.RouteId
+                routeId:resource.RouteId
             });
             /** Create the marker for the direction arrow */
-            var arrow = new window.L.ArrowMarker(location, { icon: icon, angle: rotateDegrees }).bindPopup(popoupContent, {
-                closeButton: false
+            var arrow = new window.L.ArrowMarker(location, { icon:icon, angle:rotateDegrees }).bindPopup(popoupContent, {
+                closeButton:false
             });
             /** Set selected route on mouse click */
             arrow.on('click', function (e) {
@@ -290,13 +290,13 @@ angular.module("foundOPS").controller('mapController', function ($scope, $defer,
             });
             /** Create the "route-colored" circle */
             var circle = new window.L.CircleMarker(location, {
-                radius: 10.5,
-                weight: .5,
-                opacity: 1,
-                color: color,
-                fillOpacity: 1,
-                fillColor: color,
-                clickable: false
+                radius:10.5,
+                weight:.5,
+                opacity:1,
+                color:color,
+                fillOpacity:1,
+                fillColor:color,
+                clickable:false
             });
             /** Add current marker to the map */
             resourcesGroup.addLayer(circle);
@@ -321,22 +321,22 @@ angular.module("foundOPS").controller('mapController', function ($scope, $defer,
         /** Loop through all the resources */
         for (var r in resources) {
             /** Check if the resource is on the selected route*/
-            if(resources[r].RouteId == routeId){
+            if (resources[r].RouteId == routeId) {
                 /** Get the Id of the resource */
                 var resourceId;
-                if(resources[r].EmployeeId != null){
+                if (resources[r].EmployeeId != null) {
                     resourceId = resources[r].EmployeeId;
-                }else{
+                } else {
                     resourceId = resources[r].VehicleId;
                 }
                 /** creates an empty array(necessary for the polyline to initiate) */
                 var latlngs = [];
                 /** create a polyline to connect the trackpoints */
                 var polyline = new window.L.Polyline(latlngs, {
-                    color: F.getColor(routeId),
-                    weight: 2,
-                    opacity: F.getOpacity(resourceId),
-                    clickable: false
+                    color:F.getColor(routeId),
+                    weight:2,
+                    opacity:F.getOpacity(resourceId),
+                    clickable:false
                 });
                 /** Loop through every trackpoint */
                 for (var t in mapTrackPoints) {
@@ -349,12 +349,12 @@ angular.module("foundOPS").controller('mapController', function ($scope, $defer,
                         var location = new window.L.LatLng(lat, lng);
                         /** create a point at the current location */
                         /*var marker = new window.L.CircleMarker(location, {
-                            clickable: false,
-                            radius: 3,
-                            stroke: 0,
-                            fillOpacity: F.GET_OPACITY(mapTrackPoints[t].Id),
-                            fillColor: F.GET_COLOR(mapTrackPoints[t].RouteId)
-                        });*/
+                         clickable: false,
+                         radius: 3,
+                         stroke: 0,
+                         fillOpacity: F.GET_OPACITY(mapTrackPoints[t].Id),
+                         fillColor: F.GET_COLOR(mapTrackPoints[t].RouteId)
+                         });*/
                         /** add current marker to the map */
                         /*trackPointsGroup.addLayer(marker);*/
                         /** add current location to the polyline */
@@ -409,7 +409,7 @@ angular.module("foundOPS").controller('mapController', function ($scope, $defer,
             saveNewTrackpoints();
         });
         /** Reload the resources */
-        $defer(function() {
+        $defer(function () {
             getResourcesWithLatestPoint(date);
         }, RESOURCES_REFRESH_RATE);
     };
@@ -441,39 +441,42 @@ angular.module("foundOPS").controller('mapController', function ($scope, $defer,
      */
     var addTrackpoints = function (trackpoints) {
         /** Add given trackpoints to the list of trackpoints */
-        for(var t in trackpoints){
+        for (var t in trackpoints) {
             mapTrackPoints.push(trackpoints[t]);
         }
         /** Order the trackpoints by time */
-        mapTrackPoints = Enumerable.From(mapTrackPoints).OrderBy(function(item){ return item.CollectedTimeStamp; }).ToArray();
+        mapTrackPoints = Enumerable.From(mapTrackPoints).OrderBy(
+            function (item) {
+                return item.CollectedTimeStamp;
+            }).ToArray();
         /** Check if a route is selected */
-        if(selectedRouteId){
+        if (selectedRouteId) {
             /** Draw the trackpoints on the map */
             drawHistoricalTrackPoints(selectedRouteId);
         }
     };
 
-    var saveNewTrackpoints = function(){
+    var saveNewTrackpoints = function () {
         /** An array of trackpoints
          * @type {Array.<Object>}
          */
         var trackPointCollection = [];
-        for(var r in resources){
+        for (var r in resources) {
             var resourceId;
-            if(resources[r].EmployeeId != null){
+            if (resources[r].EmployeeId != null) {
                 resourceId = resources[r].EmployeeId;
-            }else{
+            } else {
                 resourceId = resources[r].VehicleId;
             }
             /** Create a trackpoint object
              * @type {Object.<string, number>}
              */
             var trackpoint = new Object({
-                Latitude: resources[r].Latitude,
-                Longitude: resources[r].Longitude,
-                RouteId: resources[r].RouteId,
-                Id :resourceId,
-                CollectedTimeStamp: "/Date(" + new Date().getTime() + ")/"
+                Latitude:resources[r].Latitude,
+                Longitude:resources[r].Longitude,
+                RouteId:resources[r].RouteId,
+                Id:resourceId,
+                CollectedTimeStamp:"/Date(" + new Date().getTime() + ")/"
             });
             trackPointCollection.push(trackpoint);
         }
@@ -519,15 +522,15 @@ angular.module("foundOPS").controller('mapController', function ($scope, $defer,
          * @type {boolean}
          */
         var isRouteLoaded;
-        for(var r in selectedRoutes){
+        for (var r in selectedRoutes) {
             /** Check if the selected route has already been loaded */
-            if(selectedRoutes[r] == routeId){
+            if (selectedRoutes[r] == routeId) {
                 /** Draw the trackpoints on the map */
                 drawHistoricalTrackPoints(selectedRouteId);
                 isRouteLoaded = true;
             }
         }
-        if(!isRouteLoaded){
+        if (!isRouteLoaded) {
             /** Get the trackpoints on the map */
             getHistoricalTrackPoints(currentDate, selectedRouteId);
             /** Add the selected RouteId the the list of selected routes */

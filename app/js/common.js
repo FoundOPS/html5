@@ -4,23 +4,30 @@ var F = {};
 //region CONSTANTS
 
 /**
- * A flag set to true when debuging in a browser
+ * The current mode.
+ * "LOCAL": TODO: load JSON files from the application's directory. Works for both Android & Browser Debugging.
+ * "LOCALAPI": load from the local api server.
+ * "ANDROIDLA": debug in Android Emulator using the local api server.
+ * "LIVE": load from the main server. TODO: Implement this mode.
  * @const
- * @type {boolean}
+ * @type {string}
  */
-F.DEBUG = true;
+F.MODE = "LOCALAPI";
 
-/** setup the api url, depending on the mode
- *  @type {string}
- */
+/** setup the api url, depending on the mode */
 var apiUrl;
-if (F.DEBUG)
-    apiUrl = "http://localhost:9711/";
-else
-    apiUrl = "http://api.foundops.com/";
+if (F.MODE === "LOCALAPI") {
+    //For the local api, use a different root url
+    apiUrl = 'http://localhost:9711/';
+} else if (F.MODE === "ANDROIDLA") {
+    apiUrl = 'http://10.0.2.2:9711/';
+} else if (F.MODE === "LOCAL") {
+    //For local mode, use GET (for normal JSON without a callback)
+    apiUrl = 'GET';
+} else if (F.MODE === "LIVE") { };
 
 /**
- * The API url
+ * The API url.
  * @const
  * @type {string}
  */
@@ -61,14 +68,12 @@ F.ITEM_OPACITIES = [
 
 //endregion
 
-var colorIndex = 0;
-F.opacityIndex = 0;
-var routeColors = [];
-var resourceOpacities = [];
-
 //region Methods
 
-/** Change UTC format to "m-dd-yyyy" format */
+/** Change a Date to UTC, then format it as an acceptable API date string.
+ * @param {Date} The date to format.
+ * @return {string} The date formatted in "m-dd-yyyy".
+ */
 F.formatDate = function (date) {
     var month = date.getUTCMonth() + 1,
         day = date.getUTCDate(),
@@ -76,32 +81,16 @@ F.formatDate = function (date) {
     return month + "-" + day + "-" + year;
 };
 
-/** Gets the color assigned to a route (or assigns a color if none is assigned)
- * @param {string} routeId
- * @return {string} color
+//TODO (Rod) Rename to createGuid
+/** Create a unique Guid.
+ * @return {string} The Guid string.
  */
-F.getColor = function (routeId) {
-    /** Iterate through routeColors and check for the routeId*/
-    for (var obj in routeColors) {
-        if (routeColors[obj].routeId == routeId)
-        /** return the color of the route if it exists */
-            return routeColors[obj].color;
-    }
-
-    /** Add a new routeColor object to routeColors */
-    routeColors.push(new F.routeColor(routeId, F.ITEM_COLORS[colorIndex]));
-    /** Get the next color from the list
-     * @type {string}
-     */
-    var color = F.ITEM_COLORS[colorIndex];
-
-    /** reset the color index to 0 when the counter gets to 10 */
-    colorIndex++;
-    if (colorIndex > 9)
-        colorIndex = 0;
-
-    return color;
-};
+F.CreateGuid = function CreateGuid() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
 
 /** Generates a compass direction from rotation degrees
  * @param {number} deg
@@ -153,6 +142,43 @@ F.getDirection = function (deg) {
     return dir;
 };
 
+//region Color and Opacity methods TODO this all smells like repeated code
+
+//TODO Should these be common? If so they need to be generified
+
+var colorIndex = 0;
+F.opacityIndex = 0;
+
+var routeColors = [];
+var resourceOpacities = [];
+
+/** Gets the color assigned to a route (or assigns a color if none is assigned)
+ * @param {string} routeId
+ * @return {string} color
+ */
+F.getColor = function (routeId) {
+    /** Iterate through routeColors and check for the routeId*/
+    for (var obj in routeColors) {
+        if (routeColors[obj].routeId == routeId)
+        /** return the color of the route if it exists */
+            return routeColors[obj].color;
+    }
+
+    /** Add a new routeColor object to routeColors */
+    routeColors.push(new F.routeColor(routeId, F.ITEM_COLORS[colorIndex]));
+    /** Get the next color from the list
+     * @type {string}
+     */
+    var color = F.ITEM_COLORS[colorIndex];
+
+    /** reset the color index to 0 when the counter gets to 10 */
+    colorIndex++;
+    if (colorIndex > 9)
+        colorIndex = 0;
+
+    return color;
+};
+
 /** Gets the color assigned to a route (or assigns a color if none is assigned)
  * @param {string} resourceId
  * @return {number} opacity
@@ -194,5 +220,7 @@ F.routeColor = function (routeId, color) {
     this.color = color;
     this.routeId = routeId;
 };
+
+//endregion
 
 //endregion

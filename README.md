@@ -1,101 +1,36 @@
-# angular-seed — the seed for &lt;angular/&gt; apps
+#foundOPS-ng — the FoundOPS &lt;angular/&gt; app
 
-This project is an application skeleton for a typical [angular](http://angularjs.org/) web app. You
-can use it to quickly bootstrap your angular webapp projects and dev environment for these projects.
+This is the FoundOPS javascript application. The primary framework is Angular, the reason it is called foundOPS ng.
 
-The seed contains angular libraries, test libraries and a bunch of scripts all preconfigured for
-instant web development gratification. Just clone the repo (or download the zip/tarball), start up
-our (or yours) webserver and you are ready to develop and test your application.
+[Annotation](https://developers.google.com/closure/compiler/docs/js-for-compiler) All javascript MUST BE annotated for the Google Closure Compiler.
 
-The seed app doesn't do much, just shows how to wire two controllers and views together. You can
-check it out by opening app/index.html in your browser (might not work file `file://` scheme in
-certain browsers, see note below).
+TESTING IS ALSO IMPORTANT. TEST INFO HERE.
 
-_Note: While angular is client-side-only technology and it's possible to create angular webapps that
-don't require a backend server at all, we recommend hosting the project files using a local
-webserver during development to avoid issues with security restrictions (sandbox) in browsers. The
-sandbox implementation varies between browsers, but quite often prevents things like cookies, xhr,
-etc to function properly when an html page is opened via `file://` scheme instead of `http://`._
+## Frameworks
 
+[Angular](http://angularjs.org/), [API Docs](http://docs.angularjs.org/api), [Tutorial](http://docs.angularjs.org/tutorial), [WebStorm plugin](https://groups.google.com/forum/#!topic/angular/GyBSkDxZN9c)
 
-## How to use angular-seed
+Angular is the primary framework and it is used whenever possible. Please go through the tutorial.
 
-Clone the angular-seed repository and start hacking...
+[Bootstrap](http://twitter.github.com/bootstrap/), [less](http://lesscss.org/)
 
+The primary CSS frameworks.
 
-### Running the app during development
+[Kendo UI](http://demos.kendoui.com/web/overview/index.html), [Framework](http://demos.kendoui.com/web/mvvm/index.html)
 
-You can pick one of these options:
+Kendo controls are sprinkled in here and there. The Kendo framework is used when Kendo controls are involved. When/if kendo support angular's framework, that will be switched over.
 
-* serve this repository with your webserver
-* install node.js and run `scripts/web-server.js`
+Do not use the Kendo UI Mobile Widgets.
 
-Then navigate your browser to `http://localhost:<port>/app/index.html` to see the app running in
-your browser.
+Mobile specific frameworks:
 
+[jQuery mobile](http://jquerymobile.com/), [Demos](http://jquerymobile.com/demos/1.1.0/), [API Docs](http://docs.jquery.com/Main_Page)
 
-### Running the app in production
+jQuery mobile UI controls are used for applications designed initially for mobile devices.
 
-This really depends on how complex is your app and the overall infrastructure of your system, but
-the general rule is that all you need in production are all the files under the `app/` directory.
-Everything else should be omitted.
+[PhoneGap](http://phonegap.com/), [API Docs](http://docs.phonegap.com/en/1.7.0/index.html)
 
-angular apps are really just a bunch of static html, css and js files that just need to be hosted
-somewhere, where they can be accessed by browsers.
-
-If your angular app is talking to the backend server via xhr or other means, you need to figure
-out what is the best way to host the static files to comply with the same origin policy if
-applicable. Usually this is done by hosting the files by the backend server or through
-reverse-proxying the backend server(s) and a webserver(s).
-
-
-### Running unit tests
-
-We recommend using [jasmine](http://pivotal.github.com/jasmine/) and
-[JsTestDriver](http://code.google.com/p/js-test-driver/) for your unit tests/specs, but you are free
-to use whatever works for you.
-
-Requires java and a local or remote browser.
-
-* start `scripts/test-server.sh` (on windows: `scripts\test-server.bat`)
-* navigate your browser to `http://localhost:9876/`
-* click on one of the capture links (preferably the "strict" one)
-* run `scripts/test.sh` (on windows: `scripts\test.bat`)
-
-
-### Continuous unit testing
-
-Requires ruby and [watchr](https://github.com/mynyml/watchr) gem.
-
-* start JSTD server and capture a browser as described above
-* start watchr with `watchr scripts/watchr.rb`
-* in a different window/tab/editor `tail -f logs/jstd.log`
-* edit files in `app/` or `src/` and save them
-* watch the log to see updates
-
-There are many other ways to achieve the same effect. Feel free to use them if you prefer them over
-watchr.
-
-
-### End to end testing
-
-angular ships with a baked-in end-to-end test runner that understands angular, your app and allows
-you to write your tests with jasmine-like BDD syntax.
-
-Requires a webserver, node.js or your backend server that hosts the angular static files.
-
-Check out the [end-to-end runner's documentation](http://goo.gl/e8n06) for more info.
-
-* create your end-to-end tests in `test/e2e/scenarios.js`
-* serve your project directory with your http/backend server or node.js + `scripts/web-server.js`
-* open `http://localhost:port/test/e2e/runner.html` in your browser
-
-
-### Receiving updates from upstream
-
-When we upgrade angular-seed's repo with newer angular or testing library code, you can just
-fetch the changes and merge them into your project with git.
-
+PhoneGap is used to get access to mobile native functionality.
 
 ## Directory Layout
 
@@ -118,6 +53,10 @@ fetch the changes and merge them into your project with git.
       partials/         --> angular view partials (partial html templates)
         partial1.html
         partial2.html
+
+	mobile/             --> mobile application wrappers
+      lib/              --> phonegap and 3rd party native mobile libraries
+        phonegap/
 
     config/jsTestDriver.conf    --> config file for JsTestDriver
 
@@ -146,6 +85,46 @@ fetch the changes and merge them into your project with git.
       unit/                     --> unit level specs/tests
         controllersSpec.js      --> specs for controllers
 
-## Contact
+### Running the app during development
 
-For more information on angular please check out http://angularjs.org/
+_Note: While the javascript is client-side-only technology we recommend hosting the project files using a local
+webserver during development to avoid issues with security restrictions (sandbox) in browsers. The
+sandbox implementation varies between browsers, but quite often prevents things like cookies, xhr,
+etc to function properly when an html page is opened via `file://` scheme instead of `http://`._
+
+You can pick one of these options:
+
+* install node.js and run `scripts/web-server.js`
+
+Then navigate your browser to `http://localhost:<port>/app/index.html` to see the app running in
+your browser.
+
+### Running unit tests
+
+We recommend using [jasmine](http://pivotal.github.com/jasmine/) and
+[JsTestDriver](http://code.google.com/p/js-test-driver/) for your unit tests/specs, but you are free
+to use whatever works for you.
+
+Requires java and a local or remote browser.
+
+* start `scripts/test-server.sh` (on windows: `scripts\test-server.bat`)
+* navigate your browser to `http://localhost:9876/`
+* click on one of the capture links (preferably the "strict" one)
+* run `scripts/test.sh` (on windows: `scripts\test.bat`)
+
+
+### Continuous unit testing
+
+Requires ruby and [watchr](https://github.com/mynyml/watchr) gem.
+
+* start JSTD server and capture a browser as described above
+* start watchr with `watchr scripts/watchr.rb`
+* in a different window/tab/editor `tail -f logs/jstd.log`
+* edit files in `app/` or `src/` and save them
+* watch the log to see updates
+
+There are many other ways to achieve the same effect. Feel free to use them if you prefer them over
+watchr.
+
+This was edited with [MarkdownPad](http://markdownpad.com/)
+
