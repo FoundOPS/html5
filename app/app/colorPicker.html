@@ -1,0 +1,33 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <script type="text/javascript" src="js/colorPicker.min.js"></script>
+    <style type="text/css">
+        #picker { width: 200px; height: 200px }
+        #slide { width: 30px; height: 200px }
+    </style>
+    <link rel="stylesheet" href="css/colorPicker.css" />
+</head>
+<body>
+<div class="wrapper">
+    <div id="picker" class="picker"></div>
+    <div id="indicator-picker" class="indicator"></div>
+</div>
+<div class="wrapper wrapper-slide">
+    <div id="slide" class="slide"></div>
+    <div id="indicator-slide" class="indicator"></div>
+</div>
+<script type="text/javascript">
+    ColorPicker(
+            document.getElementById('slide'),
+            document.getElementById('picker'),
+            function(hex, hsv, rgb, mousePicker, mouseSlide) {
+                ColorPicker.positionIndicators(
+                        document.getElementById('indicator-slide'),
+                        document.getElementById('indicator-picker'),
+                        mouseSlide, mousePicker);
+                document.body.style.backgroundColor = hex;
+            });
+</script>
+</body>
+</html>

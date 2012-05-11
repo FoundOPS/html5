@@ -1,0 +1,21 @@
+﻿@font-face {
+    font-family: PTSans;
+    src: url(PTS55F.ttf);  /* TTF file for CSS3 browsers */
+}
+body{
+    font-family: PTSans;
+}
+.k-grid, .k-grid td, .k-grid th{
+    border-color:#000000;
+}
+.k-grid th{
+    text-overflow:ellipsis;
+}
+#color{
+    width:20px;
+    height:20px;
+    border: 1px solid #000000;
+}
+#color:hover{
+    cursor: pointer;
+}
