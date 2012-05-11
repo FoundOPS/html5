@@ -1,5 +1,4 @@
-var module = angular.module('foundOps.services', []).
-    value('version', '0.1');
+var module = angular.module('foundOps.services', []);
 
 //region Constants
 
@@ -36,8 +35,8 @@ module.factory('apiUrl', function (mode) {
 var roleId = "862C50D7-3884-41C2-AE39-80AB17923B1E";
 
 /** Performs an HTTP GET to get the depot. */
-module.factory('depotsStore', function ($http) {
-    var readUrl = F.API_URL + "api/routes/GetDepots";
+module.factory('depotsStore', function ($http, apiUrl) {
+    var readUrl = apiUrl + "api/routes/GetDepots";
     readUrl = readUrl + '?callback=JSON_CALLBACK';
 
     /** Reads the data from the readUrl */
@@ -57,8 +56,8 @@ module.factory('depotsStore', function ($http) {
 });
 
 /** Performs an HTTP GET to get the resources for the given date. */
-module.factory('resourcesStore', function ($http) {
-    var readUrl = F.API_URL + "api/trackpoint/GetResourcesWithLatestPoints";
+module.factory('resourcesStore', function ($http, apiUrl) {
+    var readUrl = apiUrl + "api/trackpoint/GetResourcesWithLatestPoints";
     readUrl = readUrl + '?callback=JSON_CALLBACK';
 
     /** Reads the data from the readUrl
@@ -80,8 +79,8 @@ module.factory('resourcesStore', function ($http) {
 });
 
 /** Performs an HTTP GET to get the routes for the given date. */
-module.factory('routesStore', function ($http) {
-    var readUrl = F.API_URL + "api/routes/GetRoutes";
+module.factory('routesStore', function ($http, apiUrl) {
+    var readUrl = apiUrl + "api/routes/GetRoutes";
     readUrl = readUrl + '?callback=JSON_CALLBACK';
 
     /** Reads the data from the readUrl */
@@ -101,8 +100,8 @@ module.factory('routesStore', function ($http) {
 });
 
 /** Performs an HTTP GET to get the trackpoints for the given date */
-module.factory('trackPointsStore', function ($http) {
-    var readUrl = F.API_URL + "api/trackpoint/GetTrackPoints";
+module.factory('trackPointsStore', function ($http, apiUrl) {
+    var readUrl = apiUrl + "api/trackpoint/GetTrackPoints";
     readUrl = readUrl + '?callback=JSON_CALLBACK';
 
     /** Reads the data from the readUrl

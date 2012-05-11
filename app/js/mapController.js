@@ -1,6 +1,6 @@
 ﻿"use strict";
 
-angular.module("foundOPS").controller('mapController', function ($scope, $defer, depotsStore, resourcesStore, routesStore, trackPointsStore) {
+angular.module("foundOps.map").controller('mapController', function ($scope, $defer, depotsStore, resourcesStore, routesStore, trackPointsStore) {
 //region Locals
 
 //region Constants

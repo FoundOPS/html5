@@ -30,6 +30,18 @@ jQuery mobile UI controls are used for applications designed initially for mobil
 
 PhoneGap is used to get access to mobile native functionality.
 
+### Coding Practices
+
+We follow [google's javascript guidelines](http://google-styleguide.googlecode.com/svn/trunk/javascriptguide.xml).
+
+We also use closure. All javascript MUST BE [annotated for the Google Closure Compiler](https://developers.google.com/closure/compiler/docs/js-for-compiler).
+
+Checkout the [tutorial](https://developers.google.com/closure/library/docs/tutorial) to get started with closure.
+
+[API Reference](http://closure-library.googlecode.com/svn/docs/index.html) [Docs](https://developers.google.com/closure/library/docs/overview)
+
+lowerCamelCase for acronyms
+
 ## Directory Layout
 
     app/                --> all of the files to be used in production
@@ -43,13 +55,10 @@ PhoneGap is used to get access to mobile native functionality.
         services.js     --> custom angular services
         widgets.js      --> custom angular widgets
       lib/              --> angular and 3rd party javascript libraries
-        angular/
-          angular.js            --> the latest angular js
-          angular.min.js        --> the latest minified angular js
-          angular-ie-compat.js  --> angular patch for IE 6&7 compatibility
-          version.txt           --> version number
-        hashset.js      --> NOT USED YET http://code.google.com/p/jshashtable/wiki/HashSet
-        hashtable.js    --> NOT USED YET http://www.timdown.co.uk/jshashtable/index.html
+        angular/..      --> the latest angular js
+        jquery/..       --> jQuery 1.7.1, jQuery mobile 1.1.0-rc.1, jQuery Mobile angularJS adapter v1.0.7-rc1
+        linq/..         --> linq.js 2.2.0.2
+        leaflet.js      --> leaflet-0.3.1
       partials/         --> angular view partials (partial html templates)
         partial1.html
         partial2.html
@@ -84,16 +93,6 @@ PhoneGap is used to get access to mobile native functionality.
         jstestdriver/           --> JSTD - JavaScript test runner
       unit/                     --> unit level specs/tests
         controllersSpec.js      --> specs for controllers
-
-### Coding Practices
-
-We follow [google's javascript guidelines](http://google-styleguide.googlecode.com/svn/trunk/javascriptguide.xml).
-
-We also use closure. All javascript MUST BE [annotated for the Google Closure Compiler](https://developers.google.com/closure/compiler/docs/js-for-compiler).
-
-Checkout the [tutorial](https://developers.google.com/closure/library/docs/tutorial) to get started with closure.
-
-[API Reference](http://closure-library.googlecode.com/svn/docs/index.html) [Docs](https://developers.google.com/closure/library/docs/overview) 
 
 ### Running the app during development
 

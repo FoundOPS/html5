@@ -16175,7 +16175,7 @@ function $RouteProvider(){
  * @example
  * <pre>
  *  // Given:
- *  // URL: http://server.com/index.html#/Chapter/1/Section/2?search=moby
+ *  // URL: http://server.com/map.html#/Chapter/1/Section/2?search=moby
  *  // Route: /Chapter/:chapterId/Section/:sectionId
  *  //
  *  // Then
@@ -22683,7 +22683,7 @@ var ngTranscludeDirective = ngDirective({
  * @description
  * # Overview
  * `ng-view` is a directive that complements the {@link angular.module.ng.$route $route} service by
- * including the rendered template of the current route into the main layout (`index.html`) file.
+ * including the rendered template of the current route into the main layout (`map.html`) file.
  * Every time the current route changes, the included view changes with it according to the
  * configuration of the `$route` service.
  *
