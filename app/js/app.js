@@ -1,12 +1,13 @@
 'use strict';
 
-/** Declare app level module which depends on filters, services, and directives */
-angular.module('foundOPS', ['foundOPS.filters', 'foundOPS.services', 'foundOPS.directives']);
+/** Declare the combined app level module. All common
+ * TODO: This eventually will replace navigation for foundOpsMap and mobileOps.  */
+angular.module('foundOps', ['foundOps.filters', 'foundOps.services', 'foundOps.directives']);
 
-/** Declare the map module which depends on filters, services, and directives */
-angular.module('foundOPS.map', ['foundOPS.filters', 'foundOPS.services', 'foundOPS.directives']);
+/** Declare the map module. This is a temporary module to manage navigation
+ * for the map while it is separate from the app level module. */
+angular.module('foundOpsMap', ['foundOps.filters', 'foundOps.services', 'foundOps.directives']);
 
-/** Declare mobile app module which depends on foundOPS.services.
- * This is a temporary module to be kept while the mobile
- * application's navigation is separate from the main site.  */
-angular.module('mobileOps', ['foundOPS.services']);
+/** Declare mobile app module. This is a temporary module to manage navigation
+ * for the mobile application while it is separate from the app level module.  */
+angular.module('foundOpsMobile', ['foundOps.services']);

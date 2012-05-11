@@ -2,8 +2,6 @@
 
 This is the FoundOPS javascript application. The primary framework is Angular, the reason it is called foundOPS ng.
 
-[Annotation](https://developers.google.com/closure/compiler/docs/js-for-compiler) All javascript MUST BE annotated for the Google Closure Compiler.
-
 TESTING IS ALSO IMPORTANT. TEST INFO HERE.
 
 ## Frameworks
@@ -50,6 +48,8 @@ PhoneGap is used to get access to mobile native functionality.
           angular.min.js        --> the latest minified angular js
           angular-ie-compat.js  --> angular patch for IE 6&7 compatibility
           version.txt           --> version number
+        hashset.js      --> NOT USED YET http://code.google.com/p/jshashtable/wiki/HashSet
+        hashtable.js    --> NOT USED YET http://www.timdown.co.uk/jshashtable/index.html
       partials/         --> angular view partials (partial html templates)
         partial1.html
         partial2.html
@@ -84,6 +84,16 @@ PhoneGap is used to get access to mobile native functionality.
         jstestdriver/           --> JSTD - JavaScript test runner
       unit/                     --> unit level specs/tests
         controllersSpec.js      --> specs for controllers
+
+### Coding Practices
+
+We follow [google's javascript guidelines](http://google-styleguide.googlecode.com/svn/trunk/javascriptguide.xml).
+
+We also use closure. All javascript MUST BE [annotated for the Google Closure Compiler](https://developers.google.com/closure/compiler/docs/js-for-compiler).
+
+Checkout the [tutorial](https://developers.google.com/closure/library/docs/tutorial) to get started with closure.
+
+[API Reference](http://closure-library.googlecode.com/svn/docs/index.html) [Docs](https://developers.google.com/closure/library/docs/overview) 
 
 ### Running the app during development
 
