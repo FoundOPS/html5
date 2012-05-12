@@ -1,7 +1,7 @@
 // Copyright 2012 FoundOPS LLC. All Rights Reserved.
 
 /**
- * @fileoverview Class dealing with the look and feel of FoundOPS applications.
+ * @fileoverview Class dealing with the look and feel of the application.
  */
 
 goog.provide('ops.ui');

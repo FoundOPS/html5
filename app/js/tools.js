@@ -68,17 +68,6 @@ ops.tools.ValueSelector = function (values) {
 }
 
 /**
- * Create a unique Guid.
- * @return {string} The Guid.
- */
-ops.tools.uniqueGuid = function () {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-    });
-}
-
-/**
  * Generates a compass direction from rotation degrees.
  * Example: NW, or NNW.
  *

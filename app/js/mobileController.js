@@ -12,7 +12,7 @@ var lastTrackPointTime; //The time that the last trackPoint was sent.
 
 var trackPoint = function () {}; // A trackpoint object
 
-angular.module("foundOps.mobile").controller('MobileController', function ($scope, $navigate, routesStore, $window, trackPointsStore) {
+angular.module("ops.mobile").controller('MobileController', function ($scope, $navigate, routesStore, $window, trackPointsStore) {
     //In order of usage
 
     $scope.data = {
