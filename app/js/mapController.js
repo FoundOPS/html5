@@ -1,6 +1,23 @@
-﻿"use strict";
+﻿// Copyright 2012 FoundOPS LLC. All Rights Reserved.
 
-angular.module("foundOps.map").controller('mapController', function ($scope, $defer, depotsStore, resourcesStore, routesStore, trackPointsStore) {
+/**
+ * @fileoverview Controller for the route map.
+ *
+ * Responsible for displaying the service provider's:
+ * a) routes and route destinations
+ * b) employees and vehicles (resources) last TrackPoint
+ * c) resources historical track points for today
+ * These are all dependent on the selectedDate and roleId.
+ */
+
+"use strict";
+
+goog.require('goog.date.UtcDateTime');
+goog.require('ops');
+goog.require('ops.tools');
+goog.require('ops.ui');
+
+angular.module("ops.map").controller('mapController', function ($scope, $defer, depotsStore, resourcesStore, routesStore, trackPointsStore) {
 //region Locals
 
 //region Constants
@@ -10,12 +27,13 @@ angular.module("foundOps.map").controller('mapController', function ($scope, $de
      */
     var RESOURCES_REFRESH_RATE = 10000;
 
-    /** Rate of refreshing routes on the map (in milliseconds)
+    /**
+     * Rate of refreshing routes on the map (in milliseconds)
      * @type {number}
      */
     var ROUTES_REFRESH_RATE = 30000;
 
-//endregion
+//#endregion
 
 //region Loaded data
 
@@ -38,7 +56,7 @@ angular.module("foundOps.map").controller('mapController', function ($scope, $de
      */
     var mapTrackPoints = [];
 
-//endregion
+//#endregion
 
 //region Map variables
 
@@ -50,54 +68,70 @@ angular.module("foundOps.map").controller('mapController', function ($scope, $de
     var routesGroup;
     var trackPointsGroup;
 
-//endregion
+//#endregion
 
-    /** The Id of the selected route
+    /**
+     * Associates the routes with colors.
+     * @type {ops.tools.ValueSelector}
+     */
+    var routeColorSelector = new ops.tools.ValueSelector(ops.ui.ITEM_COLORS);
+
+    /**
+     * Associates the routes with opacities.
+     * @type {ops.tools.ValueSelector}
+     */
+    var routeOpacitySelector = new ops.tools.ValueSelector(ops.ui.ITEM_OPACITIES);
+
+//#endregion
+
+//#region Scope Properties
+
+    /**
+     * The Id of the selected route
      * @type {string}
      */
     var selectedRouteId;
-    /** A list to keep track of which routes have been selected
+
+    /**
+     * A list to keep track of which routes have been selected
      * @type {Array.<string>}
      */
     var selectedRoutes;
 
-//endregion
+    //#endregion
 
 //region Logic
 
 //region Map Methods
 
-    /** Creates the map. */
-    var setupMap = function () {
-        /** initialize the map on the "map" div with a given center and zoom */
+    // setup an empty map
+    (function () {
+        // initialize the map on the "map" div with a given center and zoom
         map = new window.L.Map('map', {
             center:new window.L.LatLng(40, -89),
             zoom:4
         });
-        /** create a CloudMade tile layer */
-        var cloudmade = new window.L.TileLayer('http://{s}.tile.cloudmade.com/57cbb6ca8cac418dbb1a402586df4528/997/256/{z}/{x}/{y}.png', {
+        // create a CloudMade tile layer and add the CloudMade layer to the map
+        var cloudMade = new window.L.TileLayer('http://{s}.tile.cloudmade.com/57cbb6ca8cac418dbb1a402586df4528/997/256/{z}/{x}/{y}.png', {
             maxZoom:18
         });
-        /** add the CloudMade layer to the map */
-        map.addLayer(cloudmade);
-    };
+        map.addLayer(cloudMade);
+    })();
 
-    /** Setup an empty map. */
-    setupMap();
     /** Centers the map based on the given locations
      * @param {Array.<number>} resourcesToCenterOn An array to hold the lat and lng of every point used.
      */
     var center = function (resourcesToCenterOn) {
-        /** gets the total area used */
+        // get the total area used
         var bounds = new window.L.LatLngBounds(resourcesToCenterOn);
-        /** center the map on the bounds */
+        // center the map on the bounds
         map.setView(bounds.getCenter(), 11);
-        /** Sets the best view(position and zoom level) to fit all the resources
+        /* Sets the best view(position and zoom level) to fit all the resources
          * (This only works perfectly in IE) */
         map.fitBounds(bounds);
     };
 
-    /** Remove all objects from the map. */
+    // Remove all objects from the map
     var clearMap = function () {
         /** Remove the resourcesGroup if it exists */
         if (resourcesGroup != null)
@@ -114,7 +148,7 @@ angular.module("foundOps.map").controller('mapController', function ($scope, $de
         selectedRoutes = [];
     };
 
-    /** Disselect selectedRoute on map click */
+    /** Deselect selectedRoute on map click */
     map.on('click', function () {
         selectedRouteId = "";
         /** Remove the trackpointsGroup if it exists */
@@ -122,7 +156,7 @@ angular.module("foundOps.map").controller('mapController', function ($scope, $de
             map.removeLayer(trackPointsGroup);
     });
 
-//endregion
+//#endregion
 
 //region Draw Objects
 
@@ -156,7 +190,7 @@ angular.module("foundOps.map").controller('mapController', function ($scope, $de
                     opacity:1,
                     weight:1,
                     color:"#ffffff",
-                    fillColor:F.getColor(routes[r].Id),
+                    fillColor:routeColorSelector.getValue(routes[r].Id),
                     fillOpacity:1,
                     clickable:false
                 });
@@ -240,7 +274,7 @@ angular.module("foundOps.map").controller('mapController', function ($scope, $de
             var lng = resource.Longitude;
             var rotateDegrees = resource.CompassHeading;
             /** Get the color of the route */
-            var color = F.getColor(resource.RouteId);
+            var color = routeColorSelector.getValue(resource.RouteId);
             /** Get the location of the destination */
             var location = new window.L.LatLng(lat, lng);
             var url = "../img/truck.png";
@@ -260,7 +294,7 @@ angular.module("foundOps.map").controller('mapController', function ($scope, $de
             });
             var icon = new window.L.ResourceIcon();
             /** Set the text for the popup */
-            var popoupContent = "<p class='speed'><b>" + name + "</b><br />Speed: " + Math.round(resource.Speed) + " mph " + F.getDirection(rotateDegrees) + "</p>";
+            var popoupContent = "<p class='speed'><b>" + name + "</b><br />Speed: " + Math.round(resource.Speed) + " mph " + ops.tools.getDirection(rotateDegrees) + "</p>";
             var marker = new window.L.Marker(location, {
                 icon:icon
             }).bindPopup(popoupContent, {
@@ -333,9 +367,9 @@ angular.module("foundOps.map").controller('mapController', function ($scope, $de
                 var latlngs = [];
                 /** create a polyline to connect the trackpoints */
                 var polyline = new window.L.Polyline(latlngs, {
-                    color:F.getColor(routeId),
+                    color:routeColorSelector.getValue(routeId),
                     weight:2,
-                    opacity:F.getOpacity(resourceId),
+                    opacity:routeOpacitySelector.getValue(resourceId),
                     clickable:false
                 });
                 /** Loop through every trackpoint */
@@ -352,8 +386,8 @@ angular.module("foundOps.map").controller('mapController', function ($scope, $de
                          clickable: false,
                          radius: 3,
                          stroke: 0,
-                         fillOpacity: F.GET_OPACITY(mapTrackPoints[t].Id),
-                         fillColor: F.GET_COLOR(mapTrackPoints[t].RouteId)
+                         fillOpacity: routeOpacitySelector.getValue(mapTrackPoints[t].Id),
+                         fillColor: routeColorSelector.getValue(mapTrackPoints[t].RouteId)
                          });*/
                         /** add current marker to the map */
                         /*trackPointsGroup.addLayer(marker);*/
@@ -368,7 +402,7 @@ angular.module("foundOps.map").controller('mapController', function ($scope, $de
         map.addLayer(trackPointsGroup);
     };
 
-//endregion
+//#endregion
 
 //region Get Data
 
@@ -489,20 +523,17 @@ angular.module("foundOps.map").controller('mapController', function ($scope, $de
     var setDate = function (date) {
         /** reset the initial load(so the map gets re-centered) */
         isInitialLoad = true;
-        var newDate = F.formatDate(date);
+
         /** Remove all objects from the map */
         clearMap();
         /** Clear the list of trackpoints */
         mapTrackPoints = [];
-        getRoutes(newDate);
+        getRoutes(date);
         /** Get resources only if current day is today */
-        if (newDate == currentDate) {
-            getResourcesWithLatestPoint(newDate);
+        if (date.getUTCDay() == new goog.date.UtcDateTime().getUTCDate()) {
+            getResourcesWithLatestPoint(date);
         }
     };
-
-    /** Set the current date to today */
-    var currentDate = F.formatDate(new Date());
 
     /** Set the date to today. */
     setDate(new Date());
@@ -514,8 +545,9 @@ angular.module("foundOps.map").controller('mapController', function ($scope, $de
         /** Remove the previous trackpoints */
         if (trackPointsGroup != null)
             map.removeLayer(trackPointsGroup);
-        /** Reset the opacity index to 0 */
-        F.opacityIndex = 0;
+
+        //TODO? Clear the opacity value selector
+
         /** Update the selected route */
         selectedRouteId = routeId;
         /** Keeps track of whether or not the routeId has already been selected
@@ -532,11 +564,11 @@ angular.module("foundOps.map").controller('mapController', function ($scope, $de
         }
         if (!isRouteLoaded) {
             /** Get the trackpoints on the map */
-            getHistoricalTrackPoints(currentDate, selectedRouteId);
+            getHistoricalTrackPoints(selectedRouteId);
             /** Add the selected RouteId the the list of selected routes */
             selectedRoutes.push(selectedRouteId);
         }
     };
 
-//endregion
+//#endregion
 });

@@ -126,7 +126,7 @@ angular.module("ops.mobile").controller('MobileController', function ($scope, $n
         };
 
         navigator.geolocation.getCurrentPosition(onSuccess, onError, {
-            enableHighAccuracy: true,
+            enableHighAccuracy: true
         });
     };
 });

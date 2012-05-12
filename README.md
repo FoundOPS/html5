@@ -42,6 +42,9 @@ Checkout the [tutorial](https://developers.google.com/closure/library/docs/tutor
 
 lowerCamelCase for acronyms
 
+Closure Linter: To install easy-install on windows 7-64 bit http://www.lfd.uci.edu/~gohlke/pythonlibs/
+
+
 ## Directory Layout
 
     app/                --> all of the files to be used in production
