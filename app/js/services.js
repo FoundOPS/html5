@@ -10,10 +10,14 @@ goog.require('ops');
 
 /**
  * The configuration object for data services.
+ * It hold the current RoleId, Mode, and ApiUrl.
  * @const
  * @type {Array.<Object>}
  */
 ops.services.CONFIG = {
+    /*
+     * The current RoleId for the user.
+     */
     RoleId:new ops.Guid('862C50D7-3884-41C2-AE39-80AB17923B1E'),
     /**
      * The current mode.
@@ -25,95 +29,64 @@ ops.services.CONFIG = {
     Mode:'LOCALAPI'
 };
 
+//setup the api url depending on the mode
+var mode = ops.services.CONFIG.Mode;
+if (mode === "LOCALAPI") {
+    //For the local api, use a different root url
+    apiUrl = 'http://localhost:9711/';
+} else if (mode === "ANDROIDLA") {
+    apiUrl = 'http://10.0.2.2:9711/';
+}
+
+/*
+ * The url for the API.
+ */
+ops.services.CONFIG.ApiUrl = apiUrl;
+
 /**
- * Update the current RoleId.
+ * Set the current RoleId.
  * @param {ops.Guid} The roleId.
  */
 ops.services.setRoleId = function (roleId) {
     ops.services.CONFIG.RoleId = roleId;
 };
 
-//The angular module to define the services in.
-var module = angular.module('ops.services', []);
+/*
+ Setup the Routes resource service.
+ use the injector to get the $resource and apiUrl
+ */
+angular.injector(['ngResource']).invoke(function ($resource, $http) {
+    var roleId = ops.services.CONFIG.RoleId;
 
-// use the injector to get the $resource and apiUrl
-angular.injector(['ops.services']).invoke(function ($resource) {
     /**
-     * The route resource object
-     * @param {Object} The resource object.
-     * @constructor
+     * The Routes resource object. Used to get Routes...
      */
-    ops.services.prototype.Routes = $resource(apiUrl + '/routes/:roleId', [],
-        {get:{method:'JSONP', params:{roleId:ops.services.CONFIG.RoleId}},
-            replies:{method:'JSONP', params:{visibility:'@self', comments:'@comments'}}
+    ops.services.Routes = $resource(apiUrl + '/routes', [],
+        {
+            get:{method:'JSONP', params:{roleId:roleId}}
         });
-});
 
-
-/** Performs an HTTP GET to get the depot. */
-module.factory('depotsStore', function ($http, apiUrl) {
-    var readUrl = apiUrl + "api/routes/GetDepots";
-    readUrl = readUrl + '?callback=JSON_CALLBACK';
-
-    /** Reads the data from the readUrl */
-    function read() {
-        return $http({
-            method:'JSONP',
-            url:readUrl,
-            params:{ roleId:roleId }
-        }).then(function (response) {
-                return response.data;
-            });
-    }
-
-    return {
-        read:read
-    };
-});
-
-/** Performs an HTTP GET to get the resources for the given date. */
-module.factory('resourcesStore', function ($http, apiUrl) {
-    var readUrl = apiUrl + "api/trackpoint/GetResourcesWithLatestPoints";
-    readUrl = readUrl + '?callback=JSON_CALLBACK';
-
-    /** Reads the data from the readUrl
-     * @param {string} date
+    /**
+     * The Depots resource object. Used to get Depots...
      */
-    function read(date) {
-        return $http({
-            method:'JSONP',
-            url:readUrl,
-            params:{ roleId:roleId, serviceDate:date }
-        }).then(function (response) {
-                return response.data;
-            });
-    }
+    ops.services.Depots = $resource(apiUrl + '/routes/GetDepots', [],
+        {
+            get:{method:'JSONP', params:{roleId:roleId}}
+        });
 
-    return {
-        read:read
-    };
-});
-
-/** Performs an HTTP GET to get the trackpoints for the given date */
-module.factory('trackPointsStore', function ($http, apiUrl) {
-    var readUrl = apiUrl + "api/trackpoint/GetTrackPoints";
-    readUrl = readUrl + '?callback=JSON_CALLBACK';
-
-    /** Reads the data from the readUrl
-     * @param {string} date
-     * @param {string} routeId
+    /**
+     * Get the TrackPoints of the current RoleId's service provider.
+     * @param {ops.Guid} routeId The Id of the route to retrieve TrackPoints for.
+     * @param {goog.Date.UtcDate} serviceDate The service date to retrieve TrackPoints for.
      */
-    function read(date, routeId) {
+    ops.services.getTrackPoints = function (serviceDate, routeId) {
+        //retrieve using $http instead of the resource service for performance
         return $http({
             method:'JSONP',
-            url:readUrl,
-            params:{ roleId:roleId, routeId:routeId, serviceDate:date }
+            url:apiUrl + "api/trackpoint/GetTrackPoints?callback=JSON_CALLBACK",
+            params:{ roleId:roleId, routeId:routeId, serviceDate:serviceDate.toUTCIsoString() }
         }).then(function (response) {
                 return response.data;
             });
-    }
-
-    return {
-        read:read
     };
 });

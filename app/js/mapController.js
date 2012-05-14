@@ -13,11 +13,13 @@
 "use strict";
 
 goog.require('goog.date.UtcDateTime');
+
 goog.require('ops');
 goog.require('ops.tools');
+goog.require('ops.services');
 goog.require('ops.ui');
 
-angular.module("ops.map").controller('mapController', function ($scope, $defer, depotsStore, resourcesStore, routesStore, trackPointsStore) {
+angular.module("ops.map").controller('mapController', function ($scope, $defer) {
 //region Locals
 
 //region Constants
@@ -408,14 +410,14 @@ angular.module("ops.map").controller('mapController', function ($scope, $defer, 
 
     /** Gets the business's depot */
     var getDepots = function () {
-        depotsStore.read().then(function (data) {
+        ops.services.Depots.query({}, function (data) {
             if (!data) {
                 data = [];
             }
             depots = data;
             /** Draw the depot on the map */
             drawDepots();
-        });
+        })
     };
 
     /** Gets the trackpoints of the route for the specified date

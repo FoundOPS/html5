@@ -36,9 +36,13 @@ We follow [google's javascript guidelines](http://google-styleguide.googlecode.c
 
 We also use closure. All javascript MUST BE [annotated for the Google Closure Compiler](https://developers.google.com/closure/compiler/docs/js-for-compiler).
 
+[API Reference](http://closure-library.googlecode.com/svn/docs/index.html) [Docs](https://developers.google.com/closure/library/docs/overview)\
+
+Compressed via [htmlcompressor](http://code.google.com/p/htmlcompressor/)
+
 Checkout the [tutorial](https://developers.google.com/closure/library/docs/tutorial) to get started with closure.
 
-[API Reference](http://closure-library.googlecode.com/svn/docs/index.html) [Docs](https://developers.google.com/closure/library/docs/overview)
+
 
 lowerCamelCase for acronyms
 
