@@ -33,7 +33,7 @@ angular.module("ops.mobile").controller('MobileController', function ($scope, $n
     };
 
     $scope.refreshRoutes = function () {
-        $scope.routes = ops.services.Routes().then(function (data) {
+        $scope.routes = ops.services.getRoutes().then(function (data) {
             $scope.data.routes = data;
         });
     };

@@ -36,7 +36,7 @@ ops.services.CONFIG = {
      * The current RoleId for the user.
      * @type {ops.Guid}
      */
-    RoleId:new ops.Guid('0226C8AD-AB17-4842-B659-71621D61D8B0'),
+    RoleId:null,
     /*
      * The current service mode.
      * @type {ops.services.Mode}
@@ -65,17 +65,22 @@ ops.services.setRoleId = function (roleId) {
     ops.services.CONFIG.RoleId = roleId;
 };
 
+//Set the roleId to GotGrease's role (for debugging)
+if (ops.services.CONFIG.Mode != ops.services.Mode.LIVE)
+    ops.services.setRoleId(new ops.Guid('0226C8AD-AB17-4842-B659-71621D61D8B0'));
+
 /**
  * Returns a standard http get.
  * @param {Object} $http The $http service.
  * @param {String} queryString The query string to use. Ex. "routes/GetDepots"
- * @param {Object.<string|Object>}  params The parameters to use. This will automatically add roleId as a parameter.
+ * @param {Object.<string|Object>}  params The parameters to use. This will automatically add roleId as a parameter if it is not undefined.
  * @return {function(Object)} The generated http function.
  * @private
  */
 ops.services._getHttp = function ($http, queryString, params) {
     return function () {
-        params.roleId = ops.services.CONFIG.RoleId.toString();
+        if (ops.services.CONFIG.RoleId)
+            params.roleId = ops.services.CONFIG.RoleId.toString();
 
         var url = ops.services.CONFIG.ApiUrl + queryString + '?callback=JSON_CALLBACK';
 
@@ -88,24 +93,26 @@ ops.services._getHttp = function ($http, queryString, params) {
 };
 
 /*
- Setup the Routes resource service.
- use the injector to get the $resource and apiUrl
+ Setup the resource services. Use the injector to get the $http service.
  */
 angular.injector(['ng']).invoke(function ($http) {
     /**
-     * The Routes resource object. Used to get Routes...
+     * Get the Routes of the current RoleId's service provider.
+     * @return {function(Object)} The generated http function.
      */
-    ops.services.Routes = ops.services._getHttp($http, 'routes/GetRoutes', {});
+    ops.services.getRoutes = ops.services._getHttp($http, 'routes/GetRoutes', {});
 
     /**
-     * The Depots resource object. Used to get Depots...
+     * Get the Depots of the current RoleId's service provider.
+     * @return {function(Object)} The generated http function.
      */
-    ops.services.Depots = ops.services._getHttp($http, 'routes/GetDepots', {});
+    ops.services.getDepots = ops.services._getHttp($http, 'routes/GetDepots', {});
 
     /**
      * Get the TrackPoints of the current RoleId's service provider.
      * @param {goog.date.UtcDateTime} serviceDate The service date to retrieve TrackPoints for.
      * @param {ops.Guid} routeId The Id of the route to retrieve TrackPoints for.
+     * @return {function(Object)} The generated http function.
      */
     ops.services.getTrackPoints = function (serviceDate, routeId) {
         return ops.services._getHttp($http, 'trackpoint/GetTrackPoints', {routeId:routeId, serviceDate:serviceDate.toUTCIsoString()});
