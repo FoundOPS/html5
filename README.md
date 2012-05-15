@@ -15,7 +15,6 @@ The primary CSS frameworks.
 [Bootstrap](http://twitter.github.com/bootstrap/) <br/>
 [less](http://lesscss.org/)
 
-
 Kendo controls are sprinkled in here and there. The Kendo framework is used when Kendo controls are involved. When/if kendo support angular's framework, that will be switched over. (Do not use the Kendo UI Mobile Widgets.)
 
 [Kendo UI](http://demos.kendoui.com/web/overview/index.html) - [Framework](http://demos.kendoui.com/web/mvvm/index.html)
@@ -34,12 +33,11 @@ PhoneGap is used to get access to mobile native functionality.
 
 We follow [google's javascript guidelines](http://google-styleguide.googlecode.com/svn/trunk/javascriptguide.xml).
 
-We use [Google's Closure Compiler](https://developers.google.com/closure/compiler/).
+We use [Google's Closure Compiler](https://developers.google.com/closure/compiler/) - [Docs](https://developers.google.com/closure/library/docs/overview) 
+- [API Reference](http://closure-library.googlecode.com/svn/docs/index.html) - [Tutorial](https://developers.google.com/closure/library/docs/tutorial "Tutorial")
 
 - All javascript MUST BE [annotated for the Google Closure Compiler](https://developers.google.com/closure/compiler/docs/js-for-compiler)
-- [Docs](https://developers.google.com/closure/library/docs/overview)
-- [API Reference](http://closure-library.googlecode.com/svn/docs/index.html) 
-- [Tutorial](https://developers.google.com/closure/library/docs/tutorial "Tutorial")
+
 
 We use [lowerCamelCase](http://c2.com/cgi/wiki?LowerCamelCase) for acronyms.
 
