@@ -12,27 +12,22 @@ Angular is the primary framework and it is used whenever possible. Please go thr
 
 The primary CSS frameworks.
 
-[Bootstrap](http://twitter.github.com/bootstrap/)
-- [less](http://lesscss.org/)
+[Bootstrap](http://twitter.github.com/bootstrap/) - [less](http://lesscss.org/)
 
 
 Kendo controls are sprinkled in here and there. The Kendo framework is used when Kendo controls are involved. When/if kendo support angular's framework, that will be switched over. (Do not use the Kendo UI Mobile Widgets.)
 
-[Kendo UI](http://demos.kendoui.com/web/overview/index.html)
-- [Framework](http://demos.kendoui.com/web/mvvm/index.html)
+[Kendo UI](http://demos.kendoui.com/web/overview/index.html) - [Framework](http://demos.kendoui.com/web/mvvm/index.html)
 
 Mobile specific frameworks:
 
 jQuery mobile UI controls are used for applications designed initially for mobile devices.
 
-[jQuery mobile](http://jquerymobile.com/)
-- [Demos](http://jquerymobile.com/demos/1.1.0/)
-- [API Docs](http://docs.jquery.com/Main_Page)
+[jQuery mobile](http://jquerymobile.com/) - [Demos](http://jquerymobile.com/demos/1.1.0/) - [API Docs](http://docs.jquery.com/Main_Page)
 
 PhoneGap is used to get access to mobile native functionality.
 
-[PhoneGap](http://phonegap.com/)
-- [API Docs](http://docs.phonegap.caom)
+[PhoneGap](http://phonegap.com/) - [API Docs](http://docs.phonegap.caom)
 
 ### Coding Practices
 
