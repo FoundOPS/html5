@@ -15,7 +15,23 @@ body{
     width:20px;
     height:20px;
     border: 1px solid #000000;
+    margin-left: 12px;
 }
 #color:hover{
     cursor: pointer;
+}
+.k-grid  .k-grid-header  .k-header  .k-link {
+    height: auto;
+}
+
+.k-grid  .k-grid-header  .k-header {
+    white-space: normal;
+}
+.arrow{
+    position: relative;
+    top: -4px;
+    left: 23px;
+    width: 8px;
+    height: 8px;
+    background-image: url(../img/arrow.png);
 }
