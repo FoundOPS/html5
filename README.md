@@ -8,10 +8,7 @@ TESTING IS ALSO IMPORTANT. TEST INFO HERE.
 
 Angular is the primary framework and it is used whenever possible. Please go through the tutorial.
 
-[Angular](http://angularjs.org/)
-- [API Docs](http://docs.angularjs.org/api)
-- [Tutorial](http://docs.angularjs.org/tutorial)
-- [WebStorm plugin](https://groups.google.com/forum/#!topic/angular/GyBSkDxZN9c)
+[Angular](http://angularjs.org/) - [API Docs](http://docs.angularjs.org/api) - [Tutorial](http://docs.angularjs.org/tutorial) - [WebStorm plugin](https://groups.google.com/forum/#!topic/angular/GyBSkDxZN9c)
 
 The primary CSS frameworks.
 
