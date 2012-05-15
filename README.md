@@ -33,8 +33,7 @@ PhoneGap is used to get access to mobile native functionality.
 
 We follow [google's javascript guidelines](http://google-styleguide.googlecode.com/svn/trunk/javascriptguide.xml).
 
-We use [Google's Closure Compiler](https://developers.google.com/closure/compiler/) - [Docs](https://developers.google.com/closure/library/docs/overview) 
-- [API Reference](http://closure-library.googlecode.com/svn/docs/index.html) - [Tutorial](https://developers.google.com/closure/library/docs/tutorial "Tutorial")
+We use [Google's Closure Compiler](https://developers.google.com/closure/compiler/) - [Docs](https://developers.google.com/closure/library/docs/overview) - [API Reference](http://closure-library.googlecode.com/svn/docs/index.html) - [Tutorial](https://developers.google.com/closure/library/docs/tutorial "Tutorial")
 
 - All javascript MUST BE [annotated for the Google Closure Compiler](https://developers.google.com/closure/compiler/docs/js-for-compiler)
 
