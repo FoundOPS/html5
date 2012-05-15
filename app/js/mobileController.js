@@ -57,8 +57,7 @@ angular.module("ops.mobile").controller('MobileController', function ($scope, $n
         var clientContactInfo = $scope.selectedRouteDestination.Client.ContactInfoSet;
         var locationContactInfo = $scope.selectedRouteDestination.Location.ContactInfoSet;
 
-        var phoneNumbers = Enumerable.From(clientContactInfo).Union(Enumerable.From(locationContactInfo)).Where(
-            function (contactInfo) {
+        var phoneNumbers = Enumerable.From(clientContactInfo).Union(Enumerable.From(locationContactInfo)).Where(function (contactInfo) {
                 return contactInfo.Type === "Phone Number";
             }).ToArray();
 

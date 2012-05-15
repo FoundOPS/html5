@@ -11,7 +11,7 @@ goog.require('ops');
 
 /**
  * Enum for the service mode.
- * LOCAL: load data from JSON files in the application's directory. Works for both Android & Browser Debugging.  TODO: Implement this mode.
+ * LOCAL: load data from JSON files in the application's directory. Works for both Android & Browser Debugging. TODO: Implement this mode.
  * LOCALAPI: load data from the local api server.
  * ANDROIDLA: debug in Android Emulator using the local api server.
  * LIVE: load from the main server. TODO: Implement this mode.
@@ -67,7 +67,7 @@ ops.services.setRoleId = function (roleId) {
 
 //Set the roleId to GotGrease's role (for debugging)
 if (ops.services.CONFIG.Mode != ops.services.Mode.LIVE)
-    ops.services.setRoleId(new ops.Guid('0226C8AD-AB17-4842-B659-71621D61D8B0'));
+    ops.services.setRoleId(new ops.Guid('2A4A2A74-4EB4-4569-B8D5-791C44160984'));
 
 /**
  * Returns a standard http get.
