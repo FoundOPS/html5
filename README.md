@@ -12,7 +12,8 @@ Angular is the primary framework and it is used whenever possible. Please go thr
 
 The primary CSS frameworks.
 
-[Bootstrap](http://twitter.github.com/bootstrap/) - [less](http://lesscss.org/)
+[Bootstrap](http://twitter.github.com/bootstrap/) <br/>
+[less](http://lesscss.org/)
 
 
 Kendo controls are sprinkled in here and there. The Kendo framework is used when Kendo controls are involved. When/if kendo support angular's framework, that will be switched over. (Do not use the Kendo UI Mobile Widgets.)
