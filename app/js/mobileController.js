@@ -11,30 +11,26 @@ var lastTrackPointTime; //The time that the last trackPoint was sent.
 angular.module("ops.mobile").controller('MobileController', function ($scope, $navigate) {
     //In order of usage
 
-    //for debugging: skip login
-    if (ops.services.CONFIG.Mode != "LIVE")
-        $navigate("#routeslist");
-
-    $scope.data = {
-        routes:[],
-        inputEmail:'',
-        inputPass:''
-    };
-
     $scope.back = function () {
         $navigate('back');
     };
 
     $scope.login = function () {
-        //TODO validate
-        //$scope.inputEmail
-        //$scope.inputPass
-        $navigate("#routeslist");
+        ops.services.authenticate(this.email, this.pass).then(function (response) {
+            //data will be true if this was authenticated
+            if (response.data)
+            {
+                $navigate("#routeslist");
+                $scope.refreshRoutes();
+            }
+            else
+                alert("wrong login info dawg");
+        });
     };
 
     $scope.refreshRoutes = function () {
-        $scope.routes = ops.services.getRoutes().then(function (data) {
-            $scope.data.routes = data;
+        ops.services.getRoutes().then(function (response) {
+            $scope.routes = response.data;
         });
     };
 
@@ -57,7 +53,8 @@ angular.module("ops.mobile").controller('MobileController', function ($scope, $n
         var clientContactInfo = $scope.selectedRouteDestination.Client.ContactInfoSet;
         var locationContactInfo = $scope.selectedRouteDestination.Location.ContactInfoSet;
 
-        var phoneNumbers = Enumerable.From(clientContactInfo).Union(Enumerable.From(locationContactInfo)).Where(function (contactInfo) {
+        var phoneNumbers = Enumerable.From(clientContactInfo).Union(Enumerable.From(locationContactInfo)).Where(
+            function (contactInfo) {
                 return contactInfo.Type === "Phone Number";
             }).ToArray();
 
@@ -69,6 +66,8 @@ angular.module("ops.mobile").controller('MobileController', function ($scope, $n
 
     //Start the route and continuously get track points, show end button.
     $scope.startRoute = function (routeId) {
+        ops.mobile.RouteInProgress = true;
+
         //TODO change the selected route
 
 //
@@ -99,7 +98,7 @@ angular.module("ops.mobile").controller('MobileController', function ($scope, $n
 
             //TODO: Convert the position to a trackPoint and push a trackPoint.
             trackPoints.push(position);
-            trackPointsStore.write(trackPoints, routeId);
+//            trackPointsStore.write(trackPoints, routeId);
         };
 
         var onError = function (error) {

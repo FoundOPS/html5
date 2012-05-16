@@ -6,8 +6,8 @@
 
 /** Declare the map module. This is a temporary module to manage navigation
  * for the map while it is separate from the app level module. */
-angular.module('ops.map', ['ngResource']);
+angular.module('ops.map', []);
 
 /** Declare mobile app module. This is a temporary module to manage navigation
  * for the mobile application while it is separate from the app level module.  */
-angular.module('ops.mobile', ['ngResource']);
+angular.module('ops.mobile', []);

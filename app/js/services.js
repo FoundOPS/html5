@@ -67,19 +67,22 @@ ops.services.setRoleId = function (roleId) {
 
 //Set the roleId to GotGrease's role (for debugging)
 if (ops.services.CONFIG.Mode != ops.services.Mode.LIVE)
-    ops.services.setRoleId(new ops.Guid('2A4A2A74-4EB4-4569-B8D5-791C44160984'));
+    ops.services.setRoleId(new ops.Guid('ACCCAA0E-184A-4511-9E2D-31943361ADD1'));
 
 /**
  * Returns a standard http get.
  * @param {Object} $http The $http service.
  * @param {String} queryString The query string to use. Ex. "routes/GetDepots"
- * @param {Object.<string|Object>}  params The parameters to use. This will automatically add roleId as a parameter if it is not undefined.
+ * @param {Object.<string|Object>=}  opt_params The parameters to use (optional).
+ * @param {boolean=} opt_excludeRoleId Do not include the roleId in the params (optional).
  * @return {function(Object)} The generated http function.
  * @private
  */
-ops.services._getHttp = function ($http, queryString, params) {
+ops.services._getHttp = function ($http, queryString, opt_params, opt_excludeRoleId) {
     return function () {
-        if (ops.services.CONFIG.RoleId)
+        var params = opt_params || {};
+
+        if (!opt_excludeRoleId && ops.services.CONFIG.RoleId)
             params.roleId = ops.services.CONFIG.RoleId.toString();
 
         var url = ops.services.CONFIG.ApiUrl + queryString + '?callback=JSON_CALLBACK';
@@ -115,6 +118,16 @@ angular.injector(['ng']).invoke(function ($http) {
      * @return {function(Object)} The generated http function.
      */
     ops.services.getTrackPoints = function (serviceDate, routeId) {
-        return ops.services._getHttp($http, 'trackpoint/GetTrackPoints', {routeId:routeId, serviceDate:serviceDate.toUTCIsoString()});
+        return ops.services._getHttp($http, 'trackpoint/GetTrackPoints', {routeId:routeId, serviceDate:serviceDate.toUTCIsoString()})();
+    };
+
+    /**
+     * Authenticate the user.
+     * @param {string} email
+     * @param {string} password
+     * @return {function(Object)} The generated http function. If the data result will be true (for authenticated) or false (for failed authentication).
+     */
+    ops.services.authenticate = function (email, password) {
+        return ops.services._getHttp($http, 'auth/Login', {email:email, pass:password}, true)();
     };
 });

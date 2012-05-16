@@ -1,110 +1,115 @@
 ﻿<!DOCTYPE html>
 <html ng-app="ops.mobile">
-    <head>
-        <meta charset="utf-8">
-        <title>FoundOPS</title>
-        <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0" />
-        <!--3rd party css, libraries-->
-        <link rel="stylesheet" href="lib/jquery/jquery.mobile.css" />
-        <script src="lib/closure-library/closure/goog/base.js"></script>
-        <script src="lib/jquery/jquery-mobile-angular-adapter-standalone-1.0.7-rc2.js"></script>
-        <script type="text/javascript" src="lib/ngResource.js"></script>
-        <script src="lib/linq/linq.js" type="text/javascript"></script>
-        <!--Application css, libraries-->
-        <link rel="stylesheet" href="css/app.css" />
-        <script type="text/javascript" src="js/app.js"></script>
-        <script type="text/javascript" src="js/base.js"></script>
-        <script type="text/javascript" src="js/tools.js"></script>
-        <script type="text/javascript" src="js/ui.js"></script>
-        <script type="text/javascript" src="js/services.js"></script>
-        <script type="text/javascript" src="js/mobile.js"></script>
-        <script type="text/javascript" src="js/mobileController.js"></script>
-    </head>
-    <body ng-controller="MobileController">
-        <!--Login-->
-        <div id="login" data-role="page" data-theme="a" style="color: #333335">
-            <div data-role="content">
-                <div style="text-align: center; color: #FFFFFF;" id="logo">
-                    <img style="max-width: 50%;" alt="FoundOPS" src="img/SplashPNG.png" />
-                </div>
-                <form data-theme="a" id="log" class="validate" ng-submit="login()" data-ajax="false">
-                    <div style="text-align: center" data-role="fieldcontain">
-                        <input type="email" id="email" ng-model="$parent.inputEmail" required placeholder="E-mail Address" ng-model-instant />
-                        <input type="password" id="pass" ng-model="$parent.inputPass" required placeholder="Password" ng-model-instant />
-                    </div>
-                    <div>
-                        <button data-theme="a" class="btnLogin" style="color: #cccccc">
-                            Login
-                        </button>
-                    </div>
-                </form>
-            </div>
-            <div data-role="footer">
-                <h6 style="text-align: center;">&#169; 2011 FoundOPS LLC</h6>
-            </div>
+<head>
+    <meta charset="utf-8">
+    <title>FoundOPS</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0"/>
+    <!--3rd party css, libraries-->
+    <!--Includes jQuery, jQuery mobile, Angular-->
+    <script src="lib/jquery/jquery-mobile-angular-adapter-standalone-1.0.7-rc2-SNAPSHOT.js" type="text/javascript"></script>
+    <link href="lib/jquery/jquery.mobile.css" rel="stylesheet" type="text/css">
+    <script src="lib/linq/linq.js" type="text/javascript"></script>
+    <script src="lib/closure-library/closure/goog/base.js"></script>
+    <!--Application css, libraries-->
+    <link rel="stylesheet" href="css/app.css"/>
+    <script type="text/javascript" src="js/app.js"></script>
+    <script type="text/javascript" src="js/base.js"></script>
+    <script type="text/javascript" src="js/tools.js"></script>
+    <script type="text/javascript" src="js/ui.js"></script>
+    <script type="text/javascript" src="js/services.js"></script>
+    <script type="text/javascript" src="js/mobile.js"></script>
+    <script type="text/javascript" src="js/mobileController.js"></script>
+</head>
+<body ng-controller="MobileController">
+<!--Login-->
+<div id="login" data-role="page" data-theme="a" style="color: #333335">
+    <div data-role="content">
+        <div style="text-align: center; color: #FFFFFF;" id="logo">
+            <img style="max-width: 50%;" alt="FoundOPS" src="img/SplashPNG.png"/>
         </div>
-        <!--RoutesList-->
-        <div id="routeslist" data-role="page" data-theme="a" ngm-pagebeforeshow="refreshRoutes()" ngm-swiperight="back()">
-            <div data-role="header">
-                <h1>Routes</h1>
+        <form data-theme="a" id="log" class="validate" ng-submit="login()" data-ajax="false">
+            <div style="text-align: center" data-role="fieldcontain">
+                <input type="email" id="email" ng-model="email" required placeholder="E-mail Address"/>
+                <input type="password" id="pass" ng-model="pass" required placeholder="Password"/>
             </div>
-            <div data-role="content">
-                <div data-role="content">
-                    <ul data-role="listview">
-                        <li ng-repeat="route in routes" class="route">
-                            <a href="#" ngm-click='showRouteDetails(route.Id)'>{{route.Name}}</a>
-                        </li>
-                    </ul>
-                </div>
-                <div>
-                    <a href="#" ngm-click="refreshRoutes()" data-role="button">Refresh</a>
-                </div>
+            <div>
+                <button data-theme="a" class="btnLogin" style="color: #cccccc">
+                    Login
+                </button>
             </div>
-            <div data-role="footer">
-                <h6 style="text-align: center;">&#169; 2011 FoundOPS LLC</h6>
-            </div>
+        </form>
+    </div>
+    <div data-role="footer">
+        <h6 style="text-align: center;">&#169; 2011 FoundOPS LLC</h6>
+    </div>
+</div>
+<!--RoutesList-->
+<div id="routeslist" data-role="page" data-theme="a" ngm-swiperight="back()">
+    <div data-role="header">
+        <h1>Routes</h1>
+    </div>
+    <div data-role="content">
+        <div data-role="content">
+            <ul data-role="listview">
+                <li ng-repeat="route in routes" class="route">
+                    <a href="#" ngm-click='showRouteDetails(route.Id)'>{{route.Name}}</a>
+                </li>
+            </ul>
         </div>
-        <!--Route Details-->
-        <div id="routedetails" data-role="page" data-theme="a" ngm-swiperight="back()">
-            <div data-role="header" data-mini="true" >
-                <a href="#" id="startButton" data-position="inline" ng-hide="ops.mobile.RouteInProgress" ngm-click="startRoute(selectedRoute.Id)">Start Route</a>
-                <h1>{{selectedRoute.Name}}</h1>
-                <a href="#" id="endButton" data-position="inline" ng-show="ops.mobile.RouteInProgress" ngm-click="endRoute(selectedRoute.Id)">End Route</a>
-            </div>
-            <div data-role="content">
-                <div data-role="content">
-                    <ul data-role="listview">
-                        <li ng-repeat="routeDestination in selectedRoute.RouteDestinations" class="routeDestination">
-                            <a href="#" ngm-click='showRouteDestinationDetails(routeDestination.Id)'>
-                                <h3>{{routeDestination.Client.Name}}</h3>
-                                <p>{{routeDestination.Location.AddressLineOne}}</p>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            <div data-role="footer">
-                <h6 style="text-align: center;">&#169; 2011 FoundOPS LLC</h6>
-            </div>
+        <div>
+            <a href="#" ngm-click="refreshRoutes()" data-role="button">Refresh</a>
         </div>
-        <!--Route Destination Popup-->
-        <div id="routedestinationdialog" data-role="dialog" data-theme="c">
-            <div data-role="header">
-                <h1>{{selectedRouteDestination.Client.Name}}</h1>
-            </div>
-            <div data-role="content">
-                <div data-role="content">
-                    <ul data-role="listview">
-                        <li>
-                            <a href="http://maps.google.com/maps?q={{selectedRouteDestination.Location.Latitude}},{{selectedRouteDestination.Location.Longitude}}">Navigate to Route Stop</a>
-                        </li>
-                        <li ng-repeat="contactInfo in selectedPhoneNumbers" class="routeDestination">
-                            <a href="tel:{{contactInfo.Data}}">Call {{contactInfo.Label}}</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
+    </div>
+    <div data-role="footer">
+        <h6 style="text-align: center;">&#169; 2011 FoundOPS LLC</h6>
+    </div>
+</div>
+<!--Route Details-->
+<div id="routedetails" data-role="page" data-theme="a" ngm-swiperight="back()">
+    <div data-role="header" data-mini="true">
+        <a href="#" id="startButton" data-position="inline" ng-hide="ops.mobile.RouteInProgress"
+           ngm-click="startRoute(selectedRoute.Id)">Start Route</a>
 
-    </body>
+        <h1>{{selectedRoute.Name}}</h1>
+        <a href="#" id="endButton" data-position="inline" ng-show="ops.mobile.RouteInProgress"
+           ngm-click="endRoute(selectedRoute.Id)">End Route</a>
+    </div>
+    <div data-role="content">
+        <div data-role="content">
+            <ul data-role="listview">
+                <li ng-repeat="routeDestination in selectedRoute.RouteDestinations" class="routeDestination">
+                    <a href="#" ngm-click='showRouteDestinationDetails(routeDestination.Id)'>
+                        <h3>{{routeDestination.Client.Name}}</h3>
+
+                        <p>{{routeDestination.Location.AddressLineOne}}</p>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div data-role="footer">
+        <h6 style="text-align: center;">&#169; 2011 FoundOPS LLC</h6>
+    </div>
+</div>
+<!--Route Destination Popup-->
+<div id="routedestinationdialog" data-role="dialog" data-theme="c">
+    <div data-role="header">
+        <h1>{{selectedRouteDestination.Client.Name}}</h1>
+    </div>
+    <div data-role="content">
+        <div data-role="content">
+            <ul data-role="listview">
+                <li>
+                    <a href="http://maps.google.com/maps?q={{selectedRouteDestination.Location.Latitude}},{{selectedRouteDestination.Location.Longitude}}">Navigate
+                        to Route Stop</a>
+                </li>
+                <li ng-repeat="contactInfo in selectedPhoneNumbers" class="routeDestination">
+                    <a href="tel:{{contactInfo.Data}}">Call {{contactInfo.Label}}</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+</body>
 </html>
