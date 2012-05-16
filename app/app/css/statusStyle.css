@@ -7,6 +7,7 @@ body{
 }
 .k-grid, .k-grid td, .k-grid th{
     border-color:#000000;
+    z-index: 1;
 }
 .k-grid th{
     text-overflow:ellipsis;
