@@ -8,6 +8,7 @@ goog.provide('ops.services');
 
 goog.require('goog.date.UtcDateTime');
 goog.require('ops');
+goog.require('ops.developer');
 
 /**
  * Enum for the service mode.
@@ -67,7 +68,7 @@ ops.services.setRoleId = function (roleId) {
 
 //Set the roleId to GotGrease's role (for debugging)
 if (ops.services.CONFIG.Mode != ops.services.Mode.LIVE)
-    ops.services.setRoleId(new ops.Guid('ACCCAA0E-184A-4511-9E2D-31943361ADD1'));
+    ops.services.setRoleId(ops.developer.GOTGREASE_ROLE_ID);
 
 /**
  * Returns a standard http get.
