@@ -15,22 +15,21 @@ angular.module("ops.mobile").controller('MobileController', function ($scope, $n
         $navigate('back');
     };
 
+    $scope.refreshRoutes = function () {
+        ops.services.getRoutes(function (data) {
+            $scope.routes = data;
+        }, $scope);
+    };
+
     $scope.login = function () {
-        ops.services.authenticate(this.email, this.pass).then(function (response) {
+        ops.services.authenticate(this.email, this.pass, function (data) {
             //data will be true if this was authenticated
-            if (response.data)
-            {
+            if (data) {
                 $navigate("#routeslist");
                 $scope.refreshRoutes();
             }
             else
                 alert("wrong login info dawg");
-        });
-    };
-
-    $scope.refreshRoutes = function () {
-        ops.services.getRoutes().then(function (response) {
-            $scope.routes = response.data;
         });
     };
 

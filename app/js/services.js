@@ -75,59 +75,79 @@ if (ops.services.CONFIG.Mode != ops.services.Mode.LIVE)
  * @param {String} queryString The query string to use. Ex. "routes/GetDepots"
  * @param {Object.<string|Object>=}  opt_params The parameters to use (optional).
  * @param {boolean=} opt_excludeRoleId Do not include the roleId in the params (optional).
- * @return {function(Object)} The generated http function.
+ * @return {function(!function(Object), Object=)} A function to perform the get and invoke the callback.
  * @private
  */
 ops.services._getHttp = function ($http, queryString, opt_params, opt_excludeRoleId) {
-    return function () {
+    /**
+     * A function to perform the get operation on the api (defined by the parameters above).
+     * @param {!function(Object)} callback A callback to pass the loaded data to.
+     * @param {Object=} opt_scope The angular scope object to force a digest on (optional).
+     */
+    var getCallbackFunction = function (callback, opt_scope) {
         var params = opt_params || {};
 
+        //if opt_excludeRoleId was not set or true and the RoleId exists add it as a parameter
         if (!opt_excludeRoleId && ops.services.CONFIG.RoleId)
             params.roleId = ops.services.CONFIG.RoleId.toString();
 
         var url = ops.services.CONFIG.ApiUrl + queryString + '?callback=JSON_CALLBACK';
 
-        return $http({
+        $http({
+            //must use JSONP because the javascript may be hosted on a different url than the api
             method:'JSONP',
             url:url,
             params:params
-        });
+        }).then(function (response) {
+                //perform the callback function by passing the response data
+                callback(response.data);
+                //if the opt_scope was passed as a parameter force a digest on the scope
+                if (opt_scope)
+                    opt_scope.$digest;
+            });
     };
+
+    return getCallbackFunction;
 };
 
 /*
  Setup the resource services. Use the injector to get the $http service.
  */
 angular.injector(['ng']).invoke(function ($http) {
+    //TODO change all the callback function definitions to have Array.<closure classes> instead of Array.<Object>
+
     /**
-     * Get the Routes of the current RoleId's service provider.
-     * @return {function(Object)} The generated http function.
+     * Get the current service provider's Routes.
+     * TODO wrap this in a function with optional parameters to either get the service provider's routes, or to get the current user's routes or create another function and rename this
+     * @param {!function(Array.<Object>)} callback A callback to pass the loaded routes to.
+     * @param {Object=} opt_scope The angular scope to force a digest on (optional).
      */
     ops.services.getRoutes = ops.services._getHttp($http, 'routes/GetRoutes', {});
 
     /**
-     * Get the Depots of the current RoleId's service provider.
-     * @return {function(Object)} The generated http function.
+     * Get the current service provider's depots.
+     * @param {!function(Array.<Object>)} callback A callback to pass the loaded depots.
+     * @param {Object=} opt_scope The angular scope to force a digest on (optional).
      */
     ops.services.getDepots = ops.services._getHttp($http, 'routes/GetDepots', {});
 
     /**
-     * Get the TrackPoints of the current RoleId's service provider.
+     * Get the current service provider's TrackPoints.
      * @param {goog.date.UtcDateTime} serviceDate The service date to retrieve TrackPoints for.
      * @param {ops.Guid} routeId The Id of the route to retrieve TrackPoints for.
-     * @return {function(Object)} The generated http function.
+     * @param {!function(Array.<Object>)} callback The callback to pass the TrackPoints to after they are loaded.
      */
-    ops.services.getTrackPoints = function (serviceDate, routeId) {
-        return ops.services._getHttp($http, 'trackpoint/GetTrackPoints', {routeId:routeId, serviceDate:serviceDate.toUTCIsoString()})();
+    ops.services.getTrackPoints = function (serviceDate, routeId, callback) {
+        return ops.services._getHttp($http, 'trackpoint/GetTrackPoints', {routeId:routeId, serviceDate:serviceDate.toUTCIsoString()})(callback);
     };
 
     /**
      * Authenticate the user.
-     * @param {string} email
-     * @param {string} password
-     * @return {function(Object)} The generated http function. If the data result will be true (for authenticated) or false (for failed authentication).
+     * @param {!string} email
+     * @param {!string} password
+     * @param {!function(boolean)} callback The callback to pass true (success) or false (failed) to after attempting to authenticate the credentials.
      */
-    ops.services.authenticate = function (email, password) {
-        return ops.services._getHttp($http, 'auth/Login', {email:email, pass:password}, true)();
+    ops.services.authenticate = function (email, password, callback) {
+        return ops.services._getHttp($http, 'auth/Login', {email:email, pass:password}, true)(callback);
     };
 });
