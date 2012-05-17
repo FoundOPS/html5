@@ -9,12 +9,14 @@ goog.require('ops');
 goog.require('ops.Guid');
 
 /**
- * Represents a TrackPoint.
+ *
+ * @param {number} compassDirection
+ * @param {number} latitude
+ * @param {number} longitude
  * @constructor
  */
-ops.models.TrackPoint = function () {
-    this.id_ = new ops.Guid.NewGuid();
-
+ops.models.TrackPoint = function (compassDirection, latitude, longitude) {
+    this.compassDirection_ = compassDirection;
 };
 
 /**
@@ -22,16 +24,13 @@ ops.models.TrackPoint = function () {
  * @type {ops.Number}
  * @private
  */
-ops.models.TrackPoint.prototype.compassDirection = null;
+ops.models.TrackPoint.prototype.compassDirection_ = null;
 
-/**
- *
- */
 ops.models.TrackPoint.prototype.getApiModel = function () {
     var model = {};
 
-//    model.CompassDirection;
-//    model.Latitude;
+    model.CompassDirection = this.compassDirection_;
+//    model.Latitude
 //    model.Longitude;
 //    model.Speed;
 //    model.Source;
