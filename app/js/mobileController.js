@@ -1,5 +1,6 @@
 'use strict';
 
+goog.require('goog.Timer');
 goog.require('ops.services');
 goog.require('ops.mobile');
 
@@ -13,18 +14,25 @@ angular.module("ops.mobile").controller('MobileController', function ($scope, $n
         $navigate('back');
     };
 
+    //if debugging skip to routeslist
+    goog.Timer.callOnce(function () {
+        $scope.refreshRoutes();
+        $navigate("#routeslist");
+    }, 100);
+
     $scope.refreshRoutes = function () {
         ops.services.getRoutes(function (data) {
             $scope.routes = data;
-            //force a digest (not sure if this helps)
-            $scope.$digest;
+            //force apply (not yet sure why this is necessary)
+            $scope.$apply();
         });
     };
 
     $scope.login = function () {
         ops.services.authenticate(this.email, this.pass, function (data) {
-            //data will be true if this was authenticated
+            //if this was authenticated refresh routes and navigate to routeslist
             if (data) {
+                $scope.refreshRoutes();
                 $navigate("#routeslist");
             }
             else

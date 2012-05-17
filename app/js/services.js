@@ -80,10 +80,12 @@ if (ops.services.CONFIG.Mode != ops.services.Mode.LIVE)
  */
 ops.services._getHttp = function ($http, queryString, opt_params, opt_excludeRoleId) {
     /**
-     * A function to perform the get operation on the api (defined by the parameters above).
+     * A function to perform the get operation on the api (defined by the parameters above)
+     * and invoke the callback with the loaded data.
      * @param {!function(Object)} callback A callback to pass the loaded data to.
      */
-    var getCallbackFunction = function (callback) {
+    var getThenInvokeCallback;
+    getThenInvokeCallback = function (callback) {
         var params = opt_params || {};
 
         //if opt_excludeRoleId was not set or true and the RoleId exists add it as a parameter
@@ -103,7 +105,7 @@ ops.services._getHttp = function ($http, queryString, opt_params, opt_excludeRol
             });
     };
 
-    return getCallbackFunction;
+    return getThenInvokeCallback;
 };
 
 /*
