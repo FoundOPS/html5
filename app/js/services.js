@@ -82,9 +82,8 @@ ops.services._getHttp = function ($http, queryString, opt_params, opt_excludeRol
     /**
      * A function to perform the get operation on the api (defined by the parameters above).
      * @param {!function(Object)} callback A callback to pass the loaded data to.
-     * @param {Object=} opt_scope The angular scope object to force a digest on (optional).
      */
-    var getCallbackFunction = function (callback, opt_scope) {
+    var getCallbackFunction = function (callback) {
         var params = opt_params || {};
 
         //if opt_excludeRoleId was not set or true and the RoleId exists add it as a parameter
@@ -101,9 +100,6 @@ ops.services._getHttp = function ($http, queryString, opt_params, opt_excludeRol
         }).then(function (response) {
                 //perform the callback function by passing the response data
                 callback(response.data);
-                //if the opt_scope was passed as a parameter force a digest on the scope
-                if (opt_scope)
-                    opt_scope.$digest;
             });
     };
 
@@ -120,14 +116,12 @@ angular.injector(['ng']).invoke(function ($http) {
      * Get the current service provider's Routes.
      * TODO wrap this in a function with optional parameters to either get the service provider's routes, or to get the current user's routes or create another function and rename this
      * @param {!function(Array.<Object>)} callback A callback to pass the loaded routes to.
-     * @param {Object=} opt_scope The angular scope to force a digest on (optional).
      */
     ops.services.getRoutes = ops.services._getHttp($http, 'routes/GetRoutes', {});
 
     /**
      * Get the current service provider's depots.
      * @param {!function(Array.<Object>)} callback A callback to pass the loaded depots.
-     * @param {Object=} opt_scope The angular scope to force a digest on (optional).
      */
     ops.services.getDepots = ops.services._getHttp($http, 'routes/GetDepots', {});
 

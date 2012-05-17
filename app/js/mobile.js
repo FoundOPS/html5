@@ -18,9 +18,3 @@ ops.mobile.CONFIG = {
      */
     TRACKPOINT_COLLECTION_FREQUENCY_SECONDS:1
 };
-
-/**
- * Whether there is a route in progress or not.
- * @type {Boolean}
- */
-ops.mobile.RouteInProgress = false;

@@ -18,7 +18,9 @@ angular.module("ops.mobile").controller('MobileController', function ($scope, $n
     $scope.refreshRoutes = function () {
         ops.services.getRoutes(function (data) {
             $scope.routes = data;
-        }, $scope);
+            //force a digest (not sure if this helps)
+            $scope.$digest;
+        });
     };
 
     $scope.login = function () {
@@ -65,7 +67,7 @@ angular.module("ops.mobile").controller('MobileController', function ($scope, $n
 
     //Start the route and continuously get track points, show end button.
     $scope.startRoute = function (routeId) {
-        ops.mobile.RouteInProgress = true;
+        $scope.routeInProgress = true;
 
         //TODO change the selected route
 
@@ -77,7 +79,7 @@ angular.module("ops.mobile").controller('MobileController', function ($scope, $n
 
 //Ends track point accumulation, clears trackPoints array, removes end button, displays start button.
     $scope.endRoute = function (watchId) {
-        ops.mobile.RouteInProgress = false;
+        $scope.routeInProgress = false;
 
 //        $window.clearInterval(intervalId);
 
