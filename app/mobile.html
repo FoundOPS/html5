@@ -68,9 +68,10 @@
 <!--Route Details-->
 <div id="routedetails" data-role="page" data-theme="a" ngm-swiperight="back()">
     <div data-role="header" data-mini="true">
-        <a href="#" id="startButton" data-position="inline" ng-hide="routeInProgress" ngm-click="startRoute(selectedRoute.Id)">Start Route</a>
+        <a href="#" ng-hide="routeInProgress" ngm-click="startRoute(selectedRoute.Id)">Start Route</a>
+
         <h1>{{selectedRoute.Name}}</h1>
-        <a href="#" id="endButton" data-position="inline" ng-show="routeInProgress" ngm-click="endRoute(selectedRoute.Id)">End Route</a>
+        <a href="#" ng-show="routeInProgress" ngm-click="endRoute()">End Route</a>
     </div>
     <div data-role="content">
         <div data-role="content">

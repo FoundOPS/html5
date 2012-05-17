@@ -8,9 +8,7 @@ var trackPoints = []; //Array where track points are stored.
 var routeStartTime, routeEndTime, routeTotalTime;
 var lastTrackPointTime; //The time that the last trackPoint was sent.
 
-angular.module("ops.mobile").controller('MobileController', function ($scope, $navigate) {
-    //In order of usage
-
+angular.module("ops.mobile").controller('MobileController', function ($scope, $navigate, $window) {
     $scope.back = function () {
         $navigate('back');
     };
@@ -28,7 +26,6 @@ angular.module("ops.mobile").controller('MobileController', function ($scope, $n
             //data will be true if this was authenticated
             if (data) {
                 $navigate("#routeslist");
-                $scope.refreshRoutes();
             }
             else
                 alert("wrong login info dawg");
@@ -78,10 +75,8 @@ angular.module("ops.mobile").controller('MobileController', function ($scope, $n
     };
 
 //Ends track point accumulation, clears trackPoints array, removes end button, displays start button.
-    $scope.endRoute = function (watchId) {
+    $scope.endRoute = function () {
         $scope.routeInProgress = false;
-
-//        $window.clearInterval(intervalId);
 
         var date = new Date();
         routeEndTime = date.getSeconds();

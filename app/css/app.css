@@ -1,4 +1,4 @@
-﻿/* TODO: LESS. ?Split up see http://sizzlejs.com/ */
+﻿/* TODO: LESS. Checkout http://sizzlejs.com/ */
 
 /* map */
 
@@ -59,8 +59,4 @@ body{
 .menu > li:nth-child(1):before {
     content: "";
     padding: 0;
-}
-
-#endButton {
-    display: none;
 }
