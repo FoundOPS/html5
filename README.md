@@ -38,7 +38,7 @@ We use [Google's Closure Compiler](https://developers.google.com/closure/compile
 - All javascript MUST BE [annotated for the Google Closure Compiler](https://developers.google.com/closure/compiler/docs/js-for-compiler)
 
 
-We use [lowerCamelCase](http://c2.com/cgi/wiki?LowerCamelCase) for acronyms.
+We use [lowerCamelCase](http://c2.com/cgi/wiki?LowerCamelCase) for acronyms, variables, object properties, etc.
 
 
 Compressed via [htmlcompressor](http://code.google.com/p/htmlcompressor/).
