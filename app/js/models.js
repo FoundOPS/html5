@@ -1,60 +1,116 @@
 // Copyright 2012 FoundOPS LLC. All Rights Reserved.
 
 /**
- * @fileoverview Class to hold FoundOPS models.
+ * @fileoverview Class to hold FoundOPS models: ContactInfo, TrackPoint
  */
 goog.provide('ops.models');
+goog.provide('ops.models.ContactInfo');
+goog.provide('ops.models.TrackPoint');
+goog.provide('ops.models.ResourceWithLastPoint');
 
 goog.require('ops');
 goog.require('ops.Guid');
 
 /**
- * The track point model.
- * @param {number} accuracy
- * @param {number} compassDirection
- * @param {number} latitude
- * @param {number} longitude
- * @param {number} speed
- * @param {*} collectedTimeStamp
- * @param {string=} source The type of mobile device that the TrackPoint came from.
+ * Enum for info types.
+ * @enum {string}
+ */
+ops.models.InfoType = {
+    PHONE:"Phone Number",
+    EMAIL:"Email Address",
+    FAX:"Fax Number",
+    WEBSITE:"Website",
+    OTHER:"Other"
+};
+
+/**
+ * Enum for device platforms.
+ * @enum {string}
+ */
+ops.models.DevicePlatform = {
+    ANDROID:"Android",
+    BLACKBERRY:"BlackBerry",
+    IPHONE:"iPhone",
+    WEBOS:"webOS",
+    WINCE:"WinCE",
+    UNKNOWN: "Unknown"
+};
+
+/**
+ * Class encapsulating a piece of contact info.
+ * @param {ops.models.InfoType} type
+ * @param {string} label Operations Manager Cell, Sales Number, Blog
+ * @param {string} data 142-111-1111, sales@foundops.com, blog.foundops.com
  * @constructor
  */
-ops.models.TrackPoint = function (accuracy, compassDirection, latitude, longitude, speed, collectedTimeStamp, source) {
+ops.models.ContactInfo = function (type, label, data) {
     /**
-     * The accuracy that our TrackPoints is valued at.
-     * @type {ops.Number}
+     * @type {ops.models.InfoType}
      */
-    this.accuracy = accuracy;
+    this.type = type;
+
     /**
-     * The compass direction in degrees from north. Ex. 180 = South
-     * @type {ops.Number}
+     * @type {String}
      */
-    this.compassDirection = compassDirection;
+    this.label = label;
+
     /**
-     * Latitude
-     * @type {ops.Number}
+     * @type {String}
      */
-    this.latitude = latitude;
+    this.data = data;
+};
+
+/**
+ * The track point model.
+ * @param {goog.Date.UtcDateTime} collectedTimeStamp
+ * @param {?number} accuracy In meters
+ * @param {number} heading 180
+ * @param {number} latitude 31.1414
+ * @param {number} longitude -24.2444
+ * @param {ops.models.DevicePlatform} source The platform of mobile device the TrackPoint came from.
+ * @param {number} speed In meters per second
+ * @constructor
+ */
+ops.models.TrackPoint = function (collectedTimeStamp, accuracy, heading, latitude, longitude, source, speed) {
     /**
-     * Longitude
-     * @type {ops.Number}
-     */
-    this.longitude = longitude;
-    /**
-     * Speed in meters per second.
-     * @type {*}
-     */
-    this.speed = speed;
-    /**
-     * Time TrackPoint was created.
-     * @type {*}
+     * When the TrackPoint was collected.
+     * @type {goog.Date.UtcDateTime}
      */
     this.collectedTimeStamp = collectedTimeStamp;
+
     /**
-     * Type of device that sent the TrackPoint.
-     * @type {*}
+     * Accuracy level of the latitude and longitude coordinates in meters.
+     * @type {number}
+     */
+    this.accuracy = accuracy;
+
+    /**
+     * The compass heading in degrees from north. Ex. 180 = South
+     * @type {number}
+     */
+    this.heading = heading;
+
+    /**
+     * @type {number}
+     */
+    this.latitude = latitude;
+
+    /**
+     * @type {number}
+     */
+    this.longitude = longitude;
+
+    /**
+     * Type of device that sent the TrackPoint. Ex. iPhone
+     * @type {ops.models.DevicePlatform}
      */
     this.source = source;
+
+    /**
+     * Speed in meters per second.
+     * @type {number}
+     */
+    this.speed = speed;
 };
 
 /**
@@ -64,40 +120,58 @@ ops.models.TrackPoint = function (accuracy, compassDirection, latitude, longitud
 ops.models.TrackPoint.prototype.getApiModel = function () {
     var model = {};
 
-    model.Accuracy = this.accuracy;
-    model.CompassDirection = this.compassDirection;
+    //TODO refactor to heading
+    model.CompassDirection = this.heading;
     model.Latitude = this.latitude;
     model.Longitude = this.longitude;
     model.Speed = this.speed;
-    model.CollectedTimeStamp = this.collectedTimeStamp;
+    model.CollectedTimeStamp = this.collectedTimeStamp.toUTCIsoString();
     model.Source = this.source;
 
     return model;
 };
 
 /**
- * Class encapsulating a ContactInfo.
- * @param {string} type
- * @param {string} label
- * @param {string} data
+ * Class encapsulating the last trackpoint of a resource (Employee or Vehicle).
+ *
+ * @param {?ops.Guid} employeeId If not null set the resource as an employee (and vehicleId should be null).
+ * @param {?ops.Guid} vehicleId If not null set the resource as a vehicle (and employeeId should be null).
+ * @param {string} entityName
+ * @param {goog.Date.UtcDateTime} collectedTimeStamp
+ * @param {?number} accuracy In meters
+ * @param {number} heading 180
+ * @param {number} latitude 31.1414
+ * @param {number} longitude -24.2444
+ * @param {ops.models.DevicePlatform} source The type of mobile device that the TrackPoint came from.
+ * @param {number} speed In meters per second
  * @constructor
+ * @extends {goog.date.TrackPoint}
  */
-ops.models.ContactInfo = function(type, label, data){
-    /**
-     *
-     * @type {String}
-     */
-    this.type = type;
+ops.models.ResourceWithLastPoint = function (employeeId, vehicleId, entityName, collectedTimeStamp, accuracy, heading, latitude, longitude, source, speed) {
+    ops.models.TrackPoint.call(this, collectedTimeStamp, accuracy, heading, latitude, longitude, source, speed);
 
     /**
-     *
-     * @type {String}
+     * The employee's Id. If this is not null the resource is an employee.
+     * @type {ops.Guid}
      */
-    this.label = label;
+    this.employeeId = employeeId;
 
     /**
-     *
-     * @type {String}
+     * The vehicle's Id. If this is not null the resource is an vehicle.
+     * @type {ops.Guid}
      */
-    this.data = data;
+    this.vehicleId = vehicleId;
+
+    /**
+     * The name of the employee of vehicle.
+     * @type {string}
+     */
+    this.entityName = entityName;
 };
+goog.inherits(ops.models.ResourceWithLastPoint, ops.models.TrackPoint);
+
+/**
+ * This should not be sent back to the server and therefore
+ * does not need to be converted back to an api model.
+ */
+ops.models.TrackPoint.prototype.getApiModel = null;

@@ -42,3 +42,12 @@ ops.ui.ITEM_OPACITIES = [
     .35,
     .30
 ];
+
+/**
+ * Enum for image urls.
+ * @type {String}
+ * @const
+ */
+ops.ui.ImageUrls= {
+    DEPOT_ICON: "../img/depot.png"
+};

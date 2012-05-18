@@ -19,18 +19,20 @@ ops.services.RoleId = null;
 
 //setup the api url depending on the mode
 var mode = ops.developer.CURRENT_MODE;
-if (mode === ops.developer.MODE.LOCAL){
+if (mode === ops.developer.Mode.LOCAL) {
     var apiUrl = 'routes.json';
-} else if (mode === ops.developer.MODE.LOCALAPI) {
+} else if (mode === ops.developer.Mode.LOCALAPI) {
     var apiUrl = 'http://localhost:9711/api/';
-} else if (mode === ops.developer.MODE.ANDROIDLA) {
+} else if (mode === ops.developer.Mode.ANDROIDLA) {
     var apiUrl = 'http://10.0.2.2:9711/api/';
 }
 
 /*
  * The url for the API.
+ * @type {string}
+ * @const
  */
-ops.services.ApiUrl = apiUrl;
+ops.services.API_URL = apiUrl;
 
 /**
  * Set the current RoleId.
@@ -41,7 +43,7 @@ ops.services.setRoleId = function (roleId) {
 };
 
 //Set the roleId to GotGrease's role (for debugging)
-if (ops.developer.MODE != ops.developer.MODE.LIVE)
+if (ops.developer.Mode != ops.developer.Mode.LIVE)
     ops.services.setRoleId(ops.developer.GOTGREASE_ROLE_ID);
 
 /**
@@ -67,7 +69,7 @@ ops.services._getHttp = function ($http, queryString, opt_params, opt_excludeRol
             params.roleId = ops.services.RoleId.toString();
         }
 
-        var url = ops.services.ApiUrl + queryString + '?callback=JSON_CALLBACK';
+        var url = ops.services.API_URL + queryString + '?callback=JSON_CALLBACK';
 
         $http({
             //must use JSONP because the javascript may be hosted on a different url than the api

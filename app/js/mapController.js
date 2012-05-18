@@ -125,7 +125,7 @@ angular.module("ops.map").controller('mapController', function () {
             map.removeLayer(trackPointsGroup);
     });
 
-    //add the service provider's depot(s) to the map
+    //get/add the service provider's depot(s) to the map
     ops.services.getDepots(function (loadedDepots) {
         ops.leaflet.drawDepots(map, loadedDepots);
     });

@@ -17,7 +17,7 @@ goog.require('ops.Guid');
  * @type {String}
  * @enum {number}
  */
-ops.developer.MODE = {
+ops.developer.Mode = {
     LOCAL:0,
     LOCALAPI:1,
     ANDROIDLA:2,
@@ -29,7 +29,7 @@ ops.developer.MODE = {
  * @const
  * @type {ops.developer.Mode}
  */
-ops.developer.CURRENT_MODE = ops.developer.MODE.LOCALAPI;
+ops.developer.CURRENT_MODE = ops.developer.Mode.LOCALAPI;
 
 /**
  * The local server's RoleId for GotGrease
