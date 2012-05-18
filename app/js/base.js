@@ -8,6 +8,16 @@ goog.provide('ops');
 goog.provide('ops.Guid');
 
 /**
+ * Checks whether the date (without the time) are equal.
+ * @param {goog.date.Date} a
+ * @param {goog.date.Date} b
+ * @return {Boolean}
+ */
+ops.dateEqual = function (a, b) {
+    return a.getDayOfYear() == b.getDayOfYear() && a.getYear() == b.getYear();
+};
+
+/**
  * Represents a globally unique identifier. Similar to the .NET class.
  * @param {String} value The guid value as a string.
  * @constructor
@@ -33,7 +43,7 @@ ops.Guid.prototype.toString = function () {
  * @param {ops.Guid} other The guid to test.
  * @return {boolean} Whether the guids are equal.
  */
-ops.Guid.prototype.equals = function(other) {
+ops.Guid.prototype.equals = function (other) {
     return other.guid_ == this.guid_;
 };
 

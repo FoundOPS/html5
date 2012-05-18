@@ -284,16 +284,12 @@ ops.leaflet.drawRoutes = function (map, routes, routeColorSelector, shouldCenter
 
     //iterate through each route
     for (var r in routes) {
-        var destinations = routes[r].RouteDestinations;
+        var destinations = routes[r].routeDestinations;
 
         //add markers for each route destination
         for (var d in destinations) {
-            var locationName = destinations[d].Location.Name;
-            var lat = destinations[d].Location.Latitude;
-            var lng = destinations[d].Location.Longitude;
-
-            //create a window.L.LatLng from the destination's location
-            var locationLatLng = new window.L.LatLng(lat, lng);
+            var locationName = destinations[d].location.name;
+            var locationLatLng = ops.leaflet.getLatLng(destinations[d].location);
 
             //include this location in the bounds to center on
             destinationLatLngs.push(locationLatLng);
@@ -343,20 +339,16 @@ ops.leaflet.drawRoutes = function (map, routes, routeColorSelector, shouldCenter
 };
 
 /**
- * Draws the resources' trackpoints on the map for the given route
+ * Draws the track points on the map for the given route
  * @param {string} routeId
  */
-var drawHistoricalTrackPoints = function (routeId) {
-    /** remove the previous resources */
-    if (trackPointsGroup != null) {
-        map.removeLayer(trackPointsGroup);
-    }
-    /** track the resources so they can be removed when they are redrawn */
-    trackPointsGroup = new window.L.LayerGroup();
+ops.leaflet.drawTrackPoints = function (trackpoints, resources, routeId) {
+   //track the resources so they can be removed when they are redrawn
+    var trackPointsGroup = new window.L.LayerGroup();
 
-    /** Loop through all the resources */
+    //Loop through all the resources
     for (var r in resources) {
-        /** Check if the resource is on the selected route*/
+        //Check if the resource is on the selected route
         if (resources[r].RouteId == routeId) {
             /** Get the Id of the resource */
             var resourceId;

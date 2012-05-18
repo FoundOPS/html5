@@ -14,6 +14,14 @@ goog.require('ops.models.RouteDestination');
 goog.require('ops.models.TrackPoint');
 goog.require('ops.models.ResourceWithLastPoint');
 
+/**
+ * Enum for loading statuses.
+ * @enum {number}
+ */
+ops.services.Status = {
+    LOADING:0,
+    LOADED:1
+};
 
 /*
  * The current RoleId for the user.

@@ -14,6 +14,7 @@
 
 goog.require('goog.date.UtcDateTime');
 goog.require('goog.Timer');
+goog.require('goog.structs.Map');
 
 goog.require('ops');
 goog.require('ops.leaflet');
@@ -22,10 +23,6 @@ goog.require('ops.services');
 goog.require('ops.ui');
 
 angular.module("ops.map").controller('mapController', function () {
-//region Locals
-
-//region Constants
-
     /**
      * Rate of refreshing resources on the map (in milliseconds)
      * @const
@@ -40,229 +37,187 @@ angular.module("ops.map").controller('mapController', function () {
      */
     var ROUTES_REFRESH_RATE = 30000;
 
-//#endregion
-
-    //region Map Variables
-
-    //the map instance
-    var map;
-
-    //keep a reference to the layer groups so they can be cleared from the map when they are redrawn
-
     /**
-     * A map layer for the resources (Employees/Vehicles) and their latest points.
-     * @type {window.L.LayerGroup}
-     */
-    var resourcesGroup;
-
-    /**
-     * A map layer for the route's destination markers
-     * (and in the future the calculated route's legs).
-     * @type {window.L.LayerGroup}
-     */
-    var routesGroup;
-
-    /**
-     * A map layer for the TrackPoints of the selected route.
-     * @type {window.L.LayerGroup}
-     */
-    var trackPointsGroup;
-
-    //endregion
-
-    /**
-     * Associates the routes with colors.
+     * Associates routes with colors.
      * @type {ops.tools.ValueSelector}
      */
     var routeColorSelector = new ops.tools.ValueSelector(ops.ui.ITEM_COLORS);
 
     /**
-     * Associates the routes with opacities.
+     * Associates routes with opacities.
      * @type {ops.tools.ValueSelector}
      */
     var routeOpacitySelector = new ops.tools.ValueSelector(ops.ui.ITEM_OPACITIES);
 
+    //the map instance
+    var map;
+
+    //keep a reference to the layer groups so they can be cleared from the map when they are redrawn
     /**
-     * The selected route's Id.
+     * @type {window.L.LayerGroup}
+     */
+    var resourcesGroup;
+    /**
+     * @type {window.L.LayerGroup}
+     */
+    var routesGroup;
+    /**
+     * The layer group of track points for the selected route.
+     * @type {window.L.LayerGroup}
+     */
+    var trackPointsGroup;
+
+    /**
+     * If it is not null, remove the layer from the map.
+     * @param {window.L.LayerGroup} layer
+     */
+    var removeLayer = function (layer) {
+        if (layer != null)
+            map.removeLayer(layer);
+    }
+
+    /**
+     * The loaded track points separated by their routeId in ordered arrays of time.
+     * The key is the routeId {ops.Guid}.
+     * @type {goog.structs.Map}
+     */
+    var routesTrackPoints = new goog.structs.Map();
+
+    /**
+     * @type {goog.date.UtcDateTime}
+     */
+    var selectedDate;
+
+    /**
      * @type {ops.Guid}
      */
     var selectedRouteId;
 
-    /**
-     * A list to keep track of which routes have been loaded
-     * @type {Array.<ops.Models.Route>}
-     */
-    var loadedRoutes;
-
-    /**
-     * The resources (employees and vehicles) and their latest location.
-     * @type {Array.<Object>}
-     */
-    var resources;
-
-    /**
-     * Historical track points.
-     * @type {Array.<Object>}
-     */
-    var mapTrackPoints = [];
-
-    //#endregion
-
-//region Logic
-
-    //setup an empty map
-    map = ops.leaflet.setupMap();
-
-    //when the map is clicked
-    //a) deselect the route
-    //b) remove the route's TrackPoints from the map
-    map.on('click', function () {
-        //a) deselect the route
-        selectedRouteId = null;
-
-        //b) remove the route's TrackPoints from the map
-        if (trackPointsGroup != null)
-            map.removeLayer(trackPointsGroup);
-    });
-
-    //get/add the service provider's depot(s) to the map
-    ops.services.getDepots(function (loadedDepots) {
-        ops.leaflet.drawDepots(map, loadedDepots);
-    });
-
-    /**
-     * Adds trackpoints to the list of historical trackpoints
-     * @param {Array.<object>} trackpoints
-     */
-    var addTrackpoints = function (trackpoints) {
-        /** Add given trackpoints to the list of trackpoints */
-        for (var t in trackpoints) {
-            mapTrackPoints.push(trackpoints[t]);
-        }
-        /** Order the trackpoints by time */
-        mapTrackPoints = Enumerable.From(mapTrackPoints).OrderBy(
-            function (item) {
-                return item.CollectedTimeStamp;
-            }).ToArray();
-        /** Check if a route is selected */
-        if (selectedRouteId) {
-            /** Draw the trackpoints on the map */
-            drawHistoricalTrackPoints(selectedRouteId);
-        }
-    };
 
     /**
      * Sets the date to the specified date and regenerates the map objects
      * @param {goog.date.UtcDateTime} date
      */
     var setDate = function (date) {
+        selectedDate = date;
 
         //remove all objects from the map
-        if (resourcesGroup != null)
-            map.removeLayer(resourcesGroup);
-        if (routesGroup != null)
-            map.removeLayer(routesGroup);
-        if (trackPointsGroup != null)
-            map.removeLayer(trackPointsGroup);
-
-        //clear the trackpoints and selected routes
-        mapTrackPoints = [];
-        loadedRoutes = [];
+        removeLayer(resourcesGroup);
+        removeLayer(routesGroup);
+        removeLayer(trackPointsGroup);
 
         //load the routes for the date
 
         //center the map the first time routes are loaded after setDate is changed
         var center = true;
 
-        //TODO ROUTES_REFRESH_RATE
-//        //remove the previous routes
-//        if (routesGroup != null)
-//            map.removeLayer(routesGroup);
+        //TODO ROUTES_REFRESH_RATE, load routes for date
+        //load routes for the date
         ops.services.getRoutes(function (loadedRoutes) {
-            var onDestinationSelected = function (selectedRouteDestination) {
-                setSelectedRoute(selectedRouteDestination.RouteId);
-            };
-
-            routesGroup = ops.leaflet.drawRoutes(map, loadedRoutes, routeColorSelector, center, onDestinationSelected);
+            routesGroup = ops.leaflet.drawRoutes(map, loadedRoutes, routeColorSelector, center,
+                /**
+                 * @param {ops.models.RouteDestination} selectedRouteDestination
+                 */
+                    function (selectedRouteDestination) {
+                    setSelectedRoute(selectedRouteDestination.routeId);
+                });
             center = false;
         });
 
-        //load the locations of the resources only if the date is today
-        //TODO RESOURCES_REFRESH_RATE
-        if (date.getUTCDay() == new goog.date.UtcDateTime().getUTCDate()) {
-            ops.services.getResourcesWithLatestPoints(function (resourcesWithLatestPoints) {
-                /** Remove the previous resources */
-                if (resourcesGroup != null) {
-                    map.removeLayer(resourcesGroup);
-                }
-                resourcesGroup = ops.leaflet.drawResources(resourcesWithLatestPoints);
+        //load the
 
-                /**
-                 * An array of trackpoints
-                 * @type {Array.<Object>}
-                 */
-                var trackPointCollection = [];
-                for (var r in resources) {
-                    var resourceId;
-                    if (resources[r].EmployeeId != null) {
-                        resourceId = resources[r].EmployeeId;
-                    } else {
-                        resourceId = resources[r].VehicleId;
-                    }
-                    /** Create a trackpoint object
-                     * @type {Object.<string, number>}
-                     */
-                    var trackpoint = new Object({
-                        Latitude:resources[r].Latitude,
-                        Longitude:resources[r].Longitude,
-                        RouteId:resources[r].RouteId,
-                        Id:resourceId,
-                        CollectedTimeStamp:"/Date(" + new Date().getTime() + ")/"
-                    });
-                    trackPointCollection.push(trackpoint);
-                }
-                addTrackpoints(trackPointCollection);
+        //TODO RESOURCES_REFRESH_RATE
+        //if the date is today: load the resources with latest points
+        if (ops.dateEqual(date, new goog.date.UtcDateTime())) {
+            ops.services.getResourcesWithLatestPoints(function (resourcesWithLatestPoints) {
+                resourcesGroup = ops.leaflet.drawResources(resourcesWithLatestPoints);
             });
         }
     };
 
-    /** Set the date to today. */
-    setDate(new Date());
+//    /**
+//     * Adds trackpoints to the list of historical trackpoints
+//     * @param {Array.<object>} trackpoints
+//     */
+//    var addTrackpoints = function (trackpoints) {
+//        /** Add given trackpoints to the list of trackpoints */
+//        for (var t in trackpoints) {
+//            mapTrackPoints.push(trackpoints[t]);
+//        }
+//        /** Order the trackpoints by time */
+//        mapTrackPoints = Enumerable.From(mapTrackPoints).OrderBy(
+//            function (item) {
+//                return item.CollectedTimeStamp;
+//            }).ToArray();
+//        /** Check if a route is selected */
+//        if (selectedRouteId) {
+//            drawHistoricalTrackPoints(selectedRouteId);
+//        }
+//    };
 
     /**
-     * Generates a compass direction from rotation degrees
-     * @param {string} routeId
+     * Sets the selected route.
+     * @param {ops.Guid} routeId
      */
     var setSelectedRoute = function (routeId) {
-        /** Remove the previous trackpoints */
-        if (trackPointsGroup != null)
-            map.removeLayer(trackPointsGroup);
-
-        //TODO? Clear the opacity value selector
-
-        /** Update the selected route */
+        //remove track points from the map
+        removeLayer(trackPointsGroup);
         selectedRouteId = routeId;
-        /** Keeps track of whether or not the routeId has already been selected
-         * @type {boolean}
-         */
-        var isRouteLoaded;
-        for (var r in loadedRoutes) {
-            /** Check if the selected route has already been loaded */
-            if (loadedRoutes[r] == routeId) {
-                /** Draw the trackpoints on the map */
-                drawHistoricalTrackPoints(selectedRouteId);
-                isRouteLoaded = true;
-            }
-        }
-        if (!isRouteLoaded) {
-            /** Get the trackpoints on the map */
-            getHistoricalTrackPoints(selectedRouteId);
-            addTrackpoints(data);
 
-            /** Add the selected RouteId the the list of selected routes */
-            loadedRoutes.push(selectedRouteId);
+        var routeTrackPoints = routesTrackPoints.get(selectedRouteId);
+        //if the track points are loading, return
+        if (routeTrackPoints == ops.services.Status.LOADING)
+            return;
+
+        //if the track points are loaded draw them
+        if (routeTrackPoints) {
+            trackPointsGroup = ops.leaflet.drawTrackPoints(routeTrackPoints);
+        }
+        //if they are not loaded: load them then draw them
+        else {
+            routeTrackPoints.set(selectedRouteId, ops.services.Status.LOADING);
+
+            ops.services.getTrackPoints(date, routeId, function (loadedTrackPoints) {
+                //add the loaded track points to the map
+                loadedTrackPoints.set(selectedRouteId, loadedTrackPoints);
+
+                //draw the track points if the selected route is still
+                //the loaded track points
+                if (selectedRouteId == routeId)
+                {
+                    removeLayer(trackPointsGroup);
+                    trackPointsGroup = ops.leaflet.drawTrackPoints(loadedTrackPoints);
+                }
+            });
         }
     };
 
+    /**
+     * Store the initialization logic in one place.
+     */
+    var initialize = function () {
+        //setup an empty map
+        map = ops.leaflet.setupMap();
+
+        //when the map is clicked deselect the route and
+        //remove the route's TrackPoints from the map
+        map.on('click', function () {
+            //a) deselect the route
+            selectedRouteId = null;
+
+            //b) remove the route's TrackPoints from the map
+            removeLayer(trackPointsGroup);
+        });
+
+        //get/add the service provider's depot(s) to the map
+        ops.services.getDepots(function (loadedDepots) {
+            ops.leaflet.drawDepots(map, loadedDepots);
+        });
+
+        //set the date to today
+        setDate(new goog.date.UtcDateTime());
+    };
+    initialize();
 //#endregion
-});
+})
+;
