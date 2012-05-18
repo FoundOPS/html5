@@ -10,64 +10,38 @@ goog.require('goog.date.UtcDateTime');
 goog.require('ops');
 goog.require('ops.developer');
 
-/**
- * Enum for the service mode.
- * LOCAL: load data from JSON files in the application's directory. Works for both Android & Browser Debugging. TODO: Implement this mode.
- * LOCALAPI: load data from the local api server.
- * ANDROIDLA: debug in Android Emulator using the local api server.
- * LIVE: load from the main server. TODO: Implement this mode.
- * @type {String}
- * @enum {number}
- */
-ops.services.Mode = {
-    LOCAL:0,
-    LOCALAPI:1,
-    ANDROIDLA:2,
-    LIVE:3
-};
-
-/**
- * The configuration object for data services.
- * It holds the current RoleId, Mode, and ApiUrl.
+/*
+ * The current RoleId for the user.
+ * @type {ops.Guid}
  * @const
- * @type {Array.<Object>}
  */
-ops.services.CONFIG = {
-    /*
-     * The current RoleId for the user.
-     * @type {ops.Guid}
-     */
-    RoleId:null,
-    /*
-     * The current service mode.
-     * @type {ops.services.Mode}
-     */
-    Mode:ops.services.Mode.LOCALAPI
-};
+ops.services.RoleId = null;
 
 //setup the api url depending on the mode
-var mode = ops.services.CONFIG.Mode;
-if (mode == ops.services.Mode.LOCALAPI) {
-    apiUrl = 'http://localhost:9711/api/';
-} else if (mode == ops.services.Mode.ANDROIDLA) {
-    apiUrl = 'http://10.0.2.2:9711/api/';
+var mode = ops.developer.CURRENT_MODE;
+if (mode === ops.developer.MODE.LOCAL){
+    var apiUrl = 'routes.json';
+} else if (mode === ops.developer.MODE.LOCALAPI) {
+    var apiUrl = 'http://localhost:9711/api/';
+} else if (mode === ops.developer.MODE.ANDROIDLA) {
+    var apiUrl = 'http://10.0.2.2:9711/api/';
 }
 
 /*
  * The url for the API.
  */
-ops.services.CONFIG.ApiUrl = apiUrl;
+ops.services.ApiUrl = apiUrl;
 
 /**
  * Set the current RoleId.
  * @param {ops.Guid} The roleId.
  */
 ops.services.setRoleId = function (roleId) {
-    ops.services.CONFIG.RoleId = roleId;
+    ops.services.RoleId = roleId;
 };
 
 //Set the roleId to GotGrease's role (for debugging)
-if (ops.services.CONFIG.Mode != ops.services.Mode.LIVE)
+if (ops.developer.MODE != ops.developer.MODE.LIVE)
     ops.services.setRoleId(ops.developer.GOTGREASE_ROLE_ID);
 
 /**
@@ -85,15 +59,15 @@ ops.services._getHttp = function ($http, queryString, opt_params, opt_excludeRol
      * and invoke the callback with the loaded data.
      * @param {!function(Object)} callback A callback to pass the loaded data to.
      */
-    var getThenInvokeCallback;
-    getThenInvokeCallback = function (callback) {
+    var getThenInvokeCallback = function (callback) {
         var params = opt_params || {};
 
         //if opt_excludeRoleId was not set or true and the RoleId exists add it as a parameter
-        if (!opt_excludeRoleId && ops.services.CONFIG.RoleId)
-            params.roleId = ops.services.CONFIG.RoleId.toString();
+        if (!opt_excludeRoleId && ops.services.RoleId) {
+            params.roleId = ops.services.RoleId.toString();
+        }
 
-        var url = ops.services.CONFIG.ApiUrl + queryString + '?callback=JSON_CALLBACK';
+        var url = ops.services.ApiUrl + queryString + '?callback=JSON_CALLBACK';
 
         $http({
             //must use JSONP because the javascript may be hosted on a different url than the api
@@ -107,6 +81,22 @@ ops.services._getHttp = function ($http, queryString, opt_params, opt_excludeRol
     };
 
     return getThenInvokeCallback;
+
+    var postTrackPoints = function (routeId, serviceDate, trackPoints, receiver) {
+        var url = ops.services.CONFIG.Receiver;
+
+        var params = function (routeId, serviceDate, trackPoints) {
+            this.routeId_ = routeId;
+            this.serviceDate_ = serviceDate;
+            this.trackPoints_ = trackPoints;
+        }
+
+        $http({
+            method:'POST',
+            url:url,
+            params:params
+        });
+    }
 };
 
 /*
@@ -135,8 +125,20 @@ angular.injector(['ng']).invoke(function ($http) {
      * @param {!function(Array.<Object>)} callback The callback to pass the TrackPoints to after they are loaded.
      */
     ops.services.getTrackPoints = function (serviceDate, routeId, callback) {
-        return ops.services._getHttp($http, 'trackpoint/GetTrackPoints', {routeId:routeId, serviceDate:serviceDate.toUTCIsoString()})(callback);
+
+        return ops.services._getHttp($http, 'trackPoint/GetTrackPoints', {routeId:routeId, serviceDate:serviceDate.toUTCIsoString()})(callback);
     };
+
+    /**
+     * Send the current service provider's TrackPoints to the server.
+     * @param serviceDate
+     * @param routeId
+     * @param trackPoints
+     * @param receiver
+     */
+    ops.services.sendTrackPoints = function (routeId, serviceDate, trackPoints, receiver) {
+        ops.services._postHttp($http, 'trackPoint/SendTrackPoints', {routeId:routeId, serviceDate:serviceDate.toUTCIsoString(), trackPoints:trackPoints})(receiver);
+    }
 
     /**
      * Authenticate the user.

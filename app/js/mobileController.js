@@ -3,6 +3,7 @@
 goog.require('goog.Timer');
 goog.require('ops.services');
 goog.require('ops.mobile');
+goog.require('ops.models');
 
 var intervalId;
 var trackPoints = []; //Array where track points are stored.
@@ -73,16 +74,16 @@ angular.module("ops.mobile").controller('MobileController', function ($scope, $n
     //Start the route and continuously get track points, show end button.
     $scope.startRoute = function (routeId) {
         $scope.routeInProgress = true;
+        var serviceDate = new Date();
 
         //TODO change the selected route
 
-//
-//        intervalId = $window.setInterval(function () {
-//            getTrackPoints(routeId);
-//        }, ops.mobile.TRACKPOINT_COLLECTION_FREQUENCY_SECONDS * 1000);
+        intervalId = $window.setInterval(function () {
+            getTrackPoints(serviceDate, routeId);
+        }, ops.mobile.TRACKPOINT_COLLECTION_FREQUENCY_SECONDS * 1000);
     };
 
-//Ends track point accumulation, clears trackPoints array, removes end button, displays start button.
+    //Ends track point accumulation, clears trackPoints array, removes end button, displays start button.
     $scope.endRoute = function () {
         $scope.routeInProgress = false;
 
@@ -93,16 +94,25 @@ angular.module("ops.mobile").controller('MobileController', function ($scope, $n
         trackPoints = [];
     };
 
-//Creates TrackPoints, stores them on the trackPoints array and sends them to the server.
-    var getTrackPoints = function (routeId) {
+    //Converts geolocation position into a TrackPoint, stores TrackPoint on the trackPoints array and sends it to the server.
+    var getTrackPoints = function (serviceDate, routeId, callback) {
 
         var onSuccess = function (position) {
             console.log("In onSuccess");
             console.log("Longitude: " + position.longitude + " Latitude: " + position.latitude);
 
-            //TODO: Convert the position to a trackPoint and push a trackPoint.
-            trackPoints.push(position);
-//            trackPointsStore.write(trackPoints, routeId);
+            var newTrackPoint = new ops.models.TrackPoint(
+                position.coords.accuracy,
+                position.coords.heading,
+                position.coords.latitude,
+                position.coords.longitude,
+                position.coords.speed,
+                new Date(position.timestamp),
+                'Source'
+            )
+            trackPoints.push(newTrackPoint);
+
+            ops.services.postTrackPoints(routeId, serviceDate, trackPoints);
         };
 
         var onError = function (error) {
@@ -112,5 +122,6 @@ angular.module("ops.mobile").controller('MobileController', function ($scope, $n
         navigator.geolocation.getCurrentPosition(onSuccess, onError, {
             enableHighAccuracy:true
         });
+
     };
 });
