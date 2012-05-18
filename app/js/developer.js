@@ -9,6 +9,29 @@ goog.provide('ops.developer');
 goog.require('ops.Guid');
 
 /**
+ * Enum for the service mode.
+ * LOCAL: load data from JSON files in the application's directory. Works for both Android & Browser Debugging. TODO: Implement this mode.
+ * LOCALAPI: load data from the local api server.
+ * ANDROIDLA: debug in Android Emulator using the local api server.
+ * LIVE: load from the main server. TODO: Implement this mode.
+ * @type {String}
+ * @enum {number}
+ */
+ops.developer.MODE = {
+    LOCAL:0,
+    LOCALAPI:1,
+    ANDROIDLA:2,
+    LIVE:3
+};
+
+/*
+ * The current development mode.
+ * @const
+ * @type {ops.developer.Mode}
+ */
+ops.developer.CURRENT_MODE = ops.developer.MODE.LOCALAPI;
+
+/**
  * The local server's RoleId for GotGrease
  * @const
  * @type {ops.Guid}
