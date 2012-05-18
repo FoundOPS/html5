@@ -13,18 +13,18 @@
     <script src="lib/closure-library/closure/goog/base.js"></script>
     <!--Application css, libraries-->
     <link rel="stylesheet" href="css/app.css"/>
-    <script type="text/javascript" src="js/app.js"></script>
     <script type="text/javascript" src="js/base.js"></script>
-    <script type="text/javascript" src="js/tools.js"></script>
     <script type="text/javascript" src="js/ui.js"></script>
+    <script type="text/javascript" src="js/tools.js"></script>
     <script type="text/javascript" src="js/developer.js"></script>
+    <script type="text/javascript" src="js/mobile.js"></script>
     <script type="text/javascript" src="js/models.js"></script>
     <script type="text/javascript" src="js/models.Client.js"></script>
     <script type="text/javascript" src="js/models.Location.js"></script>
     <script type="text/javascript" src="js/models.Route.js"></script>
     <script type="text/javascript" src="js/models.TrackPoint.js"></script>
     <script type="text/javascript" src="js/services.js"></script>
-    <script type="text/javascript" src="js/mobile.js"></script>
+    <script type="text/javascript" src="js/app.js"></script>
     <script type="text/javascript" src="js/mobileController.js"></script>
 </head>
 <body ng-controller="MobileController">
@@ -59,7 +59,7 @@
         <div data-role="content">
             <ul data-role="listview">
                 <li ng-repeat="route in routes" class="route">
-                    <a href="#" ngm-click='showRouteDetails(route.Id)'>{{route.Name}}</a>
+                    <a href="#" ngm-click='showRouteDetails(route.id)'>{{route.name}}</a>
                 </li>
             </ul>
         </div>
@@ -74,19 +74,19 @@
 <!--Route Details-->
 <div id="routedetails" data-role="page" data-theme="a" ngm-swiperight="back()">
     <div data-role="header" data-mini="true">
-        <a href="#" ng-hide="routeInProgress" ngm-click="startRoute(selectedRoute.Id)">Start Route</a>
+        <a href="#" ng-hide="routeInProgress" ngm-click="startRoute(selectedRoute.id)">Start Route</a>
 
-        <h1>{{selectedRoute.Name}}</h1>
+        <h1>{{selectedRoute.name}}</h1>
         <a href="#" ng-show="routeInProgress" ngm-click="endRoute()">End Route</a>
     </div>
     <div data-role="content">
         <div data-role="content">
             <ul data-role="listview">
-                <li ng-repeat="routeDestination in selectedRoute.RouteDestinations" class="routeDestination">
-                    <a href="#" ngm-click='showRouteDestinationDetails(routeDestination.Id)'>
-                        <h3>{{routeDestination.Client.Name}}</h3>
+                <li ng-repeat="routeDestination in selectedRoute.routeDestinations" class="routeDestination">
+                    <a href="#" ngm-click='showRouteDestinationDetails(routeDestination.id)'>
+                        <h3>{{routeDestination.client.name}}</h3>
 
-                        <p>{{routeDestination.Location.AddressLineOne}}</p>
+                        <p>{{routeDestination.location.addressLineOne}}</p>
                     </a>
                 </li>
             </ul>
@@ -99,17 +99,17 @@
 <!--Route Destination Popup-->
 <div id="routedestinationdialog" data-role="dialog" data-theme="c">
     <div data-role="header">
-        <h1>{{selectedRouteDestination.Client.Name}}</h1>
+        <h1>{{selectedRouteDestination.client.name}}</h1>
     </div>
     <div data-role="content">
         <div data-role="content">
             <ul data-role="listview">
                 <li>
-                    <a href="http://maps.google.com/maps?q={{selectedRouteDestination.Location.Latitude}},{{selectedRouteDestination.Location.Longitude}}">Navigate
+                    <a href="http://maps.google.com/maps?q={{selectedRouteDestination.location.latitude}},{{selectedRouteDestination.location.longitude}}">Navigate
                         to Route Stop</a>
                 </li>
                 <li ng-repeat="contactInfo in selectedPhoneNumbers" class="routeDestination">
-                    <a href="tel:{{contactInfo.Data}}">Call {{contactInfo.Label}}</a>
+                    <a href="tel:{{contactInfo.data}}">Call {{contactInfo.label}}</a>
                 </li>
             </ul>
         </div>

@@ -78,9 +78,9 @@ ops.models.ContactInfo = function (type, label, data) {
 /**
  * Create a contact info from the api model.
  * @param apiModel
- * @return {ops.models.ContactInfo}
+ * @return {function(Object}: ops.models.ContactInfo}
  */
 ops.models.ContactInfo.createFromApiModel = function (apiModel) {
     //noinspection JSUnresolvedVariable
-    return ops.models.ContactInfo(apiModel.Type, apiModel.Label, apiModel.Data);
+    return new ops.models.ContactInfo(apiModel.Type, apiModel.Label, apiModel.Data);
 };

@@ -35,4 +35,4 @@ ops.developer.CURRENT_MODE = ops.developer.Mode.LOCALAPI;
  * @const
  * @type {ops.Guid}
  */
-ops.developer.GOTGREASE_ROLE_ID = new ops.Guid('46FE8E80-F9A4-45D6-A4DE-592F1A06E0CC');
+ops.developer.GOTGREASE_ROLE_ID = new ops.Guid('88D52B9C-AF33-4706-9AF0-5FC355E07839');

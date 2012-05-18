@@ -53,7 +53,7 @@ ops.models.RouteDestination.createFromApiModel = function (apiModel) {
     var location = ops.models.Location.createFromApiModel(apiModel.Location);
 
     //noinspection JSUnresolvedVariable
-    return ops.models.RouteDestination(ops.Guid.convert(apiModel.Id), apiModel.OrderInRoute, client, location);
+    return new ops.models.RouteDestination(ops.Guid.convert(apiModel.Id), apiModel.OrderInRoute, client, location);
 };
 
 /**
@@ -87,7 +87,7 @@ ops.models.Route = function (id, name, routeDestinations) {
  */
 ops.models.Route.createFromApiModel = function (apiModel) {
     //noinspection JSUnresolvedVariable
-    var routeDestinations = ops.tools.convertArray(apiModel.RouteDestinations, ops.models.RouteDestination.createFromModel);
+    var routeDestinations = ops.tools.convertArray(apiModel.RouteDestinations, ops.models.RouteDestination.createFromApiModel);
 
-    return ops.models.Route(ops.Guid.convert(apiModel.Id), apiModel.Name, routeDestinations);
+    return new ops.models.Route(ops.Guid.convert(apiModel.Id), apiModel.Name, routeDestinations);
 };

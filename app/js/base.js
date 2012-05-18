@@ -24,6 +24,19 @@ ops.Guid.prototype.toString = function () {
     return this.guid_;
 };
 
+
+/**
+ * Tests whether the given guid is equal to this guid.
+ * Note, this is a simple string comparison, it doesn't account
+ * for comparisons like "{1234-2414-14241-142414} == 1234-2414-14241-142414".
+ *
+ * @param {ops.Guid} other The guid to test.
+ * @return {boolean} Whether the guids are equal.
+ */
+ops.Guid.prototype.equals = function(other) {
+    return other.guid_ == this.guid_;
+};
+
 /**
  * Create a new unique Guid.
  * @return {ops.Guid}

@@ -22,8 +22,8 @@ angular.module("ops.mobile").controller('MobileController', function ($scope, $n
     }, 100);
 
     $scope.refreshRoutes = function () {
-        ops.services.getRoutes(function (data) {
-            $scope.routes = data;
+        ops.services.getRoutes(function (routes) {
+            $scope.routes = routes;
             //force apply (not yet sure why this is necessary)
             $scope.$apply();
         });
@@ -43,7 +43,7 @@ angular.module("ops.mobile").controller('MobileController', function ($scope, $n
 
     $scope.showRouteDetails = function (routeId) {
         var routeToSelect = Enumerable.From($scope.routes).First(function (route) {
-            return route.Id === routeId;
+            return route.id == routeId;
         });
 
         $scope.selectedRoute = routeToSelect;
@@ -51,18 +51,18 @@ angular.module("ops.mobile").controller('MobileController', function ($scope, $n
     };
 
     $scope.showRouteDestinationDetails = function (routeDestinationId) {
-        var routeDestinationToSelect = Enumerable.From($scope.selectedRoute.RouteDestinations).First(function (routeDestination) {
-            return routeDestination.Id === routeDestinationId;
+        var routeDestinationToSelect = Enumerable.From($scope.selectedRoute.routeDestinations).First(function (routeDestination) {
+            return routeDestination.id === routeDestinationId;
         });
 
         $scope.selectedRouteDestination = routeDestinationToSelect;
 
-        var clientContactInfo = $scope.selectedRouteDestination.Client.ContactInfoSet;
-        var locationContactInfo = $scope.selectedRouteDestination.Location.ContactInfoSet;
+        var clientContactInfo = $scope.selectedRouteDestination.client.contactInfoSet;
+        var locationContactInfo = $scope.selectedRouteDestination.location.contactInfoSet;
 
         var phoneNumbers = Enumerable.From(clientContactInfo).Union(Enumerable.From(locationContactInfo)).Where(
             function (contactInfo) {
-                return contactInfo.Type === "Phone Number";
+                return contactInfo.type === "Phone Number";
             }).ToArray();
 
         $scope.selectedPhoneNumbers = phoneNumbers;

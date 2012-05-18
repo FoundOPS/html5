@@ -57,8 +57,8 @@ if (ops.developer.Mode != ops.developer.Mode.LIVE)
  * @param {String} queryString The query string to use. Ex. "routes/GetDepots"
  * @param {Object.<string|Object>=}  opt_params The parameters to use (optional).
  * @param {boolean=} opt_excludeRoleId Do not include the roleId in the params (optional).
- * @param {function(Object)=} The converter function for a loaded item (optional).
- * @return {function(!function(Object), Object=)} A function to perform the get and invoke the callback.
+ * @param {?function(Object):Object} The converter function for a loaded item (optional).
+ * @return {function(!function(Object))} A function to perform the get and invoke the callback.
  * @private
  */
 ops.services._getHttp = function ($http, queryString, opt_params, opt_excludeRoleId, opt_convertItem) {
@@ -124,19 +124,22 @@ angular.injector(['ng']).invoke(function ($http) {
      * TODO wrap this in a function with optional parameters to either get the service provider's routes, or to get the current user's routes or create another function and rename this
      * @param {!function(Array.<ops.models.Route>)} callback A callback to pass the loaded routes to.
      */
-    ops.services.getRoutes = ops.services._getHttp($http, 'routes/GetRoutes', {}, ops.models.Route.createFromApiModel);
+    ops.services.getRoutes = ops.services._getHttp($http, 'routes/GetRoutes',
+        {}, false, ops.models.Route.createFromApiModel);
 
     /**
      * Get the service provider's depots.
      * @param {!function(Array.<ops.models.Location>)} callback A callback to pass the loaded depots.
      */
-    ops.services.getDepots = ops.services._getHttp($http, 'routes/GetDepots', {}, ops.models.Location.createFromApiModel);
+    ops.services.getDepots = ops.services._getHttp($http, 'routes/GetDepots',
+        {}, false, ops.models.Location.createFromApiModel);
 
     /**
      * Get resources (Employees/Vehicles) and their last recorded location.
      * @param {!function(Array.<ops.models.ResourceWithLastPoint>)} callback The callback to pass the resources with latest points after they are loaded.
      */
-    ops.services.getResourcesWithLatestPoints = ops.services._getHttp($http, 'trackpoint/GetResourcesWithLatestPoints', {}, ops.models.ResourceWithLastPoint.createFromApiModel);
+    ops.services.getResourcesWithLatestPoints = ops.services._getHttp($http, 'trackpoint/GetResourcesWithLatestPoints',
+        {}, false, ops.models.ResourceWithLastPoint.createFromApiModel);
 
     /**
      * Get the service provider's TrackPoints.
@@ -145,7 +148,8 @@ angular.injector(['ng']).invoke(function ($http) {
      * @param {!function(Array.<Object>)} callback The callback to pass the TrackPoints to after they are loaded.
      */
     ops.services.getTrackPoints = function (serviceDate, routeId, callback) {
-        return ops.services._getHttp($http, 'trackPoint/GetTrackPoints', {routeId:routeId, serviceDate:serviceDate.toUTCIsoString()}, ops.models.TrackPoint.createFromApiModel)(callback);
+        return ops.services._getHttp($http, 'trackPoint/GetTrackPoints',
+            {routeId:routeId, serviceDate:serviceDate.toUTCIsoString()}, false, ops.models.TrackPoint.createFromApiModel)(callback);
     };
 
     /**

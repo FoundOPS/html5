@@ -33,8 +33,8 @@ ops.models.Client = function (name, contactInfoSet) {
  */
 ops.models.Client.createFromApiModel = function (apiModel) {
     //noinspection JSUnresolvedVariable
-    var contactInfoSet = ops.tools.convertArray(apiModel.ContactInfoSet, ops.models.ContactInfo.createFromModel);
+    var contactInfoSet = ops.tools.convertArray(apiModel.ContactInfoSet, ops.models.ContactInfo.createFromApiModel);
 
     //noinspection JSUnresolvedVariable
-    return ops.models.Client(apiModel.Name, contactInfoSet);
+    return new ops.models.Client(apiModel.Name, contactInfoSet);
 };
