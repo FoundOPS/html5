@@ -80,25 +80,25 @@ ops.services._getHttp = function ($http, queryString, opt_params, opt_excludeRol
                 //perform the callback function by passing the response data
                 callback(response.data);
             });
+
+
     };
 
     return getThenInvokeCallback;
+};
+/**
+ * A function that performs a POST command on the server.
+ * @param {Object} $http The http service.
+ * @param {*} data
+ */
+ops.services._postHttp = function ($http, data) {
+    var url = ops.services.API_URL;
 
-    var postTrackPoints = function (routeId, serviceDate, trackPoints, receiver) {
-        var url = ops.services.CONFIG.Receiver;
-
-        var params = function (routeId, serviceDate, trackPoints) {
-            this.routeId_ = routeId;
-            this.serviceDate_ = serviceDate;
-            this.trackPoints_ = trackPoints;
-        }
-
-        $http({
-            method:'POST',
-            url:url,
-            params:params
-        });
-    }
+    $http({
+        method:'POST',
+        url:url,
+        params:data
+    });
 };
 
 /*
@@ -136,15 +136,21 @@ angular.injector(['ng']).invoke(function ($http) {
     };
 
     /**
-     * Send the current service provider's TrackPoints to the server.
-     * @param serviceDate
-     * @param routeId
-     * @param trackPoints
-     * @param receiver
+     * Post the field technician's TrackPoints.
+     * @param {ops.Guid} routeId
+     * @param {goog.date.UtcDateTime} serviceDate The service date of the upload.
+     * @param {Object.<function(goog.date.UtcDateTime, string, number, number, number, number, ops.models.DevicePlatform, string)>} trackPoints The trackPoints array.
      */
-    ops.services.sendTrackPoints = function (routeId, serviceDate, trackPoints, receiver) {
-        ops.services._postHttp($http, 'trackPoint/SendTrackPoints', {routeId:routeId, serviceDate:serviceDate.toUTCIsoString(), trackPoints:trackPoints})(receiver);
-    }
+    ops.services.postTrackPoints = function (routeId, serviceDate, trackPoints) {
+
+        var data = function (routeId, serviceDate, trackPoints) {
+            this.routeId_ = routeId;
+            this.serviceDate_ = serviceDate;
+            this.trackPoints_ = trackPoints;
+        };
+
+        ops.services._postHttp($http, data);
+    };
 
     /**
      * Authenticate the user.

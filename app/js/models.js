@@ -157,7 +157,7 @@ ops.models.ResourceWithLastPoint = function (employeeId, vehicleId, entityName, 
     this.employeeId = employeeId;
 
     /**
-     * The vehicle's Id. If this is not null the resource is an vehicle.
+     * The vehicle's Id. If this is not null the resource is a vehicle.
      * @type {ops.Guid}
      */
     this.vehicleId = vehicleId;

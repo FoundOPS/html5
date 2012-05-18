@@ -6,8 +6,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0"/>
     <!--3rd party css, libraries-->
     <!--Includes jQuery, jQuery mobile, Angular-->
-    <script src="lib/jquery/jquery-mobile-angular-adapter-standalone-1.0.7-rc2-SNAPSHOT.js"
-            type="text/javascript"></script>
+    <script src="lib/jquery/jquery-mobile-angular-adapter-standalone-1.0.7-rc2-SNAPSHOT.js" type="text/javascript"></script>
     <link href="lib/jquery/jquery.mobile.css" rel="stylesheet" type="text/css">
     <script src="lib/linq/linq.js" type="text/javascript"></script>
     <script src="lib/closure-library/closure/goog/base.js"></script>
@@ -70,16 +69,16 @@
 <!--Route Details-->
 <div id="routedetails" data-role="page" data-theme="a" ngm-swiperight="back()">
     <div data-role="header" data-mini="true">
-        <a href="#" ng-hide="routeInProgress" ngm-click="startRoute(selectedRoute.Id)">Start Route</a>
+        <a href="#" ng-hide="routeInProgress" ngm-click="startRoute(selectedRoute.Id);">Start Route</a>
 
         <h1>{{selectedRoute.Name}}</h1>
-        <a href="#" ng-show="routeInProgress" ngm-click="endRoute()">End Route</a>
+        <a href="#" ng-show="routeInProgress" ngm-click="endRoute();">End Route</a>
     </div>
     <div data-role="content">
         <div data-role="content">
             <ul data-role="listview">
                 <li ng-repeat="routeDestination in selectedRoute.RouteDestinations" class="routeDestination">
-                    <a href="#" ngm-click='showRouteDestinationDetails(routeDestination.Id)'>
+                    <a href="#" ngm-click='showRouteDestinationDetails(routeDestination.Id);'>
                         <h3>{{routeDestination.Client.Name}}</h3>
 
                         <p>{{routeDestination.Location.AddressLineOne}}</p>

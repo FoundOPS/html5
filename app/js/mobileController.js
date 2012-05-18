@@ -91,24 +91,27 @@ angular.module("ops.mobile").controller('MobileController', function ($scope, $n
         routeEndTime = date.getSeconds();
         routeTotalTime = routeEndTime - routeStartTime;
 
+        clearInterval(intervalId);
+
         trackPoints = [];
     };
 
     //Converts geolocation position into a TrackPoint, stores TrackPoint on the trackPoints array and sends it to the server.
-    var getTrackPoints = function (serviceDate, routeId, callback) {
+    var getTrackPoints = function (serviceDate, routeId) {
 
         var onSuccess = function (position) {
+
             console.log("In onSuccess");
-            console.log("Longitude: " + position.longitude + " Latitude: " + position.latitude);
+            console.log("Position: " + position.coords.latitude + " " + position.coords.longitude);
 
             var newTrackPoint = new ops.models.TrackPoint(
+                new Date(position.timestamp),
                 position.coords.accuracy,
                 position.coords.heading,
                 position.coords.latitude,
                 position.coords.longitude,
-                position.coords.speed,
-                new Date(position.timestamp),
-                'Source'
+                'Source',
+                position.coords.speed
             )
             trackPoints.push(newTrackPoint);
 
@@ -119,9 +122,6 @@ angular.module("ops.mobile").controller('MobileController', function ($scope, $n
             alert("Error Code: " + error.code + '\n' + error.message);
         };
 
-        navigator.geolocation.getCurrentPosition(onSuccess, onError, {
-            enableHighAccuracy:true
-        });
-
+        navigator.geolocation.getCurrentPosition(onSuccess, onError, {enableHighAccuracy:true});
     };
 });
