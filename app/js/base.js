@@ -3,6 +3,7 @@
 /**
  * @fileoverview Class to hold base types.
  */
+
 goog.provide('ops');
 goog.provide('ops.Guid');
 

@@ -123,13 +123,18 @@ angular.injector(['ng']).invoke(function ($http) {
     ops.services.getRoutes = ops.services._getHttp($http, 'routes/GetRoutes', {});
 
     /**
-     * Get the current service provider's depots.
+     * Get the service provider's depots.
      * @param {!function(Array.<Object>)} callback A callback to pass the loaded depots.
      */
     ops.services.getDepots = ops.services._getHttp($http, 'routes/GetDepots', {});
 
     /**
-     * Get the current service provider's TrackPoints.
+     * Get resources (Employees/Vehicles) and their last recorded location.
+     * @param {!function(Array.<Object>)} callback The callback to pass the resources with latest points after they are loaded.
+     */
+    ops.services.getResourcesWithLatestPoints = ops.services._getHttp($http, 'trackpoint/GetResourcesWithLatestPoints', {});
+    /**
+     * Get the service provider's TrackPoints.
      * @param {goog.date.UtcDateTime} serviceDate The service date to retrieve TrackPoints for.
      * @param {ops.Guid} routeId The Id of the route to retrieve TrackPoints for.
      * @param {!function(Array.<Object>)} callback The callback to pass the TrackPoints to after they are loaded.

@@ -45,3 +45,30 @@ ops.models.TrackPoint.prototype.getApiModel = function () {
 ops.models.TrackPoint.prototype.kendoModel = function () {
 
 };
+
+/**
+ * Class encapsulating a ContactInfo.
+ * @param {string} type
+ * @param {string} label
+ * @param {string} data
+ * @constructor
+ */
+ops.models.ContactInfo = function(type, label, data){
+    /**
+     *
+     * @type {String}
+     */
+    this.type = type;
+
+    /**
+     *
+     * @type {String}
+     */
+    this.label = label;
+
+    /**
+     *
+     * @type {String}
+     */
+    this.data = data;
+};
