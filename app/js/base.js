@@ -36,3 +36,19 @@ ops.Guid.NewGuid = function () {
 
     return new ops.Guid(newGuidString);
 };
+
+/**
+ * Try to convert the value to an ops.Guid
+ * @param {*} value The value to convert to.
+ * @return {?ops.Guid} If the value is empty or this cannot convert, it will return null.
+ */
+ops.Guid.convert = function (value) {
+    if (goog.isDefAndNotNull(value)) {
+        if (goog.isString(value) && !goog.string.isEmpty(value))
+            return new ops.Guid(value);
+
+        //TODO add more conversions
+    }
+
+    return null
+};

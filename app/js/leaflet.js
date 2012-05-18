@@ -6,11 +6,15 @@
 
 goog.provide('ops.leaflet');
 
+goog.require('ops.ui');
 goog.require('ops.models.Location');
+goog.require('ops.models.TrackPoint');
+goog.require('ops.models.ResourceWithLastPoint');
+goog.require('ops.models.Route');
 
 /** Add routeId to the icon so it can be accessed from the click event(to set selected route) */
 window.L.ArrowIcon = window.L.Icon.extend({
-    iconUrl:"../img/outerCircle.png",
+    iconUrl:ops.ui.ImageUrls.OUTER_CIRCLE,
     iconSize:new window.L.Point(18, 18),
     iconAnchor:new window.L.Point(9, 9),
     shadowSize:new window.L.Point(0, 0),
@@ -162,7 +166,7 @@ ops.leaflet.drawDepots = function (map, depots) {
         var location = ops.leaflet.getLatLng(depot);
 
         var icon = window.L.Icon.extend({
-            iconUrl:ops.ui.ImageUrls.DEPOT_ICON,
+            iconUrl:ops.ui.ImageUrls.DEPOT,
             iconSize:new window.L.Point(24, 18),
             iconAnchor:new window.L.Point(12, 9),
             shadowSize:new window.L.Point(0, 0),
@@ -189,7 +193,7 @@ ops.leaflet.drawDepots = function (map, depots) {
 /**
  * Draw the resources and their latest points on the map.
  * @param map The map.
- * @param {Array.<ops.models.ResourceWithLatestPoint>} resources The resources to draw on the map.
+ * @param {Array.<ops.models.ResourceWithLastPoint>} resources The resources to draw on the map.
  * @param {ops.tools.ValueSelector} routeColorSelector The route color selector.
  * @param {function(ops.models.RouteDestination)=} opt_destinationSelected A function to perform when a route destination is selected (optional).
  * @return {window.L.LayerGroup} The resources added to the map.
@@ -200,21 +204,16 @@ ops.leaflet.drawResources = function (map, resources, routeColorSelector, opt_de
     //draw each resource on the map
     for (var r in resources) {
         var resource = resources[r];
-        var name = resource.EntityName;
-        var lat = resource.Latitude;
-        var lng = resource.Longitude;
-        var rotateDegrees = resource.CompassHeading;
-        /** Get the color of the route */
-        var color = routeColorSelector.getValue(resource.RouteId);
-        /** Get the location of the destination */
-        var location = new window.L.LatLng(lat, lng);
+        var rotateDegrees = resource.heading;
 
-        //TODO put this in a config
-        var url = "../img/truck.png";
-        if (resource.TrackSource == "iPhone") {
-            url = "../img/apple.png";
-        } else if (resource.TrackSource == "Android") {
-            url = "../img/android.png";
+        var color = routeColorSelector.getValue(resource.routeId);
+        var location = new window.L.LatLng(resource.latitude, resource.longitude);
+
+        var url = ops.ui.ImageUrls.TRUCK;
+        if (resource.source == ops.models.DevicePlatform.IPHONE) {
+            url = ops.ui.ImageUrls.APPLE;
+        } else if (resource.source == ops.models.DevicePlatform.ANDROID) {
+            url = ops.ui.ImageUrls.ANDROID;
         }
         /** Create a point at the current location */
         window.L.ResourceIcon = window.L.Icon.extend({
@@ -225,36 +224,29 @@ ops.leaflet.drawResources = function (map, resources, routeColorSelector, opt_de
             popupAnchor:new window.L.Point(0, -7),
             routeId:resource.RouteId
         });
+
         var icon = new window.L.ResourceIcon();
         /** Set the text for the popup */
-        var popoupContent = "<p class='speed'><b>" + name + "</b><br />Speed: " + Math.round(resource.Speed) + " mph " + ops.tools.getDirection(rotateDegrees) + "</p>";
+        var popupContent = "<p class='speed'><b>" + resource.entityName + "</b><br />Speed: " + Math.round(resource.Speed) + " mph " + ops.tools.getDirection(rotateDegrees) + "</p>";
+
         var marker = new window.L.Marker(location, {
             icon:icon
-        }).bindPopup(popoupContent, {
-                closeButton:false
-            });
-        /** Open the popup on mouseover */
-        marker.on('mouseover', function (e) {
-            e.target.openPopup();
         });
+        ops.leaflet.addPopup_(marker, popupContent);
+
         /** Create the icon for the direction arrow */
         icon = new window.L.ArrowIcon({
             routeId:resource.RouteId
         });
         /** Create the marker for the direction arrow */
-        var arrow = new window.L.ArrowMarker(location, { icon:icon, angle:rotateDegrees }).bindPopup(popoupContent, {
-            closeButton:false
-        });
+        var arrow = new window.L.ArrowMarker(location, { icon:icon, angle:rotateDegrees });
+        ops.leaflet.addPopup_(arrow, popupContent);
+
         /** Set selected route on mouse click */
         arrow.on('click', function (e) {
             setSelectedRoute(e.target.options.icon.options.routeId);
         });
-        arrow.on('mouseover', function (e) {
-            e.target.openPopup();
-        });
-        arrow.on('mouseout', function (e) {
-            e.target.closePopup();
-        });
+
         /** Create the "route-colored" circle */
         var circle = new window.L.CircleMarker(location, {
             radius:10.5,

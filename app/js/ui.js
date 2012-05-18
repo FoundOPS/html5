@@ -45,9 +45,12 @@ ops.ui.ITEM_OPACITIES = [
 
 /**
  * Enum for image urls.
- * @type {String}
- * @const
+ * @enum {String}
  */
 ops.ui.ImageUrls= {
-    DEPOT_ICON: "../img/depot.png"
+    ANDROID: "../img/android.png",
+    APPLE: "../img/apple.png",
+    DEPOT: "../img/depot.png",
+    OUTER_CIRCLE: "../img/outerCircle.png",
+    TRUCK: "../img/truck.png"
 };

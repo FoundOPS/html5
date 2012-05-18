@@ -117,3 +117,18 @@ ops.tools.getDirection = function (deg) {
     }
     return dir;
 };
+
+/**
+ * Converts an array based on the convert function.
+ * @param {Array.<Object>) items
+ * @param {function(Object)} converter A function that converts an item.
+ * @return {Array.<*>} The converted array.
+ */
+ops.tools.convertArray = function(items, converter){
+    var convertedData = [];
+
+    for(var i in items)
+        convertedData.push(converter(items[i]));
+
+    return convertedData;
+};

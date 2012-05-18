@@ -14,7 +14,6 @@ goog.require('ops.Guid');
  * LOCALAPI: load data from the local api server.
  * ANDROIDLA: debug in Android Emulator using the local api server.
  * LIVE: load from the main server. TODO: Implement this mode.
- * @type {String}
  * @enum {number}
  */
 ops.developer.Mode = {

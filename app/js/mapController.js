@@ -151,7 +151,6 @@ angular.module("ops.map").controller('mapController', function () {
         }
     };
 
-
     /**
      * Sets the date to the specified date and regenerates the map objects
      * @param {goog.date.UtcDateTime} date

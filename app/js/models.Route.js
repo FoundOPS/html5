@@ -44,12 +44,26 @@ ops.models.RouteDestination = function (id, orderInRoute, client, location) {
 };
 
 /**
+ * Create a route destination from the api model.
+ * @param apiModel
+ * @return {ops.models.RouteDestination}
+ */
+ops.models.RouteDestination.createFromApiModel = function (apiModel) {
+    var client = ops.models.Client.createFromApiModel(apiModel.Client);
+    var location = ops.models.Location.createFromApiModel(apiModel.Location);
+
+    //noinspection JSUnresolvedVariable
+    return ops.models.RouteDestination(ops.Guid.convert(apiModel.Id), apiModel.OrderInRoute, client, location);
+};
+
+/**
  * Class that encapsulates a route.
  * @param {ops.Guid} id
  * @param {string} name
+ * @param {Array.<ops.models.RouteDestination>} routeDestinations
  * @constructor
  */
-ops.models.Route = function (id, name) {
+ops.models.Route = function (id, name, routeDestinations) {
     /**
      * @type {ops.Guid}
      */
@@ -59,4 +73,21 @@ ops.models.Route = function (id, name) {
      * @type {string}
      */
     this.name = name;
+
+    /**
+     * @type {Array.<ops.models.RouteDestination>}
+     */
+    this.routeDestinations = routeDestinations;
+};
+
+/**
+ * Create a route from the api model.
+ * @param apiModel
+ * @return {ops.models.Route}
+ */
+ops.models.Route.createFromApiModel = function (apiModel) {
+    //noinspection JSUnresolvedVariable
+    var routeDestinations = ops.tools.convertArray(apiModel.RouteDestinations, ops.models.RouteDestination.createFromModel);
+
+    return ops.models.Route(ops.Guid.convert(apiModel.Id), apiModel.Name, routeDestinations);
 };

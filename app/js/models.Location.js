@@ -74,3 +74,17 @@ ops.models.Location = function(name, addressLineOne, addressLineTwo, city, latit
      */
     this.contactInfoSet = contactInfoSet;
 };
+
+/**
+ * Create a location from the api model.
+ * @param apiModel
+ * @return {ops.models.Location}
+ */
+ops.models.Location.createFromApiModel = function (apiModel) {
+    //noinspection JSUnresolvedVariable
+    var contactInfoSet = ops.tools.convertArray(apiModel.ContactInfoSet, ops.models.ContactInfo.createFromModel);
+
+    //noinspection JSUnresolvedVariable
+    return ops.models.Location(apiModel.Name, apiModel.AddressLineOne, apiModel.AddressLineTwo, apiModel.City,
+        apiModel.Latitude, apiModel.Longitude, apiModel.State, apiModel.ZipCode, contactInfoSet);
+};
