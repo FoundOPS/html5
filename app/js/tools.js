@@ -29,42 +29,31 @@ goog.provide('ops.tools.ValueSelector');
 ops.tools.ValueSelector = function (values) {
     /**
      * The values to retrieve for keys.
-     * @type {Array.<Object>}
      * @private
      */
-    var values = values;
+    this.values = values;
 
-    /**
-     * Keep a cache of the previously retrieved keys so the same value can be returned
-     * the value is found by the following index: (key index in keysCache) % (size of values)
-     * @type {Array.<Object>}
-     * @private
-     */
-    var keysCache = [];
+    this.keysCache = [];
+}
 
-    /**
-     * Gets the value for a key.
-     * @param {Object} key The key to retrieve.
-     * @return {Object} The value for a value.
-     */
-    ops.tools.ValueSelector.prototype.getValue = function (key) {
-        var i = 0;
-        //iterate through keysCache to find the index of the key
-        for (var k in keysCache) {
-            //if the key is found break at the current index
-            if (keysCache[i] == key)
-                break;
-            i++;
-        }
+/**
+ * Gets the value for a key.
+ * @param {Object} key The key to retrieve.
+ * @return {Object} The value for a value.
+ */
+ops.tools.ValueSelector.prototype.getValue = function (key) {
+    //find the index of the key
+    var index = goog.array.indexOf(this.keysCache, key);
 
-        //if the key was not found, add it to keysCache
-        if (i == keysCache.count())
-            keysCache.push(key);
-
-        //the index of the value will be the index of the key % values.count()
-        var valueIndex = i % values.count();
-        return values[valueIndex];
+    //if the key was not found, add it to keysCache
+    if (index == -1) {
+        this.keysCache.push(key);
+        index = this.keysCache.length - 1;
     }
+
+    //the index of the value will be the index of the key % values.count()
+    var valueIndex = index % this.values.length;
+    return this.values[valueIndex];
 }
 
 /**
@@ -121,14 +110,14 @@ ops.tools.getDirection = function (deg) {
 /**
  * Converts an array based on the convert function.
  * @param {Array.<Object>) items
- * @param {function(Object): Object} converter A function that converts an item.
+    * @param {function(Object): Object} converter A function that converts an item.
  * @return {Array.<*>} The converted array.
  */
 ops.tools.convertArray = function (items, converter) {
     var convertedData = [];
 
     for (var i in items)
-    convertedData.push(converter(items[i]));
+        convertedData.push(converter(items[i]));
 
     return convertedData;
 };

@@ -149,8 +149,9 @@ goog.inherits(ops.models.ResourceWithLastPoint, ops.models.TrackPoint);
  */
 ops.models.ResourceWithLastPoint.createFromApiModel = function (apiModel) {
     //noinspection JSUnresolvedVariable
+    //TODO refactor LastTimeStamp to CollectedTimeStamp
     return new ops.models.ResourceWithLastPoint(ops.Guid.convert(apiModel.EmployeeId), ops.Guid.convert(apiModel.VehicleId), apiModel.EntityName,
-        ops.Guid.convert(apiModel.RouteId), goog.Date.fromRfc822String(apiModel.CollectedTimeStamp), apiModel.Accuracy, apiModel.Heading, apiModel.Latitude, apiModel.Longitude, apiModel.Source, apiModel.Speed);
+        ops.Guid.convert(apiModel.RouteId), goog.Date.fromRfc822String(apiModel.LastTimeStamp), apiModel.Accuracy, apiModel.Heading, apiModel.Latitude, apiModel.Longitude, apiModel.Source, apiModel.Speed);
 };
 
 /**

@@ -146,8 +146,8 @@ ops.leaflet.addPopup_ = function (marker, content) {
  * @param {ops.models.Location} location
  * @return {window.L.LatLng}
  */
-ops.models.getLatLng = function (location) {
-    return new window.L.LatLng(location.Latitude, location.Longitude);
+ops.leaflet.getLatLng = function (location) {
+    return new window.L.LatLng(location.latitude, location.longitude);
 };
 
 /**
@@ -207,7 +207,7 @@ ops.leaflet.drawResources = function (map, resources, routeColorSelector, opt_de
         var rotateDegrees = resource.heading;
 
         var color = routeColorSelector.getValue(resource.routeId);
-        var location = new window.L.LatLng(resource.latitude, resource.longitude);
+        var locationLatLng = new window.L.LatLng(resource.latitude, resource.longitude);
 
         var url = ops.ui.ImageUrls.TRUCK;
         if (resource.source == ops.models.DevicePlatform.IPHONE) {
@@ -222,14 +222,14 @@ ops.leaflet.drawResources = function (map, resources, routeColorSelector, opt_de
             iconAnchor:new window.L.Point(7.2, 7.4),
             shadowSize:new window.L.Point(0, 0),
             popupAnchor:new window.L.Point(0, -7),
-            routeId:resource.RouteId
+            routeId:resource.routeId
         });
 
         var icon = new window.L.ResourceIcon();
         /** Set the text for the popup */
         var popupContent = "<p class='speed'><b>" + resource.entityName + "</b><br />Speed: " + Math.round(resource.Speed) + " mph " + ops.tools.getDirection(rotateDegrees) + "</p>";
 
-        var marker = new window.L.Marker(location, {
+        var marker = new window.L.Marker(locationLatLng, {
             icon:icon
         });
         ops.leaflet.addPopup_(marker, popupContent);
@@ -239,7 +239,7 @@ ops.leaflet.drawResources = function (map, resources, routeColorSelector, opt_de
             routeId:resource.RouteId
         });
         /** Create the marker for the direction arrow */
-        var arrow = new window.L.ArrowMarker(location, { icon:icon, angle:rotateDegrees });
+        var arrow = new window.L.ArrowMarker(locationLatLng, { icon:icon, angle:rotateDegrees });
         ops.leaflet.addPopup_(arrow, popupContent);
 
         /** Set selected route on mouse click */
@@ -248,7 +248,7 @@ ops.leaflet.drawResources = function (map, resources, routeColorSelector, opt_de
         });
 
         /** Create the "route-colored" circle */
-        var circle = new window.L.CircleMarker(location, {
+        var circle = new window.L.CircleMarker(locationLatLng, {
             radius:10.5,
             weight:.5,
             opacity:1,
@@ -284,12 +284,13 @@ ops.leaflet.drawRoutes = function (map, routes, routeColorSelector, shouldCenter
 
     //iterate through each route
     for (var r in routes) {
-        var destinations = routes[r].routeDestinations;
+        var route = routes[r];
 
         //add markers for each route destination
-        for (var d in destinations) {
-            var locationName = destinations[d].location.name;
-            var locationLatLng = ops.leaflet.getLatLng(destinations[d].location);
+        for (var d in route.routeDestinations) {
+            var destination = route.routeDestinations[d];
+            var location = destination.location;
+            var locationLatLng = ops.leaflet.getLatLng(location);
 
             //include this location in the bounds to center on
             destinationLatLngs.push(locationLatLng);
@@ -297,9 +298,9 @@ ops.leaflet.drawRoutes = function (map, routes, routeColorSelector, shouldCenter
             //add a number marker based on the destination's order in the route
             var numMarker = new window.L.Marker(locationLatLng, {
                 icon:new window.L.DivIcon({
-                    number:destinations[d].OrderInRoute,
+                    number:destination.orderInRoute,
                     //tag this with the related destination for invoking opt_destinationSelected
-                    destination:destinations[d]
+                    destination:destination
                 })
             });
 
@@ -310,7 +311,7 @@ ops.leaflet.drawRoutes = function (map, routes, routeColorSelector, shouldCenter
                 opacity:1,
                 weight:1,
                 color:"#ffffff",
-                fillColor:routeColorSelector.getValue(routes[r].Id),
+                fillColor:routeColorSelector.getValue(route.id),
                 fillOpacity:1,
                 clickable:false
             });
@@ -323,7 +324,7 @@ ops.leaflet.drawRoutes = function (map, routes, routeColorSelector, shouldCenter
             }
 
             //setup marker popup
-            ops.leaflet.addPopup_(numMarker, locationName);
+            ops.leaflet.addPopup_(numMarker, "<b>" + location.name + "</b>");
 
             //add the markers to the map
             routesGroup.addLayer(marker);
@@ -343,7 +344,7 @@ ops.leaflet.drawRoutes = function (map, routes, routeColorSelector, shouldCenter
  * @param {string} routeId
  */
 ops.leaflet.drawTrackPoints = function (trackpoints, resources, routeId) {
-   //track the resources so they can be removed when they are redrawn
+    //track the resources so they can be removed when they are redrawn
     var trackPointsGroup = new window.L.LayerGroup();
 
     //Loop through all the resources

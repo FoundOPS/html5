@@ -103,22 +103,6 @@ ops.services._getHttp = function ($http, queryString, opt_params, opt_excludeRol
     };
 
     return getThenInvokeCallback;
-
-    var postTrackPoints = function (routeId, serviceDate, trackPoints, receiver) {
-        var url = ops.services.CONFIG.Receiver;
-
-        var params = function (routeId, serviceDate, trackPoints) {
-            this.routeId_ = routeId;
-            this.serviceDate_ = serviceDate;
-            this.trackPoints_ = trackPoints;
-        }
-
-        $http({
-            method:'POST',
-            url:url,
-            params:params
-        });
-    }
 };
 
 /*
@@ -159,17 +143,6 @@ angular.injector(['ng']).invoke(function ($http) {
         return ops.services._getHttp($http, 'trackPoint/GetTrackPoints',
             {routeId:routeId, serviceDate:serviceDate.toUTCIsoString()}, false, ops.models.TrackPoint.createFromApiModel)(callback);
     };
-
-    /**
-     * Send the current service provider's TrackPoints to the server.
-     * @param serviceDate
-     * @param routeId
-     * @param trackPoints
-     * @param receiver
-     */
-    ops.services.sendTrackPoints = function (routeId, serviceDate, trackPoints, receiver) {
-        ops.services._postHttp($http, 'trackPoint/SendTrackPoints', {routeId:routeId, serviceDate:serviceDate.toUTCIsoString(), trackPoints:trackPoints})(receiver);
-    }
 
     /**
      * Authenticate the user.
