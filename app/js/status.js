@@ -29,7 +29,6 @@ $(document).ready(function () {
                 type: "POST"
             }
         },
-        batch: true,
         schema: {
             model: {
                 // Necessary for inline editing to work
@@ -93,12 +92,18 @@ $(document).ready(function () {
         dataSource: dataSource,
         dataBound: onDataBound,
         editable: true,
-        remove: function (e) {hideOrShowSaveBtn(true); },
+        remove: function (e) {
+            hideOrShowSaveCancel(true);
+        },
         scrollable: false,
         selectable: true,
         sortable: true,
-        save: function (e) {hideOrShowSaveBtn(true); },
-        saveChanges: function (e) {hideOrShowSaveBtn(false); },
+        save: function (e) {
+            hideOrShowSaveCancel(true);
+        },
+        saveChanges: function (e) {
+            hideOrShowSaveCancel(false);
+        },
         // The command buttons above the grid
         toolbar: [
             {
@@ -197,21 +202,21 @@ function onDataBound() {
     // Detect cancel button click
     $(".k-grid-cancel-changes").click(function () {
         // Hide save and cancel buttons
-        hideOrShowSaveBtn(false);
+        hideOrShowSaveCancel(false);
     });
     // Detect add button click
     $(".k-grid-add").click(function () {
         // Show save and cancel buttons
-        hideOrShowSaveBtn(true);
+        hideOrShowSaveCancel(true);
     });
     // Bind to grid edit event
     grid.bind("edit", function (e) {
         // Set the BusinessAccountId if it is empty
-        if (e.model.BusinessAccountId === "") {
+        if (!e.model.BusinessAccountId) {
             e.model.BusinessAccountId = busAcctId;
         }
         // Set the Id if it is empty
-        if (e.model.Id === "") {
+        if (!e.model.Id) {
             e.model.Id = guidGenerator();
         }
     });
@@ -257,9 +262,7 @@ var hideOrShowDeleteBtn = function () {
  * Show the save button only if there are changes
  * @param {boolean} hasChanges
  */
-var hideOrShowSaveBtn = function (hasChanges) {
-    // Get the selected row
-    var row = grid.tbody.find(".k-state-selected");
+var hideOrShowSaveCancel = function (hasChanges) {
     if (hasChanges) {
         $('.k-grid-save-changes').css('display', "inline-block");
         $('.k-grid-cancel-changes').css('display', "inline-block");
@@ -284,7 +287,7 @@ var getSelectedRow = function (g) {
 var updateColor = function (i, color) {
     grid._data[i].Color = color;
     // Show save and cancel buttons
-    hideOrShowSaveBtn(true);
+    hideOrShowSaveCancel(true);
 };
 // Update the selected checkbox with the new value
 var updateCheckbox = function () {
@@ -295,6 +298,6 @@ var updateCheckbox = function () {
     // Set checkbox equal to the ! of what it is currently
     grid._data[index].RouteRequired = !(grid._data[index].RouteRequired);
     // Show save and cancel buttons
-    hideOrShowSaveBtn(true);
+    hideOrShowSaveCancel(true);
 };
 //endregion
