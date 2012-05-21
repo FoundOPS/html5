@@ -3,6 +3,9 @@
 /**
  * @fileoverview Class to hold FoundOPS models: ContactInfo, TrackPoint
  */
+
+'use strict';
+
 goog.provide('ops.models.TrackPoint');
 goog.provide('ops.models.ResourceWithLastPoint');
 
@@ -103,7 +106,7 @@ ops.models.TrackPoint.prototype.getApiModel = function () {
 };
 
 /**
- * Class encapsulating the last trackpoint of a resource (Employee or Vehicle).
+ * Class encapsulating the last TrackPoint of a resource (Employee or Vehicle).
  *
  * @param {?ops.Guid} employeeId If not null set the resource as an employee (and vehicleId should be null).
  * @param {?ops.Guid} vehicleId If not null set the resource as a vehicle (and employeeId should be null).

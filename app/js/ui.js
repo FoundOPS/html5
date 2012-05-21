@@ -30,24 +30,24 @@ ops.ui.ITEM_COLORS = [
  * @const
  */
 ops.ui.ITEM_OPACITIES = [
-    .80,
-    .75,
-    .70,
-    .65,
-    .60,
-    .55,
-    .50,
-    .45,
-    .40,
-    .35,
-    .30
+    0.80,
+    0.75,
+    0.70,
+    0.65,
+    0.60,
+    0.55,
+    0.50,
+    0.45,
+    0.40,
+    0.35,
+    0.30
 ];
 
 /**
  * Enum for image urls.
  * @enum {String}
  */
-ops.ui.ImageUrls= {
+ops.ui.ImageUrls = {
     ANDROID: "../img/android.png",
     APPLE: "../img/apple.png",
     DEPOT: "../img/depot.png",

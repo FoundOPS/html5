@@ -72,12 +72,11 @@ angular.module("ops.map").controller('mapController', function () {
      * @param {window.L.LayerGroup} layer
      */
     var removeLayer = function (layer) {
-        if (layer != null)
-        {
+        if (layer !== null) {
             map.removeLayer(layer);
             layer.clear();
         }
-    }
+    };
 
     /**
      * The loaded track points separated by their routeId in ordered arrays of time.
@@ -136,16 +135,19 @@ angular.module("ops.map").controller('mapController', function () {
                 //so they can be drawn individually
                 var resourcesForSelectedRoute = [];
 
-                for (var r in resourcesWithLatestPoints) {
+                var r;
+                for (r in resourcesWithLatestPoints) {
                     var resourceWithLastPoint = resourcesWithLatestPoints[r];
 
-                    if (selectedRouteId == resourceWithLastPoint.id)
+                    if (selectedRouteId === resourceWithLastPoint.id) {
                         resourcesForSelectedRoute.push(resourceWithLastPoint);
+                    }
 
                     //find the loaded track points for the route, and add this
                     var routeTrackPoints = routesTrackPoints.get(resourceWithLastPoint.routeId);
-                    if (routeTrackPoints && routeTrackPoints != ops.services.Status.LOADING)
+                    if (routeTrackPoints && routeTrackPoints !== ops.services.Status.LOADING) {
                         routeTrackPoints.push(resourceWithLastPoint);
+                    }
                 }
 
                 //draw the new track points for the selected route
@@ -165,15 +167,14 @@ angular.module("ops.map").controller('mapController', function () {
 
         var routeTrackPoints = routesTrackPoints.get(selectedRouteId);
         //if the track points are loading, return
-        if (routeTrackPoints == ops.services.Status.LOADING)
+        if (routeTrackPoints === ops.services.Status.LOADING) {
             return;
+        }
 
         //if the track points are loaded draw them
         if (routeTrackPoints) {
             trackPointsGroup = ops.leaflet.drawTrackPoints(routeTrackPoints);
-        }
-        //if they are not loaded: load them then draw them
-        else {
+        } else { //if they are not loaded: load them then draw them
             routeTrackPoints.set(selectedRouteId, ops.services.Status.LOADING);
 
             ops.services.getTrackPoints(selectedDate, routeId, function (loadedTrackPoints) {
@@ -182,7 +183,7 @@ angular.module("ops.map").controller('mapController', function () {
 
                 //draw the track points if the selected route is still
                 //the loaded track points
-                if (selectedRouteId == routeId) {
+                if (selectedRouteId === routeId) {
                     removeLayer(trackPointsGroup);
                     trackPointsGroup = ops.leaflet.drawTrackPoints(loadedTrackPoints);
                 }
@@ -217,5 +218,4 @@ angular.module("ops.map").controller('mapController', function () {
     };
     initialize();
 //#endregion
-})
-;
+});

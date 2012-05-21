@@ -4,6 +4,8 @@
  * @fileoverview Class to hold the Client model.
  */
 
+'use strict';
+
 goog.provide('ops.models.Client');
 
 goog.require('ops.models.ContactInfo');

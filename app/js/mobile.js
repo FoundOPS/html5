@@ -16,12 +16,12 @@ ops.mobile.CONFIG = {
      * @const
      * @type {number}
      */
-    TRACKPOINT_COLLECTION_FREQUENCY_SECONDS:1,
+    TRACKPOINT_COLLECTION_FREQUENCY_SECONDS: 1,
 
     /**
      * The accuracy threshold that determines whether to record a trackPoint (in meters).
      * @const
      * @type {number}
      */
-    ACCURACY_THRESHOLD:50
+    ACCURACY_THRESHOLD: 50
 };

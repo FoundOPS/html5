@@ -4,6 +4,8 @@
  * @fileoverview Class to hold the Location model.
  */
 
+'use strict';
+
 goog.provide('ops.models.Location');
 
 goog.require('ops.models.ContactInfo');
@@ -21,7 +23,7 @@ goog.require('ops.models.ContactInfo');
  * @param {Array.<ops.models.ContactInfo>} contactInfoSet
  * @constructor
  */
-ops.models.Location = function(name, addressLineOne, addressLineTwo, city, latitude, longitude, state, zipCode, contactInfoSet){
+ops.models.Location = function (name, addressLineOne, addressLineTwo, city, latitude, longitude, state, zipCode, contactInfoSet) {
     /**
      * @type {String}
      */

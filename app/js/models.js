@@ -3,6 +3,9 @@
 /**
  * @fileoverview Class to hold FoundOPS models: ContactInfo, TrackPoint
  */
+
+'use strict';
+
 goog.provide('ops.models');
 goog.provide('ops.models.IEditable');
 
@@ -16,11 +19,11 @@ goog.require('ops.Guid');
  * @enum {string}
  */
 ops.models.InfoType = {
-    PHONE:"Phone Number",
-    EMAIL:"Email Address",
-    FAX:"Fax Number",
-    WEBSITE:"Website",
-    OTHER:"Other"
+    PHONE: "Phone Number",
+    EMAIL: "Email Address",
+    FAX: "Fax Number",
+    WEBSITE: "Website",
+    OTHER: "Other"
 };
 
 /**
@@ -28,12 +31,12 @@ ops.models.InfoType = {
  * @enum {string}
  */
 ops.models.DevicePlatform = {
-    ANDROID:"Android",
-    BLACKBERRY:"BlackBerry",
-    IPHONE:"iPhone",
-    WEBOS:"webOS",
-    WINCE:"WinCE",
-    UNKNOWN:"Unknown"
+    ANDROID: "Android",
+    BLACKBERRY: "BlackBerry",
+    IPHONE: "iPhone",
+    WEBOS: "webOS",
+    WINCE: "WinCE",
+    UNKNOWN: "Unknown"
 };
 
 /**

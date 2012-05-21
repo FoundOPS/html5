@@ -14,7 +14,7 @@ goog.provide('ops.Guid');
  * @return {Boolean}
  */
 ops.dateEqual = function (a, b) {
-    return a.getDayOfYear() == b.getDayOfYear() && a.getYear() == b.getYear();
+    return a.getDayOfYear() === b.getDayOfYear() && a.getYear() === b.getYear();
 };
 
 /**
@@ -44,7 +44,7 @@ ops.Guid.prototype.toString = function () {
  * @return {boolean} Whether the guids are equal.
  */
 ops.Guid.prototype.equals = function (other) {
-    return other.guid_ == this.guid_;
+    return other.guid_ === this.guid_;
 };
 
 /**
@@ -53,7 +53,7 @@ ops.Guid.prototype.equals = function (other) {
  */
 ops.Guid.NewGuid = function () {
     var newGuidString = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
     });
 
@@ -67,11 +67,12 @@ ops.Guid.NewGuid = function () {
  */
 ops.Guid.convert = function (value) {
     if (goog.isDefAndNotNull(value)) {
-        if (goog.isString(value) && !goog.string.isEmpty(value))
+        if (goog.isString(value) && !goog.string.isEmpty(value)) {
             return new ops.Guid(value);
+        }
 
         //TODO add more conversions
     }
 
-    return null
+    return null;
 };

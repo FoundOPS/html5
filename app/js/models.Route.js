@@ -4,6 +4,8 @@
  * @fileoverview Class to hold the Route and RouteDestination models.
  */
 
+'use strict';
+
 goog.provide('ops.models.RouteDestination');
 goog.provide('ops.models.Route');
 

@@ -4,6 +4,8 @@
  * @fileoverview Class to hold data services.
  */
 
+'use strict';
+
 goog.provide('ops.services');
 
 goog.require('goog.date.UtcDateTime');
@@ -19,8 +21,8 @@ goog.require('ops.models.ResourceWithLastPoint');
  * @enum {number}
  */
 ops.services.Status = {
-    LOADING:0,
-    LOADED:1
+    LOADING: 0,
+    LOADED: 1
 };
 
 /*
@@ -56,8 +58,9 @@ ops.services.setRoleId = function (roleId) {
 };
 
 //Set the roleId to GotGrease's role (for debugging)
-if (ops.developer.Mode != ops.developer.Mode.LIVE)
+if (ops.developer.Mode !== ops.developer.Mode.LIVE) {
     ops.services.setRoleId(ops.developer.GOTGREASE_ROLE_ID);
+}
 
 /**
  * Returns a standard http get.
@@ -87,19 +90,20 @@ ops.services._getHttp = function ($http, queryString, opt_params, opt_excludeRol
 
         $http({
             //must use JSONP because the javascript may be hosted on a different url than the api
-            method:'JSONP',
-            url:url,
-            params:params
+            method: 'JSONP',
+            url: url,
+            params: params
         }).then(function (response) {
-                var convertedData = response.data;
+            var convertedData = response.data;
 
-                //if there is a converter, convert the data
-                if (opt_convertItem)
-                    convertedData = ops.tools.convertArray(response.data, opt_convertItem);
+            //if there is a converter, convert the data
+            if (opt_convertItem) {
+                convertedData = ops.tools.convertArray(response.data, opt_convertItem);
+            }
 
-                //perform the callback function by passing the response data
-                callback(convertedData);
-            });
+            //perform the callback function by passing the response data
+            callback(convertedData);
+        });
     };
 
     return getThenInvokeCallback;
@@ -141,7 +145,7 @@ angular.injector(['ng']).invoke(function ($http) {
      */
     ops.services.getTrackPoints = function (serviceDate, routeId, callback) {
         return ops.services._getHttp($http, 'trackPoint/GetTrackPoints',
-            {routeId:routeId, serviceDate:serviceDate.toUTCIsoString()}, false, ops.models.TrackPoint.createFromApiModel)(callback);
+            {routeId: routeId, serviceDate: serviceDate.toUTCIsoString()}, false, ops.models.TrackPoint.createFromApiModel)(callback);
     };
 
     /**
@@ -151,6 +155,6 @@ angular.injector(['ng']).invoke(function ($http) {
      * @param {!function(boolean)} callback The callback to pass true (success) or false (failed) to after attempting to authenticate the credentials.
      */
     ops.services.authenticate = function (email, password, callback) {
-        return ops.services._getHttp($http, 'auth/Login', {email:email, pass:password}, true, null)(callback);
+        return ops.services._getHttp($http, 'auth/Login', {email: email, pass: password}, true, null)(callback);
     };
 });

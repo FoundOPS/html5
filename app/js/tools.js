@@ -34,7 +34,7 @@ ops.tools.ValueSelector = function (values) {
     this.values = values;
 
     this.keysCache = [];
-}
+};
 
 /**
  * Gets the value for a key.
@@ -46,7 +46,7 @@ ops.tools.ValueSelector.prototype.getValue = function (key) {
     var index = goog.array.indexOf(this.keysCache, key);
 
     //if the key was not found, add it to keysCache
-    if (index == -1) {
+    if (index === -1) {
         this.keysCache.push(key);
         index = this.keysCache.length - 1;
     }
@@ -54,7 +54,7 @@ ops.tools.ValueSelector.prototype.getValue = function (key) {
     //the index of the value will be the index of the key % values.count()
     var valueIndex = index % this.values.length;
     return this.values[valueIndex];
-}
+};
 
 /**
  * Generates a compass direction from rotation degrees.
@@ -116,8 +116,10 @@ ops.tools.getDirection = function (deg) {
 ops.tools.convertArray = function (items, converter) {
     var convertedData = [];
 
-    for (var i in items)
+    var i;
+    for (i in items) {
         convertedData.push(converter(items[i]));
+    }
 
     return convertedData;
 };
