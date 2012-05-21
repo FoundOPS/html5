@@ -1,0 +1,62 @@
+﻿/* TODO: LESS. Checkout http://sizzlejs.com/ */
+
+/* map */
+
+@font-face {
+    font-family: PTSans;
+    src: url(PTS55F.ttf);  /* TTF file for CSS3 browsers */
+}
+body{
+    font-family: PTSans;
+}
+#map{
+    height: 500px; 
+    border: 1px solid #333335;
+}
+​ .leaflet-popup-content{
+      min-width: 155px;
+}
+.leaflet-marker-icon .number{
+	position: relative;
+	top: -6.5px;
+    left: -3px;
+	font-size: 8.5px;
+    color: #fff;
+    margin: 0px;
+    padding: 0px;
+    text-align: center;
+}
+.speed{
+    min-width: 130px;
+}
+
+/* mobile app */
+
+.menu {
+    list-style: none;
+    border-bottom: 0.1em solid black;
+    margin-bottom: 2em;
+    padding: 0 0 0.5em;
+}
+
+.menu:before {
+    content: "[";
+}
+
+.menu:after {
+    content: "]";
+}
+
+.menu > li {
+    display: inline;
+}
+
+.menu > li:before {
+    content: "|";
+    padding-right: 0.3em;
+}
+
+.menu > li:nth-child(1):before {
+    content: "";
+    padding: 0;
+}
