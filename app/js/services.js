@@ -9,6 +9,19 @@ goog.provide('ops.services');
 goog.require('goog.date.UtcDateTime');
 goog.require('ops');
 goog.require('ops.developer');
+goog.require('ops.models.Route');
+goog.require('ops.models.RouteDestination');
+goog.require('ops.models.TrackPoint');
+goog.require('ops.models.ResourceWithLastPoint');
+
+/**
+ * Enum for loading statuses.
+ * @enum {number}
+ */
+ops.services.Status = {
+    LOADING:0,
+    LOADED:1
+};
 
 /*
  * The current RoleId for the user.
@@ -52,10 +65,11 @@ if (ops.developer.Mode != ops.developer.Mode.LIVE)
  * @param {String} queryString The query string to use. Ex. "routes/GetDepots"
  * @param {Object.<string|Object>=}  opt_params The parameters to use (optional).
  * @param {boolean=} opt_excludeRoleId Do not include the roleId in the params (optional).
- * @return {function(!function(Object), Object=)} A function to perform the get and invoke the callback.
+ * @param {?function(Object):Object} The converter function for a loaded item (optional).
+ * @return {function(!function(Object))} A function to perform the get and invoke the callback.
  * @private
  */
-ops.services._getHttp = function ($http, queryString, opt_params, opt_excludeRoleId) {
+ops.services._getHttp = function ($http, queryString, opt_params, opt_excludeRoleId, opt_convertItem) {
     /**
      * A function to perform the get operation on the api (defined by the parameters above)
      * and invoke the callback with the loaded data.
@@ -77,28 +91,18 @@ ops.services._getHttp = function ($http, queryString, opt_params, opt_excludeRol
             url:url,
             params:params
         }).then(function (response) {
+                var convertedData = response.data;
+
+                //if there is a converter, convert the data
+                if (opt_convertItem)
+                    convertedData = ops.tools.convertArray(response.data, opt_convertItem);
+
                 //perform the callback function by passing the response data
-                callback(response.data);
+                callback(convertedData);
             });
-
-
     };
 
     return getThenInvokeCallback;
-};
-/**
- * A function that performs a POST command on the server.
- * @param {Object} $http The http service.
- * @param {*} data
- */
-ops.services._postHttp = function ($http, data) {
-    var url = ops.services.API_URL;
-
-    $http({
-        method:'POST',
-        url:url,
-        params:data
-    });
 };
 
 /*
@@ -110,21 +114,25 @@ angular.injector(['ng']).invoke(function ($http) {
     /**
      * Get the current service provider's Routes.
      * TODO wrap this in a function with optional parameters to either get the service provider's routes, or to get the current user's routes or create another function and rename this
-     * @param {!function(Array.<Object>)} callback A callback to pass the loaded routes to.
+     * @param {!function(Array.<ops.models.Route>)} callback A callback to pass the loaded routes to.
      */
-    ops.services.getRoutes = ops.services._getHttp($http, 'routes/GetRoutes', {});
+    ops.services.getRoutes = ops.services._getHttp($http, 'routes/GetRoutes',
+        {}, false, ops.models.Route.createFromApiModel);
 
     /**
      * Get the service provider's depots.
-     * @param {!function(Array.<Object>)} callback A callback to pass the loaded depots.
+     * @param {!function(Array.<ops.models.Location>)} callback A callback to pass the loaded depots.
      */
-    ops.services.getDepots = ops.services._getHttp($http, 'routes/GetDepots', {});
+    ops.services.getDepots = ops.services._getHttp($http, 'routes/GetDepots',
+        {}, false, ops.models.Location.createFromApiModel);
 
     /**
      * Get resources (Employees/Vehicles) and their last recorded location.
-     * @param {!function(Array.<Object>)} callback The callback to pass the resources with latest points after they are loaded.
+     * @param {!function(Array.<ops.models.ResourceWithLastPoint>)} callback The callback to pass the resources with latest points after they are loaded.
      */
-    ops.services.getResourcesWithLatestPoints = ops.services._getHttp($http, 'trackpoint/GetResourcesWithLatestPoints', {});
+    ops.services.getResourcesWithLatestPoints = ops.services._getHttp($http, 'trackpoint/GetResourcesWithLatestPoints',
+        {}, false, ops.models.ResourceWithLastPoint.createFromApiModel);
+
     /**
      * Get the service provider's TrackPoints.
      * @param {goog.date.UtcDateTime} serviceDate The service date to retrieve TrackPoints for.
@@ -132,24 +140,8 @@ angular.injector(['ng']).invoke(function ($http) {
      * @param {!function(Array.<Object>)} callback The callback to pass the TrackPoints to after they are loaded.
      */
     ops.services.getTrackPoints = function (serviceDate, routeId, callback) {
-        return ops.services._getHttp($http, 'trackPoint/GetTrackPoints', {routeId:routeId, serviceDate:serviceDate.toUTCIsoString()})(callback);
-    };
-
-    /**
-     * Post the field technician's TrackPoints.
-     * @param {ops.Guid} routeId
-     * @param {goog.date.UtcDateTime} serviceDate The service date of the upload.
-     * @param {Object.<function(goog.date.UtcDateTime, string, number, number, number, number, ops.models.DevicePlatform, string)>} trackPoints The trackPoints array.
-     */
-    ops.services.postTrackPoints = function (routeId, serviceDate, trackPoints) {
-
-        var data = function (routeId, serviceDate, trackPoints) {
-            this.routeId_ = routeId;
-            this.serviceDate_ = serviceDate;
-            this.trackPoints_ = trackPoints;
-        };
-
-        ops.services._postHttp($http, data);
+        return ops.services._getHttp($http, 'trackPoint/GetTrackPoints',
+            {routeId:routeId, serviceDate:serviceDate.toUTCIsoString()}, false, ops.models.TrackPoint.createFromApiModel)(callback);
     };
 
     /**
@@ -159,6 +151,6 @@ angular.injector(['ng']).invoke(function ($http) {
      * @param {!function(boolean)} callback The callback to pass true (success) or false (failed) to after attempting to authenticate the credentials.
      */
     ops.services.authenticate = function (email, password, callback) {
-        return ops.services._getHttp($http, 'auth/Login', {email:email, pass:password}, true)(callback);
+        return ops.services._getHttp($http, 'auth/Login', {email:email, pass:password}, true, null)(callback);
     };
 });

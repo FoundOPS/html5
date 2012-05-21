@@ -25,3 +25,16 @@ ops.models.Client = function (name, contactInfoSet) {
      */
     this.contactInfoSet = contactInfoSet;
 };
+
+/**
+ * Create a client from the api model.
+ * @param apiModel
+ * @return {ops.models.Client}
+ */
+ops.models.Client.createFromApiModel = function (apiModel) {
+    //noinspection JSUnresolvedVariable
+    var contactInfoSet = ops.tools.convertArray(apiModel.ContactInfoSet, ops.models.ContactInfo.createFromApiModel);
+
+    //noinspection JSUnresolvedVariable
+    return new ops.models.Client(apiModel.Name, contactInfoSet);
+};
