@@ -35,15 +35,15 @@ angular.module("ops.mobile").controller('MobileController', function ($scope, $n
             if (data) {
                 $scope.refreshRoutes();
                 $navigate("#routeslist");
-            }
-            else
+            } else {
                 alert("wrong login info dawg");
+            }
         });
     };
 
     $scope.showRouteDetails = function (routeId) {
         var routeToSelect = Enumerable.From($scope.routes).First(function (route) {
-            return route.id == routeId;
+            return route.id === routeId;
         });
 
         $scope.selectedRoute = routeToSelect;
@@ -63,7 +63,8 @@ angular.module("ops.mobile").controller('MobileController', function ($scope, $n
         var phoneNumbers = Enumerable.From(clientContactInfo).Union(Enumerable.From(locationContactInfo)).Where(
             function (contactInfo) {
                 return contactInfo.type === "Phone Number";
-            }).ToArray();
+            }
+        ).ToArray();
 
         $scope.selectedPhoneNumbers = phoneNumbers;
 
@@ -112,7 +113,7 @@ angular.module("ops.mobile").controller('MobileController', function ($scope, $n
                 position.coords.longitude,
                 'Source',
                 position.coords.speed
-            )
+            );
             trackPoints.push(newTrackPoint);
 
             ops.services.postTrackPoints(routeId, serviceDate, trackPoints);
@@ -122,6 +123,6 @@ angular.module("ops.mobile").controller('MobileController', function ($scope, $n
             alert("Error Code: " + error.code + '\n' + error.message);
         };
 
-        navigator.geolocation.getCurrentPosition(onSuccess, onError, {enableHighAccuracy:true});
+        navigator.geolocation.getCurrentPosition(onSuccess, onError, {enableHighAccuracy: true});
     };
 });
