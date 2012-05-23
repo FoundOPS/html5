@@ -179,7 +179,7 @@ angular.module("ops.map").controller('mapController', function () {
 
             ops.services.getTrackPoints(selectedDate, routeId, function (loadedTrackPoints) {
                 //add the loaded track points to the map
-                loadedTrackPoints.set(selectedRouteId, loadedTrackPoints);
+                routesTrackPoints.set(selectedRouteId, loadedTrackPoints);
 
                 //draw the track points if the selected route is still
                 //the loaded track points
