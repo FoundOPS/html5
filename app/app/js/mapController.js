@@ -1,4 +1,5 @@
-﻿// Copyright 2012 FoundOPS LLC. All Rights Reserved.
+﻿//region Using
+// Copyright 2012 FoundOPS LLC. All Rights Reserved.
 
 /**
  * @fileoverview Controller for the route map.
@@ -21,8 +22,10 @@ goog.require('ops.leaflet');
 goog.require('ops.tools');
 goog.require('ops.services');
 goog.require('ops.ui');
+//endregion
 
 angular.module("ops.map").controller('mapController', function ($defer) {
+    //region Locals
     /**
      * Rate of refreshing resources on the map (in milliseconds)
      * @const
@@ -37,6 +40,30 @@ angular.module("ops.map").controller('mapController', function ($defer) {
      */
     var ROUTES_REFRESH_RATE = 300000;
 
+    //the map instance
+    var map;
+    //keep track of whether the map should center when the routes are drawn
+    var center;
+    //the resources
+    var resources;
+
+    /**
+     * @type {goog.date.UtcDateTime}
+     */
+    var selectedDate;
+
+    /**
+     * @type {ops.Guid}
+     */
+    var selectedRouteId;
+
+    /**
+     * The loaded track points separated by their routeId in ordered arrays of time.
+     * The key is the routeId {ops.Guid}.
+     * @type {goog.structs.Map}
+     */
+    var routesTrackPoints = new goog.structs.Map();
+
     /**
      * Associates routes with colors.
      * @type {ops.tools.ValueSelector}
@@ -48,13 +75,7 @@ angular.module("ops.map").controller('mapController', function ($defer) {
      * @type {ops.tools.ValueSelector}
      */
     var routeOpacitySelector = new ops.tools.ValueSelector(ops.ui.ITEM_OPACITIES);
-
-    //the map instance
-    var map;
-    //keep track of whether the map should center when the routes are drawn
-    var center;
-    //the resources
-    var resources;
+    //endregion
 
     /**
      * If it is not null, remove the layer from the map.
@@ -65,23 +86,6 @@ angular.module("ops.map").controller('mapController', function ($defer) {
             map.removeLayer(layer);
         }
     };
-
-    /**
-     * The loaded track points separated by their routeId in ordered arrays of time.
-     * The key is the routeId {ops.Guid}.
-     * @type {goog.structs.Map}
-     */
-    var routesTrackPoints = new goog.structs.Map();
-
-    /**
-     * @type {goog.date.UtcDateTime}
-     */
-    var selectedDate;
-
-    /**
-     * @type {ops.Guid}
-     */
-    var selectedRouteId;
 
     //draws the resources for the selected route
     var drawResources = function () {
@@ -114,17 +118,16 @@ angular.module("ops.map").controller('mapController', function ($defer) {
             ops.services.getResourcesWithLatestPoints(function (resourcesWithLatestPoints) {
                 resources = resourcesWithLatestPoints;
             });
+            /** Reload the resources */
+            $defer(function () {
+                getResources();
+                drawResources();
+            }, RESOURCES_REFRESH_RATE);
         }
-        /** Reload the resources */
-        $defer(function () {
-            getResources();
-            drawResources();
-        }, RESOURCES_REFRESH_RATE);
     };
 
     //load the routes for the date
     var getRoutes = function () {
-        //TODO ROUTES_REFRESH_RATE, load routes for date
         //load routes for the date
         ops.services.getRoutes(function (loadedRoutes) {
             removeLayer(ops.routesGroup);

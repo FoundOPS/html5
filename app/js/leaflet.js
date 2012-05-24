@@ -1,3 +1,4 @@
+//region Using
 // Copyright 2012 FoundOPS LLC. All Rights Reserved.
 
 /**
@@ -11,10 +12,14 @@ goog.require('ops.models.Location');
 goog.require('ops.models.TrackPoint');
 goog.require('ops.models.ResourceWithLastPoint');
 goog.require('ops.models.Route');
+//endregion
 
+//region Locals
 //the map instance
 var map;
+//endregion
 
+//region Helpers
 /** Add routeId to the icon so it can be accessed from the click event(to set selected route) */
 window.L.ArrowIcon = window.L.Icon.extend({
     iconUrl: ops.ui.ImageUrls.OUTER_CIRCLE,
@@ -84,7 +89,9 @@ window.L.DivIcon = window.L.Icon.extend({
         }
     }
 });
+//endregion
 
+//region Methods
 /**
  * Center the map based on the array of LatLng.
  * @param map The map to center on the resources.
@@ -199,8 +206,6 @@ ops.leaflet.drawDepots = function (map, depots) {
  * @param map The map.
  * @param {Array.<ops.models.ResourceWithLastPoint>} resources The resources to draw on the map.
  * @param {ops.tools.ValueSelector} routeColorSelector The route color selector.
- * @param {function(ops.models.RouteDestination)=} opt_destinationSelected A function to perform when a route destination is selected (optional).
- * @return {window.L.LayerGroup} The resources added to the map.
  */
 ops.leaflet.drawResources = function (map, resources, routeColorSelector) {
     ops.resourcesGroup = new window.L.LayerGroup();
@@ -272,8 +277,7 @@ ops.leaflet.drawResources = function (map, resources, routeColorSelector) {
  * @param {Array.<ops.models.Route>} routes The routes to draw on the map.
  * @param {ops.tools.ValueSelector} routeColorSelector The route color selector.
  * @param {boolean} shouldCenter Center the map on the added items.
- * @param {function(ops.models.RouteDestination)=} opt_destinationSelected A function to perform when a route destination is selected (optional).
- * @return {window.L.LayerGroup} The route resources added to the map.
+ * @param {function(ops.models.Route)=} opt_routeSelected A function to perform when a route is selected (optional).
  */
 ops.leaflet.drawRoutes = function (map, routes, routeColorSelector, shouldCenter, opt_routeSelected) {
     //keep track of the destination's locations to center the map on
@@ -301,7 +305,7 @@ ops.leaflet.drawRoutes = function (map, routes, routeColorSelector, shouldCenter
             var numMarker = new window.L.Marker(locationLatLng, {
                 icon: new window.L.DivIcon({
                     number: destination.orderInRoute,
-                    //tag this with the related destination for invoking opt_destinationSelected
+                    //tag this with the related destination for invoking opt_routeSelected
                     routeId: route.id
                 })
             });
@@ -342,6 +346,10 @@ ops.leaflet.drawRoutes = function (map, routes, routeColorSelector, shouldCenter
 
 /**
  * Draws the track points on the map for the given route
+ * @param {Array<object>} trackpoints
+ * @param {Array<object>} resources
+ * @param {ops.tools.ValueSelector} routeColorSelector
+ * @param {ops.tools.ValueSelector} routeOpacitySelector
  * @param {string} routeId
  */
 ops.leaflet.drawTrackPoints = function (trackpoints, resources, routeColorSelector, routeOpacitySelector, routeId) {
@@ -369,15 +377,14 @@ ops.leaflet.drawTrackPoints = function (trackpoints, resources, routeColorSelect
                 clickable: false
             });
 
+            var t;
             /** Loop through every trackpoint */
-            for ( var t in trackpoints) {
-                /** Check if trackpoint is for the current resource and route*/
+            for (t in trackpoints) {
+                /** Check if trackpoint is for the current resource and route */
                 if ((trackpoints[t].id == resourceId) && (trackpoints[t].routeId == routeId)) {
                     var trackPoint = trackpoints[t];
-                    var lat = trackPoint.latitude;
-                    var lng = trackPoint.longitude;
                     /** get the location of the destination */
-                    var location = new window.L.LatLng(lat, lng);
+                    ops.leaflet.getLatLng(trackPoint);
                     /** create a point at the current location */
                     /*var marker = new window.L.CircleMarker(location, {
                      clickable: false,
@@ -398,3 +405,4 @@ ops.leaflet.drawTrackPoints = function (trackpoints, resources, routeColorSelect
     /** add the resources to the map */
     map.addLayer(ops.trackPointsGroup);
 };
+//endregion

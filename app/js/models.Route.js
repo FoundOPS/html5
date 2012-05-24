@@ -1,3 +1,4 @@
+//region Using
 // Copyright 2012 FoundOPS LLC. All Rights Reserved.
 
 /**
@@ -13,7 +14,7 @@ goog.require('ops');
 goog.require('ops.Guid');
 goog.require('ops.models.Client');
 goog.require('ops.models.Location');
-
+//endregion
 
 /**
  * Class encapsulating a route destination.

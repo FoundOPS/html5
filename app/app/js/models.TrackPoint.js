@@ -1,3 +1,4 @@
+//region Using
 // Copyright 2012 FoundOPS LLC. All Rights Reserved.
 
 /**
@@ -14,6 +15,7 @@ goog.require('ops');
 goog.require('ops.Guid');
 goog.require('ops.models');
 goog.require('ops.models.IEditable');
+//endregion
 
 /**
  * The track point model.

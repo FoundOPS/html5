@@ -1,3 +1,4 @@
+//region Using
 // Copyright 2012 FoundOPS LLC. All Rights Reserved.
 
 /**
@@ -6,6 +7,7 @@
 
 goog.provide('ops');
 goog.provide('ops.Guid');
+//endregion
 
 /**
  * Checks whether the date (without the time) are equal.
@@ -28,23 +30,6 @@ ops.Guid.NewGuid = function () {
     });
 
     return newGuidString;
-};
-
-/**
- * Try to convert the value to an ops.Guid
- * @param {*} value The value to convert to.
- * @return {?ops.Guid} If the value is empty or this cannot convert, it will return null.
- */
-ops.Guid.convert = function (value) {
-    if (goog.isDefAndNotNull(value)) {
-        if (goog.isString(value) && !goog.string.isEmpty(value)) {
-            return value;
-        }
-
-        //TODO add more conversions
-    }
-
-    return null;
 };
 
 /**

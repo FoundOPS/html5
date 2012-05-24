@@ -35,4 +35,4 @@ ops.developer.CURRENT_MODE = ops.developer.Mode.ANDROIDLA;
  * @const
  * @type {ops.Guid}
  */
-ops.developer.GOTGREASE_ROLE_ID = new ops.Guid('1F4C710E-5B87-4694-87E3-E79331C6E203');
+ops.developer.GOTGREASE_ROLE_ID = '1F4C710E-5B87-4694-87E3-E79331C6E203';
