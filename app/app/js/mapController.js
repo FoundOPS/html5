@@ -31,14 +31,14 @@ angular.module("ops.map").controller('mapController', function ($defer) {
      * @const
      * @type {number}
      */
-    var RESOURCES_REFRESH_RATE = 100000;
+    var RESOURCES_REFRESH_RATE = 10000;
 
     /**
      * Rate of refreshing routes on the map (in milliseconds)
      * @const
      * @type {number}
      */
-    var ROUTES_REFRESH_RATE = 300000;
+    var ROUTES_REFRESH_RATE = 30000;
 
     //the map instance
     var map;
@@ -46,6 +46,21 @@ angular.module("ops.map").controller('mapController', function ($defer) {
     var center;
     //the resources
     var resources;
+
+    //keep a reference to the layer groups so they can be cleared from the map when they are redrawn
+    /**
+    * @type {window.L.LayerGroup}
+    */
+    var resourcesGroup;
+    /**
+    * @type {window.L.LayerGroup}
+    */
+    var routesGroup;
+    /**
+    * The layer group of track points for the selected route.
+    * @type {window.L.LayerGroup}
+    */
+    var trackPointsGroup;
 
     /**
      * @type {goog.date.UtcDateTime}
@@ -90,7 +105,7 @@ angular.module("ops.map").controller('mapController', function ($defer) {
     //draws the resources for the selected route
     var drawResources = function () {
         //remove the current resources from the map
-        removeLayer(ops.resourcesGroup);
+        removeLayer(resourcesGroup);
         //so they can be drawn individually
         var resourcesForSelectedRoute = [];
         var r;
@@ -108,7 +123,7 @@ angular.module("ops.map").controller('mapController', function ($defer) {
             }
         }
         //draw the new track points for the selected route
-        ops.leaflet.drawResources(map, resourcesForSelectedRoute, routeColorSelector);
+        resourcesGroup = ops.leaflet.drawResources(map, resourcesForSelectedRoute, routeColorSelector);
     };
 
     //gets all of the resources
@@ -130,8 +145,8 @@ angular.module("ops.map").controller('mapController', function ($defer) {
     var getRoutes = function () {
         //load routes for the date
         ops.services.getRoutes(function (loadedRoutes) {
-            removeLayer(ops.routesGroup);
-            ops.leaflet.drawRoutes(map, loadedRoutes, routeColorSelector, center,
+            removeLayer(routesGroup);
+            routesGroup = ops.leaflet.drawRoutes(map, loadedRoutes, routeColorSelector, center,
                 /**
                  * @param {ops.models.Route} selectedRoute
                  */
@@ -155,9 +170,9 @@ angular.module("ops.map").controller('mapController', function ($defer) {
         selectedDate = date;
 
         //remove all objects from the map
-        removeLayer(ops.resourcesGroup);
-        removeLayer(ops.routesGroup);
-        removeLayer(ops.trackPointsGroup);
+        removeLayer(resourcesGroup);
+        removeLayer(routesGroup);
+        removeLayer(trackPointsGroup);
 
         //center the map the first time routes are loaded after setDate is changed
         center = true;
@@ -173,7 +188,7 @@ angular.module("ops.map").controller('mapController', function ($defer) {
      */
     var setSelectedRoute = function (routeId) {
         //remove track points from the map
-        removeLayer(ops.trackPointsGroup);
+        removeLayer(trackPointsGroup);
         selectedRouteId = routeId;
         drawResources();
 
@@ -185,7 +200,7 @@ angular.module("ops.map").controller('mapController', function ($defer) {
 
         //if the track points are loaded draw them
         if (routeTrackPoints) {
-            ops.leaflet.drawTrackPoints(routeTrackPoints, resources, routeColorSelector, routeOpacitySelector, routeId);
+            trackPointsGroup = ops.leaflet.drawTrackPoints(map, routeTrackPoints, resources, routeColorSelector, routeOpacitySelector, routeId);
         //if they are not loaded: load them then draw them
         } else {
             routesTrackPoints.set(selectedRouteId, ops.services.Status.LOADING);
@@ -197,8 +212,8 @@ angular.module("ops.map").controller('mapController', function ($defer) {
                 //draw the track points if the selected route is still
                 //the loaded track points
                 if (selectedRouteId == routeId) {
-                    removeLayer(ops.trackPointsGroup);
-                    ops.leaflet.drawTrackPoints(loadedTrackPoints, resources, routeColorSelector, routeOpacitySelector, routeId);
+                    removeLayer(trackPointsGroup);
+                    trackPointsGroup = ops.leaflet.drawTrackPoints(map, loadedTrackPoints, resources, routeColorSelector, routeOpacitySelector, routeId);
                 }
             });
         }
@@ -217,9 +232,9 @@ angular.module("ops.map").controller('mapController', function ($defer) {
             // deselect the route
             selectedRouteId = null;
             // remove the route's resources from the map
-            removeLayer(ops.resourcesGroup);
+            removeLayer(resourcesGroup);
             // remove the route's TrackPoints from the map
-            removeLayer(ops.trackPointsGroup);
+            removeLayer(trackPointsGroup);
         });
 
         //get/add the service provider's depot(s) to the map

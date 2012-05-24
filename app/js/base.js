@@ -31,21 +31,3 @@ ops.Guid.NewGuid = function () {
 
     return newGuidString;
 };
-
-/**
- * The layer group of resources for the selected route.
- * @type {window.L.LayerGroup}
- */
-ops.resourcesGroup = new window.L.LayerGroup();
-
-/**
- * The layer group of routes.
- * @type {window.L.LayerGroup}
- */
-ops.routesGroup = new window.L.LayerGroup();
-
-/**
- * The layer group of track points for the selected route.
- * @type {window.L.LayerGroup}
- */
-ops.trackPointsGroup = new window.L.LayerGroup();

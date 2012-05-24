@@ -56,7 +56,7 @@ ops.models.TrackPoint = function (id, routeId, collectedTimeStamp, accuracy, hea
     this.accuracy = accuracy;
 
     /**
-     * The compass heading in degrees from north. Ex. 180 = South
+     * The heading in degrees from north. Ex. 180 = South
      * @type {number}
      */
     this.heading = heading;
@@ -92,7 +92,7 @@ ops.models.TrackPoint = function (id, routeId, collectedTimeStamp, accuracy, hea
 ops.models.TrackPoint.createFromApiModel = function (apiModel) {
     //noinspection JSUnresolvedVariable
     return new ops.models.TrackPoint(apiModel.Id, apiModel.RouteId, goog.date.DateTime.fromRfc822String(apiModel.CollectedTimeStamp),
-        apiModel.Accuracy, apiModel.CompassDirection, apiModel.Latitude, apiModel.Longitude, apiModel.Source, apiModel.Speed);
+        apiModel.Accuracy, apiModel.Heading, apiModel.Latitude, apiModel.Longitude, apiModel.Source, apiModel.Speed);
 };
 
 /**
@@ -104,12 +104,13 @@ ops.models.TrackPoint.prototype.getApiModel = function () {
 
     //TODO refactor to heading
     model.Id = this.id;
-    model.CompassDirection = this.heading;
+    model.Heading = this.heading;
     model.Latitude = this.latitude;
     model.Longitude = this.longitude;
     model.Speed = this.speed;
     model.CollectedTimeStamp = new Date(this.collectedTimeStamp).toUTCIsoString();
     model.Source = this.source;
+    model.Accuracy = this.accuracy;
 
     return model;
 };
@@ -169,9 +170,8 @@ goog.inherits(ops.models.ResourceWithLastPoint, ops.models.TrackPoint);
  */
 ops.models.ResourceWithLastPoint.createFromApiModel = function (apiModel) {
     //noinspection JSUnresolvedVariable
-    //TODO refactor LastTimeStamp to CollectedTimeStamp
     return new ops.models.ResourceWithLastPoint(apiModel.EmployeeId, apiModel.VehicleId, apiModel.EntityName,
-        apiModel.RouteId, goog.date.DateTime.fromRfc822String(apiModel.LastTimeStamp), apiModel.Accuracy, apiModel.CompassHeading, apiModel.Latitude, apiModel.Longitude, apiModel.TrackSource, apiModel.Speed);
+        apiModel.RouteId, goog.date.DateTime.fromRfc822String(apiModel.CollectedTimeStamp), apiModel.Accuracy, apiModel.Heading, apiModel.Latitude, apiModel.Longitude, apiModel.Source, apiModel.Speed);
 };
 
 /**

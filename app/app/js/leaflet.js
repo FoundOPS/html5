@@ -14,11 +14,6 @@ goog.require('ops.models.ResourceWithLastPoint');
 goog.require('ops.models.Route');
 //endregion
 
-//region Locals
-//the map instance
-var map;
-//endregion
-
 //region Helpers
 /** Add routeId to the icon so it can be accessed from the click event(to set selected route) */
 window.L.ArrowIcon = window.L.Icon.extend({
@@ -94,7 +89,7 @@ window.L.DivIcon = window.L.Icon.extend({
 //region Methods
 /**
  * Center the map based on the array of LatLng.
- * @param map The map to center on the resources.
+ * @param {window.L.Map} map The map to center on the resources.
  * @param {Array.<window.L.LatLng>} resources An array of latitude and longitudes to center on.
  */
 ops.leaflet.center = function (map, resources) {
@@ -115,7 +110,7 @@ ops.leaflet.center = function (map, resources) {
  */
 ops.leaflet.setupMap = function () {
     // initialize the map on the "map" div with a given center and zoom
-    map = new window.L.Map('map', {
+    var map = new window.L.Map('map', {
         center: new window.L.LatLng(40, -89),
         zoom: 4
     });
@@ -203,12 +198,12 @@ ops.leaflet.drawDepots = function (map, depots) {
 
 /**
  * Draw the resources and their latest points on the map.
- * @param map The map.
+ * @param {window.L.Map} map The map.
  * @param {Array.<ops.models.ResourceWithLastPoint>} resources The resources to draw on the map.
  * @param {ops.tools.ValueSelector} routeColorSelector The route color selector.
  */
 ops.leaflet.drawResources = function (map, resources, routeColorSelector) {
-    ops.resourcesGroup = new window.L.LayerGroup();
+    var resourcesGroup = new window.L.LayerGroup();
     var r;
 
     //draw each resource on the map
@@ -263,17 +258,19 @@ ops.leaflet.drawResources = function (map, resources, routeColorSelector) {
             clickable: false
         });
         /** Add current marker to the map */
-        ops.resourcesGroup.addLayer(circle);
-        ops.resourcesGroup.addLayer(arrow);
-        ops.resourcesGroup.addLayer(marker);
+        resourcesGroup.addLayer(circle);
+        resourcesGroup.addLayer(arrow);
+        resourcesGroup.addLayer(marker);
     }
     /** Add the resources to the map */
-    map.addLayer(ops.resourcesGroup);
+    map.addLayer(resourcesGroup);
+
+    return resourcesGroup;
 };
 
 /**
  * Draw the Route's RouteDestinations with markers on the map.
- * @param map The map.
+ * @param {window.L.Map} map The map.
  * @param {Array.<ops.models.Route>} routes The routes to draw on the map.
  * @param {ops.tools.ValueSelector} routeColorSelector The route color selector.
  * @param {boolean} shouldCenter Center the map on the added items.
@@ -284,7 +281,7 @@ ops.leaflet.drawRoutes = function (map, routes, routeColorSelector, shouldCenter
     var destinationLatLngs = [];
 
     //track the route resources added to the map
-    ops.routesGroup = new window.L.LayerGroup();
+    var routesGroup = new window.L.LayerGroup();
 
     var r;
     //iterate through each route
@@ -333,27 +330,30 @@ ops.leaflet.drawRoutes = function (map, routes, routeColorSelector, shouldCenter
             ops.leaflet.addPopup_(numMarker, "<b>" + location.name + "</b>");
 
             //add the markers to the map
-            ops.routesGroup.addLayer(marker);
-            ops.routesGroup.addLayer(numMarker);
+            routesGroup.addLayer(marker);
+            routesGroup.addLayer(numMarker);
         }
     }
-    map.addLayer(ops.routesGroup);
+    map.addLayer(routesGroup);
 
     if (shouldCenter) {
         ops.leaflet.center(map, destinationLatLngs);
     }
+
+    return routesGroup;
 };
 
 /**
  * Draws the track points on the map for the given route
+ * @param {window.L.Map} map
  * @param {Array<object>} trackpoints
  * @param {Array<object>} resources
  * @param {ops.tools.ValueSelector} routeColorSelector
  * @param {ops.tools.ValueSelector} routeOpacitySelector
  * @param {string} routeId
  */
-ops.leaflet.drawTrackPoints = function (trackpoints, resources, routeColorSelector, routeOpacitySelector, routeId) {
-    ops.trackPointsGroup = new window.L.LayerGroup();
+ops.leaflet.drawTrackPoints = function (map, trackpoints, resources, routeColorSelector, routeOpacitySelector, routeId) {
+    var trackPointsGroup = new window.L.LayerGroup();
 
     var r;
     //Loop through all the resources
@@ -383,8 +383,10 @@ ops.leaflet.drawTrackPoints = function (trackpoints, resources, routeColorSelect
                 /** Check if trackpoint is for the current resource and route */
                 if ((trackpoints[t].id == resourceId) && (trackpoints[t].routeId == routeId)) {
                     var trackPoint = trackpoints[t];
+                    var lat = trackPoint.latitude;
+                    var lng = trackPoint.longitude;
                     /** get the location of the destination */
-                    ops.leaflet.getLatLng(trackPoint);
+                    var location = new window.L.LatLng(lat, lng);
                     /** create a point at the current location */
                     /*var marker = new window.L.CircleMarker(location, {
                      clickable: false,
@@ -399,10 +401,12 @@ ops.leaflet.drawTrackPoints = function (trackpoints, resources, routeColorSelect
                     polyline.addLatLng(location);
                 }
             }
-            ops.trackPointsGroup.addLayer(polyline);
+            trackPointsGroup.addLayer(polyline);
         }
     }
     /** add the resources to the map */
-    map.addLayer(ops.trackPointsGroup);
+    map.addLayer(trackPointsGroup);
+
+    return trackPointsGroup;
 };
 //endregion
