@@ -91,7 +91,7 @@ ops.models.TrackPoint = function (id, routeId, collectedTimeStamp, accuracy, hea
  */
 ops.models.TrackPoint.createFromApiModel = function (apiModel) {
     //noinspection JSUnresolvedVariable
-    return new ops.models.TrackPoint(apiModel.Id, apiModel.RouteId, goog.date.DateTime.fromRfc822String(apiModel.CollectedTimeStamp),
+    return new ops.models.TrackPoint(apiModel.Id, apiModel.RouteId, apiModel.CollectedTimeStamp,
         apiModel.Accuracy, apiModel.Heading, apiModel.Latitude, apiModel.Longitude, apiModel.Source, apiModel.Speed);
 };
 
@@ -108,7 +108,7 @@ ops.models.TrackPoint.prototype.getApiModel = function () {
     model.Latitude = this.latitude;
     model.Longitude = this.longitude;
     model.Speed = this.speed;
-    model.CollectedTimeStamp = new Date(this.collectedTimeStamp).toUTCIsoString();
+    model.CollectedTimeStamp = this.collectedTimeStamp;
     model.Source = this.source;
     model.Accuracy = this.accuracy;
 
@@ -171,7 +171,7 @@ goog.inherits(ops.models.ResourceWithLastPoint, ops.models.TrackPoint);
 ops.models.ResourceWithLastPoint.createFromApiModel = function (apiModel) {
     //noinspection JSUnresolvedVariable
     return new ops.models.ResourceWithLastPoint(apiModel.EmployeeId, apiModel.VehicleId, apiModel.EntityName,
-        apiModel.RouteId, goog.date.DateTime.fromRfc822String(apiModel.CollectedTimeStamp), apiModel.Accuracy, apiModel.Heading, apiModel.Latitude, apiModel.Longitude, apiModel.Source, apiModel.Speed);
+        apiModel.RouteId, apiModel.CollectedTimeStamp, apiModel.Accuracy, apiModel.Heading, apiModel.Latitude, apiModel.Longitude, apiModel.Source, apiModel.Speed);
 };
 
 /**

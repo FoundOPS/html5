@@ -202,7 +202,7 @@ ops.leaflet.drawDepots = function (map, depots) {
  * @param {Array.<ops.models.ResourceWithLastPoint>} resources The resources to draw on the map.
  * @param {ops.tools.ValueSelector} routeColorSelector The route color selector.
  */
-ops.leaflet.drawResources = function (map, resources, routeColorSelector) {
+ops.leaflet.drawResources = function (map, resources, routeColorSelector, opt_routeSelected) {
     var resourcesGroup = new window.L.LayerGroup();
     var r;
 
@@ -242,10 +242,19 @@ ops.leaflet.drawResources = function (map, resources, routeColorSelector) {
         ops.leaflet.addPopup_(marker, popupContent);
 
         /** Create the icon for the direction arrow */
-        icon = new window.L.ArrowIcon();
+        icon = new window.L.ArrowIcon({
+            routeId: resource.routeId
+        });
         /** Create the marker for the direction arrow */
         var arrow = new window.L.ArrowMarker(locationLatLng, { icon: icon, angle: rotateDegrees });
         ops.leaflet.addPopup_(arrow, popupContent);
+
+        //if the onRouteSelected callback was defined, invoke it when the marker is clicked
+        if (opt_routeSelected) {
+            arrow.on('click', function (e) {
+                opt_routeSelected(e.target.options.icon.options.routeId);
+            });
+        }
 
         /** Create the "route-colored" circle */
         var circle = new window.L.CircleMarker(locationLatLng, {
