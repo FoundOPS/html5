@@ -19,10 +19,10 @@ goog.require('ops.models.Route');
 window.L.ArrowIcon = window.L.Icon.extend({
     iconUrl: ops.ui.ImageUrls.OUTER_CIRCLE,
     shadowUrl: null,
-    iconSize: new window.L.Point(18, 18),
+    iconSize: new window.L.Point(18.5, 18.5),
     iconAnchor: new window.L.Point(9, 9),
     shadowSize: new window.L.Point(0, 0),
-    popupAnchor: new window.L.Point(0, -7),
+    popupAnchor: new window.L.Point(0, -9),
     options: {
         routeId: ''
     },
@@ -131,14 +131,13 @@ ops.leaflet.setupMap = function () {
  */
 ops.leaflet.addPopup_ = function (marker, content) {
     marker.bindPopup(content, {
-        closeButton: false
+        closeButton: false,
+        autoPan: false
     });
-
     //on mouseover: open the number marker popup
     marker.on('mouseover', function (e) {
         e.target.openPopup();
     });
-
     //on mouseout: close the popup
     marker.on('mouseout', function (e) {
         e.target.closePopup();
@@ -167,9 +166,7 @@ ops.leaflet.drawDepots = function (map, depots) {
 
     for (d in depots) {
         var depot = depots[d];
-
         var location = ops.leaflet.getLatLng(depot);
-
         var icon = window.L.Icon.extend({
             iconUrl: ops.ui.ImageUrls.DEPOT,
             shadowUrl: null,
@@ -179,14 +176,11 @@ ops.leaflet.drawDepots = function (map, depots) {
             popupAnchor: new window.L.Point(0, -10)
         });
         var depotIcon = new icon();
-
         var marker = new window.L.Marker(location, {
             icon: depotIcon
         });
-
         //setup marker popup
         ops.leaflet.addPopup_(marker, "<b>" + depot.name + "</b>");
-
         //add the depot layer to the group
         depotsGroup.addLayer(marker);
     }
@@ -201,6 +195,8 @@ ops.leaflet.drawDepots = function (map, depots) {
  * @param {window.L.Map} map The map.
  * @param {Array.<ops.models.ResourceWithLastPoint>} resources The resources to draw on the map.
  * @param {ops.tools.ValueSelector} routeColorSelector The route color selector.
+ * @param {function(ops.models.Route)=} opt_routeSelected A function to perform when a route is selected (optional).
+ * @return {window.L.LayerGroup} The resources added to the map.
  */
 ops.leaflet.drawResources = function (map, resources, routeColorSelector, opt_routeSelected) {
     var resourcesGroup = new window.L.LayerGroup();
@@ -210,10 +206,8 @@ ops.leaflet.drawResources = function (map, resources, routeColorSelector, opt_ro
     for (r in resources) {
         var resource = resources[r];
         var rotateDegrees = resource.heading;
-
         var color = routeColorSelector.getValue(resource.routeId);
         var locationLatLng = new window.L.LatLng(resource.latitude, resource.longitude);
-
         var url = ops.ui.ImageUrls.TRUCK;
         if (resource.source === ops.models.DevicePlatform.IPHONE) {
             url = ops.ui.ImageUrls.APPLE;
@@ -225,7 +219,7 @@ ops.leaflet.drawResources = function (map, resources, routeColorSelector, opt_ro
             iconUrl: url,
             shadowUrl: null,
             iconSize: new window.L.Point(14, 14),
-            iconAnchor: new window.L.Point(7.2, 7.4),
+            iconAnchor: new window.L.Point(7, 7),
             shadowSize: new window.L.Point(0, 0),
             popupAnchor: new window.L.Point(0, -7),
             routeId: resource.routeId
@@ -246,7 +240,10 @@ ops.leaflet.drawResources = function (map, resources, routeColorSelector, opt_ro
             routeId: resource.routeId
         });
         /** Create the marker for the direction arrow */
-        var arrow = new window.L.ArrowMarker(locationLatLng, { icon: icon, angle: rotateDegrees });
+        var arrow = new window.L.ArrowMarker(locationLatLng, {
+            icon: icon,
+            angle: rotateDegrees
+        });
         ops.leaflet.addPopup_(arrow, popupContent);
 
         //if the onRouteSelected callback was defined, invoke it when the marker is clicked
@@ -284,6 +281,7 @@ ops.leaflet.drawResources = function (map, resources, routeColorSelector, opt_ro
  * @param {ops.tools.ValueSelector} routeColorSelector The route color selector.
  * @param {boolean} shouldCenter Center the map on the added items.
  * @param {function(ops.models.Route)=} opt_routeSelected A function to perform when a route is selected (optional).
+ * @return {window.L.LayerGroup} The route destinations added to the map.
  */
 ops.leaflet.drawRoutes = function (map, routes, routeColorSelector, shouldCenter, opt_routeSelected) {
     //keep track of the destination's locations to center the map on
@@ -360,6 +358,7 @@ ops.leaflet.drawRoutes = function (map, routes, routeColorSelector, shouldCenter
  * @param {ops.tools.ValueSelector} routeColorSelector
  * @param {ops.tools.ValueSelector} routeOpacitySelector
  * @param {string} routeId
+ * @return {window.L.LayerGroup} The historical trackpoints added to the map.
  */
 ops.leaflet.drawTrackPoints = function (map, trackpoints, resources, routeColorSelector, routeOpacitySelector, routeId) {
     var trackPointsGroup = new window.L.LayerGroup();

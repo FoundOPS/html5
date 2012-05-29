@@ -31,14 +31,14 @@ angular.module("ops.map").controller('mapController', function ($defer) {
      * @const
      * @type {number}
      */
-    var RESOURCES_REFRESH_RATE = 10000;
+    var RESOURCES_REFRESH_RATE = 100000;
 
     /**
      * Rate of refreshing routes on the map (in milliseconds)
      * @const
      * @type {number}
      */
-    var ROUTES_REFRESH_RATE = 30000;
+    var ROUTES_REFRESH_RATE = 300000;
 
     //the map instance
     var map;
