@@ -207,9 +207,28 @@ body{
     color: #778398;
 }
 .customWidget {
-    position: relative;
+    position: absolute;
     height: 36px;
+    margin-top: -33px;
+    z-index: 100;
 }
 input[type="checkbox"]:hover{
     cursor: pointer;
+}
+.gridColor{
+    position: relative;
+    left:5px;
+    width:26px;
+    height:26px;
+}
+.colorInput{
+    visibility: hidden;
+    max-width: 30px;
+}
+.k-edit-cell input{
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
+#grid tbody tr{
+    min-height: 40px;
 }
