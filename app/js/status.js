@@ -1,4 +1,3 @@
-
 //region Locals
 var grid;
 //keep track of the business account id to be used for new items
@@ -93,16 +92,22 @@ $(document).ready(function () {
         dataSource: dataSource,
         dataBound: onDataBound,
         editable: true,
-        remove: function (e) {
+        //called when a row it removed from the grid
+        remove: function () {
+            //hide the save and cencel buttons
             hideOrShowSaveCancel(true);
         },
         scrollable: false,
         selectable: true,
         sortable: true,
-        save: function (e) {
+        //called when the grid detects changes to the data
+        save: function () {
+            //hide the save and cencel buttons
             hideOrShowSaveCancel(true);
         },
-        saveChanges: function (e) {
+        //called when the changes are synced with the served
+        saveChanges: function () {
+            //show the save and cencel buttons
             hideOrShowSaveCancel(false);
         },
         // The command buttons above the grid
@@ -131,14 +136,92 @@ $(document).ready(function () {
 
 //region Methods
 
-function colorEditor(container, options) {
+//region Checkbox
+//disable the checkboxes for the default rows
+var disableDefaultCheckboxes = function () {
+    $("input[type='checkbox']").each(function (i) {
+        // Get the DefaultTypeInt for the row
+        var int = grid._data[i].DefaultTypeInt;
+        // Check if the row is a default type
+        if (int !== null) {
+            // Disable checkbox
+            this.disabled = true;
+        }
+    });
+};
+//keep the default checkboxes disabled
+$(document).click(function () {
+    disableDefaultCheckboxes();
+});
+/**
+ * Takes a boolean and converts it to a checked(if true) or unchecked(if false) checkbox
+ * @param {boolean} checked
+ * @return {string}
+ */
+var getChecked = function (checked) {
+    if (checked === true) {
+        return "<input type='checkbox' checked onclick='updateCheckbox(checked)'/>";
+    } else {
+        return "<input type='checkbox' onclick='updateCheckbox(checked)' />";
+    }
+};
+// Update the selected checkbox with the new value
+var updateCheckbox = function (checked) {
+    //update the model with the new RouteRequired value
+    selectedItem.set('RouteRequired', checked);
+    // Show save and cancel buttons
+    hideOrShowSaveCancel(true);
+};
+//endregion
+
+//region Color
+//attaches a color picker to the color element
+var addColorPicker = function () {
+    $('.colorSelector2').ColorPicker({
+        // Set the initial color of the picker to be the current color
+        color: grid.dataItem(grid.select()).Color, // rgbToHex($('.innerSelector').eq(i))
+        onShow: function (colpkr) {
+            // Set a high z-index so picker show up above the grid
+            $(colpkr).css('z-index', "1000");
+            $(colpkr).fadeIn(200);
+            return false;
+        },
+        onHide: function (colpkr) {
+            $(colpkr).fadeOut(200);
+            return false;
+        },
+        onChange: function (hsb, hex, rgb) {
+            var color = '#' + hex;
+            //$('.k-state-selected .innerSelector').css('background-color', color);
+            // Change the current color on selection
+            updateColor(color);
+        }
+    });
+}
+/**
+ * Creates the cell edit template for the color
+ * @param {Object} container
+ * @param {Object} options
+ */
+var colorEditor = function (container, options) {
     $("<input class='colorInput' data-text-field='Color' data-value-field='Color' data-bind='value:" + options.field + "'/>" +
         "<div class='customWidget'><div class='colorSelector2'><div class='innerSelector' style='background-color:" +
         options.model.Color + "'></div></div><div class='colorpickerHolder2'></div></div>")
         .appendTo(container);
-
+    //attach the color picker
     addColorPicker();
 }
+/**
+ * Updates the model with the selected color
+ * @param {string} color The picked color
+ */
+var updateColor = function (color) {
+    //update the current model with the new color value
+    selectedItem.set('Color', color);
+    // Show save and cancel buttons
+    hideOrShowSaveCancel(true);
+};
+//endregion
 
 /**
  * Takes a number and converts it to one of three default strings
@@ -156,56 +239,12 @@ var getAttributeText = function (int) {
         return "";
     }
 };
-/**
- * Takes a boolean and converts it to a checked(if true) or unchecked(if false) checkbox
- * @param {boolean} checked
- * @return {string}
- */
-var getChecked = function (checked) {
-    if (checked === true) {
-        return "<input type='checkbox' checked onclick='updateCheckbox(checked)'/>";
-    } else {
-        return "<input type='checkbox' onclick='updateCheckbox(checked)' />";
-    }
-};
-function addColorPicker() {
-    $('.colorSelector2').each(function () {
-        $(this).ColorPicker({
-            // Set the initial color of the picker to be the current color
-            color: grid.dataItem(grid.select()).Color, // rgbToHex($('.innerSelector').eq(i))
-            onShow: function (colpkr) {
-                // Set a high z-index so picker show up above the grid
-                $(colpkr).css('z-index', "1000");
-                $(colpkr).fadeIn(500);
-                return false;
-            },
-            onHide: function (colpkr) {
-                $(colpkr).fadeOut(500);
-                return false;
-            },
-            onChange: function (hsb, hex, rgb) {
-                var color = '#' + hex;
-                //$('.k-state-selected .innerSelector').css('background-color', color);
-                // Change the current color on selection
-                updateColor(color);
-            }
-        });
-    });
-}
 // After the data is loaded, assign the color picker to each of the current color boxes
-function onDataBound() {
+var onDataBound = function () {
     // Get a reference to the grid widget
     grid = $("#grid").data("kendoGrid");
-    // Disable checkboxes for default rows
-    $("input[type='checkbox']").each(function (i) {
-        // Get the DefaultTypeInt for the row
-        var int = grid._data[i].DefaultTypeInt;
-        // Check if the row is a default type
-        if (int === 1 || int === 2 || int === 3) {
-            // Disable checkbox
-            this.disabled = true;
-        }
-    });
+    //disable the checkboxes for the default rows
+    disableDefaultCheckboxes();
     // Get the BusinessAccountId from another row to be used to set in new rows
     busAcctId = grid._data[1].BusinessAccountId;
     // Bind to the selection change event
@@ -217,6 +256,8 @@ function onDataBound() {
     $(".k-grid-cancel-changes").click(function () {
         // Hide save and cancel buttons
         hideOrShowSaveCancel(false);
+        //hide the delete button(there isn't a selected row after cancel is clicked)
+        $('.k-grid-delete').css('display', "none");
         grid.dataSource.read();
     });
     // Detect add button click
@@ -226,6 +267,13 @@ function onDataBound() {
     });
     // Bind to grid edit event
     grid.bind("edit", function (e) {
+        //disable the checkboxes for the default rows
+        disableDefaultCheckboxes();
+        if (e.sender._editContainer.context) {
+            if (e.sender._editContainer.context.cellIndex == 1) {
+                $('.colorSelector2').ColorPickerShow();
+            }
+        }
         // Set the BusinessAccountId if it is empty
         if (!e.model.BusinessAccountId) {
             e.model.BusinessAccountId = busAcctId;
@@ -235,19 +283,6 @@ function onDataBound() {
             e.model.Id = guidGenerator();
         }
     });
-}
-/**
- * Takes a color in "rgb(0,0,256)" format and converts it to "#0000FF"
- * @param {string} color
- * @return {String}
- */
-function rgbToHex(color) {
-    var digits = /(.*?)rgb\((\d+), (\d+), (\d+)\)/.exec(color);
-    var red = parseInt(digits[2], 10);
-    var green = parseInt(digits[3], 10);
-    var blue = parseInt(digits[4], 10);
-    var rgb = blue | (green << 8) | (red << 16);
-    return digits[1] + '#' + rgb.toString(16);
 }
 // Removes the selected row from the grid(stays in pending changes until changes are saved)
 var removeSelectedRow = function () {
@@ -260,7 +295,7 @@ var removeSelectedRow = function () {
  * Create a new unique Guid.
  * @return {string} newGuidString
  */
-function guidGenerator() {
+var guidGenerator = function () {
     var newGuidString = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
         var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
@@ -297,22 +332,5 @@ var hideOrShowSaveCancel = function (hasChanges) {
  */
 var getSelectedRow = function (g) {
     return g.tbody.find(".k-state-selected");
-};
-/**
- * Updates the model with the selected color
- * @param {string} color The picked color
- */
-var updateColor = function (color) {
-    //update the current model with the new color value
-    selectedItem.set('Color', color);
-    // Show save and cancel buttons
-    hideOrShowSaveCancel(true);
-};
-// Update the selected checkbox with the new value
-var updateCheckbox = function (checked) {
-    //update the model with the new RouteRequired value
-    selectedItem.set('RouteRequired', checked);
-    // Show save and cancel buttons
-    hideOrShowSaveCancel(true);
 };
 //endregion

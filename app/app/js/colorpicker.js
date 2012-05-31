@@ -1,10 +1,7 @@
 /**
- *
  * Color picker
  * Author: Stefan Petre www.eyecon.ro
- * 
  * Dual licensed under the MIT and GPL licenses
- * 
  */
 (function ($) {
 	var ColorPicker = function () {
@@ -199,7 +196,7 @@
 				if (left + 356 > viewPort.l + viewPort.w) {
 					left -= 356;
 				}
-				cal.css({left: left + 'px', top: top + 'px'});
+				cal.css({left: left + 'px', top: top - 7 + 'px'});
 				if (cal.data('colorpicker').onShow.apply(this, [cal.get(0)]) != false) {
 					cal.show();
 				}
