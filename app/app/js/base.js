@@ -21,7 +21,7 @@ ops.dateEqual = function (a, b) {
 
 /**
  * Create a new unique Guid.
- * @return {ops.Guid}
+ * @return {string}
  */
 ops.Guid.NewGuid = function () {
     var newGuidString = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {

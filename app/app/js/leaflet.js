@@ -15,7 +15,7 @@ goog.require('ops.models.Route');
 //endregion
 
 //region Helpers
-/** Add routeId to the icon so it can be accessed from the click event(to set selected route) */
+// extent window.L.Icon to include routeId so it can be accessed from the click event(to set selected route)
 window.L.ArrowIcon = window.L.Icon.extend({
     iconUrl: ops.ui.ImageUrls.OUTER_CIRCLE,
     shadowUrl: null,
@@ -31,13 +31,11 @@ window.L.ArrowIcon = window.L.Icon.extend({
     }
 });
 
-/** Add the rotate functionality to the marker */
+//extend window.L.Marker to include rotate functionality
 window.L.ArrowMarker = window.L.Marker.extend({
     _reset: function () {
         var pos = this._map.latLngToLayerPoint(this._latlng).round();
-
         window.L.DomUtil.setPosition(this._icon, pos);
-
         this._icon.style.WebkitTransform += ' rotate(' + this.options.angle + 'deg)';
         this._icon.style.MozTransform = 'rotate(' + this.options.angle + 'deg)';
         this._icon.style.msTransform = 'rotate(' + this.options.angle + 'deg)';
@@ -45,7 +43,7 @@ window.L.ArrowMarker = window.L.Marker.extend({
     }
 });
 
-/** Add text functionality to the icon */
+//extend window.L.Icon to include text functionality
 window.L.DivIcon = window.L.Icon.extend({
     popupAnchor: new window.L.Point(0, -7),
     options: {
@@ -92,21 +90,18 @@ window.L.DivIcon = window.L.Icon.extend({
  * @param {window.L.Map} map The map to center on the resources.
  * @param {Array.<window.L.LatLng>} resources An array of latitude and longitudes to center on.
  */
-ops.leaflet.center = function (map, resources) {
+ops.leaflet.center = function (map, locations) {
     // get the total area used
-    var bounds = new window.L.LatLngBounds(resources);
-
+    var bounds = new window.L.LatLngBounds(locations);
     // center the map on the bounds
     map.setView(bounds.getCenter(), 11);
-
-    /* Sets the best view(position and zoom level) to fit all the resources
-     * (This only works perfectly in IE) */
+    //Sets the best view(position and zoom level) to fit all the locations(This only works perfectly in IE)
     map.fitBounds(bounds);
 };
 
 /**
  * Sets up an empty map with the CloudMade tile layer.
- * @return {window.L.Map} The map
+ * @return {window.L.Map} map
  */
 ops.leaflet.setupMap = function () {
     // initialize the map on the "map" div with a given center and zoom
@@ -114,7 +109,7 @@ ops.leaflet.setupMap = function () {
         center: new window.L.LatLng(40, -89),
         zoom: 4
     });
-    // create a CloudMade tile layer and add the CloudMade layer to the map
+    // create a CloudMade tile layer and add it to the map
     var cloudMade = new window.L.TileLayer('http://{s}.tile.cloudmade.com/57cbb6ca8cac418dbb1a402586df4528/997/256/{z}/{x}/{y}.png', {
         maxZoom: 18
     });
@@ -134,11 +129,11 @@ ops.leaflet.addPopup_ = function (marker, content) {
         closeButton: false,
         autoPan: false
     });
-    //on mouseover: open the number marker popup
+    //open the number marker popup on mouseover
     marker.on('mouseover', function (e) {
         e.target.openPopup();
     });
-    //on mouseout: close the popup
+    //close the popup on mouseout
     marker.on('mouseout', function (e) {
         e.target.closePopup();
     });
@@ -167,7 +162,7 @@ ops.leaflet.drawDepots = function (map, depots) {
     for (d in depots) {
         var depot = depots[d];
         var location = ops.leaflet.getLatLng(depot);
-        var icon = window.L.Icon.extend({
+        var Icon = window.L.Icon.extend({
             iconUrl: ops.ui.ImageUrls.DEPOT,
             shadowUrl: null,
             iconSize: new window.L.Point(24, 18),
@@ -175,7 +170,7 @@ ops.leaflet.drawDepots = function (map, depots) {
             shadowSize: new window.L.Point(0, 0),
             popupAnchor: new window.L.Point(0, -10)
         });
-        var depotIcon = new icon();
+        var depotIcon = new Icon();
         var marker = new window.L.Marker(location, {
             icon: depotIcon
         });
@@ -214,7 +209,7 @@ ops.leaflet.drawResources = function (map, resources, routeColorSelector, opt_ro
         } else if (resource.source === ops.models.DevicePlatform.ANDROID) {
             url = ops.ui.ImageUrls.ANDROID;
         }
-        /** Create a point at the current location */
+        //create a point at the current location
         window.L.ResourceIcon = window.L.Icon.extend({
             iconUrl: url,
             shadowUrl: null,
@@ -226,7 +221,7 @@ ops.leaflet.drawResources = function (map, resources, routeColorSelector, opt_ro
         });
 
         var icon = new window.L.ResourceIcon();
-        /** Set the text for the popup */
+        //set the text for the popup
         var popupContent = "<p class='speed'><b>" + resource.entityName + "</b><br />Speed: "
             + Math.round(resource.speed) + " mph " + ops.tools.getDirection(rotateDegrees) + "</p>";
 
@@ -235,11 +230,11 @@ ops.leaflet.drawResources = function (map, resources, routeColorSelector, opt_ro
         });
         ops.leaflet.addPopup_(marker, popupContent);
 
-        /** Create the icon for the direction arrow */
+        //create the icon for the direction arrow
         icon = new window.L.ArrowIcon({
             routeId: resource.routeId
         });
-        /** Create the marker for the direction arrow */
+        //create the marker for the direction arrow
         var arrow = new window.L.ArrowMarker(locationLatLng, {
             icon: icon,
             angle: rotateDegrees
@@ -253,7 +248,7 @@ ops.leaflet.drawResources = function (map, resources, routeColorSelector, opt_ro
             });
         }
 
-        /** Create the "route-colored" circle */
+        //create the "route-colored" circle
         var circle = new window.L.CircleMarker(locationLatLng, {
             radius: 10.5,
             weight: 0.5,
@@ -263,19 +258,19 @@ ops.leaflet.drawResources = function (map, resources, routeColorSelector, opt_ro
             fillColor: color,
             clickable: false
         });
-        /** Add current marker to the map */
+        //add current marker to the map
         resourcesGroup.addLayer(circle);
         resourcesGroup.addLayer(arrow);
         resourcesGroup.addLayer(marker);
     }
-    /** Add the resources to the map */
+    //add the resources to the map
     map.addLayer(resourcesGroup);
 
     return resourcesGroup;
 };
 
 /**
- * Draw the Route's RouteDestinations with markers on the map.
+ * Draw the route's destinations with markers on the map.
  * @param {window.L.Map} map The map.
  * @param {Array.<ops.models.Route>} routes The routes to draw on the map.
  * @param {ops.tools.ValueSelector} routeColorSelector The route color selector.
@@ -286,22 +281,18 @@ ops.leaflet.drawResources = function (map, resources, routeColorSelector, opt_ro
 ops.leaflet.drawRoutes = function (map, routes, routeColorSelector, shouldCenter, opt_routeSelected) {
     //keep track of the destination's locations to center the map on
     var destinationLatLngs = [];
-
     //track the route resources added to the map
     var routesGroup = new window.L.LayerGroup();
-
     var r;
     //iterate through each route
     for (r in routes) {
         var route = routes[r];
-
         var d;
         //add markers for each route destination
         for (d in route.routeDestinations) {
             var destination = route.routeDestinations[d];
             var location = destination.location;
             var locationLatLng = ops.leaflet.getLatLng(location);
-
             //include this location in the bounds to center on
             destinationLatLngs.push(locationLatLng);
 
@@ -364,20 +355,20 @@ ops.leaflet.drawTrackPoints = function (map, trackpoints, resources, routeColorS
     var trackPointsGroup = new window.L.LayerGroup();
 
     var r;
-    //Loop through all the resources
+    //loop through all the resources
     for (r in resources) {
         //Check if the resource is on the selected route
         if (resources[r].routeId == routeId) {
-            /** Get the Id of the resource */
+            //get the Id of the resource
             var resourceId;
             if (resources[r].employeeId !== null) {
                 resourceId = resources[r].employeeId;
             } else {
                 resourceId = resources[r].vehicleId;
             }
-            /** creates an empty array(necessary for the polyline to initiate) */
+            //creates an empty array(necessary for the polyline to initiate)
             var latlngs = [];
-            /** create a polyline to connect the trackpoints */
+            //create a polyline to connect the trackpoints
             var polyline = new window.L.Polyline(latlngs, {
                 color: routeColorSelector.getValue(routeId),
                 weight: 2,
@@ -386,16 +377,16 @@ ops.leaflet.drawTrackPoints = function (map, trackpoints, resources, routeColorS
             });
 
             var t;
-            /** Loop through every trackpoint */
+            //loop through every trackpoint
             for (t in trackpoints) {
-                /** Check if trackpoint is for the current resource and route */
+                //check if trackpoint is for the current resource and route
                 if ((trackpoints[t].id == resourceId) && (trackpoints[t].routeId == routeId)) {
                     var trackPoint = trackpoints[t];
                     var lat = trackPoint.latitude;
                     var lng = trackPoint.longitude;
-                    /** get the location of the destination */
+                    //get the location of the destination
                     var location = new window.L.LatLng(lat, lng);
-                    /** create a point at the current location */
+                    //create a point at the current location
                     /*var marker = new window.L.CircleMarker(location, {
                      clickable: false,
                      radius: 3,
@@ -403,16 +394,16 @@ ops.leaflet.drawTrackPoints = function (map, trackpoints, resources, routeColorS
                      fillOpacity: routeOpacitySelector.getValue(mapTrackPoints[t].Id),
                      fillColor: routeColorSelector.getValue(mapTrackPoints[t].RouteId)
                      });*/
-                    /** add current marker to the map */
-                    /*ops.trackPointsGroup.addLayer(marker);*/
-                    /** add current location to the polyline */
+                    //add current marker to the map
+                    //ops.trackPointsGroup.addLayer(marker);
+                    //add current location to the polyline
                     polyline.addLatLng(location);
                 }
             }
             trackPointsGroup.addLayer(polyline);
         }
     }
-    /** add the resources to the map */
+    //add the resources to the map
     map.addLayer(trackPointsGroup);
 
     return trackPointsGroup;

@@ -68,7 +68,7 @@ angular.module("ops.map").controller('mapController', function ($defer) {
     var selectedDate;
 
     /**
-     * @type {ops.Guid}
+     * @type {string}
      */
     var selectedRouteId;
 
@@ -115,6 +115,7 @@ angular.module("ops.map").controller('mapController', function ($defer) {
             //find the loaded track points for the route, and add this
             var routeTrackPoints = routesTrackPoints.get(resource.routeId);
             if (routeTrackPoints && routeTrackPoints != ops.services.Status.LOADING) {
+                //add current resource to the list of trackpoints
                 routeTrackPoints.push(resource);
                 //check if a route is currently selected
                 if (selectedRouteId) {
@@ -145,6 +146,7 @@ angular.module("ops.map").controller('mapController', function ($defer) {
      * @param {string} routeId The Id of the selected route
      */
     var drawTrackpoints = function (routeId) {
+        //get the current list of trackpoints
         var routeTrackPoints = routesTrackPoints.get(selectedRouteId);
         //if the track points are loading, return
         if (routeTrackPoints == ops.services.Status.LOADING) {
@@ -177,7 +179,7 @@ angular.module("ops.map").controller('mapController', function ($defer) {
                 resources = resourcesWithLatestPoints;
                 drawResources();
             });
-            /** Reload the resources */
+            //reload the resources
             $defer(function () {
                 getResources();
             }, RESOURCES_REFRESH_RATE);
@@ -186,9 +188,9 @@ angular.module("ops.map").controller('mapController', function ($defer) {
 
     //load the routes for the date
     var getRoutes = function () {
-        //load routes for the date
         ops.services.getRoutes(function (loadedRoutes) {
             removeLayer(routesGroup);
+            //draw the routes
             routesGroup = ops.leaflet.drawRoutes(map, loadedRoutes, routeColorSelector, center,
                 /**
                  * @param {ops.models.Route} selectedRoute
@@ -226,7 +228,7 @@ angular.module("ops.map").controller('mapController', function ($defer) {
 
     /**
      * Sets the selected route.
-     * @param {ops.Guid} routeId
+     * @param {string} routeId
      */
     var setSelectedRoute = function (routeId) {
         //check if the selected route is already selected
@@ -240,9 +242,7 @@ angular.module("ops.map").controller('mapController', function ($defer) {
         }
     };
 
-    /**
-     * Store the initialization logic in one place.
-     */
+    // Store the initialization logic in one place.
     var initialize = function () {
         //setup an empty map
         map = ops.leaflet.setupMap();
@@ -256,7 +256,7 @@ angular.module("ops.map").controller('mapController', function ($defer) {
             removeLayer(trackPointsGroup);
         });
 
-        //get/add the service provider's depot(s) to the map
+        //get and add the service provider's depot(s) to the map
         ops.services.getDepots(function (loadedDepots) {
             ops.leaflet.drawDepots(map, loadedDepots);
         });
