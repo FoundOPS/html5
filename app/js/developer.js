@@ -23,7 +23,7 @@ ops.developer.Mode = {
     LIVE: 3
 };
 
-/*
+/**
  * The current development mode.
  * @const
  * @type {ops.developer.Mode}
@@ -35,4 +35,4 @@ ops.developer.CURRENT_MODE = ops.developer.Mode.LOCALAPI;
  * @const
  * @type {ops.Guid}
  */
-ops.developer.GOTGREASE_ROLE_ID = 'CE818482-AD0F-44B2-B1CC-8600D3F45F36';
+ops.developer.GOTGREASE_ROLE_ID = 'BA10E3E6-0D15-48BD-903D-14D2E0F68E6F';

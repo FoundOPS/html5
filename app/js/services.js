@@ -9,13 +9,14 @@
 
 goog.provide('ops.services');
 
-goog.require('goog.date.UtcDateTime');
 goog.require('ops');
 goog.require('ops.developer');
 goog.require('ops.models.Route');
 goog.require('ops.models.RouteDestination');
 goog.require('ops.models.TrackPoint');
 goog.require('ops.models.ResourceWithLastPoint');
+goog.require('ops.tools');
+
 //endregion
 
 /**
@@ -27,7 +28,7 @@ ops.services.Status = {
     LOADED: 1
 };
 
-/*
+/**
  * The current RoleId for the user.
  * @type {ops.Guid}
  * @const
@@ -44,7 +45,7 @@ if (mode === ops.developer.Mode.LOCAL) {
     var apiUrl = 'http://10.0.2.2:9711/api/';
 }
 
-/*
+/**
  * The url for the API.
  * @type {string}
  * @const
@@ -66,7 +67,6 @@ if (ops.developer.Mode !== ops.developer.Mode.LIVE) {
 
 /**
  * Returns a standard http get.
- * @param {Object} $http The $http service.
  * @param {String} queryString The query string to use. Ex. "routes/GetDepots"
  * @param {Object.<string|Object>=}  opt_params The parameters to use (optional).
  * @param {boolean=} opt_excludeRoleId Do not include the roleId in the params (optional).
@@ -74,7 +74,7 @@ if (ops.developer.Mode !== ops.developer.Mode.LIVE) {
  * @return {function(!function(Object))} A function to perform the get and invoke the callback.
  * @private
  */
-ops.services._getHttp = function ($http, queryString, opt_params, opt_excludeRoleId, opt_convertItem) {
+ops.services._getHttp = function (queryString, opt_params, opt_excludeRoleId, opt_convertItem) {
     /**
      * A function to perform the get operation on the api (defined by the parameters above)
      * and invoke the callback with the loaded data.
@@ -88,19 +88,20 @@ ops.services._getHttp = function ($http, queryString, opt_params, opt_excludeRol
             params.roleId = ops.services.RoleId.toString();
         }
 
-        var url = ops.services.API_URL + queryString + '?callback=JSON_CALLBACK';
+        var url = ops.services.API_URL + queryString;
 
-        $http({
+        $.ajax({
             //must use JSONP because the javascript may be hosted on a different url than the api
-            method: 'JSONP',
+            type: "GET",
+            dataType: 'JSONP',
             url: url,
-            params: params
-        }).then(function (response) {
-            var convertedData = response.data;
+            data: params
+        }).success(function (response) {
+            var convertedData = response;
 
             //if there is a converter, convert the data
             if (opt_convertItem) {
-                convertedData = ops.tools.convertArray(response.data, opt_convertItem);
+                convertedData = ops.tools.convertArray(response, opt_convertItem);
             }
 
             //perform the callback function by passing the response data
@@ -114,7 +115,7 @@ ops.services._getHttp = function ($http, queryString, opt_params, opt_excludeRol
 /*
  Setup the resource services. Use the injector to get the $http service.
  */
-angular.injector(['ng']).invoke(function ($http) {
+angular.injector(['ng']).invoke(function () {
     //TODO change all the callback function definitions to have Array.<closure classes> instead of Array.<Object>
 
     /**
@@ -122,21 +123,21 @@ angular.injector(['ng']).invoke(function ($http) {
      * TODO wrap this in a function with optional parameters to either get the service provider's routes, or to get the current user's routes or create another function and rename this
      * @param {!function(Array.<ops.models.Route>)} callback A callback to pass the loaded routes to.
      */
-    ops.services.getRoutes = ops.services._getHttp($http, 'routes/GetRoutes',
+    ops.services.getRoutes = ops.services._getHttp('routes/GetRoutes',
         {}, false, ops.models.Route.createFromApiModel);
 
     /**
      * Get the service provider's depots.
      * @param {!function(Array.<ops.models.Location>)} callback A callback to pass the loaded depots.
      */
-    ops.services.getDepots = ops.services._getHttp($http, 'routes/GetDepots',
+    ops.services.getDepots = ops.services._getHttp('routes/GetDepots',
         {}, false, ops.models.Location.createFromApiModel);
 
     /**
      * Get resources (Employees/Vehicles) and their last recorded location.
      * @param {!function(Array.<ops.models.ResourceWithLastPoint>)} callback The callback to pass the resources with latest points after they are loaded.
      */
-    ops.services.getResourcesWithLatestPoints = ops.services._getHttp($http, 'trackpoint/GetResourcesWithLatestPoints',
+    ops.services.getResourcesWithLatestPoints = ops.services._getHttp('trackpoint/GetResourcesWithLatestPoints',
         {}, false, ops.models.ResourceWithLastPoint.createFromApiModel);
 
     /**
@@ -146,7 +147,7 @@ angular.injector(['ng']).invoke(function ($http) {
      * @param {!function(Array.<Object>)} callback The callback to pass the TrackPoints to after they are loaded.
      */
     ops.services.getTrackPoints = function (serviceDate, routeId, callback) {
-        return ops.services._getHttp($http, 'trackPoint/GetTrackPoints',
+        return ops.services._getHttp('trackPoint/GetTrackPoints',
             {routeId: routeId, serviceDate: serviceDate}, false, ops.models.TrackPoint.createFromApiModel)(callback);
     };
 
@@ -157,6 +158,6 @@ angular.injector(['ng']).invoke(function ($http) {
      * @param {!function(boolean)} callback The callback to pass true (success) or false (failed) to after attempting to authenticate the credentials.
      */
     ops.services.authenticate = function (email, password, callback) {
-        return ops.services._getHttp($http, 'auth/Login', {email: email, pass: password}, true, null)(callback);
+        return ops.services._getHttp('auth/Login', {email: email, pass: password}, true, null)(callback);
     };
 });

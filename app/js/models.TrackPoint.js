@@ -10,7 +10,6 @@
 goog.provide('ops.models.TrackPoint');
 goog.provide('ops.models.ResourceWithLastPoint');
 
-goog.require('goog.date.UtcDateTime');
 goog.require('ops');
 goog.require('ops.Guid');
 goog.require('ops.models');
