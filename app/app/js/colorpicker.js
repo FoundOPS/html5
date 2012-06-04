@@ -2,6 +2,8 @@
  * Color picker
  * Author: Stefan Petre www.eyecon.ro
  * Dual licensed under the MIT and GPL licenses
+ *
+ * IMPORTANT: FOUNDOPS changes. DO NOT replace this file
  */
 (function ($) {
 	var ColorPicker = function () {

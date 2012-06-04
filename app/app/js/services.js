@@ -14,8 +14,8 @@ module.factory('depotsStore', function ($http) {
             url: readUrl,
             params: { roleId: roleId }
         }).then(function (response) {
-                return response.data;
-            });
+            return response.data;
+        });
     }
 
     return {
@@ -37,8 +37,8 @@ module.factory('resourcesStore', function ($http) {
             url: readUrl,
             params: { roleId: roleId, serviceDate: date }
         }).then(function (response) {
-                return response.data;
-            });
+            return response.data;
+        });
     }
 
     return {
@@ -58,8 +58,8 @@ module.factory('routesStore', function ($http) {
             url: readUrl,
             params: { roleId: roleId }
         }).then(function (response) {
-                return response.data;
-            });
+            return response.data;
+        });
     }
 
     return {
@@ -82,8 +82,8 @@ module.factory('trackPointsStore', function ($http) {
             url: readUrl,
             params: { roleId: roleId, routeId: routeId, serviceDate: date }
         }).then(function (response) {
-                return response.data;
-            });
+            return response.data;
+        });
     }
 
     return {

@@ -254,6 +254,7 @@ input[type="checkbox"]:hover{
     left:5px;
     width:26px;
     height:26px;
+    margin-right: 0px;
 }
 .colorInput{
     visibility: hidden;

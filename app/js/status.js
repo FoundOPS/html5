@@ -9,7 +9,7 @@ var selectedItem;
 //region Setup Grid
 $(document).ready(function () {
     var baseUrl = "http://localhost:9711/api/TaskStatus/";
-    var roleId = "9507BDA4-8913-44DA-97A4-F7DD7ACB47FE";
+    var roleId = "76C35DCA-2106-4D06-98F4-F795EE551929";
     var dataSource = new kendo.data.DataSource({
         transport: {
             read: {
@@ -131,7 +131,7 @@ $(document).ready(function () {
             }
         ]
     });
-}); // End document.ready
+}); //end document.ready
 //endregion
 
 //region Methods
@@ -144,15 +144,12 @@ var disableDefaultCheckboxes = function () {
         var int = grid._data[i].DefaultTypeInt;
         // Check if the row is a default type
         if (int !== null) {
-            // Disable checkbox
+            //disable checkbox
             this.disabled = true;
         }
     });
 };
-//keep the default checkboxes disabled
-$(document).click(function () {
-    disableDefaultCheckboxes();
-});
+
 /**
  * Takes a boolean and converts it to a checked(if true) or unchecked(if false) checkbox
  * @param {boolean} checked
@@ -165,11 +162,12 @@ var getChecked = function (checked) {
         return "<input type='checkbox' onclick='updateCheckbox(checked)' />";
     }
 };
-// Update the selected checkbox with the new value
+
+//update the selected checkbox with the new value
 var updateCheckbox = function (checked) {
     //update the model with the new RouteRequired value
     selectedItem.set('RouteRequired', checked);
-    // Show save and cancel buttons
+    //show save and cancel buttons
     hideOrShowSaveCancel(true);
 };
 //endregion
@@ -178,10 +176,10 @@ var updateCheckbox = function (checked) {
 //attaches a color picker to the color element
 var addColorPicker = function () {
     $('.colorSelector2').ColorPicker({
-        // Set the initial color of the picker to be the current color
+        //set the initial color of the picker to be the current color
         color: grid.dataItem(grid.select()).Color, // rgbToHex($('.innerSelector').eq(i))
         onShow: function (colpkr) {
-            // Set a high z-index so picker show up above the grid
+            //set a high z-index so picker show up above the grid
             $(colpkr).css('z-index', "1000");
             $(colpkr).fadeIn(200);
             return false;
@@ -190,27 +188,29 @@ var addColorPicker = function () {
             $(colpkr).fadeOut(200);
             return false;
         },
-        onChange: function (hsb, hex, rgb) {
+        onChange: function (hsb, hex) {
             var color = '#' + hex;
-            //$('.k-state-selected .innerSelector').css('background-color', color);
-            // Change the current color on selection
+            //change the current color on selection
             updateColor(color);
         }
     });
-}
+};
+
 /**
  * Creates the cell edit template for the color
  * @param {Object} container
  * @param {Object} options
  */
 var colorEditor = function (container, options) {
+    //attach the color picker element
     $("<input class='colorInput' data-text-field='Color' data-value-field='Color' data-bind='value:" + options.field + "'/>" +
         "<div class='customWidget'><div class='colorSelector2'><div class='innerSelector' style='background-color:" +
         options.model.Color + "'></div></div><div class='colorpickerHolder2'></div></div>")
         .appendTo(container);
     //attach the color picker
     addColorPicker();
-}
+};
+
 /**
  * Updates the model with the selected color
  * @param {string} color The picked color
@@ -239,33 +239,34 @@ var getAttributeText = function (int) {
         return "";
     }
 };
-// After the data is loaded, assign the color picker to each of the current color boxes
+
+//after the data is loaded, assign the color picker to each of the current color boxes
 var onDataBound = function () {
-    // Get a reference to the grid widget
+    //get a reference to the grid widget
     grid = $("#grid").data("kendoGrid");
     //disable the checkboxes for the default rows
     disableDefaultCheckboxes();
-    // Get the BusinessAccountId from another row to be used to set in new rows
+    //get the BusinessAccountId from another row to be used to set in new rows
     busAcctId = grid._data[1].BusinessAccountId;
-    // Bind to the selection change event
-    grid.bind("change", function (e) {
+    //bind to the selection change event
+    grid.bind("change", function () {
         hideOrShowDeleteBtn();
         selectedItem = grid.dataItem(grid.select());
     });
-    // Detect cancel button click
+    //detect cancel button click
     $(".k-grid-cancel-changes").click(function () {
-        // Hide save and cancel buttons
+        //hide save and cancel buttons
         hideOrShowSaveCancel(false);
         //hide the delete button(there isn't a selected row after cancel is clicked)
         $('.k-grid-delete').css('display', "none");
         grid.dataSource.read();
     });
-    // Detect add button click
+    //detect add button click
     $(".k-grid-add").click(function () {
         // Show save and cancel buttons
         hideOrShowSaveCancel(true);
     });
-    // Bind to grid edit event
+    //bind to grid edit event
     grid.bind("edit", function (e) {
         //disable the checkboxes for the default rows
         disableDefaultCheckboxes();
@@ -274,37 +275,39 @@ var onDataBound = function () {
                 $('.colorSelector2').ColorPickerShow();
             }
         }
-        // Set the BusinessAccountId if it is empty
+        //set the BusinessAccountId if it is empty
         if (!e.model.BusinessAccountId) {
             e.model.BusinessAccountId = busAcctId;
         }
-        // Set the Id if it is empty
+        //set the Id if it is empty
         if (!e.model.Id) {
             e.model.Id = guidGenerator();
         }
     });
-}
-// Removes the selected row from the grid(stays in pending changes until changes are saved)
+};
+
+//removes the selected row from the grid(stays in pending changes until changes are saved)
 var removeSelectedRow = function () {
-    // Get selected row
+    //get selected row
     var row = getSelectedRow(grid);
-    // Remove selected row
+    //remove selected row
     grid.removeRow(row);
 };
+
 /**
  * Create a new unique Guid.
  * @return {string} newGuidString
  */
 var guidGenerator = function () {
-    var newGuidString = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
         var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
     });
-    return newGuidString;
-}
-// Hide the delete button if a default row is selected, otherwise show it
+};
+
+//hide the delete button if a default row is selected, otherwise show it
 var hideOrShowDeleteBtn = function () {
-    // Get the selected row
+    //get the selected row
     var row = getSelectedRow(grid);
     if (row[0].cells[3].innerHTML !== "") {
         $('.k-grid-delete').css('display', "none");
@@ -312,6 +315,7 @@ var hideOrShowDeleteBtn = function () {
         $('.k-grid-delete').css('display', "inline-block");
     }
 };
+
 /**
  * Show the save button only if there are changes
  * @param {boolean} hasChanges
@@ -325,6 +329,7 @@ var hideOrShowSaveCancel = function (hasChanges) {
         $('.k-grid-cancel-changes').css('display', "none");
     }
 };
+
 /**
  * Gets the selected row
  * @param {object} g The grid
