@@ -1,119 +1,44 @@
-<!DOCTYPE html>
-<html ng-app="ops.mobile">
+﻿<!DOCTYPE html>
+<html>
 <head>
     <meta charset="utf-8">
     <title>FoundOPS</title>
-    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0"/>
-    <!--3rd party css, libraries-->
-    <!--Includes jQuery, jQuery mobile, Angular-->
-    <script src="lib/jquery/jquery-mobile-angular-adapter-standalone-1.0.7-rc2-SNAPSHOT.js"
-            type="text/javascript"></script>
-    <link href="lib/jquery/jquery.mobile.css" rel="stylesheet" type="text/css">
-    <script src="lib/linq/linq.js" type="text/javascript"></script>
+    <!--3rd Party CSS/Javascript!-->
+    <script src="lib/jquery/jquery.js"></script>
+    <script src="lib/kendo.mobile.min.js"></script>
+    <link href="lib/kendo.common.min.css" rel="stylesheet"/>
+    <link href="lib/kendo.mobile.all.min.css" rel="stylesheet"/>
+    <!--Application CSS/Javascript!-->
     <script src="lib/closure-library/closure/goog/base.js"></script>
-    <!--Application css, libraries-->
-    <link rel="stylesheet" href="css/app.css"/>
-    <script type="text/javascript" src="js/base.js"></script>
-    <script type="text/javascript" src="js/ui.js"></script>
-    <script type="text/javascript" src="js/tools.js"></script>
-    <script type="text/javascript" src="js/developer.js"></script>
-    <script type="text/javascript" src="js/mobile.js"></script>
-    <script type="text/javascript" src="js/models.js"></script>
-    <script type="text/javascript" src="js/models.Client.js"></script>
-    <script type="text/javascript" src="js/models.Location.js"></script>
-    <script type="text/javascript" src="js/models.Route.js"></script>
-    <script type="text/javascript" src="js/models.TrackPoint.js"></script>
-    <script type="text/javascript" src="js/services.js"></script>
-    <script type="text/javascript" src="js/app.js"></script>
-    <script type="text/javascript" src="js/mobileController.js"></script>
+    <script src="js/tools.js"></script>
+    <script src="js/models.js"></script>
+    <script src="js/services.js"></script>
+    <script src="js/mobile.js"></script>
 </head>
-<body ng-controller="MobileController">
-<!--Login-->
-<div id="login" data-role="page" data-theme="a" style="color: #333335">
-    <div data-role="content">
-        <div style="text-align: center; color: #FFFFFF;" id="logo">
-            <img style="max-width: 50%;" alt="FoundOPS" src="img/SplashPNG.png"/>
+<body>
+<div data-role="view" data-title="Login">
+    <header data-role="header">
+        <!--replaced navbar to not have a back button-->
+        <div data-role="navbar">
+            <span data-role="view-title"></span>
         </div>
-        <form data-theme="a" id="log" class="validate" ng-submit="login()" data-ajax="false">
-            <div style="text-align: center" data-role="fieldcontain">
-                <input type="email" id="email" ng-model="email" required placeholder="E-mail Address"/>
-                <input type="password" id="pass" ng-model="pass" required placeholder="Password"/>
-            </div>
-            <div>
-                <button data-theme="a" class="btnLogin" style="color: #cccccc">
-                    Login
-                </button>
-            </div>
-        </form>
-    </div>
-    <div data-role="footer">
-        <h6 style="text-align: center;">&#169; 2011 FoundOPS LLC</h6>
-    </div>
-</div>
-<!--RoutesList-->
-<div id="routeslist" data-role="page" data-theme="a" ngm-swiperight="back()">
-    <div data-role="header">
-        <h1>Routes</h1>
-    </div>
-    <div data-role="content">
-        <div data-role="content">
-            <ul data-role="listview">
-                <li ng-repeat="route in routes" class="route">
-                    <a href="#" ngm-click='showRouteDetails(route.id)'>{{route.name}}</a>
-                </li>
-            </ul>
-        </div>
-        <div>
-            <a href="#" ngm-click="refreshRoutes()" data-role="button">Refresh</a>
-        </div>
-    </div>
-    <div data-role="footer">
-        <h6 style="text-align: center;">&#169; 2011 FoundOPS LLC</h6>
-    </div>
-</div>
-<!--Route Details-->
-<div id="routedetails" data-role="page" data-theme="a" ngm-swiperight="back()">
-    <div data-role="header" data-mini="true">
-        <a href="#" ng-hide="routeInProgress" ngm-click="startRoute(selectedRoute.id)">Start Route</a>
+    </header>
+    (Eventually Login Boxes)
 
-        <h1>{{selectedRoute.name}}</h1>
-        <a href="#" ng-show="routeInProgress" ngm-click="endRoute()">End Route</a>
-    </div>
-    <div data-role="content">
-        <div data-role="content">
-            <ul data-role="listview">
-                <li ng-repeat="routeDestination in selectedRoute.routeDestinations" class="routeDestination">
-                    <a href="#" ngm-click='showRouteDestinationDetails(routeDestination.id)'>
-                        <h3>{{routeDestination.client.name}}</h3>
-
-                        <p>{{routeDestination.location.addressLineOne}}</p>
-                    </a>
-                </li>
-            </ul>
-        </div>
-    </div>
-    <div data-role="footer">
-        <h6 style="text-align: center;">&#169; 2011 FoundOPS LLC</h6>
-    </div>
+    <!--Button to skip to routes. remove this eventually-->
+    <ul data-role="listview" data-style="inset">
+        <li><a href="views/routes.html">Routes</a></li>
+    </ul>
 </div>
-<!--Route Destination Popup-->
-<div id="routedestinationdialog" data-role="dialog" data-theme="c">
-    <div data-role="header">
-        <h1>{{selectedRouteDestination.client.name}}</h1>
-    </div>
-    <div data-role="content">
-        <div data-role="content">
-            <ul data-role="listview">
-                <li>
-                    <a href="http://maps.google.com/maps?q={{selectedRouteDestination.location.latitude}},{{selectedRouteDestination.location.longitude}}">Navigate
-                        to Route Stop</a>
-                </li>
-                <li ng-repeat="contactInfo in selectedPhoneNumbers" class="routeDestination">
-                    <a href="tel:{{contactInfo.data}}">Call {{contactInfo.label}}</a>
-                </li>
-            </ul>
+
+<!--default mobile settings-->
+<div data-role="layout" data-id="mobile-view">
+    <header data-role="header">
+        <div data-role="navbar">
+            <a class="nav-button" data-align="left" data-role="backbutton">Back</a>
+            <span data-role="view-title"></span>
         </div>
-    </div>
+    </header>
 </div>
 
 </body>

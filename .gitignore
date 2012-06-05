@@ -7,3 +7,5 @@ build.xml
 .settings
 .idea/*
 app/app
+Android/assets/www
+Android/bin/*

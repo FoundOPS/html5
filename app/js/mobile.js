@@ -1,3 +1,5 @@
+'use strict';
+
 // Copyright 2012 FoundOPS LLC. All Rights Reserved.
 
 /**
@@ -16,12 +18,28 @@ ops.mobile.CONFIG = {
      * @const
      * @type {number}
      */
-    TRACKPOINT_COLLECTION_FREQUENCY_SECONDS: 1,
+    TRACKPOINT_COLLECTION_FREQUENCY_SECONDS:1,
 
     /**
      * The accuracy threshold that determines whether to record a trackPoint (in meters).
      * @const
      * @type {number}
      */
-    ACCURACY_THRESHOLD: 50
+    ACCURACY_THRESHOLD:50
+};
+
+$(document).ready(function () {
+    //Start the mobile application
+    var app = new kendo.mobile.Application(document.body);
+
+    //navigate to routes
+//    app.navigate("views/routes.html");
+});
+
+ops.mobile.setupRoutesList = function () {
+    $("#routes-listview").kendoMobileListView({
+        dataSource: ops.services.routesDataSource,
+        pullToRefresh: true,
+        template : "<strong>${Name}</strong>"
+    });
 };

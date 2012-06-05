@@ -24,8 +24,8 @@ goog.require('ops.tools');
  * @enum {number}
  */
 ops.services.Status = {
-    LOADING: 0,
-    LOADED: 1
+    LOADING:0,
+    LOADED:1
 };
 
 //setup the api url depending on the mode
@@ -85,21 +85,21 @@ ops.services._getHttp = function (queryString, opt_params, opt_excludeRoleId, op
 
         $.ajax({
             //must use JSONP because the javascript may be hosted on a different url than the api
-            type: "GET",
-            dataType: 'JSONP',
-            url: url,
-            data: params
+            type:"GET",
+            dataType:'JSONP',
+            url:url,
+            data:params
         }).success(function (response) {
-            var convertedData = response;
+                var convertedData = response;
 
-            //if there is a converter, convert the data
-            if (opt_convertItem) {
-                convertedData = ops.tools.convertArray(response, opt_convertItem);
-            }
+                //if there is a converter, convert the data
+                if (opt_convertItem) {
+                    convertedData = ops.tools.convertArray(response, opt_convertItem);
+                }
 
-            //perform the callback function by passing the response data
-            callback(convertedData);
-        });
+                //perform the callback function by passing the response data
+                callback(convertedData);
+            });
     };
 
     return getThenInvokeCallback;
@@ -115,6 +115,21 @@ ops.services._getHttp = function (queryString, opt_params, opt_excludeRoleId, op
  */
 ops.services.getRoutes = ops.services._getHttp('routes/GetRoutes',
     {}, false, ops.models.Route.createFromApiModel);
+
+/**
+ * A kendo data source for Routes for the current user's routes.
+ * @type {kendo.data.DataSource}
+ */
+ops.services.routesDataSource = new kendo.data.DataSource({
+    transport:{
+        read:{
+            url:apiUrl + "routes/GetRoutes",
+            type:"GET",
+            dataType:"jsonp",
+            contentType:"application/json; charset=utf-8"
+        }
+    }
+});
 
 /**
  * Get the service provider's depots.
@@ -138,7 +153,7 @@ ops.services.getResourcesWithLatestPoints = ops.services._getHttp('trackpoint/Ge
  */
 ops.services.getTrackPoints = function (serviceDate, routeId, callback) {
     return ops.services._getHttp('trackPoint/GetTrackPoints',
-        {routeId: routeId, serviceDate: serviceDate}, false, ops.models.TrackPoint.createFromApiModel)(callback);
+        {routeId:routeId, serviceDate:serviceDate}, false, ops.models.TrackPoint.createFromApiModel)(callback);
 };
 
 /**
@@ -148,5 +163,5 @@ ops.services.getTrackPoints = function (serviceDate, routeId, callback) {
  * @param {!function(boolean)} callback The callback to pass true (success) or false (failed) to after attempting to authenticate the credentials.
  */
 ops.services.authenticate = function (email, password, callback) {
-    return ops.services._getHttp('auth/Login', {email: email, pass: password}, true, null)(callback);
+    return ops.services._getHttp('auth/Login', {email:email, pass:password}, true, null)(callback);
 };
