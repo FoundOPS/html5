@@ -5,9 +5,36 @@
  * @fileoverview Class to hold general tools. This will be split up as it grows and the divisions become obvious.
  */
 
+goog.provide('ops');
+goog.provide('ops.ui');
+goog.provide('ops.Guid');
 goog.provide('ops.tools');
+goog.provide('ops.developer');
 goog.provide('ops.tools.ValueSelector');
 //endregion
+
+/**
+ * Checks whether the date (without the time) are equal.
+ * @param {goog.date.Date} a
+ * @param {goog.date.Date} b
+ * @return {Boolean}
+ */
+ops.dateEqual = function (a, b) {
+    return a.getDayOfYear() === b.getDayOfYear() && a.getYear() === b.getYear();
+};
+
+/**
+ * Create a new unique Guid.
+ * @return {string}
+ */
+ops.Guid.NewGuid = function () {
+    var newGuidString = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+
+    return newGuidString;
+};
 
 /**
 * TODO replace with default methods Change a Date to UTC, then format it as an acceptable API date string.
@@ -125,3 +152,83 @@ ops.tools.convertArray = function (items, converter) {
 
     return convertedData;
 };
+
+//region UI
+/**
+ * An array of item colors to iterate for multiple items.
+ * @type {Array.<string>}
+ * @const
+ */
+ops.ui.ITEM_COLORS = [
+    "#194A91", //dark blue
+    "#ff0000", //red
+    "#03EA03", //lime green
+    "#663300", //brown
+    "#660099", //purple
+    "#FF9900", //orange
+    "#0099ff", //light blue
+    "#006600", //dark green
+    "#990000", //dark red
+    "#FF00CC"  //pink
+];
+
+/**
+ * An array of item opacities to iterate for multiple items.
+ * @type {Array.<number>}
+ * @const
+ */
+ops.ui.ITEM_OPACITIES = [
+    0.80,
+    0.75,
+    0.70,
+    0.65,
+    0.60,
+    0.55,
+    0.50,
+    0.45,
+    0.40,
+    0.35,
+    0.30
+];
+
+/**
+ * Enum for image urls.
+ * @enum {String}
+ */
+ops.ui.ImageUrls = {
+    ANDROID: "img/android.png",
+    APPLE: "img/apple.png",
+    DEPOT: "img/depot.png",
+    OUTER_CIRCLE: "img/outerCircle.png",
+    TRUCK: "img/truck.png"
+};
+//endregion
+
+/**
+ * Enum for the service mode.
+ * LOCAL: load data from JSON files in the application's directory. Works for both Android & Browser Debugging. TODO: Implement this mode.
+ * LOCALAPI: load data from the local api server.
+ * ANDROIDLA: debug in Android Emulator using the local api server.
+ * LIVE: load from the main server. TODO: Implement this mode.
+ * @enum {number}
+ */
+ops.developer.Mode = {
+    LOCAL: 0,
+    LOCALAPI: 1,
+    ANDROIDLA: 2,
+    LIVE: 3
+};
+
+/**
+ * The current development mode.
+ * @const
+ * @type {ops.developer.Mode}
+ */
+ops.developer.CURRENT_MODE = ops.developer.Mode.LOCALAPI;
+
+/**
+ * The local server's RoleId for GotGrease
+ * @const
+ * @type {ops.Guid}
+ */
+ops.developer.GOTGREASE_ROLE_ID = '942D7519-EBC5-4F9B-A7C6-19E670DFCC1E';

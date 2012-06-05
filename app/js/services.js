@@ -28,13 +28,6 @@ ops.services.Status = {
     LOADED: 1
 };
 
-/**
- * The current RoleId for the user.
- * @type {ops.Guid}
- * @const
- */
-ops.services.RoleId = null;
-
 //setup the api url depending on the mode
 var mode = ops.developer.CURRENT_MODE;
 if (mode === ops.developer.Mode.LOCAL) {
@@ -112,52 +105,48 @@ ops.services._getHttp = function (queryString, opt_params, opt_excludeRoleId, op
     return getThenInvokeCallback;
 };
 
-/*
- Setup the resource services. Use the injector to get the $http service.
+//setup the resource services. Use the injector to get the $http service.
+//TODO change all the callback function definitions to have Array.<closure classes> instead of Array.<Object>
+
+/**
+ * Get the current service provider's Routes.
+ * TODO wrap this in a function with optional parameters to either get the service provider's routes, or to get the current user's routes or create another function and rename this
+ * @param {!function(Array.<ops.models.Route>)} callback A callback to pass the loaded routes to.
  */
-angular.injector(['ng']).invoke(function () {
-    //TODO change all the callback function definitions to have Array.<closure classes> instead of Array.<Object>
+ops.services.getRoutes = ops.services._getHttp('routes/GetRoutes',
+    {}, false, ops.models.Route.createFromApiModel);
 
-    /**
-     * Get the current service provider's Routes.
-     * TODO wrap this in a function with optional parameters to either get the service provider's routes, or to get the current user's routes or create another function and rename this
-     * @param {!function(Array.<ops.models.Route>)} callback A callback to pass the loaded routes to.
-     */
-    ops.services.getRoutes = ops.services._getHttp('routes/GetRoutes',
-        {}, false, ops.models.Route.createFromApiModel);
+/**
+ * Get the service provider's depots.
+ * @param {!function(Array.<ops.models.Location>)} callback A callback to pass the loaded depots.
+ */
+ops.services.getDepots = ops.services._getHttp('routes/GetDepots',
+    {}, false, ops.models.Location.createFromApiModel);
 
-    /**
-     * Get the service provider's depots.
-     * @param {!function(Array.<ops.models.Location>)} callback A callback to pass the loaded depots.
-     */
-    ops.services.getDepots = ops.services._getHttp('routes/GetDepots',
-        {}, false, ops.models.Location.createFromApiModel);
+/**
+ * Get resources (Employees/Vehicles) and their last recorded location.
+ * @param {!function(Array.<ops.models.ResourceWithLastPoint>)} callback The callback to pass the resources with latest points after they are loaded.
+ */
+ops.services.getResourcesWithLatestPoints = ops.services._getHttp('trackpoint/GetResourcesWithLatestPoints',
+    {}, false, ops.models.ResourceWithLastPoint.createFromApiModel);
 
-    /**
-     * Get resources (Employees/Vehicles) and their last recorded location.
-     * @param {!function(Array.<ops.models.ResourceWithLastPoint>)} callback The callback to pass the resources with latest points after they are loaded.
-     */
-    ops.services.getResourcesWithLatestPoints = ops.services._getHttp('trackpoint/GetResourcesWithLatestPoints',
-        {}, false, ops.models.ResourceWithLastPoint.createFromApiModel);
+/**
+ * Get the service provider's TrackPoints.
+ * @param {goog.date.UtcDateTime} serviceDate The service date to retrieve TrackPoints for.
+ * @param {ops.Guid} routeId The Id of the route to retrieve TrackPoints for.
+ * @param {!function(Array.<Object>)} callback The callback to pass the TrackPoints to after they are loaded.
+ */
+ops.services.getTrackPoints = function (serviceDate, routeId, callback) {
+    return ops.services._getHttp('trackPoint/GetTrackPoints',
+        {routeId: routeId, serviceDate: serviceDate}, false, ops.models.TrackPoint.createFromApiModel)(callback);
+};
 
-    /**
-     * Get the service provider's TrackPoints.
-     * @param {goog.date.UtcDateTime} serviceDate The service date to retrieve TrackPoints for.
-     * @param {ops.Guid} routeId The Id of the route to retrieve TrackPoints for.
-     * @param {!function(Array.<Object>)} callback The callback to pass the TrackPoints to after they are loaded.
-     */
-    ops.services.getTrackPoints = function (serviceDate, routeId, callback) {
-        return ops.services._getHttp('trackPoint/GetTrackPoints',
-            {routeId: routeId, serviceDate: serviceDate}, false, ops.models.TrackPoint.createFromApiModel)(callback);
-    };
-
-    /**
-     * Authenticate the user.
-     * @param {!string} email
-     * @param {!string} password
-     * @param {!function(boolean)} callback The callback to pass true (success) or false (failed) to after attempting to authenticate the credentials.
-     */
-    ops.services.authenticate = function (email, password, callback) {
-        return ops.services._getHttp('auth/Login', {email: email, pass: password}, true, null)(callback);
-    };
-});
+/**
+ * Authenticate the user.
+ * @param {!string} email
+ * @param {!string} password
+ * @param {!function(boolean)} callback The callback to pass true (success) or false (failed) to after attempting to authenticate the credentials.
+ */
+ops.services.authenticate = function (email, password, callback) {
+    return ops.services._getHttp('auth/Login', {email: email, pass: password}, true, null)(callback);
+};
