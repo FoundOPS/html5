@@ -23,12 +23,21 @@
             <span data-role="view-title"></span>
         </div>
     </header>
-    (Eventually Login Boxes)
-
-    <!--Button to skip to routes. remove this eventually-->
-    <ul data-role="listview" data-style="inset">
-        <li><a href="views/routes.html">Routes</a></li>
-    </ul>
+    <div id="logo" style="text-align: center">
+        <img style="width:70%;" alt="FoundOPS" src="img/SplashPNG.png"/>
+    </div>
+    <div style="text-align: center">
+        <form id="log" class="validate" method="post">
+            <input class="k-textbox"  placeholder="E-mail Address" required type="email" id="email"/>
+            <input class="k-textbox" placeholder="Password" required type="password" id="pass"/>
+        </form>
+        <ul data-role="listview" data-style="inset">
+            <li><a class="k-button" data-role="button" style="color: #cccccc">Login</a></li>
+        </ul>
+    </div>
+    <footer>
+        <h6 style="text-align: center;" >&#169;2011 FoundOPS LLC</h6>
+    </footer>
 </div>
 
 <!--default mobile settings-->

@@ -1,4 +1,7 @@
-<div data-role="view" data-layout="mobile-view" data-title="Pull to refresh routes"
+<div data-role="view" data-layout="mobile-view" data-title="Pull down to refresh routes"
      data-init="ops.mobile.setupRoutesList" id="routes">
-    <ul id="routes-listview" style="margin-bottom: 400px;"></ul>
+    <ul id="routes-listview" data-style="inset" style="margin-bottom: 400px;"></ul>
 </div>
+<script type="text/x-kendo-template" id="routeListViewTemplate">
+    <a href="\\#views/routedestinations.html">${Name}</a>
+</script>

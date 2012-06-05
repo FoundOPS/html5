@@ -33,13 +33,21 @@ $(document).ready(function () {
     var app = new kendo.mobile.Application(document.body);
 
     //navigate to routes
-//    app.navigate("views/routes.html");
+    app.navigate("views/routes.html");
 });
 
 ops.mobile.setupRoutesList = function () {
     $("#routes-listview").kendoMobileListView({
         dataSource: ops.services.routesDataSource,
         pullToRefresh: true,
-        template : "<strong>${Name}</strong>"
+        selectable: true,
+        template : $("#routeListViewTemplate").html()
+    });
+};
+
+ops.mobile.setupRouteDestinationsList = function () {
+    $("#routedestinations-listview").kendoMobileListView({
+        dataSource: ops.services.routeDestinationsDataSource,
+        template : $("#routeDestinationsViewTemplate").html()
     });
 };

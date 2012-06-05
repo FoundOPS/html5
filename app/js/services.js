@@ -1,5 +1,4 @@
-//region Using
-// Copyright 2012 FoundOPS LLC. All Rights Reserved.
+//region Copyright 2012 FoundOPS LLC. All Rights Reserved.
 
 /**
  * @fileoverview Class to hold data services.
@@ -121,6 +120,17 @@ ops.services.getRoutes = ops.services._getHttp('routes/GetRoutes',
  * @type {kendo.data.DataSource}
  */
 ops.services.routesDataSource = new kendo.data.DataSource({
+    transport:{
+        read:{
+            url:apiUrl + "routes/GetRoutes",
+            type:"GET",
+            dataType:"jsonp",
+            contentType:"application/json; charset=utf-8"
+        }
+    }
+});
+
+ops.services.routeDestinationsDataSource = new kendo.data.DataSource({
     transport:{
         read:{
             url:apiUrl + "routes/GetRoutes",
