@@ -3,5 +3,5 @@
     <ul id="routedestinations-listview" data-style="inset"></ul>
 </div>
 <script type="text/x-kendo-template" id="routeDestinationsViewTemplate">
-    <a href="\\#views/routedestinationdetails.html">${Name}</a>
+    <a href="\\#views/routedestinationdetails.html"><span data-bind="text:selectedRoute.RouteDestination.Name">${Name}</span></a>
 </script>
