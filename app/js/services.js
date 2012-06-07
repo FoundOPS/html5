@@ -84,28 +84,41 @@ ops.services._getHttp = function (queryString, opt_params, opt_excludeRoleId, op
 
         $.ajax({
             //must use JSONP because the javascript may be hosted on a different url than the api
-            type:"GET",
-            dataType:'JSONP',
-            url:url,
-            data:params
+            type: "GET",
+            dataType: 'JSONP',
+            url: url,
+            data: params
         }).success(function (response) {
-                var convertedData = response;
+            var convertedData = response;
 
-                //if there is a converter, convert the data
-                if (opt_convertItem) {
-                    convertedData = ops.tools.convertArray(response, opt_convertItem);
-                }
+            //if there is a converter, convert the data
+            if (opt_convertItem) {
+                convertedData = ops.tools.convertArray(response, opt_convertItem);
+            }
 
-                //perform the callback function by passing the response data
-                callback(convertedData);
-            });
+            //perform the callback function by passing the response data
+            callback(convertedData);
+        });
     };
 
     return getThenInvokeCallback;
 };
 
-//setup the resource services. Use the injector to get the $http service.
-//TODO change all the callback function definitions to have Array.<closure classes> instead of Array.<Object>
+
+/**
+ * A kendo data source for Routes for the current user's routes.
+ * @type {kendo.data.DataSource}
+ */
+ops.services.routesDataSource = new kendo.data.DataSource({
+    transport: {
+        read: {
+            url: apiUrl + "routes/GetRoutes",
+            type: "GET",
+            dataType: "jsonp",
+            contentType: "application/json; charset=utf-8"
+        }
+    }
+});
 
 /**
  * Get the current service provider's Routes.
@@ -114,41 +127,6 @@ ops.services._getHttp = function (queryString, opt_params, opt_excludeRoleId, op
  */
 ops.services.getRoutes = ops.services._getHttp('routes/GetRoutes',
     {}, false, ops.models.Route.createFromApiModel);
-
-/**
- * A kendo data source for Routes for the current user's routes.
- * @type {kendo.data.DataSource}
- */
-ops.services.routesDataSource = new kendo.data.DataSource({
-    transport:{
-        read:{
-            url:apiUrl + "routes/GetRoutes",
-            type:"GET",
-            dataType:"jsonp",
-            contentType:"application/json; charset=utf-8"
-        }
-    }
-});
-
-ops.services.routeDestinationsDataSource = ops.services.routesDataSource({
-    selectedRoute: null,
-    hasChanges: false,
-    save: function () {
-        this.routesSource.sync();
-        this.set("hasChanges", false);
-    },
-    showForm: function () {
-        return this.get("selectedRoute") !== null;
-    },
-    change: function () {
-        this.set("hasChanges", true);
-    }
-});
-
-var viewModel = kendo.observable({
-    routesSource: ops.services.routeDestinationsDataSource
-});
-kendo.bind($("#route-listview"), viewModel);
 
 /**
  * Get the service provider's depots.
