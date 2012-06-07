@@ -28,7 +28,7 @@ goog.require('ops.ui');
  * @const
  * @type {number}
  */
-var RESOURCES_REFRESH_RATE = 100000;
+var RESOURCES_REFRESH_RATE = 10000;
 
 //the map instance
 var map;
@@ -254,5 +254,4 @@ var initialize = function () {
 $(document).ready(function () {
     initialize();
 });
-
 //endregion
