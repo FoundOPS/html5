@@ -1,4 +1,4 @@
-﻿//region Using
+//region Using
 // Copyright 2012 FoundOPS LLC. All Rights Reserved.
 
 /**
@@ -28,7 +28,7 @@ goog.require('ops.ui');
  * @const
  * @type {number}
  */
-var RESOURCES_REFRESH_RATE = 100000;
+var RESOURCES_REFRESH_RATE = 10000;
 
 //the map instance
 var map;
@@ -124,7 +124,7 @@ var drawResources = function () {
 
     resourcesGroup = ops.leaflet.drawResources(map, resources, routeColorSelector,
         /**
-         * @param {Route} selectedRoute
+         * @param {ops.models.Route} selectedRoute
          */
             function (selectedRoute) {
             setSelectedRoute(selectedRoute);
@@ -185,7 +185,7 @@ var getRoutes = function () {
         //draw the routes
         routesGroup = ops.leaflet.drawRoutes(map, loadedRoutes, routeColorSelector, center,
             /**
-             * @param {Route} selectedRoute
+             * @param {ops.models.Route} selectedRoute
              */
                 function (selectedRoute) {
                 setSelectedRoute(selectedRoute);
@@ -254,5 +254,4 @@ var initialize = function () {
 $(document).ready(function () {
     initialize();
 });
-
 //endregion

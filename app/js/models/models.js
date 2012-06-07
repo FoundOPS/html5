@@ -29,7 +29,6 @@ define(function () {
         OTHER:"Other"
     };
 
-
     return models;
 });
 

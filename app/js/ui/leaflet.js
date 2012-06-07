@@ -16,20 +16,6 @@ goog.require('ops.models.Route');
 
 //region Methods
 /**
- * Center the map based on the array of LatLng.
- * @param {window.L.Map} map The map to center on the resources.
- * @param {Array.<window.L.LatLng>} resources An array of latitude and longitudes to center on.
- */
-ops.leaflet.center = function (map, locations) {
-    // get the total area used
-    var bounds = new window.L.LatLngBounds(locations);
-    // center the map on the bounds
-    map.setView(bounds.getCenter(), 11);
-    //Sets the best view(position and zoom level) to fit all the locations(This only works perfectly in IE)
-    map.fitBounds(bounds);
-};
-
-/**
  * Sets up an empty map with the CloudMade tile layer.
  * @return {window.L.Map} map
  */
@@ -46,6 +32,18 @@ ops.leaflet.setupMap = function () {
     map.addLayer(cloudMade);
 
     return map;
+};
+
+/**
+ * Center the map based on the array of LatLng.
+ * @param {window.L.Map} map The map to center on the resources.
+ * @param {Array.<window.L.LatLng>} resources An array of latitude and longitudes to center on.
+ */
+ops.leaflet.center = function (map, locations) {
+    // get the total area used
+    var bounds = new window.L.LatLngBounds(locations);
+    //Sets the best view(position and zoom level) to fit all the locations(This only works perfectly in IE)
+    map.fitBounds(bounds);
 };
 
 /**
