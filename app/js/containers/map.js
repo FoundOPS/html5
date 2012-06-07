@@ -124,7 +124,7 @@ var drawResources = function () {
 
     resourcesGroup = ops.leaflet.drawResources(map, resources, routeColorSelector,
         /**
-         * @param {ops.models.Route} selectedRoute
+         * @param {Route} selectedRoute
          */
             function (selectedRoute) {
             setSelectedRoute(selectedRoute);
@@ -185,7 +185,7 @@ var getRoutes = function () {
         //draw the routes
         routesGroup = ops.leaflet.drawRoutes(map, loadedRoutes, routeColorSelector, center,
             /**
-             * @param {ops.models.Route} selectedRoute
+             * @param {Route} selectedRoute
              */
                 function (selectedRoute) {
                 setSelectedRoute(selectedRoute);

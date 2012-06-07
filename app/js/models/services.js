@@ -110,7 +110,7 @@ ops.services._getHttp = function (queryString, opt_params, opt_excludeRoleId, op
 /**
  * Get the current service provider's Routes.
  * TODO wrap this in a function with optional parameters to either get the service provider's routes, or to get the current user's routes or create another function and rename this
- * @param {!function(Array.<ops.models.Route>)} callback A callback to pass the loaded routes to.
+ * @param {!function(Array.<Object>)} callback A callback to pass the loaded routes to.
  */
 ops.services.getRoutes = ops.services._getHttp('routes/GetRoutes',
     {}, false, ops.models.Route.createFromApiModel);
@@ -143,17 +143,17 @@ ops.services.routeDestinationsDataSource = new kendo.data.DataSource({
 
 /**
  * Get the service provider's depots.
- * @param {!function(Array.<ops.models.Location>)} callback A callback to pass the loaded depots.
+ * @param {!function(Array.<Object>)} callback A callback to pass the loaded depots.
  */
 ops.services.getDepots = ops.services._getHttp('routes/GetDepots',
-    {}, false, ops.models.Location.createFromApiModel);
+    {}, false);
 
 /**
  * Get resources (Employees/Vehicles) and their last recorded location.
- * @param {!function(Array.<ops.models.ResourceWithLastPoint>)} callback The callback to pass the resources with latest points after they are loaded.
+ * @param {!function(Array.<Object>)} callback The callback to pass the resources with latest points after they are loaded.
  */
 ops.services.getResourcesWithLatestPoints = ops.services._getHttp('trackpoint/GetResourcesWithLatestPoints',
-    {}, false, ops.models.ResourceWithLastPoint.createFromApiModel);
+    {}, false);
 
 /**
  * Get the service provider's TrackPoints.
@@ -163,7 +163,7 @@ ops.services.getResourcesWithLatestPoints = ops.services._getHttp('trackpoint/Ge
  */
 ops.services.getTrackPoints = function (serviceDate, routeId, callback) {
     return ops.services._getHttp('trackPoint/GetTrackPoints',
-        {routeId:routeId, serviceDate:serviceDate}, false, ops.models.TrackPoint.createFromApiModel)(callback);
+        {routeId:routeId, serviceDate:serviceDate}, false)(callback);
 };
 
 /**
