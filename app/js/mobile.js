@@ -30,15 +30,20 @@ ops.mobile.CONFIG = {
 
 var app;
 var selectedRoute = null;
+var selectedRouteDestination = null;
 
 var selectRoute = function (route) {
     selectedRoute = route;
     app.navigate("views/routedestinations.html");
 };
 
+var selectRouteDestination = function () {
+
+};
+
 $(document).ready(function () {
     //Start the mobile application
-    app = new kendo.mobile.Application($(document.body), {platform:"ios"});
+    app = new kendo.mobile.Application($(document.body), {platform: "ios"});
 
     //navigate to routes
     app.navigate("views/routes.html");
@@ -46,12 +51,12 @@ $(document).ready(function () {
 
 ops.mobile.setupRoutesList = function () {
     $("#routes-listview").kendoMobileListView({
-        dataSource:ops.services.routesDataSource,
-        pullToRefresh:true,
-        selectable:true,
-        style:"inset",
-        template:$("#routeListViewTemplate").html(),
-        click:function (e) {
+        dataSource: ops.services.routesDataSource,
+        pullToRefresh: true,
+        selectable: true,
+        style: "inset",
+        template: $("#routeListViewTemplate").html(),
+        click: function (e) {
             selectRoute(e.dataItem);
         }
     });
@@ -59,9 +64,9 @@ ops.mobile.setupRoutesList = function () {
 
 ops.mobile.setupRouteDestinationsList = function () {
     $("#routedestinations-listview").kendoMobileListView({
-        dataSource:selectedRoute.RouteDestinations,
-        selectable:true,
-        style:"inset",
-        template:$("#routeDestinationsViewTemplate").html()
+        dataSource: selectedRoute.RouteDestinations,
+        selectable: true,
+        style: "inset",
+        template: $("#routeDestinationsViewTemplate").html()
     });
 };

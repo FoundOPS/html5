@@ -1,7 +1,7 @@
 <div data-role="view" data-layout="mobile-view" data-title="Route Destinations"
      data-init="ops.mobile.setupRouteDestinationsList" id="routedestinations">
-    <div id="routedestinations-listview"></div>
+    <ul id="routedestinations-listview"></ul>
 </div>
 <script type="text/x-kendo-template" id="routeDestinationsViewTemplate">
-    <a>#= selectedRoute.RouteDestinations.Client.Name #</a>
+    <a>#= Client.Name #</a>
 </script>
