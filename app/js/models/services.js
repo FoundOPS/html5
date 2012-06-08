@@ -130,16 +130,25 @@ ops.services.routesDataSource = new kendo.data.DataSource({
     }
 });
 
-ops.services.routeDestinationsDataSource = new kendo.data.DataSource({
-    transport:{
-        read:{
-            url:apiUrl + "routes/GetRoutes",
-            type:"GET",
-            dataType:"jsonp",
-            contentType:"application/json; charset=utf-8"
-        }
+ops.services.routeDestinationsDataSource = ops.services.routesDataSource({
+    selectedRoute: null,
+    hasChanges: false,
+    save: function () {
+        this.routesSource.sync();
+        this.set("hasChanges", false);
+    },
+    showForm: function () {
+        return this.get("selectedRoute") !== null;
+    },
+    change: function () {
+        this.set("hasChanges", true);
     }
 });
+
+var viewModel = kendo.observable({
+    routesSource: ops.services.routeDestinationsDataSource
+});
+kendo.bind($("#route-listview"), viewModel);
 
 /**
  * Get the service provider's depots.
