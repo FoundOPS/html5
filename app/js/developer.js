@@ -31,7 +31,7 @@ define(function () {
      * The local server's RoleId for GotGrease.
      * @type {ops.Guid}
      */
-    developer.GOTGREASE_ROLE_ID = 'd4173da6-f4b0-444e-a9a2-e293a7598ef9';
+    developer.GOTGREASE_ROLE_ID = '68698f53-a894-4db2-9b65-995287b2580f';
 
     return developer;
 });
