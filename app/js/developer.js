@@ -1,8 +1,10 @@
 // Copyright 2012 FoundOPS LLC. All Rights Reserved.
 
 /**
- * @fileoverview Class to hold developer specific settings
+ * @fileoverview Class to hold developer specific settings.
  */
+
+"use strict";
 
 define(function () {
     var developer = {};
@@ -15,21 +17,21 @@ define(function () {
      * @enum {number}
      */
     developer.Mode = {
-        LOCAL:0,
-        LOCALAPI:1,
-        ANDROIDLA:2,
-        LIVE:3
+        LOCAL: 0,
+        LOCALAPI: 1,
+        ANDROIDLA: 2,
+        LIVE: 3
     };
 
     /**
      * The current development mode.
-     * @type {ops.developer.Mode}
+     * @type {developer.Mode}
      */
     developer.CURRENT_MODE = developer.Mode.LOCALAPI;
 
     /**
      * The local server's RoleId for GotGrease.
-     * @type {ops.Guid}
+     * @type {string}
      */
     developer.GOTGREASE_ROLE_ID = '68698f53-a894-4db2-9b65-995287b2580f';
 

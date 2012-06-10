@@ -9,12 +9,12 @@ define(function () {
      * @enum {string}
      */
     models.DevicePlatform = {
-        ANDROID:"Android",
-        BLACKBERRY:"BlackBerry",
-        IPHONE:"iPhone",
-        WEBOS:"webOS",
-        WINCE:"WinCE",
-        UNKNOWN:"Unknown"
+        ANDROID: "Android",
+        BLACKBERRY: "BlackBerry",
+        IPHONE: "iPhone",
+        WEBOS: "webOS",
+        WINCE: "WinCE",
+        UNKNOWN: "Unknown"
     };
 
     /**
@@ -22,11 +22,11 @@ define(function () {
      * @enum {string}
      */
     models.InfoType = {
-        PHONE:"Phone Number",
-        EMAIL:"Email Address",
-        FAX:"Fax Number",
-        WEBSITE:"Website",
-        OTHER:"Other"
+        PHONE: "Phone Number",
+        EMAIL: "Email Address",
+        FAX: "Fax Number",
+        WEBSITE: "Website",
+        OTHER: "Other"
     };
 
     return models;
