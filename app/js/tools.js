@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(['lib/underscore'], function (_) {
+define(['underscore'], function (_) {
     var tools = {};
 
     /**

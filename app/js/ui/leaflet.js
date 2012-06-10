@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(['ui/ui'], function (ui) {
+define(['db/models', 'tools', 'ui/ui'], function (models, tools, ui) {
     var leaflet = {};
 
     /**
@@ -67,7 +67,7 @@ define(['ui/ui'], function (ui) {
      * @return {window.L.LatLng}
      */
     leaflet.getLatLng = function (location) {
-        return new window.L.LatLng(location.latitude, location.longitude);
+        return new window.L.LatLng(location.Latitude, location.Longitude);
     };
 
     /**
@@ -101,7 +101,7 @@ define(['ui/ui'], function (ui) {
             icon: depotIcon
         });
         //setup marker popup
-        leaflet.addPopup_(marker, "<b>" + depot.name + "</b>");
+        leaflet.addPopup_(marker, "<b>" + depot.Name + "</b>");
         //add the depot layer to the group
         layer.addLayer(marker);
     };
@@ -130,15 +130,15 @@ define(['ui/ui'], function (ui) {
     /**
      * Add a resource to the layer.
      * @param {window.L.LayerGroup} layer The layer to add the resource's markers to.
-     * @param {models.ResourceWithLastPoint} resource The resource to draw.
+     * @param {Object} resource The resource to draw.
      * @param {tools.ValueSelector} routeColorSelector The route color selector.
      * @param {function(models.Route)=} opt_routeSelected A function to perform when a route is selected (optional).
      * @private
      */
     leaflet.drawResource_ = function (layer, resource, routeColorSelector, opt_routeSelected) {
-        var rotateDegrees = resource.heading;
-        var color = routeColorSelector.getValue(resource.routeId);
-        var locationLatLng = new window.L.LatLng(resource.latitude, resource.longitude);
+        var rotateDegrees = resource.Heading;
+        var color = routeColorSelector.getValue(resource.RouteId);
+        var locationLatLng = new window.L.LatLng(resource.Latitude, resource.Longitude);
         var iconUrl = ui.ImageUrls.TRUCK;
         if (resource.source === models.DevicePlatform.IPHONE) {
             iconUrl = ui.ImageUrls.APPLE;
@@ -172,12 +172,12 @@ define(['ui/ui'], function (ui) {
             iconAnchor: new window.L.Point(7, 7),
             shadowSize: new window.L.Point(0, 0),
             popupAnchor: new window.L.Point(0, -7),
-            routeId: resource.routeId
+            routeId: resource.RouteId
         });
 
         //set the text for the popup
-        var popupContent = "<p class='speed'><b>" + resource.entityName + "</b><br />Speed: "
-            + Math.round(resource.speed) + " mph " + tools.getDirection(rotateDegrees) + "</p>";
+        var popupContent = "<p class='speed'><b>" + resource.EntityName + "</b><br />Speed: "
+            + Math.round(resource.Speed) + " mph " + tools.getDirection(rotateDegrees) + "</p>";
 
         var iconMarker = new window.L.Marker(locationLatLng, {
             icon: resourceIcon
@@ -188,7 +188,7 @@ define(['ui/ui'], function (ui) {
         //c) an icon arrow that rotates
         var arrowIcon = new window.L.Icon();
         $.extend(arrowIcon, {
-            routeId: resource.routeId,
+            routeId: resource.RouteId,
             iconUrl: ui.ImageUrls.OUTER_CIRCLE,
             shadowUrl: null,
             iconSize: new window.L.Point(18.5, 18.5),
@@ -261,14 +261,14 @@ define(['ui/ui'], function (ui) {
      * @private
      */
     leaflet.drawDestination_ = function (layer, destination, routeId, routeColorSelector, opt_routeSelected) {
-        var location = destination.location;
+        var location = destination.Location;
         var locationLatLng = leaflet.getLatLng(location);
 
         //an icon for the destination
         var destinationIcon = new window.L.Icon();
         //extend the icon to include text
         $.extend(destinationIcon, {
-            number: destination.orderInRoute,
+            number: destination.OrderInRoute,
             //tag this with the related destination for invoking opt_routeSelected
             routeId: routeId,
             popupAnchor: new window.L.Point(0, -7),
@@ -330,7 +330,7 @@ define(['ui/ui'], function (ui) {
         }
 
         //setup marker popup
-        leaflet.addPopup_(numMarker, "<b>" + location.name + "</b>");
+        leaflet.addPopup_(numMarker, "<b>" + location.Name + "</b>");
 
         //add the markers to the map
         layer.addLayer(marker);
@@ -342,7 +342,7 @@ define(['ui/ui'], function (ui) {
     /**
      * Draw the route's destinations with markers on the map.
      * @param {window.L.Map} map The map.
-     * @param {Array.<Object>} routes The routes to draw on the map.
+     * @param {Array.<{RouteDestinations: Array.<Object>}>} routes The routes to draw on the map.
      * @param {tools.ValueSelector} routeColorSelector The route color selector.
      * @param {boolean} shouldCenter Center the map on the added items.
      * @param {function(Object)=} opt_routeSelected A function to perform when a route is selected (optional).
@@ -359,9 +359,9 @@ define(['ui/ui'], function (ui) {
             var route = routes[r];
             var d;
             //add markers for each route destination
-            for (d in route.routeDestinations) {
-                var destination = route.routeDestinations[d];
-                var latLng = leaflet.drawDestination_(routesGroup, destination, route.id, routeColorSelector, opt_routeSelected);
+            for (d in route.RouteDestinations) {
+                var destination = route.RouteDestinations[d];
+                var latLng = leaflet.drawDestination_(routesGroup, destination, route.Id, routeColorSelector, opt_routeSelected);
                 destinationLatLngs.push(latLng);
             }
         }
@@ -381,8 +381,8 @@ define(['ui/ui'], function (ui) {
      * @private
      */
     leaflet.drawTrackPoint_ = function (polyline, trackPoint) {
-        var lat = trackPoint.latitude;
-        var lng = trackPoint.longitude;
+        var lat = trackPoint.Latitude;
+        var lng = trackPoint.Longitude;
         //get the location of the destination
         var location = new window.L.LatLng(lat, lng);
         //create a point at the current location
@@ -416,13 +416,13 @@ define(['ui/ui'], function (ui) {
         //loop through all the resources
         for (r in resources) {
             //Check if the resource is on the selected route
-            if (resources[r].routeId === routeId) {
+            if (resources[r].RouteId === routeId) {
                 //get the Id of the resource
                 var resourceId;
-                if (resources[r].employeeId !== null) {
-                    resourceId = resources[r].employeeId;
+                if (resources[r].EmployeeId !== null) {
+                    resourceId = resources[r].EmployeeId;
                 } else {
-                    resourceId = resources[r].vehicleId;
+                    resourceId = resources[r].VehicleId;
                 }
                 //creates an empty array(necessary for the polyline to initiate)
                 var latlngs = [];
@@ -438,7 +438,7 @@ define(['ui/ui'], function (ui) {
                 //loop through every trackpoint
                 for (t in trackpoints) {
                     //check if trackpoint is for the current resource and route
-                    if ((trackpoints[t].id == resourceId) && (trackpoints[t].routeId == routeId)) {
+                    if ((trackpoints[t].Id === resourceId) && (trackpoints[t].RouteId === routeId)) {
                         var trackPoint = trackpoints[t];
                         leaflet.drawTrackPoint_(polyline, trackPoint);
                     }

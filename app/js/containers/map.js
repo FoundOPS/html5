@@ -16,9 +16,18 @@ require.config({
     waitSeconds: 10,
     baseUrl: 'js',
     paths: {
-        "lib": "../lib",
-        "ui": "ui",
-        "db": "db"
+        // JavaScript folders
+        lib: "../lib",
+        ui: "ui",
+        db: "db",
+
+        // Libraries
+        underscore: "../lib/underscore"
+    },
+    shim: {
+        underscore: {
+            exports: '_'
+        }
     }
 });
 

@@ -6,24 +6,26 @@ TESTING IS ALSO IMPORTANT. TEST INFO HERE.
 
 ## Frameworks
 
-Angular is the primary framework and it is used whenever possible. Please go through the tutorial.
-
-[Angular](http://angularjs.org/) - [API Docs](http://docs.angularjs.org/api) - [Tutorial](http://docs.angularjs.org/tutorial) - [WebStorm plugin](https://groups.google.com/forum/#!topic/angular/GyBSkDxZN9c)
-
 The primary CSS frameworks.
 
 [Bootstrap](http://twitter.github.com/bootstrap/) <br/>
 [less](http://lesscss.org/)
 
-Kendo controls are sprinkled in here and there. The Kendo framework is used when Kendo controls are involved. When/if kendo support angular's framework, that will be switched over. (Do not use the Kendo UI Mobile Widgets.)
+The module loader we use to organize the project.
+
+[RequireJS](http://requirejs.org/docs/api.html)
+
+A commonly used javascript utility.
+
+[Underscore Docs](http://underscorejs.org/) -
+[(the requirejs compatible fork we use)](http://tagneto.blogspot.com/2012/01/amd-support-for-underscore-and-backbone.html)
+
+
+Kendo controls are used a majority of the time along with the Kendo MVVM framework. When/if kendo support angular's framework, that will be switched over.
 
 [Kendo UI](http://demos.kendoui.com/web/overview/index.html) - [Framework](http://demos.kendoui.com/web/mvvm/index.html)
 
 Mobile specific frameworks:
-
-jQuery mobile UI controls are used for applications designed initially for mobile devices.
-
-[jQuery mobile](http://jquerymobile.com/) - [Demos](http://jquerymobile.com/demos/1.1.0/) - [API Docs](http://docs.jquery.com/Main_Page)
 
 PhoneGap is used to get access to mobile native functionality.
 
@@ -33,19 +35,14 @@ PhoneGap is used to get access to mobile native functionality.
 
 We follow [google's javascript guidelines](http://google-styleguide.googlecode.com/svn/trunk/javascriptguide.xml) and the [jsLint Code Conventions](http://javascript.crockford.com/code.html).
 
-We use [Google's Closure Compiler](https://developers.google.com/closure/compiler/) - [Docs](https://developers.google.com/closure/library/docs/overview) - [API Reference](http://closure-library.googlecode.com/svn/docs/index.html) - [Tutorial](https://developers.google.com/closure/library/docs/tutorial "Tutorial")
-
-- All javascript MUST BE [annotated for the Google Closure Compiler](https://developers.google.com/closure/compiler/docs/js-for-compiler)
+- All javascript MUST BE [annotated for the Google Closure Compiler](https://developers.google.com/closure/compiler/docs/js-for-compiler) (even though we don't use the compiler)
 
 
 We use [lowerCamelCase](http://c2.com/cgi/wiki?LowerCamelCase) for acronyms, variables, object properties, etc.
 
-
 Compressed via [htmlcompressor](http://code.google.com/p/htmlcompressor/).
 
-Closure Linter: To install easy-install on windows 7-64 bit http://www.lfd.uci.edu/~gohlke/pythonlibs/
-
-
+Need to update below:
 ## Directory Layout
 
     app/                --> all of the files to be used in production
