@@ -104,7 +104,7 @@ require(["jquery", "lib/leaflet", "developer", "db/services", "tools", "ui/leafl
         }
     };
 
-//draws the resources
+    //draws the resources
     var drawResources = function () {
         //remove the current resources from the map
         removeLayer(resourcesGroup);
@@ -114,7 +114,7 @@ require(["jquery", "lib/leaflet", "developer", "db/services", "tools", "ui/leafl
         for (r in resources) {
             var resource = resources[r];
             //find the loaded track points for the route, and add this
-            var routeTrackPoints = routesTrackPoints[resource.routeId];
+            var routeTrackPoints = routesTrackPoints[resource.RouteId];
             if (routeTrackPoints && routeTrackPoints != services.Status.LOADING) {
                 //add current resource to the list of trackpoints
                 routeTrackPoints.push(resource);
@@ -174,7 +174,7 @@ require(["jquery", "lib/leaflet", "developer", "db/services", "tools", "ui/leafl
         }
     };
 
-//gets all of the resources
+    //gets all of the resources
     var getResources = function () {
         //if the date is today: load the resources with latest points
         if (tools.dateEqual(selectedDate, new Date())) {
@@ -189,7 +189,7 @@ require(["jquery", "lib/leaflet", "developer", "db/services", "tools", "ui/leafl
         }
     };
 
-//load the routes for the date
+    //load the routes for the date
     var getRoutes = function () {
         services.getRoutes(function (loadedRoutes) {
             removeLayer(routesGroup);
@@ -240,7 +240,7 @@ require(["jquery", "lib/leaflet", "developer", "db/services", "tools", "ui/leafl
         }
     };
 
-// Store the initialization logic in one place.
+    // Store the initialization logic in one place.
     var initialize = function () {
         //setup an empty map
         map = leaflet.setupMap();

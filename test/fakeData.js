@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(['tools'], function (tools) {
+define(['tools', 'ui/ui'], function (tools, ui) {
     var fakeData = {};
     fakeData.depots = [
         {"AddressLineOne": "1305 Cumberland Ave", "AddressLineTwo": "", "City": "West Lafayette", "ContactInfoSet": [], "Latitude": "40.46033500", "Longitude": "-86.92984000", "Name": "Depot", "State": "IN", "ZipCode": "47906"}
@@ -33,8 +33,8 @@ define(['tools'], function (tools) {
         {"Accuracy": 1, "CollectedTimeStamp": "\/Date(1338886830000)\/", "Heading": null, "Id": "ded264b5-523a-4107-a364-774cbc295cd1", "Latitude": 40.589, "Longitude": -86.9299, "RouteId": "f57f763f-87e1-47e0-98c8-f650b2c556dc", "Source": null, "Speed": null}
     ];
 
-    fakeData.routeColorSelector = new tools.ValueSelector(ops.ui.ITEM_COLORS);
-    fakeData.routeOpacitySelector = new tools.ValueSelector(ops.ui.ITEM_OPACITIES);
+    fakeData.routeColorSelector = new tools.ValueSelector(ui.ITEM_COLORS);
+    fakeData.routeOpacitySelector = new tools.ValueSelector(ui.ITEM_OPACITIES);
 
     return fakeData;
 });
