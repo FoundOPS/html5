@@ -1,0 +1,717 @@
+[{
+	"Id": "324fbe7c-0aaf-4755-8715-63584818e8ca",
+	"Name": "North Side",
+	"RouteDestinations": [{
+		"Client": {
+			"ContactInfoSet": [],
+			"Name": "Black Sparrow"
+		},
+		"Id": "41822534-09c1-4158-b178-00d1dacb56ea",
+		"Location": {
+			"AddressLineOne": "111 E Main St",
+			"AddressLineTwo": "Crawfordsville",
+			"City": "Lafayette",
+			"ContactInfoSet": [{
+				"Data": "2020vision.com",
+				"Label": "Oren Shatken",
+				"Type": "Website"
+			},
+			{
+				"Data": "jrice@purdue.edu",
+				"Label": "Jason Rice",
+				"Type": "Email Address"
+			},
+			{
+				"Data": "703-582-1810",
+				"Label": "Zach Bright",
+				"Type": "Phone Number"
+			}],
+			"Latitude": "40.04169600",
+			"Longitude": "-86.90109500",
+			"Name": "Arthur's",
+			"State": "IN",
+			"ZipCode": "47933-1710"
+		},
+		"OrderInRoute": 5
+	},
+	{
+		"Client": {
+			"ContactInfoSet": [],
+			"Name": "Arthur's"
+		},
+		"Id": "def8c30f-c13f-41b5-9436-17523a2c9962",
+		"Location": {
+			"AddressLineOne": "223 Main St",
+			"AddressLineTwo": "",
+			"City": "Lafayette",
+			"ContactInfoSet": [{
+				"Data": "2020vision.com",
+				"Label": "Oren Shatken",
+				"Type": "Website"
+			},
+			{
+				"Data": "703-582-1810",
+				"Label": "Zach Bright",
+				"Type": "Phone Number"
+			},
+			{
+				"Data": "jrice@purdue.edu",
+				"Label": "Jason Rice",
+				"Type": "Email Address"
+			}],
+			"Latitude": "40.41911900",
+			"Longitude": "-86.89460400",
+			"Name": "Black Sparrow",
+			"State": "IN",
+			"ZipCode": "47901-1261"
+		},
+		"OrderInRoute": 1
+	},
+	{
+		"Client": {
+			"ContactInfoSet": [],
+			"Name": "Blue Fin Bistro Sushi Lafayette"
+		},
+		"Id": "6dbc4ddc-2f6e-448b-a925-69bf480d7dcd",
+		"Location": {
+			"AddressLineOne": "201 N Delaware St",
+			"AddressLineTwo": "",
+			"City": "Indianapolis",
+			"ContactInfoSet": [{
+				"Data": "703-582-1810",
+				"Label": "Zach Bright",
+				"Type": "Phone Number"
+			},
+			{
+				"Data": "2020vision.com",
+				"Label": "Oren Shatken",
+				"Type": "Website"
+			},
+			{
+				"Data": "jrice@purdue.edu",
+				"Label": "Jason Rice",
+				"Type": "Email Address"
+			}],
+			"Latitude": "39.76988700",
+			"Longitude": "-86.15435900",
+			"Name": "Barcelona Tapas",
+			"State": "IN",
+			"ZipCode": "46204-2127"
+		},
+		"OrderInRoute": 6
+	},
+	{
+		"Client": {
+			"ContactInfoSet": [],
+			"Name": "Barcelona Tapas"
+		},
+		"Id": "3a859961-0e0e-4de9-ac39-85ccceaf314d",
+		"Location": {
+			"AddressLineOne": "501 Main St",
+			"AddressLineTwo": "",
+			"City": "Lafayette",
+			"ContactInfoSet": [{
+				"Data": "jrice@purdue.edu",
+				"Label": "Jason Rice",
+				"Type": "Email Address"
+			},
+			{
+				"Data": "2020vision.com",
+				"Label": "Oren Shatken",
+				"Type": "Website"
+			},
+			{
+				"Data": "703-582-1810",
+				"Label": "Zach Bright",
+				"Type": "Phone Number"
+			}],
+			"Latitude": "40.41914200",
+			"Longitude": "-86.89172700",
+			"Name": "Bistro 501",
+			"State": "IN",
+			"ZipCode": "47901-1446"
+		},
+		"OrderInRoute": 3
+	},
+	{
+		"Client": {
+			"ContactInfoSet": [],
+			"Name": "Bistro 501"
+		},
+		"Id": "3e2236ed-9c32-4133-be69-b01703afacd9",
+		"Location": {
+			"AddressLineOne": "2 S 4th St",
+			"AddressLineTwo": "",
+			"City": "Lafayette",
+			"ContactInfoSet": [{
+				"Data": "703-582-1810",
+				"Label": "Zach Bright",
+				"Type": "Phone Number"
+			},
+			{
+				"Data": "2020vision.com",
+				"Label": "Oren Shatken",
+				"Type": "Website"
+			},
+			{
+				"Data": "jrice@purdue.edu",
+				"Label": "Jason Rice",
+				"Type": "Email Address"
+			}],
+			"Latitude": "40.41722400",
+			"Longitude": "-86.89304600",
+			"Name": "Blue Fin Bistro Sushi Lafayette",
+			"State": "IN",
+			"ZipCode": "47901-1603"
+		},
+		"OrderInRoute": 4
+	},
+	{
+		"Client": {
+			"ContactInfoSet": [],
+			"Name": "Artie's Tenderloin"
+		},
+		"Id": "d777ef26-900d-4312-9990-d39ba8100da3",
+		"Location": {
+			"AddressLineOne": "922 S Main St",
+			"AddressLineTwo": "",
+			"City": "Kokomo",
+			"ContactInfoSet": [{
+				"Data": "jrice@purdue.edu",
+				"Label": "Jason Rice",
+				"Type": "Email Address"
+			},
+			{
+				"Data": "703-582-1810",
+				"Label": "Zach Bright",
+				"Type": "Phone Number"
+			},
+			{
+				"Data": "2020vision.com",
+				"Label": "Oren Shatken",
+				"Type": "Website"
+			}],
+			"Latitude": "40.47738400",
+			"Longitude": "-86.13100500",
+			"Name": "Artie's Tenderloin",
+			"State": "IN",
+			"ZipCode": "46901-5457"
+		},
+		"OrderInRoute": 2
+	}]
+},
+{
+	"Id": "7b79dd6a-78df-44db-b53f-b9048f920d58",
+	"Name": "SF Bay Area",
+	"RouteDestinations": [{
+		"Client": {
+			"ContactInfoSet": [],
+			"Name": "Campbell's On Main Street"
+		},
+		"Id": "c4bc3bd8-64ad-4189-a265-1b75604f5238",
+		"Location": {
+			"AddressLineOne": "35 N Illinois St",
+			"AddressLineTwo": "",
+			"City": "Indianapolis",
+			"ContactInfoSet": [{
+				"Data": "jrice@purdue.edu",
+				"Label": "Jason Rice",
+				"Type": "Email Address"
+			},
+			{
+				"Data": "2020vision.com",
+				"Label": "Oren Shatken",
+				"Type": "Website"
+			},
+			{
+				"Data": "703-582-1810",
+				"Label": "Zach Bright",
+				"Type": "Phone Number"
+			}],
+			"Latitude": "39.76809800",
+			"Longitude": "-86.15986400",
+			"Name": "Buca di Beppo - Downtown Indianapolis",
+			"State": "IN",
+			"ZipCode": "46204-2803"
+		},
+		"OrderInRoute": 6
+	},
+	{
+		"Client": {
+			"ContactInfoSet": [],
+			"Name": "Bob Evans Restaurant"
+		},
+		"Id": "0cb3df73-0dad-430d-b058-3e99b2d01d1c",
+		"Location": {
+			"AddressLineOne": "212 Brown St",
+			"AddressLineTwo": "",
+			"City": "West Lafayette",
+			"ContactInfoSet": [{
+				"Data": "jrice@purdue.edu",
+				"Label": "Jason Rice",
+				"Type": "Email Address"
+			},
+			{
+				"Data": "703-582-1810",
+				"Label": "Zach Bright",
+				"Type": "Phone Number"
+			},
+			{
+				"Data": "2020vision.com",
+				"Label": "Oren Shatken",
+				"Type": "Website"
+			}],
+			"Latitude": "40.42208100",
+			"Longitude": "-86.90356900",
+			"Name": "Bruno's Pizza and Big O's Sports Room",
+			"State": "IN",
+			"ZipCode": "47906-3210"
+		},
+		"OrderInRoute": 1
+	},
+	{
+		"Client": {
+			"ContactInfoSet": [],
+			"Name": "Burger King"
+		},
+		"Id": "fb3421ed-eb09-4329-993b-a7e62b6400ea",
+		"Location": {
+			"AddressLineOne": "101 E Main St",
+			"AddressLineTwo": "",
+			"City": "Crawfordsville",
+			"ContactInfoSet": [{
+				"Data": "2020vision.com",
+				"Label": "Oren Shatken",
+				"Type": "Website"
+			},
+			{
+				"Data": "jrice@purdue.edu",
+				"Label": "Jason Rice",
+				"Type": "Email Address"
+			},
+			{
+				"Data": "703-582-1810",
+				"Label": "Zach Bright",
+				"Type": "Phone Number"
+			}],
+			"Latitude": "40.04169400",
+			"Longitude": "-86.90121600",
+			"Name": "Campbell's On Main Street",
+			"State": "IN",
+			"ZipCode": "47933-1710"
+		},
+		"OrderInRoute": 5
+	},
+	{
+		"Client": {
+			"ContactInfoSet": [],
+			"Name": "Buca di Beppo - Downtown Indianapolis"
+		},
+		"Id": "75a3edee-3eba-469c-ad5d-dc6815e5d8db",
+		"Location": {
+			"AddressLineOne": "2338 Teal Rd",
+			"AddressLineTwo": "",
+			"City": "Lafayette",
+			"ContactInfoSet": [{
+				"Data": "2020vision.com",
+				"Label": "Oren Shatken",
+				"Type": "Website"
+			},
+			{
+				"Data": "703-582-1810",
+				"Label": "Zach Bright",
+				"Type": "Phone Number"
+			},
+			{
+				"Data": "jrice@purdue.edu",
+				"Label": "Jason Rice",
+				"Type": "Email Address"
+			}],
+			"Latitude": "40.39550400",
+			"Longitude": "-86.86852700",
+			"Name": "Burger King",
+			"State": "IN",
+			"ZipCode": "47905-2219"
+		},
+		"OrderInRoute": 3
+	},
+	{
+		"Client": {
+			"ContactInfoSet": [],
+			"Name": "Buffalo Wild Wings Grill & Bar"
+		},
+		"Id": "53ae1220-5b19-447d-aff3-fbe48ab07891",
+		"Location": {
+			"AddressLineOne": "2715 S Creasy Ln",
+			"AddressLineTwo": "",
+			"City": "Lafayette",
+			"ContactInfoSet": [{
+				"Data": "jrice@purdue.edu",
+				"Label": "Jason Rice",
+				"Type": "Email Address"
+			},
+			{
+				"Data": "703-582-1810",
+				"Label": "Zach Bright",
+				"Type": "Phone Number"
+			},
+			{
+				"Data": "2020vision.com",
+				"Label": "Oren Shatken",
+				"Type": "Website"
+			}],
+			"Latitude": "40.38861800",
+			"Longitude": "-86.83898100",
+			"Name": "Buffalo Wild Wings Grill & Bar",
+			"State": "IN",
+			"ZipCode": "47905-5201"
+		},
+		"OrderInRoute": 4
+	}]
+},
+{
+	"Id": "5dc85112-33cd-41da-b774-5a1475cfa79c",
+	"Name": "SF Bay Area",
+	"RouteDestinations": [{
+		"Client": {
+			"ContactInfoSet": [],
+			"Name": "Dairy Queen"
+		},
+		"Id": "edd8e643-c0d4-4f1a-97f5-79c4e49a529a",
+		"Location": {
+			"AddressLineOne": "3949 State Road 38 E",
+			"AddressLineTwo": "",
+			"City": "Lafayette",
+			"ContactInfoSet": [{
+				"Data": "703-582-1810",
+				"Label": "Zach Bright",
+				"Type": "Phone Number"
+			},
+			{
+				"Data": "2020vision.com",
+				"Label": "Oren Shatken",
+				"Type": "Website"
+			},
+			{
+				"Data": "jrice@purdue.edu",
+				"Label": "Jason Rice",
+				"Type": "Email Address"
+			}],
+			"Latitude": "40.38814100",
+			"Longitude": "-86.83713700",
+			"Name": "Dairy Queen",
+			"State": "IN",
+			"ZipCode": "47905-9464"
+		},
+		"OrderInRoute": 3
+	},
+	{
+		"Client": {
+			"ContactInfoSet": [],
+			"Name": "Diamond Coffee Company"
+		},
+		"Id": "09c4e26c-bddb-4a74-9ce3-b705c0cb8337",
+		"Location": {
+			"AddressLineOne": "3107 Builder Dr",
+			"AddressLineTwo": "",
+			"City": "Lafayette",
+			"ContactInfoSet": [{
+				"Data": "703-582-1810",
+				"Label": "Zach Bright",
+				"Type": "Phone Number"
+			},
+			{
+				"Data": "jrice@purdue.edu",
+				"Label": "Jason Rice",
+				"Type": "Email Address"
+			},
+			{
+				"Data": "2020vision.com",
+				"Label": "Oren Shatken",
+				"Type": "Website"
+			}],
+			"Latitude": "40.36819100",
+			"Longitude": "-86.86046600",
+			"Name": "Diamond Coffee Company",
+			"State": "IN",
+			"ZipCode": "47909"
+		},
+		"OrderInRoute": 4
+	},
+	{
+		"Client": {
+			"ContactInfoSet": [],
+			"Name": "Culver's"
+		},
+		"Id": "3ad13679-6edb-4beb-9eee-cb29affa64b2",
+		"Location": {
+			"AddressLineOne": "1410 Darlington Ave",
+			"AddressLineTwo": "",
+			"City": "Crawfordsville",
+			"ContactInfoSet": [{
+				"Data": "jrice@purdue.edu",
+				"Label": "Jason Rice",
+				"Type": "Email Address"
+			},
+			{
+				"Data": "2020vision.com",
+				"Label": "Oren Shatken",
+				"Type": "Website"
+			},
+			{
+				"Data": "703-582-1810",
+				"Label": "Zach Bright",
+				"Type": "Phone Number"
+			}],
+			"Latitude": "40.04680400",
+			"Longitude": "-86.87993300",
+			"Name": "Crawfordsville Forum Family",
+			"State": "IN",
+			"ZipCode": "47933-2007"
+		},
+		"OrderInRoute": 5
+	},
+	{
+		"Client": {
+			"ContactInfoSet": [],
+			"Name": "Covered Bridge Restaurant"
+		},
+		"Id": "545d1bc9-e4d7-42d8-9eb5-eb1107302c61",
+		"Location": {
+			"AddressLineOne": "5787 N Main St",
+			"AddressLineTwo": "",
+			"City": "Cayuga",
+			"ContactInfoSet": [{
+				"Data": "jrice@purdue.edu",
+				"Label": "Jason Rice",
+				"Type": "Email Address"
+			},
+			{
+				"Data": "703-582-1810",
+				"Label": "Zach Bright",
+				"Type": "Phone Number"
+			},
+			{
+				"Data": "2020vision.com",
+				"Label": "Oren Shatken",
+				"Type": "Website"
+			}],
+			"Latitude": "39.96864100",
+			"Longitude": "-87.47241700",
+			"Name": "Covered Bridge Restaurant",
+			"State": "IN",
+			"ZipCode": "47928-8024"
+		},
+		"OrderInRoute": 1
+	}]
+},
+{
+	"Id": "f4671de4-3259-4ff2-9821-a54fe81e4a4f",
+	"Name": "Shelter Island",
+	"RouteDestinations": [{
+		"Client": {
+			"ContactInfoSet": [],
+			"Name": "Bistro 501"
+		},
+		"Id": "68d02a6b-4c7f-4746-ba13-6644adf9ff2d",
+		"Location": {
+			"AddressLineOne": "2 S 4th St",
+			"AddressLineTwo": "",
+			"City": "Lafayette",
+			"ContactInfoSet": [{
+				"Data": "2020vision.com",
+				"Label": "Oren Shatken",
+				"Type": "Website"
+			},
+			{
+				"Data": "703-582-1810",
+				"Label": "Zach Bright",
+				"Type": "Phone Number"
+			},
+			{
+				"Data": "jrice@purdue.edu",
+				"Label": "Jason Rice",
+				"Type": "Email Address"
+			}],
+			"Latitude": "40.41722400",
+			"Longitude": "-86.89304600",
+			"Name": "Blue Fin Bistro Sushi Lafayette",
+			"State": "IN",
+			"ZipCode": "47901-1603"
+		},
+		"OrderInRoute": 4
+	},
+	{
+		"Client": {
+			"ContactInfoSet": [],
+			"Name": "Blue Fin Bistro Sushi Lafayette"
+		},
+		"Id": "e396487e-9028-478e-918e-c5dc8a919c87",
+		"Location": {
+			"AddressLineOne": "201 N Delaware St",
+			"AddressLineTwo": "",
+			"City": "Indianapolis",
+			"ContactInfoSet": [{
+				"Data": "2020vision.com",
+				"Label": "Oren Shatken",
+				"Type": "Website"
+			},
+			{
+				"Data": "703-582-1810",
+				"Label": "Zach Bright",
+				"Type": "Phone Number"
+			},
+			{
+				"Data": "jrice@purdue.edu",
+				"Label": "Jason Rice",
+				"Type": "Email Address"
+			}],
+			"Latitude": "39.76988700",
+			"Longitude": "-86.15435900",
+			"Name": "Barcelona Tapas",
+			"State": "IN",
+			"ZipCode": "46204-2127"
+		},
+		"OrderInRoute": 6
+	},
+	{
+		"Client": {
+			"ContactInfoSet": [],
+			"Name": "Arthur's"
+		},
+		"Id": "f750494f-a771-44d1-95e3-d335d1cae087",
+		"Location": {
+			"AddressLineOne": "223 Main St",
+			"AddressLineTwo": "",
+			"City": "Lafayette",
+			"ContactInfoSet": [{
+				"Data": "jrice@purdue.edu",
+				"Label": "Jason Rice",
+				"Type": "Email Address"
+			},
+			{
+				"Data": "2020vision.com",
+				"Label": "Oren Shatken",
+				"Type": "Website"
+			},
+			{
+				"Data": "703-582-1810",
+				"Label": "Zach Bright",
+				"Type": "Phone Number"
+			}],
+			"Latitude": "40.41911900",
+			"Longitude": "-86.89460400",
+			"Name": "Black Sparrow",
+			"State": "IN",
+			"ZipCode": "47901-1261"
+		},
+		"OrderInRoute": 1
+	}]
+},
+{
+	"Id": "f5ccecb1-b427-4763-ae69-120430edd5b2",
+	"Name": "South Side",
+	"RouteDestinations": [{
+		"Client": {
+			"ContactInfoSet": [],
+			"Name": "Buca di Beppo - Downtown Indianapolis"
+		},
+		"Id": "54147d01-3769-43d8-b337-91cd466879cf",
+		"Location": {
+			"AddressLineOne": "2338 Teal Rd",
+			"AddressLineTwo": "",
+			"City": "Lafayette",
+			"ContactInfoSet": [{
+				"Data": "jrice@purdue.edu",
+				"Label": "Jason Rice",
+				"Type": "Email Address"
+			},
+			{
+				"Data": "703-582-1810",
+				"Label": "Zach Bright",
+				"Type": "Phone Number"
+			},
+			{
+				"Data": "2020vision.com",
+				"Label": "Oren Shatken",
+				"Type": "Website"
+			}],
+			"Latitude": "40.39550400",
+			"Longitude": "-86.86852700",
+			"Name": "Burger King",
+			"State": "IN",
+			"ZipCode": "47905-2219"
+		},
+		"OrderInRoute": 3
+	},
+	{
+		"Client": {
+			"ContactInfoSet": [],
+			"Name": "Bob Evans Restaurant"
+		},
+		"Id": "eb052b85-0c19-48c2-a5b9-9fe8fbcdd32e",
+		"Location": {
+			"AddressLineOne": "212 Brown St",
+			"AddressLineTwo": "",
+			"City": "West Lafayette",
+			"ContactInfoSet": [{
+				"Data": "703-582-1810",
+				"Label": "Zach Bright",
+				"Type": "Phone Number"
+			},
+			{
+				"Data": "2020vision.com",
+				"Label": "Oren Shatken",
+				"Type": "Website"
+			},
+			{
+				"Data": "jrice@purdue.edu",
+				"Label": "Jason Rice",
+				"Type": "Email Address"
+			}],
+			"Latitude": "40.42208100",
+			"Longitude": "-86.90356900",
+			"Name": "Bruno's Pizza and Big O's Sports Room",
+			"State": "IN",
+			"ZipCode": "47906-3210"
+		},
+		"OrderInRoute": 1
+	}]
+},
+{
+	"Id": "cb16e24e-ae6e-4528-a0a4-e8633cb29c4e",
+	"Name": "South Side",
+	"RouteDestinations": [{
+		"Client": {
+			"ContactInfoSet": [],
+			"Name": "Dairy Queen"
+		},
+		"Id": "8674bb58-34d5-4db1-bbaf-f967a5cee813",
+		"Location": {
+			"AddressLineOne": "3949 State Road 38 E",
+			"AddressLineTwo": "",
+			"City": "Lafayette",
+			"ContactInfoSet": [{
+				"Data": "703-582-1810",
+				"Label": "Zach Bright",
+				"Type": "Phone Number"
+			},
+			{
+				"Data": "2020vision.com",
+				"Label": "Oren Shatken",
+				"Type": "Website"
+			},
+			{
+				"Data": "jrice@purdue.edu",
+				"Label": "Jason Rice",
+				"Type": "Email Address"
+			}],
+			"Latitude": "40.38814100",
+			"Longitude": "-86.83713700",
+			"Name": "Dairy Queen",
+			"State": "IN",
+			"ZipCode": "47905-9464"
+		},
+		"OrderInRoute": 3
+	}]
+}]

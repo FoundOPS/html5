@@ -10,8 +10,9 @@ body{
     font-family: PTSans;
 }
 #map{
-    height: 500px; 
-    border: 1px solid #333335;
+    position: absolute;
+    height: 100%;
+    width: 100%
 }
 ​ .leaflet-popup-content{
       min-width: 155px;

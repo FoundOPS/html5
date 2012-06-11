@@ -1,0 +1,1 @@
+ops={},ops.closeCell=function(){disableDefaultCheckboxes()}
