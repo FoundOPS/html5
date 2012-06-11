@@ -1,4 +1,7 @@
 <div data-role="view" data-layout="mobile-view" data-title="Destination Details"
-     data-init="ops.mobile.setupRouteDestinationDetailsList" id="routedestinationdetails">
-    <ul id="routedestinationdetails-listview"></ul>
+     data-init="mobile.setupRouteDestinationDetailsList" id="routeDestinationDetails">
+    <ul id="routeDestinationDetails-listview"></ul>
 </div>
+<script type="text/x-kendo-template" id="routeDestinationDetailsViewTemplate">
+    <a>#= ContactInfoSet.Data #</a>
+</script>

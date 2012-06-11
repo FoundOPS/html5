@@ -50,10 +50,16 @@ require(["jquery", "lib/kendo.mobile.min", "developer", "db/services"], function
 
     var app;
     var selectedRoute = null;
+    var selectedDestination = null;
 
     var selectRoute = function (route) {
         selectedRoute = route;
-        app.navigate("views/routedestinations.html");
+        app.navigate("views/routeDestinations.html");
+    };
+
+    var selectDestination = function (destination) {
+        selectedDestination = destination;
+        app.navigate("views/routeDestinationDetails.html");
     };
 
     mobile.setupRoutesList = function () {
@@ -70,13 +76,28 @@ require(["jquery", "lib/kendo.mobile.min", "developer", "db/services"], function
     };
 
     mobile.setupRouteDestinationsList = function () {
-        $("#routedestinations-listview").kendoMobileListView({
-            dataSource: selectedRoute.RouteDestinations,
+        var dataSource = new kendo.data.DataSource({data: selectedRoute.RouteDestinations});
+
+        $("#routeDestinations-listview").kendoMobileListView({
+            dataSource: dataSource,
             selectable: true,
             style: "inset",
-            template: $("#routeDestinationsViewTemplate").html()
+            template: $("#routeDestinationsViewTemplate").html(),
+            click: function (e) {
+                selectDestination(e.dataItem);
+            }
         });
     };
+
+    mobile.setupRouteDestinationDetailsList = function () {
+//        $('#routeDestinationDetails-listview').kendoMobileListView({
+//            dataSource: selectedDestination.Location,
+//            selectable: true,
+//            style: "inset",
+//            template: $("#routeDestinationDetailsViewTemplate").html()
+//        });
+    };
+
 
     //set mobile to a global function, so the functions are accessible from the HTML element
     window.mobile = mobile;
@@ -84,6 +105,6 @@ require(["jquery", "lib/kendo.mobile.min", "developer", "db/services"], function
     //Start the mobile application
     app = new kendo.mobile.Application($(document.body), {platform: "ios"});
 
-    //navigate to routes
+    //navigate to routes (for development purposes)
     app.navigate("views/routes.html");
 });
