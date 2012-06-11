@@ -18,14 +18,15 @@ define(['lib/kendo.all.min', 'developer'], function (k, developer) {
         LOADED: 1
     };
 
+    var apiUrl;
 //setup the api url depending on the mode
     var mode = developer.CURRENT_MODE;
     if (mode === developer.Mode.LOCAL) {
-        var apiUrl = 'routes.json';
+        apiUrl = 'routes.json';
     } else if (mode === developer.Mode.LOCALAPI) {
-        var apiUrl = 'http://localhost:9711/api/';
+        apiUrl = 'http://localhost:9711/api/';
     } else if (mode === developer.Mode.ANDROIDLA) {
-        var apiUrl = 'http://10.0.2.2:9711/api/';
+        apiUrl = 'http://10.0.2.2:9711/api/';
     }
 
     /**
