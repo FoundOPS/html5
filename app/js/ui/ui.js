@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(function () {
+define(['developer'], function (developer) {
     var ui = {};
 
     /**
@@ -46,16 +46,21 @@ define(function () {
         0.30
     ];
 
+    var imageRootUrl = "../Content/";
+    if (developer.CURRENT_FRAME === developer.Frame.BROWSER) {
+        imageRootUrl = 'img/';
+    }
+
     /**
      * Enum for image urls.
      * @enum {String}
      */
     ui.ImageUrls = {
-        ANDROID: "img/android.png",
-        APPLE: "img/apple.png",
-        DEPOT: "img/depot.png",
-        OUTER_CIRCLE: "img/outerCircle.png",
-        TRUCK: "img/truck.png"
+        ANDROID: imageRootUrl + "android.png",
+        APPLE: imageRootUrl + "apple.png",
+        DEPOT: imageRootUrl + "depot.png",
+        OUTER_CIRCLE: imageRootUrl + "outerCircle.png",
+        TRUCK: imageRootUrl + "truck.png"
     };
 
     return ui;

@@ -140,9 +140,9 @@ define(['db/models', 'tools', 'ui/ui', 'lib/leaflet'], function (models, tools, 
         var color = routeColorSelector.getValue(resource.RouteId);
         var locationLatLng = new window.L.LatLng(resource.Latitude, resource.Longitude);
         var iconUrl = ui.ImageUrls.TRUCK;
-        if (resource.source === models.DevicePlatform.IPHONE) {
+        if (resource.Source === models.DevicePlatform.IPHONE) {
             iconUrl = ui.ImageUrls.APPLE;
-        } else if (resource.source === models.DevicePlatform.ANDROID) {
+        } else if (resource.Source === models.DevicePlatform.ANDROID) {
             iconUrl = ui.ImageUrls.ANDROID;
         }
 

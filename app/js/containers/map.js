@@ -116,6 +116,12 @@ require(["jquery", "lib/leaflet", "developer", "db/services", "tools", "ui/leafl
             //find the loaded track points for the route, and add this
             var routeTrackPoints = routesTrackPoints[resource.RouteId];
             if (routeTrackPoints && routeTrackPoints != services.Status.LOADING) {
+                if (resource.EmployeeId != null) {
+                    resource.Id = resource.EmployeeId;
+                } else {
+                    resource.Id = resource.VehicleId;
+                }
+
                 //add current resource to the list of trackpoints
                 routeTrackPoints.push(resource);
                 //check if a route is currently selected
@@ -261,8 +267,23 @@ require(["jquery", "lib/leaflet", "developer", "db/services", "tools", "ui/leafl
         //set the date to today
         setDate(new Date());
     };
+    initialize();
 
 //endregion
 
-    initialize();
+    //expose certain functionality to the browser window
+    // (so it can be accessed from silverlight)
+    var functions = {
+        setRoleId: function (roleId) {
+            services.setRoleId(roleId);
+            getRoutes();
+            getResources();
+        },
+        setSelectedRoute: setSelectedRoute
+    };
+
+    window.map = functions;
+
+    //for debugging
+//    functions.setRoleId(developer.GOTGREASE_ROLE_ID);
 });

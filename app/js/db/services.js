@@ -20,12 +20,12 @@ define(['lib/kendo.all.min', 'developer'], function (k, developer) {
 
     var apiUrl;
 //setup the api url depending on the mode
-    var mode = developer.CURRENT_MODE;
-    if (mode === developer.Mode.LOCAL) {
+    var mode = developer.CURRENT_DATA_SOURCE;
+    if (mode === developer.DataSource.LOCAL) {
         apiUrl = 'routes.json';
-    } else if (mode === developer.Mode.LOCALAPI) {
+    } else if (mode === developer.DataSource.LOCALAPI) {
         apiUrl = 'http://localhost:9711/api/';
-    } else if (mode === developer.Mode.ANDROIDLA) {
+    } else if (mode === developer.DataSource.ANDROIDLA) {
         apiUrl = 'http://10.0.2.2:9711/api/';
     }
 
@@ -45,7 +45,7 @@ define(['lib/kendo.all.min', 'developer'], function (k, developer) {
     };
 
 //Set the roleId to GotGrease's role (for debugging)
-    if (developer.Mode !== developer.Mode.LIVE) {
+    if (developer.DataSource !== developer.DataSource.LIVE) {
         services.setRoleId(developer.GOTGREASE_ROLE_ID);
     }
 
