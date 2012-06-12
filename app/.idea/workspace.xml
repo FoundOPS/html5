@@ -6,16 +6,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="26047507-8fcb-40e1-a644-df8830ed2000" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/codeStyleSettings.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/jsLinters/jshint.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/dictionaries/Rod.xml" afterPath="$PROJECT_DIR$/.idea/dictionaries/Rod.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/jsLinters/jslint.xml" afterPath="$PROJECT_DIR$/.idea/jsLinters/jslint.xml" />
+      <change type="MOVED" beforePath="C:\FoundOPS\foundOPS-ng\app\views\routedestinations.html" afterPath="$PROJECT_DIR$/views/routeDestinations.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/codeStyleSettings.xml" afterPath="$PROJECT_DIR$/.idea/codeStyleSettings.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/containers/mobile.js" afterPath="$PROJECT_DIR$/js/containers/mobile.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/db/services.js" afterPath="$PROJECT_DIR$/js/db/services.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/developer.js" afterPath="$PROJECT_DIR$/js/developer.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile.html" afterPath="$PROJECT_DIR$/mobile.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/lib/kendo.web.min.js" afterPath="$PROJECT_DIR$/lib/kendo.web.min.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/views/routeDestinationDetails.html" afterPath="$PROJECT_DIR$/views/routeDestinationDetails.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/views/routes.html" afterPath="$PROJECT_DIR$/views/routes.html" />
     </list>
     <ignored path="app.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -32,6 +31,36 @@
   <component name="DaemonCodeAnalyzer">
     <disable_hints />
   </component>
+  <component name="DockManager">
+    <window id="1">
+      <content type="file-editors">
+        <state>
+          <leaf>
+            <file leaf-file-name="mobile.js" pinned="false" current="false" current-in-tab="false">
+              <entry file="file://$PROJECT_DIR$/js/containers/mobile.js">
+                <provider selected="true" editor-type-id="text-editor">
+                  <state line="77" column="13" selection-start="1955" selection-end="1955" vertical-scroll-proportion="0.0">
+                    <folding>
+                      <element signature="e#145#434#0" expanded="false" />
+                    </folding>
+                  </state>
+                </provider>
+              </entry>
+            </file>
+            <file leaf-file-name="routes.json" pinned="false" current="false" current-in-tab="true">
+              <entry file="file://$PROJECT_DIR$/routes.json">
+                <provider selected="true" editor-type-id="text-editor">
+                  <state line="13" column="32" selection-start="357" selection-end="357" vertical-scroll-proportion="0.01609442">
+                    <folding />
+                  </state>
+                </provider>
+              </entry>
+            </file>
+          </leaf>
+        </state>
+      </content>
+    </window>
+  </component>
   <component name="FavoritesManager">
     <favorites_list name="app" />
   </component>
@@ -40,16 +69,16 @@
       <file leaf-file-name="mobile.html" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/mobile.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="36" column="30" selection-start="1379" selection-end="1379" vertical-scroll-proportion="-6.428571">
+            <state line="43" column="13" selection-start="1653" selection-end="1653" vertical-scroll-proportion="-13.75">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="routes.html" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="routes.html" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/views/routes.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="6" column="20" selection-start="390" selection-end="390" vertical-scroll-proportion="-3.75">
+            <state line="9" column="9" selection-start="606" selection-end="606" vertical-scroll-proportion="0.28846154">
               <folding />
             </state>
           </provider>
@@ -58,7 +87,7 @@
       <file leaf-file-name="routeDestinations.html" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/views/routeDestinations.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="1" column="14" selection-start="94" selection-end="94" vertical-scroll-proportion="-0.625">
+            <state line="6" column="9" selection-start="318" selection-end="318" vertical-scroll-proportion="-3.75">
               <folding />
             </state>
           </provider>
@@ -67,19 +96,8 @@
       <file leaf-file-name="routeDestinationDetails.html" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/views/routeDestinationDetails.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="1" column="14" selection-start="95" selection-end="95" vertical-scroll-proportion="-0.625">
+            <state line="7" column="0" selection-start="352" selection-end="352" vertical-scroll-proportion="-4.375">
               <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="mobile.js" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/js/containers/mobile.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="88" column="11" selection-start="2353" selection-end="2353" vertical-scroll-proportion="0.73512477">
-              <folding>
-                <element signature="e#145#434#0" expanded="false" />
-              </folding>
             </state>
           </provider>
         </entry>
@@ -87,7 +105,7 @@
       <file leaf-file-name="services.js" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/js/db/services.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="180" column="20" selection-start="6492" selection-end="6492" vertical-scroll-proportion="0.0">
+            <state line="44" column="6" selection-start="1017" selection-end="1017" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -96,7 +114,7 @@
       <file leaf-file-name="models.js" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/js/db/models.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+            <state line="13" column="25" selection-start="300" selection-end="300" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -115,7 +133,6 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/js/mobileController.js" />
         <option value="$PROJECT_DIR$/map.html" />
         <option value="$PROJECT_DIR$/lib/kendo.all.min.js" />
         <option value="$PROJECT_DIR$/views/routedetails.html" />
@@ -124,21 +141,21 @@
         <option value="$PROJECT_DIR$/js/services.js" />
         <option value="$PROJECT_DIR$/js/mobile.js" />
         <option value="$PROJECT_DIR$/views/routedestinationdetails.html" />
-        <option value="$PROJECT_DIR$/js/developer.js" />
         <option value="$PROJECT_DIR$/views/routedestinations.html" />
         <option value="$PROJECT_DIR$/mobile.html" />
-        <option value="$PROJECT_DIR$/views/routes.html" />
-        <option value="$PROJECT_DIR$/views/routeDestinationDetails.html" />
-        <option value="$PROJECT_DIR$/js/containers/mobile.js" />
+        <option value="$PROJECT_DIR$/js/developer.js" />
         <option value="$PROJECT_DIR$/views/routeDestinations.html" />
+        <option value="$PROJECT_DIR$/views/routeDestinationDetails.html" />
+        <option value="$PROJECT_DIR$/js/db/services.js" />
+        <option value="$PROJECT_DIR$/js/containers/mobile.js" />
+        <option value="$PROJECT_DIR$/views/routes.html" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="-8" />
-    <option name="y" value="-8" />
-    <option name="width" value="1936" />
-    <option name="height" value="1056" />
+    <option name="x" value="839" />
+    <option name="width" value="1081" />
+    <option name="height" value="1040" />
   </component>
   <component name="ProjectInspectionProfilesVisibleTreeState">
     <entry key="Project Default">
@@ -182,6 +199,16 @@
       <sortByType />
     </navigator>
     <panes>
+      <pane id="Scope">
+        <subPane subId="Project Files">
+          <PATH>
+            <PATH_ELEMENT USER_OBJECT="Root">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+          </PATH>
+        </subPane>
+      </pane>
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -210,50 +237,8 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="views" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="app" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="app" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
               <option name="myItemId" value="js" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="app" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="app" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="js" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="containers" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-        </subPane>
-      </pane>
-      <pane id="Scope">
-        <subPane subId="Project Files">
-          <PATH>
-            <PATH_ELEMENT USER_OBJECT="Root">
-              <option name="myItemId" value="" />
-              <option name="myItemType" value="" />
             </PATH_ELEMENT>
           </PATH>
         </subPane>
@@ -263,11 +248,11 @@
   <component name="PropertiesComponent">
     <property name="options.splitter.main.proportions" value="0.3" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="options.lastSelected" value="preferences.sourceCode.JavaScript" />
     <property name="recentsLimit" value="5" />
+    <property name="options.lastSelected" value="preferences.sourceCode.JavaScript" />
     <property name="DefaultHtmlFileTemplate" value="Html" />
-    <property name="options.searchVisible" value="true" />
     <property name="options.splitter.details.proportions" value="0.2" />
+    <property name="options.searchVisible" value="true" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
@@ -334,15 +319,15 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
-    <editor active="false" />
+    <frame x="839" y="0" width="1081" height="1040" extended-state="0" />
+    <editor active="true" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3295838" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.26996624" sideWeight="0.9985391" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.2693182" sideWeight="0.9985391" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24967742" sideWeight="0.5" order="0" side_tool="true" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.13233724" sideWeight="0.609375" order="3" side_tool="false" content_ui="combo" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.390625" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.2423945" sideWeight="0.60227275" order="3" side_tool="false" content_ui="combo" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.39772728" sideWeight="0.99901867" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="1" side_tool="true" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33485195" sideWeight="0.50595236" order="10" side_tool="true" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.2480091" sideWeight="0.9990282" order="2" side_tool="false" content_ui="tabs" />
@@ -412,123 +397,105 @@
     <breakpoint-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/js/developer.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="35" column="71" selection-start="994" selection-end="994" vertical-scroll-proportion="0.6235154">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/js/tools.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="152" column="3" selection-start="4680" selection-end="4680" vertical-scroll-proportion="0.8947368">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/js/ui/ui.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="15" column="7" selection-start="299" selection-end="299" vertical-scroll-proportion="0.2631579">
-          <folding />
-        </state>
+        <state line="15" column="7" selection-start="299" selection-end="299" vertical-scroll-proportion="0.2631579" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/jquery.qrcode.min.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/require-jquery.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
-          <folding>
-            <element signature="n#!!doc" expanded="true" />
-          </folding>
-        </state>
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/underscore.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
-          <folding>
-            <element signature="n#!!doc" expanded="true" />
-          </folding>
-        </state>
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/qrcode.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
-          <folding>
-            <element signature="n#!!doc" expanded="true" />
-          </folding>
-        </state>
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/closure-library/closure/goog/async/animationdelay.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="15" column="31" selection-start="663" selection-end="663" vertical-scroll-proportion="0.074875206">
+        <state line="15" column="31" selection-start="663" selection-end="663" vertical-scroll-proportion="0.074875206" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/developer.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="36" column="0" selection-start="997" selection-end="997" vertical-scroll-proportion="0.7696737">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/kendo.web.min.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="7" column="53" selection-start="363" selection-end="363" vertical-scroll-proportion="0.20669292">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/js/db/models.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/routes.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="14" column="41" selection-start="387" selection-end="387" vertical-scroll-proportion="0.4085603">
+        <state line="13" column="25" selection-start="300" selection-end="300" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/js/db/services.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="180" column="20" selection-start="6492" selection-end="6492" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/views/routeDestinations.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="1" column="14" selection-start="94" selection-end="94" vertical-scroll-proportion="-0.625">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/views/routes.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="6" column="20" selection-start="390" selection-end="390" vertical-scroll-proportion="-3.75">
+        <state line="44" column="6" selection-start="1017" selection-end="1017" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/mobile.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="36" column="30" selection-start="1379" selection-end="1379" vertical-scroll-proportion="-6.428571">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/views/routeDestinationDetails.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="1" column="14" selection-start="95" selection-end="95" vertical-scroll-proportion="-0.625">
+        <state line="43" column="13" selection-start="1653" selection-end="1653" vertical-scroll-proportion="-13.75">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/js/containers/mobile.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="88" column="11" selection-start="2353" selection-end="2353" vertical-scroll-proportion="0.73512477">
+        <state line="77" column="13" selection-start="1955" selection-end="1955" vertical-scroll-proportion="0.0">
           <folding>
             <element signature="e#145#434#0" expanded="false" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/routes.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="13" column="32" selection-start="357" selection-end="357" vertical-scroll-proportion="0.01609442">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/views/routeDestinations.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="6" column="9" selection-start="318" selection-end="318" vertical-scroll-proportion="-3.75">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/views/routeDestinationDetails.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="7" column="0" selection-start="352" selection-end="352" vertical-scroll-proportion="-4.375">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/views/routes.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="9" column="9" selection-start="606" selection-end="606" vertical-scroll-proportion="0.28846154">
+          <folding />
         </state>
       </provider>
     </entry>
