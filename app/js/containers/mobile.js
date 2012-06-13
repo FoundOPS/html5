@@ -25,7 +25,7 @@ require.config({
     }
 });
 
-require(["jquery", "lib/kendo.mobile.min", "developer", "db/services"], function ($, m, developer, services) {
+require(["jquery", "lib/kendo.all.min", "developer", "db/services"], function ($, m, developer, services) {
     var mobile = {};
     /**
      * The configuration object for the mobile application.
@@ -49,45 +49,64 @@ require(["jquery", "lib/kendo.mobile.min", "developer", "db/services"], function
     };
 
     var app;
-    var selectedRoute = null;
-    var selectedDestination = null;
 
-    var selectRoute = function (route) {
-        selectedRoute = route;
-        app.navigate("views/routeDestinations.html");
+    var viewModel = kendo.observable({
+        routesSource: services.routesDataSource,
+        selectedRoute: null,
+        selectedDestination: null,
+        /**
+         * Select a route
+         * @param e The event args from a list view click event
+         */
+        selectRoute: function (e) {
+            this.set("selectedRoute", e.dataItem);
+            this.set("routeDestinationsSource", new kendo.data.DataSource({data: this.get("selectedRoute").RouteDestinations }));
+            app.navigate("views/routeDestinations.html");
+        },
+        /**
+         * Select a route destination
+         * @param e The event args from a list view click event
+         */
+        selectRouteDestination: function (e) {
+            this.set("selectedDestination", e.dataItem);
+            app.navigate("views/routeDestinationDetails.html");
+        }
+    });
+
+    mobile.setupRouteBindings = function () {
+        kendo.bind($("#routes-listview"), viewModel, kendo.mobile.ui);
     };
 
-    var selectDestination = function (destination) {
-        selectedDestination = destination;
-        app.navigate("views/routeDestinationDetails.html");
+    mobile.setupRouteDestinationBindings = function () {
+        kendo.bind($("#routeDestinations-listview"), viewModel, kendo.mobile.ui);
     };
 
-    mobile.setupRoutesList = function () {
-        $("#routes-listview").kendoMobileListView({
-            dataSource: services.routesDataSource,
-            pullToRefresh: true,
-            selectable: true,
-            style: "inset",
-            template: $("#routeListViewTemplate").html(),
-            click: function (e) {
-                selectRoute(e.dataItem);
-            }
-        });
-    };
+//    mobile.setupRoutesList = function () {
+//        $("#routes-listview").kendoMobileListView({
+//            dataSource: services.routesDataSource,
+//            pullToRefresh: true,
+//            selectable: true,
+//            style: "inset",
+//            template: $("#routeListViewTemplate").html(),
+//            click: function (e) {
+//                selectRoute(e.dataItem);
+//            }
+//        });
+//    };
 
-    mobile.setupRouteDestinationsList = function () {
-        var dataSource = new kendo.data.DataSource({data: selectedRoute.RouteDestinations});
-
-        $("#routeDestinations-listview").kendoMobileListView({
-            dataSource: dataSource,
-            selectable: true,
-            style: "inset",
-            template: $("#routeDestinationsViewTemplate").html(),
-            click: function (e) {
-                selectDestination(e.dataItem);
-            }
-        });
-    };
+//    mobile.setupRouteDestinationsList = function () {
+//        var dataSource = new kendo.data.DataSource({data: selectedRoute.RouteDestinations});
+//
+//        $("#routeDestinations-listview").kendoMobileListView({
+//            dataSource: dataSource,
+//            selectable: true,
+//            style: "inset",
+//            template: $("#routeDestinationsViewTemplate").html(),
+//            click: function (e) {
+//                selectDestination(e.dataItem);
+//            }
+//        });
+//    };
 
     mobile.setupRouteDestinationDetailsList = function () {
 //        $('#routeDestinationDetails-listview').kendoMobileListView({

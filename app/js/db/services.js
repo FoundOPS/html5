@@ -71,24 +71,24 @@ define(['lib/kendo.all.min', 'developer', 'tools'], function (k, developer, tool
 
             var url = services.API_URL + queryString;
 
-            $.ajax({
-                //must use JSONP because the javascript may be hosted on a different url than the api
-                type: "GET",
-                dataType: 'JSONP',
-                url: url,
-                data: params
-            })
-                .success(function (response) {
-                    var convertedData = response;
-
-                    //if there is a converter, convert the data
-                    if (opt_convertItem) {
-                        convertedData = tools.convertArray(response, opt_convertItem);
-                    }
-
-                    //perform the callback function by passing the response data
-                    callback(convertedData);
-                });
+//            $.ajax({
+//                //must use JSONP because the javascript may be hosted on a different url than the api
+//                type: "GET",
+//                dataType: 'JSONP',
+//                url: url,
+//                data: params
+//            })
+//                .success(function (response) {
+//                    var convertedData = response;
+//
+//                    //if there is a converter, convert the data
+//                    if (opt_convertItem) {
+//                        convertedData = tools.convertArray(response, opt_convertItem);
+//                    }
+//
+//                    //perform the callback function by passing the response data
+//                    callback(convertedData);
+//                });
         };
 
         return getThenInvokeCallback;
@@ -170,12 +170,6 @@ define(['lib/kendo.all.min', 'developer', 'tools'], function (k, developer, tool
     services.authenticate = function (email, password, callback) {
         return services._getHttp('auth/Login', {email: email, pass: password}, true, null)(callback);
     };
-
-    //TODO Move to appropriate location
-    var viewModel = kendo.observable({
-        routesSource: services.routeDestinationsDataSource
-    });
-    kendo.bind($("#route-listview"), viewModel);
 
     return services;
 });

@@ -1,7 +1,8 @@
-<div data-role="view" data-layout="mobile-view" data-title="Route Destinations"
-     data-init="mobile.setupRouteDestinationsList" id="routeDestinations">
-    <ul id="routeDestinations-listview"></ul>
+<div id="routeDestinations" data-role="view" data-layout="mobile-view" data-title="Route Destinations"
+     data-init="mobile.setupRouteDestinationBindings">
+    <ul id="routeDestinations-listview" data-bind="source:routeDestinationsSource, click: selectRouteDestination" data-pullToRefresh="true" data-role="listview"
+        data-selectable="true" data-style="inset" data-template="routeDestinationsViewTemplate" style="margin-bottom: 400px;"></ul>
 </div>
 <script type="text/x-kendo-template" id="routeDestinationsViewTemplate">
-    <a>#= Client.Name #</a>
+    <a>${Client.Name}</a>
 </script>
