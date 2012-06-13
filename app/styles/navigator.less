@@ -1,0 +1,513 @@
+/* app css stylesheet */
+
+/* http://meyerweb.com/eric/tools/css/reset/
+   v2.0 | 20110126
+   License: none (public domain)
+*/
+
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 100%;
+    font: inherit;
+    vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+    display: block;
+}
+body {
+    line-height: 1;
+}
+ol, ul {
+    list-style: none;
+}
+blockquote, q {
+    quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+    content: '';
+    content: none;
+}
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+/*******************************************************
+***                   END RESET                      ***
+*******************************************************/
+
+/*NOTES:    The following are linked values:
+                  #nav height = .navElement height
+                  (#nav height + #nav padding-top/bottom) = #sideBar top = #content padding-top
+                  #sideBar width = #rightColumn .columnContent padding-right
+                  #sideBar width = (#nav height + #nav padding-top/bottom) ?
+
+                  TODO: To fix vertical centering when client logo is removed, add line height to container, and change element centering to middle.
+*/
+
+/*  CONSTANTS  */
+
+/*  Colors */
+@lightCharcoal: #777779;
+@lightGrey: #F1F2F2;
+@darkGrey: #CCCCCC;
+@charcoal: #333335;
+@orange: #D9591E;
+@green: #659A41;
+@blue: #488FCD;
+@red: #991A36;
+@black: #000;
+
+/*  Positioning  */
+@navHeightMax: 45px;
+@navHeightMid: 38px;
+@navHeightMin: 35px;
+
+/*  Other Vars  */
+@hoverOpacity: .7;
+
+@popupCarrotHeight: 14px;
+@popupCarrotWidth: 28px;
+
+@sideBarWrapperWidth: 55px;
+
+@sideBarExpandedWidth: 159px;
+
+
+/*  MAIN  */
+html{
+    padding: 0;
+    margin: 0;
+    height: 100%;
+    width: 100%;
+}
+
+body{
+    padding: 0;
+    margin: 0;
+    height: 100%;
+    width: 100%;
+
+    color: @charcoal;
+
+    font-family: segoe, verdana, sans-serif;
+    font-size: 100%;
+}
+
+a{
+    color: @lightGrey;
+    text-decoration: none;
+
+    &:hover{
+        color: @darkGrey;
+    }
+}
+
+.navColor{
+    background: @charcoal;
+}
+
+#nav{
+    width: 100%;
+    position: fixed;
+    z-index: 2;
+    text-align: center;
+    height: @navHeightMax;
+    box-shadow: 0px 1px 6px #888;
+
+    img{
+        max-height: 100%;
+    }
+
+    a:hover{
+        opacity: @hoverOpacity;
+    }
+	
+	.navColor;
+}
+
+#navContainer{
+    height: 100%;
+    display: inline-block;
+/* ie 6/7 fix
+*display: inline;
+zoom: 1;*/
+    line-height:100%;
+    font-size:100%;
+
+    .last{
+        margin-right: 0;
+    }
+}
+
+.navElement{
+    display: inline-block;
+    vertical-align: baseline;
+    margin-right: 60px;        /*Spacing between nav elements*/
+    height: 100%;
+
+    input{
+        margin-right: 15px;
+        line-height: 100%;
+        min-height: 12px;
+        max-height: 30px;
+
+        font-size: 12px;    /*TODO: Change to relative font size (.75em)*/
+        color: @charcoal;
+    }
+
+    img{
+        vertical-align: middle;
+    }
+}
+
+#clientLogo {
+    margin-left: 10px;
+    padding: 0 5px;
+}
+
+#popup{
+    position: fixed;
+    margin-top: @popupCarrotHeight - 2;
+    display: none;
+    width: 300px;
+    z-index: 3;
+    left: 0;
+
+    background: @lightGrey;
+    color: @charcoal;
+    border: solid @charcoal 3px;
+    border-radius: 5px;
+    box-shadow: 0px 0px 5px #888;
+
+    a{
+       color: @charcoal;
+
+       &:hover{
+           color: @lightCharcoal;
+       }
+    }
+}
+
+#popupHeader{
+    padding: 10px;
+    text-align: center;
+
+    border-bottom: 3px solid @charcoal;
+
+    font-size: 16px;
+}
+
+#popupArrow{
+    position: absolute;
+    top: -1 * @popupCarrotHeight;
+    left: 50%;
+    margin-left: -1 * (@popupCarrotWidth / 2)-2;     /* Half width */
+
+    height: @popupCarrotHeight;
+    width: @popupCarrotWidth;
+
+    background: url('../../../ng/app/img/popupArrow.png') no-repeat;
+}
+
+//TODO: Simplify transparent on hover.
+#popupBack{
+    float: left;
+    height: 16px;
+    width: 8px;
+    background: url('../../../ng/app/img/popupBack.png') center center no-repeat;
+
+    &:hover{
+        opacity: @hoverOpacity;
+    }
+}
+
+#popupClose{
+    float: right;
+    height: 16px;
+    width: 16px;
+    background: url('../../../ng/app/img/popupClose.png') center center no-repeat;
+
+    &:hover{
+        opacity: @hoverOpacity;
+    }
+}
+
+#popupContent{
+    background: @lightGrey;
+    color: @charcoal;
+    padding: 0 15px;
+    text-align: left;
+    font-size: 18px;
+
+    .last{
+        border-bottom: none;
+    }
+}
+
+.popupContentRow{
+    border-bottom: 1px solid @darkGrey;
+    padding: 8px;
+}
+
+#logo{
+    position: absolute;
+    right: 4px;
+    top: 2px;
+    bottom: 2px;
+    margin: auto;
+}
+
+#showMenu{
+    display: none;
+    position: absolute;
+    top: 0;
+    right: 10px;
+}
+
+#showMenu img{
+    padding: 6px;
+}
+
+#sideBarWrapper{
+    position: fixed;
+    top: @navHeightMax;
+    bottom: 0;
+    right: 0;
+    overflow-x: hidden;
+    width: @sideBarWrapperWidth;
+	z-index: 2;
+	.navColor;
+    /*TODO: Give box shadows vendor prefixes.*/
+    box-shadow: -1px 4px 6px #888;
+}
+
+#sideBar{
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+    width: @sideBarWrapperWidth;
+    max-height: 100%;
+    right: 0px;
+
+    color: @lightGrey;
+
+    padding: 8px 0;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    line-height: 1;
+	
+	.navColor;
+
+}
+
+.sideBarElement{
+    position: relative;
+    padding-right: 10px;
+
+    span{
+        vertical-align: middle;
+    }
+
+    img{
+        max-width: 100%;
+        min-width: 20px;
+        position: relative;
+
+        width: 25px;
+        height: 25px;
+        vertical-align: middle;
+        padding: 8px 15px;
+    }
+
+    .icon{
+        width: 25px;
+        height: 25px;
+        display: inline-block;
+        padding: 6px 15px;
+    }
+}
+
+#contentWrapper{
+    position: fixed;
+    top: @navHeightMax;
+    right: @sideBarWrapperWidth;
+    left: 0;
+    bottom: 0;
+
+    background: @lightGrey + #050505;
+}
+
+#content{
+    padding: 8px;
+}
+
+#slideMenu:hover{
+    opacity: @hoverOpacity;
+}
+
+a:hover .iconExpand{opacity: @hoverOpacity;}
+
+.iconExpand, .iconShow {
+    -webkit-transition: all .3s ease-in-out;
+    -moz-transition: all .3s ease-in-out;
+    -ms-transition: all .3s ease-in-out;
+    -o-transition: all .3s ease-in-out;
+    transition: all .3s ease-in-out;
+}
+
+//Mixin to rotate elements.
+.rotate(@deg) {
+    -webkit-transform: rotate(@deg);
+    -ms-transform: rotate(@deg); /* IE 9 */
+    -o-transform: rotate(@deg); /* Opera */
+    -moz-transform: rotate(@deg); /* Firefox */
+    transform: rotate(@deg);
+}
+
+.iconShow{
+    .rotate(-90deg);
+}
+
+.rotateIcon{
+    .rotate(90deg);
+}
+
+.flip {
+    -webkit-transform: rotateY(-180deg);
+    -ms-transform: rotateY(-180deg); /* IE 9 */
+    -o-transform: rotateY(-180deg); /* Opera */
+    -moz-transform: rotateY(-180deg); /* Firefox */
+    transform: rotateY(-180deg);
+}
+
+//Sidebar Icons
+.makeIcon(@iconName, @iconColor){
+    (~".@{iconName}"){
+        .icon {background: url("../img/@{iconName}.png") center center no-repeat;}
+        &:hover{
+            color: @iconColor;
+            .icon {background: url("../img/@{iconName}Color.png") center center no-repeat;}
+        }
+    }
+}
+.makeIcon(dispatcher, @blue);
+.makeIcon(employees, @red);
+.makeIcon(locations, @orange);
+.makeIcon(logout, @black);
+.makeIcon(regions, @orange);
+.makeIcon(routes, @green);
+.makeIcon(services, @green);
+.makeIcon(settings, @black);
+.makeIcon(uservoice, @blue);
+.makeIcon(vehicles, @red);
+
+@media screen and (max-width:1280px){
+    #nav{
+        height: @navHeightMid;
+    }
+
+    #sideBarWrapper{
+        top: @navHeightMid;
+    }
+
+    #contentWrapper{
+        top: @navHeightMid;
+    }
+}
+
+@media screen and (max-width:650px){
+    #nav{
+        height: @navHeightMin;
+    }
+
+    #logo{
+        display: none;
+    }
+
+    #clientLogo{
+        visibility: hidden;
+        height: 100%;
+        width: 0;
+        margin-left: 0;
+        padding: 0;
+    }
+
+    #navSearch input{
+        display: none;
+    }
+
+    #showMenu{
+        display: inline;
+    }
+	
+    #sideBar{
+        right: 0;
+        height: auto;
+        width: @sideBarExpandedWidth;
+
+        box-shadow: 0px 0px 10px #888;
+    }
+
+    #sideBarWrapper{
+        display: inline-block;
+        top: @navHeightMin;
+        height: auto;
+        background: transparent;
+        width: @sideBarExpandedWidth;
+
+        box-shadow: none;
+    }
+
+    #slideMenu{
+        display: none;
+    }
+
+    #contentWrapper{
+        top: @navHeightMin;
+        right: 0;
+    }
+}
+
+@media screen and (max-width:390px){
+    #logo{
+        display: none;
+    }
+
+    #showMenu{
+        display: inline;
+    }
+
+    #navContainer{
+        width: 100%;
+    }
+
+    .navElement{
+        margin-right: 5%;
+    }
+
+    #nav .last{
+        margin-right: 0px;
+    }
+
+    #popup{
+        width: 80%;
+    }
+}

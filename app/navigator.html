@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>FoundOPS Navigator</title>
+
+    <link rel="stylesheet/less" type="text/css" href="css/navigator.less">
+    <link rel="stylesheet" type="text/css" href="css/jquery.jscrollpane.css" media="all"/>
+    <script src="lib/less.min.js" type="text/javascript"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript"></script>
+    <script src="lib/jquery.jscrollpane.min.js" type="text/javascript"></script>
+    <script src="lib/jquery.mousewheel.js" type="text/javascript"></script>
+    <script src="js/navigator.js" type="text/javascript"></script>
+    <!--script data-main="js/navigator.js" src="lib/require-jquery.js"></script-->
+</head>
+
+<body>
+<div id="nav">
+
+    <div id="navContainer">
+        <div id="navSearch" class="navElement">
+            <input name="search" type="text" placeholder="Search..."/>
+            <a href="#"><img class="navIcon" src="../../ng/app/img/Search.png"/></a>
+        </div>
+
+        <div id="navNotif" class="navElement">
+            <a href="#"><img class="navIcon" src="../../ng/app/img/Notify.png"/></a>
+        </div>
+
+        <div id="navClient" class="navElement last">
+            <a href="#"><img class="navIcon" src="./img/Clients.png"/><img id="clientLogo" src="../../ng/app/img/flickr.png"/></a>
+        </div>
+    </div>
+
+    <span id="showMenu"><a href="#"><img class="iconShow" src="../../ng/app/img/Expand.png"/></a></span>
+
+    <img id="logo" src="../../ng/app/img/Logo.png" alt="FoundOPS"/>
+</div>
+
+<div id="sideBarWrapper">
+    <div id="sideBar">
+        <a href="#">
+            <div id="slideMenu" class="sideBarElement"><img class="iconExpand" src="../../ng/app/img/Expand.png"/></div>
+        </a>
+        <a href="#">
+            <div class="sideBarElement employees">
+                <span class="icon"></span>
+                <span>Employees</span>
+            </div>
+        </a>
+        <a href="#">
+            <div class="sideBarElement vehicles">
+                <span class="icon"></span>
+                <span>Vehicles</span>
+            </div>
+        </a>
+        <a href="#">
+            <div class="sideBarElement settings">
+                <span class="icon"></span>
+                <span>Settings</span>
+            </div>
+        </a>
+        <a href="#">
+            <div class="sideBarElement regions">
+                <span class="icon"></span>
+                <span>Regions</span>
+            </div>
+        </a>
+        <a href="#">
+            <div class="sideBarElement services">
+                <span class="icon"></span>
+                <span>Services</span>
+            </div>
+        </a>
+        <a href="#">
+            <div class="sideBarElement uservoice">
+                <span class="icon"></span>
+                <span>Uservoice</span>
+            </div>
+        </a>
+        <a href="#">
+            <div class="sideBarElement logout">
+                <span class="icon"></span>
+                <span>Logout</span>
+            </div>
+        </a>
+    </div>
+</div>
+
+<div id="contentWrapper">
+    <div id="content">
+        Test content here
+    </div>
+</div>
+
+</body>
+</html>
