@@ -6,6 +6,10 @@ require.config({
 
 require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min"], function($) {
 */
+    function Navigator(initData){
+
+    }
+
     $(window).load(function() {
         var sideBar = $("#sideBar");
         var sideBarDiv = $("#sideBar");
@@ -417,6 +421,7 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min"], function($) {
                     sideBarDiv.removeClass("expand");
                     sideBarDiv.attr("style", "");
                     $("#sideBarWrapper").attr("style", "");
+
                     //console.log("Removed class: expand");
                     //console.log("Removed style.");
                 }
@@ -425,6 +430,9 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min"], function($) {
                     sideBarDiv.removeClass("hidden");
                     sideBarDiv.attr("style", "");
                     $("#sideBarWrapper").attr("style", "");
+                    if($(".iconShow").hasClass('rotateIcon')){
+                        $(".iconShow").removeClass('rotateIcon');
+                    }
                     //console.log("Removed class: hidden");
                     //console.log("Removed style.");
                 }
@@ -475,7 +483,7 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min"], function($) {
         );
 
         //Hover listener that expands/contracts sideBar.
-        $("#sideBar, .jspVerticalBar").hover(
+        $(".jspContainer, .jspVerticalBar").hover(
             function(){
                 //console.log("Hovering!");
                 hoverMenu();
@@ -497,6 +505,7 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min"], function($) {
 
             var offset = -1*(sideBar.offset().top + sideBar.outerHeight());
             if(sideBar.hasClass("hidden")){
+                $("#sideBarWrapper").css('display', 'inline-block');
                 sideBar.stop(false, true).animate(
                     {
                         top: 0
@@ -504,7 +513,7 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min"], function($) {
                     'fast',
                     function () {
                         //console.log("Animate completed. navHeight: "+navHeight);
-                        $("#sideBarWrapper").css('display', 'inline-block');
+
                     }
                 );
 

@@ -75,11 +75,6 @@ table {
 @red: #991A36;
 @black: #000;
 
-/*  Positioning  */
-@navHeightMax: 45px;
-@navHeightMid: 38px;
-@navHeightMin: 35px;
-
 /*  Other Vars  */
 @hoverOpacity: .7;
 
@@ -90,6 +85,13 @@ table {
 
 @sideBarExpandedWidth: 159px;
 
+@imageHeight: 15px;
+@iconPadding: 4px;
+@borderSize: 3px;
+
+/*  Positioning  */
+@navHeightMax: 45px;
+@navHeightMin: 35px;
 
 /*  MAIN  */
 html{
@@ -128,9 +130,9 @@ a{
     width: 100%;
     position: fixed;
     z-index: 2;
-    text-align: center;
     height: @navHeightMax;
     box-shadow: 0px 1px 6px #888;
+    text-align: left;
 
     img{
         max-height: 100%;
@@ -149,38 +151,70 @@ a{
 /* ie 6/7 fix
 *display: inline;
 zoom: 1;*/
-    line-height:100%;
+    margin-left: 50px;
     font-size:100%;
+//TODO: Make this dynamic.
+    line-height: @navHeightMax - 5;
 
     .last{
         margin-right: 0;
     }
 }
 
+
+.roundedIcon{
+    border: @borderSize solid @darkGrey;
+    border-radius: 6px;
+}
+
 .navElement{
+    .roundedIcon;
+    background: white;
     display: inline-block;
-    vertical-align: baseline;
+    vertical-align: middle;
     margin-right: 60px;        /*Spacing between nav elements*/
-    height: 100%;
+    line-height: normal;
+
+    .navIcon{
+        padding: @iconPadding;
+    }
 
     input{
-        margin-right: 15px;
+        border: 0;
         line-height: 100%;
-        min-height: 12px;
-        max-height: 30px;
-
-        font-size: 12px;    /*TODO: Change to relative font size (.75em)*/
+        height: @imageHeight + @iconPadding*2 - 2;
+        font-size: 14px;    /*TODO: Change to relative font size (.75em)*/
         color: @charcoal;
+        margin: 0 0 0 2px;
+        padding-left: 4px;
     }
 
     img{
+        height: @imageHeight;
         vertical-align: middle;
     }
 }
 
-#clientLogo {
-    margin-left: 10px;
-    padding: 0 5px;
+#navClient{
+    padding: 0;
+    .navIcon{
+        border: 0;
+        border-radius: 0;
+        border-right: @borderSize solid @darkGrey;
+        padding: 0;
+        padding: 0;
+        height: @imageHeight + @iconPadding*2;
+        overflow:hidden;
+    }
+}
+
+#navSearch .navIcon{
+    border-left: @borderSize solid @darkGrey;
+}
+
+#clientLogo{
+    background: #fff;
+    padding: 0 8px;
 }
 
 #popup{
@@ -224,7 +258,7 @@ zoom: 1;*/
     height: @popupCarrotHeight;
     width: @popupCarrotWidth;
 
-    background: url('../../../ng/app/img/popupArrow.png') no-repeat;
+    background: url('../img/popupArrow.png') no-repeat;
 }
 
 //TODO: Simplify transparent on hover.
@@ -232,7 +266,7 @@ zoom: 1;*/
     float: left;
     height: 16px;
     width: 8px;
-    background: url('../../../ng/app/img/popupBack.png') center center no-repeat;
+    background: url('../img/popupBack.png') center center no-repeat;
 
     &:hover{
         opacity: @hoverOpacity;
@@ -243,7 +277,7 @@ zoom: 1;*/
     float: right;
     height: 16px;
     width: 16px;
-    background: url('../../../ng/app/img/popupClose.png') center center no-repeat;
+    background: url('../img/popupClose.png') center center no-repeat;
 
     &:hover{
         opacity: @hoverOpacity;
@@ -269,7 +303,7 @@ zoom: 1;*/
 
 #logo{
     position: absolute;
-    right: 4px;
+    right: 10px;
     top: 2px;
     bottom: 2px;
     margin: auto;
@@ -309,7 +343,7 @@ zoom: 1;*/
 
     color: @lightGrey;
 
-    padding: 8px 0;
+    padding: 0 0;
     white-space: nowrap;
     -webkit-overflow-scrolling: touch;
     line-height: 1;
@@ -320,13 +354,14 @@ zoom: 1;*/
 
 .sideBarElement{
     position: relative;
-    padding-right: 10px;
+    margin: 0 5px;
 
     span{
         vertical-align: middle;
     }
 
     img{
+        display: inline;
         max-width: 100%;
         min-width: 20px;
         position: relative;
@@ -334,14 +369,17 @@ zoom: 1;*/
         width: 25px;
         height: 25px;
         vertical-align: middle;
-        padding: 8px 15px;
+        padding: 5px 10px;
+        text-decoration:none;
+        border: 0;
     }
 
+    //TODO: Eliminate most of this.
     .icon{
         width: 25px;
         height: 25px;
         display: inline-block;
-        padding: 6px 15px;
+        padding: 6px 10px;
     }
 }
 
@@ -357,6 +395,11 @@ zoom: 1;*/
 
 #content{
     padding: 8px;
+}
+
+#slideMenu{
+    border-top: 1px solid @darkGrey;
+    border-bottom: 1px solid @darkGrey;
 }
 
 #slideMenu:hover{
@@ -387,7 +430,7 @@ a:hover .iconExpand{opacity: @hoverOpacity;}
 }
 
 .rotateIcon{
-    .rotate(90deg);
+    .rotate(0deg);
 }
 
 .flip {
@@ -419,27 +462,28 @@ a:hover .iconExpand{opacity: @hoverOpacity;}
 .makeIcon(uservoice, @blue);
 .makeIcon(vehicles, @red);
 
-@media screen and (max-width:1280px){
-    #nav{
-        height: @navHeightMid;
-    }
-
-    #sideBarWrapper{
-        top: @navHeightMid;
-    }
-
-    #contentWrapper{
-        top: @navHeightMid;
-    }
-}
-
 @media screen and (max-width:650px){
     #nav{
         height: @navHeightMin;
     }
 
+    #navContainer{
+        line-height: @navHeightMin - 5;
+    }
+
+    .navElement{
+    }
+
     #logo{
         display: none;
+    }
+
+    #navClient{
+        border: 0;
+        .navIcon{
+            .roundedIcon;
+            padding: 0;
+        }
     }
 
     #clientLogo{
@@ -500,7 +544,7 @@ a:hover .iconExpand{opacity: @hoverOpacity;}
     }
 
     .navElement{
-        margin-right: 5%;
+        margin-right: 10%;
     }
 
     #nav .last{
