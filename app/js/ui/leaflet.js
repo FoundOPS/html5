@@ -20,7 +20,7 @@ define(['db/models', 'tools', 'ui/ui', 'lib/leaflet'], function (models, tools, 
             zoom: 4
         });
         // create a CloudMade tile layer and add it to the map
-        var cloudMade = new window.L.TileLayer('http://{s}.tile.cloudmade.com/57cbb6ca8cac418dbb1a402586df4528/997/256/{z}/{x}/{y}.png', {
+        var cloudMade = new window.L.TileLayer('http://{s}.tile.cloudmade.com/57cbb6ca8cac418dbb1a402586df4528/65210/256/{z}/{x}/{y}.png', {
             maxZoom: 18
         });
         map.addLayer(cloudMade);
@@ -280,6 +280,13 @@ define(['db/models', 'tools', 'ui/ui', 'lib/leaflet'], function (models, tools, 
                 /** Next 4 lines were custom added */
                 var numdiv = document.createElement('div');
                 numdiv.setAttribute("class", "number");
+                if(destination.OrderInRoute > 9 && destination.OrderInRoute < 100){
+                    numdiv.style.left = "-5px";
+                }else if(destination.OrderInRoute >= 100){
+                    numdiv.style.top = "-4px";
+                    numdiv.style.left = "-5px";
+                    numdiv.style.fontSize = "6.4px";
+                }
                 numdiv.innerHTML = this.number || '';
                 div.appendChild(numdiv);
                 this._setIconStyles(div, 'icon');

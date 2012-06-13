@@ -44,11 +44,6 @@ define(['lib/kendo.all.min', 'developer'], function (k, developer) {
         services.RoleId = roleId;
     };
 
-//Set the roleId to GotGrease's role (for debugging)
-    if (developer.DataSource !== developer.DataSource.LIVE) {
-        services.setRoleId(developer.GOTGREASE_ROLE_ID);
-    }
-
     /**
      * Returns a standard http get.
      * @param {String} queryString The query string to use. Ex. "routes/GetDepots"

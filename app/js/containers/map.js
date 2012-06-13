@@ -52,13 +52,16 @@ require(["jquery", "lib/leaflet", "developer", "db/services", "tools", "ui/leafl
     /**
      * @type {window.L.LayerGroup}
      */
+    var depotsGroup;
+    /**
+     * @type {window.L.LayerGroup}
+     */
     var resourcesGroup;
     /**
      * @type {window.L.LayerGroup}
      */
     var routesGroup;
     /**
-     * The layer group of track points for the selected route.
      * @type {window.L.LayerGroup}
      */
     var trackPointsGroup;
@@ -180,35 +183,57 @@ require(["jquery", "lib/leaflet", "developer", "db/services", "tools", "ui/leafl
         }
     };
 
-    //gets all of the resources
-    var getResources = function () {
-        //if the date is today: load the resources with latest points
-        if (tools.dateEqual(selectedDate, new Date())) {
-            services.getResourcesWithLatestPoints(function (resourcesWithLatestPoints) {
-                resources = resourcesWithLatestPoints;
-                drawResources();
+    //load/draw the current service provider's depots
+    var getDepots = function () {
+        //remove old depot from map
+        removeLayer(depotsGroup);
+        //check if there is a roleId set
+        if (services.RoleId != null) {
+            services.getDepots(function (loadedDepots) {
+                depotsGroup = leaflet.drawDepots(map, loadedDepots);
             });
-            //reload the resources
-            setTimeout(function () {
-                getResources();
-            }, RESOURCES_REFRESH_RATE);
         }
     };
 
-    //load the routes for the date
-    var getRoutes = function () {
-        services.getRoutes(function (loadedRoutes) {
-            removeLayer(routesGroup);
-            //draw the routes
-            routesGroup = leaflet.drawRoutes(map, loadedRoutes, routeColorSelector, center,
-                /**
-                 * @param {Object} selectedRoute
-                 */
-                    function (selectedRoute) {
-                    setSelectedRoute(selectedRoute);
+    //load/draw the resources with latest points
+    var getResources = function () {
+        //check if there is a roleId set
+        if (services.RoleId != null) {
+            //if the date is today: load the resources with latest points
+            if (tools.dateEqual(selectedDate, new Date())) {
+                services.getResourcesWithLatestPoints(function (resourcesWithLatestPoints) {
+                    resources = resourcesWithLatestPoints;
+                    drawResources();
                 });
-            center = false;
-        });
+                //reload the resources
+                setTimeout(function () {
+                    getResources();
+                }, RESOURCES_REFRESH_RATE);
+            }
+        }
+    };
+
+    //load/draw the routes for the date
+    var getRoutes = function () {
+        //check if there is a roleId set
+        if (services.RoleId != null) {
+            services.getRoutes(function (loadedRoutes) {
+                removeLayer(routesGroup);
+                //draw the routes
+                routesGroup = leaflet.drawRoutes(map, loadedRoutes, routeColorSelector, center,
+                    /**
+                     * @param {Object} selectedRoute
+                     */
+                        function (selectedRoute) {
+                        setSelectedRoute(selectedRoute);
+                    });
+                center = false;
+
+                //if selectedRouteId is set, select that route (now that the routes are loaded)
+                if (selectedRouteId)
+                    setSelectedRoute(selectedRouteId);
+            });
+        }
     };
 
     /**
@@ -259,11 +284,6 @@ require(["jquery", "lib/leaflet", "developer", "db/services", "tools", "ui/leafl
             removeLayer(trackPointsGroup);
         });
 
-        //get and add the service provider's depot(s) to the map
-        services.getDepots(function (loadedDepots) {
-            leaflet.drawDepots(map, loadedDepots);
-        });
-
         //set the date to today
         setDate(new Date());
     };
@@ -274,8 +294,12 @@ require(["jquery", "lib/leaflet", "developer", "db/services", "tools", "ui/leafl
     //expose certain functionality to the browser window
     // (so it can be accessed from silverlight)
     var functions = {
+        getRoutes: getRoutes,
+        setDate: setDate,
         setRoleId: function (roleId) {
+            selectedRouteId = null;
             services.setRoleId(roleId);
+            getDepots();
             getRoutes();
             getResources();
         },
@@ -285,5 +309,5 @@ require(["jquery", "lib/leaflet", "developer", "db/services", "tools", "ui/leafl
     window.map = functions;
 
     //for debugging
-//    functions.setRoleId(developer.GOTGREASE_ROLE_ID);
+    //functions.setRoleId(developer.GOTGREASE_ROLE_ID);
 });

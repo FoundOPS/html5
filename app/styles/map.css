@@ -8,6 +8,7 @@
 }
 body{
     font-family: PTSans;
+    margin: 0;
 }
 #map{
     position: absolute;

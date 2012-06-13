@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(['underscore'], function (_) {
+define(['underscore', 'developer'], function (_, developer) {
     var tools = {};
 
     /**
@@ -41,9 +41,9 @@ define(['underscore'], function (_) {
      * @return {string} The date formatted in "m-dd-yyyy".
      */
     tools.formatDate = function (date) {
-        var month = date.getUTCMonth() + 1,
-            day = date.getUTCDate(),
-            year = date.getUTCFullYear();
+            var month = date.getUTCMonth() + 1,
+                day = date.getUTCDate(),
+                year = date.getUTCFullYear();
         return month + "-" + day + "-" + year;
     };
 
