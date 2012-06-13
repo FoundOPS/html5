@@ -1,6 +1,8 @@
 <div id="routes" data-role="view" data-layout="mobile-view" data-title="Routes" data-init="mobile.setupRouteBindings">
-    <ul id="routes-listview" data-bind="source:routesSource, click: selectRoute" data-pullToRefresh="true" data-role="listview"
-        data-selectable="true" data-style="inset" data-template="routeListViewTemplate" style="margin-bottom: 400px;"></ul>
+    <!--Add following attributes with next release of KendoUI Mobile
+    data-pull-to-refresh="true" style="margin-bottom: 400px;"-->
+    <ul id="routes-listview" data-bind="source:routesSource, click: selectRoute" data-role="listview"
+        data-style="inset" data-template="routeListViewTemplate"></ul>
 </div>
 <script type="text/x-kendo-template" id="routeListViewTemplate">
     <a>${Name}</a>

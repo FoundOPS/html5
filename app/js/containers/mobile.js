@@ -60,7 +60,7 @@ require(["jquery", "lib/kendo.all.min", "developer", "db/services"], function ($
          */
         selectRoute: function (e) {
             this.set("selectedRoute", e.dataItem);
-            this.set("routeDestinationsSource", new kendo.data.DataSource({data: this.get("selectedRoute").RouteDestinations }));
+            this.set("routeDestinationsSource", new kendo.data.DataSource({data: this.get("selectedRoute").RouteDestinations}));
             app.navigate("views/routeDestinations.html");
         },
         /**
@@ -69,6 +69,7 @@ require(["jquery", "lib/kendo.all.min", "developer", "db/services"], function ($
          */
         selectRouteDestination: function (e) {
             this.set("selectedDestination", e.dataItem);
+            this.set("routeDestinationDetailsContactInfoSource", new kendo.data.DataSource({data: this.get("selectedDestination").Location.ContactInfoSet}));
             app.navigate("views/routeDestinationDetails.html");
         }
     });
@@ -77,9 +78,15 @@ require(["jquery", "lib/kendo.all.min", "developer", "db/services"], function ($
         kendo.bind($("#routes-listview"), viewModel, kendo.mobile.ui);
     };
 
-    mobile.setupRouteDestinationBindings = function () {
+    mobile.setupRouteDestinationsBindings = function () {
         kendo.bind($("#routeDestinations-listview"), viewModel, kendo.mobile.ui);
     };
+
+    mobile.setupRouteDestinationDetailsBindings = function () {
+        kendo.bind($("#navInfo"), viewModel, kendo.mobile.ui);
+        kendo.bind($("#routeDestinationDetailsContactInfo-listview"), viewModel, kendo.mobile.ui);
+    };
+
 
 //    mobile.setupRoutesList = function () {
 //        $("#routes-listview").kendoMobileListView({
@@ -93,7 +100,7 @@ require(["jquery", "lib/kendo.all.min", "developer", "db/services"], function ($
 //            }
 //        });
 //    };
-
+//
 //    mobile.setupRouteDestinationsList = function () {
 //        var dataSource = new kendo.data.DataSource({data: selectedRoute.RouteDestinations});
 //
@@ -107,22 +114,22 @@ require(["jquery", "lib/kendo.all.min", "developer", "db/services"], function ($
 //            }
 //        });
 //    };
-
-    mobile.setupRouteDestinationDetailsList = function () {
+//
+//    mobile.setupRouteDestinationDetailsList = function () {
 //        $('#routeDestinationDetails-listview').kendoMobileListView({
 //            dataSource: selectedDestination.Location,
 //            selectable: true,
 //            style: "inset",
 //            template: $("#routeDestinationDetailsViewTemplate").html()
 //        });
-    };
+//    };
 
 
     //set mobile to a global function, so the functions are accessible from the HTML element
     window.mobile = mobile;
 
     //Start the mobile application
-    app = new kendo.mobile.Application($(document.body), {platform: "ios"});
+    app = new kendo.mobile.Application($(document.body), {});
 
     //navigate to routes (for development purposes)
     app.navigate("views/routes.html");
