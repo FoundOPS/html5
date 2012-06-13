@@ -1,15 +1,14 @@
 <div id="routeDestinationDetails" data-role="view" data-layout="mobile-view" data-title="Destination Details"
      data-init="mobile.setupRouteDestinationDetailsBindings">
-    <ul data-role="listview" data-style="inset">
-        <li><a id="navInfo" data-bind="source:selectedDestination">Navigate to Route Stop</a></li>
-    </ul>
+    <ul id="navInfo" data-bind="source:navInfoDataSource" data-role="listview" data-style="inset"
+        data-template="navInfoTemplate"></ul>
     <ul id="routeDestinationDetailsContactInfo-listview" data-bind="source:routeDestinationDetailsContactInfoSource"
-        data-role="listview"
-        data-style="inset" data-template="routeDestinationDetailsContactInfoViewTemplate"></ul>
+        data-role="listview" data-style="inset" data-template="routeDestinationDetailsContactInfoViewTemplate"></ul>
 </div>
-<script type="text/x-kendo-template" id="routeDestinationDetailsViewTemplate">
-    <a>${Latitude} ${Longitude}</a>
+<script type="text/x-kendo-template" id="navInfoTemplate">
+    <a>Navigate to Route Stop</a><br/>
+    <!--<a href="http://maps.google.com/maps?q=40.460073,-86.930670">Navigate to Route Stop</a>-->
 </script>
 <script type="text/x-kendo-template" id="routeDestinationDetailsContactInfoViewTemplate">
-    <a>${Label} ${Data}</a>
+    <a href="tel:${Data}">Call ${Label}</a>
 </script>

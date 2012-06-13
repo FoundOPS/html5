@@ -60,7 +60,10 @@ require(["jquery", "lib/kendo.all.min", "developer", "db/services"], function ($
          */
         selectRoute: function (e) {
             this.set("selectedRoute", e.dataItem);
-            this.set("routeDestinationsSource", new kendo.data.DataSource({data: this.get("selectedRoute").RouteDestinations}));
+            this.set("routeDestinationsSource",
+                new kendo.data.DataSource({
+                    data: this.get("selectedRoute").RouteDestinations
+                }));
             app.navigate("views/routeDestinations.html");
         },
         /**
@@ -69,7 +72,15 @@ require(["jquery", "lib/kendo.all.min", "developer", "db/services"], function ($
          */
         selectRouteDestination: function (e) {
             this.set("selectedDestination", e.dataItem);
-            this.set("routeDestinationDetailsContactInfoSource", new kendo.data.DataSource({data: this.get("selectedDestination").Location.ContactInfoSet}));
+            this.set("routeDestinationDetailsContactInfoSource",
+                new kendo.data.DataSource({
+                    data: this.get("selectedDestination").Location.ContactInfoSet
+//                    filter: {field: "type", operator: "eq", value: "Phone Number"}
+                }));
+            this.set("navInfoDataSource",
+                new kendo.data.DataSource({
+//                    schema: {data: this.get("selectedDestination").Location}
+                }));
             app.navigate("views/routeDestinationDetails.html");
         }
     });
