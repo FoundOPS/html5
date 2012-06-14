@@ -19,10 +19,6 @@ lib/leaflet.ie.css
 ----------------
 lib/leaflet.ie.css
 
-lib/linq/test/qunit.css
-----------------
-lib/linq/test/qunit.css
-
 styles/map.css
 ----------------
 styles/map.css
@@ -45,9 +41,9 @@ lib/jquery.js
 lib/leaflet.js
 js/developer.js
 lib/kendo.all.min.js
-js/db/services.js
 lib/underscore.js
 js/tools.js
+js/db/services.js
 js/db/models.js
 js/ui/ui.js
 js/ui/leaflet.js

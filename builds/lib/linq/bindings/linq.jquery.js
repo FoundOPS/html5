@@ -1,1 +1,0 @@
-(function($,Enumerable){$.fn.toEnumerable=function(){return Enumerable.From(this).Select(function(e){return $(e)})},Enumerable.prototype.TojQuery=function(){return $(this.ToArray())}})(jQuery,this.Enumerable||this.jQuery.Enumerable)

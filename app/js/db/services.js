@@ -6,7 +6,7 @@
 
 'use strict';
 
-define(['lib/kendo.all.min', 'developer'], function (k, developer) {
+define(['lib/kendo.all.min', 'developer', 'tools'], function (k, developer, tools) {
     var services = {};
 
     /**
@@ -21,12 +21,14 @@ define(['lib/kendo.all.min', 'developer'], function (k, developer) {
     var apiUrl;
 //setup the api url depending on the mode
     var mode = developer.CURRENT_DATA_SOURCE;
-    if (mode === developer.DataSource.LOCAL) {
-        apiUrl = 'routes.json';
-    } else if (mode === developer.DataSource.LOCALAPI) {
+    if (mode === developer.DataSource.LOCALAPI) {
         apiUrl = 'http://localhost:9711/api/';
     } else if (mode === developer.DataSource.ANDROIDLA) {
         apiUrl = 'http://10.0.2.2:9711/api/';
+    } else if (mode === developer.DataSource.LIVE) {
+        apiUrl = 'http://api.foundops.com/api/';
+    } else if (mode === developer.DataSource.TESTAPI) {
+        apiUrl = 'http://testapi.foundops.com/api/';
     }
 
     /**

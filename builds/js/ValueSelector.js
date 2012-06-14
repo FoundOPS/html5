@@ -1,1 +1,0 @@
-define([],function(){var ValueSelector=function(values){this.values=values,this.keysCache=[]};return ValueSelector.prototype.getValue=function(key){var index=goog.array.indexOf(this.keysCache,key);index===-1&&(this.keysCache.push(key),index=this.keysCache.length-1);var valueIndex=index%this.values.length;return this.values[valueIndex]},ValueSelector})

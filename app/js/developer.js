@@ -17,10 +17,10 @@ define(function () {
      * @enum {number}
      */
     developer.DataSource = {
-        LOCAL: 0,
-        LOCALAPI: 1,
-        ANDROIDLA: 2,
-        LIVE: 3
+        LOCALAPI: 0,
+        ANDROIDLA: 1,
+        LIVE: 2,
+        TESTAPI: 3
     };
 
     /**
@@ -38,7 +38,7 @@ define(function () {
      * The current web service source.
      * @type {developer.DataSource}
      */
-    developer.CURRENT_DATA_SOURCE = developer.DataSource.LOCALAPI;
+    developer.CURRENT_DATA_SOURCE = developer.DataSource.TESTAPI;
 
     /**
      * The current web service source.
