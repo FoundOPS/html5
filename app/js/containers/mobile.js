@@ -52,8 +52,6 @@ require(["jquery", "lib/kendo.all.min", "developer", "db/services"], function ($
 
     var viewModel = kendo.observable({
         routesSource: services.routesDataSource,
-        selectedRoute: null,
-        selectedDestination: null,
         /**
          * Select a route
          * @param e The event args from a list view click event
@@ -72,14 +70,10 @@ require(["jquery", "lib/kendo.all.min", "developer", "db/services"], function ($
          */
         selectRouteDestination: function (e) {
             this.set("selectedDestination", e.dataItem);
-            this.set("routeDestinationDetailsContactInfoSource",
+            this.set("destinationContactInfoSource",
                 new kendo.data.DataSource({
                     data: this.get("selectedDestination").Location.ContactInfoSet
 //                    filter: {field: "type", operator: "eq", value: "Phone Number"}
-                }));
-            this.set("navInfoDataSource",
-                new kendo.data.DataSource({
-//                    schema: {data: this.get("selectedDestination").Location}
                 }));
             app.navigate("views/routeDestinationDetails.html");
         }
@@ -94,8 +88,8 @@ require(["jquery", "lib/kendo.all.min", "developer", "db/services"], function ($
     };
 
     mobile.setupRouteDestinationDetailsBindings = function () {
-        kendo.bind($("#navInfo"), viewModel, kendo.mobile.ui);
-        kendo.bind($("#routeDestinationDetailsContactInfo-listview"), viewModel, kendo.mobile.ui);
+        kendo.bind($("#destinationDetailsHolder"), viewModel, kendo.mobile.ui);
+        kendo.bind($("#destinationContactInfoListView"), viewModel, kendo.mobile.ui);
     };
 
 

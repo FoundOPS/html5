@@ -1,14 +1,13 @@
 <div id="routeDestinationDetails" data-role="view" data-layout="mobile-view" data-title="Destination Details"
-     data-init="mobile.setupRouteDestinationDetailsBindings">
-    <ul id="navInfo" data-bind="source:navInfoDataSource" data-role="listview" data-style="inset"
-        data-template="navInfoTemplate"></ul>
-    <ul id="routeDestinationDetailsContactInfo-listview" data-bind="source:routeDestinationDetailsContactInfoSource"
-        data-role="listview" data-style="inset" data-template="routeDestinationDetailsContactInfoViewTemplate"></ul>
+     data-show="mobile.setupRouteDestinationDetailsBindings">
+    <div id="destinationDetailsHolder" data-bind="source: this" data-template="destinationDetailsTemplate" ></div>
 </div>
-<script type="text/x-kendo-template" id="navInfoTemplate">
-    <a>Navigate to Route Stop</a><br/>
-    <!--<a href="http://maps.google.com/maps?q=40.460073,-86.930670">Navigate to Route Stop</a>-->
+<script type="text/x-kendo-template" id="destinationDetailsTemplate">
+    <a href="http://maps.google.com/maps?q=${selectedDestination.Location.Latitude},${selectedDestination.Location.Longitude}">Navigate
+        to Route Stop</a>
+    <ul id="destinationContactInfoListView" data-bind="source: destinationContactInfoSource"
+        data-role="listview" data-style="inset" data-template="contactInfoTemplate"></ul>
 </script>
-<script type="text/x-kendo-template" id="routeDestinationDetailsContactInfoViewTemplate">
+<script type="text/x-kendo-template" id="contactInfoTemplate">
     <a href="tel:${Data}">Call ${Label}</a>
 </script>

@@ -1,5 +1,5 @@
 <div id="routeDestinations" data-role="view" data-layout="mobile-view" data-title="Route Destinations"
-     data-init="mobile.setupRouteDestinationsBindings">
+     data-show="mobile.setupRouteDestinationsBindings">
     <ul id="routeDestinations-listview" data-bind="source:routeDestinationsSource, click: selectRouteDestination" data-role="listview"
         data-style="inset" data-template="routeDestinationsViewTemplate" style="margin-bottom: 400px;"></ul>
 </div>
@@ -7,5 +7,4 @@
     <a>${Client.Name}
         <span id="address-label">${Location.AddressLineOne}</span>
     </a>
-
 </script>
