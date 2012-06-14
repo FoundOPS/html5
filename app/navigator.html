@@ -6,91 +6,40 @@
 
     <link rel="stylesheet/less" type="text/css" href="styles/navigator.less">
     <link rel="stylesheet" type="text/css" href="styles/jquery.jscrollpane.css" media="all"/>
-    <script src="lib/less.min.js" type="text/javascript"></script>
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript"></script>
-    <script src="lib/jquery.jscrollpane.min.js" type="text/javascript"></script>
-    <script src="lib/jquery.mousewheel.js" type="text/javascript"></script>
-    <script src="js/containers/navigator.js" type="text/javascript"></script>
     <!--script data-main="js/containers/navigator.js" src="lib/require-jquery.js"></script-->
 </head>
 
 <body>
-<div id="nav">
-
-    <div id="navContainer">
-        <div id="navSearch" class="navElement"><input name="search" type="text" placeholder="Search..."/><a href="#"><img class="navIcon" src="img/search.png"/></a></div>
-
-        <!--div id="navNotif" class="navElement">
-            <a href="#"><img class="navIcon" src="img/notify.png"/></a>
-        </div-->
-
-        <div id="navClient" class="navElement last"><a href="#"><img class="navIcon profile" src="img/david.png"/><img id="clientLogo" src="img/got-grease-logo.png"/></a></div>
-    </div>
-
-    <span id="showMenu"><a href="#"><img class="iconShow" src="img/Expand.png"/></a></span>
-
-    <img id="logo" src="./img/Logo.png" alt="FoundOPS"/>
-</div>
-
-<div id="sideBarWrapper">
-    <div id="sideBar">
-        <a href="#">
-            <div id="slideMenu" class="sideBarElement"><img class="iconExpand" src="img/Expand.png"/></div>
-        </a>
-        <a href="#">
-            <div class="sideBarElement employees">
-                <span class="icon"></span>
-                <span>Employees</span>
-            </div>
-        </a>
-        <a href="#">
-            <div class="sideBarElement vehicles">
-                <span class="icon"></span>
-                <span>Vehicles</span>
-            </div>
-        </a>
-        <a href="#">
-            <div class="sideBarElement settings">
-                <span class="icon"></span>
-                <span>Settings</span>
-            </div>
-        </a>
-        <a href="#">
-            <div class="sideBarElement regions">
-                <span class="icon"></span>
-                <span>Regions</span>
-            </div>
-        </a>
-        <a href="#">
-            <div class="sideBarElement services">
-                <span class="icon"></span>
-                <span>Services</span>
-            </div>
-        </a>
-        <a href="#">
-            <div class="sideBarElement uservoice">
-                <span class="icon"></span>
-                <span>Uservoice</span>
-            </div>
-        </a>
-        <a href="#">
-            <div class="sideBarElement logout">
-                <span class="icon"></span>
-                <span>Logout</span>
-            </div>
-        </a>
-    </div>
-</div>
-
 <div id="contentWrapper">
     <div id="content">
         Test content here
     </div>
 </div>
 
+<script src="lib/less.min.js" type="text/javascript"></script>
+<script src="lib/jquery.js" type="text/javascript"></script>
+<script src="lib/jquery.jscrollpane.min.js" type="text/javascript"></script>
+<script src="lib/jquery.mousewheel.js" type="text/javascript"></script>
+<script src="js/containers/navigator.js" type="text/javascript"></script>
 <script>
-    var navigator = new Navigator();
+    var initData = {
+        name: "Jordan Kelly",
+        avatarUrl: "./img/jordan.jpg",
+        businessLogoUrl: "./img/myBusiness.jpg",
+        roles: [
+            {name: "FoundOPS", id:"23144-24242-242442"},
+            {name: "GotGrease", id:"Afsafsaf-24242-242442"},
+            {name: "AB Couriers", id:"Dagag-24242-242442"}
+        ],
+        sections: [
+            {name: "Employees", url:"#Employees", color: "red", iconUrl: "img/employees.png"},
+            {name: "Routes", url:"#Routes", color: "green", iconUrl: "./img/routes.png"},
+            {name: "Regions", url:"#Regions", color: "orange", iconUrl: "./img/regions.png"},
+            {name: "Vehicles", url:"#Vehicles", color: "red", iconUrl: "./img/vehicles.png"}
+        ]
+    };
+    var navigationFrame = new Navigator(initData);
 </script>
 
 </body>

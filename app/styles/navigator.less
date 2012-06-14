@@ -108,7 +108,7 @@ body{
     width: 100%;
 
     color: @charcoal;
-
+    background: @charcoal;
     font-family: segoe, verdana, sans-serif;
     font-size: 100%;
 }
@@ -380,6 +380,7 @@ zoom: 1;*/
         height: 25px;
         display: inline-block;
         padding: 6px 10px;
+        margin-right: 5px;
     }
 }
 
@@ -400,6 +401,7 @@ zoom: 1;*/
 #slideMenu{
     border-top: 1px solid @darkGrey;
     border-bottom: 1px solid @darkGrey;
+    .sideBarElement;
 }
 
 #slideMenu:hover{
@@ -442,7 +444,7 @@ a:hover .iconExpand{opacity: @hoverOpacity;}
 }
 
 //Sidebar Icons
-.makeIcon(@iconName, @iconColor){
+/*.makeIcon(@iconName, @iconColor){
     (~".@{iconName}"){
         .icon {background: url("../img/@{iconName}.png") center center no-repeat;}
         &:hover{
@@ -460,7 +462,23 @@ a:hover .iconExpand{opacity: @hoverOpacity;}
 .makeIcon(services, @green);
 .makeIcon(settings, @black);
 .makeIcon(uservoice, @blue);
-.makeIcon(vehicles, @red);
+.makeIcon(vehicles, @red);*/
+
+.createColors(@color){
+    (~".@{color}"){
+        color: @@color;
+    }
+}
+
+.createColors('lightGrey');
+.createColors('darkGrey');
+.createColors('red');
+.createColors('orange');
+.createColors('green');
+.createColors('blue');
+.createColors('lightCharcoal');
+.createColors('charcoal');
+.createColors('black');
 
 @media screen and (max-width:650px){
     #nav{

@@ -6,11 +6,111 @@ require.config({
 
 require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min"], function($) {
 */
-    function Navigator(initData){
-
+var data = null;
+var thisNav = this;
+    function Navigator(iData){
+        data = iData;
+        initTopNav();
+        initSideBar(iData.sections);
+        afterInit();
     }
 
-    $(window).load(function() {
+//    <!--div id='navNotif' class='navElement'>
+//        <a href='#'><img class='navIcon' src='img/notify.png'/></a>
+//    </div-->
+
+
+var initTopNav = function(){
+        var topNav = $(document.createElement('div'));
+        topNav.attr('id', 'nav');
+
+        var navContainer = "<div id='navContainer'>"+
+                "<div id='navSearch' class='navElement'><input name='search' type='text' placeholder='Search...'/><a href='#'><img class='navIcon' src='img/search.png'/></a></div>"+
+                "<div id='navClient' class='navElement last'><a href='#'><img class='navIcon profile' src='img/david.png'/><img id='clientLogo' src='img/got-grease-logo.png'/></a></div>"+
+            "</div>"+
+
+            //TODO: Should technically be added in with initSideBar.
+            "<span id='showMenu'><a href='#'><img class='iconShow' src='img/Expand.png'/></a></span>"+
+
+            "<img id='logo' src='./img/Logo.png' alt='FoundOPS'/>"+
+        "</div>";
+
+        topNav.html(navContainer);
+        $('body').prepend(topNav);
+    };
+
+    var initSideBar = function(sections){
+        //TODO: Lots of error checking.
+        var sBarWrapper = $(document.createElement('div'));
+        sBarWrapper.attr('id', 'sideBarWrapper');
+
+        var sBar = $(document.createElement('div'));
+        sBar.attr('id', 'sideBar');
+        var expandButton = "<a href='#'>"+
+                "<div id='slideMenu' class='sideBarElement'><img class='iconExpand' src='img/Expand.png'/></div>"+
+            "</a>";
+        sBar.html(expandButton);
+
+        function compareName(a,b) {
+            if (a.name < b.name)
+                return -1;
+            if (a.name > b.name)
+                return 1;
+            return 0;
+        }
+
+        sections.sort(compareName);
+        sections.push({name: "Logout", url: "#logout", color: "black", iconUrl: "./img/logout.png"});
+        var section;
+        //var sBarElement = "";
+        for(section in sections){
+            var currentSection = sections[section];
+            var name = currentSection.name;
+            var color = currentSection.color;
+            var iconUrl = currentSection.iconUrl;
+            //TODO: Implement sprite selection.
+
+            var bgX = 'center';
+            var bgY = 'center';
+
+            var anchorElement = $(document.createElement('a'));
+            var hoverElement = $(document.createElement('div'));
+            hoverElement.addClass('sideBarElement');
+            var sBarElement = "<span class='icon' style = 'background: url(\""+iconUrl+"\") "+bgX+" "+bgY+" no-repeat'></span>"+
+                "<span>" + name + "</span>";
+            hoverElement.html(sBarElement);
+
+            hoverElement.attr("color", color);
+
+            anchorElement.append(hoverElement);
+
+            sBar.append(anchorElement);
+        }
+
+        sBarWrapper.append(sBar);
+        $('#nav').after(sBarWrapper);
+        $(".sideBarElement").hover(function(){
+            console.log($(this).attr('color'));
+            $(this).stop(true, true).addClass($(this).attr('color'), 100);
+            var image = $(this).find(".icon:first").css('background-image').replace(/^url|[\(\)]/g, '');
+            var extIndex = image.lastIndexOf('.');
+            image = image.substring(0, extIndex) + "Color" + image.substring(extIndex);
+            console.log(image);
+            $(this).find(".icon").css('background-image', 'url('+image+')');
+        },function(){
+            $(this).stop(true, true).removeClass($(this).attr('color'), 100);
+
+                var image = $(this).find(".icon:first").css('background-image').replace(/^url|[\(\)]/g, '');
+                image = image.replace('Color.', '.');
+
+            $(this).find(".icon").css('background-image', 'url('+image+')');
+        }
+        );
+
+
+    };
+
+    var afterInit = function(){
         var sideBar = $("#sideBar");
         var sideBarDiv = $("#sideBar");
         var sideBarWrapperDiv = $("#sideBarWrapper");
@@ -198,7 +298,6 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min"], function($) {
                     //console.log("Back button clicked.");
                     //console.log(thisPopup.history.length);
                     var x = thisPopup.history.pop();
-                    //TODO: IMPLEMENT HIDE METHOD
                     if(thisPopup.history.length<=0){
                         thisPopup.history = [];
                         popupDiv.stop().fadeOut('fast');
@@ -380,14 +479,11 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min"], function($) {
             };
         }
 
-        //$("#sideBarWrapper").width($("#sideBar").outerWidth());
-
         /*********************
          ** Event Listeners **
          *********************/
-        //TODO: Possibly merge into Popup constructor and create on init.
-        //Listens for top nav link clicks
-        this.popup = new Popup();
+        //Initializes popup and sets listeners.
+        new Popup();
 
         //Listens for clicks outside of elements
         $('html').on('click', function (e) {
@@ -540,8 +636,8 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min"], function($) {
                 toggleMenu();
             }
         );
+    };
         /*************************
          ** End Event Listeners **
          *************************/
     //});
-});
