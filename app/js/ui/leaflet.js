@@ -20,7 +20,7 @@ define(['db/models', 'tools', 'ui/ui', 'lib/leaflet'], function (models, tools, 
             zoom: 4
         });
         // create a CloudMade tile layer and add it to the map
-        var cloudMade = new window.L.TileLayer('http://{s}.tile.cloudmade.com/57cbb6ca8cac418dbb1a402586df4528/65210/256/{z}/{x}/{y}.png', {
+        var cloudMade = new window.L.TileLayer('http://{s}.tile.cloudmade.com/57cbb6ca8cac418dbb1a402586df4528/997/256/{z}/{x}/{y}.png', {
             maxZoom: 18
         });
         map.addLayer(cloudMade);
