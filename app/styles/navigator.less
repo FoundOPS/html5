@@ -75,6 +75,8 @@ table {
 @red: #991A36;
 @black: #000;
 
+@navBorderColor: @lightCharcoal;
+
 /*  Other Vars  */
 @hoverOpacity: .7;
 
@@ -85,13 +87,13 @@ table {
 
 @sideBarExpandedWidth: 159px;
 
-@imageHeight: 15px;
+@imageHeight: 20px;
 @iconPadding: 4px;
-@borderSize: 3px;
+@borderSize: 2px;
 
 /*  Positioning  */
 @navHeightMax: 45px;
-@navHeightMin: 35px;
+@navHeightMin: 38px;
 
 /*  MAIN  */
 html{
@@ -122,6 +124,10 @@ a{
     }
 }
 
+input:focus {
+    outline: none;
+}
+
 .navColor{
     background: @charcoal;
 }
@@ -137,12 +143,22 @@ a{
     img{
         max-height: 100%;
     }
-
-    a:hover{
-        opacity: @hoverOpacity;
-    }
 	
 	.navColor;
+
+    background-image: linear-gradient(bottom, rgb(34,34,36) 0%, rgb(85,85,86) 100%);
+    background-image: -o-linear-gradient(bottom, rgb(34,34,36) 0%, rgb(85,85,86) 100%);
+    background-image: -moz-linear-gradient(bottom, rgb(34,34,36) 0%, rgb(85,85,86) 100%);
+    background-image: -webkit-linear-gradient(bottom, rgb(34,34,36) 0%, rgb(85,85,86) 100%);
+    background-image: -ms-linear-gradient(bottom, rgb(34,34,36) 0%, rgb(85,85,86) 100%);
+
+    background-image: -webkit-gradient(
+        linear,
+        left bottom,
+        left top,
+        color-stop(0, rgb(34,34,36)),
+        color-stop(1, rgb(85,85,86))
+    );
 }
 
 #navContainer{
@@ -154,7 +170,7 @@ zoom: 1;*/
     margin-left: 50px;
     font-size:100%;
 //TODO: Make this dynamic.
-    line-height: @navHeightMax - 5;
+    line-height: @navHeightMax - 4;
 
     .last{
         margin-right: 0;
@@ -163,17 +179,25 @@ zoom: 1;*/
 
 
 .roundedIcon{
-    border: @borderSize solid @darkGrey;
+    border: @borderSize solid @navBorderColor;
     border-radius: 6px;
 }
 
 .navElement{
+    &:focus {
+        outline: white solid thin;
+    }
+    box-shadow: inset 0px 0px 5px #777779;
     .roundedIcon;
     background: white;
     display: inline-block;
     vertical-align: middle;
     margin-right: 60px;        /*Spacing between nav elements*/
     line-height: normal;
+
+    a:hover{
+        opacity: @hoverOpacity;
+    }
 
     .navIcon{
         padding: @iconPadding;
@@ -183,38 +207,41 @@ zoom: 1;*/
         border: 0;
         line-height: 100%;
         height: @imageHeight + @iconPadding*2 - 2;
-        font-size: 14px;    /*TODO: Change to relative font size (.75em)*/
+        font-size: 12px;    /*TODO: Change to relative font size (.75em)*/
         color: @charcoal;
         margin: 0 0 0 2px;
         padding-left: 4px;
+        background: transparent;
     }
 
     img{
         height: @imageHeight;
         vertical-align: middle;
     }
+
+    &:hover{
+    }
 }
 
 #navClient{
     padding: 0;
     .navIcon{
-        border: 0;
-        border-radius: 0;
-        border-right: @borderSize solid @darkGrey;
         padding: 0;
-        padding: 0;
+        border-right: @borderSize solid @navBorderColor;
         height: @imageHeight + @iconPadding*2;
         overflow:hidden;
     }
 }
 
-#navSearch .navIcon{
-    border-left: @borderSize solid @darkGrey;
+#navSearch{
+    .navIcon{
+        //border-left: @borderSize solid @navBorderColor;
+    }
 }
 
 #clientLogo{
     background: #fff;
-    padding: 0 8px;
+    margin: 0 4px;
 }
 
 #popup{
@@ -225,11 +252,11 @@ zoom: 1;*/
     z-index: 3;
     left: 0;
 
-    background: @lightGrey;
+    background: #efefef;
     color: @charcoal;
-    border: solid @charcoal 3px;
+    //border: solid @charcoal 3px;
     border-radius: 5px;
-    box-shadow: 0px 0px 5px #888;
+    box-shadow: 0px 0px 8px #888;
 
     a{
        color: @charcoal;
@@ -244,9 +271,11 @@ zoom: 1;*/
     padding: 10px;
     text-align: center;
 
-    border-bottom: 3px solid @charcoal;
+    //border-bottom: 1px solid @charcoal;
 
     font-size: 16px;
+    box-shadow: 0px 0px 5px #888;
+    overflow: hidden;
 }
 
 #popupArrow{
@@ -262,15 +291,18 @@ zoom: 1;*/
 }
 
 //TODO: Simplify transparent on hover.
+.hover(){
+    &:hover{
+        opacity: @hoverOpacity;
+    }
+}
+
 #popupBack{
     float: left;
     height: 16px;
     width: 8px;
     background: url('../img/popupBack.png') center center no-repeat;
-
-    &:hover{
-        opacity: @hoverOpacity;
-    }
+    .hover;
 }
 
 #popupClose{
@@ -278,14 +310,10 @@ zoom: 1;*/
     height: 16px;
     width: 16px;
     background: url('../img/popupClose.png') center center no-repeat;
-
-    &:hover{
-        opacity: @hoverOpacity;
-    }
+    .hover;
 }
 
 #popupContent{
-    background: @lightGrey;
     color: @charcoal;
     padding: 0 15px;
     text-align: left;
@@ -297,7 +325,7 @@ zoom: 1;*/
 }
 
 .popupContentRow{
-    border-bottom: 1px solid @darkGrey;
+    border-bottom: 1px dashed @darkGrey;
     padding: 8px;
 }
 
@@ -408,7 +436,7 @@ zoom: 1;*/
     opacity: @hoverOpacity;
 }
 
-a:hover .iconExpand{opacity: @hoverOpacity;}
+a .iconExpand:hover{opacity: @hoverOpacity;}
 
 .iconExpand, .iconShow {
     -webkit-transition: all .3s ease-in-out;
@@ -486,7 +514,7 @@ a:hover .iconExpand{opacity: @hoverOpacity;}
     }
 
     #navContainer{
-        line-height: @navHeightMin - 5;
+        line-height: @navHeightMin - 5px;
     }
 
     .navElement{
@@ -497,15 +525,14 @@ a:hover .iconExpand{opacity: @hoverOpacity;}
     }
 
     #navClient{
-        border: 0;
         .navIcon{
-            .roundedIcon;
+            border: 0;
             padding: 0;
         }
     }
 
     #clientLogo{
-        visibility: hidden;
+        display: none;
         height: 100%;
         width: 0;
         margin-left: 0;

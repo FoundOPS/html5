@@ -26,7 +26,7 @@ var initTopNav = function(){
 
         var navContainer = "<div id='navContainer'>"+
                 "<div id='navSearch' class='navElement'><input name='search' type='text' placeholder='Search...'/><a href='#'><img class='navIcon' src='img/search.png'/></a></div>"+
-                "<div id='navClient' class='navElement last'><a href='#'><img class='navIcon profile' src='img/david.png'/><img id='clientLogo' src='img/got-grease-logo.png'/></a></div>"+
+                "<div id='navClient' class='navElement popup last'><a href='#'><img class='navIcon profile' src='img/david.png'/><img id='clientLogo' src='img/got-grease-logo.png'/></a></div>"+
             "</div>"+
 
             //TODO: Should technically be added in with initSideBar.
@@ -37,6 +37,9 @@ var initTopNav = function(){
 
         topNav.html(navContainer);
         $('body').prepend(topNav);
+        $('#logo').dblclick(function(){
+            window.location.href=window.location.href;
+        });
     };
 
     var initSideBar = function(sections){
@@ -47,7 +50,7 @@ var initTopNav = function(){
         var sBar = $(document.createElement('div'));
         sBar.attr('id', 'sideBar');
         var expandButton = "<a href='#'>"+
-                "<div id='slideMenu' class='sideBarElement'><img class='iconExpand' src='img/Expand.png'/></div>"+
+                "<div id='slideMenu'><img class='iconExpand' src='img/Expand.png'/></div>"+
             "</a>";
         sBar.html(expandButton);
 
@@ -89,13 +92,14 @@ var initTopNav = function(){
 
         sBarWrapper.append(sBar);
         $('#nav').after(sBarWrapper);
+
+        var originalImage = null;
         $(".sideBarElement").hover(function(){
-            console.log($(this).attr('color'));
             $(this).stop(true, true).addClass($(this).attr('color'), 100);
             var image = $(this).find(".icon:first").css('background-image').replace(/^url|[\(\)]/g, '');
             var extIndex = image.lastIndexOf('.');
             image = image.substring(0, extIndex) + "Color" + image.substring(extIndex);
-            console.log(image);
+            //console.log(image);
             $(this).find(".icon").css('background-image', 'url('+image+')');
         },function(){
             $(this).stop(true, true).removeClass($(this).attr('color'), 100);
@@ -121,25 +125,17 @@ var initTopNav = function(){
             'showArrows': false
         });
 
-        //From jScrollPane examples: http://jscrollpane.kelvinluck.com/dynamic_height.html
         var sideBarScrollBar = sideBarWrapperDiv.data('jsp');
+        //From jScrollPane examples: http://jscrollpane.kelvinluck.com/dynamic_height.html
         var throttleTimeout;
-        $(window).bind(
-            'resize',
-            function()
-            {
+        $(window).bind('resize', function(){
                 if ($.browser.msie) {
-                    // IE fires multiple resize events while you are dragging the browser window which
-                    // causes it to crash if you try to update the scrollpane on every one. So we need
-                    // to throttle it to fire a maximum of once every 50 milliseconds...
                     if (!throttleTimeout) {
                         throttleTimeout = setTimeout(
-                            function()
-                            {
+                            function(){
                                 sideBarScrollBar.reinitialise();
                                 throttleTimeout = null;
-                            },
-                            50
+                            },50
                         );
                     }
                 } else {
@@ -161,9 +157,11 @@ var initTopNav = function(){
             var currentIconTarget = null;
 
             this.history = [];
-            $(".navElement a").click(function (e) {
-                //console.log("Parent: " + $(this));
-                thisPopup.toggleVisible(e, $(this));
+            $(".navElement").filter(".popup").click(function (e) {
+                console.log("Parent: " + $(this));
+                //if(this.hasClass("popup")){
+                    thisPopup.toggleVisible(e, $(this));
+                //}
             });
 
             /*TODO: Break toggleVisible into generic functions (eg. Should not expect el=navElement)*/
@@ -326,19 +324,27 @@ var initTopNav = function(){
                 //Click listener to detect clicks outside of popup
                 $('html').on('click', function (e) {
                     var clicked = $(e.target);
-                    //console.log("Clicked on: " + clicked.html());
-                    var popupLen = clicked.parents("#popup").length;
-                    var navElLen = clicked.parents(".navElement").length;
+                    //console.log("Clicked on: " + clicked.get(0).tagName+" "+clicked.attr('id'));
+                    var popupLen = clicked.parents("#popup").length + clicked.is("#popup")?1:0;
+                    var navLen = clicked.parents(".navElement").length + clicked.is(".navElement")?1:0;
                     var popupContentRow = clicked.parents(".popupContentRow").length;
                     //console.log(clicked.parents().length);
                     //console.log(clicked.parents()[0].outerHTML);
                     //TODO: Fix this jquery event bug.......
-                    //console.log("pLen: " + popupLen + " navLen: "+navElLen+" pLen: "+popupContentRow);
-                    if ((!clicked.is("#popup")) && popupLen === 0 && navElLen === 0 && popupContentRow === 0) {
+                    //console.log("pLen: " + popupLen + " navLen: "+navLen+" cLen: "+popupContentRow);
+                    if (popupLen === 0 && navLen === 0 && popupContentRow === 0) {
                         //console.log("clicked outside: "+clicked.parents()[0].outerHTML);
                         thisPopup.hide();
                     }
                 });
+                $(document).on('click', '.popupContentRow a',
+                    function(e){
+                        //console.log($(e.target).parents().length);
+                        //console.log($(e.target).parents()[0].outerHTML);
+
+                        thisPopup.populate(this.innerHTML);
+                    }
+                );
 
                 //Sets global popup object, object, with the created div.
                 object = popupDiv;
@@ -363,6 +369,7 @@ var initTopNav = function(){
                     return;
                 }
                 this.history.push(popupData);
+                //TODO: Parent bug still present; fix sometime.
                 this.setData(popupData);
             };
 
@@ -372,31 +379,27 @@ var initTopNav = function(){
                 //console.log("Length: " + c.length);
 
                 //Push data to array. 4 Hide method calls.
-
+                var popupContentDiv = $("#popupContent");
                 var c = "";
                 var i;
+
+                popupContentDiv.html('');
                 for (i=0; i< contArray.length; i+=1) {
                     //console.log("In loop.");
                     var lastElement = "";
                     if (i === contArray.length - 1) { lastElement = "last"; }
-                    c += "<div class='popupContentRow " + lastElement + "'>" +
-                        "<a href='#' onclick='popup.populate(this.innerHTML);'>" +
+                    c = "<div class='popupContentRow " + lastElement + "'>" +
+                        "<a href='#'>" +
                         contArray[i].name +
                         "</a></div>";
+                    popupContentDiv.append(c);
                 }
-
 
                 //console.log("Setting title: " + title);
                 //console.log("Setting content: " + c);
                 this.setTitle(data.title);
-                this.setContent(c);
-                /*$(".popupContentRow a").on('click',
-                    function(e){
-                        //console.log($(e.target).parents().length);
-                        //console.log($(e.target).parents()[0].outerHTML);
-                        popup.populate(this.innerHTML);
-                    }
-                );*/
+                //this.setContent(c);
+
             };
 
             //Public setter function for private var title and sets title of the html popup element.
@@ -460,6 +463,15 @@ var initTopNav = function(){
                             {name: "Got Grease"},
                             {name: "AB Couriers"}
                         ]
+                    },
+                    {
+                        id: "FoundOPS",
+                        title: "FoundOPS",
+                        contents: [
+                            {name: "Test 1"},
+                            {name: "Test 2"},
+                            {name: "Test 3"}
+                        ]
                     }
                 ];
 
@@ -483,10 +495,10 @@ var initTopNav = function(){
          ** Event Listeners **
          *********************/
         //Initializes popup and sets listeners.
-        new Popup();
+        var popup = new Popup();
 
         //Listens for clicks outside of elements
-        $('html').on('click', function (e) {
+        $('body').on('click', function (e) {
             var clicked = $(e.target);
             //console.log("Clicked on: " + $clicked.html());
             var sideBarLen = clicked.parents("#sideBar").length;
