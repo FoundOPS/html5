@@ -1,7 +1,7 @@
 'use strict';
 
-//region Tools Tests
 define(['tools', 'ui/leaflet', '../../test/fakeData'], function (tools, leaflet, data) {
+//region Tools Tests
     describe("Tools", function () {
         describe("getDirection", function () {
             it("converts degrees to a compass direction", function () {
@@ -14,6 +14,24 @@ define(['tools', 'ui/leaflet', '../../test/fakeData'], function (tools, leaflet,
                 expect(tools.formatDate(date)).toEqual("6-5-2012");
             });
         });
+        describe("dateEqual", function () {
+            it("checks if two dates(without the time) are equal'", function () {
+                var date1 = new Date(2012, 6, 5, 5, 20, 5, 5);
+                var date2 = new Date(2012, 6, 5, 5, 21, 5, 5);
+                expect(tools.dateEqual(date1, date2)).toBeTruthy();
+            });
+        });
+        describe("newGuid", function () {
+            it("should create a new GUID", function () {
+                //expect("3df4").toMatch(/^(?:[0-9A-Za-z]{4})$/);
+                expect(tools.newGuid()).toMatch(/^(?:[0-9A-Za-z]{8})-(?:[0-9A-Za-z]{4})-(?:[0-9A-Za-z]{4})-(?:[0-9A-Za-z]{4})-(?:[0-9A-Za-z]{12})$/);
+            });
+            it("should create a unique GUID", function () {
+                var guid1 = tools.newGuid();
+                var guid2 = tools.newGuid();
+                expect(guid1).not.toEqual(guid2);
+            });
+        });
     });
 //endregion
 
@@ -23,7 +41,7 @@ define(['tools', 'ui/leaflet', '../../test/fakeData'], function (tools, leaflet,
             setFixtures('<div id="map"></div>');
         });
         describe("setupMap", function () {
-            it("should be loaded", function () {
+            it("should load the map", function () {
                 var map = leaflet.setupMap();
                 expect(map._zoom).toEqual(4);
                 expect(map.options.center.lat).toEqual(40);
@@ -61,7 +79,7 @@ define(['tools', 'ui/leaflet', '../../test/fakeData'], function (tools, leaflet,
                 var latLng = leaflet.getLatLng(location);
                 expect(latLng.lat).toEqual(40.460335);
             });
-        })
+        });
         describe("drawDepots", function () {
             it("should return a layer group with depots", function () {
                 var map = leaflet.setupMap();
@@ -75,7 +93,7 @@ define(['tools', 'ui/leaflet', '../../test/fakeData'], function (tools, leaflet,
                 var map = leaflet.setupMap();
                 var resources = leaflet.drawResources(map, data.resources, data.routeColorSelector);
                 //using regex, checks that there are 2 apple icons on the map
-                expect(map._panes.markerPane.innerHTML).toMatch(/truck.*truck/g);
+                expect(map._panes.markerPane.innerHTML).toMatch(/apple.*apple/g);
             });
         });
         describe("drawRoutes", function () {
@@ -97,6 +115,131 @@ define(['tools', 'ui/leaflet', '../../test/fakeData'], function (tools, leaflet,
                 expect(map._objectsPane.innerHTML).toMatch(/svg.*194A91/g);
             });
         });
+    });
+//endregion
+
+//region Map Tests
+    describe("Map", function () {
+        beforeEach(function () {
+            setFixtures('<div id="map"></div>');
+        });
+//        describe("on initialization", function () {
+//            it("should create a map and set the date", function () {
+//                initialize();
+//                expect(map.innerHTML).not.toEqual("");
+//                //expect(setDate).toHaveBeenCalledWith(new Date());
+//            });
+//        });
+        describe("the role (id) is set", function () {
+            it("should set the role id", function () {
+
+            });
+            it("should load and draw depots", function () {
+
+            });
+            it("should load and draw routes", function () {
+
+            });
+            it("should load and draw resources", function () {
+
+            });
+        });
+//        describe("setSelectedRoute", function () {
+//            it("should set the selected routeId, clear old trackpoints, and draw new trackpoints", function () {
+//                var selectedRouteId = "7c4d1de7-974a-46e1-8e56-b701bcb28f8c";
+//                var routeId = "f57f763f-87e1-47e0-98c8-f650b2c556dc";
+//                var trackPointsGroup = new window.L.LayerGroup();
+//                setSelectedRoute("f57f763f-87e1-47e0-98c8-f650b2c556dc");
+//                expect(removeLayer).toHaveBeenCalledWith(trackPointsGroup);
+//                expect(selectedRouteId).toEqual(routeId);
+//                expect(drawTrackpoints).toHaveBeenCalledWith(routeId);
+//            });
+//        });
+//        describe("setDate", function () {
+//            it("should set the selected date, and clear and redraw all objects", function () {
+//                var selectedDate = new Date(2012,6,13);
+//                var date = new Date();
+//                var resourcesGroup = new window.L.LayerGroup();
+//                var routesGroup = new window.L.LayerGroup();
+//                var trackPointsGroup = new window.L.LayerGroup();
+//                var center = false;
+//                setDate(date);
+//                expect(selectedDate).toEqual(date);
+//                expect(removeLayer).toHaveBeenCalledWith(resourcesGroup);
+//                expect(removeLayer).toHaveBeenCalledWith(routesGroup);
+//                expect(removeLayer).toHaveBeenCalledWith(trackPointsGroup);
+//                expect(center).toBeTruthy();
+//                expect(getRoutes).toHaveBeenCalled();
+//                expect(getResources).toHaveBeenCalled();
+//            });
+//        });
+//        describe("removeLayer", function () {
+//            it("should remove a layer from the map", function () {
+//                var layer = new window.L.LayerGroup();
+//                var map = leaflet.setupMap();
+//                map.addLayer(layer);
+//                removeLayer(layer)
+//                expect(map._layers[43]).not.toBeDefined();
+//            });
+//        });
+//        describe("drawResources", function () {
+//            it("should call draw methods for resources and trackpoints", function () {
+//                var resources = data.resources;
+//                drawResources();
+//                expect(routeTrackPoints).toContain(resources[0]);
+//                expect(leaflet.drawResources).toHaveBeenCalled();
+//                if (selectedRouteId) {
+//                    expect(leaflet.drawTrackPoints).toHaveBeenCalled();
+//                }
+//            });
+//        });
+//        describe("drawTrackpoints", function () {
+//            it("should get the trackpoints and call their draw method", function () {
+//                var routeId = "f57f763f-87e1-47e0-98c8-f650b2c556dc";
+//                var routeId2 = "f57f763f-87e1-47e0-98c8-f650b2c556dc";
+//                //call drawTrackpoints when routeTrackPoints has trackpoints
+//                var routeTrackPoints = data.trackpoints[routeId];
+//                drawTrackpoints(routeId);
+//                if(routeTrackPoints){
+//                    expect(services.getTrackPoints).not.toHaveBeenCalled();
+//                }else{
+//                    expect(services.getTrackPoints).toHaveBeenCalled();
+//                }
+//                //call drawTrackpoints when routeTrackPoints is empty
+//                var routeTrackPoints = data.trackpoints[routeId2];
+//                drawTrackpoints(routeId);
+//                expect(leaflet.drawTrackPoints).toHaveBeenCalled();
+//                if(routeTrackPoints){
+//                    expect(services.getTrackPoints).not.toHaveBeenCalled();
+//                }else{
+//                    expect(services.getTrackPoints).toHaveBeenCalled();
+//                }
+//                //check that the trackpoints were drawn
+//                expect(leaflet.drawTrackPoints).toHaveBeenCalled();
+//            });
+//        });
+//        describe("getDepots", function () {
+//            it("should get the depots and call their draw method", function () {
+//                services.RoleId = "3959D9BF-66EA-41FD-90F2-7AD58A18DF2A";
+//                getDepots();
+//                expect(removeLayer).toHaveBeenCalled();
+//                expect(services.getDepots).toHaveBeenCalled();
+//            });
+//        });
+//        describe("getResources", function () {
+//            it("should get the resources and call their draw method", function () {
+//            services.RoleId = "3959D9BF-66EA-41FD-90F2-7AD58A18DF2A";
+//            var selectedDate = new Date();
+//            getResources();
+//            expect(services.getResourcesWithLatestPoints).toHaveBeenCalled();
+//        });
+//        describe("getRoutes", function () {
+//            it("should get the routes and call their draw method", function () {
+//                services.RoleId = "3959D9BF-66EA-41FD-90F2-7AD58A18DF2A";
+//                getRoutes();
+//                expect(services.getRoutes).toHaveBeenCalled();
+//            });
+//        });
     });
 //endregion
 });

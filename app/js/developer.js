@@ -38,19 +38,19 @@ define(function () {
      * The current web service source.
      * @type {developer.DataSource}
      */
-    developer.CURRENT_DATA_SOURCE = developer.DataSource.TESTAPI;
+    developer.CURRENT_DATA_SOURCE = developer.DataSource.LOCALAPI;
 
     /**
      * The current web service source.
      * @type {developer.Frame}
      */
-    developer.CURRENT_FRAME = developer.Frame.SILVERLIGHT;
+    developer.CURRENT_FRAME = developer.Frame.BROWSER;
 
     /**
      * The local server's RoleId for GotGrease.
      * @type {string}
      */
-    developer.GOTGREASE_ROLE_ID = '3959D9BF-66EA-41FD-90F2-7AD58A18DF2A';
+    developer.GOTGREASE_ROLE_ID = 'B6C0AA05-3947-4AE5-8C08-840132ACF5C2';
 
     return developer;
 });

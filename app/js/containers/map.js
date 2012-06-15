@@ -309,5 +309,5 @@ require(["jquery", "lib/leaflet", "developer", "db/services", "tools", "ui/leafl
     window.map = functions;
 
     //for debugging
-    //functions.setRoleId(developer.GOTGREASE_ROLE_ID);
+    functions.setRoleId(developer.GOTGREASE_ROLE_ID);
 });
