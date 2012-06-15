@@ -97,9 +97,9 @@ require(["jquery", "lib/kendo.all.min", "lib/cordova-1.8.1", "developer", "db/se
         }
     });
 
-    mobile.setupRouteBindings = function () {
-        kendo.bind($("#routes-listview"), mobile.viewModel, kendo.mobile.ui);
-    };
+//    mobile.setupRouteBindings = function () {
+//        kendo.bind($("#routes-listview"), mobile.viewModel, kendo.mobile.ui);
+//    };
 //
 //    mobile.setupRouteDestinationsBindings = function () {
 //        kendo.bind($("#routeDestinations-listview"), viewModel, kendo.mobile.ui);

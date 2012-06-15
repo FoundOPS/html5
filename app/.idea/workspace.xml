@@ -5,14 +5,7 @@
     <bookmark url="file://$PROJECT_DIR$/routes.json" line="368" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="26047507-8fcb-40e1-a644-df8830ed2000" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/containers/mobile.js" afterPath="$PROJECT_DIR$/js/containers/mobile.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/developer.js" afterPath="$PROJECT_DIR$/js/developer.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile.html" afterPath="$PROJECT_DIR$/mobile.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/views/routeDestinationDetails.html" afterPath="$PROJECT_DIR$/views/routeDestinationDetails.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/views/routedestinations.html" afterPath="$PROJECT_DIR$/views/routedestinations.html" />
-    </list>
+    <list default="true" id="26047507-8fcb-40e1-a644-df8830ed2000" name="Default" comment="" />
     <ignored path="app.iws" />
     <ignored path=".idea/workspace.xml" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -42,7 +35,7 @@
                 </provider>
               </entry>
             </file>
-            <file leaf-file-name="mobile.js" pinned="false" current="true" current-in-tab="true">
+            <file leaf-file-name="mobile.js" pinned="false" current="false" current-in-tab="true">
               <entry file="file://$PROJECT_DIR$/js/containers/mobile.js">
                 <provider selected="true" editor-type-id="text-editor">
                   <state line="86" column="63" selection-start="2435" selection-end="2435" vertical-scroll-proportion="0.8702461">
@@ -61,7 +54,7 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="routes.html" pinned="false" current="false" current-in-tab="true">
+      <file leaf-file-name="routes.html" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/views/routes.html">
           <provider selected="true" editor-type-id="text-editor">
             <state line="8" column="9" selection-start="526" selection-end="526" vertical-scroll-proportion="0.20134228">
@@ -227,20 +220,6 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="app" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="app" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="js" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
         </subPane>
       </pane>
     </panes>
@@ -335,7 +314,7 @@
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24967742" sideWeight="0.5" order="0" side_tool="true" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.24720149" sideWeight="0.74687856" order="3" side_tool="false" content_ui="combo" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.25312147" sideWeight="0.95077485" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25312147" sideWeight="0.95077485" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="1" side_tool="true" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25312147" sideWeight="0.04284412" order="10" side_tool="true" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24744609" sideWeight="0.8960802" order="2" side_tool="false" content_ui="tabs" />
@@ -482,16 +461,16 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/views/routes.html">
+    <entry file="file://$PROJECT_DIR$/js/containers/mobile.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="8" column="9" selection-start="526" selection-end="526" vertical-scroll-proportion="0.20134228">
+        <state line="86" column="63" selection-start="2435" selection-end="2435" vertical-scroll-proportion="0.8702461">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/js/containers/mobile.js">
+    <entry file="file://$PROJECT_DIR$/views/routes.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="86" column="63" selection-start="2435" selection-end="2435" vertical-scroll-proportion="0.8702461">
+        <state line="8" column="9" selection-start="526" selection-end="526" vertical-scroll-proportion="0.20134228">
           <folding />
         </state>
       </provider>
