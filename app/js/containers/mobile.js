@@ -67,7 +67,7 @@ require(["jquery", "lib/kendo.all.min", "lib/cordova-1.8.1", "developer", "db/se
     var serviceDate, intervalId = null, routeStartTime, routeEndTime, routeTotalTime;
     var trackPoints = [];
 
-    var viewModel = kendo.observable({
+    mobile.viewModel = kendo.observable({
         routesSource: services.routesDataSource,
         /**
          * Select a route
@@ -98,17 +98,17 @@ require(["jquery", "lib/kendo.all.min", "lib/cordova-1.8.1", "developer", "db/se
     });
 
     mobile.setupRouteBindings = function () {
-        kendo.bind($("#routes-listview"), viewModel, kendo.mobile.ui);
+        kendo.bind($("#routes-listview"), mobile.viewModel, kendo.mobile.ui);
     };
-
-    mobile.setupRouteDestinationsBindings = function () {
-        kendo.bind($("#routeDestinations-listview"), viewModel, kendo.mobile.ui);
-    };
-
-    mobile.setupRouteDestinationDetailsBindings = function () {
-        kendo.bind($("#destinationDetailsHolder"), viewModel, kendo.mobile.ui);
-        kendo.bind($("#destinationContactInfoListView"), viewModel, kendo.mobile.ui);
-    };
+//
+//    mobile.setupRouteDestinationsBindings = function () {
+//        kendo.bind($("#routeDestinations-listview"), viewModel, kendo.mobile.ui);
+//    };
+//
+//    mobile.setupRouteDestinationDetailsBindings = function () {
+//        kendo.bind($("#destinationDetailsHolder"), viewModel, kendo.mobile.ui);
+//        kendo.bind($("#destinationContactInfoListView"), viewModel, kendo.mobile.ui);
+//    };
 
     mobile.startRoute = function (routeId) {
         $('#startButton').hide();
@@ -176,6 +176,11 @@ require(["jquery", "lib/kendo.all.min", "lib/cordova-1.8.1", "developer", "db/se
                 alert("Wrong login info, manG.");
             }
         });
+    };
+
+    //for development purposes
+    mobile.navToRoutesList = function () {
+        app.navigate("views/routes.html");
     };
 
     //set mobile to a global function, so the functions are accessible from the HTML element

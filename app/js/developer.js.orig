@@ -38,7 +38,7 @@ define(function () {
      * The current web service source.
      * @type {developer.DataSource}
      */
-    developer.CURRENT_DATA_SOURCE = developer.DataSource.LOCALAPI;
+    developer.CURRENT_DATA_SOURCE = developer.DataSource.TESTAPI;
 
     /**
      * The current web service source.
@@ -50,7 +50,11 @@ define(function () {
      * The local server's RoleId for GotGrease.
      * @type {string}
      */
-    developer.GOTGREASE_ROLE_ID = '0AFAA1D3-20A2-4F8B-B8A8-FB3C6914EDC0';
+<<<<<<< HEAD
+    developer.GOTGREASE_ROLE_ID = '3959D9BF-66EA-41FD-90F2-7AD58A18DF2A';
+=======
+    developer.GOTGREASE_ROLE_ID = 'DEAB215B-BECE-4A44-AEB3-C5D54D4FC402';
+>>>>>>> 5ef6027... Added TrackPoint accumulation and user login/authentication.
 
     return developer;
 });
