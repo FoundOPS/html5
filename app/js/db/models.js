@@ -29,6 +29,12 @@ define(function () {
         OTHER: "Other"
     };
 
+    models.TrackPoint = {
+
+    };
+
     return models;
 });
+
+
 

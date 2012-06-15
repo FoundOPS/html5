@@ -161,6 +161,10 @@ define(['lib/kendo.all.min', 'developer', 'tools'], function (k, developer, tool
             {routeId: routeId, serviceDateUtc: serviceDateUtc}, false)(callback);
     };
 
+    services.postTrackPoints = function (serviceDate, routeId) {
+        //Send trackPoint array to server and return success or failure.
+    };
+
     /**
      * Authenticate the user.
      * @param {!string} email

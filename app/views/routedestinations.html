@@ -1,7 +1,17 @@
 <div id="routeDestinations" data-role="view" data-layout="mobile-view" data-title="Route Destinations"
      data-show="mobile.setupRouteDestinationsBindings">
+    <header data-role="header">
+        <div data-role="navbar">
+            <a class="nav-button" data-align="left" data-role="backbutton">Back</a>
+            <a id="startButton" class="nav-button" data-align="right"
+               data-click="mobile.startRoute" data-role="button">Start Route</a>
+            <a id="endButton" class="nav-button" data-align="right"
+               data-click="mobile.endRoute" data-role="button" style="display:none">End Route</a>
+            <span data-role="view-title"></span>
+        </div>
+    </header>
     <ul id="routeDestinations-listview" data-bind="source:routeDestinationsSource, click: selectRouteDestination" data-role="listview"
-        data-style="inset" data-template="routeDestinationsViewTemplate" style="margin-bottom: 400px;"></ul>
+        data-style="inset" data-template="routeDestinationsViewTemplate"></ul>
 </div>
 <script type="text/x-kendo-template" id="routeDestinationsViewTemplate">
     <a>${Client.Name}

@@ -25,7 +25,7 @@ require.config({
     }
 });
 
-require(["jquery", "lib/kendo.all.min", "developer", "db/services"], function ($, m, developer, services) {
+require(["jquery", "lib/kendo.all.min", "lib/cordova-1.8.1", "developer", "db/services", "db/models"], function ($, m, c, developer, services, models) {
     var mobile = {};
     /**
      * The configuration object for the mobile application.
@@ -48,7 +48,24 @@ require(["jquery", "lib/kendo.all.min", "developer", "db/services"], function ($
         ACCURACY_THRESHOLD: 50
     };
 
+    // Wait for Cordova to load
+    document.addEventListener("deviceready", onDeviceReady, false);
+
+    // Cordova is ready
+    function onDeviceReady() {
+        var element = document.getElementById('deviceProperties');
+
+        /**
+         * OS of the device running the app.
+         */
+        mobile.CONFIG.DEVICE_PLATFORM = device.platform;
+        console.log("TEST " + device.platform);
+    }
+
     var app;
+    var routeId = null, routeInProgress = null;
+    var serviceDate, intervalId = null, routeStartTime, routeEndTime, routeTotalTime;
+    var trackPoints = [];
 
     var viewModel = kendo.observable({
         routesSource: services.routesDataSource,
@@ -62,6 +79,7 @@ require(["jquery", "lib/kendo.all.min", "developer", "db/services"], function ($
                 new kendo.data.DataSource({
                     data: this.get("selectedRoute").RouteDestinations
                 }));
+            this.set("routeId", this.get("selectedRoute").Id);
             app.navigate("views/routeDestinations.html");
         },
         /**
@@ -92,43 +110,73 @@ require(["jquery", "lib/kendo.all.min", "developer", "db/services"], function ($
         kendo.bind($("#destinationContactInfoListView"), viewModel, kendo.mobile.ui);
     };
 
+    mobile.startRoute = function (routeId) {
+        $('#startButton').hide();
+        $('#endButton').show();
 
-//    mobile.setupRoutesList = function () {
-//        $("#routes-listview").kendoMobileListView({
-//            dataSource: services.routesDataSource,
-//            pullToRefresh: true,
-//            selectable: true,
-//            style: "inset",
-//            template: $("#routeListViewTemplate").html(),
-//            click: function (e) {
-//                selectRoute(e.dataItem);
-//            }
-//        });
-//    };
-//
-//    mobile.setupRouteDestinationsList = function () {
-//        var dataSource = new kendo.data.DataSource({data: selectedRoute.RouteDestinations});
-//
-//        $("#routeDestinations-listview").kendoMobileListView({
-//            dataSource: dataSource,
-//            selectable: true,
-//            style: "inset",
-//            template: $("#routeDestinationsViewTemplate").html(),
-//            click: function (e) {
-//                selectDestination(e.dataItem);
-//            }
-//        });
-//    };
-//
-//    mobile.setupRouteDestinationDetailsList = function () {
-//        $('#routeDestinationDetails-listview').kendoMobileListView({
-//            dataSource: selectedDestination.Location,
-//            selectable: true,
-//            style: "inset",
-//            template: $("#routeDestinationDetailsViewTemplate").html()
-//        });
-//    };
+        routeInProgress = true;
+        serviceDate = new Date();
+        routeStartTime = serviceDate.getSeconds();
 
+        intervalId = window.setInterval(function () {
+            createTrackPoints(routeId);
+        }, mobile.CONFIG.TRACKPOINT_COLLECTION_FREQUENCY_SECONDS * 1000);
+    };
+
+    mobile.endRoute = function () {
+        $('#endButton').hide();
+        $('#startButton').show();
+
+        routeInProgress = false;
+
+        var date = new Date();
+        routeEndTime = date.getSeconds();
+        routeTotalTime = routeEndTime - routeStartTime;
+
+        clearInterval(intervalId);
+
+        trackPoints = [];
+    };
+
+    var createTrackPoints = function (routeId) {
+
+        var onSuccess = function (position) {
+
+            console.log("Position: " + position.coords.latitude + " " + position.coords.longitude);
+
+            var newTrackPoint = new models.TrackPoint(
+                new Date(position.timestamp),
+                position.coords.accuracy,
+                position.coords.heading,
+                position.coords.latitude,
+                position.coords.longitude,
+                mobile.CONFIG.DEVICE_PLATFORM,
+                position.coords.speed
+            );
+            trackPoints.push(newTrackPoint);
+
+            services.postTrackPoints(serviceDate, routeId);
+        };
+
+        var onError = function (error) {
+            alert("Error Code: " + error.code + '\n' + error.message);
+        };
+
+        navigator.geolocation.getCurrentPosition(onSuccess, onError, {enableHighAccuracy: true});
+    };
+
+    mobile.login = function () {
+        var e = $("#email").val();
+        var p = $("#pass").val();
+        services.authenticate(e, p, function (data) {
+            //if this was authenticated refresh routes and navigate to routeslist
+            if (data) {
+                app.navigate("#routes");
+            } else {
+                alert("Wrong login info, manG.");
+            }
+        });
+    };
 
     //set mobile to a global function, so the functions are accessible from the HTML element
     window.mobile = mobile;
@@ -137,5 +185,5 @@ require(["jquery", "lib/kendo.all.min", "developer", "db/services"], function ($
     app = new kendo.mobile.Application($(document.body), {});
 
     //navigate to routes (for development purposes)
-    app.navigate("views/routes.html");
+//    app.navigate("views/routes.html");
 });
