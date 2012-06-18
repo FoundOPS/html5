@@ -1,21 +1,21 @@
 'use strict';
 
-define(['tools', 'ui/leaflet', '../../test/fakeData'], function (tools, leaflet, data) {
+define(['tools', 'ui/leaflet', '../../test/fakeData', 'ui/ui'], function (tools, leaflet, data, ui) {
 //region Tools Tests
     describe("Tools", function () {
         describe("getDirection", function () {
-            it("converts degrees to a compass direction", function () {
+            it("should convert degrees to a compass direction", function () {
                 expect(tools.getDirection(488)).toEqual("SE");
             });
         });
         describe("formatDate", function () {
-            it("convert a Date to 'mm-dd-yyyy'", function () {
+            it("should convert a Date to 'mm-dd-yyyy'", function () {
                 var date = new Date(2012, 5, 5);
                 expect(tools.formatDate(date)).toEqual("6-5-2012");
             });
         });
         describe("dateEqual", function () {
-            it("checks if two dates(without the time) are equal'", function () {
+            it("should check if two dates(without the time) are equal'", function () {
                 var date1 = new Date(2012, 6, 5, 5, 20, 5, 5);
                 var date2 = new Date(2012, 6, 5, 5, 21, 5, 5);
                 expect(tools.dateEqual(date1, date2)).toBeTruthy();
@@ -40,7 +40,7 @@ define(['tools', 'ui/leaflet', '../../test/fakeData'], function (tools, leaflet,
         beforeEach(function () {
             setFixtures('<div id="map"></div>');
         });
-        describe("setupMap", function () {
+        describe("setup the map", function () {
             it("should load the map", function () {
                 var map = leaflet.setupMap();
                 expect(map._zoom).toEqual(4);
@@ -48,7 +48,7 @@ define(['tools', 'ui/leaflet', '../../test/fakeData'], function (tools, leaflet,
                 expect(map.options.center.lng).toEqual(-89);
             });
         });
-        describe("center", function () {
+        describe("center the map", function () {
             it("should center/fit the map based on the given locations", function () {
                 var map = leaflet.setupMap();
                 var p1 = new window.L.LatLng("40.1", "-85.1");
@@ -62,7 +62,7 @@ define(['tools', 'ui/leaflet', '../../test/fakeData'], function (tools, leaflet,
                 expect(map._animateToCenter.lng).toEqual(-85.15);
             });
         });
-        describe("addPopup", function () {
+        describe("adding a Popup to a marker", function () {
             it("should add a popup to the given marker", function () {
                 var map = leaflet.setupMap();
                 var p1 = new window.L.LatLng("40.1", "-85.1");
@@ -73,14 +73,14 @@ define(['tools', 'ui/leaflet', '../../test/fakeData'], function (tools, leaflet,
                 expect(map._layers[15]._popup._content).toBeDefined();
             });
         });
-        describe("getLatLng", function () {
+        describe("get LatLng from location", function () {
             it("should create a new window.L.LatLng from a location", function () {
                 var location = data.depots[0];
                 var latLng = leaflet.getLatLng(location);
                 expect(latLng.lat).toEqual(40.460335);
             });
         });
-        describe("drawDepots", function () {
+        describe("drawing depots", function () {
             it("should return a layer group with depots", function () {
                 var map = leaflet.setupMap();
                 var depots = leaflet.drawDepots(map, data.depots);
@@ -88,15 +88,24 @@ define(['tools', 'ui/leaflet', '../../test/fakeData'], function (tools, leaflet,
                 expect(map._panes.markerPane.innerHTML).toMatch(/depot\.png/);
             });
         });
-        describe("drawResources", function () {
+        describe("drawing resources", function () {
             it("should return a layer group with resources", function () {
                 var map = leaflet.setupMap();
                 var resources = leaflet.drawResources(map, data.resources, data.routeColorSelector);
                 //using regex, checks that there are 2 apple icons on the map
                 expect(map._panes.markerPane.innerHTML).toMatch(/apple.*apple/g);
             });
+            describe("adding a click handler to the marker", function () {
+                it("should select a route when a resource is clicked on", function () {
+                    var callback = jasmine.createSpy();
+                    var map = leaflet.setupMap();
+                    var resources = leaflet.drawResources(map, data.resources, data.routeColorSelector, callback);
+                    map._panes.markerPane.lastChild.click();
+                    expect(callback).toHaveBeenCalledWith("7c4d1de7-974a-46e1-8e56-b701bcb28f8c");
+                });
+            });
         });
-        describe("drawRoutes", function () {
+        describe("drawing routes", function () {
             it("should return a layer group with routes", function () {
                 var map = leaflet.setupMap();
                 var routes = leaflet.drawRoutes(map, data.routes, data.routeColorSelector, true);
@@ -104,8 +113,17 @@ define(['tools', 'ui/leaflet', '../../test/fakeData'], function (tools, leaflet,
                 //(each divIcon has a number class)
                 expect(map._panes.markerPane.innerHTML).toMatch(/number.*number.*number.*number/g);
             });
+            describe("adding a click handler to the marker", function () {
+                it("should select a route when a destination is clicked on", function () {
+                    var callback = jasmine.createSpy();
+                    var map = leaflet.setupMap();
+                    var resources = leaflet.drawRoutes(map, data.routes, data.routeColorSelector, true, callback);
+                    map._panes.markerPane.lastChild.click();
+                    expect(callback).toHaveBeenCalledWith("7c4d1de7-974a-46e1-8e56-b701bcb28f8c");
+                });
+            });
         });
-        describe("drawTrackPoints", function () {
+        describe("drawing trackPoints", function () {
             it("should return a layer group with TrackPoints", function () {
                 var map = leaflet.setupMap();
                 var trackPoints = leaflet.drawTrackPoints(map, data.trackpoints, data.resources, data.routeColorSelector, data.routeOpacitySelector, 'f57f763f-87e1-47e0-98c8-f650b2c556dc');
@@ -125,26 +143,31 @@ define(['tools', 'ui/leaflet', '../../test/fakeData'], function (tools, leaflet,
         });
 //        describe("on initialization", function () {
 //            it("should create a map and set the date", function () {
+//                map.selectedRouteId = "f57f763f-87e1-47e0-98c8-f650b2c556dc";
 //                initialize();
 //                expect(map.innerHTML).not.toEqual("");
-//                //expect(setDate).toHaveBeenCalledWith(new Date());
+//                expect(setDate).toHaveBeenCalledWith(new Date());
+//                $('#map').click();
+//                expect(map.selectedRouteId).toBeFalsy();
 //            });
 //        });
-        describe("the role (id) is set", function () {
-            it("should set the role id", function () {
-
-            });
-            it("should load and draw depots", function () {
-
-            });
-            it("should load and draw routes", function () {
-
-            });
-            it("should load and draw resources", function () {
-
-            });
-        });
-//        describe("setSelectedRoute", function () {
+//        describe("the role (id) is set", function () {
+//            var roleId = "B6C0AA05-3947-4AE5-8C08-840132ACF5C2";
+//            window.map.setRoleId(roleId);
+//            it("should set the role id", function () {
+//                expect(services.setRoleId).toEqual(roleId);
+//            });
+//            it("should load and draw depots", function () {
+//                expect(getDepots).toHaveBeenCalled();
+//            });
+//            it("should load and draw routes", function () {
+//                expect(getRoutes).toHaveBeenCalled();
+//            });
+//            it("should load and draw resources", function () {
+//                expect(getResources).toHaveBeenCalled();
+//            });
+//        });
+//        describe("a route is selected", function () {
 //            it("should set the selected routeId, clear old trackpoints, and draw new trackpoints", function () {
 //                var selectedRouteId = "7c4d1de7-974a-46e1-8e56-b701bcb28f8c";
 //                var routeId = "f57f763f-87e1-47e0-98c8-f650b2c556dc";
@@ -155,7 +178,7 @@ define(['tools', 'ui/leaflet', '../../test/fakeData'], function (tools, leaflet,
 //                expect(drawTrackpoints).toHaveBeenCalledWith(routeId);
 //            });
 //        });
-//        describe("setDate", function () {
+//        describe("the date is set", function () {
 //            it("should set the selected date, and clear and redraw all objects", function () {
 //                var selectedDate = new Date(2012,6,13);
 //                var date = new Date();
@@ -173,12 +196,12 @@ define(['tools', 'ui/leaflet', '../../test/fakeData'], function (tools, leaflet,
 //                expect(getResources).toHaveBeenCalled();
 //            });
 //        });
-//        describe("removeLayer", function () {
+//        describe("removing a layer", function () {
 //            it("should remove a layer from the map", function () {
 //                var layer = new window.L.LayerGroup();
 //                var map = leaflet.setupMap();
 //                map.addLayer(layer);
-//                removeLayer(layer)
+//                removeLayer(layer);
 //                expect(map._layers[43]).not.toBeDefined();
 //            });
 //        });
@@ -218,7 +241,7 @@ define(['tools', 'ui/leaflet', '../../test/fakeData'], function (tools, leaflet,
 //                expect(leaflet.drawTrackPoints).toHaveBeenCalled();
 //            });
 //        });
-//        describe("getDepots", function () {
+//        describe("getting the depots", function () {
 //            it("should get the depots and call their draw method", function () {
 //                services.RoleId = "3959D9BF-66EA-41FD-90F2-7AD58A18DF2A";
 //                getDepots();
@@ -226,14 +249,14 @@ define(['tools', 'ui/leaflet', '../../test/fakeData'], function (tools, leaflet,
 //                expect(services.getDepots).toHaveBeenCalled();
 //            });
 //        });
-//        describe("getResources", function () {
+//        describe("getting the resources", function () {
 //            it("should get the resources and call their draw method", function () {
 //            services.RoleId = "3959D9BF-66EA-41FD-90F2-7AD58A18DF2A";
 //            var selectedDate = new Date();
 //            getResources();
 //            expect(services.getResourcesWithLatestPoints).toHaveBeenCalled();
 //        });
-//        describe("getRoutes", function () {
+//        describe("getting the routes", function () {
 //            it("should get the routes and call their draw method", function () {
 //                services.RoleId = "3959D9BF-66EA-41FD-90F2-7AD58A18DF2A";
 //                getRoutes();
