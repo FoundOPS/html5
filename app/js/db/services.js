@@ -96,10 +96,12 @@ define(['lib/kendo.all.min', 'developer', 'tools'], function (k, developer, tool
 
     /**
      * Get the current service provider's Routes.
-     * TODO wrap this in a function with optional parameters to either get the service provider's routes, or to get the current user's routes or create another function and rename this
+     * @param {string} serviceDateUtc The service date to get routes for (in Utc).
      * @param {!function(Array.<Object>)} callback A callback to pass the loaded routes to.
      */
-    services.getRoutes = services._getHttp('routes/GetRoutes', {}, false);
+    services.getRoutes = function (serviceDateUtc, callback) {
+        return services._getHttp('routes/GetRoutes', {serviceDateUtc: serviceDateUtc}, false)(callback);
+    };
 
     /**
      * A kendo data source for Routes for the current user's routes.
@@ -150,13 +152,13 @@ define(['lib/kendo.all.min', 'developer', 'tools'], function (k, developer, tool
 
     /**
      * Get the service provider's TrackPoints.
-     * @param {goog.date.UtcDateTime} serviceDate The service date to retrieve TrackPoints for.
+     * @param {string} serviceDate The service date to retrieve TrackPoints for (in Utc).
      * @param {string} routeId The Id of the route to retrieve TrackPoints for.
      * @param {!function(Array.<Object>)} callback The callback to pass the TrackPoints to after they are loaded.
      */
-    services.getTrackPoints = function (serviceDate, routeId, callback) {
+    services.getTrackPoints = function (serviceDateUtc, routeId, callback) {
         return services._getHttp('trackPoint/GetTrackPoints',
-            {routeId: routeId, serviceDate: serviceDate}, false)(callback);
+            {routeId: routeId, serviceDateUtc: serviceDateUtc}, false)(callback);
     };
 
     /**

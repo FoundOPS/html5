@@ -217,7 +217,7 @@ require(["jquery", "lib/leaflet", "developer", "db/services", "tools", "ui/leafl
     var getRoutes = function () {
         //check if there is a roleId set
         if (services.RoleId != null) {
-            services.getRoutes(function (loadedRoutes) {
+            services.getRoutes(tools.formatDate(selectedDate), function (loadedRoutes) {
                 removeLayer(routesGroup);
                 //draw the routes
                 routesGroup = leaflet.drawRoutes(map, loadedRoutes, routeColorSelector, center,
@@ -309,5 +309,5 @@ require(["jquery", "lib/leaflet", "developer", "db/services", "tools", "ui/leafl
     window.map = functions;
 
     //for debugging
-    //functions.setRoleId(developer.GOTGREASE_ROLE_ID);
+//    functions.setRoleId(developer.GOTGREASE_ROLE_ID);
 });
