@@ -161,28 +161,25 @@ define(['lib/kendo.all.min', 'developer', 'tools'], function (k, developer, tool
             {routeId: routeId, serviceDateUtc: serviceDateUtc}, false)(callback);
     };
 
-    services.postTrackPoints = function (trackPoints, serviceDate, routeId) {
-        //Send trackPoint array to server and return success or failure.
+    /**
+     * Send trackPoint array to server and return success or failure to the callback
+     * @param {Array.<models.TrackPoint>} trackPoints
+     * @param routeId
+     * @param callback
+     */
+    services.postTrackPoints = function (trackPoints, routeId, callback) {
+        var params = {};
+        params.modelTrackPoints = trackPoints;
+        params.routeId = routeId;
 
-        var postThenInvokeCallback = function (callback) {
-            var params = function (trackPoints, serviceDate, routeId) {
-                this.trackPoints = trackPoints;
-                this.serviceDate = serviceDate;
-                this.routeId = routeId;
-            };
-            params(trackPoints, serviceDate, routeId);
-
-            $.ajax({
-                //must use JSONP because the javascript may be hosted on a different url than the api
-                type: "POST",
-                dataType: 'JSONP',
-                url: services.API_URL + "",
-                data: params
-            }).success(function (response) {
-                    callback(response);
-                });
-            return postThenInvokeCallback;
-        };
+        $.ajax({
+            //must use JSONP because the javascript may be hosted on a different url than the api
+            type: "POST",
+            url: services.API_URL + "trackpoint/PostEmployeeTrackPoint",
+            data: JSON.stringify(params)
+        }).success(function (response) {
+                callback(response);
+            });
     };
 
     /**

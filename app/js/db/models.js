@@ -2,7 +2,7 @@
 
 'use strict';
 
-define(function () {
+define(['tools'], function (tools) {
     var models = {};
     /**
      * Enum for device platforms.
@@ -29,15 +29,27 @@ define(function () {
         OTHER: "Other"
     };
 
-    models.TrackPoint = function (date, accuracy, heading, latitude, longitude, routeId, source, speed) {
-        this.collectedTimeStamp = date;
-        this.accuracy = accuracy;
-        this.heading = heading;
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.routeId = routeId;
-        this.source = source;
-        this.speed = speed;
+    /**
+     * Creates a TrackPoint to send to the API server.
+     * @param {Date} date
+     * @param {} accuracy
+     * @param heading
+     * @param latitude
+     * @param longitude
+     * @param routeId
+     * @param source
+     * @param speed
+     * @constructor
+     */
+    models.TrackPoint = function TrackPoint (accuracy, date, heading, latitude, longitude, routeId, source, speed) {
+        this.Accuracy = accuracy;
+        this.CollectedTimeStamp = tools.formatDate(date);
+        this.Heading = heading;
+        this.Latitude = latitude;
+        this.Longitude = longitude;
+        this.RouteId = routeId;
+        this.Source = source;
+        this.Speed = speed;
     };
 
     return models;

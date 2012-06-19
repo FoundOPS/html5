@@ -4,9 +4,9 @@
         <div data-role="navbar">
             <a class="nav-button" data-align="left" data-role="backbutton">Back</a>
             <a id="startButton" class="nav-button" data-align="right"
-               data-click="mobile.startRoute" data-role="button">Start Route</a>
+               data-bind="click: startRoute, visible: startVisible" data-role="button">Start Route</a>
             <a id="endButton" class="nav-button" data-align="right"
-               data-click="mobile.endRoute" data-role="button" style="display:none">End Route</a>
+               data-bind="click: endRoute, visible: endVisible" data-role="button" style="display:none">End Route</a>
             <span data-role="view-title"></span>
         </div>
     </header>
