@@ -46,7 +46,7 @@ define(function () {
      * The current web service source.
      * @type {developer.Frame}
      */
-    developer.CURRENT_FRAME = developer.Frame.SILVERLIGHT;
+    developer.CURRENT_FRAME = developer.Frame.BROWSER;
 
     /**
      * The local server's RoleId for GotGrease.
