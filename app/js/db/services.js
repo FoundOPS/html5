@@ -118,26 +118,6 @@ define(['lib/kendo.mobile.min', 'developer', 'tools'], function (k, developer, t
         }
     });
 
-    //Questionable?
-//    /**
-//     * A kendo data source for RouteDestinations of the selected route.
-//     * @type {kendo.data.DataSource}
-//     */
-//    services.routeDestinationsDataSource = services.routesDataSource({
-//        selectedRoute: null,
-//        hasChanges: false,
-//        save: function () {
-//            this.routesSource.sync();
-//            this.set("hasChanges", false);
-//        },
-//        showForm: function () {
-//            return this.get("selectedRoute") !== null;
-//        },
-//        change: function () {
-//            this.set("hasChanges", true);
-//        }
-//    });
-
     /**
      * Get the service provider's depots.
      * @param {!function(Array.<Object>)} callback A callback to pass the loaded depots.

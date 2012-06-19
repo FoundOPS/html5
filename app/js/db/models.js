@@ -31,14 +31,14 @@ define(['tools'], function (tools) {
 
     /**
      * Creates a TrackPoint to send to the API server.
+     * @param {Number} Accuracy In meters.
      * @param {Date} date
-     * @param {} accuracy
-     * @param heading
-     * @param latitude
-     * @param longitude
-     * @param routeId
-     * @param source
-     * @param speed
+     * @param {Number} heading An angle that dictates the direction the phone is facing.
+     * @param {Number} latitude
+     * @param {Number} longitude
+     * @param {Guid} routeId
+     * @param {models.DevicePlatform} source The OS of the device using the app.
+     * @param {Number} speed Speed at which the phone is moving.
      * @constructor
      */
     models.TrackPoint = function TrackPoint (accuracy, date, heading, latitude, longitude, routeId, source, speed) {
