@@ -1,11 +1,27 @@
 "use strict";
 //TODO: Fix hover state css/js aesthetics.
 require.config({
-    baseUrl: 'lib'
+    baseUrl:'lib',
+    underscore: "../lib/underscore",
+    shim:{
+        underscore: {
+            exports: '_'
+        }
+    }
 });
 
-require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min"], function($) {
-    /* Popup Constructor */
+require(["jquery", "underscore", "jquery.mousewheel", "jquery.jscrollpane.min", "text!../navigatorTemplates.html"], function ($, _, a, b, templates) {
+    //extract the templates from the html
+    var expandMenuButton = $(templates).filter("#expandMenuButton");
+//    var myTemplate = "";
+//    $.tmpl(myTemplate, myData).appendTo("#myDiv");
+
+    //TODO: Move to init.
+    _.templateSettings = {
+        interpolate : /\{\{(.+?)\}\}/g
+    };
+
+    /** Popup Constructor **/
     function Popup(data) {
         var title = "";
         var content = "";
@@ -17,24 +33,23 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min"], function($) {
         var thisPopup = this;
         var currentIconTarget = null;
 
-        var data = data;
         var history = [];
 
-        //Static data objects, will be removed in future iterations.
+        //Static data objects, could be removed in future iterations.
         var menus = [
             {
-                id: "navClient",
-                title: data.name,
-                contents: [
-                    {"name": "Settings"},
-                    {"name": "Change Business", id: "changeBusiness"},
-                    {"name": "Logout"}
+                id:"navClient",
+                title:data.name,
+                contents:[
+                    {"name":"Settings"},
+                    {"name":"Change Business", id:"changeBusiness"},
+                    {"name":"Logout"}
                 ]
             }
         ];
 
-        this.addMenu = function(id, title, contents){
-            menus.push({'id': id, 'title':title, 'contents':contents});
+        this.addMenu = function (id, title, contents) {
+            menus.push({'id':id, 'title':title, 'contents':contents});
         }
 
         $(".navElement").filter(".popup").click(function (e) {
@@ -96,7 +111,7 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min"], function($) {
         };
 
         //Function returns the left offset of the popup and sets the carrot element's position.
-        this.getLeft = function(iconTarget, popupDiv){
+        this.getLeft = function (iconTarget, popupDiv) {
             currentIconTarget = iconTarget;
             //console.log("IconTarget Offset: " + iconTarget.offset().left);
             //console.log("IconTarget Width: " + iconTarget.width());
@@ -114,7 +129,7 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min"], function($) {
             carrotPos = "50%";
 
             var carrot = $("#popupArrow");
-            if((offset < 0) || (rightOffset > windowWidth)) {
+            if ((offset < 0) || (rightOffset > windowWidth)) {
                 //console.log("Offscreen popup.");
                 offset = (windowWidth - popupDiv.width()) / 2;
                 offScreen = true;
@@ -160,17 +175,17 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min"], function($) {
 
             $("#popupBack").click(function (e) {
                 var x = history.pop();
-                if(history.length<=0){
+                if (history.length <= 0) {
                     thisPopup.hide();
                     return;
                 }
-                thisPopup.setData(history[history.length-1]);
+                thisPopup.setData(history[history.length - 1]);
             });
 
             //Window resize listener to check if popup is off screen.
-            $(window).on('resize', function(){
+            $(window).on('resize', function () {
                     var popupDiv = $("#popup");
-                    if(popupDiv.is(":visible")){
+                    if (popupDiv.is(":visible")) {
                         var left = thisPopup.getLeft(currentIconTarget, popupDiv);
                         popupDiv.css("left", left);
                     }
@@ -180,15 +195,15 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min"], function($) {
             //Click listener to detect clicks outside of popup
             $('html').on('click', function (e) {
                 var clicked = $(e.target);
-                var popupLen = clicked.parents("#popup").length + clicked.is("#popup")?1:0;
-                var navLen = clicked.parents(".navElement").length + clicked.is(".navElement")?1:0;
+                var popupLen = clicked.parents("#popup").length + clicked.is("#popup") ? 1 : 0;
+                var navLen = clicked.parents(".navElement").length + clicked.is(".navElement") ? 1 : 0;
                 //Parent bug fixed. Was entirely the fault of the previous listener creation.
                 if (popupLen === 0 && navLen === 0) {
                     thisPopup.hide();
                 }
             });
             $(document).on('click', '.popupContentRow a',
-                function(e){
+                function (e) {
                     //TODO: Fire event or change menu
                     var newId = $(this).parent().attr('id');
                     thisPopup.populate(newId);
@@ -204,15 +219,15 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min"], function($) {
             return popupDiv;
         };
 
-        this.hide = function() {
+        this.hide = function () {
             history = [];
             $("#popup").stop(false, true).fadeOut('fast');
         };
 
         //Public void function that populates setTitle and setContent with data found by id passed.
-        this.populate = function(id){
+        this.populate = function (id) {
             var newMenu = this.getMenu(id);
-            if(newMenu===null){
+            if (newMenu === null) {
                 //console.log("ID not found.");
                 return;
             }
@@ -220,17 +235,21 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min"], function($) {
             this.setData(newMenu);
         };
 
-        this.setData = function(data){
+        this.setData = function (data) {
             var contArray = data.contents;
             var c = "";
             var menuId = "";
             var i;
             //popupContentDiv.html('');
-            for (var i=0; i<contArray.length; i++) {
+            for (var i = 0; i < contArray.length; i++) {
                 var lastElement = "";
-                if (i === contArray.length - 1) { lastElement = "last"; }
-                if(contArray[i].id!=undefined){menuId = "id = '"+contArray[i].id+"'";}
-                c += "<div "+menuId+" class='popupContentRow " + lastElement + "'>" +
+                if (i === contArray.length - 1) {
+                    lastElement = "last";
+                }
+                if (contArray[i].id != undefined) {
+                    menuId = "id = '" + contArray[i].id + "'";
+                }
+                c += "<div " + menuId + " class='popupContentRow " + lastElement + "'>" +
                     "<a href='#'>" +
                     contArray[i].name +
                     "</a></div>";
@@ -240,13 +259,13 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min"], function($) {
         };
 
         //Public setter function for private var title and sets title of the html popup element.
-        this.setTitle = function(t){
+        this.setTitle = function (t) {
             title = t;
             $("#popupTitle").html(title);
         };
 
         //Public setter function for private var content and sets content of the html popup element.
-        this.setContent = function(cont){
+        this.setContent = function (cont) {
             content = cont;
             var popupContentDiv = $("#popupContent");
             popupContentDiv.html(content);
@@ -259,11 +278,11 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min"], function($) {
         //      title: Display text for popup header
         //      contents: Array of objects, included identifiers below
         //          name: Display text for links
-        this.getMenu = function(id) {
+        this.getMenu = function (id) {
             //Searches for a popup data object by the id passed, returns data object if found.
             var i;
-            for(i=0; i<menus.length; i+=1){
-                if(menus[i].id===id){
+            for (i = 0; i < menus.length; i += 1) {
+                if (menus[i].id === id) {
                     return menus[i];
                 }
             }
@@ -274,56 +293,80 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min"], function($) {
         };
     }
 
-    function Navigator(data){
-        initTopNav(data);
-        initSideBar(data.sections);
-        new Popup(data);
+    /**
+     * Initializes the navigator
+     * @param config Example below
+     * {
+     * name: "Jordan Kelly",
+     * avatarUrl: ".\img\jordan.jpg",
+     * businessLogoUrl: ".\img\myBusiness.jpg",
+     * roles: [{name: "FoundOPS", id:"23144-24242-242442"},
+     *         {name: "GotGrease", id:"Afsafsaf-24242-242442"},
+     *         {name: "AB Couriers", id:"Dagag-24242-242442"}],
+     * sections: [{name: "Employees", url:"#Employees", iconUrl: ".\img\employees.jpg"},
+     *            {name: "Logout", url:"#Logout", iconUrl: ".\img\logout.jpg"}
+     *            {name: "Regions", url:"#Regions", iconUrl: ".\img\regions.jpg"},
+     *            {name: "Vehicles", url:"#Vehicles", iconUrl: ".\img\vehicles.jpg"}];
+     * };
+     * @constructor
+     */
+    function Navigator(config) {
+        initTopNav(config);
+        initSideBar(config.sections);
+        new Popup(config);
     }
 
-    var initTopNav = function(data){
+    /** Initializes top navigation **/
+    var initTopNav = function (config) {
         var topNav = $(document.createElement('div'));
         topNav.attr('id', 'nav');
 
-        var name = data.name;
-        var avatarUrl = data.avatarUrl;
-        var businessLogoUrl = data.businessLogoUrl;
-        var navContainer = "<div id='navContainer'>"+
-                "<div id='navSearch' class='navElement'><input name='search' type='text' placeholder='Search...'/><a href='#'><img class='navIcon' src='img/search.png'/></a></div>"+
-                //    <!--div id='navNotif' class='navElement'>
-                //        <a href='#'><img class='navIcon' src='img/notify.png'/></a>
-                //    </div-->
-                "<div id='navClient' class='navElement popup last'><a href='#'><img class='navIcon profile' src='"+avatarUrl+"'/><img id='clientLogo' src='"+businessLogoUrl+"'/></a></div>"+
-            "</div>"+
-            "<img id='logo' src='./img/Logo.png' alt='FoundOPS'/>"+
-        "</div>";
+        //TODO Replace below w http://api.jquery.com/jQuery.template/#jQuery-template1
+        var avatarUrl = config.avatarUrl;
+        var businessLogoUrl = config.businessLogoUrl;
+        var navContainer = "<div id='navContainer'>" +
+            "<div id='navSearch' class='navElement'><input name='search' type='text' placeholder='Search...'/><a href='#'><img class='navIcon' src='img/search.png'/></a></div>" +
+            //    <!--div id='navNotif' class='navElement'>
+            //        <a href='#'><img class='navIcon' src='img/notify.png'/></a>
+            //    </div-->
+            "<div id='navClient' class='navElement popup last'><a href='#'><img class='navIcon profile' src='" + avatarUrl + "'/><img id='clientLogo' src='" + businessLogoUrl + "'/></a></div>" +
+            "</div>" +
+            "<img id='logo' src='./img/Logo.png' alt='FoundOPS'/>";
+
+          //TODO: Make this work.
+//        var navContainerTemplateText = $(templates).filter("#expandMenuButton");
+//        var navContainerTemplate = _.template(navContainerTemplateText.html());
+//        topNav.html(navContainerTemplate({avatarUrl : avatarUrl, businessLogoUrl: businessLogoUrl}));
 
         topNav.html(navContainer);
         $('body').prepend(topNav);
-        $('#logo').dblclick(function(){
+        $('#logo').dblclick(function () {
+            //refresh the page when the user double clicks on the corner logo
             window.location.href = window.location.href;
         });
     };
 
-    var initSideBarScrollBar = function(){
+    /** Initializes scrollbar for sidebar navigation **/
+    var initSideBarScrollBar = function () {
         var sideBarWrapperDiv = $("#sideBarWrapper");
         sideBarWrapperDiv.jScrollPane({
             horizontalGutter:0,
             verticalGutter:0,
-            verticalDragMinHeight: 25,
-            'showArrows': false
+            verticalDragMinHeight:25,
+            'showArrows':false
         });
 
         var sideBarScrollBar = sideBarWrapperDiv.data('jsp');
         //From jScrollPane examples: http://jscrollpane.kelvinluck.com/dynamic_height.html
         var throttleTimeout;
-        $(window).bind('resize', function(){
+        $(window).bind('resize', function () {
                 if ($.browser.msie) {
                     if (!throttleTimeout) {
                         throttleTimeout = setTimeout(
-                            function(){
+                            function () {
                                 sideBarScrollBar.reinitialise();
                                 throttleTimeout = null;
-                            },50
+                            }, 50
                         );
                     }
                 } else {
@@ -333,24 +376,28 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min"], function($) {
         );
     }
 
-    var initSideBar = function(sections){
-        //TODO: Lots of error checking.
-        function toHoverImage(imgLoc, color){
+    /** Initializes sidebar navigation **/
+    var initSideBar = function (sections) {
+        //TODO: Error checking?
+        /**
+         * Converts an image url to its colored version, for the hover url
+         * Ex. dispatcher.png -> dispatcherColor.png
+         */
+        function toHoverImage(imgLoc, color) {
             var extIndex = imgLoc.lastIndexOf('.');
             return imgLoc.substring(0, extIndex) + "Color" + imgLoc.substring(extIndex);
         }
 
+        //setup the sidebar wrapper (for the scrollbar)
         var sBarWrapper = $(document.createElement('div'));
         sBarWrapper.attr('id', 'sideBarWrapper');
 
+        //setup the sidebar (the place for buttons)
         var sBar = $(document.createElement('div'));
         sBar.attr('id', 'sideBar');
-        var expandButton = "<a href='#'>"+
-                "<div id='slideMenu'><img class='iconExpand' src='img/Expand.png'/></div>"+
-            "</a>";
-        sBar.html(expandButton);
+        sBar.html(expandMenuButton);
 
-        sections.sort(function (a,b) {
+        sections.sort(function (a, b) {
             if (a.name < b.name)
                 return -1;
             if (a.name > b.name)
@@ -358,10 +405,10 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min"], function($) {
             return 0;
         });
         //Insert sections outside of complete alphabetical sort.
-        sections.push({name: "Logout", url: "#logout", color: "black", iconUrl: "./img/logout.png"});
+        sections.push({name:"Logout", url:"#logout", color:"black", iconUrl:"./img/logout.png"});
         var section;
         var sBarElement = "";
-        for(section in sections){
+        for (section in sections) {
             var currentSection = sections[section];
             var name = currentSection.name;
             var color = currentSection.color;
@@ -372,11 +419,12 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min"], function($) {
             var bgX = 'center';
             var bgY = 'center';
 
-            sBarElement += "<a><div class='sideBarElement' color='"+color+"'><span class='icon' style = 'background: url(\""+iconUrl+"\") "+bgX+" "+bgY+" no-repeat'></span>"+
+            sBarElement += "<a><div class='sideBarElement' color='" + color + "'><span class='icon' style = 'background: url(\"" + iconUrl + "\") " + bgX + " " + bgY + " no-repeat'></span>" +
                 "<span>" + name + "</span></div></a>";
         }
         sBar.append(sBarElement);
 
+        //TODO: Possibly simplify sideBar creation.
         sBarWrapper.append(sBar);
         $('#nav').after(sBarWrapper);
 
@@ -387,16 +435,16 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min"], function($) {
         showMenuSpan.html(showMenuSpanInner);
         $('#navContainer').after(showMenuSpan);
 
-        $(".sideBarElement").hover(function(){
+        $(".sideBarElement").hover(function () {
             $(this).stop(true, true).addClass($(this).attr('color'), 100);
             var image = $(this).find(".icon:first").css('background-image').replace(/^url|[\(\)]/g, '');
             var hoverImg = toHoverImage(image);
-            $(this).find(".icon").css('background-image', 'url('+hoverImg+')');
-        },function(){
+            $(this).find(".icon").css('background-image', 'url(' + hoverImg + ')');
+        }, function () {
             $(this).stop(true, true).removeClass($(this).attr('color'), 100);
             var image = $(this).find(".icon:first").css('background-image').replace(/^url|[\(\)]/g, '');
             image = image.replace('Color.', '.');
-            $(this).find(".icon").css('background-image', 'url('+image+')');
+            $(this).find(".icon").css('background-image', 'url(' + image + ')');
         });
 
         /** Initialize sidebar scrollbar **/
@@ -415,7 +463,7 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min"], function($) {
             //Detects clicks outside of the sideBar when shown.
             if ((!clicked.is("#sideBar")) && sideBarLen === 0 && showMenuLen === 0
                 && $("#sideBar").offset().top > 0
-                && $(document).width()<=650) {
+                && $(document).width() <= 650) {
                 toggleMenu();
             }
 
@@ -423,26 +471,26 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min"], function($) {
             var slideMenuLen = clicked.parents("#slideMenu").length;
             if ((!clicked.is("#sideBar")) && sideBarLen === 0 && slideMenuLen === 0
                 && $("#sideBar").hasClass("expand")
-                && $(document).width()>650) {
+                && $(document).width() > 650) {
                 slideMenu();
             }
         });
 
         //Listener for window resize to reset sideBar styles.
-        $(window).resize(function() {
-            if($(window).width()<=650){
+        $(window).resize(function () {
+            if ($(window).width() <= 650) {
                 sideBarDiv.css("width", "");
-                if(sideBarDiv.hasClass("expand")){
+                if (sideBarDiv.hasClass("expand")) {
                     sideBarDiv.removeClass("expand");
                     sideBarDiv.attr("style", "");
                     $("#sideBarWrapper").attr("style", "");
                 }
-            }else if($(window).width()>650){
-                if(sideBarDiv.hasClass("hidden")){
+            } else if ($(window).width() > 650) {
+                if (sideBarDiv.hasClass("hidden")) {
                     sideBarDiv.removeClass("hidden");
                     sideBarDiv.attr("style", "");
                     $("#sideBarWrapper").attr("style", "");
-                    if($(".iconShow").hasClass('rotateIcon')){
+                    if ($(".iconShow").hasClass('rotateIcon')) {
                         $(".iconShow").removeClass('rotateIcon');
                     }
                 }
@@ -450,24 +498,24 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min"], function($) {
         });
 
         //Function toggles menu slide out.
-        var slideMenu = function() {
+        var slideMenu = function () {
             $(".iconExpand").toggleClass("flip");
             //TODO: Change static 159px width to be dynamic?
-            if(!sideBarDiv.hasClass("expand")){
+            if (!sideBarDiv.hasClass("expand")) {
                 $("#sideBar, #sideBarWrapper, .jspContainer")
                     .stop(true, false)
-                    .animate({width: '159px'}, 'fast');
+                    .animate({width:'159px'}, 'fast');
             } else {
                 $("#sideBar, #sideBarWrapper, .jspContainer")
                     .stop(true, false)
-                    .animate({width: '55px'}, 'fast');
+                    .animate({width:'55px'}, 'fast');
             }
             sideBarDiv.toggleClass("expand");
         };
 
         //Helper function detecting if menu is able to have a hover state.
-        var hoverMenu = function() {
-            if($(document).width() > 650){
+        var hoverMenu = function () {
+            if ($(document).width() > 650) {
                 sideBarDiv.toggleClass("hover");
                 slideMenu();
             }
@@ -475,8 +523,8 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min"], function($) {
 
         //Click listener in charge of expanding sideBar on slideMenu button click.
         $("#slideMenu").stop().click(
-            function(){
-                if(!sideBarDiv.hasClass("hover")){
+            function () {
+                if (!sideBarDiv.hasClass("hover")) {
                     slideMenu();
                 }
             }
@@ -484,28 +532,28 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min"], function($) {
 
         //Hover listener that expands/contracts sideBar.
         $("#sideBarWrapper").hover(
-            function(){
+            function () {
                 hoverMenu();
             }
         );
 
         //General function that toggles menu up, out of view.
-        var toggleMenu = function() {
+        var toggleMenu = function () {
             $(".iconShow").toggleClass("rotateIcon");
 
-            var offset = -1*(sideBarDiv.offset().top + sideBarDiv.outerHeight());
-            if(sideBarDiv.hasClass("hidden")){
+            var offset = -1 * (sideBarDiv.offset().top + sideBarDiv.outerHeight());
+            if (sideBarDiv.hasClass("hidden")) {
                 sideBarWrapperDiv.css('display', 'inline-block');
                 sideBarDiv.stop(false, true).animate(
                     {
-                        top: 0
+                        top:0
                     },
                     'fast'
                 );
             } else {
                 sideBarDiv.stop(false, true).animate(
                     {
-                        top: offset
+                        top:offset
                     },
                     'fast',
                     function () {
@@ -518,7 +566,7 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min"], function($) {
 
         //Click listener that toggles menu visibility.
         $("#showMenu").stop(true, false).click(
-            function(){
+            function () {
                 toggleMenu();
             }
         );
@@ -526,19 +574,19 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min"], function($) {
 
     /**  Config  **/
     var initData = {
-        name: "Jordan Kelly",
-        avatarUrl: "./img/david.png",
-        businessLogoUrl: "./img/got-grease-logo.png",
-        roles: [
-            {name: "FoundOPS", id:"23144-24242-242442"},
-            {name: "GotGrease", id:"95838-24242-242442"},
-            {name: "AB Couriers", id:"64729-24242-242442"}
+        name:"Jordan Kelly",
+        avatarUrl:"./img/david.png",
+        businessLogoUrl:"./img/got-grease-logo.png",
+        roles:[
+            {name:"FoundOPS", id:"23144-24242-242442"},
+            {name:"GotGrease", id:"95838-24242-242442"},
+            {name:"AB Couriers", id:"64729-24242-242442"}
         ],
-        sections: [
-            {name: "Employees", url:"#Employees", color: "red", iconUrl: "img/employees.png"},
-            {name: "Routes", url:"#Routes", color: "green", iconUrl: "./img/routes.png"},
-            {name: "Regions", url:"#Regions", color: "orange", iconUrl: "./img/regions.png"},
-            {name: "Vehicles", url:"#Vehicles", color: "red", iconUrl: "./img/vehicles.png"}
+        sections:[
+            {name:"Employees", url:"#Employees", color:"red", iconUrl:"img/employees.png"},
+            {name:"Routes", url:"#Routes", color:"green", iconUrl:"./img/routes.png"},
+            {name:"Regions", url:"#Regions", color:"orange", iconUrl:"./img/regions.png"},
+            {name:"Vehicles", url:"#Vehicles", color:"red", iconUrl:"./img/vehicles.png"}
         ]
     };
     var navigationFrame = new Navigator(initData);
