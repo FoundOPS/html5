@@ -40,7 +40,7 @@ define(function () {
      * The current web service source.
      * @type {developer.DataSource}
      */
-    developer.CURRENT_DATA_SOURCE = developer.DataSource.LOCALAPI;
+    developer.CURRENT_DATA_SOURCE = developer.DataSource.ANDROIDLA;
 
     /**
      * The current web service source.

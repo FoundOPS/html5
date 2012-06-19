@@ -25,7 +25,7 @@ require.config({
     }
 });
 
-require(["jquery", "lib/kendo.all.min", "lib/cordova-1.8.1", "developer", "db/services", "db/models"], function ($, k, c, developer, services, models) {
+require(["jquery", "lib/kendo.mobile.min", "lib/cordova-1.8.1", "developer", "db/services", "db/models"], function ($, k, c, developer, services, models) {
     var mobile = {};
     /**
      * The configuration object for the mobile application.
@@ -99,9 +99,13 @@ require(["jquery", "lib/kendo.all.min", "lib/cordova-1.8.1", "developer", "db/se
             console.log("Error Code: " + error.code + '\n' + error.message);
         };
 
+        //native geolocation function
         navigator.geolocation.getCurrentPosition(onSuccess, onError, {enableHighAccuracy: true});
     };
 
+    /**
+     * Contains all the information and resources relating to the route view templates.
+     */
     mobile.viewModel = kendo.observable({
         routesSource: services.routesDataSource,
         /**
@@ -122,13 +126,24 @@ require(["jquery", "lib/kendo.all.min", "lib/cordova-1.8.1", "developer", "db/se
          */
         selectRouteDestination: function (e) {
             this.set("selectedDestination", e.dataItem);
-            this.set("destinationContactInfoSource",
+            this.set("destinationPhoneContactInfoSource",
                 new kendo.data.DataSource({
-                    data: this.get("selectedDestination").Location.ContactInfoSet
-//                    filter: {field: "type", operator: "eq", value: "Phone Number"}
+                    data: this.get("selectedDestination").Location.ContactInfoSet,
+                    filter: {field: "Type", operator: "equal", value: "Phone Number"}
+                }));
+            this.set("destinationEmailContactInfoSource",
+                new kendo.data.DataSource({
+                    data: this.get("selectedDestination").Location.ContactInfoSet,
+                    filter: {field: "Type", operator: "equal", value: "Email Address"}
+                }));
+            this.set("destinationWebsiteContactInfoSource",
+                new kendo.data.DataSource({
+                    data: this.get("selectedDestination").Location.ContactInfoSet,
+                    filter: {field: "Type", operator: "equal", value: "Website"}
                 }));
             app.navigate("views/routeDestinationDetails.html");
         },
+        //Dictate the visibility of the startRoute and endRoute buttons.
         startVisible: true,
         endVisible: false,
         /**
@@ -157,7 +172,7 @@ require(["jquery", "lib/kendo.all.min", "lib/cordova-1.8.1", "developer", "db/se
 
             var date = new Date();
 
-            //stop calling
+            //stop calling addPushTrackPoints
             clearInterval(intervalId);
             trackPointsToSend = [];
         }

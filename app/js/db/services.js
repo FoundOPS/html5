@@ -6,7 +6,7 @@
 
 'use strict';
 
-define(['lib/kendo.all.min', 'developer', 'tools'], function (k, developer, tools) {
+define(['lib/kendo.mobile.min', 'developer', 'tools'], function (k, developer, tools) {
     var services = {};
 
     /**
