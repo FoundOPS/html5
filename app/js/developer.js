@@ -52,7 +52,7 @@ define(function () {
      * The local server's RoleId for GotGrease.
      * @type {string}
      */
-    developer.GOTGREASE_ROLE_ID = '0AFAA1D3-20A2-4F8B-B8A8-FB3C6914EDC0';
+    developer.GOTGREASE_ROLE_ID = '03EC5972-1161-4B9F-ABC9-D359A32FD076';
 
     return developer;
 });

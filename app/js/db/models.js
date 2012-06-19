@@ -29,8 +29,15 @@ define(function () {
         OTHER: "Other"
     };
 
-    models.TrackPoint = {
-
+    models.TrackPoint = function (date, accuracy, heading, latitude, longitude, routeId, source, speed) {
+        this.collectedTimeStamp = date;
+        this.accuracy = accuracy;
+        this.heading = heading;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.routeId = routeId;
+        this.source = source;
+        this.speed = speed;
     };
 
     return models;

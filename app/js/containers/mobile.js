@@ -79,7 +79,7 @@ require(["jquery", "lib/kendo.all.min", "lib/cordova-1.8.1", "developer", "db/se
                 new kendo.data.DataSource({
                     data: this.get("selectedRoute").RouteDestinations
                 }));
-            this.set("routeId", this.get("selectedRoute").Id);
+            routeId = this.get("selectedRoute").Id;
             app.navigate("views/routeDestinations.html");
         },
         /**
@@ -150,12 +150,17 @@ require(["jquery", "lib/kendo.all.min", "lib/cordova-1.8.1", "developer", "db/se
                 position.coords.heading,
                 position.coords.latitude,
                 position.coords.longitude,
+                routeId,
                 mobile.CONFIG.DEVICE_PLATFORM,
                 position.coords.speed
             );
             trackPoints.push(newTrackPoint);
 
-            services.postTrackPoints(serviceDate, routeId);
+            var callback = services.postTrackPoints(trackPoints, serviceDate, routeId);
+
+//            if(callback) {
+//                trackPoints = [];
+//            }
         };
 
         var onError = function (error) {
@@ -171,9 +176,9 @@ require(["jquery", "lib/kendo.all.min", "lib/cordova-1.8.1", "developer", "db/se
         services.authenticate(e, p, function (data) {
             //if this was authenticated refresh routes and navigate to routeslist
             if (data) {
-                app.navigate("#routes");
+                app.navigate("views/routes.html");
             } else {
-                alert("Wrong login info, manG.");
+                alert("Login information is incorrect.");
             }
         });
     };
