@@ -1,26 +1,292 @@
 "use strict";
-
+//TODO: Fix hover state css/js aesthetics.
 require.config({
     baseUrl: 'lib'
 });
 
 require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min"], function($) {
-    var thisNav = this;
+    /* Popup Constructor */
+    function Popup(data) {
+        var title = "";
+        var content = "";
+        var object = null;
 
-    function Navigator(iData){
-        var data = iData;
-        initTopNav(data);
-        initSideBar(data.sections);
-        afterInit(data);
+        var lastNavClick = null;
+        var offScreen = false;
+        var carrotPos = "50%";
+        var thisPopup = this;
+        var currentIconTarget = null;
+
+        var data = data;
+        var history = [];
+
+        //Static data objects, will be removed in future iterations.
+        var menus = [
+            {
+                id: "navClient",
+                title: data.name,
+                contents: [
+                    {"name": "Settings"},
+                    {"name": "Change Business", id: "changeBusiness"},
+                    {"name": "Logout"}
+                ]
+            }
+        ];
+
+        this.addMenu = function(id, title, contents){
+            menus.push({'id': id, 'title':title, 'contents':contents});
+        }
+
+        $(".navElement").filter(".popup").click(function (e) {
+            thisPopup.toggleVisible(e, $(this));
+        });
+
+        /*TODO: Break toggleVisible into generic functions (eg. Should not expect el=navElement)*/
+        this.toggleVisible = function (e, el) {
+            var icon = $(el).find("img.navIcon").first();
+            if (icon === null) {
+                //console.log("ERROR: Cannot locate nav icon in element!");
+                return;
+            }
+            //console.log("Found navIcon in element.");
+            //console.log("Looking for existing popup...");
+
+            var popupDiv = $("#popup");
+
+            if (popupDiv.length === 0) {
+                //console.log("Popup not initialized");
+                popupDiv = this.createPopup(icon);
+            }
+            if (popupDiv.length === 0) {
+                /*console.log("ERROR: FAILED TO CREATE POPUP!!!");*/
+                return;
+            }
+
+            var navElem = $(el).closest(".navElement");
+            var left = "50%";
+            var id = navElem.attr("id");
+            //TODO: Fix repetition.
+            if (popupDiv.is(":visible") && lastNavClick !== null) {
+                if (navElem.is("#" + lastNavClick)) {
+                    //console.log("Clicked on same nav button!");
+                    this.hide();
+                    lastNavClick = navElem.attr("id");
+                    return;
+                }
+                //console.log("Clicked on different nav button!");
+                var thisPopup = this;
+                this.hide();
+                popupDiv.promise("fx").done(function () {
+                    left = thisPopup.getLeft(icon, popupDiv);
+                    thisPopup.populate(id);
+                    popupDiv.css("left", left);
+                    popupDiv.stop(false, true).fadeIn('fast');
+                });
+                lastNavClick = navElem.attr("id");
+                return;
+            }
+
+            left = this.getLeft(icon, popupDiv);
+            popupDiv.css("left", left);
+            popupDiv.css("top", $("nav").height());
+            lastNavClick = navElem.attr("id");
+            //console.log("current click: " + lastNavClick);
+            this.populate(id);
+            popupDiv.stop(false, true).fadeIn();
+        };
+
+        //Function returns the left offset of the popup and sets the carrot element's position.
+        this.getLeft = function(iconTarget, popupDiv){
+            currentIconTarget = iconTarget;
+            //console.log("IconTarget Offset: " + iconTarget.offset().left);
+            //console.log("IconTarget Width: " + iconTarget.width());
+            var x = iconTarget.offset().left + iconTarget.width() / 2;
+            //console.log("x: " + x);
+            //TODO: Should this be outerWidth()?
+            var rightOffset = x + popupDiv.width() / 2 + 4;
+            var offset = x - popupDiv.width() / 2;
+            var windowWidth = $(window).width();
+            //console.log("Window width: " + windowWidth);
+            //console.log("Right popup offset: " + rightOffset);
+
+            //Sets popup variables referenced in resize listener.
+            offScreen = false;
+            carrotPos = "50%";
+
+            var carrot = $("#popupArrow");
+            if((offset < 0) || (rightOffset > windowWidth)) {
+                //console.log("Offscreen popup.");
+                offset = (windowWidth - popupDiv.width()) / 2;
+                offScreen = true;
+
+                carrotPos = (x - offset);
+                //console.log("x: " + x);
+                //console.log("Carrot width: " + carrot.width());
+                //console.log("Popup offset: " + popupDiv.offset().left);
+                //console.log("Carrot position: " + carrotPos);
+            }
+
+            //Moves carrot on popup div.
+            carrot.css("left", carrotPos);
+
+            //Returns left offset of popup from window.
+            return offset;
+        };
+
+        // createPopup: Appends popup to the nav
+        this.createPopup = function (icon) {
+            //Creates popup div that will be populated in the future.
+            var popupDiv = $(document.createElement("div"));
+            popupDiv.attr("id", "popup");
+
+            var s = "<div id='popupArrow'></div>" +
+                "<div id='popupHeader'>" +
+                "<a href='#'><div id='popupBack'></div></a>" +
+                "<span id='popupTitle'></span>" +
+                "<a href='#'><div id='popupClose'></div></a>" +
+                "</div>" +
+                "<div id='popupContent'></div>" +
+                "</div>";
+            popupDiv.html(s);
+            popupDiv.css("display", "none");
+
+            //Appends created div to page.
+            $("#nav").append(popupDiv);
+
+            //Click listener for popup close button.
+            $("#popupClose").click(function () {
+                thisPopup.hide();
+            });
+
+            $("#popupBack").click(function (e) {
+                var x = history.pop();
+                if(history.length<=0){
+                    thisPopup.hide();
+                    return;
+                }
+                thisPopup.setData(history[history.length-1]);
+            });
+
+            //Window resize listener to check if popup is off screen.
+            $(window).on('resize', function(){
+                    var popupDiv = $("#popup");
+                    if(popupDiv.is(":visible")){
+                        var left = thisPopup.getLeft(currentIconTarget, popupDiv);
+                        popupDiv.css("left", left);
+                    }
+                }
+            );
+
+            //Click listener to detect clicks outside of popup
+            $('html').on('click', function (e) {
+                var clicked = $(e.target);
+                var popupLen = clicked.parents("#popup").length + clicked.is("#popup")?1:0;
+                var navLen = clicked.parents(".navElement").length + clicked.is(".navElement")?1:0;
+                //Parent bug fixed. Was entirely the fault of the previous listener creation.
+                if (popupLen === 0 && navLen === 0) {
+                    thisPopup.hide();
+                }
+            });
+            $(document).on('click', '.popupContentRow a',
+                function(e){
+                    //TODO: Fire event or change menu
+                    var newId = $(this).parent().attr('id');
+                    thisPopup.populate(newId);
+                }
+            );
+
+            //Sets global popup object, object, with the created div.
+            object = popupDiv;
+
+            this.addMenu("changeBusiness", "Businesses", data.roles);
+
+            //Function also returns the popup div for ease of use.
+            return popupDiv;
+        };
+
+        this.hide = function() {
+            history = [];
+            $("#popup").stop(false, true).fadeOut('fast');
+        };
+
+        //Public void function that populates setTitle and setContent with data found by id passed.
+        this.populate = function(id){
+            var newMenu = this.getMenu(id);
+            if(newMenu===null){
+                //console.log("ID not found.");
+                return;
+            }
+            history.push(newMenu);
+            this.setData(newMenu);
+        };
+
+        this.setData = function(data){
+            var contArray = data.contents;
+            var c = "";
+            var menuId = "";
+            var i;
+            //popupContentDiv.html('');
+            for (var i=0; i<contArray.length; i++) {
+                var lastElement = "";
+                if (i === contArray.length - 1) { lastElement = "last"; }
+                if(contArray[i].id!=undefined){menuId = "id = '"+contArray[i].id+"'";}
+                c += "<div "+menuId+" class='popupContentRow " + lastElement + "'>" +
+                    "<a href='#'>" +
+                    contArray[i].name +
+                    "</a></div>";
+            }
+            this.setTitle(data.title);
+            this.setContent(c);
+        };
+
+        //Public setter function for private var title and sets title of the html popup element.
+        this.setTitle = function(t){
+            title = t;
+            $("#popupTitle").html(title);
+        };
+
+        //Public setter function for private var content and sets content of the html popup element.
+        this.setContent = function(cont){
+            content = cont;
+            var popupContentDiv = $("#popupContent");
+            popupContentDiv.html(content);
+        };
+
+        // Public getter function that returns a popup data object.
+        // Returns: Popup data object if found, null if not.
+        // Identifiers in object:
+        //      id: Same as html id used if static
+        //      title: Display text for popup header
+        //      contents: Array of objects, included identifiers below
+        //          name: Display text for links
+        this.getMenu = function(id) {
+            //Searches for a popup data object by the id passed, returns data object if found.
+            var i;
+            for(i=0; i<menus.length; i+=1){
+                if(menus[i].id===id){
+                    return menus[i];
+                }
+            }
+
+            //Null result returned if popup data object is not found.
+            //console.log("No data found, returning null.");
+            return null;
+        };
     }
 
-    var initTopNav = function(d){
+    function Navigator(data){
+        initTopNav(data);
+        initSideBar(data.sections);
+        new Popup(data);
+    }
+
+    var initTopNav = function(data){
         var topNav = $(document.createElement('div'));
         topNav.attr('id', 'nav');
 
-        var name = d.name;
-        var avatarUrl = d.avatarUrl;
-        var businessLogoUrl = d.businessLogoUrl;
+        var name = data.name;
+        var avatarUrl = data.avatarUrl;
+        var businessLogoUrl = data.businessLogoUrl;
         var navContainer = "<div id='navContainer'>"+
                 "<div id='navSearch' class='navElement'><input name='search' type='text' placeholder='Search...'/><a href='#'><img class='navIcon' src='img/search.png'/></a></div>"+
                 //    <!--div id='navNotif' class='navElement'>
@@ -28,94 +294,17 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min"], function($) {
                 //    </div-->
                 "<div id='navClient' class='navElement popup last'><a href='#'><img class='navIcon profile' src='"+avatarUrl+"'/><img id='clientLogo' src='"+businessLogoUrl+"'/></a></div>"+
             "</div>"+
-
-            //TODO: Should technically be added in with initSideBar.
-            "<span id='showMenu'><a href='#'><img class='iconShow' src='img/Expand.png'/></a></span>"+
-
             "<img id='logo' src='./img/Logo.png' alt='FoundOPS'/>"+
         "</div>";
 
         topNav.html(navContainer);
         $('body').prepend(topNav);
         $('#logo').dblclick(function(){
-            window.location.href=window.location.href;
+            window.location.href = window.location.href;
         });
     };
 
-    var initSideBar = function(sections){
-        //TODO: Lots of error checking.
-        var sBarWrapper = $(document.createElement('div'));
-        sBarWrapper.attr('id', 'sideBarWrapper');
-
-        var sBar = $(document.createElement('div'));
-        sBar.attr('id', 'sideBar');
-        var expandButton = "<a href='#'>"+
-                "<div id='slideMenu'><img class='iconExpand' src='img/Expand.png'/></div>"+
-            "</a>";
-        sBar.html(expandButton);
-
-        function compareName(a,b) {
-            if (a.name < b.name)
-                return -1;
-            if (a.name > b.name)
-                return 1;
-            return 0;
-        }
-
-        sections.sort(compareName);
-        sections.push({name: "Logout", url: "#logout", color: "black", iconUrl: "./img/logout.png"});
-        var section;
-        //var sBarElement = "";
-        for(section in sections){
-            var currentSection = sections[section];
-            var name = currentSection.name;
-            var color = currentSection.color;
-            var iconUrl = currentSection.iconUrl;
-            //TODO: Implement sprite selection.
-
-            var bgX = 'center';
-            var bgY = 'center';
-
-            var anchorElement = $(document.createElement('a'));
-            var hoverElement = $(document.createElement('div'));
-            hoverElement.addClass('sideBarElement');
-            var sBarElement = "<span class='icon' style = 'background: url(\""+iconUrl+"\") "+bgX+" "+bgY+" no-repeat'></span>"+
-                "<span>" + name + "</span>";
-            hoverElement.html(sBarElement);
-
-            hoverElement.attr("color", color);
-
-            anchorElement.append(hoverElement);
-
-            sBar.append(anchorElement);
-        }
-
-        sBarWrapper.append(sBar);
-        $('#nav').after(sBarWrapper);
-
-        var originalImage = null;
-        $(".sideBarElement").hover(function(){
-            $(this).stop(true, true).addClass($(this).attr('color'), 100);
-            var image = $(this).find(".icon:first").css('background-image').replace(/^url|[\(\)]/g, '');
-            var extIndex = image.lastIndexOf('.');
-            image = image.substring(0, extIndex) + "Color" + image.substring(extIndex);
-            //console.log(image);
-            $(this).find(".icon").css('background-image', 'url('+image+')');
-        },function(){
-            $(this).stop(true, true).removeClass($(this).attr('color'), 100);
-
-                var image = $(this).find(".icon:first").css('background-image').replace(/^url|[\(\)]/g, '');
-                image = image.replace('Color.', '.');
-
-            $(this).find(".icon").css('background-image', 'url('+image+')');
-        }
-        );
-
-
-    };
-
-    var afterInit = function(data){
-        var sideBarDiv = $("#sideBar");
+    var initSideBarScrollBar = function(){
         var sideBarWrapperDiv = $("#sideBarWrapper");
         sideBarWrapperDiv.jScrollPane({
             horizontalGutter:0,
@@ -142,311 +331,80 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min"], function($) {
                 }
             }
         );
+    }
 
-        /* Popup Constructor */
-        function Popup(data) {
-            var title = "";
-            var content = "";
-            var object = null;
-
-            var lastNavClick = null;
-            var offScreen = false;
-            var carrotPos = "50%";
-            var thisPopup = this;
-            var currentIconTarget = null;
-
-            var data = data;
-            var history = [];
-            $(".navElement").filter(".popup").click(function (e) {
-                thisPopup.toggleVisible(e, $(this));
-            });
-
-            /*TODO: Break toggleVisible into generic functions (eg. Should not expect el=navElement)*/
-            this.toggleVisible = function (e, el) {
-                var icon = $(el).find("img.navIcon").first();
-                if (icon === null) {
-                    //console.log("ERROR: Cannot locate nav icon in element!");
-                    return;
-                }
-                //console.log("Found navIcon in element.");
-                //console.log("Looking for existing popup...");
-
-                var popupDiv = $("#popup");
-                //console.log("Popup: " + $popup.text());
-
-                if (popupDiv.length === 0) {
-                    //console.log("Popup not initialized");
-                    popupDiv = this.createPopup(icon);
-                }
-                if (popupDiv.length === 0) {
-                    /*console.log("ERROR: FAILED TO CREATE POPUP!!!");*/
-                    return;
-                }
-
-                var navElem = $(el).closest(".navElement");
-                var left = "50%";
-                var id = navElem.attr("id");
-                //TODO: Fix repetition.
-                if (popupDiv.is(":visible") && lastNavClick !== null) {
-                    if (navElem.is("#" + lastNavClick)) {
-                        //console.log("Clicked on same nav button!");
-                        this.hide();
-                        lastNavClick = navElem.attr("id");
-                        return;
-                    }
-                    //console.log("Clicked on different nav button!");
-                    var thisPopup = this;
-                    this.hide();
-                    popupDiv.promise("fx").done(function () {
-                        left = thisPopup.getLeft(icon, popupDiv);
-                        thisPopup.populate(id);
-                        popupDiv.css("left", left);
-                        popupDiv.stop(false, true).fadeIn('fast');
-                    });
-                    lastNavClick = navElem.attr("id");
-                    return;
-                }
-
-                left = this.getLeft(icon, popupDiv);
-                popupDiv.css("left", left);
-                popupDiv.css("top", $("nav").height());
-                //console.log($(el).text());
-                lastNavClick = navElem.attr("id");
-                //console.log("current click: " + lastNavClick);
-                this.populate(id);
-                popupDiv.stop(false, true).fadeIn();
-            };
-
-            //Function returns the left offset of the popup and sets the carrot element's position.
-            this.getLeft = function(iconTarget, popupDiv){
-                currentIconTarget = iconTarget;
-                //console.log("IconTarget Offset: " + iconTarget.offset().left);
-                //console.log("IconTarget Width: " + iconTarget.width());
-                var x = iconTarget.offset().left + iconTarget.width() / 2;
-                //console.log("x: " + x);
-                //TODO: Should this be outerWidth()?
-                var rightOffset = x + popupDiv.width() / 2 + 4;
-                var offset = x - popupDiv.width() / 2;
-                var windowWidth = $(window).width();
-                //console.log("Window width: " + windowWidth);
-                //console.log("Right popup offset: " + rightOffset);
-
-                //Sets popup variables referenced in resize listener.
-                offScreen = false;
-                carrotPos = "50%";
-
-                var carrot = $("#popupArrow");
-                if((offset < 0) || (rightOffset > windowWidth)) {
-                    //console.log("Offscreen popup.");
-                    offset = (windowWidth - popupDiv.width()) / 2;
-                    offScreen = true;
-
-                    carrotPos = (x - offset);
-                    //console.log("x: " + x);
-                    //console.log("Carrot width: " + carrot.width());
-                    //console.log("Popup offset: " + popupDiv.offset().left);
-                    //console.log("Carrot position: " + carrotPos);
-                }
-
-                //Moves carrot on popup div.
-                carrot.css("left", carrotPos);
-
-                //Returns left offset of popup from window.
-                return offset;
-            };
-
-            // createPopup: Appends popup to the nav
-            this.createPopup = function (icon) {
-                //Creates popup div that will be populated in the future.
-                var popupDiv = $(document.createElement("div"));
-                popupDiv.attr("id", "popup");
-
-                var s = "<div id='popupArrow'></div>" +
-                    "<div id='popupHeader'>" +
-                    "<a href='#'><div id='popupBack'></div></a>" +
-                    "<span id='popupTitle'></span>" +
-                    "<a href='#'><div id='popupClose'></div></a>" +
-                    "</div>" +
-                    "<div id='popupContent'></div>" +
-                    "</div>";
-                popupDiv.html(s);
-                popupDiv.css("display", "none");
-
-                //Appends created div to page.
-                $("#nav").append(popupDiv);
-
-                //Click listener for popup close button.
-                $("#popupClose").click(function () {
-                    thisPopup.hide();
-                });
-
-                $("#popupBack").click(function (e) {
-                    var x = history.pop();
-                    if(history.length<=0){
-                        thisPopup.hide();
-                        return;
-                    }
-                    thisPopup.setData(history[history.length-1]);
-                });
-
-                //Window resize listener to check if popup is off screen.
-                $(window).on('resize', function(){
-                        var popupDiv = $("#popup");
-                        if(popupDiv.is(":visible")){
-                            var left = thisPopup.getLeft(currentIconTarget, popupDiv);
-                            popupDiv.css("left", left);
-                        }
-                    }
-                );
-
-                //Click listener to detect clicks outside of popup
-                $('html').on('click', function (e) {
-                    var clicked = $(e.target);
-                    var popupLen = clicked.parents("#popup").length + clicked.is("#popup")?1:0;
-                    var navLen = clicked.parents(".navElement").length + clicked.is(".navElement")?1:0;
-                    //Parent bug fixed. Was entirely the fault of the previous listener creation.
-                    if (popupLen === 0 && navLen === 0) {
-                        thisPopup.hide();
-                    }
-                });
-                $(document).on('click', '.popupContentRow a',
-                    function(e){
-                        console.log($(e.target).parents().length);
-                        console.log($(e.target).parents()[0].outerHTML);
-                        thisPopup.populate(this.innerHTML);
-                    }
-                );
-
-                //Sets global popup object, object, with the created div.
-                object = popupDiv;
-
-                //Function also returns the popup div for ease of use.
-                return popupDiv;
-            };
-
-            this.hide = function() {
-                history = [];
-                $("#popup").stop(false, true).fadeOut('fast');
-            };
-
-            //Public void function that populates setTitle and setContent with data found by id passed.
-            this.populate = function(id){
-                var popupData = this.getData(id);
-                if(popupData===null){
-                    //console.log("ID not found.");
-                    return;
-                }
-                history.push(popupData);
-                //TODO: Parent bug still present; fix sometime.
-                this.setData(popupData);
-            };
-
-            this.setData = function(data){
-                var contArray = data.contents;
-                var c = "";
-                var i;
-                //popupContentDiv.html('');
-                for (i=0; i< contArray.length; i+=1) {
-                    var lastElement = "";
-                    if (i === contArray.length - 1) { lastElement = "last"; }
-                    c += "<div class='popupContentRow " + lastElement + "'>" +
-                        "<a href='#'>" +
-                        contArray[i].name +
-                        "</a></div>";
-                }
-                this.setTitle(data.title);
-                this.setContent(c);
-            };
-
-            //Public setter function for private var title and sets title of the html popup element.
-            this.setTitle = function(t){
-                title = t;
-                $("#popupTitle").html(title);
-            };
-
-            //Public setter function for private var content and sets content of the html popup element.
-            this.setContent = function(cont){
-                content = cont;
-                var popupContentDiv = $("#popupContent");
-                popupContentDiv.html(content);
-            };
-
-            // Public getter function that returns a popup data object.
-            // Returns: Popup data object if found, null if not.
-            // Identifiers in object:
-            //      id: Same as html id used if static
-            //      title: Display text for popup header
-            //      contents: Array of objects, included identifiers below
-            //          name: Display text for links
-            this.getData = function(id) {
-                //TODO: Implement dynamic data retrieval
-                //Static data objects, will be removed in future iterations.
-                var data = [
-                    {
-                        id: "navClient",
-                        title: "User Name",
-                        contents: [
-                            {"name": "Settings"},
-                            {"name": "Change Business"},
-                            {"name": "Logout"}
-                        ]
-                    },
-                    {
-                        id: "navNotif",
-                        title: "Businesses",
-                        contents: [
-                            {"name": "FoundOPS"},
-                            {"name": "Got Grease"},
-                            {"name": "AB Couriers"}
-                        ]
-                    },
-                    {
-                        id: "navSearch",
-                        title: "Search",
-                        contents: [
-                            {"name": "I'm Feeling Lucky"},
-                            {"name": "Advanced"}
-                        ]
-                    },
-                    {
-                        id: "Change Business",
-                        title: "Businesses",
-                        contents: [
-                            {name: "FoundOPS"},
-                            {name: "Got Grease"},
-                            {name: "AB Couriers"}
-                        ]
-                    },
-                    {
-                        id: "FoundOPS",
-                        title: "FoundOPS",
-                        contents: [
-                            {name: "Test 1"},
-                            {name: "Test 2"},
-                            {name: "Test 3"}
-                        ]
-                    }
-                ];
-
-                //Searches for a popup data object by the id passed, returns data object if found.
-                var i;
-                for(i=0; i<data.length; i+=1){
-                    if(data[i].id===id){
-                        return data[i];
-                    }
-                }
-
-                //Null result returned if popup data object is not found.
-                //console.log("No data found, returning null.");
-                return null;
-            };
+    var initSideBar = function(sections){
+        //TODO: Lots of error checking.
+        function toHoverImage(imgLoc, color){
+            var extIndex = imgLoc.lastIndexOf('.');
+            return imgLoc.substring(0, extIndex) + "Color" + imgLoc.substring(extIndex);
         }
 
-        /** Event Listeners **/
+        var sBarWrapper = $(document.createElement('div'));
+        sBarWrapper.attr('id', 'sideBarWrapper');
 
-        //Initializes popup and sets listeners.
-        var popup = new Popup(data);
+        var sBar = $(document.createElement('div'));
+        sBar.attr('id', 'sideBar');
+        var expandButton = "<a href='#'>"+
+                "<div id='slideMenu'><img class='iconExpand' src='img/Expand.png'/></div>"+
+            "</a>";
+        sBar.html(expandButton);
 
+        sections.sort(function (a,b) {
+            if (a.name < b.name)
+                return -1;
+            if (a.name > b.name)
+                return 1;
+            return 0;
+        });
+        //Insert sections outside of complete alphabetical sort.
+        sections.push({name: "Logout", url: "#logout", color: "black", iconUrl: "./img/logout.png"});
+        var section;
+        var sBarElement = "";
+        for(section in sections){
+            var currentSection = sections[section];
+            var name = currentSection.name;
+            var color = currentSection.color;
+            var iconUrl = currentSection.iconUrl;
+            //TODO: Implement sprite selection.
+            var preloadHover = new Image();
+            preloadHover.src = toHoverImage(iconUrl);
+            var bgX = 'center';
+            var bgY = 'center';
+
+            sBarElement += "<a><div class='sideBarElement' color='"+color+"'><span class='icon' style = 'background: url(\""+iconUrl+"\") "+bgX+" "+bgY+" no-repeat'></span>"+
+                "<span>" + name + "</span></div></a>";
+        }
+        sBar.append(sBarElement);
+
+        sBarWrapper.append(sBar);
+        $('#nav').after(sBarWrapper);
+
+        //Add showMenuSpan to topNav.
+        var showMenuSpan = $(document.createElement("div"));
+        showMenuSpan.attr('id', 'showMenu');
+        var showMenuSpanInner = "<a href='#'><img class='iconShow' src='img/Expand.png'/></a>";
+        showMenuSpan.html(showMenuSpanInner);
+        $('#navContainer').after(showMenuSpan);
+
+        $(".sideBarElement").hover(function(){
+            $(this).stop(true, true).addClass($(this).attr('color'), 100);
+            var image = $(this).find(".icon:first").css('background-image').replace(/^url|[\(\)]/g, '');
+            var hoverImg = toHoverImage(image);
+            $(this).find(".icon").css('background-image', 'url('+hoverImg+')');
+        },function(){
+            $(this).stop(true, true).removeClass($(this).attr('color'), 100);
+            var image = $(this).find(".icon:first").css('background-image').replace(/^url|[\(\)]/g, '');
+            image = image.replace('Color.', '.');
+            $(this).find(".icon").css('background-image', 'url('+image+')');
+        });
+
+        /** Initialize sidebar scrollbar **/
+        initSideBarScrollBar();
+
+        /** Sidebar event listeners **/
+        var sideBarDiv = $("#sideBar");
+        var sideBarWrapperDiv = $("#sideBarWrapper");
         //Listens for clicks outside of elements
         $('body').on('click', function (e) {
             var clicked = $(e.target);
@@ -458,7 +416,7 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min"], function($) {
             if ((!clicked.is("#sideBar")) && sideBarLen === 0 && showMenuLen === 0
                 && $("#sideBar").offset().top > 0
                 && $(document).width()<=650) {
-                    toggleMenu();
+                toggleMenu();
             }
 
             //Detects clicks outside of the sideBar when expanded.
@@ -567,15 +525,14 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min"], function($) {
     };
 
     /**  Config  **/
-
     var initData = {
         name: "Jordan Kelly",
         avatarUrl: "./img/david.png",
         businessLogoUrl: "./img/got-grease-logo.png",
         roles: [
             {name: "FoundOPS", id:"23144-24242-242442"},
-            {name: "GotGrease", id:"Afsafsaf-24242-242442"},
-            {name: "AB Couriers", id:"Dagag-24242-242442"}
+            {name: "GotGrease", id:"95838-24242-242442"},
+            {name: "AB Couriers", id:"64729-24242-242442"}
         ],
         sections: [
             {name: "Employees", url:"#Employees", color: "red", iconUrl: "img/employees.png"},
