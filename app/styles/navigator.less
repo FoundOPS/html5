@@ -156,7 +156,7 @@ input:focus {
         linear,
         left bottom,
         left top,
-        color-stop(0, rgb(34,34,36)),
+        color-stop(0, @charcoal),
         color-stop(1, rgb(85,85,86))
     );
 }
@@ -471,27 +471,6 @@ a .iconExpand:hover{opacity: @hoverOpacity;}
     transform: rotateY(-180deg);
 }
 
-//Sidebar Icons
-/*.makeIcon(@iconName, @iconColor){
-    (~".@{iconName}"){
-        .icon {background: url("../img/@{iconName}.png") center center no-repeat;}
-        &:hover{
-            color: @iconColor;
-            .icon {background: url("../img/@{iconName}Color.png") center center no-repeat;}
-        }
-    }
-}
-.makeIcon(dispatcher, @blue);
-.makeIcon(employees, @red);
-.makeIcon(locations, @orange);
-.makeIcon(logout, @black);
-.makeIcon(regions, @orange);
-.makeIcon(routes, @green);
-.makeIcon(services, @green);
-.makeIcon(settings, @black);
-.makeIcon(uservoice, @blue);
-.makeIcon(vehicles, @red);*/
-
 .createColors(@color){
     (~".@{color}"){
         color: @@color;
@@ -515,9 +494,6 @@ a .iconExpand:hover{opacity: @hoverOpacity;}
 
     #navContainer{
         line-height: @navHeightMin - 5px;
-    }
-
-    .navElement{
     }
 
     #logo{

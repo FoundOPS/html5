@@ -1,32 +1,32 @@
 "use strict";
-/*
+
 require.config({
     baseUrl: 'lib'
 });
 
 require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min"], function($) {
-*/
-var data = null;
-var thisNav = this;
+    var thisNav = this;
+
     function Navigator(iData){
-        data = iData;
-        initTopNav();
-        initSideBar(iData.sections);
-        afterInit();
+        var data = iData;
+        initTopNav(data);
+        initSideBar(data.sections);
+        afterInit(data);
     }
 
-//    <!--div id='navNotif' class='navElement'>
-//        <a href='#'><img class='navIcon' src='img/notify.png'/></a>
-//    </div-->
-
-
-var initTopNav = function(){
+    var initTopNav = function(d){
         var topNav = $(document.createElement('div'));
         topNav.attr('id', 'nav');
 
+        var name = d.name;
+        var avatarUrl = d.avatarUrl;
+        var businessLogoUrl = d.businessLogoUrl;
         var navContainer = "<div id='navContainer'>"+
                 "<div id='navSearch' class='navElement'><input name='search' type='text' placeholder='Search...'/><a href='#'><img class='navIcon' src='img/search.png'/></a></div>"+
-                "<div id='navClient' class='navElement popup last'><a href='#'><img class='navIcon profile' src='img/david.png'/><img id='clientLogo' src='img/got-grease-logo.png'/></a></div>"+
+                //    <!--div id='navNotif' class='navElement'>
+                //        <a href='#'><img class='navIcon' src='img/notify.png'/></a>
+                //    </div-->
+                "<div id='navClient' class='navElement popup last'><a href='#'><img class='navIcon profile' src='"+avatarUrl+"'/><img id='clientLogo' src='"+businessLogoUrl+"'/></a></div>"+
             "</div>"+
 
             //TODO: Should technically be added in with initSideBar.
@@ -114,8 +114,7 @@ var initTopNav = function(){
 
     };
 
-    var afterInit = function(){
-        var sideBar = $("#sideBar");
+    var afterInit = function(data){
         var sideBarDiv = $("#sideBar");
         var sideBarWrapperDiv = $("#sideBarWrapper");
         sideBarWrapperDiv.jScrollPane({
@@ -145,7 +144,7 @@ var initTopNav = function(){
         );
 
         /* Popup Constructor */
-        function Popup() {
+        function Popup(data) {
             var title = "";
             var content = "";
             var object = null;
@@ -156,12 +155,10 @@ var initTopNav = function(){
             var thisPopup = this;
             var currentIconTarget = null;
 
-            this.history = [];
+            var data = data;
+            var history = [];
             $(".navElement").filter(".popup").click(function (e) {
-                console.log("Parent: " + $(this));
-                //if(this.hasClass("popup")){
-                    thisPopup.toggleVisible(e, $(this));
-                //}
+                thisPopup.toggleVisible(e, $(this));
             });
 
             /*TODO: Break toggleVisible into generic functions (eg. Should not expect el=navElement)*/
@@ -234,8 +231,7 @@ var initTopNav = function(){
                 //console.log("Window width: " + windowWidth);
                 //console.log("Right popup offset: " + rightOffset);
 
-                //TODO: Create resize listener in popup constructor.
-                //Sets global popup variables referenced in resize listener.
+                //Sets popup variables referenced in resize listener.
                 offScreen = false;
                 carrotPos = "50%";
 
@@ -253,7 +249,6 @@ var initTopNav = function(){
                 }
 
                 //Moves carrot on popup div.
-                //console.log("Setting carrot pos.");
                 carrot.css("left", carrotPos);
 
                 //Returns left offset of popup from window.
@@ -262,13 +257,10 @@ var initTopNav = function(){
 
             // createPopup: Appends popup to the nav
             this.createPopup = function (icon) {
-                //console.log("Creating popup.");
-
                 //Creates popup div that will be populated in the future.
                 var popupDiv = $(document.createElement("div"));
                 popupDiv.attr("id", "popup");
 
-                /*TODO: Change to document fragment? Might make action listener simpler/faster */
                 var s = "<div id='popupArrow'></div>" +
                     "<div id='popupHeader'>" +
                     "<a href='#'><div id='popupBack'></div></a>" +
@@ -281,38 +273,24 @@ var initTopNav = function(){
                 popupDiv.css("display", "none");
 
                 //Appends created div to page.
-                //console.log("Appending: " + popupDiv);
                 $("#nav").append(popupDiv);
 
                 //Click listener for popup close button.
                 $("#popupClose").click(function () {
-                    //console.log("Close button clicked.");
-                    //TODO: IMPLEMENT HIDE METHOD
-                    thisPopup.history = [];
-                    popupDiv.stop().fadeOut('fast');
+                    thisPopup.hide();
                 });
 
                 $("#popupBack").click(function (e) {
-                    //console.log("Back button clicked.");
-                    //console.log(thisPopup.history.length);
-                    var x = thisPopup.history.pop();
-                    if(thisPopup.history.length<=0){
-                        thisPopup.history = [];
-                        popupDiv.stop().fadeOut('fast');
+                    var x = history.pop();
+                    if(history.length<=0){
+                        thisPopup.hide();
                         return;
                     }
-                    //console.log(thisPopup.history.length);
-                    //console.log("Popped: " + x.id);
-                    thisPopup.setData(thisPopup.history[thisPopup.history.length-1]);
-
+                    thisPopup.setData(history[history.length-1]);
                 });
 
                 //Window resize listener to check if popup is off screen.
-                $(window).on(
-                    'resize',
-                    function()
-                    {
-                        //console.log("Resize!");
+                $(window).on('resize', function(){
                         var popupDiv = $("#popup");
                         if(popupDiv.is(":visible")){
                             var left = thisPopup.getLeft(currentIconTarget, popupDiv);
@@ -324,24 +302,17 @@ var initTopNav = function(){
                 //Click listener to detect clicks outside of popup
                 $('html').on('click', function (e) {
                     var clicked = $(e.target);
-                    //console.log("Clicked on: " + clicked.get(0).tagName+" "+clicked.attr('id'));
                     var popupLen = clicked.parents("#popup").length + clicked.is("#popup")?1:0;
                     var navLen = clicked.parents(".navElement").length + clicked.is(".navElement")?1:0;
-                    var popupContentRow = clicked.parents(".popupContentRow").length;
-                    //console.log(clicked.parents().length);
-                    //console.log(clicked.parents()[0].outerHTML);
-                    //TODO: Fix this jquery event bug.......
-                    //console.log("pLen: " + popupLen + " navLen: "+navLen+" cLen: "+popupContentRow);
-                    if (popupLen === 0 && navLen === 0 && popupContentRow === 0) {
-                        //console.log("clicked outside: "+clicked.parents()[0].outerHTML);
+                    //Parent bug fixed. Was entirely the fault of the previous listener creation.
+                    if (popupLen === 0 && navLen === 0) {
                         thisPopup.hide();
                     }
                 });
                 $(document).on('click', '.popupContentRow a',
                     function(e){
-                        //console.log($(e.target).parents().length);
-                        //console.log($(e.target).parents()[0].outerHTML);
-
+                        console.log($(e.target).parents().length);
+                        console.log($(e.target).parents()[0].outerHTML);
                         thisPopup.populate(this.innerHTML);
                     }
                 );
@@ -350,70 +321,54 @@ var initTopNav = function(){
                 object = popupDiv;
 
                 //Function also returns the popup div for ease of use.
-                //console.log("Before createPopup return.");
                 return popupDiv;
             };
 
             this.hide = function() {
-                thisPopup.history = [];
+                history = [];
                 $("#popup").stop(false, true).fadeOut('fast');
             };
 
-            //TODO: Error checking if id not found.
             //Public void function that populates setTitle and setContent with data found by id passed.
             this.populate = function(id){
-                //console.log("Populating data.");
                 var popupData = this.getData(id);
                 if(popupData===null){
                     //console.log("ID not found.");
                     return;
                 }
-                this.history.push(popupData);
+                history.push(popupData);
                 //TODO: Parent bug still present; fix sometime.
                 this.setData(popupData);
             };
 
             this.setData = function(data){
                 var contArray = data.contents;
-                //console.log("Content Array: " + contArray);
-                //console.log("Length: " + c.length);
-
-                //Push data to array. 4 Hide method calls.
-                var popupContentDiv = $("#popupContent");
                 var c = "";
                 var i;
-
-                popupContentDiv.html('');
+                //popupContentDiv.html('');
                 for (i=0; i< contArray.length; i+=1) {
-                    //console.log("In loop.");
                     var lastElement = "";
                     if (i === contArray.length - 1) { lastElement = "last"; }
-                    c = "<div class='popupContentRow " + lastElement + "'>" +
+                    c += "<div class='popupContentRow " + lastElement + "'>" +
                         "<a href='#'>" +
                         contArray[i].name +
                         "</a></div>";
-                    popupContentDiv.append(c);
                 }
-
-                //console.log("Setting title: " + title);
-                //console.log("Setting content: " + c);
                 this.setTitle(data.title);
-                //this.setContent(c);
-
+                this.setContent(c);
             };
 
             //Public setter function for private var title and sets title of the html popup element.
             this.setTitle = function(t){
                 title = t;
-                //console.log("Setting title: " + title);
                 $("#popupTitle").html(title);
             };
 
             //Public setter function for private var content and sets content of the html popup element.
             this.setContent = function(cont){
                 content = cont;
-                //console.log("Setting content: " + content);
-                $("#popupContent").html(content);
+                var popupContentDiv = $("#popupContent");
+                popupContentDiv.html(content);
             };
 
             // Public getter function that returns a popup data object.
@@ -424,8 +379,6 @@ var initTopNav = function(){
             //      contents: Array of objects, included identifiers below
             //          name: Display text for links
             this.getData = function(id) {
-                //console.log("Getting data.");
-
                 //TODO: Implement dynamic data retrieval
                 //Static data objects, will be removed in future iterations.
                 var data = [
@@ -479,8 +432,6 @@ var initTopNav = function(){
                 var i;
                 for(i=0; i<data.length; i+=1){
                     if(data[i].id===id){
-                        //console.log("Data found.");
-                        //console.log("DATA: " + data[i].id);
                         return data[i];
                     }
                 }
@@ -491,11 +442,10 @@ var initTopNav = function(){
             };
         }
 
-        /*********************
-         ** Event Listeners **
-         *********************/
+        /** Event Listeners **/
+
         //Initializes popup and sets listeners.
-        var popup = new Popup();
+        var popup = new Popup(data);
 
         //Listens for clicks outside of elements
         $('body').on('click', function (e) {
@@ -522,16 +472,12 @@ var initTopNav = function(){
 
         //Listener for window resize to reset sideBar styles.
         $(window).resize(function() {
-            //console.log("Browser resize event.");
             if($(window).width()<=650){
                 sideBarDiv.css("width", "");
                 if(sideBarDiv.hasClass("expand")){
                     sideBarDiv.removeClass("expand");
                     sideBarDiv.attr("style", "");
                     $("#sideBarWrapper").attr("style", "");
-
-                    //console.log("Removed class: expand");
-                    //console.log("Removed style.");
                 }
             }else if($(window).width()>650){
                 if(sideBarDiv.hasClass("hidden")){
@@ -541,8 +487,6 @@ var initTopNav = function(){
                     if($(".iconShow").hasClass('rotateIcon')){
                         $(".iconShow").removeClass('rotateIcon');
                     }
-                    //console.log("Removed class: hidden");
-                    //console.log("Removed style.");
                 }
             }
         });
@@ -550,106 +494,95 @@ var initTopNav = function(){
         //Function toggles menu slide out.
         var slideMenu = function() {
             $(".iconExpand").toggleClass("flip");
-
-            //console.log("Classes: " + $("#sideBar").attr("class"));
-            //TODO: Change static 159px width to be dynamic.
-            if(!sideBar.hasClass("expand")){
+            //TODO: Change static 159px width to be dynamic?
+            if(!sideBarDiv.hasClass("expand")){
                 $("#sideBar, #sideBarWrapper, .jspContainer")
                     .stop(true, false)
-                    .animate(
-                        {
-                            width: '159px'
-                        },
-                        'fast',
-                        function () {
-                            //console.log("Animate completed.");
-                        }
-                    );
+                    .animate({width: '159px'}, 'fast');
             } else {
                 $("#sideBar, #sideBarWrapper, .jspContainer")
                     .stop(true, false)
-                    .animate(
-                        {
-                            width: '55px'
-                        },
-                        'fast',
-                        function () {
-                            //console.log("Animate completed.");
-                        }
-                    );
+                    .animate({width: '55px'}, 'fast');
             }
-            sideBar.toggleClass("expand");
+            sideBarDiv.toggleClass("expand");
+        };
+
+        //Helper function detecting if menu is able to have a hover state.
+        var hoverMenu = function() {
+            if($(document).width() > 650){
+                sideBarDiv.toggleClass("hover");
+                slideMenu();
+            }
         };
 
         //Click listener in charge of expanding sideBar on slideMenu button click.
         $("#slideMenu").stop().click(
-            function () {
-                if(!sideBar.hasClass("hover")){
+            function(){
+                if(!sideBarDiv.hasClass("hover")){
                     slideMenu();
                 }
             }
         );
 
         //Hover listener that expands/contracts sideBar.
-        $(".jspContainer, .jspVerticalBar").hover(
+        $("#sideBarWrapper").hover(
             function(){
-                //console.log("Hovering!");
                 hoverMenu();
             }
         );
 
-        //Helper function detecting if menu is able to have a hover state.
-        var hoverMenu = function() {
-            if($(document).width()>650){
-                sideBar.toggleClass("hover");
-                slideMenu();
-            }
-        };
-
         //General function that toggles menu up, out of view.
         var toggleMenu = function() {
-            //console.log("Toggle hidden.");
             $(".iconShow").toggleClass("rotateIcon");
 
-            var offset = -1*(sideBar.offset().top + sideBar.outerHeight());
-            if(sideBar.hasClass("hidden")){
-                $("#sideBarWrapper").css('display', 'inline-block');
-                sideBar.stop(false, true).animate(
+            var offset = -1*(sideBarDiv.offset().top + sideBarDiv.outerHeight());
+            if(sideBarDiv.hasClass("hidden")){
+                sideBarWrapperDiv.css('display', 'inline-block');
+                sideBarDiv.stop(false, true).animate(
                     {
                         top: 0
                     },
-                    'fast',
-                    function () {
-                        //console.log("Animate completed. navHeight: "+navHeight);
-
-                    }
+                    'fast'
                 );
-
             } else {
-                sideBar.stop(false, true).animate(
+                sideBarDiv.stop(false, true).animate(
                     {
                         top: offset
                     },
                     'fast',
                     function () {
                         $("#sideBarWrapper").css('display', 'none');
-                        //$("#sideBarWrapper").css("overflow", "hidden");
                     }
                 );
             }
-
-            sideBar.toggleClass("hidden");
-            //console.log("Classes: " + $("#sideBar").attr("class"));
+            sideBarDiv.toggleClass("hidden");
         };
 
         //Click listener that toggles menu visibility.
         $("#showMenu").stop(true, false).click(
-            function () {
+            function(){
                 toggleMenu();
             }
         );
     };
-        /*************************
-         ** End Event Listeners **
-         *************************/
-    //});
+
+    /**  Config  **/
+
+    var initData = {
+        name: "Jordan Kelly",
+        avatarUrl: "./img/david.png",
+        businessLogoUrl: "./img/got-grease-logo.png",
+        roles: [
+            {name: "FoundOPS", id:"23144-24242-242442"},
+            {name: "GotGrease", id:"Afsafsaf-24242-242442"},
+            {name: "AB Couriers", id:"Dagag-24242-242442"}
+        ],
+        sections: [
+            {name: "Employees", url:"#Employees", color: "red", iconUrl: "img/employees.png"},
+            {name: "Routes", url:"#Routes", color: "green", iconUrl: "./img/routes.png"},
+            {name: "Regions", url:"#Regions", color: "orange", iconUrl: "./img/regions.png"},
+            {name: "Vehicles", url:"#Vehicles", color: "red", iconUrl: "./img/vehicles.png"}
+        ]
+    };
+    var navigationFrame = new Navigator(initData);
+});
