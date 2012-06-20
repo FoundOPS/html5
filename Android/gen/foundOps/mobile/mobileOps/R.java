@@ -5,7 +5,7 @@
  * should not be modified by hand.
  */
 
-package com.foundOPS.mobilebuild;
+package foundOps.mobile.mobileOps;
 
 public final class R {
     public static final class attr {

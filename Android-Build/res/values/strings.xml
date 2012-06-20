@@ -2,6 +2,6 @@
 <resources>
 
     <string name="hello">Hello World, mobilebuild!</string>
-    <string name="app_name">foundOPS.mobilebuild</string>
+    <string name="app_name">FoundOPS</string>
 
 </resources>
