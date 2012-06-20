@@ -10,19 +10,17 @@ define(function () {
     var developer = {};
     /**
      * Enum for the data source.
+     * LOCAL: load data from JSON files in the application's directory. Works for both Android & Browser Debugging. TODO: Implement this mode.
      * LOCALAPI: load data from the local api server.
      * ANDROIDLA: debug in Android Emulator using the local api server.
      * LIVE: load from the main server. TODO: Implement this mode.
-     * TESTAPI: Load data from the main server's test api.
-     * LOCAL: load data from JSON files in the application's directory. Works for both Android & Browser Debugging. TODO: Implement this mode.
      * @enum {number}
      */
     developer.DataSource = {
         LOCALAPI: 0,
         ANDROIDLA: 1,
         LIVE: 2,
-        TESTAPI: 3,
-        LOCAL: 4
+        TESTAPI: 3
     };
 
     /**
@@ -40,7 +38,7 @@ define(function () {
      * The current web service source.
      * @type {developer.DataSource}
      */
-    developer.CURRENT_DATA_SOURCE = developer.DataSource.LIVE;
+    developer.CURRENT_DATA_SOURCE = developer.DataSource.LOCALAPI;
 
     /**
      * The current web service source.
@@ -52,7 +50,7 @@ define(function () {
      * The local server's RoleId for GotGrease.
      * @type {string}
      */
-    developer.GOTGREASE_ROLE_ID = '03EC5972-1161-4B9F-ABC9-D359A32FD076';
+    developer.GOTGREASE_ROLE_ID = '0422E014-A06A-451D-8D38-5E6EC0098843';
 
     return developer;
 });

@@ -75,7 +75,7 @@ define(['db/models', 'tools', 'ui/ui', 'lib/leaflet'], function (models, tools, 
      * @param {window.L.Marker} marker
      * @param {function(Object)=} selected A function to perform when a route is selected (optional).
      */
-    var addMarkerClick = function (marker, opt_selected) {
+    leaflet.addMarkerClick = function (marker, opt_selected) {
         marker.on('click', function (e) {
             opt_selected(e.target.options.icon.routeId);
         });
@@ -220,7 +220,7 @@ define(['db/models', 'tools', 'ui/ui', 'lib/leaflet'], function (models, tools, 
 
         //if the onRouteSelected callback was defined, invoke it when the marker is clicked
         if (opt_routeSelected) {
-            addMarkerClick(arrowMarker, opt_routeSelected);
+            leaflet.addMarkerClick(arrowMarker, opt_routeSelected);
         }
         //add current marker to the map
         layer.addLayer(arrowMarker);
@@ -333,7 +333,7 @@ define(['db/models', 'tools', 'ui/ui', 'lib/leaflet'], function (models, tools, 
 
         //if the onRouteSelected callback was defined, invoke it when the number marker is clicked
         if (opt_routeSelected) {
-            addMarkerClick(numMarker, opt_routeSelected);
+            leaflet.addMarkerClick(numMarker, opt_routeSelected);
         }
 
         //setup marker popup
