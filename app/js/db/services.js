@@ -172,5 +172,9 @@ define(['lib/kendo.mobile.min', 'developer', 'tools'], function (k, developer, t
         return services._getHttp('auth/Login', {email: email, pass: password}, true, null)(callback);
     };
 
+    services.logout = function (callback) {
+        return services._getHttp('auth/LogOut')(callback);
+    };
+
     return services;
 });

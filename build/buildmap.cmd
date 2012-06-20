@@ -1,2 +1,2 @@
-node r.js -o app.build.js
+node r.js -o map.build.js
 pause

@@ -16,16 +16,20 @@ require.config({
         db: "db",
 
         // Libraries
+        cordova: "../lib/cordova-1.8.1",
         underscore: "../lib/underscore"
     },
     shim: {
+        cordova: {
+            exports: "c"
+        },
         underscore: {
-            exports: '_'
+            exports: "_"
         }
     }
 });
 
-require(["jquery", "lib/kendo.mobile.min", "lib/cordova-1.8.1", "developer", "db/services", "db/models"], function ($, k, c, developer, services, models) {
+require(["jquery", "lib/kendo.mobile.min", "developer", "db/services", "db/models"], function ($, k, developer, services, models) {
     var mobile = {};
     /**
      * The configuration object for the mobile application.
@@ -188,6 +192,16 @@ require(["jquery", "lib/kendo.mobile.min", "lib/cordova-1.8.1", "developer", "db
                 app.navigate("views/routeList.html");
             } else {
                 alert("Login information is incorrect.");
+            }
+        });
+    };
+
+    mobile.logout = function () {
+        services.logout (function (data) {
+            if (data) {
+                app.navigate("mobile.html");
+            } else {
+                alert("Logout cannot be completed at this time.");
             }
         });
     };

@@ -1,5 +1,5 @@
 /** Automatically generated file. DO NOT MODIFY */
-package foundOps.mobile.mobileOps;
+package com.foundOPS.mobilebuild;
 
 public final class BuildConfig {
     public final static boolean DEBUG = true;
