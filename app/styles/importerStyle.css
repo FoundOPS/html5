@@ -49,19 +49,21 @@ ul, li {
     margin:0;
 }
 #crumbs {
+    margin-top: 50px;
     height:2.3em;
+    min-width: 300px;
     border:1px solid #dedede;
 }
 #crumbs li {
     float:left;
     line-height:2.3em;
     color:#777;
-    padding-left:.75em;
+    padding-left: 0;
 }
 #crumbs li a {
     background:url(../img/crumbs.png) no-repeat right center;
     display:block;
-    padding:0 15px 0 0;
+    padding:0 15px 0 10px;
 }
 #crumbs li a:link,
 #crumbs li a:visited {
@@ -74,7 +76,7 @@ a:link, a:visited,
     cursor: default;
 }
 #crumbs li.active a{
-    /*background:url(../img/crumbsActive.png) no-repeat right center;*/
+    background:url(../img/crumbsActive.png) no-repeat right center;
 }
 /*************************** UPLOAD *******************************/
 #upload{
@@ -83,17 +85,48 @@ a:link, a:visited,
     margin: 20px auto 0;
 }
 #hints{
-    margin-bottom: 20px;
+    margin-bottom: 30px;
     border: 1px solid #ccc;
 }
 #hints legend{
     font-size: 18px;
-}#hints ol{
-     padding-left: 25px;
- }
+}
+#hints ul{
+     padding: 10px 0 0 20px;
+}
+#hints ul li{
+    list-style: disc;
+}
+
 /*************************** GRID *******************************/
+#grid {
+    width: 650px;
+    margin: 20px auto 0;
+}
+.k-listview{
+    border: none;
+}
 #grid p{
     padding-left: 10px;
+}
+.header{
+    padding: 5px;
+    float: left;
+    min-width: 200px;
+    /*margin-bottom: -23px;*/
+}
+.value{
+    padding: 5px;
+    float: left;
+    min-width: 200px;
+    /*margin-left: 150px;*/
+}
+#listView .k-dropdown{
+    width: 200px;
+    margin: 0;
+}
+#listView li{
+    margin-bottom: 3px;
 }
 #grid button{
     margin: 20px 0 0 10px;
@@ -103,3 +136,7 @@ a:link, a:visited,
 }
 
 /*************************** PREWIEW *******************************/
+#preview {
+    width: 650px;
+    margin: 20px auto 0;
+}

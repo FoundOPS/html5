@@ -113,36 +113,38 @@ require(["jquery", "lib/kendo.all.min", "lib/csv"], function ($, m, csv) {
 
 //region Grid
     grid.initialize = function () {
-        var data = [{header: "Client Name", value: "Meyer", name: ""},
-            {header: "Phone", value: "123-456-7890", name: ""}]
+        var data = [{header: "Client Name", value: "Abbott, Lori", name: ""},
+                    {header: "Phone", value: "123-456-7890", name: ""},
+                    {header: "Email", value: "labbit@yahoo.com", name: ""},
+                    {header: "Location Name", value: "Abbott, Lori", name: ""},
+                    {header: "Address Line 1", value: "2525 N 925 W", name: ""},
+                    {header: "Service", value: "Trash Pickup", name: ""},
+                    {header: "Frequency", value: "Weekly", name: ""}]
 
-        $("#fields").kendoGrid({
-            dataSource: data,
-            schema: {
-                model: {
-                    id: "header",
-                    fields: {
-                        header: { editable: false},
-                        value: { editable: false},
-                        name: { editable: true}
-                    }
-                }
-            },
-            columns: [
-                {
-                    field: "header",
-                    title: "Row 1"
-                },
-                {
-                    field: "value",
-                    title: "Row 2"
-                },
-                {
-                    field: "name",
-                    title: " ",
-                    editor: categoryDropDownEditor
+        $("#listView").kendoListView({
+            template: "<li><div class='header'>${header}</div><div class='value'>${value}</div><input class='fields' /></li>",
+            dataSource: data
+        });
+
+        $(".fields").kendoDropDownList({
+            dataTextField: "Name",
+            dataValueField: "Id",
+            dataSource: {
+                type: "odata",
+                serverFiltering: false,
+                filter: [{
+                    field: "Name",
+                    operator: "contains",
+                    value: "Star Wars"
+                },{
+                    field: "BoxArt.SmallUrl",
+                    operator: "neq",
+                    value: null
                 }],
-            scrollable: true
+                transport: {
+                    read: "http://odata.netflix.com/Catalog/Titles"
+                }
+            }
         });
     }
 
@@ -170,16 +172,29 @@ require(["jquery", "lib/kendo.all.min", "lib/csv"], function ($, m, csv) {
 
     window.preview = preview;
 
+    var li = $('#crumbs').context.childNodes[1];
+    
     upload.go = function () {
         app.navigate("views/importerUpload.html");
+        li.childNodes[1].removeClass('active');
+        li.childNodes[2].removeClass('active');
+        $('#crumbs').childNodes[0].addClass('active');
+
     };
 
     grid.go = function () {
         app.navigate("views/importerGrid.html");
+        li.childNodes[0].removeClass('active');
+        li.childNodes[2].removeClass('active');
+        li.childNodes[1].addClass('active');
     };
 
     preview.go = function () {
         app.navigate("views/importerPreview.html");
+        li.childNodes[0].removeClass('active');
+        li.childNodes[1].removeClass('active');
+        li.childNodes[2].addClass('active');
+
     };
 //endregion
 });
