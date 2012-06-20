@@ -27,15 +27,16 @@ require.config({
 
 //"lib/swfupload",
 require(["jquery", "lib/kendo.all.min", "lib/csv"], function ($, m, csv) {
-    var importer = {};
+    var upload = {};
     var grid = {};
+    var preview = {};
     var app;
 
     //Start the application
     app = new kendo.mobile.Application($(document.body), {initial: "views/importerUpload.html"});
 
 //region Importer
-    importer.initialize = function () {
+    upload.initialize = function () {
 //        var settings = {
 //            upload_url: "http://www.swfupload.org/upload.php",
 //            flash_url: "lib/swfupload.swf",
@@ -103,13 +104,9 @@ require(["jquery", "lib/kendo.all.min", "lib/csv"], function ($, m, csv) {
 
         function onChange() {
         };
-
-        importer.upload = function () {
-            app.navigate("views/importerGrid.html");
-        };
     };
 
-    window.importer = importer;
+    window.upload = upload;
 
     //var parsedCsv = csv.parse();
 //endregion
@@ -165,4 +162,24 @@ require(["jquery", "lib/kendo.all.min", "lib/csv"], function ($, m, csv) {
 
     window.grid = grid;
     //endregion
+
+//region Review
+
+    preview.initialize = function () {
+    }
+
+    window.preview = preview;
+
+    upload.go = function () {
+        app.navigate("views/importerUpload.html");
+    };
+
+    grid.go = function () {
+        app.navigate("views/importerGrid.html");
+    };
+
+    preview.go = function () {
+        app.navigate("views/importerPreview.html");
+    };
+//endregion
 });

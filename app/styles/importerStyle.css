@@ -38,11 +38,49 @@ body{
     margin: 0;
     font-family: PTSans;
 }
-/*************************** IMPORTER *******************************/
+/* Simple scalable breadcrumb by Veerle Pieters
+------------------------------------------------------------------*/
+body {
+    font:71%/165% "Lucida Grande", Lucida, Verdana, sans-serif;
+}
+ul, li {
+    list-style-type:none;
+    padding:0;
+    margin:0;
+}
+#crumbs {
+    height:2.3em;
+    border:1px solid #dedede;
+}
+#crumbs li {
+    float:left;
+    line-height:2.3em;
+    color:#777;
+    padding-left:.75em;
+}
+#crumbs li a {
+    background:url(../img/crumbs.png) no-repeat right center;
+    display:block;
+    padding:0 15px 0 0;
+}
+#crumbs li a:link,
+#crumbs li a:visited {
+    color:#777;
+    text-decoration:none;
+}
+a:link, a:visited,
+#crumbs li a:hover,
+#crumbs li a:focus {
+    cursor: default;
+}
+#crumbs li.active a{
+    /*background:url(../img/crumbsActive.png) no-repeat right center;*/
+}
+/*************************** UPLOAD *******************************/
 #upload{
     width: 400px;
     padding: 10px;
-    margin: 0 auto;
+    margin: 20px auto 0;
 }
 #hints{
     margin-bottom: 20px;
@@ -57,3 +95,11 @@ body{
 #grid p{
     padding-left: 10px;
 }
+#grid button{
+    margin: 20px 0 0 10px;
+}
+#grid #previewBtn{
+    margin: 0 0 0 20px;
+}
+
+/*************************** PREWIEW *******************************/
