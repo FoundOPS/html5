@@ -269,67 +269,84 @@ define(['tools', 'ui/leaflet', '../../test/fakeData', 'ui/ui', 'db/services'], f
 //region Servcice Tests
     describe("Service", function () {
         beforeEach(function () {
-            services.setRoleId('0422E014-A06A-451D-8D38-5E6EC0098843');
+            services.setRoleId('2B1F25C6-213A-44F4-AAF5-622113577FD4');
         });
-        describe("getting routes", function () {
-            it("should get the routes data from the API", function () {
-                var routes;
+//        describe("getting routes", function () {
+//            it("should get the routes data from the API", function () {
+//                var date = tools.formatDate(new Date());
+//                var routes;
+//                runs(function () {
+//                    services.getRoutes(date, function (loadedRoutes) {
+//                        routes = loadedRoutes;
+//                    });
+//                });
+//                waits(2000);
+//                runs(function () {
+//                    var route = routes[0].Id;
+//                    expect(route).toBeDefined();
+//                });
+//            });
+//        });
+//        describe("getting resources", function () {
+//            it("should get the resources data from the API", function () {
+//                var resources;
+//                runs(function () {
+//                    services.getResourcesWithLatestPoints(function (resourcesWithLatestPoints) {
+//                        resources = resourcesWithLatestPoints;
+//                    });
+//                });
+//                waits(2000);
+//                runs(function () {
+//                    var resourceName = resources[0].EntityName;
+//                    expect(resourceName).toBeDefined();
+//                });
+//            });
+//        });
+//        describe("getting depots", function () {
+//            it("should get the depots data from the API", function () {
+//                var depots;
+//                runs(function () {
+//                    services.getDepots(function (loadedDepots) {
+//                        depots = loadedDepots;
+//                    });
+//                });
+//                waits(2000);
+//                runs(function () {
+//                    var depotName = depots[0].Name;
+//                    expect(depotName).toBeDefined();
+//                });
+//            });
+//        });
+//        describe("getting trackpoints", function () {
+//            it("should get the trackpoints data from the API", function () {
+//                var trackpoints;
+//                var routeId = '82a14c51-815e-43cd-937e-0883538af357';
+//                var date = tools.formatDate(new Date());
+//                runs(function () {
+//                    services.getTrackPoints(date, routeId, function (loadedTrackpoints) {
+//                        trackpoints = loadedTrackpoints;
+//                    });
+//                });
+//                waits(8000);
+//                runs(function () {
+//                    var trackpointId = trackpoints[0].Id;
+//                    expect(trackpointId).toBeDefined();
+//                });
+//            });
+//        });
+        describe("posting trackpoints", function () {
+            it("should post trackpoints to the API", function () {
+                var trackpointsPosted;
+                var trackpoints = data.trackpoints;
+                var routeId = 'f57f763f-87e1-47e0-98c8-f650b2c556dc';
                 runs(function () {
-                    services.getRoutes(function (loadedRoutes) {
-                        routes = loadedRoutes;
+                    services.postTrackPoints(trackpoints, routeId, function () {
+                        trackpointsPosted = true;
                     });
                 });
-                waits(2000);
+                waits(3000);
                 runs(function () {
-                    var route = routes[0].Id;
-                    expect(route).toBeDefined();
-                });
-            });
-        });
-        describe("getting resources", function () {
-            it("should get the resources data from the API", function () {
-                var resources;
-                runs(function () {
-                    services.getResourcesWithLatestPoints(function (resourcesWithLatestPoints) {
-                        resources = resourcesWithLatestPoints;
-                    });
-                });
-                waits(2000);
-                runs(function () {
-                    var resourceName = resources[0].EntityName;
-                    expect(resourceName).toBeDefined();
-                });
-            });
-        });
-        describe("getting depots", function () {
-            it("should get the depots data from the API", function () {
-                var depots;
-                runs(function () {
-                    services.getDepots(function (loadedDepots) {
-                        depots = loadedDepots;
-                    });
-                });
-                waits(2000);
-                runs(function () {
-                    var depotName = depots[0].Name;
-                    expect(depotName).toBeDefined();
-                });
-            });
-        });
-        describe("getting trackpoints", function () {
-            it("should get the trackpoints data from the API", function () {
-                var trackpoints;
-                var routeId = '4c5e8397-f102-4e68-942b-60094fc8e36a';
-                var date = tools.formatDate(new Date());
-                runs(function () {
-                    services.getTrackPoints(date, routeId, function (loadedTrackpoints) {
-                        trackpoints = loadedTrackpoints;
-                    });
-                });
-                waits(8000);
-                runs(function () {
-                    var trackpointId = trackpoints[0].Id;
-                    expect(trackpointId).toBeDefined();
+                    expect(trackpointsPosted).toBeTruthy();
                 });
             });
         });
