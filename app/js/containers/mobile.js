@@ -182,10 +182,11 @@ require(["jquery", "lib/kendo.mobile.min", "developer", "db/services", "db/model
         }
     });
 
+    var e, p;
 //eventually will be moved to new navigator
     mobile.login = function () {
-        var e = $("#email").val();
-        var p = $("#pass").val();
+        e = $("#email").val();
+        p = $("#pass").val();
         services.authenticate(e, p, function (data) {
             //if this was authenticated refresh routes and navigate to routeslist
             if (data) {
@@ -199,7 +200,8 @@ require(["jquery", "lib/kendo.mobile.min", "developer", "db/services", "db/model
     mobile.logout = function () {
         services.logout (function (data) {
             if (data) {
-                app.navigate("mobile.html");
+                mobile.viewModel.routesSource.data();
+                app.navigate("views/clearhist.html");
             } else {
                 alert("Logout cannot be completed at this time.");
             }

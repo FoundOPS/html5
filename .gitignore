@@ -5,11 +5,12 @@ build.xml
 
 .project
 .settings
-.idea/*
+.idea/
 app/app
 Android/assets/www
-Android/bin/*
+Android/bin/
 Android-Build/assets/www
-Android-Build/bin/*
+Android-Build/bin/
 buildsmap/
 buildsmobile/
+PhoneGap Build Package/
