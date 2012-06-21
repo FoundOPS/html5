@@ -90,7 +90,7 @@ require(["jquery", "lib/kendo.mobile.min", "developer", "db/services", "db/model
             );
             trackPointsToSend.push(newTrackPoint);
 
-            services.postTrackPoints(trackPointsToSend, routeId, function (e) {
+            services.postTrackPoints(trackPointsToSend, function (e) {
                 if (e) {
                     //flush trackpoints if successful
                     trackPointsToSend = [];
