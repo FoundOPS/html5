@@ -338,9 +338,8 @@ define(['tools', 'ui/leaflet', '../../test/fakeData', 'ui/ui', 'db/services'], f
             it("should post trackpoints to the API", function () {
                 var trackpointsPosted;
                 var trackpoints = data.trackpoints;
-                var routeId = 'f57f763f-87e1-47e0-98c8-f650b2c556dc';
                 runs(function () {
-                    services.postTrackPoints(trackpoints, routeId, function () {
+                    services.postTrackPoints(trackpoints, function () {
                         trackpointsPosted = true;
                     });
                 });

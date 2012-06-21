@@ -147,16 +147,13 @@ define(['lib/kendo.mobile.min', 'developer', 'tools'], function (k, developer, t
      * @param routeId
      * @param callback
      */
-    services.postTrackPoints = function (trackPoints, routeId, callback) {
-        var params = {};
-        params.modelTrackPoints = trackPoints;
-        params.routeId = routeId;
-
+    services.postTrackPoints = function (trackPoints, callback) {
         $.ajax({
-            //must use JSONP because the javascript may be hosted on a different url than the api
-            type: "POST",
             url: services.API_URL + "trackpoint/PostEmployeeTrackPoint",
-            data: JSON.stringify(params)
+            type: "POST",
+            dataType: "json",
+            contentType: 'application/json',
+            data: JSON.stringify(trackPoints)
         }).success(function (response) {
                 callback(response);
             });
