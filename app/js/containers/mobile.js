@@ -60,6 +60,7 @@ require(["jquery", "lib/kendo.mobile.min", "developer", "db/services", "db/model
         //set the OS of the device running the app
         mobile.CONFIG.DEVICE_PLATFORM = device.platform;
 
+
         //console.log("Current platform " + device.platform);
     }
 
@@ -185,11 +186,18 @@ require(["jquery", "lib/kendo.mobile.min", "developer", "db/services", "db/model
     var e, p;
 //eventually will be moved to new navigator
     mobile.login = function () {
-        e = $("#email").val();
-        p = $("#pass").val();
+        if (localStorage.getItem("loggedIn") === "true") {
+            e = localStorage.getItem("email");
+            p = localStorage.getItem("pass");
+        } else {
+            e = $("#email").val();
+            p = $("#pass").val();
+        }
         services.authenticate(e, p, function (data) {
             //if this was authenticated refresh routes and navigate to routeslist
             if (data) {
+                //Save the application's login state.
+                localStorage.setItem("loggedIn", true); localStorage["email"] = e; localStorage["pass"] = p;
                 app.navigate("views/routeList.html");
             } else {
                 alert("Login information is incorrect.");
@@ -200,12 +208,20 @@ require(["jquery", "lib/kendo.mobile.min", "developer", "db/services", "db/model
     mobile.logout = function () {
         services.logout (function (data) {
             if (data) {
+                //Clear application's login state.
+                localStorage.setItem("loggedIn", false);
                 mobile.viewModel.routesSource.data();
                 app.navigate("views/clearhist.html");
             } else {
                 alert("Logout cannot be completed at this time.");
             }
         });
+    };
+
+    mobile.checkLogin = function () {
+        if(localStorage.getItem("loggedIn") === "true") {
+            mobile.login();
+        }
     };
 
 //for development purposes
@@ -216,7 +232,7 @@ require(["jquery", "lib/kendo.mobile.min", "developer", "db/services", "db/model
 //set mobile to a global function, so the functions are accessible from the HTML element
     window.mobile = mobile;
 
-//Start the mobile application
+    //Start the mobile application
     app = new kendo.mobile.Application($(document.body), {});
-})
-;
+
+});
