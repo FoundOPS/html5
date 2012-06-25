@@ -3,13 +3,9 @@ nbproject
 manifest.mf
 build.xml
 
-.project
-.settings
 .idea/
-app/app
 Android/assets/www
 Android/bin/
-Android-Build/assets/www
 Android-Build/bin/
 buildsmap/
 buildsmobile/

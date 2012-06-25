@@ -209,9 +209,9 @@ require(["jquery", "lib/kendo.mobile.min", "developer", "db/services", "db/model
     };
 
 //for development purposes
-//    mobile.navToRoutesList = function () {
-//        app.navigate("views/routeList.html");
-//    };
+    mobile.navToRoutesList = function () {
+        app.navigate("views/routeList.html");
+    };
 
 //set mobile to a global function, so the functions are accessible from the HTML element
     window.mobile = mobile;

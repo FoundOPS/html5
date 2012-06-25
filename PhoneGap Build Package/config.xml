@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<widget xmlns		= "http://www.w3.org/ns/widgets"
+	xmlns:gap	= "http://phonegap.com/ns/1.0"
+	id		= "foundOps.mobile"
+	version 	= "0.1.2"
+	versionCode = "3">
+
+	<name>FoundOPS</name>
+
+	<description>FoundOPS Mobile Application</description>
+
+	<author href="http://www.foundops.com" email="info@foundops.com">FoundOPS</author>
+
+	<icon src="icon.png" />
+	<icon src="icon/ios/icon.png" gap:platform="ios" width="57" height="57"/>
+	<icon src="icon/ios/icon-72.png" gap:platform="ios" width="72" height="72"/>
+	<icon src="icon/ios/icon@2x.png" gap:platform="ios" width="114" height="114"/>
+	<icon src="icon/android/ldpi.png" gap:platform="android" gap:density="ldpi"/>
+	<icon src="icon/android/mdpi.png" gap:platform="android" gap:density="mdpi"/>
+	<icon src="icon/android/hdpi.png" gap:platform="android" gap:density="hdpi"/>
+	
+	<preference name="phonegap-version" value="1.8.1" />
+	<preference name="prerendered-icon" value="true" />
+	<preference name="orientation" value="default" />
+
+	<feature name="http://api.phonegap.com/1.0/file"/>
+	<feature name="http://api.phonegap.com/1.0/geolocation"/>
+	<feature name="http://api.phonegap.com/1.0/media"/>
+	<feature name="http://api.phonegap.com/1.0/network"/>
+	<feature name="http://api.phonegap.com/1.0/notification"/>
+</widget>
