@@ -3,6 +3,8 @@
     package="foundOps.mobile.mobileOps"
     android:versionCode="1"
     android:versionName="1.0" >
+	
+	<access origin="https://www.foundops.com" subdomains="true" />
 
     <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="15" />
     

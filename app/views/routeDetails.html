@@ -7,7 +7,7 @@
                data-bind="click: startRoute, visible: startVisible" data-role="button">Start Route</a>
             <a id="endButton" class="nav-button" data-align="right"
                data-bind="click: endRoute, visible: endVisible" data-role="button" style="display:none">End Route</a>
-            <span data-role="view-title"></span>
+            <span data-bind="source:routesSource">${Name}</span>
         </div>
     </header>
     <ul id="routeDestinations-listview" data-bind="source:routeDestinationsSource, click: selectRouteDestination" data-role="listview"
