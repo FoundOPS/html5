@@ -1,5 +1,7 @@
+'use strict';
+
 define(function () {
-    var csv =[];
+    var csv = {};
     csv.parse = function(text) {
         var header;
         return csv.parseRows(text, function(row, i) {
@@ -48,7 +50,7 @@ define(function () {
                 } else if (c === 10) {
                     eol = true;
                 }
-                return text.substring(j + 1, i).replace(/""/g, "\"");
+                return text.substring(j + 1, i).replace(/""/g, "");
             }
 
             // common case
@@ -73,4 +75,6 @@ define(function () {
 
         return rows;
     };
+
+    return csv;
 });
