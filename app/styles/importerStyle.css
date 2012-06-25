@@ -31,7 +31,7 @@ button{
 /*--------------- Simple scalable breadcrumb by Veerle Pieters --------------*/
 #crumbs {
     position: relative;
-    top:50px;
+    top:0;
     left:300px;
     font:71%/165% "Lucida Grande", Lucida, Verdana, sans-serif;
     height:2.3em;
@@ -48,8 +48,8 @@ button{
     line-height:2.3em;
     color:#777;
     padding-left: 0;
-    border-top:1px solid #dedede;
-    border-bottom:1px solid #dedede;
+    /*border-top:1px solid #dedede;*/
+    /*border-bottom:1px solid #dedede;*/
 }
 #crumbs li a {
     background:url(../img/crumbs.png) no-repeat right center;
@@ -72,19 +72,31 @@ button{
 /*************************** GENERIC *******************************/
 @font-face {
     font-family: PTSans;
+    src: url(PTS55F.eot); /* EOT file for IE */
+}
+@font-face {
+    font-family: PTSans;
     src: url(PTS55F.ttf);  /* TTF file for CSS3 browsers */
+}
+@font-face {
+    font-family: vavont;
+    src: url("vavont.eot") /* EOT file for IE */
+}
+@font-face {
+    font-family: kurzetsType;
+    src: url("kurzetsType.ttf") /* TTF file for CSS3 browsers */
 }
 body{
     padding: 0;
     margin: 0;
-    font-family: PTSans sans-serif;
+    font-family: PTSans;
 }
 .border{
     border: 1px solid #ccc;
     padding: 10px;
 }
 .wrap{
-    margin-top: 70px;
+    margin-top: 20px;
     margin-left: 300px;
     width: 720px;
 }
@@ -92,13 +104,17 @@ body{
     position: absolute;
     top:50px;
     width: 200px;
-    font-family: 'Coming Soon', cursive;
+    font-family: kurzetsType;
+    font-size: 16px;
 }
 .help li{
     margin-bottom: 0;
 }
+.noArrow{
+    margin-top: 20px;
+}
 .arrow{
-    margin: 0 0 -48px 165px;
+    margin: 0 0 -48px 175px;
 }
 .km-scroll-wrapper{
     overflow: visible !important;
@@ -111,7 +127,7 @@ body{
 }
 /*************************** UPLOAD *******************************/
 #upload .help{
-    margin-top:140px;
+    margin-top:90px;
 }
 #upload ol{
     margin-top: -20px;
@@ -144,7 +160,7 @@ body{
 }
 /*************************** SELECT *******************************/
 #select .wrap, #review .wrap{
-    margin-top: 70px;
+    margin-top: 20px;
 }
 .k-listview{
     border: none;
@@ -176,13 +192,13 @@ body{
 }
 #select #bottomHeader li{
     display: inline;
-    margin-right: 155px;
+    margin-right: 160px;
     font-size: 12px;
 }
 .header{
     padding: 5px 0;
     float: left;
-    min-width: 240px;
+    width: 230px;
     /*margin-bottom: -23px;*/
 }
 #select .wrap li{
@@ -191,21 +207,48 @@ body{
 .value{
     padding: 5px;
     float: left;
-    min-width: 240px;
-    /*margin-left: 150px;*/
+    width: 303px;
+    overflow: hidden;
 }
 #listView .k-dropdown{
-    width: 200px;
+    width: 150px;
     margin: 0;
 }
 #listView li{
     margin-bottom: 3px;
 }
 /*************************** REWIEW *******************************/
-#review {
+ol{
+    padding-left: 30px;
+}
+#review ul{
+    padding-left: 0;
+}
+#review ul li{
+  list-style: none;
+    margin: 10px 0;
+}
+#review ul li p{
+    margin: -17px 0 0 25px;
 }
 .warning{
-    width: 14px;
-    height: 12px;
+    width: 16px;
+    height: 14px;
+    position: relative;
+    top: 2px;
     background: url("../img/warning.png") no-repeat;
+}
+#exists, #autofilled, #synced{
+    width: 16px;
+    height: 16px;
+    border: 1px solid #000;
+}
+#exists{
+    background-color: #659A41;
+}
+#autofilled{
+    background-color: #488FCD;
+}
+#synced{
+    background-color: #991A36;
 }
