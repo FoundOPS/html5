@@ -43,7 +43,7 @@ define(['tools'], function (tools) {
      */
     models.TrackPoint = function TrackPoint (accuracy, date, heading, latitude, longitude, routeId, source, speed) {
         this.Accuracy = accuracy;
-        this.CollectedTimeStamp = tools.formatDate(date);
+        this.CollectedTimeStamp = date.toJSON();
         this.Heading = heading;
         this.Latitude = latitude;
         this.Longitude = longitude;

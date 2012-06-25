@@ -37,6 +37,8 @@ define(['underscore', 'developer'], function (_, developer) {
     };
 
     /**
+     * This will return the date's UTC date without the time,
+     * in a format consumable for the web api.
      * @param {Date} The date to format.
      * @return {string} The date formatted in "m-dd-yyyy".
      */
@@ -46,7 +48,6 @@ define(['underscore', 'developer'], function (_, developer) {
                 year = date.getUTCFullYear();
         return month + "-" + day + "-" + year;
     };
-
 
     /**
      * Generates a compass direction from rotation degrees.
