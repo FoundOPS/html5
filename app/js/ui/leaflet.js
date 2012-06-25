@@ -176,8 +176,9 @@ define(['db/models', 'tools', 'ui/ui', 'lib/leaflet'], function (models, tools, 
         });
 
         //set the text for the popup
+        //speed is converted from m/s to mph
         var popupContent = "<p class='speed'><b>" + resource.EntityName + "</b><br />Speed: "
-            + Math.round(resource.Speed) + " mph " + tools.getDirection(rotateDegrees) + "</p>";
+            + Math.round(resource.Speed * 2.23693629) + " mph " + tools.getDirection(rotateDegrees) + "</p>";
 
         var iconMarker = new window.L.Marker(locationLatLng, {
             icon: resourceIcon

@@ -1,4 +1,27 @@
-<div data-role="view" data-layout="mobile-view" data-title="Destination Details"
-     data-init="ops.mobile.setupRouteDestinationDetailsList" id="routedestinationdetails">
-    <ul id="routedestinationdetails-listview"></ul>
+<div id="routeDestinationDetails" data-role="view" data-layout="mobile-view" data-model="mobile.viewModel"
+     data-title="Destination Details">
+    <div data-bind="source: this" data-template="navigateTemplate"></div>
+    <ul id="destinationContactInfoListView" data-bind="source: destinationPhoneContactInfoSource"
+        data-role="listview" data-style="inset" data-template="contactInfoPhoneTemplate"></ul>
+    <ul id="destinationContactInfoListView" data-bind="source: destinationEmailContactInfoSource"
+        data-role="listview" data-style="inset" data-template="contactInfoEmailTemplate"></ul>
+    <ul id="destinationContactInfoListView" data-bind="source: destinationWebsiteContactInfoSource"
+        data-role="listview" data-style="inset" data-template="contactInfoWebsiteTemplate"></ul>
 </div>
+<script type="text/x-kendo-template" id="navigateTemplate">
+    <ul class="km-listview km-list km-listinset">
+        <li>
+            <a href="http://maps.google.com/maps?q=${selectedDestination.Location.Latitude},${selectedDestination.Location.Longitude}"
+               class="km-listview-link">Navigate to Route Stop</a>
+        </li>
+    </ul>
+</script>
+<script type="text/x-kendo-template" id="contactInfoPhoneTemplate">
+    <a data-rel="external" href="tel:${Data}">Call ${Label}</a>
+</script>
+<script type="text/x-kendo-template" id="contactInfoEmailTemplate">
+    <a data-rel="external" href="mailto:${Data}">E-mail ${Label}</a>
+</script>
+<script type="text/x-kendo-template" id="contactInfoWebsiteTemplate">
+    <a data-rel="external" href="${Data}">Go to Website</a>
+</script>

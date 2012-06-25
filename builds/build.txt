@@ -27,6 +27,10 @@ styles/mapIE.css
 ----------------
 styles/mapIE.css
 
+styles/mobile.css
+----------------
+styles/mobile.css
+
 styles/statusStyle.css
 ----------------
 styles/statusStyle.css
@@ -40,7 +44,7 @@ js/containers/map.js
 lib/jquery.js
 lib/leaflet.js
 js/developer.js
-lib/kendo.all.min.js
+lib/kendo.mobile.min.js
 lib/underscore.js
 js/tools.js
 js/db/services.js
