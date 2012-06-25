@@ -11,3 +11,5 @@ Android/assets/www
 Android/bin/*
 Android-Build/assets/www
 Android-Build/bin/*
+buildsmap/
+buildsmobile/

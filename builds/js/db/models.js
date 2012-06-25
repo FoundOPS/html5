@@ -1,3 +1,0 @@
-// Copyright 2012 FoundOPS LLC. All Rights Reserved.
-
-define(["tools"],function(tools){var models={};return models.DevicePlatform={ANDROID:"Android",BLACKBERRY:"BlackBerry",IPHONE:"iPhone",WEBOS:"webOS",WINCE:"WinCE",UNKNOWN:"Unknown"},models.InfoType={PHONE:"Phone Number",EMAIL:"Email Address",FAX:"Fax Number",WEBSITE:"Website",OTHER:"Other"},models.TrackPoint=function(accuracy,date,heading,latitude,longitude,routeId,source,speed){this.Accuracy=accuracy,this.CollectedTimeStamp=tools.formatDate(date),this.Heading=heading,this.Latitude=latitude,this.Longitude=longitude,this.RouteId=routeId,this.Source=source,this.Speed=speed},models})

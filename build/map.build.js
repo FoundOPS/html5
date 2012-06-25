@@ -1,7 +1,7 @@
 ({
     appDir: "../app",
     baseUrl: "js",
-    dir: "../builds",
+    dir: "../buildsmap",
     paths: {
         lib: '../lib',
         jquery: '../lib/jquery',
