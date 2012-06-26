@@ -36,26 +36,28 @@ require(["jquery", "lib/kendo.all.min", "lib/jquery-ui-1.8.21.core.min", "lib/jq
     }
 
     //setup breadcrumbs
-    var li = $('#crumbs')[0].children;
+    var li1 = $('#crumbs li:nth-child(1)');
+    var li2 = $('#crumbs li:nth-child(2)');
+    var li3 = $('#crumbs li:nth-child(3)');
     importer.upload = function () {
         app.navigate("views/importerUpload.html");
-        li[1].classList.remove('active');
-        li[2].classList.remove('active');
-        li[0].classList.add('active');
+        li2.removeClass('active');
+        li3.removeClass('active');
+        li1.addClass('active');
     };
 
     importer.select = function () {
         app.navigate("views/importerSelect.html");
-        li[0].classList.remove('active');
-        li[2].classList.remove('active');
-        li[1].classList.add('active');
+        li1.removeClass('active');
+        li3.removeClass('active');
+        li2.addClass('active');
     };
 
     importer.review = function () {
         app.navigate("views/importerReview.html");
-        li[0].classList.remove('active');
-        li[1].classList.remove('active');
-        li[2].classList.add('active');
+        li1.removeClass('active');
+        li2.removeClass('active');
+        li3.addClass('active');
     };
 
     window.importer = importer;

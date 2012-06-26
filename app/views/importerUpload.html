@@ -1,9 +1,9 @@
 <div data-init="upload.initialize" data-role="view" data-title="Upload File" id="upload">
     <div class="help">
         <ol>
-            <img class="arrow" src="../img/importerArrow.png" alt="" height="48" width="89" />
+            <div class="arrowA"></div>
             <li>Select your data file. Make sure it's in .csv format.</li>
-            <img class="arrow" src="../img/importerArrow.png" alt="" height="48" width="89" />
+            <div class="arrowA"></div>
             <li>Select the type of service.</li>
         </ol>
     </div>
@@ -12,13 +12,13 @@
             <fieldset>
                 <legend>Helpful Hints</legend>
                 <ul>
-                    <li>Sample excel sheet download</li>
+                    <li>Sample excel sheet <a href="../lib/example.xlsx">download</a></li>
                     <li>Ask support for help</li>
                 </ul>
             </fieldset>
         </div>
         <div id="main" class="border">
-            <input id="fileUpload" type="file" />
+            <input id="fileUpload" type="file" accept=".csv" />
             <br />
             <br />
             <br />

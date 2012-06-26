@@ -3,6 +3,17 @@
 define(["lib/csv" , "ui/importerSelect"], function (csv, select) {
     var upload = {};
 
+    //TODO: try to use this
+    function check_file(){
+        var str = document.getElementById('fileToUpload').value.toUpperCase();
+        var suffix = ".csv";
+        if(!(str.indexOf(suffix, str.length - suffix.length) !== -1||
+            str.indexOf(suffix2, str.length - suffix2.length) !== -1)){
+            alert('File type not allowed,\nAllowed file: *.jpg,*.jpeg');
+            document.getElementById('fileToUpload').value='';
+        }
+    }
+
     var parse = function (file) {
         var data = csv.parseRows(file);
         var newData = [];
@@ -23,7 +34,7 @@ define(["lib/csv" , "ui/importerSelect"], function (csv, select) {
             filereader: "../../lib/filereader.swf",
             debugMode: false,
             multiple: false,
-            accept: "*.csv",
+            accept: ".csv",
             label: ".csv"
         });
 
@@ -41,29 +52,17 @@ define(["lib/csv" , "ui/importerSelect"], function (csv, select) {
             reader.readAsText(csvFile);
         });
 
+        var list = [
+            {Name: 'Septic Pumping'},
+            {Name: 'WVO'},
+            {Name: 'Grease Trap'}
+        ]
+
         //create DropDownList from input HTML element
         $("#serviceType").kendoDropDownList({
             dataTextField: "Name",
             dataValueField: "Id",
-            dataSource: {
-                type: "odata",
-                serverFiltering: false,
-                filter: [
-                    {
-                        field: "Name",
-                        operator: "contains",
-                        value: "Star Wars"
-                    },
-                    {
-                        field: "BoxArt.SmallUrl",
-                        operator: "neq",
-                        value: null
-                    }
-                ],
-                transport: {
-                    read: "http://odata.netflix.com/Catalog/Titles"
-                }
-            }
+            dataSource: list
         });
 
         //get a reference to the DropDownList

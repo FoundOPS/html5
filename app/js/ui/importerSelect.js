@@ -5,17 +5,8 @@ define(function () {
     select.data = [];
 
     select.initialize = function () {
-        var data = [
-            {header: "Client Name", value: "Abbott, Lori"},
-            {header: "Phone", value: "123-456-7890"},
-            {header: "Email", value: "labbit@yahoo.com"},
-            {header: "Location Name", value: "52 Mobile Home Estates (Lafayette 1)"},
-            {header: "Address Line 1", value: "2525 N 925 W"},
-            {header: "Service", value: "Trash Pickup"},
-            {header: "Frequency", value: "Weekly"}
-        ]
-
         var list = [
+            {Name: "Don't Import"},
             {Name: 'Client Name'},
             {Name: 'Location Name'},
             {Name: 'Email'},
