@@ -1,4 +1,4 @@
-<div id="routes" data-role="view" data-layout="mobile-view" data-model="mobile.viewModel" data-title="Routes">
+<div id="routes" data-role="view" data-layout="mobile-view" data-model="mobile.viewModel" data-title="Routes" data-transition="slide">
     <header data-role="header">
         <div data-role="navbar">
             <a id="logoutButton " class="nav-button km-button km-back" data-align="left"
@@ -9,7 +9,7 @@
     <!--Add following attributes when supported by KendoUI Mobile
     data-pull-to-refresh="true" style="margin-bottom: 400px;"-->
     <ul id="routes-listview" data-bind="source:routesSource, click:selectRoute" data-role="listview"
-        data-style="inset" data-template="routeListViewTemplate"></ul>
+        data-style="inset" data-template="routeListViewTemplate" style="margin-bottom: 800px;"></ul>
 </div>
 <script type="text/x-kendo-template" id="routeListViewTemplate">
     <a>${Name}</a>

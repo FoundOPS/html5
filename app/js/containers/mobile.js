@@ -218,6 +218,7 @@ require(["jquery", "lib/kendo.mobile.min", "developer", "db/services", "db/model
         });
     };
 
+    //Must change to better design. Change if statement within mobile.login too.
     mobile.checkLogin = function () {
         if(localStorage.getItem("loggedIn") === "true") {
             mobile.login();
@@ -233,6 +234,6 @@ require(["jquery", "lib/kendo.mobile.min", "developer", "db/services", "db/model
     window.mobile = mobile;
 
     //Start the mobile application
-    app = new kendo.mobile.Application($(document.body), {});
+    app = new kendo.mobile.Application($(document.body));
 
 });
