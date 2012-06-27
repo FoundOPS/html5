@@ -1,0 +1,17 @@
+**/.DS_Store
+nbproject
+manifest.mf
+build.xml
+
+.idea/
+Android/assets/www
+<<<<<<< HEAD
+Android/bin/
+Android-Build/bin/
+buildsmap/
+buildsmobile/
+PhoneGap Build Package/
+=======
+Android/bin/*
+buildsmobile/*
+>>>>>>> c17aba8... Added persistent login. Fixed up .gitignore

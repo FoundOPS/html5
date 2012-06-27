@@ -4,6 +4,6 @@
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="gen"/>
-	<classpathentry kind="lib" path="libs/cordova-1.8.1.jar"/>
+	<classpathentry kind="lib" path="libs/cordova.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

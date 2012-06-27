@@ -16,7 +16,7 @@ require.config({
         db: "db",
 
         // Libraries
-        cordova: "../lib/cordova-1.8.1",
+        cordova: "../lib/cordova",
         underscore: "../lib/underscore"
     },
     shim: {
@@ -60,9 +60,21 @@ require(["jquery", "lib/kendo.mobile.min", "developer", "db/services", "db/model
         //set the OS of the device running the app
         mobile.CONFIG.DEVICE_PLATFORM = device.platform;
 
-
-        //console.log("Current platform " + device.platform);
+        //Used to disallow user from navigating back to login screen if already logged in.
+        document.addEventListener("backbutton", onBack, false);
     }
+
+    function onBack () {
+        if(window.location.hash === "#views/routeList.html"){
+            navigator.notification.confirm("Going back will log you out, do you want to proceed?", function (buttonIndex) {
+                if(buttonIndex === 1) {
+                    mobile.logout();
+                };
+            }, "Warning", "Confirm,Cancel");
+        } else {
+            app.navigate("#:back");
+        }
+    };
 
     var app;
     var serviceDate, intervalId = null;
@@ -131,19 +143,34 @@ require(["jquery", "lib/kendo.mobile.min", "developer", "db/services", "db/model
          */
         selectRouteDestination: function (e) {
             this.set("selectedDestination", e.dataItem);
-            this.set("destinationPhoneContactInfoSource",
+            this.set("locationPhoneContactInfoSource",
                 new kendo.data.DataSource({
                     data: this.get("selectedDestination").Location.ContactInfoSet,
                     filter: {field: "Type", operator: "equal", value: "Phone Number"}
                 }));
-            this.set("destinationEmailContactInfoSource",
+            this.set("locationEmailContactInfoSource",
                 new kendo.data.DataSource({
                     data: this.get("selectedDestination").Location.ContactInfoSet,
                     filter: {field: "Type", operator: "equal", value: "Email Address"}
                 }));
-            this.set("destinationWebsiteContactInfoSource",
+            this.set("locationWebsiteContactInfoSource",
                 new kendo.data.DataSource({
                     data: this.get("selectedDestination").Location.ContactInfoSet,
+                    filter: {field: "Type", operator: "equal", value: "Website"}
+                }));
+            this.set("clientPhoneContactInfoSource",
+                new kendo.data.DataSource({
+                    data: this.get("selectedDestination").Client.ContactInfoSet,
+                    filter: {field: "Type", operator: "equal", value: "Phone Number"}
+                }));
+            this.set("clientEmailContactInfoSource",
+                new kendo.data.DataSource({
+                    data: this.get("selectedDestination").Client.ContactInfoSet,
+                    filter: {field: "Type", operator: "equal", value: "Email Address"}
+                }));
+            this.set("clientWebsiteContactInfoSource",
+                new kendo.data.DataSource({
+                    data: this.get("selectedDestination").Client.ContactInfoSet,
                     filter: {field: "Type", operator: "equal", value: "Website"}
                 }));
             app.navigate("views/routeDestinationDetails.html");
@@ -200,7 +227,7 @@ require(["jquery", "lib/kendo.mobile.min", "developer", "db/services", "db/model
                 localStorage.setItem("loggedIn", true); localStorage["email"] = e; localStorage["pass"] = p;
                 app.navigate("views/routeList.html");
             } else {
-                alert("Login information is incorrect.");
+                navigator.notification.alert("Login information is incorrect.");
             }
         });
     };
@@ -213,7 +240,7 @@ require(["jquery", "lib/kendo.mobile.min", "developer", "db/services", "db/model
                 mobile.viewModel.routesSource.data();
                 app.navigate("views/clearhist.html");
             } else {
-                alert("Logout cannot be completed at this time.");
+                navigator.notification.alert("Logout cannot be completed at this time.");
             }
         });
     };
@@ -225,15 +252,10 @@ require(["jquery", "lib/kendo.mobile.min", "developer", "db/services", "db/model
         }
     };
 
-//for development purposes
-    mobile.navToRoutesList = function () {
-        app.navigate("views/routeList.html");
-    };
-
 //set mobile to a global function, so the functions are accessible from the HTML element
     window.mobile = mobile;
 
     //Start the mobile application
-    app = new kendo.mobile.Application($(document.body));
+    app = new kendo.mobile.Application($(document.body), {platform: ""});
 
 });

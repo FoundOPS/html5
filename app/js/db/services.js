@@ -110,7 +110,8 @@ define(['lib/kendo.mobile.min', 'developer', 'tools'], function (k, developer, t
     services.routesDataSource = new kendo.data.DataSource({
         transport: {
             read: {
-                url: apiUrl + "routes/GetRoutes",
+                //Get the routes based on the phone's date for today
+                url: apiUrl + "routes/GetRoutes?serviceDateUtc=" + tools.formatDate(new Date()),
                 type: "GET",
                 dataType: "jsonp",
                 contentType: "application/json; charset=utf-8"

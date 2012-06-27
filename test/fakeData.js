@@ -19,8 +19,10 @@ define(['tools', 'ui/ui'], function (tools, ui) {
 
     fakeData.routes = [
         {"Id": "f57f763f-87e1-47e0-98c8-f650b2c556dc", "Name": "North SIde", "RouteDestinations": [
-            {"Location": {"Latitude": "40.42273300", "Longitude": "-86.90275800", "Name": "El Rodeo"}, "OrderInRoute": 1},
-            {"Location": {"Latitude": "40.01214500", "Longitude": "-86.90382500", "Name": "Culver's"}, "OrderInRoute": 2}
+            {"Client": {"Name": "Arctic White Soft Serve Ice", "ContactInfoSet": []},
+                "Location": {"Latitude": "40.42273300", "Longitude": "-86.90275800", "Name": "El Rodeo"}, "OrderInRoute": 1},
+            {"Client": {"Name": "Arctic White Soft Serve Ice", "ContactInfoSet": []},
+                "Location": {"Latitude": "40.01214500", "Longitude": "-86.90382500", "Name": "Culver's"}, "OrderInRoute": 2}
         ]},
         {"Id": "7c4d1de7-974a-46e1-8e56-b701bcb28f8c", "Name": "Shelter Island", "RouteDestinations": [
             {"Location": {"Latitude": "40.42208100", "Longitude": "-86.90356900", "Name": "Bruno's Pizza and Big O's Sports Room"}, "OrderInRoute": 1},

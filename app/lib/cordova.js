@@ -66,7 +66,7 @@ if (typeof module === "object" && typeof require === "function") {
     module.exports.require = require;
     module.exports.define = define;
 }
-// file: lib/cordova-1.8.1.js
+// file: lib/cordova.js
 define("cordova", function(require, exports, module) {
 var channel = require('cordova/channel');
 

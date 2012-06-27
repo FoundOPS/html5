@@ -8,9 +8,10 @@
     <link href="styles/mobile.css" rel="stylesheet"/>
     <!--Application CSS/Javascript!-->
     <script data-main="js/containers/mobile" src="lib/require-jquery.js"></script>
+    <script src="lib/cordova.js"></script>
 </head>
 <body>
-<div data-role="view" data-title="Login" data-show="mobile.checkLogin">
+<div data-role="view" data-title="Login" data-show="mobile.checkLogin" data-transition="slide">
     <header data-role="header">
         <!--replaced navbar to not have a back button-->
         <div data-role="navbar" style="height: 44px;">
@@ -26,7 +27,6 @@
             <input class="k-textbox" placeholder="Password" required type="password" id="pass"/>
             <p><input data-click="mobile.login" data-role="button" type="submit" value="Login"/></p>
         </form>
-        <!--<button data-click="mobile.navToRoutesList" data-role="button">Navigate to Routes List</button>-->
         <!--Listview for styling purposes-->
         <ul data-role="listview" data-style="inset"></ul>
     </div>

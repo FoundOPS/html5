@@ -2,8 +2,8 @@
 <widget xmlns		= "http://www.w3.org/ns/widgets"
 	xmlns:gap	= "http://phonegap.com/ns/1.0"
 	id		= "foundOps.mobile"
-	version 	= "0.2.1"
-	versionCode = "4">
+	version 	= "0.3.0"
+	versionCode = "5">
 
 	<name>FoundOPS</name>
 
@@ -23,9 +23,10 @@
 	<preference name="prerendered-icon" value="true" />
 	<preference name="orientation" value="default" />
 
-	<feature name="http://api.phonegap.com/1.0/file"/>
+	<feature name="http://api.phonegap.com/1.0/battery"/>
+	<feature name="http://api.phonegap.com/1.0/device"/>
 	<feature name="http://api.phonegap.com/1.0/geolocation"/>
-	<feature name="http://api.phonegap.com/1.0/media"/>
 	<feature name="http://api.phonegap.com/1.0/network"/>
 	<feature name="http://api.phonegap.com/1.0/notification"/>
+
 </widget>

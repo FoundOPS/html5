@@ -4,3 +4,7 @@
     top: 21px;
     left: 12px;
 }
+.km-android .km-navbar div.km-view-title
+{
+    display: inline-block;
+}

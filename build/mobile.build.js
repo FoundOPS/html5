@@ -9,7 +9,7 @@
         db: "db",
 
         // Libraries
-        cordova: "../lib/cordova-1.8.1",
+        cordova: "../lib/cordova",
         jquery: '../lib/jquery',
         underscore: "../lib/underscore"
     },
