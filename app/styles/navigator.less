@@ -436,9 +436,9 @@ zoom: 1;*/
     opacity: @hoverOpacity;
 }
 
-a .iconExpand:hover{opacity: @hoverOpacity;}
+.iconExpand:hover{opacity: @hoverOpacity;}
 
-.iconExpand, .iconShow {
+.iconExpand, .iconShow{
     -webkit-transition: all .3s ease-in-out;
     -moz-transition: all .3s ease-in-out;
     -ms-transition: all .3s ease-in-out;
@@ -473,7 +473,11 @@ a .iconExpand:hover{opacity: @hoverOpacity;}
 
 .createColors(@color){
     (~".@{color}"){
-        color: @@color;
+        color: #fff;
+        text-decoration: none;
+        text-shadow: none;
+        outline: 0 none;
+        text-shadow: 0px 2px 20px @@color, 0px 2px 30px @@color+#222;
     }
 }
 
@@ -516,6 +520,10 @@ a .iconExpand:hover{opacity: @hoverOpacity;}
     }
 
     #navSearch input{
+        display: none;
+    }
+
+    #navSearch{
         display: none;
     }
 

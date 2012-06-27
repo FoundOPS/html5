@@ -1,9 +1,28 @@
-<a id="expandMenuButton" href='#'>
-    <div id='slideMenu'><img class='iconExpand' src='img/Expand.png'/></div>
-</a>
+<script id="navTemplate" type="text/x-kendo-template">
+    <div id='navContainer'>
+        <div id='navSearch' class='navElement'><input name='search' type='text' placeholder='Search...'/><a href='\#'><img class='navIcon' src='img/search.png'/></a></div>
+        <div id='navClient' class='navElement popup last'><a href='\#'><img class='navIcon profile' src='#= data[0] #'/><img id='clientLogo' src='#= data[1] #'/></a></div>
+    </div>
+    <img id='logo' src='./img/Logo.png' alt='FoundOPS'/>
+</script>
 
-<div id='navContainer'>
-    <div id='navSearch' class='navElement'><input name='search' type='text' placeholder='Search...'/><a href='#'><img class='navIcon' src='img/search.png'/></a></div>
-    <div id='navClient' class='navElement popup last'><a href='#'><img class='navIcon profile' src='" + avatarUrl + "'/><img id='clientLogo' src='" + businessLogoUrl + "'/></a></div>
-</div>
-<img id='logo' src='./img/Logo.png' alt='FoundOPS'/>
+<script id="expandTemplate" type="text/x-kendo-template">
+    <a id="expandMenuButton" href='\#'>
+        <div id='slideMenu'><img class='iconExpand' src='img/Expand.png'/></div>
+    </a>
+</script>
+
+<script id="showMenuTemplate" type="text/x-kendo-template">
+    <div id="showMenu">
+        <a href='\#'><img class='iconShow' src='img/Expand.png'/></a>
+    </div>
+</script>
+
+<script id="sideBarElementTemplate" type="text/x-kendo-template">
+    <a>
+        <div class='sideBarElement' color='#= color #'>
+            <span class='icon' style = "background: url('#= iconUrl #') #= bgX # #= bgY # no-repeat"></span>
+            <span>#= name #</span>
+        </div>
+    </a>
+</script>

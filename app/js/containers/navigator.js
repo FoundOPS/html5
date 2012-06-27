@@ -1,26 +1,10 @@
 "use strict";
 //TODO: Fix hover state css/js aesthetics.
 require.config({
-    baseUrl:'lib',
-    underscore: "../lib/underscore",
-    shim:{
-        underscore: {
-            exports: '_'
-        }
-    }
+    baseUrl:'lib'
 });
 
-require(["jquery", "underscore", "jquery.mousewheel", "jquery.jscrollpane.min", "text!../navigatorTemplates.html"], function ($, _, a, b, templates) {
-    //extract the templates from the html
-    var expandMenuButton = $(templates).filter("#expandMenuButton");
-//    var myTemplate = "";
-//    $.tmpl(myTemplate, myData).appendTo("#myDiv");
-
-    //TODO: Move to init.
-    _.templateSettings = {
-        interpolate : /\{\{(.+?)\}\}/g
-    };
-
+require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min", "kendo.mobile.min", "text!../navigatorTemplates.html"], function ($, a, b, k, templates) {
     /** Popup Constructor **/
     function Popup(data) {
         var title = "";
@@ -50,7 +34,7 @@ require(["jquery", "underscore", "jquery.mousewheel", "jquery.jscrollpane.min", 
 
         this.addMenu = function (id, title, contents) {
             menus.push({'id':id, 'title':title, 'contents':contents});
-        }
+        };
 
         $(".navElement").filter(".popup").click(function (e) {
             thisPopup.toggleVisible(e, $(this));
@@ -70,7 +54,7 @@ require(["jquery", "underscore", "jquery.mousewheel", "jquery.jscrollpane.min", 
 
             if (popupDiv.length === 0) {
                 //console.log("Popup not initialized");
-                popupDiv = this.createPopup(icon);
+                popupDiv = this.createPopup();
             }
             if (popupDiv.length === 0) {
                 /*console.log("ERROR: FAILED TO CREATE POPUP!!!");*/
@@ -91,23 +75,22 @@ require(["jquery", "underscore", "jquery.mousewheel", "jquery.jscrollpane.min", 
                 //console.log("Clicked on different nav button!");
                 var thisPopup = this;
                 this.hide();
-                popupDiv.promise("fx").done(function () {
+                //TODO: Make sure this doesn't cause animation problems.
+                /*popupDiv.promise("fx").done(function () {
                     left = thisPopup.getLeft(icon, popupDiv);
-                    thisPopup.populate(id);
                     popupDiv.css("left", left);
+                    thisPopup.populate(id);
                     popupDiv.stop(false, true).fadeIn('fast');
                 });
                 lastNavClick = navElem.attr("id");
-                return;
+                return;*/
             }
-
             left = this.getLeft(icon, popupDiv);
             popupDiv.css("left", left);
             popupDiv.css("top", $("nav").height());
-            lastNavClick = navElem.attr("id");
-            //console.log("current click: " + lastNavClick);
             this.populate(id);
-            popupDiv.stop(false, true).fadeIn();
+            popupDiv.stop(false, true).fadeIn('fast');
+            lastNavClick = navElem.attr("id");
         };
 
         //Function returns the left offset of the popup and sets the carrot element's position.
@@ -149,7 +132,7 @@ require(["jquery", "underscore", "jquery.mousewheel", "jquery.jscrollpane.min", 
         };
 
         // createPopup: Appends popup to the nav
-        this.createPopup = function (icon) {
+        this.createPopup = function () {
             //Creates popup div that will be populated in the future.
             var popupDiv = $(document.createElement("div"));
             popupDiv.attr("id", "popup");
@@ -173,8 +156,8 @@ require(["jquery", "underscore", "jquery.mousewheel", "jquery.jscrollpane.min", 
                 thisPopup.hide();
             });
 
-            $("#popupBack").click(function (e) {
-                var x = history.pop();
+            $("#popupBack").click(function () {
+                history.pop();
                 if (history.length <= 0) {
                     thisPopup.hide();
                     return;
@@ -203,7 +186,7 @@ require(["jquery", "underscore", "jquery.mousewheel", "jquery.jscrollpane.min", 
                 }
             });
             $(document).on('click', '.popupContentRow a',
-                function (e) {
+                function () {
                     //TODO: Fire event or change menu
                     var newId = $(this).parent().attr('id');
                     thisPopup.populate(newId);
@@ -241,7 +224,7 @@ require(["jquery", "underscore", "jquery.mousewheel", "jquery.jscrollpane.min", 
             var menuId = "";
             var i;
             //popupContentDiv.html('');
-            for (var i = 0; i < contArray.length; i++) {
+            for (i = 0; i < contArray.length; i++) {
                 var lastElement = "";
                 if (i === contArray.length - 1) {
                     lastElement = "last";
@@ -321,27 +304,15 @@ require(["jquery", "underscore", "jquery.mousewheel", "jquery.jscrollpane.min", 
         var topNav = $(document.createElement('div'));
         topNav.attr('id', 'nav');
 
-        //TODO Replace below w http://api.jquery.com/jQuery.template/#jQuery-template1
-        var avatarUrl = config.avatarUrl;
-        var businessLogoUrl = config.businessLogoUrl;
-        var navContainer = "<div id='navContainer'>" +
-            "<div id='navSearch' class='navElement'><input name='search' type='text' placeholder='Search...'/><a href='#'><img class='navIcon' src='img/search.png'/></a></div>" +
-            //    <!--div id='navNotif' class='navElement'>
-            //        <a href='#'><img class='navIcon' src='img/notify.png'/></a>
-            //    </div-->
-            "<div id='navClient' class='navElement popup last'><a href='#'><img class='navIcon profile' src='" + avatarUrl + "'/><img id='clientLogo' src='" + businessLogoUrl + "'/></a></div>" +
-            "</div>" +
-            "<img id='logo' src='./img/Logo.png' alt='FoundOPS'/>";
+        var navTemplateHtml = $(templates).filter("#navTemplate").html();
+        var navTemplate = kendo.template(navTemplateHtml);
+        var params = [config.avatarUrl, config.businessLogoUrl];
+        topNav.html(navTemplate(params));
 
-          //TODO: Make this work.
-//        var navContainerTemplateText = $(templates).filter("#expandMenuButton");
-//        var navContainerTemplate = _.template(navContainerTemplateText.html());
-//        topNav.html(navContainerTemplate({avatarUrl : avatarUrl, businessLogoUrl: businessLogoUrl}));
-
-        topNav.html(navContainer);
         $('body').prepend(topNav);
+
+        //refresh the page when the user double clicks on the corner logo
         $('#logo').dblclick(function () {
-            //refresh the page when the user double clicks on the corner logo
             window.location.href = window.location.href;
         });
     };
@@ -374,7 +345,7 @@ require(["jquery", "underscore", "jquery.mousewheel", "jquery.jscrollpane.min", 
                 }
             }
         );
-    }
+    };
 
     /** Initializes sidebar navigation **/
     var initSideBar = function (sections) {
@@ -383,7 +354,7 @@ require(["jquery", "underscore", "jquery.mousewheel", "jquery.jscrollpane.min", 
          * Converts an image url to its colored version, for the hover url
          * Ex. dispatcher.png -> dispatcherColor.png
          */
-        function toHoverImage(imgLoc, color) {
+        function toHoverImage(imgLoc) {
             var extIndex = imgLoc.lastIndexOf('.');
             return imgLoc.substring(0, extIndex) + "Color" + imgLoc.substring(extIndex);
         }
@@ -395,7 +366,11 @@ require(["jquery", "underscore", "jquery.mousewheel", "jquery.jscrollpane.min", 
         //setup the sidebar (the place for buttons)
         var sBar = $(document.createElement('div'));
         sBar.attr('id', 'sideBar');
-        sBar.html(expandMenuButton);
+
+        //extract the template from the html
+        var expandTemplateHtml = $(templates).filter("#expandTemplate").html();
+        var expandTemplate = kendo.template(expandTemplateHtml);
+        sBar.html(expandTemplate);
 
         sections.sort(function (a, b) {
             if (a.name < b.name)
@@ -404,6 +379,7 @@ require(["jquery", "underscore", "jquery.mousewheel", "jquery.jscrollpane.min", 
                 return 1;
             return 0;
         });
+
         //Insert sections outside of complete alphabetical sort.
         sections.push({name:"Logout", url:"#logout", color:"black", iconUrl:"./img/logout.png"});
         var section;
@@ -414,13 +390,21 @@ require(["jquery", "underscore", "jquery.mousewheel", "jquery.jscrollpane.min", 
             var color = currentSection.color;
             var iconUrl = currentSection.iconUrl;
             //TODO: Implement sprite selection.
-            var preloadHover = new Image();
-            preloadHover.src = toHoverImage(iconUrl);
+            $('<img/>').src = toHoverImage(iconUrl);
+            //Default values unless sprite.
             var bgX = 'center';
             var bgY = 'center';
 
-            sBarElement += "<a><div class='sideBarElement' color='" + color + "'><span class='icon' style = 'background: url(\"" + iconUrl + "\") " + bgX + " " + bgY + " no-repeat'></span>" +
-                "<span>" + name + "</span></div></a>";
+            var sideBarElementTemplateHtml = $(templates).filter("#sideBarElementTemplate").html();
+            var sideBarElementTemplate = kendo.template(sideBarElementTemplateHtml);
+            var params = {
+                color: color,
+                iconUrl: iconUrl,
+                bgX: bgX,
+                bgY: bgY,
+                name: name
+            };
+            sBarElement += sideBarElementTemplate(params);
         }
         sBar.append(sBarElement);
 
@@ -429,19 +413,17 @@ require(["jquery", "underscore", "jquery.mousewheel", "jquery.jscrollpane.min", 
         $('#nav').after(sBarWrapper);
 
         //Add showMenuSpan to topNav.
-        var showMenuSpan = $(document.createElement("div"));
-        showMenuSpan.attr('id', 'showMenu');
-        var showMenuSpanInner = "<a href='#'><img class='iconShow' src='img/Expand.png'/></a>";
-        showMenuSpan.html(showMenuSpanInner);
-        $('#navContainer').after(showMenuSpan);
+        var showMenuTemplateHtml = $(templates).filter("#showMenuTemplate").html();
+        var showMenuTemplate = kendo.template(showMenuTemplateHtml);
+        $('#navContainer').after(showMenuTemplate);
 
         $(".sideBarElement").hover(function () {
-            $(this).stop(true, true).addClass($(this).attr('color'), 100);
+            $(this).stop(true, true).addClass($(this).attr('color'));
             var image = $(this).find(".icon:first").css('background-image').replace(/^url|[\(\)]/g, '');
             var hoverImg = toHoverImage(image);
             $(this).find(".icon").css('background-image', 'url(' + hoverImg + ')');
         }, function () {
-            $(this).stop(true, true).removeClass($(this).attr('color'), 100);
+            $(this).stop(true, true).removeClass($(this).attr('color'));
             var image = $(this).find(".icon:first").css('background-image').replace(/^url|[\(\)]/g, '');
             image = image.replace('Color.', '.');
             $(this).find(".icon").css('background-image', 'url(' + image + ')');
@@ -456,23 +438,21 @@ require(["jquery", "underscore", "jquery.mousewheel", "jquery.jscrollpane.min", 
         //Listens for clicks outside of elements
         $('body').on('click', function (e) {
             var clicked = $(e.target);
-            //console.log("Clicked on: " + $clicked.html());
-            var sideBarLen = clicked.parents("#sideBar").length;
-            var showMenuLen = clicked.parents("#showMenu").length;
+            //console.log("Clicked on: " + clicked.html());
+            var sideBarLen = clicked.parents("#sideBar").length + clicked.is("#sideBar") ? 1 : 0;
+            var showMenuLen = clicked.parents("#showMenu").length + clicked.is("#showMenu") ? 1 : 0;
 
             //Detects clicks outside of the sideBar when shown.
-            if ((!clicked.is("#sideBar")) && sideBarLen === 0 && showMenuLen === 0
-                && $("#sideBar").offset().top > 0
-                && $(document).width() <= 650) {
+            if (sideBarLen === 0 && showMenuLen === 0 && $("#sideBar").offset().top > 0 && $(document).width() <= 650) {
                 toggleMenu();
             }
 
+            var sideBarWrapperLen = clicked.parents("#sideBarWrapper").length + clicked.is("#sideBarWrapper") ? 1 : 0;
             //Detects clicks outside of the sideBar when expanded.
-            var slideMenuLen = clicked.parents("#slideMenu").length;
-            if ((!clicked.is("#sideBar")) && sideBarLen === 0 && slideMenuLen === 0
-                && $("#sideBar").hasClass("expand")
-                && $(document).width() > 650) {
-                slideMenu();
+            var slideMenuLen = clicked.parents("#slideMenu").length + clicked.is("#slideMenu") ? 1 : 0;
+            if (sideBarWrapperLen === 0 && slideMenuLen === 0 && $("#sideBar").hasClass("expand")&& $(document).width() > 650){
+                //TODO: Change method back!!!!!
+                slideMenuClosed();
             }
         });
 
@@ -480,6 +460,7 @@ require(["jquery", "underscore", "jquery.mousewheel", "jquery.jscrollpane.min", 
         $(window).resize(function () {
             if ($(window).width() <= 650) {
                 sideBarDiv.css("width", "");
+                sideBarDiv.removeClass("hover");
                 if (sideBarDiv.hasClass("expand")) {
                     sideBarDiv.removeClass("expand");
                     sideBarDiv.attr("style", "");
@@ -493,47 +474,82 @@ require(["jquery", "underscore", "jquery.mousewheel", "jquery.jscrollpane.min", 
                     if ($(".iconShow").hasClass('rotateIcon')) {
                         $(".iconShow").removeClass('rotateIcon');
                     }
-                }
+                }/*
+                if(sideBarDiv.hasClass("hover")){
+                    slideMenuClosed();
+                    sideBarDiv.removeClass("hover");
+                }*/
             }
         });
 
-        //Function toggles menu slide out.
-        var slideMenu = function () {
-            $(".iconExpand").toggleClass("flip");
-            //TODO: Change static 159px width to be dynamic?
-            if (!sideBarDiv.hasClass("expand")) {
-                $("#sideBar, #sideBarWrapper, .jspContainer")
-                    .stop(true, false)
-                    .animate({width:'159px'}, 'fast');
-            } else {
-                $("#sideBar, #sideBarWrapper, .jspContainer")
-                    .stop(true, false)
-                    .animate({width:'55px'}, 'fast');
-            }
-            sideBarDiv.toggleClass("expand");
+        var slideMenuOpen = function(){
+            $("#sideBar, #sideBarWrapper, .jspContainer")
+                .stop(true, false)
+                .animate({width:'159px'}, 'fast');
+            $(".iconExpand").addClass("flip");
         };
 
-        //Helper function detecting if menu is able to have a hover state.
-        var hoverMenu = function () {
-            if ($(document).width() > 650) {
-                sideBarDiv.toggleClass("hover");
-                slideMenu();
-            }
+        var slideMenuClosed = function(){
+            $("#sideBar, #sideBarWrapper, .jspContainer")
+                .stop(true, false)
+                .animate({width:'55px'}, 'fast');
+            $(".iconExpand").removeClass("flip");
         };
+
+        /* Explanation of hover/click states.
+        onhoverin:
+         addClass hover
+         if no expand -> slideIn
+         //if expand, slideIn has fired, so do nothing.
+
+         onhoverout:
+         if expand -> slideOut, removeClass expand
+         else if hover -> slideOut, removeClass hover
+
+         onClick:
+         if hover -> slideOut, removeClass hover
+         else if expand -> slideOut, removeClass expand
+         */
 
         //Click listener in charge of expanding sideBar on slideMenu button click.
         $("#slideMenu").stop().click(
             function () {
-                if (!sideBarDiv.hasClass("hover")) {
-                    slideMenu();
+                if (sideBarDiv.hasClass("hover")) {
+                    slideMenuClosed();
+                    sideBarDiv.removeClass("hover");
+                    sideBarDiv.removeClass("expand");
+                }else if(sideBarDiv.hasClass("expand")){
+                    slideMenuClosed();
+                    sideBarDiv.removeClass("expand");
+                }else{
+                    sideBarDiv.addClass("expand");
+                    slideMenuOpen();
                 }
             }
         );
 
         //Hover listener that expands/contracts sideBar.
         $("#sideBarWrapper").hover(
-            function () {
-                hoverMenu();
+            //Hover In
+            function(){
+                sideBarDiv.addClass("hover");
+                if ($(document).width() > 650&&!sideBarDiv.hasClass("expand")) {
+                    slideMenuOpen();
+                }
+            },
+            //Hover Out
+            function(){
+                if($(document).width() <= 650)return;
+                if(sideBarDiv.hasClass("expand")){
+                    slideMenuClosed();
+                    sideBarDiv.removeClass("expand");
+                }
+                if(sideBarDiv.hasClass("hover")){
+                    //TODO: Fix redundancy
+                    slideMenuClosed();
+                    sideBarDiv.removeClass("hover");
+                    //sideBarDiv.removeClass("expand");
+                }
             }
         );
 
@@ -546,14 +562,14 @@ require(["jquery", "underscore", "jquery.mousewheel", "jquery.jscrollpane.min", 
                 sideBarWrapperDiv.css('display', 'inline-block');
                 sideBarDiv.stop(false, true).animate(
                     {
-                        top:0
+                        top: 0
                     },
                     'fast'
                 );
             } else {
                 sideBarDiv.stop(false, true).animate(
                     {
-                        top:offset
+                        top: offset
                     },
                     'fast',
                     function () {
