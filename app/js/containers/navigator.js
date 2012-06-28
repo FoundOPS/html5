@@ -77,13 +77,13 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min", "kendo.mobile.
                 this.hide();
                 //TODO: Make sure this doesn't cause animation problems.
                 /*popupDiv.promise("fx").done(function () {
-                    left = thisPopup.getLeft(icon, popupDiv);
-                    popupDiv.css("left", left);
-                    thisPopup.populate(id);
-                    popupDiv.stop(false, true).fadeIn('fast');
-                });
-                lastNavClick = navElem.attr("id");
-                return;*/
+                 left = thisPopup.getLeft(icon, popupDiv);
+                 popupDiv.css("left", left);
+                 thisPopup.populate(id);
+                 popupDiv.stop(false, true).fadeIn('fast');
+                 });
+                 lastNavClick = navElem.attr("id");
+                 return;*/
             }
             left = this.getLeft(icon, popupDiv);
             popupDiv.css("left", left);
@@ -315,6 +315,14 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min", "kendo.mobile.
         $('#logo').dblclick(function () {
             window.location.href = window.location.href;
         });
+
+        Navigator.prototype.hideSearch = function () {
+            $("#navSearch").hide();
+        };
+
+        Navigator.prototype.showSearch = function () {
+            $("#navSearch").show();
+        };
     };
 
     /** Initializes scrollbar for sidebar navigation **/
@@ -372,20 +380,13 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min", "kendo.mobile.
         var expandTemplate = kendo.template(expandTemplateHtml);
         sBar.html(expandTemplate);
 
-        sections.sort(function (a, b) {
-            if (a.name < b.name)
-                return -1;
-            if (a.name > b.name)
-                return 1;
-            return 0;
-        });
-
-        //Insert sections outside of complete alphabetical sort.
-        sections.push({name:"Logout", url:"#logout", color:"black", iconUrl:"./img/logout.png"});
         var section;
         var sBarElement = "";
+
+        //initialize the sections on the sidebar
         for (section in sections) {
             var currentSection = sections[section];
+            var href =  currentSection.url;
             var name = currentSection.name;
             var color = currentSection.color;
             var iconUrl = currentSection.iconUrl;
@@ -397,14 +398,15 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min", "kendo.mobile.
 
             var sideBarElementTemplateHtml = $(templates).filter("#sideBarElementTemplate").html();
             var sideBarElementTemplate = kendo.template(sideBarElementTemplateHtml);
-            var params = {
-                color: color,
-                iconUrl: iconUrl,
-                bgX: bgX,
-                bgY: bgY,
-                name: name
+            var templateData = {
+                href: href,
+                color:color,
+                iconUrl:iconUrl,
+                bgX:bgX,
+                bgY:bgY,
+                name:name
             };
-            sBarElement += sideBarElementTemplate(params);
+            sBarElement += sideBarElementTemplate(templateData);
         }
         sBar.append(sBarElement);
 
@@ -450,8 +452,7 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min", "kendo.mobile.
             var sideBarWrapperLen = clicked.parents("#sideBarWrapper").length + clicked.is("#sideBarWrapper") ? 1 : 0;
             //Detects clicks outside of the sideBar when expanded.
             var slideMenuLen = clicked.parents("#slideMenu").length + clicked.is("#slideMenu") ? 1 : 0;
-            if (sideBarWrapperLen === 0 && slideMenuLen === 0 && $("#sideBar").hasClass("expand")&& $(document).width() > 650){
-                //TODO: Change method back!!!!!
+            if (sideBarWrapperLen === 0 && slideMenuLen === 0 && $("#sideBar").hasClass("expand") && $(document).width() > 650) {
                 slideMenuClosed();
             }
         });
@@ -474,22 +475,22 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min", "kendo.mobile.
                     if ($(".iconShow").hasClass('rotateIcon')) {
                         $(".iconShow").removeClass('rotateIcon');
                     }
-                }/*
-                if(sideBarDiv.hasClass("hover")){
+                }
+                if (sideBarDiv.hasClass("hover")) {
                     slideMenuClosed();
                     sideBarDiv.removeClass("hover");
-                }*/
+                }
             }
         });
 
-        var slideMenuOpen = function(){
+        var slideMenuOpen = function () {
             $("#sideBar, #sideBarWrapper, .jspContainer")
                 .stop(true, false)
                 .animate({width:'159px'}, 'fast');
             $(".iconExpand").addClass("flip");
         };
 
-        var slideMenuClosed = function(){
+        var slideMenuClosed = function () {
             $("#sideBar, #sideBarWrapper, .jspContainer")
                 .stop(true, false)
                 .animate({width:'55px'}, 'fast');
@@ -497,7 +498,7 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min", "kendo.mobile.
         };
 
         /* Explanation of hover/click states.
-        onhoverin:
+         onhoverin:
          addClass hover
          if no expand -> slideIn
          //if expand, slideIn has fired, so do nothing.
@@ -518,10 +519,10 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min", "kendo.mobile.
                     slideMenuClosed();
                     sideBarDiv.removeClass("hover");
                     sideBarDiv.removeClass("expand");
-                }else if(sideBarDiv.hasClass("expand")){
+                } else if (sideBarDiv.hasClass("expand")) {
                     slideMenuClosed();
                     sideBarDiv.removeClass("expand");
-                }else{
+                } else {
                     sideBarDiv.addClass("expand");
                     slideMenuOpen();
                 }
@@ -531,20 +532,20 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min", "kendo.mobile.
         //Hover listener that expands/contracts sideBar.
         $("#sideBarWrapper").hover(
             //Hover In
-            function(){
+            function () {
                 sideBarDiv.addClass("hover");
-                if ($(document).width() > 650&&!sideBarDiv.hasClass("expand")) {
+                if ($(document).width() > 650 && !sideBarDiv.hasClass("expand")) {
                     slideMenuOpen();
                 }
             },
             //Hover Out
-            function(){
-                if($(document).width() <= 650)return;
-                if(sideBarDiv.hasClass("expand")){
+            function () {
+                if ($(document).width() <= 650)return;
+                if (sideBarDiv.hasClass("expand")) {
                     slideMenuClosed();
                     sideBarDiv.removeClass("expand");
                 }
-                if(sideBarDiv.hasClass("hover")){
+                if (sideBarDiv.hasClass("hover")) {
                     //TODO: Fix redundancy
                     slideMenuClosed();
                     sideBarDiv.removeClass("hover");
@@ -562,14 +563,14 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min", "kendo.mobile.
                 sideBarWrapperDiv.css('display', 'inline-block');
                 sideBarDiv.stop(false, true).animate(
                     {
-                        top: 0
+                        top:0
                     },
                     'fast'
                 );
             } else {
                 sideBarDiv.stop(false, true).animate(
                     {
-                        top: offset
+                        top:offset
                     },
                     'fast',
                     function () {
@@ -602,8 +603,13 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min", "kendo.mobile.
             {name:"Employees", url:"#Employees", color:"red", iconUrl:"img/employees.png"},
             {name:"Routes", url:"#Routes", color:"green", iconUrl:"./img/routes.png"},
             {name:"Regions", url:"#Regions", color:"orange", iconUrl:"./img/regions.png"},
-            {name:"Vehicles", url:"#Vehicles", color:"red", iconUrl:"./img/vehicles.png"}
+            {name:"Vehicles", url:"#Vehicles", color:"red", iconUrl:"./img/vehicles.png"},
+            {name:"Logout", url:"#logout", color:"black", iconUrl:"./img/logout.png"}
         ]
     };
-    var navigationFrame = new Navigator(initData);
+
+    //FOR DEBUGGING
+    var n = new Navigator(initData);
+
+    return Navigator;
 });
