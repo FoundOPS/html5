@@ -101,6 +101,7 @@ html{
     margin: 0;
     height: 100%;
     width: 100%;
+    overflow: auto;
 }
 
 body{
@@ -113,6 +114,7 @@ body{
     background: @charcoal;
     font-family: segoe, verdana, sans-serif;
     font-size: 100%;
+    overflow: auto;
 }
 
 a{
@@ -135,7 +137,6 @@ input:focus {
 #nav{
     width: 100%;
     position: fixed;
-    z-index: 2;
     height: @navHeightMax;
     box-shadow: 0px 1px 6px #888;
     text-align: left;
@@ -249,7 +250,7 @@ zoom: 1;*/
     margin-top: @popupCarrotHeight - 2;
     display: none;
     width: 300px;
-    z-index: 3;
+    z-index: 9999;
     left: 0;
 
     background: #efefef;
@@ -413,13 +414,12 @@ zoom: 1;*/
 }
 
 #contentWrapper{
-    position: fixed;
+    position: absolute;
     top: @navHeightMax;
     right: @sideBarWrapperWidth;
     left: 0;
-    bottom: 0;
-
     background: @lightGrey + #050505;
+    z-index: -1;
 }
 
 #content{
@@ -491,7 +491,8 @@ zoom: 1;*/
 .createColors('charcoal');
 .createColors('black');
 
-@media screen and (max-width:650px){
+
+@media only screen and (max-width:800px){
     #nav{
         height: @navHeightMin;
     }
@@ -556,10 +557,12 @@ zoom: 1;*/
     #contentWrapper{
         top: @navHeightMin;
         right: 0;
+
+        background: #00f;
     }
 }
 
-@media screen and (max-width:390px){
+@media only screen and (max-width:390px){
     #logo{
         display: none;
     }
@@ -582,5 +585,9 @@ zoom: 1;*/
 
     #popup{
         width: 80%;
+    }
+
+    #contentWrapper{
+        background: #0f0;
     }
 }

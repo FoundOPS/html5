@@ -4,7 +4,7 @@ require.config({
     baseUrl:'lib'
 });
 
-require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min", "kendo.mobile.min", "text!../navigatorTemplates.html"], function ($, a, b, k, templates) {
+require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min", "kendo.all","text!../navigatorTemplates.html"], function ($, a, b, k,templates) {
     /** Popup Constructor **/
     function Popup(data) {
         var title = "";
