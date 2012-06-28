@@ -193,21 +193,6 @@ require(["jquery", "lib/kendo.mobile.min", "developer", "db/services", "db/model
          */
         selectRouteDestination: function (e) {
             this.set("selectedDestination", e.dataItem);
-            this.set("locationPhoneContactInfoSource",
-                new kendo.data.DataSource({
-                    data: this.get("selectedDestination").Location.ContactInfoSet,
-                    filter: {field: "Type", operator: "equal", value: "Phone Number"}
-                }));
-            this.set("locationEmailContactInfoSource",
-                new kendo.data.DataSource({
-                    data: this.get("selectedDestination").Location.ContactInfoSet,
-                    filter: {field: "Type", operator: "equal", value: "Email Address"}
-                }));
-            this.set("locationWebsiteContactInfoSource",
-                new kendo.data.DataSource({
-                    data: this.get("selectedDestination").Location.ContactInfoSet,
-                    filter: {field: "Type", operator: "equal", value: "Website"}
-                }));
             this.set("clientPhoneContactInfoSource",
                 new kendo.data.DataSource({
                     data: this.get("selectedDestination").Client.ContactInfoSet,
@@ -221,6 +206,21 @@ require(["jquery", "lib/kendo.mobile.min", "developer", "db/services", "db/model
             this.set("clientWebsiteContactInfoSource",
                 new kendo.data.DataSource({
                     data: this.get("selectedDestination").Client.ContactInfoSet,
+                    filter: {field: "Type", operator: "equal", value: "Website"}
+                }));
+            this.set("locationPhoneContactInfoSource",
+                new kendo.data.DataSource({
+                    data: this.get("selectedDestination").Location.ContactInfoSet,
+                    filter: {field: "Type", operator: "equal", value: "Phone Number"}
+                }));
+            this.set("locationEmailContactInfoSource",
+                new kendo.data.DataSource({
+                    data: this.get("selectedDestination").Location.ContactInfoSet,
+                    filter: {field: "Type", operator: "equal", value: "Email Address"}
+                }));
+            this.set("locationWebsiteContactInfoSource",
+                new kendo.data.DataSource({
+                    data: this.get("selectedDestination").Location.ContactInfoSet,
                     filter: {field: "Type", operator: "equal", value: "Website"}
                 }));
             app.navigate("views/routeDestinationDetails.html");
