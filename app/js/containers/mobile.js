@@ -28,7 +28,7 @@ require.config({
 
 require(["jquery", "lib/kendo.mobile.min", "developer", "db/services", "db/models"], function ($, k, developer, services, models) {
     /**
-     * mobile = wrapper all mobile objects
+     * mobile = wrapper for all mobile objects
      * app = the kendoUI mobile app
      * serviceDate = the date for the routes that are acquired form the server
      * intervalId = used to start and stop a route
@@ -66,8 +66,6 @@ require(["jquery", "lib/kendo.mobile.min", "developer", "db/services", "db/model
     function onBack() {
         if (window.location.hash === "#views/routeList.html") {
             mobile.logout();
-        } else if (window.location.hash === "") {
-            app.navigate("#:back");
         } else if (window.location.hash === "#views/routeDetails.html") {
             app.navigate("views/routeList.html");
         } else if (window.location.hash === "#views/routeDestinationDetails.html") {
@@ -261,6 +259,6 @@ require(["jquery", "lib/kendo.mobile.min", "developer", "db/services", "db/model
     //endregion
 
     //Start the mobile application - must be at the bottom of the code.
-    app = new kendo.mobile.Application($(document.body));
+    app = new kendo.mobile.Application($(document.body), {platform: "android"});
 
 });

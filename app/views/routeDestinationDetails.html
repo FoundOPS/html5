@@ -1,7 +1,8 @@
 <div id="routeDestinationDetails" data-role="view" data-layout="mobile-view" data-model="mobile.viewModel"
      data-title="Destination Info" data-transition="slide">
-    <div data-bind="source: this" data-template="navigateTemplate"></div>
+    <div id="locationInfo" data-bind="source: this" data-template="locationTemplate"></div>
     <ul data-role="listview" data-style="inset" data-type="group">
+        <li>Contacts</li>
         <li>Client Contact Info
             <ul id="destinationContactInfoListView" data-bind="source: clientPhoneContactInfoSource"
                 data-role="listview" data-style="inset" data-template="contactInfoPhoneTemplate"></ul>
@@ -20,11 +21,14 @@
         </li>
     </ul>
 </div>
-<script type="text/x-kendo-template" id="navigateTemplate">
-    <div style="text-align:center; margin-top: 7px">
-            <a href="http://maps.google.com/maps?q=${selectedDestination.Location.Latitude},${selectedDestination.Location.Longitude}"
-               class="km-button">Navigate to Route Stop</a>
-    </div>
+<script type="text/x-kendo-template" id="locationTemplate">
+    <h2>${selectedDestination.Client.Name}</h2>
+    <p>${selectedDestination.Location.AddressLineOne}</p>
+    <p>${selectedDestination.Location.AddressLineTwo}</p>
+    <p>${selectedDestination.Location.City}, ${selectedDestination.Location.State}<br/>
+        ${selectedDestination.Location.ZipCode}</p>
+    <p style="margin-top:10px;"><a href="http://maps.google.com/maps?q=${selectedDestination.Location.Latitude},${selectedDestination.Location.Longitude}"
+       class="km-button">Directions</a></p>
 </script>
 <script type="text/x-kendo-template" id="contactInfoPhoneTemplate">
     <a data-rel="external" href="tel:${Data}">Call ${Label}</a>

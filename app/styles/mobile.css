@@ -4,3 +4,9 @@
     top: 21px;
     left: 12px;
 }
+#locationInfo h2 {
+
+}
+#locationInfo p {
+    margin-top: -10px;
+}
