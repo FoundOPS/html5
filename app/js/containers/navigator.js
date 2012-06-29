@@ -110,12 +110,18 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min", "kendo.all","t
             //Sets popup variables referenced in resize listener.
             offScreen = false;
             carrotPos = "50%";
+            var padding = 4;
+            if(offset < 0){
+                offScreen = true;
+                offset = padding;
+            }else if(rightOffset > windowWidth){
+                offScreen = true;
+                offset = windowWidth - popupDiv.width() - padding;
+            }
 
             var carrot = $("#popupArrow");
-            if ((offset < 0) || (rightOffset > windowWidth)) {
+            if (offScreen) {
                 //console.log("Offscreen popup.");
-                offset = (windowWidth - popupDiv.width()) / 2;
-                offScreen = true;
 
                 carrotPos = (x - offset);
                 //console.log("x: " + x);
@@ -139,9 +145,9 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min", "kendo.all","t
 
             var s = "<div id='popupArrow'></div>" +
                 "<div id='popupHeader'>" +
-                "<a href='#'><div id='popupBack'></div></a>" +
+                "<a id='popupBack' href='#'></a>" +
                 "<span id='popupTitle'></span>" +
-                "<a href='#'><div id='popupClose'></div></a>" +
+                "<a id='popupClose' href='#'></a>" +
                 "</div>" +
                 "<div id='popupContent'></div>" +
                 "</div>";
@@ -149,7 +155,7 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min", "kendo.all","t
             popupDiv.css("display", "none");
 
             //Appends created div to page.
-            $("#nav").append(popupDiv);
+            popupDiv.insertAfter("#nav");
 
             //Click listener for popup close button.
             $("#popupClose").click(function () {
@@ -185,13 +191,21 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min", "kendo.all","t
                     thisPopup.hide();
                 }
             });
-            $(document).on('click', '.popupContentRow a',
+            $(document)
+                .on('touchstart', '#popup a',
+                function () {
+                    $(this).css({backgroundColor:"#488FCD"});
+                })
+                .on('touchend mouseout', '#popup a',
+                function () {
+                    $(this).css({backgroundColor:""});
+                })
+                .on('click', '.popupContentRow',
                 function () {
                     //TODO: Fire event or change menu
-                    var newId = $(this).parent().attr('id');
+                    var newId = $(this).attr('id');
                     thisPopup.populate(newId);
-                }
-            );
+                });
 
             //Sets global popup object, object, with the created div.
             object = popupDiv;
@@ -232,10 +246,9 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min", "kendo.all","t
                 if (contArray[i].id != undefined) {
                     menuId = "id = '" + contArray[i].id + "'";
                 }
-                c += "<div " + menuId + " class='popupContentRow " + lastElement + "'>" +
-                    "<a href='#'>" +
+                c += "<a href='#'" + menuId + " class='popupContentRow " + lastElement + "'>" +
                     contArray[i].name +
-                    "</a></div>";
+                    "</a>";
             }
             this.setTitle(data.title);
             this.setContent(c);
@@ -445,21 +458,21 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min", "kendo.all","t
             var showMenuLen = clicked.parents("#showMenu").length + clicked.is("#showMenu") ? 1 : 0;
 
             //Detects clicks outside of the sideBar when shown.
-            if (sideBarLen === 0 && showMenuLen === 0 && $("#sideBar").offset().top > 0 && $(document).width() <= 650) {
+            if (sideBarLen === 0 && showMenuLen === 0 && $("#sideBar").offset().top > 0 && $(document).width() <= 800) {
                 toggleMenu();
             }
 
             var sideBarWrapperLen = clicked.parents("#sideBarWrapper").length + clicked.is("#sideBarWrapper") ? 1 : 0;
             //Detects clicks outside of the sideBar when expanded.
             var slideMenuLen = clicked.parents("#slideMenu").length + clicked.is("#slideMenu") ? 1 : 0;
-            if (sideBarWrapperLen === 0 && slideMenuLen === 0 && $("#sideBar").hasClass("expand") && $(document).width() > 650) {
+            if (sideBarWrapperLen === 0 && slideMenuLen === 0 && $("#sideBar").hasClass("expand") && $(document).width() > 800) {
                 slideMenuClosed();
             }
         });
 
         //Listener for window resize to reset sideBar styles.
         $(window).resize(function () {
-            if ($(window).width() <= 650) {
+            if ($(window).width() <= 800) {
                 sideBarDiv.css("width", "");
                 sideBarDiv.removeClass("hover");
                 if (sideBarDiv.hasClass("expand")) {
@@ -467,7 +480,7 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min", "kendo.all","t
                     sideBarDiv.attr("style", "");
                     $("#sideBarWrapper").attr("style", "");
                 }
-            } else if ($(window).width() > 650) {
+            } else if ($(window).width() > 800) {
                 if (sideBarDiv.hasClass("hidden")) {
                     sideBarDiv.removeClass("hidden");
                     sideBarDiv.attr("style", "");
@@ -534,13 +547,13 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min", "kendo.all","t
             //Hover In
             function () {
                 sideBarDiv.addClass("hover");
-                if ($(document).width() > 650 && !sideBarDiv.hasClass("expand")) {
+                if ($(document).width() > 800 && !sideBarDiv.hasClass("expand")) {
                     slideMenuOpen();
                 }
             },
             //Hover Out
             function () {
-                if ($(document).width() <= 650)return;
+                if ($(document).width() <= 800)return;
                 if (sideBarDiv.hasClass("expand")) {
                     slideMenuClosed();
                     sideBarDiv.removeClass("expand");
@@ -603,8 +616,8 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min", "kendo.all","t
             {name:"Employees", url:"#Employees", color:"red", iconUrl:"img/employees.png"},
             {name:"Routes", url:"#Routes", color:"green", iconUrl:"./img/routes.png"},
             {name:"Regions", url:"#Regions", color:"orange", iconUrl:"./img/regions.png"},
-            {name:"Vehicles", url:"#Vehicles", color:"red", iconUrl:"./img/vehicles.png"},
-            {name:"Logout", url:"#logout", color:"black", iconUrl:"./img/logout.png"}
+            {name:"Vehicles", url:"#Vehicles", color:"red", iconUrl:"./img/vehicles.png"}/*,
+            {name:"Logout", url:"#logout", color:"black", iconUrl:"./img/logout.png"}*/
         ]
     };
 

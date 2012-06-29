@@ -78,10 +78,11 @@ table {
 @navBorderColor: @lightCharcoal;
 
 /*  Other Vars  */
-@hoverOpacity: .7;
+@hoverOpacity: .5;
 
 @popupCarrotHeight: 14px;
 @popupCarrotWidth: 28px;
+@popupHeaderHeight: 43px;
 
 @sideBarWrapperWidth: 55px;
 
@@ -110,8 +111,8 @@ body{
     height: 100%;
     width: 100%;
 
+    background: @lightGrey + #050505;
     color: @charcoal;
-    background: @charcoal;
     font-family: segoe, verdana, sans-serif;
     font-size: 100%;
     overflow: auto;
@@ -138,11 +139,14 @@ input:focus {
     width: 100%;
     position: fixed;
     height: @navHeightMax;
+    line-height: @navHeightMax - 4;
     box-shadow: 0px 1px 6px #888;
     text-align: left;
+    z-index: 1;
 
     img{
         max-height: 100%;
+        vertical-align: middle;
     }
 	
 	.navColor;
@@ -171,7 +175,7 @@ zoom: 1;*/
     margin-left: 50px;
     font-size:100%;
 //TODO: Make this dynamic.
-    line-height: @navHeightMax - 4;
+    //line-height: @navHeightMax - 4;
 
     .last{
         margin-right: 0;
@@ -195,6 +199,10 @@ zoom: 1;*/
     vertical-align: middle;
     margin-right: 60px;        /*Spacing between nav elements*/
     line-height: normal;
+
+    a{
+        display: block;
+    }
 
     a:hover{
         opacity: @hoverOpacity;
@@ -235,6 +243,9 @@ zoom: 1;*/
 }
 
 #navSearch{
+    a{
+        float: right;
+    }
     .navIcon{
         //border-left: @borderSize solid @navBorderColor;
     }
@@ -252,29 +263,27 @@ zoom: 1;*/
     width: 300px;
     z-index: 9999;
     left: 0;
-
+    top: @navHeightMax;
     background: #efefef;
     color: @charcoal;
     //border: solid @charcoal 3px;
+    border: solid @darkGrey 2px;
     border-radius: 5px;
     box-shadow: 0px 0px 8px #888;
 
     a{
-       color: @charcoal;
-
-       &:hover{
-           color: @lightCharcoal;
-       }
+        color: @charcoal;
     }
 }
 
 #popupHeader{
-    padding: 10px;
+    //padding: 10px;
     text-align: center;
 
     //border-bottom: 1px solid @charcoal;
-
+    line-height: @popupHeaderHeight;
     font-size: 16px;
+    border-bottom: 1px solid @darkGrey;
     box-shadow: 0px 0px 5px #888;
     overflow: hidden;
 }
@@ -300,23 +309,22 @@ zoom: 1;*/
 
 #popupBack{
     float: left;
-    height: 16px;
-    width: 8px;
+    height: @popupHeaderHeight;
+    width: @popupHeaderHeight+10;
     background: url('../img/popupBack.png') center center no-repeat;
     .hover;
 }
 
 #popupClose{
     float: right;
-    height: 16px;
-    width: 16px;
+    height: @popupHeaderHeight;
+    width: @popupHeaderHeight;
     background: url('../img/popupClose.png') center center no-repeat;
     .hover;
 }
 
 #popupContent{
     color: @charcoal;
-    padding: 0 15px;
     text-align: left;
     font-size: 18px;
 
@@ -326,8 +334,9 @@ zoom: 1;*/
 }
 
 .popupContentRow{
-    border-bottom: 1px dashed @darkGrey;
-    padding: 8px;
+    border-bottom: 1px solid @darkGrey;
+    display: block;
+    padding: 12px 23px;
 }
 
 #logo{
@@ -342,11 +351,10 @@ zoom: 1;*/
     display: none;
     position: absolute;
     top: 0;
-    right: 10px;
-}
-
-#showMenu img{
-    padding: 6px;
+    right: 0;
+    padding: 0 10px;
+    border-left: 2px solid;
+    height: 100%;
 }
 
 #sideBarWrapper{
@@ -415,15 +423,18 @@ zoom: 1;*/
 
 #contentWrapper{
     position: absolute;
-    top: @navHeightMax;
-    right: @sideBarWrapperWidth;
+    top: 0;
     left: 0;
-    background: @lightGrey + #050505;
-    z-index: -1;
+    height: 100%;
+    width: 100%;
 }
 
 #content{
+    position: relative;
     padding: 8px;
+    top: @navHeightMax;
+    padding-right: @sideBarWrapperWidth + 8;
+    background: @lightGrey + #050505;
 }
 
 #slideMenu{
@@ -494,11 +505,11 @@ zoom: 1;*/
 
 @media only screen and (max-width:800px){
     #nav{
-        height: @navHeightMin;
+        height: @navHeightMax;
     }
 
     #navContainer{
-        line-height: @navHeightMin - 5px;
+        line-height: @navHeightMax - 5px;
     }
 
     #logo{
@@ -542,7 +553,7 @@ zoom: 1;*/
 
     #sideBarWrapper{
         display: inline-block;
-        top: @navHeightMin;
+        top: @navHeightMax;
         height: auto;
         background: transparent;
         width: @sideBarExpandedWidth;
@@ -554,10 +565,16 @@ zoom: 1;*/
         display: none;
     }
 
-    #contentWrapper{
-        top: @navHeightMin;
-        right: 0;
+    #popup{
+        top: @navHeightMax;
+    }
 
+    #contentWrapper{
+    }
+
+    #content{
+        top: @navHeightMax;
+        padding-right: 8px;
         background: #00f;
     }
 }
@@ -587,7 +604,7 @@ zoom: 1;*/
         width: 80%;
     }
 
-    #contentWrapper{
+    #content{
         background: #0f0;
     }
 }
