@@ -200,7 +200,7 @@ require(["jquery", "lib/leaflet", "developer", "db/services", "tools", "ui/leafl
         //check if there is a roleId set
         if (services.RoleId != null) {
             //if the date is today: load the resources with latest points
-            if (tools.dateEqual(selectedDate, new Date())) {
+            if (tools.dateEqual(selectedDate, new Date(), true)) {
                 services.getResourcesWithLatestPoints(function (resourcesWithLatestPoints) {
                     resources = resourcesWithLatestPoints;
                     drawResources();
