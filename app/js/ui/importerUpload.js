@@ -15,6 +15,7 @@ define(["lib/csv" , "ui/importerSelect"], function (csv, select) {
 
     var parse = function (file) {
         var data = csv.parseRows(file);
+        upload.data = data;
         var newData = [];
         //turn the array sideways, ex [{1,2,3}, {4,5,6}] becomes [{1,4}, {2,5}, {3,6}]
         //this is all under assumption that all the arrays are the same size

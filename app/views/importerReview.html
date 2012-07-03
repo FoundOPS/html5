@@ -11,7 +11,7 @@
                 <ul>
                     <li><div id="exists"></div><p>Matched to existing</p></li>
                     <li><div id="autofilled"></div><p>Autofilled from FoundOPS</p></li>
-                    <li><div id="synced"></div><p>Synced from web</p></li>
+                    <li><div id="synced"></div><p>Autofilled from web</p></li>
                 </ul>
             </li>
             <li>When everything is correct, Click "Import".</li>
@@ -19,7 +19,7 @@
     </div>
     <div class="wrap">
         <div class="border">
-            <p>You are currently reviewing your data!</p>
+            <div id="gridView"></div>
             <button onclick="importer.select()">Back</button>
             <button class="advanceBtn" onclick="importer.import()">Import</button>
         </div>

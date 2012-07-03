@@ -250,6 +250,9 @@ body{
 ol{
     padding-left: 30px;
 }
+#review .wrap{
+    margin-right: 10px;
+}
 #review ol button{
     margin-top: 0;
 }
