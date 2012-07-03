@@ -44,13 +44,13 @@ define(function () {
      * This is for sections that are in the Silverlight application and is used for debugging.
      * @type {developer.Frame}
      */
-    developer.CURRENT_FRAME = developer.Frame.SILVERLIGHT;
+    developer.CURRENT_FRAME = developer.Frame.BROWSER;
 
     /**
      * The local server's RoleId for GotGrease.
      * @type {string}
      */
-    developer.GOTGREASE_ROLE_ID = '4FDE6449-E29A-4B46-A7E6-A8305CACAA04';
+    developer.GOTGREASE_ROLE_ID = '';
 
     return developer;
 });
