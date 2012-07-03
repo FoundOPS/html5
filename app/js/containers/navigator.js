@@ -182,13 +182,19 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min", "kendo.mobile.
             );
 
             //Click listener to detect clicks outside of popup
-            $('html').on('click', function (e) {
-                var clicked = $(e.target);
-                var popupLen = clicked.parents("#popup").length + clicked.is("#popup") ? 1 : 0;
-                var navLen = clicked.parents(".navElement").length + clicked.is(".navElement") ? 1 : 0;
-                //Parent bug fixed. Was entirely the fault of the previous listener creation.
-                if (popupLen === 0 && navLen === 0) {
-                    thisPopup.hide();
+            var flag = false;
+            $(document).on('click touchend', function (e) {
+                if (!flag) {
+                    flag = true;
+                    var clicked = $(e.target);
+                    //TODO: Return if not visible.
+                    setTimeout(function(){ flag = false; }, 100);
+                    var popupLen = clicked.parents("#popup").length + clicked.is("#popup") ? 1 : 0;
+                    var navLen = clicked.parents(".navElement").length + clicked.is(".navElement") ? 1 : 0;
+                    //Parent bug fixed. Was entirely the fault of the previous listener creation.
+                    if (popupLen === 0 && navLen === 0) {
+                        thisPopup.hide();
+                    }
                 }
             });
             $(document)
@@ -451,14 +457,14 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min", "kendo.mobile.
         var sideBarDiv = $("#sideBar");
         var sideBarWrapperDiv = $("#sideBarWrapper");
         //Listens for clicks outside of elements
-        $('body').on('click', function (e) {
+        $(document).on('click touchend', function (e) {
             var clicked = $(e.target);
             //console.log("Clicked on: " + clicked.html());
             var sideBarLen = clicked.parents("#sideBar").length + clicked.is("#sideBar") ? 1 : 0;
             var showMenuLen = clicked.parents("#showMenu").length + clicked.is("#showMenu") ? 1 : 0;
 
             //Detects clicks outside of the sideBar when shown.
-            if (sideBarLen === 0 && showMenuLen === 0 && $("#sideBar").offset().top > 0 && $(document).width() <= 800) {
+            if (sideBarLen === 0 && showMenuLen === 0 &&  !$("#sideBar").hasClass("hidden") && $(document).width() <= 800) {
                 toggleMenu();
             }
 
@@ -569,7 +575,7 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min", "kendo.mobile.
         );
 
         //General function that toggles menu up, out of view.
-        //TODO: Rotation works on default browser http://jsfiddle.net/KrRsy/
+        //TODO: Get rotation to work on default android 2.3 browser http://jsfiddle.net/KrRsy/
         var toggleMenu = function () {
             $(".iconShow").toggleClass("rotateIcon");
             var offset = -1 * (sideBarDiv.offset().top + sideBarDiv.outerHeight());
@@ -624,6 +630,9 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min", "kendo.mobile.
 
     //FOR DEBUGGING
     var n = new Navigator(initData);
-
+    //NOTO: Line below never is called on android.....
+    //$(window).load(function(){
+        $("#nav").toggleClass("androidFixedPositionFix");
+    //});
     return Navigator;
 });
