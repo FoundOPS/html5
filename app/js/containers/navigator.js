@@ -4,7 +4,7 @@ require.config({
     baseUrl:'lib'
 });
 
-require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min", "kendo.mobile.min","text!../navigatorTemplates.html"], function ($, a, b, k, templates) {
+require(["jquery", "jquery.mousewheel", "jquery.google.fastbutton", "google.fastbutton", "jquery.jscrollpane.min", "kendo.mobile.min","text!../navigatorTemplates.html"], function ($, a, b, c, d, k, templates) {
     /** Popup Constructor **/
     function Popup(data) {
         var title = "";
@@ -158,11 +158,11 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min", "kendo.mobile.
             popupDiv.insertAfter("#nav");
 
             //Click listener for popup close button.
-            $("#popupClose").click(function () {
+            $("#popupClose").fastClick(function () {
                 thisPopup.hide();
             });
 
-            $("#popupBack").click(function () {
+            $("#popupBack").fastClick(function () {
                 history.pop();
                 if (history.length <= 0) {
                     thisPopup.hide();
@@ -433,16 +433,19 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min", "kendo.mobile.
         var showMenuTemplate = kendo.template(showMenuTemplateHtml);
         $('#navContainer').after(showMenuTemplate);
 
-        $(".sideBarElement").hover(function () {
-            $(this).stop(true, true).addClass($(this).attr('color'));
-            var image = $(this).find(".icon:first").css('background-image').replace(/^url|[\(\)]/g, '');
-            var hoverImg = toHoverImage(image);
-            $(this).find(".icon").css('background-image', 'url(' + hoverImg + ')');
-        }, function () {
-            $(this).stop(true, true).removeClass($(this).attr('color'));
-            var image = $(this).find(".icon:first").css('background-image').replace(/^url|[\(\)]/g, '');
-            image = image.replace('Color.', '.');
-            $(this).find(".icon").css('background-image', 'url(' + image + ')');
+        $(".sideBarElement").on({
+            "touchstart mouseenter": function () {
+                $(this).stop(true, true).addClass($(this).attr('color'));
+                var image = $(this).find(".icon:first").css('background-image').replace(/^url|[\(\)]/g, '');
+                var hoverImg = toHoverImage(image);
+                $(this).find(".icon").css('background-image', 'url(' + hoverImg + ')');
+            },
+            "touchend mouseleave mouseup": function () {
+                $(this).stop(true, true).removeClass($(this).attr('color'));
+                var image = $(this).find(".icon:first").css('background-image').replace(/^url|[\(\)]/g, '');
+                image = image.replace('Color.', '.');
+                $(this).find(".icon").css('background-image', 'url(' + image + ')');
+            }
         });
 
         /** Initialize sidebar scrollbar **/
@@ -528,7 +531,7 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min", "kendo.mobile.
          */
 
         //Click listener in charge of expanding sideBar on slideMenu button click.
-        $("#slideMenu").stop().click(
+        $("#slideMenu").stop().fastClick(
             function () {
                 if (sideBarDiv.hasClass("hover")) {
                     slideMenuClosed();
@@ -626,8 +629,8 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min", "kendo.mobile.
     //FOR DEBUGGING
     var n = new Navigator(initData);
     //NOTO: Line below never is called on android.....
-    //$(window).load(function(){
+    ////$(window).load(function(){
         $("#nav").toggleClass("androidFixedPositionFix");
-    //});
+    ////});
     return Navigator;
 });
