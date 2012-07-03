@@ -4,14 +4,13 @@ define(["lib/csv" , "ui/importerSelect"], function (csv, select) {
     var upload = {};
 
     //TODO: try to use this
-    function check_file(){
-        var str = document.getElementById('fileToUpload').value.toUpperCase();
-        var suffix = ".csv";
-        if(!(str.indexOf(suffix, str.length - suffix.length) !== -1||
-            str.indexOf(suffix2, str.length - suffix2.length) !== -1)){
-            alert('File type not allowed,\nAllowed file: *.jpg,*.jpeg');
-            document.getElementById('fileToUpload').value='';
+    //checks for .csv file type
+    function checkFileType(file){
+        if(!file.name.match(/(.*\.csv$)/)){
+            alert("Only .CSV files types allowed!");
+            return false;
         }
+        return true;
     }
 
     var parse = function (file) {
@@ -33,23 +32,24 @@ define(["lib/csv" , "ui/importerSelect"], function (csv, select) {
             id: "fileReaderSWFObject",
             filereader: "../../lib/filereader.swf",
             debugMode: false,
-            multiple: false,
-            accept: ".csv",
-            label: ".csv"
+            multiple: false
         });
 
         $("#fileUpload").on('change', function (evt) {
             var csvFile = evt.target.files[0];
-
-            var reader = new FileReader();
-            reader.onload = function () {
-                //after the csv file has been loaded, parse it
-                //TODO error checking
-                parse(reader.result);
-            };
-
+            //if file is a .csv
+            if(checkFileType(csvFile)){
+                var reader = new FileReader();
+                reader.onload = function () {
+                    //after the csv file has been loaded, parse it
+                    //TODO error checking
+                    parse(reader.result);
+                };
+            }
             //since the csv file has been selected, read it as text
             reader.readAsText(csvFile);
+            $('#fileName').text(csvFile.name);
+            $('#uploadBtn').removeAttr('disabled');
         });
 
         var list = [

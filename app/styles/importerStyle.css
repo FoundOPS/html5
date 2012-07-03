@@ -22,8 +22,11 @@
 .k-dropdown{
     width: 280px;
 }
+#upload .k-input, #select .k-input{
+    color: #000;
+}
 button{
-    padding: 3px 10px;
+    padding: 2px 6px;
     font-size: 14px;
 }
 /*--------------- Simple scalable breadcrumb by Veerle Pieters --------------*/
@@ -53,6 +56,7 @@ button{
     background:url(../img/crumbs.png) no-repeat right center;
     display:block;
     padding:0 15px 0 10px;
+    z-index: 100;
 }
 #crumbs li a:link,
 #crumbs li a:visited {
@@ -119,6 +123,9 @@ body{
 .arrowB{
     background: url("../img/arrowB.png") no-repeat;
 }
+.low{
+    margin: 40px 0 -75px 170px;
+}
 .km-scroll-wrapper{
     overflow: visible !important;
 }
@@ -127,10 +134,24 @@ body{
 }
 .advanceBtn{
     margin: 0 0 0 20px;
+    border: 1px solid #666666;
+    border-radius: 2px;
+    background: -moz-linear-gradient(top, #9cee65, #7ec152);
+    filter: progid:dximagetransform.microsoft.gradient(startColorstr=#9cee65, endColorstr=#7ec152);
+    background: -webkit-gradient(linear, left top, left bottom, from(#9cee65), to(#7ec152));
+    background: -moz-linear-gradient(top, #9cee65, #7ec152);
+    filter: progid:dximagetransform.microsoft.gradient(startColorstr='#9cee65', endColorstr='#7ec152');
+}
+.advanceBtn:hover{
+    background: -moz-linear-gradient(top, #a7ff6c, #8dd85b);
+    filter: progid:dximagetransform.microsoft.gradient(startColorstr=#a7ff6c, endColorstr=#8dd85b);
+    background: -webkit-gradient(linear, left top, left bottom, from(#a7ff6c), to(#8dd85b));
+    background: -moz-linear-gradient(top, #a7ff6c, #8dd85b);
+    filter: progid:dximagetransform.microsoft.gradient(startColorstr='#a7ff6c', endColorstr='#8dd85b');
 }
 /*************************** UPLOAD *******************************/
 #upload .help{
-    margin-top:110px;
+    margin-top:130px;
 }
 #upload ol{
     /*margin-top: -20px;*/
@@ -156,10 +177,14 @@ body{
 #hints ul li{
     list-style: disc;
 }
-#main{
+#upload .k-dropdown{
+    margin-top: 5px;
 }
 #fileUpload{
-    margin: 0;
+    margin: 5px 0 0 0;
+}
+#fileName{
+    color: green;
 }
 /*************************** SELECT *******************************/
 #select .k-dropdown-wrap.k-state-default, #select .k-dropdown-wrap.k-state-active, #select .k-dropdown-wrap.k-state-focused,

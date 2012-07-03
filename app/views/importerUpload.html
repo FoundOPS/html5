@@ -5,6 +5,8 @@
             <li>Select your data file. Make sure it's in .csv format.</li>
             <div class="arrowA"></div>
             <li>Select the type of service.</li>
+            <div class="arrowA low"></div>
+            <li>Click "Upload".</li>
         </ol>
     </div>
     <div class="wrap">
@@ -12,22 +14,25 @@
             <fieldset>
                 <legend>Helpful Hints</legend>
                 <ul>
-                    <li>Sample excel sheet <a href="../lib/example.xlsx">download</a></li>
-                    <li>Ask support for help</li>
+                    <li>If you are unsure how to format your .CSV sheet, try downloading this
+                        <a href="../lib/example.xlsx">sample file</a>.</li>
+                    <li>If you run into any difficulties during the process, feel free to contact support,
+                        either <a href="javascript:void(0)" onclick="importer.userVoiceOpen()">online</a>, or by calling (347)460-4004.</li>
                 </ul>
             </fieldset>
         </div>
         <div id="main" class="border">
-            <input id="fileUpload" type="file" accept=".csv" />
+            <label for="fileUpload">Data Sheet: <span id="fileName"></span></label><br />
+            <input id="fileUpload" name="fileUpload" type="file" />
             <br />
             <br />
             <br />
-            <label for="serviceType">Service Type</label><br />
+            <label for="serviceType">Service Type:</label><br />
             <input id="serviceType"/>
             <br />
             <br />
             <br />
-            <button onclick="importer.select()">Upload</button>
+            <button class="advanceBtn" id="uploadBtn" onclick="importer.select()" disabled="disabled">Upload</button>
         </div>
     </div>
 </div>

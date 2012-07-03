@@ -6,7 +6,7 @@ define(function () {
 
     select.initialize = function () {
         var list = [
-            {Name: "Don't Import"},
+            {Name: "Do not Import"},
             {Name: 'Client Name'},
             {Name: 'Location Name'},
             {Name: 'Email'},

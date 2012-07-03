@@ -3,7 +3,6 @@
         <ol>
             <div class="arrowA"></div>
             <li>Check Our Headers <br /> Make sure they correctly align with your data below.</li>
-            <div class="arrowB"></div>
             <li>Is this row headers or data? <br /> If it's one of your old headers,
                 we don't want to import it. Check "Don't Import".</li>
             <li>Review Your Data <br /> If you see <span class="warning">&nbsp;&nbsp;</span>, it means we are missing data
@@ -15,14 +14,14 @@
                     <li><div id="synced"></div><p>Synced from web</p></li>
                 </ul>
             </li>
-            <li>When everything is correct, Click
-                <button class="advanceBtn" onclick="importer.import()">Import</button></li>
+            <li>When everything is correct, Click "Import".</li>
         </ol>
     </div>
     <div class="wrap">
         <div class="border">
             <p>You are currently reviewing your data!</p>
             <button onclick="importer.select()">Back</button>
+            <button class="advanceBtn" onclick="importer.import()">Import</button>
         </div>
     </div>
 </div>
