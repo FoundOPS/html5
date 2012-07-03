@@ -1,0 +1,106 @@
+<html><head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title> - jsFiddle demo</title>
+
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+    <style type="text/css">
+        .iconShow{
+            -webkit-transition: -webkit-transform .3s ease-in-out;
+            -moz-transition: -moz-transform .3s ease-in-out;
+            -ms-transition: -ms-transform .3s ease-in-out;
+            -o-transition: -o-transform .3s ease-in-out;
+            transition: transform .3s ease-in-out;
+            zoom: 1;
+        }
+
+        .rotateIcon {
+            -webkit-transform: rotate(-90deg);
+            -ms-transform: rotate(-90deg); /* IE 9 */
+            -o-transform: rotate(-90deg); /* Opera */
+            -moz-transform: rotate(-90deg); /* Firefox */
+            transform: rotate(-90deg);
+        }
+
+        #showMenu{
+            display: inline;
+            position: absolute;
+            top: 0;
+            right: 0;
+            padding: 0 10px;
+            border-left: 2px solid;
+            height: 100%;
+        }
+
+        #navContainer{
+            height: 100%;
+            display: inline-block;
+            margin-left: 50px;
+            font-size:100%;
+            width: 100%;
+            line-height: 40px;
+        }
+
+        #navContainer .last{
+            margin-right: 0;
+        }
+
+        #nav{
+            width: 100%;
+            position: fixed;
+            height: 45px;
+            line-height: 41px;
+            box-shadow: 0px 1px 6px #888;
+            text-align: left;
+            z-index: 1;
+            background: #333335;
+            background-image: linear-gradient(bottom, rgb(34,34,36) 0%, rgb(85,85,86) 100%);
+            background-image: -o-linear-gradient(bottom, rgb(34,34,36) 0%, rgb(85,85,86) 100%);
+            background-image: -moz-linear-gradient(bottom, rgb(34,34,36) 0%, rgb(85,85,86) 100%);
+            background-image: -webkit-linear-gradient(bottom, rgb(34,34,36) 0%, rgb(85,85,86) 100%);
+            background-image: -ms-linear-gradient(bottom, rgb(34,34,36) 0%, rgb(85,85,86) 100%);
+
+            background-image: -webkit-gradient(
+                linear,
+                left bottom,
+                left top,
+                color-stop(0, @charcoal),
+                color-stop(1, rgb(85,85,86))
+            );
+        }
+
+        #nav img{
+            max-height: 100%;
+            vertical-align: middle;
+        }
+    </style>
+
+
+
+    <script type="text/javascript">//<![CDATA[
+    $(window).load(function(){
+        $("#showMenu").stop(true, false).click(
+                function () {
+                    $(".iconShow").toggleClass("rotateIcon");
+                }
+        );
+    });//]]>
+
+    </script>
+
+
+</head>
+<body>
+<div id="nav">
+    <div id="navContainer">
+        <div id="showMenu">
+            <a href="#"><img class="iconShow rotateIcon" src="http://placekitten.com/100/100"></a>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+</body></html>

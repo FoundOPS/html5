@@ -4,7 +4,7 @@ require.config({
     baseUrl:'lib'
 });
 
-require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min", "kendo.all","text!../navigatorTemplates.html"], function ($, a, b, k,templates) {
+require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min", "kendo.mobile.min","text!../navigatorTemplates.html"], function ($, a, b, k, templates) {
     /** Popup Constructor **/
     function Popup(data) {
         var title = "";
@@ -192,11 +192,11 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min", "kendo.all","t
                 }
             });
             $(document)
-                .on('touchstart', '#popup a',
+                .on('touchstart mousedown', '#popup a',
                 function () {
                     $(this).css({backgroundColor:"#488FCD"});
                 })
-                .on('touchend mouseout', '#popup a',
+                .on('touchend mouseup mouseout', '#popup a',
                 function () {
                     $(this).css({backgroundColor:""});
                 })
@@ -480,14 +480,15 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min", "kendo.all","t
                     sideBarDiv.attr("style", "");
                     $("#sideBarWrapper").attr("style", "");
                 }
+                if(!sideBarDiv.hasClass("hidden")){
+                    $(".iconShow").addClass('rotateIcon');
+                }
             } else if ($(window).width() > 800) {
                 if (sideBarDiv.hasClass("hidden")) {
                     sideBarDiv.removeClass("hidden");
                     sideBarDiv.attr("style", "");
                     $("#sideBarWrapper").attr("style", "");
-                    if ($(".iconShow").hasClass('rotateIcon')) {
-                        $(".iconShow").removeClass('rotateIcon');
-                    }
+                    //$(".iconShow").removeClass('rotateIcon');
                 }
                 if (sideBarDiv.hasClass("hover")) {
                     slideMenuClosed();
@@ -568,9 +569,9 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min", "kendo.all","t
         );
 
         //General function that toggles menu up, out of view.
+        //TODO: Rotation works on default browser http://jsfiddle.net/KrRsy/
         var toggleMenu = function () {
             $(".iconShow").toggleClass("rotateIcon");
-
             var offset = -1 * (sideBarDiv.offset().top + sideBarDiv.outerHeight());
             if (sideBarDiv.hasClass("hidden")) {
                 sideBarWrapperDiv.css('display', 'inline-block');

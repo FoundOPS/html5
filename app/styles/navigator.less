@@ -450,11 +450,13 @@ zoom: 1;*/
 .iconExpand:hover{opacity: @hoverOpacity;}
 
 .iconExpand, .iconShow{
-    -webkit-transition: all .3s ease-in-out;
-    -moz-transition: all .3s ease-in-out;
-    -ms-transition: all .3s ease-in-out;
-    -o-transition: all .3s ease-in-out;
-    transition: all .3s ease-in-out;
+//TODO: Fix problem w/ android 2.3 browser. http://jsfiddle.net/KrRsy/4/
+//    -webkit-transition: -webkit-transform .3s ease-in-out;
+//    -moz-transition: -moz-transform .3s ease-in-out;
+//    -ms-transition: -ms-transform .3s ease-in-out;
+//    -o-transition: -o-transform .3s ease-in-out;
+//    transition: transform .3s ease-in-out;
+//    zoom: 1;
 }
 
 //Mixin to rotate elements.
@@ -466,12 +468,8 @@ zoom: 1;*/
     transform: rotate(@deg);
 }
 
-.iconShow{
-    .rotate(-90deg);
-}
-
 .rotateIcon{
-    .rotate(0deg);
+    .rotate(-90deg);
 }
 
 .flip {
