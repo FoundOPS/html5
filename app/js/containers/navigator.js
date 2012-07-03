@@ -182,20 +182,15 @@ require(["jquery", "jquery.mousewheel", "jquery.jscrollpane.min", "kendo.mobile.
             );
 
             //Click listener to detect clicks outside of popup
-            var flag = false;
-            $(document).on('click touchend', function (e) {
-                if (!flag) {
-                    flag = true;
+            $('html').on('click touchend', function (e) {
                     var clicked = $(e.target);
                     //TODO: Return if not visible.
-                    setTimeout(function(){ flag = false; }, 100);
                     var popupLen = clicked.parents("#popup").length + clicked.is("#popup") ? 1 : 0;
                     var navLen = clicked.parents(".navElement").length + clicked.is(".navElement") ? 1 : 0;
                     //Parent bug fixed. Was entirely the fault of the previous listener creation.
                     if (popupLen === 0 && navLen === 0) {
                         thisPopup.hide();
                     }
-                }
             });
             $(document)
                 .on('touchstart mousedown', '#popup a',
