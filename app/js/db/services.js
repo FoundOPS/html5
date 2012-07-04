@@ -120,6 +120,27 @@ define(['lib/kendo.mobile.min', 'developer', 'tools'], function (k, developer, t
     });
 
     /**
+     * A kendo data source for Services for the current business account.
+     * @type {kendo.data.DataSource}
+     */
+    services.servicesDataSource = function () {
+        var dataSource = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    //Get the routes based on the phone's date for today
+                    url: apiUrl + "service/GetServicesHoldersWithFields?roleId=" + services.RoleId + "&startDate=" + tools.formatDate(new Date()) +
+                        "&endDate=" + tools.formatDate(new Date()),
+                    type: "GET",
+                    dataType: "jsonp",
+                    contentType: "application/json; charset=utf-8"
+                }
+            }
+        });
+
+        return dataSource;
+    };
+
+    /**
      * Get the service provider's depots.
      * @param {!function(Array.<Object>)} callback A callback to pass the loaded depots.
      */

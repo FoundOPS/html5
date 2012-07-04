@@ -38,19 +38,19 @@ define(function () {
      * The current web service source.
      * @type {developer.DataSource}
      */
-    developer.CURRENT_DATA_SOURCE = developer.DataSource.LIVE;
+    developer.CURRENT_DATA_SOURCE = developer.DataSource.LOCALAPI;
 
     /**
      * This is for sections that are in the Silverlight application and is used for debugging.
      * @type {developer.Frame}
      */
-    developer.CURRENT_FRAME = developer.Frame.SILVERLIGHT;
+    developer.CURRENT_FRAME = developer.Frame.BROWSER;
 
     /**
      * The local server's RoleId for GotGrease.
      * @type {string}
      */
-    developer.GOTGREASE_ROLE_ID = '4FDE6449-E29A-4B46-A7E6-A8305CACAA04';
+    developer.GOTGREASE_ROLE_ID = '6BB6618D-ED7C-4458-9794-537291F220E2';
 
     return developer;
 });
