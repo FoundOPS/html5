@@ -11,12 +11,20 @@ require.config({
         // JavaScript folders
         lib: "../lib",
         ui: "ui",
-        db: "db"
+        db: "db",
+
+        // Libraries
+        underscore: "../lib/underscore"
+    },
+    shim: {
+        underscore: {
+            exports: '_'
+        }
     }
 });
 
 //"lib/swfupload",
-require(["jquery", "lib/kendo.all.min", "ui/personalSettings"], function ($, m, personalSettings) {
+require(["jquery", "lib/kendo.all.min", "ui/personalSettings", "ui/businessSettings", "ui/usersSettings"], function ($, m, p, b, u) {
     var app;
     var settings = {};
 

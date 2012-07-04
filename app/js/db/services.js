@@ -19,7 +19,7 @@ define(['lib/kendo.mobile.min', 'developer', 'tools'], function (k, developer, t
     };
 
     var apiUrl;
-//setup the api url depending on the mode
+    //setup the api url depending on the mode
     var mode = developer.CURRENT_DATA_SOURCE;
     if (mode === developer.DataSource.LOCALAPI) {
         apiUrl = 'http://localhost:9711/api/';
@@ -155,6 +155,44 @@ define(['lib/kendo.mobile.min', 'developer', 'tools'], function (k, developer, t
             dataType: "json",
             contentType: 'application/json',
             data: JSON.stringify(trackPoints)
+        }).success(function (response) {
+                callback(response);
+            });
+    };
+
+    /**
+     * Get personal user settings.
+     * @param {!function(Array.<Object>)} callback A callback to pass the loaded settings.
+     */
+    services.getPersonalSettings = services._getHttp('settings/GetUserSettings', {}, false);
+
+    /**
+     * Updates personal user settings.
+     * @param {!function(Array.<Object>)} callback A callback to pass the loaded settings.
+     */
+    services.updatePersonalSettings = function (settings, callback) {
+        $.ajax({
+            url: services.API_URL + "settings/UpdateUserSettings",
+            type: "POST",
+            dataType: "json",
+            contentType: 'application/json',
+            data: JSON.stringify(settings)
+        }).success(function (response) {
+                callback(response);
+            });
+    };
+    /**
+     * Updates personal user settings.
+     * @param {!function(Array.<Object>)} callback A callback to pass the loaded settings.
+     */
+
+    services.updateUserImage = function (imageData, x, y, w, h, callback) {
+        $.ajax({
+            url: services.API_URL + "settings/UpdateUserImage",
+            type: "POST",
+            dataType: "json",
+            contentType: 'application/json',
+            data: JSON.stringify(imageData, x, y, w, h)
         }).success(function (response) {
                 callback(response);
             });
