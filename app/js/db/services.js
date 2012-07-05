@@ -188,11 +188,10 @@ define(['lib/kendo.mobile.min', 'developer', 'tools'], function (k, developer, t
 
     services.updateUserImage = function (imageData, x, y, w, h, callback) {
         $.ajax({
-            url: services.API_URL + "settings/UpdateUserImage",
+            url: services.API_URL + "settings/UpdateUserImage?x=" + x + "&y=" + y + "&w=" + w + "&h=" + h,
             type: "POST",
             dataType: "json",
-            contentType: 'application/json',
-            data: JSON.stringify(imageData, x, y, w, h)
+            data: imageData
         }).success(function (response) {
                 callback(response);
             });

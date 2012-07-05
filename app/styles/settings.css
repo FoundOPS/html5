@@ -45,6 +45,9 @@ body{
 hr{
     border: 1px solid #666;
 }
+button{
+    cursor: pointer;
+}
 #settingsList{
     position: absolute;
     width: 120px;
@@ -55,11 +58,12 @@ hr{
     z-index: 100000;
 }
 #settingsList .active{
-    background-color: #ddd;
+    background-color: #488FCD;
 }
 #settingsList li{
     list-style: none;
     padding: 3px 0 3px 15px;
+    cursor: pointer;
 }
 .wrap{
     border: 2px solid #000;
@@ -90,11 +94,16 @@ hr{
 #personal .save, #business .save{
     margin-left: 113px;
 }
-#photo{
-    width: 100px;
-    height: 100px;
-    margin: 0 0 20px 110px;
-    border: 1px solid #666666;
+#imageUpload{
+    width: 85px;
+    margin-bottom: 5px;
+}
+#uploadBtn{
+    width: 85px;
+    margin-bottom: 10px;
+}
+.jcrop-holder{
+    margin-bottom: 10px;
 }
 /**************** Business ****************/
 #business table{

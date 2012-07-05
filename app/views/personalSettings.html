@@ -1,30 +1,35 @@
 <div data-init="personalSettings.initialize" data-role="view" data-title="Personal User Settings" id="personal">
     <h1>Your Personal User Settings</h1>
+
     <div class="wrap">
         <h2>The Basics</h2>
         <table>
             <tr>
                 <td>First Name:&nbsp;</td>
-                <td><input type="text" data-bind="value: settings.FirstName" /></td>
+                <td><input type="text" data-bind="value: settings.FirstName"/></td>
             </tr>
             <tr>
                 <td>Last Name:&nbsp;</td>
-                <td><input type="text" data-bind="value: settings.LastName" /></td>
+                <td><input type="text" data-bind="value: settings.LastName"/></td>
             </tr>
             <tr>
                 <td>Email Address:&nbsp;</td>
-                <td><input type="text" data-bind="value: settings.EmailAddress" /></td>
+                <td><input type="text" data-bind="value: settings.EmailAddress"/></td>
             </tr>
         </table>
         <h2>Your Photo</h2>
-        <img src="" id="cropbox" width="300" height="300"/>
-        <form action="javascript:void(0);" method="post" onsubmit="return personalSettings.checkCoords();">
-            <input name="photos[]" id="photos" type="file" onChange="personalSettings.displayImage(this)" />
-            <input type="hidden" id="x" name="x" />
-            <input type="hidden" id="y" name="y" />
-            <input type="hidden" id="w" name="w" />
-            <input type="hidden" id="h" name="h" />
-            <input type="submit" name="datafile" value="Crop Image" style="width: 80px; margin-bottom: 10px;" />
+        <img src="" id="cropbox" width="100" height="100" max-width="300"/>
+
+        <form id="imageUploadForm" enctype="multipart/form-data" method="POST">
+            <input id="imageUpload" type="file"/>
+            <label for="imageUpload"><span id="fileName"></span></label><br/>
+            <input type="hidden" id="imageFileName" name="imageFileName"/>
+            <input id="imageData" type="hidden" name="imageData"/>
+            <input type="hidden" id="x" name="x"/>
+            <input type="hidden" id="y" name="y"/>
+            <input type="hidden" id="w" name="w"/>
+            <input type="hidden" id="h" name="h"/>
+            <input type="submit" id="uploadBtn" value="Crop Image" disabled="disabled"/>
         </form>
         <h2>Password</h2>
         <button>Change Your Password</button>
