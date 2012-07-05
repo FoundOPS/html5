@@ -6,7 +6,7 @@
 
 define(['jquery', 'lib/jquery-ui-1.8.21.core.min', 'lib/jcrop', 'db/services', 'lib/cordova', 'lib/jquery.FileReader', 'lib/swfobject'], function (jquery, jui, j, services, c, f, s) {
     var personalSettings = {};
-
+    var crop;
     var viewModel = kendo.observable({
         saveChanges: function () {
             services.updatePersonalSettings(this.get("settings"));
@@ -15,12 +15,6 @@ define(['jquery', 'lib/jquery-ui-1.8.21.core.min', 'lib/jcrop', 'db/services', '
     personalSettings.viewModel = viewModel;
 
     personalSettings.initialize = function () {
-        //TODO: add check if user doesn't already have an image
-//        if(){
-//            $(".jcrop-handle").attr("style", "display:block;");
-//            $(".jcrop-dragbar").attr("style", "display:block;");
-//        }
-
         //setup the FileReader on the imageUpload button
         //this will enable the flash FileReader polyfill from https://github.com/Jahdrien/FileReader
         $("#imageUpload").fileReader({
@@ -38,13 +32,31 @@ define(['jquery', 'lib/jquery-ui-1.8.21.core.min', 'lib/jcrop', 'db/services', '
                 if (imageData == null)
                     return;
 
-                $("#cropbox").attr("src", imageData).attr("style", "margin-bottom:-" + $("#cropbox")[0].width + "px;display:block;visibility:visible;");
-                $("#image").attr("src", imageData).attr("height", $("#cropbox")[0].height).attr("width", $("#cropbox")[0].width);
-                //$(".jcrop-handle").attr("style", "display:block;");
-                //$(".jcrop-dragbar").attr("style", "display:block;");
-                //personalSettings.imageData = evt.target.result;
+                if(crop){
+                    crop.destroy();
+                }
+                var cropbox = $("#cropbox");
+                cropbox.attr("src", imageData);
 
-                //set a hidden form to the file value (because we stole it with FileReader)
+                //Setup the cropbox after the image's source is set
+                crop = $.Jcrop('#cropbox',{
+                    aspectRatio: 1,
+                    onSelect: updateCoords,
+                    onChange: updateCoords,
+                    setSelect: [0, 0, 100, 100],
+                    maxSize: [300, 300]
+                });
+
+                //if the Flash FileAPIProxy is being used, move the swf on top the moved input button
+                if (window.FileAPIProxy !== null) {
+                    var input = $("#imageUpload");
+                    window.FileAPIProxy.container
+                        .height(input.outerHeight())
+                        .width(input.outerWidth())
+                        .position({of: input});
+                }
+
+                //set a hidden form to the file image's data (because we stole it with FileReader)
                 $('#imageData').val(imageData);
             };
 
@@ -56,20 +68,9 @@ define(['jquery', 'lib/jquery-ui-1.8.21.core.min', 'lib/jcrop', 'db/services', '
 
             //Read the file to trigger onLoad
             reader.readAsDataURL(file);
-
-            $('#fileName').text(file.name);
-
             //set the form value
             $('#imageFileName').val(file.name);
             $('#uploadBtn').removeAttr('disabled');
-        });
-
-        $('#cropbox').Jcrop({
-            aspectRatio: 1,
-            onSelect: updateCoords,
-            onChange: updateCoords,
-            setSelect: [0, 0, 100, 100],
-            maxSize: [300, 300]
         });
 
         $('#imageUploadForm').attr("action", services.API_URL + "settings/UpdateUserImage");
@@ -80,20 +81,6 @@ define(['jquery', 'lib/jquery-ui-1.8.21.core.min', 'lib/jcrop', 'db/services', '
             $('#w').val(c.w);
             $('#h').val(c.h);
         }
-
-//        personalSettings.uploadImage = function () {
-//            if (parseInt($('#w').val()) > 0) {
-//                var x = $('#x')[0].value;
-//                var y = $('#y')[0].value;
-//                var w = $('#w')[0].value;
-//                var h = $('#h')[0].value;
-//
-//                services.updateUserImage(personalSettings.imageData, x, y, w, h);
-//                return true;
-//            }
-//            alert('Please select a crop region then press submit.');
-//            return false;
-//        };
 
         services.getPersonalSettings(function (settings) {
             viewModel.set("settings", settings);

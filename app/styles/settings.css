@@ -94,8 +94,11 @@ button{
 #personal .save, #business .save{
     margin-left: 113px;
 }
+#cropbox{
+    max-height: 300px;
+    max-width: 300px;
+}
 #imageUpload{
-    width: 85px;
     margin-bottom: 5px;
 }
 #uploadBtn{
@@ -104,6 +107,9 @@ button{
 }
 .jcrop-holder{
     margin-bottom: 10px;
+}
+#fileName{
+    background-color: #fff;
 }
 /**************** Business ****************/
 #business table{
@@ -122,7 +128,6 @@ button{
     text-align: left;
 }
 /* These styles define the border lines */
-.jcrop-vline,.jcrop-hline{background:#FFF url(../img/jcrop.gif) top left repeat;font-size:0;position:absolute;}
 .jcrop-vline{height:100%;width:1px!important;}
 .jcrop-hline{height:1px!important;width:100%;}
 .jcrop-vline.right{right:0;}
