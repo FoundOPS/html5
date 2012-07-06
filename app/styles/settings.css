@@ -94,10 +94,6 @@ button{
 #personal .save, #business .save{
     margin-left: 113px;
 }
-#cropbox{
-    max-height: 300px;
-    max-width: 300px;
-}
 #imageUpload{
     margin-bottom: 5px;
 }

@@ -6,6 +6,7 @@
 
 define(['jquery', 'lib/jquery-ui-1.8.21.core.min', 'lib/jcrop', 'db/services', 'lib/cordova', 'lib/jquery.FileReader', 'lib/swfobject'], function (jquery, jui, j, services, c, f, s) {
     var personalSettings = {};
+
     var crop;
     var viewModel = kendo.observable({
         saveChanges: function () {
@@ -13,6 +14,7 @@ define(['jquery', 'lib/jquery-ui-1.8.21.core.min', 'lib/jcrop', 'db/services', '
         }
     });
     personalSettings.viewModel = viewModel;
+    personalSettings.ratio = 1;
 
     personalSettings.initialize = function () {
         //setup the FileReader on the imageUpload button
@@ -32,19 +34,35 @@ define(['jquery', 'lib/jquery-ui-1.8.21.core.min', 'lib/jcrop', 'db/services', '
                 if (imageData == null)
                     return;
 
+                var cropbox = $("#cropbox");
+
                 if(crop){
                     crop.destroy();
+                    cropbox.removeAttr("height").removeAttr("width").removeAttr("style");
                 }
-                var cropbox = $("#cropbox");
                 cropbox.attr("src", imageData);
+
+                var width = cropbox[0].width;
+                var height = cropbox[0].height;
+                var w = 300 / width;
+                var h = 300 / height;
+                var ratio = Math.min(w,h);
+                var newW = ratio * width;
+                var newH = ratio * height;
+                personalSettings.ratio = ratio;
+
+                if(width > height){
+                    cropbox.attr("width", newW);
+                }else{
+                    cropbox.attr("height", newH);
+                }
 
                 //Setup the cropbox after the image's source is set
                 crop = $.Jcrop('#cropbox',{
                     aspectRatio: 1,
                     onSelect: updateCoords,
                     onChange: updateCoords,
-                    setSelect: [0, 0, 100, 100],
-                    maxSize: [300, 300]
+                    setSelect: [0, 0, newW, newH]
                 });
 
                 //if the Flash FileAPIProxy is being used, move the swf on top the moved input button
@@ -65,6 +83,10 @@ define(['jquery', 'lib/jquery-ui-1.8.21.core.min', 'lib/jcrop', 'db/services', '
                 alert("Only .jpg, .png, and .gif files types allowed!");
                 return;
             }
+            if(file.size > 500000){
+                alert("File is too large! Maximum allowed is 500KB.");
+                return;
+            }
 
             //Read the file to trigger onLoad
             reader.readAsDataURL(file);
@@ -76,10 +98,10 @@ define(['jquery', 'lib/jquery-ui-1.8.21.core.min', 'lib/jcrop', 'db/services', '
         $('#imageUploadForm').attr("action", services.API_URL + "settings/UpdateUserImage");
 
         function updateCoords(c) {
-            $('#x').val(c.x);
-            $('#y').val(c.y);
-            $('#w').val(c.w);
-            $('#h').val(c.h);
+            $('#x').val(c.x/personalSettings.ratio);
+            $('#y').val(c.y/personalSettings.ratio);
+            $('#w').val(c.w/personalSettings.ratio);
+            $('#h').val(c.h/personalSettings.ratio);
         }
 
         services.getPersonalSettings(function (settings) {
