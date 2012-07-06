@@ -172,8 +172,31 @@ define(['lib/kendo.mobile.min', 'developer', 'tools'], function (k, developer, t
 
                                 dataSource.options.schema.model.fields = fields;
 
-                                //Return the data, except for the first row (the types row)
-                                return _.rest(data);
+                                var formattedData = [];
+                                //exclude the first row
+                                _.each(_.rest(data), function (row) {
+                                    var formattedRow = {};
+                                    //go through each field type, and convert the data to the proper type
+                                    _.each(fields, function (value, key) {
+                                        var originalValue = row[key];
+                                        var convertedValue;
+                                        if (originalValue === null) {
+                                            originalValue = convertedValue;
+                                        } else if (value.type === "number") {
+                                            convertedValue = parseFloat(originalValue);
+                                        } else if (value.type === "date") {
+                                            convertedValue = new Date(originalValue);
+                                        } else if (value.type === "string") {
+                                            convertedValue = originalValue.toString();
+                                        }
+
+                                        formattedRow[key] = convertedValue;
+                                    });
+
+                                    formattedData.push(formattedRow);
+                                });
+
+                                return formattedData;
                             }
                         }
                     });

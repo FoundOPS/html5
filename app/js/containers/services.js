@@ -34,18 +34,18 @@ require(["jquery", "lib/kendo.all.min", "developer", "db/services", "lib/moment"
 
     services.initialize = function () {
 
-        var columns = [
-            { title: "Occur Date", field: "OccurDate", type: "date", format: "{0:dd/MMMM/yyyy}" },
-            { title: "Client Name", field: "ClientName" },
-            { title: "Oil Collected", field: "Oil_Collected" },
-            { title: "Service Destination", field: "Service_Destination" },
-            { title: "Hose Length", field: "Hose_Length", type: "number"},
-            { title: "Notes", field: "Notes" }
-        ];
+//        var columns = [
+//            { title: "Occur Date", field: "OccurDate", type: "date", format: "{0:dd/MMMM/yyyy}" },
+//            { title: "Client Name", field: "ClientName" },
+//            { title: "Oil Collected", field: "Oil_Collected" },
+//            { title: "Service Destination", field: "Service_Destination" },
+//            { title: "Hose Length", field: "Hose_Length", type: "number"},
+//            { title: "Notes", field: "Notes" }
+//        ];
 
         $("#grid").kendoGrid({
             autoBind: false,
-            columns: columns,
+//            columns: columns,
             dataSource: dbServices.servicesDataSource.value(),
             filterable: true,
             sortable: true,
