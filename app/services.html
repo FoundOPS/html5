@@ -3,18 +3,16 @@
 <head>
     <meta charset="utf-8">
     <title>Services</title>
-    <link rel="stylesheet" href="styles/statusStyle.css"/>
-    <!--[if IE]>
-    <link rel="stylesheet" href="styles/statusStyleIE.css"/>
-    <![endif]-->
     <script data-main="js/containers/services" src="lib/require-jquery.js"></script>
+    <link href="lib/kendo.common.min.css" rel="stylesheet" />
+    <link href="lib/kendo.default.min.css" rel="stylesheet" />
 </head>
 <body>
 <div data-init="services.initialize" data-role="view" data-title="Services" id="services">
     <h1>Services</h1>
 
-    <input id="startDatePicker" style="width:150px;" />
-    <input id="endDatePicker" style="width:150px;" />
+    <input id="startDatePicker" style="width:150px;"/>
+    <input id="endDatePicker" style="width:150px;"/>
 
     <div id="grid"></div>
 </div>
