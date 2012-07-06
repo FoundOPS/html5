@@ -4,16 +4,14 @@
  */
 "use strict";
 
-define(['jquery', 'lib/jquery-ui-1.8.21.core.min', 'lib/jcrop', 'db/services', 'lib/cordova', 'lib/jquery.FileReader', 'lib/swfobject'], function (jquery, jui, j, services, c, f, s) {
+define(['db/services'], function (services) {
     var personalSettings = {};
-    var crop;
 
-    var viewModel = kendo.observable({
+    personalSettings.viewModel = kendo.observable({
         saveChanges: function () {
             services.updatePersonalSettings(this.get("settings"));
         }
     });
-    personalSettings.viewModel = viewModel;
 
     //make sure the image fits into desired area
     personalSettings.resize = function () {
@@ -39,49 +37,23 @@ define(['jquery', 'lib/jquery-ui-1.8.21.core.min', 'lib/jcrop', 'db/services', '
         }
         //center the image
         var margin = (320 - personalSettings.newW) / 2;
-        if (crop) {
-            $(".jcrop-holder").css("marginLeft", margin + "px");
-        } else {
-            cropbox.css("marginLeft", margin + "px");
-        }
+        cropbox.css("marginLeft", margin + "px");
+
         return cropbox;
     };
 
     personalSettings.initialize = function () {
-        console.log("initialize");
-
         var fileLoaded = function (evt) {
-            console.log("fileLoaded");
-
             var imageData = evt.target.result;
 
             if (imageData == null)
                 return;
 
             var cropbox = $("#cropbox");
-
-            //remove the image crop if one already exists
-            if (crop) {
-                crop.destroy();
-                //remove it's height and width(neccesary for the new image to be correct size)
-                cropbox.removeAttr("height").removeAttr("width").removeAttr("style");
-            }
             //set the source of the image element to be the newly uploaded image
             cropbox.attr("src", imageData);
-
             //make sure the image fits into desired area
             personalSettings.resize();
-
-            //Setup the cropbox after the image's source is set
-            crop = $.Jcrop('#cropbox', {
-                //keep the crop area square
-                aspectRatio: 1,
-                onSelect: updateCoords,
-                onChange: updateCoords,
-                onRelease: updateCoords,
-                //set a predefined crop area
-                setSelect: [0, 0, personalSettings.newW, personalSettings.newH]
-            });
 
             //if the Flash FileAPIProxy is being used, move the swf on top the moved input button
             if (window.FileAPIProxy !== null) {
@@ -96,9 +68,6 @@ define(['jquery', 'lib/jquery-ui-1.8.21.core.min', 'lib/jcrop', 'db/services', '
             $('#imageData').val(imageData);
         };
 
-        var reader = new FileReader();
-        reader.onload = fileLoaded;
-
         //setup the FileReader on the imageUpload button
         //this will enable the flash FileReader polyfill from https://github.com/Jahdrien/FileReader
         $("#imageUpload").fileReader({
@@ -109,6 +78,9 @@ define(['jquery', 'lib/jquery-ui-1.8.21.core.min', 'lib/jcrop', 'db/services', '
         });
 
         $("#imageUpload").on('change', function (evt) {
+            var reader = new FileReader();
+            reader.onload = fileLoaded;
+
             var file = evt.target.files[0];
             //check that the file is an image
             if (!file.name.match(/(.*\.png$)/) && !file.name.match(/(.*\.jpg$)/) && !file.name.match(/(.*\.JPG$)/) && !file.name.match(/(.*\.gif$)/)) {
@@ -132,25 +104,15 @@ define(['jquery', 'lib/jquery-ui-1.8.21.core.min', 'lib/jcrop', 'db/services', '
         //set the form action to the update image url
         $('#imageUploadForm').attr("action", services.API_URL + "settings/UpdateUserImage");
 
-        //update the position and size of the crop area
-        function updateCoords(c) {
-            //divide by the ratio to account for images that are larger than they appear
-            $('#x').val(Math.round(c.x / personalSettings.ratio));
-            $('#y').val(Math.round(c.y / personalSettings.ratio));
-            $('#w').val(Math.round(c.w / personalSettings.ratio));
-            $('#h').val(Math.round(c.h / personalSettings.ratio));
-        }
-
         //retrieve the settings and bind them to the form
         services.getPersonalSettings(function (settings) {
-            viewModel.set("settings", settings);
-            kendo.bind($("#personal"), viewModel);
+            personalSettings.viewModel.set("settings", settings);
+            kendo.bind($("#personal"), personalSettings.viewModel);
         });
     };
 
-//set personalSettings to a global function, so the functions are accessible from the HTML element
+    //set personalSettings to a global function, so the functions are accessible from the HTML element
     window.personalSettings = personalSettings;
 
     return personalSettings;
-})
-;
+});

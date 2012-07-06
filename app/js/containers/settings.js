@@ -23,8 +23,8 @@ require.config({
     }
 });
 
-//"lib/swfupload",
-require(["jquery", "lib/kendo.all.min", "ui/personalSettings", "ui/businessSettings", "ui/usersSettings"], function ($, m, p, b, u) {
+require(["jquery", "lib/kendo.all.min", "ui/personalSettings", "ui/businessSettings", "ui/usersSettings", 'lib/jquery-ui-1.8.21.core.min',
+    'lib/cordova', 'lib/jquery.FileReader', 'lib/swfobject'], function ($, m, p, b, u, jqu, c, f, s) {
     var app;
     var settings = {};
 

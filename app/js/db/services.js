@@ -164,37 +164,40 @@ define(['lib/kendo.mobile.min', 'developer', 'tools'], function (k, developer, t
      * Get personal user settings.
      * @param {!function(Array.<Object>)} callback A callback to pass the loaded settings.
      */
-    services.getPersonalSettings = services._getHttp('settings/GetUserSettings', {}, false);
+    services.getPersonalSettings = services._getHttp('settings/GetPersonalSettings', {}, false);
 
     /**
      * Updates personal user settings.
      * @param {!function(Array.<Object>)} callback A callback to pass the loaded settings.
      */
-    services.updatePersonalSettings = function (settings, callback) {
+    services.updatePersonalSettings = function (settings) {
         $.ajax({
-            url: services.API_URL + "settings/UpdateUserSettings",
+            url: services.API_URL + "settings/UpdatePersonalSettings",
             type: "POST",
             dataType: "json",
             contentType: 'application/json',
             data: JSON.stringify(settings)
-        }).success(function (response) {
-                callback(response);
-            });
+        });
     };
+
     /**
-     * Updates personal user settings.
+     * Get business settings.
      * @param {!function(Array.<Object>)} callback A callback to pass the loaded settings.
      */
+    services.getBusinessSettings = services._getHttp('settings/GetBusinessSettings', {roleId: developer.GOTGREASE_ROLE_ID}, false);
 
-    services.updateUserImage = function (imageData, x, y, w, h, callback) {
+    /**
+     * Updates businesssettings.
+     * @param {(Array.<Object>)} the updated settings.
+     */
+    services.updateBusinessSettings = function (settings) {
         $.ajax({
-            url: services.API_URL + "settings/UpdateUserImage?x=" + x + "&y=" + y + "&w=" + w + "&h=" + h,
+            url: services.API_URL + "settings/UpdateBusinessSettings",
             type: "POST",
             dataType: "json",
-            data: imageData
-        }).success(function (response) {
-                callback(response);
-            });
+            contentType: 'application/json',
+            data: JSON.stringify(developer.GOTGREASE_ROLE_ID, settings)
+        });
     };
 
     /**
