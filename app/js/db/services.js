@@ -138,8 +138,42 @@ define(['lib/kendo.mobile.min', 'developer', 'tools'], function (k, developer, t
                             }
                         },
                         schema: {
+                            model: {
+                                fields: {
+                                    OccurDate: { type: "date", defaultValue: new Date() },
+                                    ClientName: { },
+                                    Oil_Collected: {type: "number" },
+                                    Service_Destination: {},
+                                    Hose_Length: { type: "number"},
+                                    Notes: { field: "Notes" }
+                                }
+                            },
                             parse: function (data) {
-                                return data;
+                                var types = _.first(data);
+
+                                var fields = {};
+
+                                _.each(types, function (type, name) {
+                                    //Example ShipCity: { type: "string" }
+                                    var field = {};
+                                    var jType;
+                                    if (type === "System.Decimal") {
+                                        jType = "number";
+                                    } else if (type === "System.DateTime") {
+                                        jType = "date";
+                                    } else {
+                                        jType = "string";
+                                    }
+                                    var fieldValues = {type: jType, defaultValue: "", nullable: "true"};
+
+                                    //Add the type to fields
+                                    fields[name] = fieldValues;
+                                });
+
+                                dataSource.options.schema.model.fields = fields;
+
+                                //Return the data, except for the first row (the types row)
+                                return _.rest(data);
                             }
                         }
                     });
@@ -154,7 +188,6 @@ define(['lib/kendo.mobile.min', 'developer', 'tools'], function (k, developer, t
             }
         };
     }());
-
 
     /**
      * Get the service provider's depots.
@@ -212,4 +245,5 @@ define(['lib/kendo.mobile.min', 'developer', 'tools'], function (k, developer, t
     };
 
     return services;
-});
+})
+;
