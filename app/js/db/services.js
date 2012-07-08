@@ -51,11 +51,10 @@ define(['lib/kendo.mobile.min', 'developer', 'tools'], function (k, developer, t
      * @param {String} queryString The query string to use. Ex. "routes/GetDepots"
      * @param {Object.<string|Object>=}  opt_params The parameters to use (optional).
      * @param {boolean=} opt_excludeRoleId Do not include the roleId in the params (optional).
-     * @param {?function(Object):Object} The converter function for a loaded item (optional).
      * @return {function(!function(Object))} A function to perform the get and invoke the callback.
      * @private
      */
-    services._getHttp = function (queryString, opt_params, opt_excludeRoleId, opt_convertItem) {
+    services._getHttp = function (queryString, opt_params, opt_excludeRoleId) {
         /**
          * A function to perform the get operation on the api (defined by the parameters above)
          * and invoke the callback with the loaded data.
@@ -78,17 +77,8 @@ define(['lib/kendo.mobile.min', 'developer', 'tools'], function (k, developer, t
                 url: url,
                 data: params
             })
-                .success(function (response) {
-                    var convertedData = response;
-
-                    //if there is a converter, convert the data
-                    if (opt_convertItem) {
-                        convertedData = tools.convertArray(response, opt_convertItem);
-                    }
-
-                    //perform the callback function by passing the response data
-                    callback(convertedData);
-                });
+                //perform the callback function by passing the response data
+                .success(callback);
         };
 
         return getThenInvokeCallback;
@@ -121,96 +111,86 @@ define(['lib/kendo.mobile.min', 'developer', 'tools'], function (k, developer, t
 
     /**
      * A kendo data source for Services for the current business account.
-     * It is only initialized once.
-     * @type {kendo.data.DataSource}
+     * It is initialized every time the data is loaded because the data schema is dynamic
+     * and kendo datasource does not allow you to change the schema.
+     * @param {Date} startDate The first date to load services for
+     * @param {Date} endDate The last date to load services for
+     * @param {!function(kendo.data.DataSource, Array.<Object>, Array.<Object>} callback When the data is loaded it will call
+     * this function and pass 3 parameters: the datasource, the fields, and the formatted data
      */
-    services.servicesDataSource = (function () {
-        var dataSource;
-        return {
-            value: function () {
-                if (!dataSource) {
-                    dataSource = new kendo.data.DataSource({
-                        transport: {
-                            read: {
-                                type: "GET",
-                                dataType: "jsonp",
-                                contentType: "application/json; charset=utf-8"
-                            }
-                        },
-                        schema: {
-                            model: {
-                                fields: {
-                                    OccurDate: { type: "date", defaultValue: new Date() },
-                                    ClientName: { },
-                                    Oil_Collected: {type: "number" },
-                                    Service_Destination: {},
-                                    Hose_Length: { type: "number"},
-                                    Notes: { field: "Notes" }
-                                }
-                            },
-                            parse: function (data) {
-                                var types = _.first(data);
+    services.servicesDataSource = function (startDate, endDate, callback) {
+        var formatResponse = function (data) {
+            //The types will be returned in the first row
+            var types = _.first(data);
 
-                                var fields = {};
-
-                                _.each(types, function (type, name) {
-                                    //Example ShipCity: { type: "string" }
-                                    var field = {};
-                                    var jType;
-                                    if (type === "System.Decimal") {
-                                        jType = "number";
-                                    } else if (type === "System.DateTime") {
-                                        jType = "date";
-                                    } else {
-                                        jType = "string";
-                                    }
-                                    var fieldValues = {type: jType, defaultValue: "", nullable: "true"};
-
-                                    //Add the type to fields
-                                    fields[name] = fieldValues;
-                                });
-
-                                dataSource.options.schema.model.fields = fields;
-
-                                var formattedData = [];
-                                //exclude the first row
-                                _.each(_.rest(data), function (row) {
-                                    var formattedRow = {};
-                                    //go through each field type, and convert the data to the proper type
-                                    _.each(fields, function (value, key) {
-                                        var originalValue = row[key];
-                                        var convertedValue;
-                                        if (originalValue === null) {
-                                            originalValue = convertedValue;
-                                        } else if (value.type === "number") {
-                                            convertedValue = parseFloat(originalValue);
-                                        } else if (value.type === "date") {
-                                            convertedValue = new Date(originalValue);
-                                        } else if (value.type === "string") {
-                                            convertedValue = originalValue.toString();
-                                        }
-
-                                        formattedRow[key] = convertedValue;
-                                    });
-
-                                    formattedData.push(formattedRow);
-                                });
-
-                                return formattedData;
-                            }
-                        }
-                    });
+            //Setup the data source fields info
+            var fields = {};
+            _.each(types, function (type, name) {
+                //Example ShipCity: { type: "string" }
+                var field = {};
+                var jType;
+                if (type === "System.Decimal") {
+                    jType = "number";
+                } else if (type === "System.DateTime") {
+                    jType = "date";
+                } else if (type === "System.String" || type === "System.Guid") {
+                    jType = "string";
+                } else {
+                    return;
                 }
-                return dataSource;
-            },
-            setDateRange: function (startDate, endDate) {
-                this.value().transport.options.read.url = services.API_URL + "service/GetServicesHoldersWithFields?roleId=" + services.RoleId +
-                    "&startDate=" + tools.formatDate(startDate) + "&endDate=" + tools.formatDate(endDate);
+                var fieldValues = {type: jType, defaultValue: ""};
 
-                this.value().read();
-            }
+                if (type === "System.Guid") {
+                    fieldValues.hidden = true;
+                }
+
+                //Add the type to fields
+                fields[name] = fieldValues;
+            });
+
+            //format the data
+            var formattedData = [];
+            //exclude the type data in the first row
+            _.each(_.rest(data), function (row) {
+                var formattedRow = {};
+                //go through each field type, and convert the data to the proper type
+                _.each(fields, function (value, key) {
+                    var originalValue = row[key];
+                    var convertedValue;
+                    if (originalValue === null) {
+                        convertedValue = "";
+                    } else if (value.type === "number") {
+                        convertedValue = parseFloat(originalValue);
+                    } else if (value.type === "date") {
+                        convertedValue = new Date(originalValue);
+                    } else if (value.type === "string") {
+                        convertedValue = originalValue.toString();
+                    } else {
+                        return;
+                    }
+
+                    formattedRow[key] = convertedValue;
+                });
+
+                formattedData.push(formattedRow);
+            });
+
+            //Setup the datasource
+            var dataSource = new kendo.data.DataSource({
+                data: formattedData,
+                schema: {
+                    model: {
+                        id: "ServiceId",
+                        fields: fields
+                    }
+                }
+            });
+
+            callback(dataSource, fields, formattedData);
         };
-    }());
+
+        services._getHttp("service/GetServicesHoldersWithFields", {startDate: tools.formatDate(startDate), endDate: tools.formatDate(endDate)}, false)(formatResponse);
+    };
 
     /**
      * Get the service provider's depots.
@@ -268,5 +248,4 @@ define(['lib/kendo.mobile.min', 'developer', 'tools'], function (k, developer, t
     };
 
     return services;
-})
-;
+});

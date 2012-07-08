@@ -30,28 +30,39 @@ require(["jquery", "lib/kendo.all.min", "developer", "db/services", "lib/moment"
     //set services to a global function, so the functions are accessible from the HTML element
     window.services = services;
 
-    //initialize servicesDataSource
-
     services.initialize = function () {
+        var setupGrid = function (dataSource, fields) {
+            //Setup the columns based on the fields
+            var columns = [];
+            _.each(fields, function (value, key) {
+                if (value.hidden) {
+                    return;
+                }
 
-//        var columns = [
-//            { title: "Occur Date", field: "OccurDate", type: "date", format: "{0:dd/MMMM/yyyy}" },
-//            { title: "Client Name", field: "ClientName" },
-//            { title: "Oil Collected", field: "Oil_Collected" },
-//            { title: "Service Destination", field: "Service_Destination" },
-//            { title: "Hose Length", field: "Hose_Length", type: "number"},
-//            { title: "Notes", field: "Notes" }
-//        ];
+                var column = {};
 
-        $("#grid").kendoGrid({
-            autoBind: false,
-//            columns: columns,
-            dataSource: dbServices.servicesDataSource.value(),
-            filterable: true,
-            sortable: true,
-            selectable: true,
-            scrollable: true
-        });
+                //replace _ with spaces, and insert a space before each capital letter
+                column.title = key.split('_').join(' ').replace(/([A-Z])/g, ' $1');
+
+                column.field = key;
+                column.type = value.type;
+                if (column.type === "number") {
+                    column.template = "#= (" + key + "== null) ? ' ' : " + key + " #";
+                }
+
+                columns.push(column);
+            });
+
+            $("#grid").kendoGrid({
+                autoBind: true,
+                columns: columns,
+                dataSource: dataSource,
+                filterable: true,
+                sortable: true,
+                selectable: true,
+                scrollable: true
+            });
+        };
 
         var startDatePicker = $("#startDatePicker");
         var endDatePicker = $("#endDatePicker");
@@ -59,7 +70,8 @@ require(["jquery", "lib/kendo.all.min", "developer", "db/services", "lib/moment"
         var updateDateRange = function () {
             var startDate = startDatePicker.data("kendoDatePicker").value();
             var endDate = endDatePicker.data("kendoDatePicker").value();
-            dbServices.servicesDataSource.setDateRange(startDate, endDate);
+
+            dbServices.servicesDataSource(startDate, endDate, setupGrid);
         };
 
         startDatePicker.kendoDatePicker({
