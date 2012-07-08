@@ -24,7 +24,7 @@ require.config({
     }
 });
 
-require(["jquery", "lib/kendo.all.min", "developer", "db/services", "lib/moment"], function ($, k, developer, dbServices, m) {
+require(["jquery", "lib/kendo.all.min", "developer", "db/services", "tools", "lib/moment"], function ($, k, developer, dbServices, tools, m) {
     var services = {};
 
     //set services to a global function, so the functions are accessible from the HTML element
@@ -32,6 +32,8 @@ require(["jquery", "lib/kendo.all.min", "developer", "db/services", "lib/moment"
 
     services.initialize = function () {
         var setupGrid = function (dataSource, fields) {
+            services.dataSource = dataSource;
+
             //Setup the columns based on the fields
             var columns = [];
             _.each(fields, function (value, key) {
@@ -48,6 +50,8 @@ require(["jquery", "lib/kendo.all.min", "developer", "db/services", "lib/moment"
                 column.type = value.type;
                 if (column.type === "number") {
                     column.template = "#= (" + key + "== null) ? ' ' : " + key + " #";
+                } else if (column.type === "date") {
+                    column.template = '#= kendo.toString(' + key + ', "dd MMMM yyyy") #';
                 }
 
                 columns.push(column);
@@ -58,7 +62,9 @@ require(["jquery", "lib/kendo.all.min", "developer", "db/services", "lib/moment"
                 columns: columns,
                 dataSource: dataSource,
                 filterable: true,
-                sortable: true,
+                sortable: {
+                    mode: "multiple"
+                },
                 selectable: true,
                 scrollable: true
             });
@@ -89,6 +95,10 @@ require(["jquery", "lib/kendo.all.min", "developer", "db/services", "lib/moment"
 
         //Start loading the initial services
         updateDateRange();
+    };
+
+    services.exportToCSV = function () {
+        tools.toCSV(services.dataSource.view(), "Services", true, ['RecurringServiceId', 'ServiceId']);
     };
 
     //for debugging

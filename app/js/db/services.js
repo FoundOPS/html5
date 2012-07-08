@@ -186,6 +186,8 @@ define(['lib/kendo.mobile.min', 'developer', 'tools'], function (k, developer, t
                 }
             });
 
+            dataSource.sort({ field: "OccurDate", dir: "asc" });
+
             callback(dataSource, fields, formattedData);
         };
 
