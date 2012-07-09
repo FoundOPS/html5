@@ -1,10 +1,13 @@
 "use strict";
 //TODO: Fix hover state css/js aesthetics.
 require.config({
-    baseUrl:'lib'
+    baseUrl: 'js',
+    paths: {
+        lib: "../lib"
+    }
 });
 
-require(["jquery", "jquery.mousewheel", "jquery.google.fastbutton", "google.fastbutton", "jquery.jscrollpane.min", "kendo.mobile.min","text!../navigatorTemplates.html"], function ($, a, b, c, d, k, templates) {
+require(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/jquery.google.fastbutton", "lib/google.fastbutton", "lib/kendo.mobile.min"], function ($) {
     /** Popup Constructor **/
     function Popup(data) {
         var title = "";
@@ -22,18 +25,18 @@ require(["jquery", "jquery.mousewheel", "jquery.google.fastbutton", "google.fast
         //Static data objects, could be removed in future iterations.
         var menus = [
             {
-                id:"navClient",
-                title:data.name,
-                contents:[
-                    {"name":"Settings"},
-                    {"name":"Change Business", id:"changeBusiness"},
-                    {"name":"Logout"}
+                id: "navClient",
+                title: data.name,
+                contents: [
+                    {"name": "Settings"},
+                    {"name": "Change Business", id: "changeBusiness"},
+                    {"name": "Logout"}
                 ]
             }
         ];
 
         this.addMenu = function (id, title, contents) {
-            menus.push({'id':id, 'title':title, 'contents':contents});
+            menus.push({'id': id, 'title': title, 'contents': contents});
         };
 
         $(".navElement").filter(".popup").click(function (e) {
@@ -111,10 +114,10 @@ require(["jquery", "jquery.mousewheel", "jquery.google.fastbutton", "google.fast
             offScreen = false;
             carrotPos = "50%";
             var padding = 4;
-            if(offset < 0){
+            if (offset < 0) {
                 offScreen = true;
                 offset = padding;
-            }else if(rightOffset > windowWidth){
+            } else if (rightOffset > windowWidth) {
                 offScreen = true;
                 offset = windowWidth - popupDiv.width() - padding;
             }
@@ -183,23 +186,23 @@ require(["jquery", "jquery.mousewheel", "jquery.google.fastbutton", "google.fast
 
             //Click listener to detect clicks outside of popup
             $('html').on('click touchend', function (e) {
-                    var clicked = $(e.target);
-                    //TODO: Return if not visible.
-                    var popupLen = clicked.parents("#popup").length + clicked.is("#popup") ? 1 : 0;
-                    var navLen = clicked.parents(".navElement").length + clicked.is(".navElement") ? 1 : 0;
-                    //Parent bug fixed. Was entirely the fault of the previous listener creation.
-                    if (popupLen === 0 && navLen === 0) {
-                        thisPopup.hide();
-                    }
+                var clicked = $(e.target);
+                //TODO: Return if not visible.
+                var popupLen = clicked.parents("#popup").length + clicked.is("#popup") ? 1 : 0;
+                var navLen = clicked.parents(".navElement").length + clicked.is(".navElement") ? 1 : 0;
+                //Parent bug fixed. Was entirely the fault of the previous listener creation.
+                if (popupLen === 0 && navLen === 0) {
+                    thisPopup.hide();
+                }
             });
             $(document)
                 .on('touchstart mousedown', '#popup a',
                 function () {
-                    $(this).css({backgroundColor:"#488FCD"});
+                    $(this).css({backgroundColor: "#488FCD"});
                 })
                 .on('touchend mouseup mouseout', '#popup a',
                 function () {
-                    $(this).css({backgroundColor:""});
+                    $(this).css({backgroundColor: ""});
                 })
                 .on('click', '.popupContentRow',
                 function () {
@@ -318,7 +321,7 @@ require(["jquery", "jquery.mousewheel", "jquery.google.fastbutton", "google.fast
         var topNav = $(document.createElement('div'));
         topNav.attr('id', 'nav');
 
-        var navTemplateHtml = $(templates).filter("#navTemplate").html();
+        var navTemplateHtml = $("#navTemplate").html();
         var navTemplate = kendo.template(navTemplateHtml);
         var params = [config.avatarUrl, config.businessLogoUrl];
         topNav.html(navTemplate(params));
@@ -327,7 +330,13 @@ require(["jquery", "jquery.mousewheel", "jquery.google.fastbutton", "google.fast
 
         //refresh the page when the user double clicks on the corner logo
         $('#logo').dblclick(function () {
-            window.location.href = window.location.href;
+            var url = window.location.href;
+            //remove the hash
+            var index = url.indexOf('#');
+            if (index > 0) {
+                url = url.substring(0, index);
+            }
+            window.location.href = url;
         });
 
         Navigator.prototype.hideSearch = function () {
@@ -343,10 +352,10 @@ require(["jquery", "jquery.mousewheel", "jquery.google.fastbutton", "google.fast
     var initSideBarScrollBar = function () {
         var sideBarWrapperDiv = $("#sideBarWrapper");
         sideBarWrapperDiv.jScrollPane({
-            horizontalGutter:0,
-            verticalGutter:0,
-            verticalDragMinHeight:25,
-            'showArrows':false
+            horizontalGutter: 0,
+            verticalGutter: 0,
+            verticalDragMinHeight: 25,
+            'showArrows': false
         });
 
         var sideBarScrollBar = sideBarWrapperDiv.data('jsp');
@@ -390,7 +399,7 @@ require(["jquery", "jquery.mousewheel", "jquery.google.fastbutton", "google.fast
         sBar.attr('id', 'sideBar');
 
         //extract the template from the html
-        var expandTemplateHtml = $(templates).filter("#expandTemplate").html();
+        var expandTemplateHtml = $("#expandTemplate").html();
         var expandTemplate = kendo.template(expandTemplateHtml);
         sBar.html(expandTemplate);
 
@@ -400,7 +409,7 @@ require(["jquery", "jquery.mousewheel", "jquery.google.fastbutton", "google.fast
         //initialize the sections on the sidebar
         for (section in sections) {
             var currentSection = sections[section];
-            var href =  currentSection.url;
+            var href = currentSection.url;
             var name = currentSection.name;
             var color = currentSection.color;
             var iconUrl = currentSection.iconUrl;
@@ -410,15 +419,15 @@ require(["jquery", "jquery.mousewheel", "jquery.google.fastbutton", "google.fast
             var bgX = 'center';
             var bgY = 'center';
 
-            var sideBarElementTemplateHtml = $(templates).filter("#sideBarElementTemplate").html();
+            var sideBarElementTemplateHtml = $("#sideBarElementTemplate").html();
             var sideBarElementTemplate = kendo.template(sideBarElementTemplateHtml);
             var templateData = {
                 href: href,
-                color:color,
-                iconUrl:iconUrl,
-                bgX:bgX,
-                bgY:bgY,
-                name:name
+                color: color,
+                iconUrl: iconUrl,
+                bgX: bgX,
+                bgY: bgY,
+                name: name
             };
             sBarElement += sideBarElementTemplate(templateData);
         }
@@ -429,7 +438,7 @@ require(["jquery", "jquery.mousewheel", "jquery.google.fastbutton", "google.fast
         $('#nav').after(sBarWrapper);
 
         //Add showMenuSpan to topNav.
-        var showMenuTemplateHtml = $(templates).filter("#showMenuTemplate").html();
+        var showMenuTemplateHtml = $("#showMenuTemplate").html();
         var showMenuTemplate = kendo.template(showMenuTemplateHtml);
         $('#navContainer').after(showMenuTemplate);
 
@@ -462,7 +471,7 @@ require(["jquery", "jquery.mousewheel", "jquery.google.fastbutton", "google.fast
             var showMenuLen = clicked.parents("#showMenu").length + clicked.is("#showMenu") ? 1 : 0;
 
             //Detects clicks outside of the sideBar when shown.
-            if (sideBarLen === 0 && showMenuLen === 0 &&  !$("#sideBar").hasClass("hidden") && $(document).width() <= 800) {
+            if (sideBarLen === 0 && showMenuLen === 0 && !$("#sideBar").hasClass("hidden") && $(document).width() <= 800) {
                 toggleMenu();
             }
 
@@ -484,7 +493,7 @@ require(["jquery", "jquery.mousewheel", "jquery.google.fastbutton", "google.fast
                     sideBarDiv.attr("style", "");
                     $("#sideBarWrapper").attr("style", "");
                 }
-                if(!sideBarDiv.hasClass("hidden")){
+                if (!sideBarDiv.hasClass("hidden")) {
                     $(".iconShow").addClass('rotateIcon');
                 }
             } else if ($(window).width() > 800) {
@@ -504,14 +513,14 @@ require(["jquery", "jquery.mousewheel", "jquery.google.fastbutton", "google.fast
         var slideMenuOpen = function () {
             $("#sideBar, #sideBarWrapper, .jspContainer")
                 .stop(true, false)
-                .animate({width:'159px'}, 'fast');
+                .animate({width: '159px'}, 'fast');
             $(".iconExpand").addClass("flip");
         };
 
         var slideMenuClosed = function () {
             $("#sideBar, #sideBarWrapper, .jspContainer")
                 .stop(true, false)
-                .animate({width:'55px'}, 'fast');
+                .animate({width: '55px'}, 'fast');
             $(".iconExpand").removeClass("flip");
         };
 
@@ -581,14 +590,14 @@ require(["jquery", "jquery.mousewheel", "jquery.google.fastbutton", "google.fast
                 sideBarWrapperDiv.css('display', 'inline-block');
                 sideBarDiv.stop(false, true).animate(
                     {
-                        top:0
+                        top: 0
                     },
                     'fast'
                 );
             } else {
                 sideBarDiv.stop(false, true).animate(
                     {
-                        top:offset
+                        top: offset
                     },
                     'fast',
                     function () {
@@ -609,20 +618,20 @@ require(["jquery", "jquery.mousewheel", "jquery.google.fastbutton", "google.fast
 
     /**  Config  **/
     var initData = {
-        name:"Jordan Kelly",
-        avatarUrl:"./img/david.png",
-        businessLogoUrl:"./img/got-grease-logo.png",
-        roles:[
-            {name:"FoundOPS", id:"23144-24242-242442"},
-            {name:"GotGrease", id:"95838-24242-242442"},
-            {name:"AB Couriers", id:"64729-24242-242442"}
+        name: "Jordan Kelly",
+        avatarUrl: "./img/david.png",
+        businessLogoUrl: "./img/got-grease-logo.png",
+        roles: [
+            {name: "FoundOPS", id: "23144-24242-242442"},
+            {name: "GotGrease", id: "95838-24242-242442"},
+            {name: "AB Couriers", id: "64729-24242-242442"}
         ],
-        sections:[
-            {name:"Employees", url:"#Employees", color:"red", iconUrl:"img/employees.png"},
-            {name:"Routes", url:"#Routes", color:"green", iconUrl:"./img/routes.png"},
-            {name:"Regions", url:"#Regions", color:"orange", iconUrl:"./img/regions.png"},
-            {name:"Vehicles", url:"#Vehicles", color:"red", iconUrl:"./img/vehicles.png"}/*,
-            {name:"Logout", url:"#logout", color:"black", iconUrl:"./img/logout.png"}*/
+        sections: [
+            {name: "Employees", url: "#Employees", color: "red", iconUrl: "img/employees.png"},
+            {name: "Routes", url: "#Routes", color: "green", iconUrl: "./img/routes.png"},
+            {name: "Regions", url: "#Regions", color: "orange", iconUrl: "./img/regions.png"},
+            {name: "Vehicles", url: "#Vehicles", color: "red", iconUrl: "./img/vehicles.png"}/*,
+             {name:"Logout", url:"#logout", color:"black", iconUrl:"./img/logout.png"}*/
         ]
     };
 
@@ -630,7 +639,7 @@ require(["jquery", "jquery.mousewheel", "jquery.google.fastbutton", "google.fast
     var n = new Navigator(initData);
     //NOTO: Line below never is called on android.....
     ////$(window).load(function(){
-        $("#nav").toggleClass("androidFixedPositionFix");
+    $("#nav").toggleClass("androidFixedPositionFix");
     ////});
     return Navigator;
 });
