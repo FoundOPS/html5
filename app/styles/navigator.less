@@ -138,8 +138,8 @@ input:focus {
 }
 
 #nav{
-    width: 100%;
     position: fixed;
+    width: 100%;
     height: @navHeightMax;
     line-height: @navHeightMax - 4;
     box-shadow: 0px 1px 6px #888;
@@ -204,10 +204,6 @@ zoom: 1;*/
 
     a{
         display: block;
-    }
-
-    a:hover{
-        opacity: @hoverOpacity;
     }
 
     .navIcon{
@@ -305,7 +301,7 @@ zoom: 1;*/
 //TODO: Simplify transparent on hover.
 .hover(){
     &:hover{
-        opacity: @hoverOpacity;
+        //opacity: @hoverOpacity;
     }
 }
 
@@ -446,10 +442,12 @@ zoom: 1;*/
 }
 
 #slideMenu:hover{
-    opacity: @hoverOpacity;
+    //opacity: @hoverOpacity;
 }
 
-.iconExpand:hover{opacity: @hoverOpacity;}
+.iconExpand:hover{
+    //opacity: @hoverOpacity;
+}
 
 .androidFixedPositionFix{
     -webkit-transition: -webkit-transform .3s ease-in-out;
@@ -515,6 +513,7 @@ zoom: 1;*/
 
 @media only screen and (max-width:800px){
     #nav{
+        position: absolute;
         height: @navHeightMax;
     }
 
@@ -562,6 +561,7 @@ zoom: 1;*/
     }
 
     #sideBarWrapper{
+        position: absolute;
         display: inline-block;
         top: @navHeightMax;
         height: auto;
