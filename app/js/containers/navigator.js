@@ -1,5 +1,5 @@
 "use strict";
-//TODO: Fix hover state css/js aesthetics.
+
 require.config({
     baseUrl: 'js',
     paths: {
@@ -190,11 +190,11 @@ require(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo
                 //TODO: Return if not visible.
                 var popupLen = clicked.parents("#popup").length + clicked.is("#popup") ? 1 : 0;
                 var navLen = clicked.parents(".navElement").length + clicked.is(".navElement") ? 1 : 0;
-                //Parent bug fixed. Was entirely the fault of the previous listener creation.
                 if (popupLen === 0 && navLen === 0) {
                     thisPopup.hide();
                 }
             });
+
             $(document)
                 .on('touchstart mousedown', '#popup a',
                 function () {
@@ -291,8 +291,6 @@ require(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo
             //console.log("No data found, returning null.");
             return null;
         };
-
-        new FastButton($("#popup"));
     }
 
     /**
@@ -639,9 +637,5 @@ require(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo
 
     //FOR DEBUGGING
     var n = new Navigator(initData);
-    //NOTO: Line below never is called on android.....
-    ////$(window).load(function(){
-    $("#nav").toggleClass("androidFixedPositionFix");
-    ////});
     return Navigator;
 });
