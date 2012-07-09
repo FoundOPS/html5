@@ -1,6 +1,6 @@
 :: Build the project with requirejs
-node r.js -o navigator.build.js
+node r.js -o main.build.js
 :: Convert less to css
-cd  ../buildsnavigator
+cd  ../builds
 CALL lessless
 PAUSE

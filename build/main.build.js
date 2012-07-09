@@ -1,7 +1,7 @@
 ({
     appDir: "../app",
     baseUrl: "js",
-    dir: "../buildsnavigator",
+    dir: "../builds",
     paths: {
         lib: '../lib',
         jquery: 'empty:'
@@ -10,7 +10,7 @@
     optimizeCss: "standard",
     modules: [
         {
-            name: "containers/navigator"
+            name: "main"
         }
     ]
 })
