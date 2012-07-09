@@ -158,11 +158,11 @@ require(["jquery", "jquery.mousewheel", "jquery.google.fastbutton", "google.fast
             popupDiv.insertAfter("#nav");
 
             //Click listener for popup close button.
-            $("#popupClose").fastClick(function () {
+            $("#popupClose").click(function () {
                 thisPopup.hide();
             });
 
-            $("#popupBack").fastClick(function () {
+            $("#popupBack").click(function () {
                 history.pop();
                 if (history.length <= 0) {
                     thisPopup.hide();
@@ -288,6 +288,8 @@ require(["jquery", "jquery.mousewheel", "jquery.google.fastbutton", "google.fast
             //console.log("No data found, returning null.");
             return null;
         };
+
+        new FastButton($("#popup"));
     }
 
     /**
