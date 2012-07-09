@@ -5,8 +5,6 @@
     paths: {
         lib: '../lib',
         jquery: '../lib/jquery',
-
-        // Libraries
         underscore: "../lib/underscore"
     },
     shim: {
