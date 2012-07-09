@@ -7,7 +7,7 @@ require.config({
     }
 });
 
-require(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/jquery.google.fastbutton", "lib/google.fastbutton", "lib/kendo.mobile.min"], function ($) {
+require(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.mobile.min"], function ($) {
     /** Popup Constructor **/
     function Popup(data) {
         var title = "";
@@ -542,7 +542,7 @@ require(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/jquer
          */
 
         //Click listener in charge of expanding sideBar on slideMenu button click.
-        $("#slideMenu").stop().fastClick(
+        $("#slideMenu").stop().click(
             function () {
                 if (sideBarDiv.hasClass("hover")) {
                     slideMenuClosed();
