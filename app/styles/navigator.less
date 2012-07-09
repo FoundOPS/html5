@@ -254,10 +254,8 @@ zoom: 1;*/
 }
 
 #popup{
-    position: fixed;
+    position: relative;
     margin-top: @popupCarrotHeight - 2;
-    display: none;
-    width: 300px;
     z-index: 9999;
     left: 0;
     top: @navHeightMax;
@@ -267,10 +265,17 @@ zoom: 1;*/
     border: solid @darkGrey 2px;
     border-radius: 5px;
     box-shadow: 0px 0px 8px #888;
+    max-height: 100%;
 
     a{
         color: @charcoal;
     }
+}
+
+#popupWrapper{
+    position: fixed;
+    height: 100%;
+    width: 305px;
 }
 
 #popupHeader{
@@ -324,6 +329,8 @@ zoom: 1;*/
     color: @charcoal;
     text-align: left;
     font-size: 18px;
+    height: 100%;
+    overflow: auto;
 
     .last{
         border-bottom: none;
