@@ -51,6 +51,7 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
             if (popupDiv.length === 0) {
                 //console.log("Popup not initialized");
                 popupDiv = this.createPopup();
+                //initPopupScrollBar();
             }
             if (popupDiv.length === 0) {
                 /*console.log("ERROR: FAILED TO CREATE POPUP!!!");*/
@@ -132,6 +133,19 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
             //Returns left offset of popup from window.
             return offset;
         };
+
+        /** Initializes scrollbar for sidebar navigation **/
+        var initPopupScrollBar = function () {
+            var popupContentDiv = $("#popupContent");
+            popupContentDiv.jScrollPane({
+                horizontalGutter: 0,
+                verticalGutter: 0,
+                verticalDragMinHeight: 25,
+                'showArrows': false
+            });
+            popupContentDiv.data('jsp').reinitialise();
+        };
+
 
         // createPopup: Appends popup to the nav
         this.createPopup = function () {
@@ -262,6 +276,8 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
             content = cont;
             var popupContentDiv = $("#popupContent");
             popupContentDiv.html(content);
+            //popupContentDiv.data('jsp').getContentPane().html(content);
+            //popupContentDiv.data('jsp').reinitialise();
         };
 
         // Public getter function that returns a popup data object.
