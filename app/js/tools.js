@@ -56,6 +56,15 @@ define(['underscore', 'developer', 'lib/moment'], function (_, developer, m) {
     };
 
     /**
+     * Strips the time zone from a date (to UTC) but keeps the same date.
+     * @param date
+     * @return {Date}
+     */
+    tools.stripTimeZone = function (date) {
+        return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    };
+
+    /**
      * Generates a compass direction from rotation degrees.
      * Example: NW, or NNW.
      *

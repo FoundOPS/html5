@@ -24,13 +24,24 @@ require.config({
     }
 });
 
-require(["jquery", "lib/kendo.all.min", "developer", "db/services", "tools", "lib/moment"], function ($, k, developer, dbServices, tools, m) {
+require(["jquery", "underscore", "lib/kendo.all.min", "developer", "db/services", "tools", "lib/moment"], function ($, u, k, developer, dbServices, tools, m) {
     var services = {};
 
     //set services to a global function, so the functions are accessible from the HTML element
     window.services = services;
 
     services.initialize = function () {
+        var resizeGrid = function () {
+            var windowHeight = $(window).height();
+            var topHeight = $('#top').outerHeight(true);
+            var contentHeight = windowHeight - topHeight;
+            $('#grid').css("height", contentHeight + 'px');
+
+            var gridPagerHeight = $('.k-grid-pager').outerHeight(true);
+            var gridHeaderHeight = $('.t-grid-header').outerHeight(true);
+            var tableContentHeight = contentHeight - (gridPagerHeight + gridHeaderHeight);
+            $('#grid .k-grid-content').css("height", tableContentHeight + 'px');
+        };
         var setupGrid = function (dataSource, fields) {
             services.dataSource = dataSource;
 
@@ -53,6 +64,9 @@ require(["jquery", "lib/kendo.all.min", "developer", "db/services", "tools", "li
                 } else if (column.type === "date") {
                     column.template = '#= kendo.toString(' + key + ', "dd MMMM yyyy") #';
                 }
+
+                //TODO calculate width based on title
+                column.width = "110px";
 
                 columns.push(column);
             });
@@ -95,6 +109,12 @@ require(["jquery", "lib/kendo.all.min", "developer", "db/services", "tools", "li
 
         //Start loading the initial services
         updateDateRange();
+
+        $(window).resize(function () {
+            resizeGrid();
+        });
+
+        resizeGrid();
     };
 
     services.exportToCSV = function () {

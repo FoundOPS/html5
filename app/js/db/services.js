@@ -231,8 +231,8 @@ define(['lib/kendo.mobile.min', 'developer', 'tools'], function (k, developer, t
             contentType: 'application/json',
             data: JSON.stringify(trackPoints)
         }).success(function (response) {
-                callback(response);
-            });
+            callback(response);
+        });
     };
 
     /**

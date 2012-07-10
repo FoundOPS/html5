@@ -4,20 +4,24 @@
     <meta charset="utf-8">
     <title>Services</title>
     <script data-main="js/containers/services" src="lib/require-jquery.js"></script>
-    <link href="lib/kendo.common.min.css" rel="stylesheet" />
-    <link href="lib/kendo.default.min.css" rel="stylesheet" />
-    <link href="lib/kendo.metro.min.css" rel="stylesheet" />
+    <link href="lib/kendo.common.min.css" rel="stylesheet"/>
+    <link href="lib/kendo.default.min.css" rel="stylesheet"/>
+    <link href="lib/kendo.metro.min.css" rel="stylesheet"/>
+    <link href="styles/services.css" rel="stylesheet"/>
 </head>
 <body>
-<div data-init="services.initialize" data-role="view" data-title="Services" id="services">
-    <h1>Services</h1>
-
-    <input id="startDatePicker" style="width:150px;"/>
-    <input id="endDatePicker" style="width:150px;"/>
-
-    <button type="export" onclick="services.exportToCSV()">Export</button>
-
-    <div id="grid"></div>
+<div data-init="services.initialize" data-role="view" data-title="Services" data-stretch="true" id="services">
+    <div id="left">
+        <div id="top">
+            <input id="startDatePicker" style="width:150px;"/>
+            <input id="endDatePicker" style="width:150px;"/>
+            <button type="export" onclick="services.exportToCSV()">Export</button>
+        </div>
+        <div id="grid"></div>
+    </div>
+    <div id="details">
+        LOAD THE SERVICE DETAILS VIEW HERE?
+    </div>
 </div>
 </body>
 </html>
