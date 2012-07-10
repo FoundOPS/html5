@@ -4,7 +4,13 @@
     dir: "../builds",
     paths: {
         lib: '../lib',
-        jquery: 'empty:'
+        jquery: 'empty:',
+        underscore: "../lib/underscore"
+    },
+    shim: {
+        underscore: {
+            exports: '_'
+        }
     },
     optimize: "uglify",
     optimizeCss: "standard",

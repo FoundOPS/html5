@@ -1,19 +1,20 @@
 require.config({
     baseUrl: 'js',
     paths: {
-        lib: "../lib"
+        lib: "../lib",
+        underscore: "../lib/underscore"
+    },
+    shim: {
+        underscore: {
+            exports: '_'
+        }
     }
 });
 
-require(["containers/navigator", "lib/kendo.all.min", "view/silverlight"], function (Navigator) {
+require(["containers/navigator", "silverlight", "underscore", "lib/kendo.all.min"], function (Navigator, silverlight) {
     //setup the navigator
-    var n = new Navigator(window.initializeConfig);
+    var n = new Navigator(window.navigatorConfig);
     n.hideSearch();
-
-    //for debugging navigator
-    // var application = new kendo.mobile.Application($("#content"), { initial: "view/testContent.html"});
-
-    //for release
 
     //setup page tracking
     try {
@@ -27,8 +28,7 @@ require(["containers/navigator", "lib/kendo.all.min", "view/silverlight"], funct
     catch (err) {
     }
 
-    //initially load silverlight (so it starts loading)
-    var application = new kendo.mobile.Application($("#content"), { initial: "home/silverlight"});
-
-//    application.navigate("view/updates.html");
+    var application = new kendo.mobile.Application($("#remoteContent"), { initial: "view/updates.html"});
+    silverlight.show();
+//    _.delay(silverlight.show, 3000);
 });

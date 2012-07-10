@@ -8,7 +8,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>FoundOPS Navigator</title>
+    <title>FoundOPS</title>
 
     <!-- From H5BP:M -->
     <meta name="description" content="">
@@ -50,9 +50,9 @@
 
     <script type="text/javascript">
         //If release
-        //window.initializeConfig = @Model;
+        //window.navigatorConfig = @Html.Raw(Model.NavigatorConfig)
         //If debugging
-        window.initializeConfig = {
+        window.navigatorConfig = {
             name: "Jordan Kelly",
             avatarUrl: "./img/david.png",
             businessLogoUrl: "./img/got-grease-logo.png",
@@ -74,7 +74,57 @@
 
 <body ontouchstart="">
 <div id="contentWrapper">
-    <div id="content"></div>
+    <div id="content">
+        <div id="remoteContent">
+        </div>
+        <div id="silverlightControlHost" style="visibility: hidden">
+            <object data="data:application/x-silverlight-2," type="application/x-silverlight-2" width="100%" height="100%">
+                <param name="onSourceDownloadProgressChanged" value="onSourceDownloadProgressChanged" />
+                <!--if debugging outside of VS-->
+                <param name="splashscreensource" value="http://localhost:31820/ClientBin/SplashScreen.xaml" />
+                <param name="source" value="http://localhost:31820/ClientBin/FoundOps.SLClient.Navigator.xap"/>
+
+                <!--if in VS-->
+                <!--@{-->
+                <!--var xapSource = "";-->
+                <!--var splashSource = "";-->
+                <!--switch (FoundOps.Server.Global.Mode)-->
+                <!--{-->
+                <!--case "DEBUG":-->
+                <!--xapSource = Url.Content("/ClientBin/FoundOps.SLClient.Navigator.xap");-->
+                <!--splashSource = Url.Content("/ClientBin/SplashScreen.xaml");-->
+                <!--break;-->
+                <!--case "TESTRELEASE":-->
+                <!--xapSource = Url.Content("http://opsapptest.blob.core.windows.net/xaps/FoundOps.SLClient.Navigator.xap");-->
+                <!--splashSource = Url.Content("http://opsapptest.blob.core.windows.net/xaps/SplashScreen.xaml");-->
+                <!--break;-->
+                <!--case "RELEASE":-->
+                <!--xapSource = Url.Content("http://opsapplive.blob.core.windows.net/xaps/FoundOps.SLClient.Navigator.xap");-->
+                <!--splashSource = Url.Content("http://opsapplive.blob.core.windows.net/xaps/SplashScreen.xaml");-->
+                <!--break;-->
+                <!--}-->
+
+                <!--//Setup version-->
+                <!--var sourceParam = xapSource + "?ignore=" + Model.SilverlightVersion;-->
+                <!--}-->
+                <!--<param name="splashscreensource" value="@splashSource" />-->
+                <!--<param name="source" value="@sourceParam"/>-->
+
+                <param name="onError" value="onSilverlightError" />
+                <param name="background" value="#ff333335" />
+                <param name="windowless" value="true" />
+                <param name="minRuntimeVersion" value="5.0.61118.0" />
+                <param name="enableHtmlAccess" value="true" />
+                <param name="autoUpgrade" value="true" />
+                <a href="http://go.microsoft.com/fwlink/?LinkID=149156&v=5.0.61118.0" style="text-decoration: none">
+                    <img src="http://go.microsoft.com/fwlink/?LinkId=161376" alt="Get Microsoft Silverlight"
+                         style="border-style: none" />
+                </a>
+            </object>
+            <iframe id="_sl_historyFrame" style="visibility: hidden; height: 0px; width: 0px;
+            border: 0px"></iframe>
+        </div>
+    </div>
 </div>
 
 <script type="text/javascript">

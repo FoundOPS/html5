@@ -1,4 +1,16 @@
 define(function () {
+    var silverlight = {};
+
+    silverlight.hide =function() {
+        document.getElementById("silverlightControlHost").style.visibility = "hidden";
+        document.getElementById("remoteContent").style.visibility = "visible";
+    };
+
+    silverlight.show =function() {
+        document.getElementById("remoteContent").style.visibility = "hidden";
+        document.getElementById("silverlightControlHost").style.visibility = "visible";
+    };
+
     //Access function for silverlight to get around a security exception for Http Gets that do not have a crossdomainpolicy
     window.httpGet = function (url) {
         var img = new Image();
@@ -51,4 +63,6 @@ define(function () {
         var myBar = sender.findName("ProgressBarTransform");
         myBar.ScaleX = eventArgs.progress;
     };
+
+    return silverlight;
 });
