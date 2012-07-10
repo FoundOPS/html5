@@ -51,6 +51,7 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
             if (popupDiv.length === 0) {
                 //console.log("Popup not initialized");
                 popupDiv = this.createPopup();
+                //initPopupScrollBar();
             }
             if (popupDiv.length === 0) {
                 /*console.log("ERROR: FAILED TO CREATE POPUP!!!");*/
@@ -133,20 +134,32 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
             return offset;
         };
 
+        /** Initializes scrollbar for sidebar navigation **/
+        var initPopupScrollBar = function () {
+            var popupContentDiv = $("#popupContent");
+            popupContentDiv.jScrollPane({
+                horizontalGutter: 0,
+                verticalGutter: 0,
+                'showArrows': false
+            });
+            popupContentDiv.data('jsp').reinitialise();
+        };
+
+
         // createPopup: Appends popup to the nav
         this.createPopup = function () {
             //Creates popup div that will be populated in the future.
             var popupDiv = $(document.createElement("div"));
-            popupDiv.attr("id", "popup");
+            popupDiv.attr("id", "popupWrapper");
 
-            var s = "<div id='popupArrow'></div>" +
+            var s = "<div id='popup'><div id='popupArrow'></div>" +
                 "<div id='popupHeader'>" +
                 "<a id='popupBack' href='#'></a>" +
                 "<span id='popupTitle'></span>" +
                 "<a id='popupClose' href='#'></a>" +
                 "</div>" +
                 "<div id='popupContent'></div>" +
-                "</div>";
+                "</div></div>";
             popupDiv.html(s);
             popupDiv.css("display", "none");
 
@@ -237,9 +250,11 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
             //popupContentDiv.html('');
             for (i = 0; i < contArray.length; i++) {
                 var lastElement = "";
+                menuId = "";
                 if (i === contArray.length - 1) {
                     lastElement = "last";
                 }
+                //TODO: Fix undefined check.
                 if (contArray[i].id != undefined) {
                     menuId = "id = '" + contArray[i].id + "'";
                 }
@@ -262,6 +277,8 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
             content = cont;
             var popupContentDiv = $("#popupContent");
             popupContentDiv.html(content);
+            //popupContentDiv.data('jsp').getContentPane().html(content);
+            //popupContentDiv.data('jsp').reinitialise();
         };
 
         // Public getter function that returns a popup data object.
@@ -305,7 +322,7 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
      */
     function Navigator(config) {
         initTopNav(config);
-        initSideBar(config.sections);
+        initSideBar(config);
         new Popup(config);
     }
 
@@ -316,7 +333,7 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
 
         var navTemplateHtml = $("#navTemplate").html();
         var navTemplate = kendo.template(navTemplateHtml);
-        var params = [config.avatarUrl, config.businessLogoUrl];
+        var params = [config.avatarUrl, config.roles[0].businessLogoUrl];
         topNav.html(navTemplate(params));
 
         $('body').prepend(topNav);
@@ -371,37 +388,18 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
         );
     };
 
-    /** Initializes sidebar navigation **/
-    var initSideBar = function (sections) {
-        //TODO: Error checking?
-        /**
-         * Converts an image url to its colored version, for the hover url
-         * Ex. dispatcher.png -> dispatcherColor.png
-         */
-        function toHoverImage(imgLoc) {
-            var extIndex = imgLoc.lastIndexOf('.');
-            return imgLoc.substring(0, extIndex) + "Color" + imgLoc.substring(extIndex);
-        }
+    function toHoverImage(imgLoc) {
+        var extIndex = imgLoc.lastIndexOf('.');
+        return imgLoc.substring(0, extIndex) + "Color" + imgLoc.substring(extIndex);
+    }
 
-        //setup the sidebar wrapper (for the scrollbar)
-        var sBarWrapper = $(document.createElement('div'));
-        sBarWrapper.attr('id', 'sideBarWrapper');
-
-        //setup the sidebar (the place for buttons)
-        var sBar = $(document.createElement('div'));
-        sBar.attr('id', 'sideBar');
-
-        //extract the template from the html
-        var expandTemplateHtml = $("#expandTemplate").html();
-        var expandTemplate = kendo.template(expandTemplateHtml);
-        sBar.html(expandTemplate);
-
+    var setSideBarSections = function(config, availableSections){
         var section;
+        var sBar = $("#sideBar");
         var sBarElement = "";
-
         //initialize the sections on the sidebar
-        for (section in sections) {
-            var currentSection = sections[section];
+        for (section in availableSections) {
+            var currentSection = config.sections[section];
             var href = currentSection.url;
             var name = currentSection.name;
             var color = currentSection.color;
@@ -424,11 +422,35 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
             };
             sBarElement += sideBarElementTemplate(templateData);
         }
-        sBar.append(sBarElement);
+        $("#expandMenuButton").after(sBarElement);
+    };
 
+    /** Initializes sidebar navigation **/
+    var initSideBar = function (config) {
+        //TODO: Error checking?
+        /**
+         * Converts an image url to its colored version, for the hover url
+         * Ex. dispatcher.png -> dispatcherColor.png
+         */
+        var sections = config.sections;
+
+        //setup the sidebar wrapper (for the scrollbar)
+        var sBarWrapper = $(document.createElement('div'));
+        sBarWrapper.attr('id', 'sideBarWrapper');
+
+        //setup the sidebar (the place for buttons)
+        var sBar = $(document.createElement('div'));
+        sBar.attr('id', 'sideBar');
+
+        //extract the template from the html
+        var expandTemplateHtml = $("#expandTemplate").html();
+        var expandTemplate = kendo.template(expandTemplateHtml);
+        sBar.html(expandTemplate);
         //TODO: Possibly simplify sideBar creation.
         sBarWrapper.append(sBar);
         $('#nav').after(sBarWrapper);
+
+        setSideBarSections(config, config.roles[0].sections);
 
         //Add showMenuSpan to topNav.
         var showMenuTemplateHtml = $("#showMenuTemplate").html();
@@ -504,14 +526,14 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
         });
 
         var slideMenuOpen = function () {
-            $("#sideBar, #sideBarWrapper, .jspContainer")
+            $("#sideBar, #sideBarWrapper, #sideBarWrapper .jspContainer")
                 .stop(true, false)
                 .animate({width: '159px'}, 'fast');
             $(".iconExpand").addClass("flip");
         };
 
         var slideMenuClosed = function () {
-            $("#sideBar, #sideBarWrapper, .jspContainer")
+            $("#sideBar, #sideBarWrapper, #sideBarWrapper .jspContainer")
                 .stop(true, false)
                 .animate({width: '55px'}, 'fast');
             $(".iconExpand").removeClass("flip");
