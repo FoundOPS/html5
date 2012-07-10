@@ -23,8 +23,8 @@ require.config({
     }
 });
 
-require(["jquery", "lib/kendo.all.min", "ui/personalSettings", "ui/businessSettings", "ui/usersSettings", 'lib/jquery-ui-1.8.21.core.min',
-    'lib/cordova', 'lib/jquery.FileReader', 'lib/swfobject'], function ($, m, p, b, u, jqu, c, f, s) {
+require(["jquery", "lib/kendo.all.min", "ui/personalSettings", "ui/businessSettings", "ui/usersSettings", "lib/jquery-ui-1.8.21.core.min",
+    "lib/cordova", "lib/jquery.FileReader", "lib/swfobject", "session"], function ($, m, p, b, u, jqu, c, f, s, session) {
     var app;
     var settings = {};
 
@@ -32,6 +32,13 @@ require(["jquery", "lib/kendo.all.min", "ui/personalSettings", "ui/businessSetti
     var li1 = $('#settingsList li:nth-child(1)');
     var li2 = $('#settingsList li:nth-child(2)');
     var li3 = $('#settingsList li:nth-child(3)');
+
+    //Show all settings if user is admin
+    if(session.RoleType === "Administrator"){
+        li2.css("display", "block");
+        li3.css("display", "block");
+    }
+
     settings.personal = function () {
         app.navigate("views/personalSettings.html");
         li2.removeClass('active');

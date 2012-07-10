@@ -66,9 +66,12 @@ button{
     cursor: pointer;
 }
 .wrap{
-    border: 2px solid #000;
+    border: 1px solid #000;
     margin: 0 10px 10px 200px;
     padding: 10px;
+}
+#settingsList li:nth-child(2), #settingsList li:nth-child(3){
+    display: none;
 }
 /**************** Personal ****************/
 #personal .wrap, #business .wrap{
@@ -110,4 +113,11 @@ button{
 /**************** Business ****************/
 #business table{
     margin: 0 0 0 67px;
+}
+/**************** Users ****************/
+#addUser{
+    margin-bottom: 10px;
+}
+.k-grid-save-changes, .k-grid-cancel-changes, .k-grid-delete, .k-grid-edit{
+    display: none;
 }
