@@ -28,8 +28,9 @@ require(["containers/navigator", "silverlight", "underscore", "lib/kendo.all.min
     var n = new Navigator(window.navigatorConfig);
     n.hideSearch();
 
-    $(document).on('click', ".sideBarElement", function(){
-        console.log("sideBarElement event fired!: "+$(this));
+    //whenever a section is chosen, choose it in the silverlight app
+    $(document).on("sectionSelected", function(e, section){
+        silverlight.plugin.navigationVM.NavigateToView(section.name);
     });
 
     var application = new kendo.mobile.Application($("#remoteContent"), { initial: "view/updates.html"});

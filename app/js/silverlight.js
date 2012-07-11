@@ -1,12 +1,12 @@
 define(function () {
     var silverlight = {};
 
-    silverlight.hide =function() {
+    silverlight.hide = function () {
         document.getElementById("silverlightControlHost").style.visibility = "hidden";
         document.getElementById("remoteContent").style.visibility = "visible";
     };
 
-    silverlight.show =function() {
+    silverlight.show = function () {
         document.getElementById("remoteContent").style.visibility = "hidden";
         document.getElementById("silverlightControlHost").style.visibility = "visible";
     };
@@ -17,11 +17,14 @@ define(function () {
         img.src = url;
     };
 
+    window.onSilverlightPluginLoaded = function (sender, args) {
+        silverlight.plugin = document.getElementById('silverlightPlugin').Content;
+    };
+
     //TODO MOVE TO NATIVE
     window.openUserVoice = function () {
         UserVoice.showPopupWidget();
     };
-
     window.onSilverlightError = function (sender, args) {
         var appSource = "";
         if (sender != null && sender != 0) {
@@ -56,7 +59,6 @@ define(function () {
 
         throw new Error(errMsg);
     };
-
     window.onSourceDownloadProgressChanged = function (sender, eventArgs) {
         var myText = sender.findName("progressText");
         myText.Text = (Math.round(eventArgs.progress * 100)).toString();

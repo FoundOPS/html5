@@ -55,13 +55,14 @@
             logoutUrl: "#logout",
             roles:[
                     //TODO: Fix crash with no roles.
-                {name:"FoundOPS", id:"23144-24242-242442", businessLogoUrl:"./img/got-grease-logo.png", sections:["Employees", "Routes", "Regions", "Vehicles"]},
-                {name:"GotGrease", id:"95838-24242-242442", businessLogoUrl:"./img/got-grease-logo.png", sections:["Employees", "Routes", "Regions"]},
-                {name:"AB Couriers", id:"64729-24242-242442", businessLogoUrl:"./img/got-grease-logo.png", sections:["Employees"]}
+                {name:"AB Couriers", id:"64729-24242-242442", businessLogoUrl:"./img/got-grease-logo.png", sections:["Dispatcher", "Employees", "Regions", "Vehicles"]},
+                {name:"FoundOPS", id:"23144-24242-242442", businessLogoUrl:"./img/got-grease-logo.png", sections:["Business Accounts"]},
+                {name:"GotGrease", id:"95838-24242-242442", businessLogoUrl:"./img/got-grease-logo.png", sections:["Dispatcher", "Employees", "Regions", "Vehicles"]}
             ],
             sections:[
+                {name:"Business Accounts", url:"#Business Accounts", color:"red", iconUrl:"img/employees.png", iconHoverUrl: "img/employeesColor.png"},
+                {name:"Dispatcher", url:"#Dispatcher", color:"red", iconUrl:"img/dispatcher.png", iconHoverUrl: "img/dispatcherColor.png"},
                 {name:"Employees", url:"#Employees", color:"red", iconUrl:"img/employees.png", iconHoverUrl: "img/employeesColor.png"},
-                {name:"Routes", url:"#Routes", color:"green", iconUrl:"./img/routes.png", iconHoverUrl: "img/routesColor.png"},
                 {name:"Regions", url:"#Regions", color:"orange", iconUrl:"./img/regions.png", iconHoverUrl: "img/regionsColor.png"},
                 {name:"Vehicles", url:"#Vehicles", color:"red", iconUrl:"./img/vehicles.png", iconHoverUrl: "img/vehiclesColor.png"}/*,
                  {name:"Logout", url:"#logout", color:"black", iconUrl:"./img/logout.png"}*/
@@ -76,7 +77,7 @@
         <div id="remoteContent">
         </div>
         <div id="silverlightControlHost" style="visibility: hidden; z-index: 0;">
-            <object data="data:application/x-silverlight-2," type="application/x-silverlight-2" width="100%" height="100%">
+            <object id="silverlightPlugin" data="data:application/x-silverlight-2," type="application/x-silverlight-2" width="100%" height="100%">
                 <param name="onSourceDownloadProgressChanged" value="onSourceDownloadProgressChanged" />
                 <!--if debugging outside of VS-->
                 <param name="splashscreensource" value="http://localhost:31820/ClientBin/SplashScreen.xaml" />
@@ -108,6 +109,7 @@
                 <!--<param name="splashscreensource" value="@splashSource" />-->
                 <!--<param name="source" value="@sourceParam"/>-->
 
+                <param name="onLoad" value="onSilverlightPluginLoaded"/>
                 <param name="onError" value="onSilverlightError" />
                 <param name="background" value="#ff333335" />
                 <param name="windowless" value="true" />

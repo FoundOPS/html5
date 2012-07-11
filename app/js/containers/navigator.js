@@ -718,7 +718,7 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
         $(document).on('click', ".sideBarElement", function(){
             var name = $(this).find(".sectionName:first").html();
             var section = getSection(config.sections, name);
-            $(this).trigger("sectionSelected", section.name);
+            $(this).trigger("sectionSelected", section);
         });
     };
 
