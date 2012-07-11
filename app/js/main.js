@@ -31,7 +31,13 @@ require(["containers/navigator", "silverlight", "underscore", "lib/kendo.all.min
     //whenever a section is chosen, choose it in the silverlight app
     $(document).on("sectionSelected", function (e, section) {
         try {
-            silverlight.plugin.navigationVM.NavigateToView(section.name);
+            if (section.isSilverlight) {
+                silverlight.show();
+                silverlight.plugin.navigationVM.NavigateToView(section.name);
+            }
+            else{
+                silverlight.hide();
+            }
         }
         catch (err) {
         }
