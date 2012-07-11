@@ -168,7 +168,7 @@ define(['lib/kendo.mobile.min', 'developer', 'tools'], function (k, developer, t
 
     /**
      * Updates personal user settings.
-     * @param {!function(Array.<Object>)} callback A callback to pass the loaded settings.
+     * @param {!function(Array.<Object>)} settings The loaded settings.
      */
     services.updatePersonalSettings = function (settings) {
         $.ajax({
@@ -188,7 +188,7 @@ define(['lib/kendo.mobile.min', 'developer', 'tools'], function (k, developer, t
 
     /**
      * Updates businesssettings.
-     * @param {(Array.<Object>)} the updated settings.
+     * @param {(Array.<Object>)} settings The updated settings.
      */
     services.updateBusinessSettings = function (settings) {
         $.ajax({
