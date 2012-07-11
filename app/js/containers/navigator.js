@@ -503,7 +503,8 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
         var sBarElement = "";
         //initialize the sections on the sidebar
         for (section in availableSections) {
-            var currentSection = config.sections[section];
+            console.log(section);
+            var currentSection = getSection(config.sections, availableSections[section]);//config.sections[section];
             var href = currentSection.url;
             var name = currentSection.name;
             var color = currentSection.color;
