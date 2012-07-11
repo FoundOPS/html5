@@ -156,9 +156,9 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
                 "<div id='currentPopupAction' style='display: none;'></div>" +
                 "<div id='popupArrow'></div>" +
                 "<div id='popupHeader'>" +
-                    "<a id='popupBack' href='#'></a>" +
+                    "<a id='popupBack'></a>" +
                     "<span id='popupTitle'></span>" +
-                    "<a id='popupClose' href='#'></a>" +
+                    "<a id='popupClose'></a>" +
                     "</div>" +
                     "<div id='popupContent'></div>" +
                 "</div></div>";
@@ -262,22 +262,22 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
                 var lastElement = "";
                 var popupEvent = "";
                 var menuId = "";
-                var menuUrl = "#";
+                var menuUrl = "";
                 if (i === contArray.length - 1) {
                     lastElement = " last";
                 }
-                //TODO: Fix undefined check.
+
                 if (typeof(contArray[i].id) !== 'undefined') {
-                    menuId = "id='" + contArray[i].id + "'";
+                    menuId = " id='" + contArray[i].id + "'";
                 }
 
                 if (typeof(contArray[i].url) !== 'undefined') {
-                    menuUrl = contArray[i].url;
+                    menuUrl = " href='"+contArray[i].url+"'";
                 }else{
                     popupEvent = " popupEvent";
                 }
 
-                c += "<a href='"+menuUrl+"'" + menuId + " class='popupContentRow" + popupEvent + lastElement + "'>" +
+                c += "<a" + menuUrl + menuId + " class='popupContentRow" + popupEvent + lastElement + "'>" +
                     contArray[i].name +
                     "</a>";
             }
