@@ -222,7 +222,7 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
 
                     if($(this).hasClass("popupEvent")){
                         $(this).trigger("popupEvent", $(this));
-                        console.log(thisPopup.getAction());
+                        //console.log(thisPopup.getAction());
                         if(thisPopup.getAction()==="changeBusiness"){
                             thisPopup.changeBusiness($(this));
                         }
@@ -360,7 +360,7 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
                 return;
             }
             this.changeBusinessLogo(business);
-            setSideBarSections(data, business.sections)
+            setSideBarSections(data, business.sections);
         };
 
         this.changeBusinessLogo = function(business){
@@ -420,6 +420,11 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
             if(($(data).attr("id") === "navClient") && config.roles.length<=1){
                 $("#changeBusiness").css("display", "none");
             }
+            var name = $(data).html();
+            var role = getRole(config.roles, name);
+            if(role!==null){
+                $(this).trigger("roleSelected", role);
+            }
         });
 
         Navigator.prototype.hideSearch = function () {
@@ -473,9 +478,20 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
     var getSection = function(sections, name){
         var section;
         for(section in sections){
-            //console.log(sections[section]);
+            //console.log("Sections: " + sections[section]);
             if(sections[section].name === name){
                 return sections[section];
+            }
+        }
+        return null;
+    };
+
+    var getRole = function(roles, name){
+        var role;
+        for(role in roles){
+            //console.log("Roles: " + roles[role].name);
+            if(roles[role].name === name){
+                return roles[role];
             }
         }
         return null;
@@ -518,7 +534,7 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
     /** Initializes sidebar navigation **/
     var initSideBar = function (config) {
         //TODO: Error checking?
-
+        var slideMenuTimeout = null;
         var sections = config.sections;
 
         //setup the sidebar wrapper (for the scrollbar)
@@ -618,6 +634,7 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
         };
 
         var slideMenuClosed = function () {
+            clearTimeout(slideMenuTimeout);
             $("#sideBar, #sideBarWrapper, #sideBarWrapper .jspContainer")
                 .stop(true, false)
                 .animate({width: '55px'}, 'fast');
@@ -651,6 +668,7 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
                     sideBarDiv.removeClass("expand");
                 } else {
                     sideBarDiv.addClass("expand");
+                    clearTimeout(slideMenuTimeout);
                     slideMenuOpen();
                 }
             }
@@ -660,9 +678,11 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
         $("#sideBarWrapper").hover(
             //Hover In
             function () {
-                sideBarDiv.addClass("hover");
                 if ($(document).width() > 800 && !sideBarDiv.hasClass("expand")) {
-                    slideMenuOpen();
+                    slideMenuTimeout = setTimeout(function(){
+                        sideBarDiv.addClass("hover");
+                        slideMenuOpen();
+                    }, 2000);
                 }
             },
             //Hover Out
