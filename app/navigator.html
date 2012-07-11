@@ -17,7 +17,7 @@
     <meta name="MobileOptimized" content="320">
     <!-- Enabling user-scalable=no or calling $("#nav").toggleClass("androidFixedPositionFix"); fixes fixed position bug in android 2.3 -->
     <meta name="viewport"
-          content="width=100%; initial-scale=1; minimum-scale=1.0; maximum-scale=1.0; user-scalable=no"/>
+          content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
     <!-- Home screen icon  Mathias Bynens mathiasbynens.be/notes/touch-icons -->
     <!-- For iPhone 4 with high-resolution Retina display: -->
     <link rel="apple-touch-icon-precomposed" sizes="114x114" href="img/h/apple-touch-icon.png">
@@ -54,6 +54,7 @@
             settingsUrl: "#settings",
             logoutUrl: "#logout",
             roles:[
+                    //TODO: Fix crash with no roles.
                 {name:"FoundOPS", id:"23144-24242-242442", businessLogoUrl:"./img/got-grease-logo.png", sections:["Employees", "Routes", "Regions", "Vehicles"]},
                 {name:"GotGrease", id:"95838-24242-242442", businessLogoUrl:"./img/got-grease-logo.png", sections:["Employees", "Routes", "Regions"]},
                 {name:"AB Couriers", id:"64729-24242-242442", businessLogoUrl:"./img/got-grease-logo.png", sections:["Employees"]}
@@ -74,7 +75,7 @@
     <div id="content">
         <div id="remoteContent">
         </div>
-        <div id="silverlightControlHost" style="visibility: hidden">
+        <div id="silverlightControlHost" style="visibility: hidden; z-index: 0;">
             <object data="data:application/x-silverlight-2," type="application/x-silverlight-2" width="100%" height="100%">
                 <param name="onSourceDownloadProgressChanged" value="onSourceDownloadProgressChanged" />
                 <!--if debugging outside of VS-->
@@ -118,7 +119,7 @@
                          style="border-style: none" />
                 </a>
             </object>
-            <iframe id="_sl_historyFrame" style="visibility: hidden; height: 0px; width: 0px;
+            <iframe id="_sl_historyFrame" style="visibility: hidden; height: 0px; width: 0px; z-index: -1;
             border: 0px"></iframe>
         </div>
     </div>

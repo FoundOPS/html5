@@ -86,6 +86,10 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
             popupDiv.css("left", left);
             popupDiv.css("top", $("nav").height());
             this.populate(id);
+
+            //console.log(el);
+            $(el).trigger("popupEvent", $(el));
+
             popupDiv.stop(false, true).fadeIn('fast');
             lastNavClick = navElem.attr("id");
         };
@@ -214,16 +218,20 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
                 })
                 .on('click', '.popupContentRow',
                 function () {
-                    if($(this).hasClass("popupEvent")){
-                        //$(this).trigger("popupEvent!");
+                    var newId = $(this).attr('id');
 
+                    if($(this).hasClass("popupEvent")){
+                        $(this).trigger("popupEvent", $(this));
+                        console.log(thisPopup.getAction());
                         if(thisPopup.getAction()==="changeBusiness"){
                             thisPopup.changeBusiness($(this));
                         }
                     }
 
-                    var newId = $(this).attr('id');
-                    thisPopup.populate(newId);
+                    var keepOpen = thisPopup.populate(newId);
+
+                    if(!keepOpen)
+                        thisPopup.hide();
                 });
 
             //Sets global popup object, object, with the created div.
@@ -244,11 +252,12 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
         this.populate = function (id) {
             var newMenu = this.getMenu(id);
             if (newMenu === null) {
-                //console.log("ID not found.");
-                return;
+                console.log("ID not found.");
+                return false;
             }
             history.push(newMenu);
             this.setData(newMenu);
+            return true;
         };
 
         //Links are given the popupEvent class if no url passed. If link has popupEvent,
@@ -406,6 +415,13 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
             window.location.href = url;
         });
 
+        $(document).on("popupEvent", function(e, data){
+            //console.log(data);
+            if(($(data).attr("id") === "navClient") && config.roles.length<=1){
+                $("#changeBusiness").css("display", "none");
+            }
+        });
+
         Navigator.prototype.hideSearch = function () {
             $("#navSearch").hide();
         };
@@ -454,16 +470,16 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
 //        return imgLoc.substring(0, extIndex) + "Color" + imgLoc.substring(extIndex);
 //    }
 
-//    var getSection = function(sections, name){
-//        var section;
-//        for(section in sections){
-//            //console.log(sections[section]);
-//            if(sections[section].name === name){
-//                return sections[section];
-//            }
-//        }
-//        return null;
-//    };
+    var getSection = function(sections, name){
+        var section;
+        for(section in sections){
+            //console.log(sections[section]);
+            if(sections[section].name === name){
+                return sections[section];
+            }
+        }
+        return null;
+    };
 
     var setSideBarSections = function(config, availableSections){
         var section;
@@ -698,11 +714,13 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
                 toggleMenu();
             }
         );
-    };
 
-    $(document).on('click', ".sideBarElement", function(){
-        console.log("sideBarElement event fired!: "+$(this));
-    });
+        $(document).on('click', ".sideBarElement", function(){
+            var name = $(this).find(".sectionName:first").html();
+            var section = getSection(config.sections, name);
+            $(this).trigger("sectionSelected", section.name);
+        });
+    };
 
     return Navigator;
 });
