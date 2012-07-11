@@ -25,8 +25,8 @@ require(["containers/navigator", "silverlight", "underscore", "lib/kendo.all.min
     }
 
     //setup the navigator
-    var n = new Navigator(window.navigatorConfig);
-    n.hideSearch();
+    var navigator = new Navigator(window.navigatorConfig);
+    navigator.hideSearch();
 
     //whenever a section is chosen, choose it in the silverlight app
     $(document).on("sectionSelected", function (e, section) {
@@ -35,7 +35,7 @@ require(["containers/navigator", "silverlight", "underscore", "lib/kendo.all.min
                 silverlight.show();
                 silverlight.plugin.navigationVM.NavigateToView(section.name);
             }
-            else{
+            else {
                 silverlight.hide();
             }
         }
@@ -50,6 +50,13 @@ require(["containers/navigator", "silverlight", "underscore", "lib/kendo.all.min
         }
         catch (err) {
         }
+    });
+
+    //hook into the silverlight click events, and hide the popup
+    $(silverlight).bind('loaded', function () {
+        silverlight.plugin.mainPage.addEventListener("Clicked", function () {
+            navigator.closePopup();
+        });
     });
 
     var application = new kendo.mobile.Application($("#remoteContent"), { initial: "view/updates.html"});

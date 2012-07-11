@@ -65,13 +65,13 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
             if (popupDiv.is(":visible") && lastNavClick !== null) {
                 if (navElem.is("#" + lastNavClick)) {
                     //console.log("Clicked on same nav button!");
-                    this.hidePopup();
+                    this.closePopup();
                     lastNavClick = navElem.attr("id");
                     return;
                 }
                 //console.log("Clicked on different nav button!");
                 var thisPopup = this;
-                this.hidePopup();
+                this.closePopup();
                 //TODO: Make sure this doesn't cause animation problems.
                 /*popupDiv.promise("fx").done(function () {
                  left = thisPopup.getLeft(icon, popupDiv);
@@ -174,13 +174,13 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
 
             //Click listener for popup close button.
             $("#popupClose").click(function () {
-                thisPopup.hidePopup();
+                thisPopup.closePopup();
             });
 
             $("#popupBack").click(function () {
                 history.pop();
                 if (history.length <= 0) {
-                    thisPopup.hidePopup();
+                    thisPopup.closePopup();
                     return;
                 }
                 thisPopup.setData(history[history.length - 1]);
@@ -203,7 +203,7 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
                 var popupLen = clicked.parents("#popup").length + clicked.is("#popup") ? 1 : 0;
                 var navLen = clicked.parents(".navElement").length + clicked.is(".navElement") ? 1 : 0;
                 if (popupLen === 0 && navLen === 0) {
-                    thisPopup.hidePopup();
+                    thisPopup.closePopup();
                 }
             });
 
@@ -231,7 +231,7 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
                     var keepOpen = thisPopup.populate(newId);
 
                     if(!keepOpen)
-                        thisPopup.hidePopup();
+                        thisPopup.closePopup();
                 });
 
             //Sets global popup object, object, with the created div.
@@ -243,7 +243,8 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
             return popupDiv;
         };
 
-        this.hidePopup = function () {
+        //Closes the popup
+        this.closePopup = function () {
             history = [];
             $("#popup").stop(false, true).fadeOut('fast');
         };
@@ -390,6 +391,7 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
         initTopNav(config);
         initSideBar(config);
         this.popup = new Popup(config);
+        this.closePopup = this.popup.closePopup;
     }
 
     /** Initializes top navigation **/

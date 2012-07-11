@@ -19,6 +19,7 @@ define(function () {
 
     window.onSilverlightPluginLoaded = function (sender, args) {
         silverlight.plugin = document.getElementById('silverlightPlugin').Content;
+        $(silverlight).trigger('loaded');
     };
 
     //TODO MOVE TO NATIVE
