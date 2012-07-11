@@ -21,9 +21,9 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
                 id: "navClient",
                 title: data.name,
                 contents: [
-                    {"name": "Settings"},
+                    {"name": "Settings", url: data.settingsUrl},
                     {"name": "Change Business", id: "changeBusiness"},
-                    {"name": "Logout"}
+                    {"name": "Logout", url: data.logoutUrl}
                 ]
             }
         ];
@@ -152,13 +152,15 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
             var popupDiv = $(document.createElement("div"));
             popupDiv.attr("id", "popupWrapper");
 
-            var s = "<div id='popup'><div id='popupArrow'></div>" +
+            var s = "<div id='popup'>" +
+                "<div id='currentPopupAction' style='display: none;'></div>" +
+                "<div id='popupArrow'></div>" +
                 "<div id='popupHeader'>" +
-                "<a id='popupBack' href='#'></a>" +
-                "<span id='popupTitle'></span>" +
-                "<a id='popupClose' href='#'></a>" +
-                "</div>" +
-                "<div id='popupContent'></div>" +
+                    "<a id='popupBack' href='#'></a>" +
+                    "<span id='popupTitle'></span>" +
+                    "<a id='popupClose' href='#'></a>" +
+                    "</div>" +
+                    "<div id='popupContent'></div>" +
                 "</div></div>";
             popupDiv.html(s);
             popupDiv.css("display", "none");
@@ -212,7 +214,14 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
                 })
                 .on('click', '.popupContentRow',
                 function () {
-                    //TODO: Fire event or change menu
+                    if($(this).hasClass("popupEvent")){
+                        //$(this).trigger("popupEvent!");
+
+                        if(thisPopup.getAction()==="changeBusiness"){
+                            thisPopup.changeBusiness($(this));
+                        }
+                    }
+
                     var newId = $(this).attr('id');
                     thisPopup.populate(newId);
                 });
@@ -242,28 +251,47 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
             this.setData(newMenu);
         };
 
+        //Links are given the popupEvent class if no url passed. If link has popupEvent,
+        // event is fired based on currentPopupAction.
         this.setData = function (data) {
             var contArray = data.contents;
             var c = "";
-            var menuId = "";
             var i;
             //popupContentDiv.html('');
             for (i = 0; i < contArray.length; i++) {
                 var lastElement = "";
-                menuId = "";
+                var popupEvent = "";
+                var menuId = "";
+                var menuUrl = "#";
                 if (i === contArray.length - 1) {
-                    lastElement = "last";
+                    lastElement = " last";
                 }
                 //TODO: Fix undefined check.
-                if (contArray[i].id != undefined) {
-                    menuId = "id = '" + contArray[i].id + "'";
+                if (typeof(contArray[i].id) !== 'undefined') {
+                    menuId = "id='" + contArray[i].id + "'";
                 }
-                c += "<a href='#'" + menuId + " class='popupContentRow " + lastElement + "'>" +
+
+                if (typeof(contArray[i].url) !== 'undefined') {
+                    menuUrl = contArray[i].url;
+                }else{
+                    popupEvent = " popupEvent";
+                }
+
+                c += "<a href='"+menuUrl+"'" + menuId + " class='popupContentRow" + popupEvent + lastElement + "'>" +
                     contArray[i].name +
                     "</a>";
             }
+            this.setAction(data.id);
             this.setTitle(data.title);
             this.setContent(c);
+        };
+
+        this.getAction = function(){
+            return $("#currentPopupAction").html();
+        };
+
+        this.setAction = function(id){
+            $("#currentPopupAction").html(id);
         };
 
         //Public setter function for private var title and sets title of the html popup element.
@@ -300,6 +328,35 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
             //Null result returned if popup data object is not found.
             //console.log("No data found, returning null.");
             return null;
+        };
+
+        this.getBusiness = function(name){
+            //console.log("name: "+name);
+            var roles = data.roles;
+            var role;
+
+            for(role in roles){
+                //console.log(roles[role]);
+                if(roles[role].name === name)return roles[role];
+            }
+            return null;
+        };
+
+        this.changeBusiness = function(clicked){
+            var businessId = clicked.attr("id");
+            var name = clicked.html();
+            var business = this.getBusiness(name);
+            if(business===null){
+                console.log("Business not found!");
+                return;
+            }
+            this.changeBusinessLogo(business);
+            setSideBarSections(data, business.sections)
+        };
+
+        this.changeBusinessLogo = function(business){
+            $("#clientLogo").attr('src', business.businessLogoUrl);
+            console.log("Logo: "+business.businessLogoUrl);
         };
     }
 
@@ -422,7 +479,7 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
             };
             sBarElement += sideBarElementTemplate(templateData);
         }
-        $("#expandMenuButton").after(sBarElement);
+        $("#sideBarSections").html(sBarElement);
     };
 
     /** Initializes sidebar navigation **/
@@ -446,7 +503,7 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
         var expandTemplateHtml = $("#expandTemplate").html();
         var expandTemplate = kendo.template(expandTemplateHtml);
         sBar.html(expandTemplate);
-        //TODO: Possibly simplify sideBar creation.
+        sBar.append("<div id='sideBarSections'></div>");
         sBarWrapper.append(sBar);
         $('#nav').after(sBarWrapper);
 
@@ -630,6 +687,10 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
             }
         );
     };
+
+    $(document).on('click', ".sideBarElement", function(){
+        console.log("sideBarElement event fired!: "+$(this));
+    });
 
     return Navigator;
 });

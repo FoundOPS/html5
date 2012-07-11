@@ -37,11 +37,7 @@
 
     <!-- Mobile IE allows us to activate ClearType technology for smoothing fonts for easy reading -->
     <meta http-equiv="cleartype" content="on">
-
     <!-- more tags for your 'head' to consider h5bp.com/d/head-Tips -->
-
-    <!-- Main Stylesheet -->
-    <!--link rel="stylesheet" href="css/style.css"-->
 
     <link rel="shortcut icon" href="./favicon_32.ico"/>
     <!--If debug-->
@@ -55,6 +51,8 @@
         window.initializeConfig = {
             name:"Jordan Kelly",
             avatarUrl:"./img/david.png",
+            settingsUrl: "#settings",
+            logoutUrl: "#logout",
             roles:[
                 {name:"FoundOPS", id:"23144-24242-242442", businessLogoUrl:"./img/got-grease-logo.png", sections:["Employees", "Routes", "Regions", "Vehicles"]},
                 {name:"GotGrease", id:"95838-24242-242442", businessLogoUrl:"./img/got-grease-logo.png", sections:["Employees", "Routes", "Regions"]},
@@ -119,11 +117,10 @@ mathiasbynens.be/notes/async-analytics-snippet -->
 </script>
 
 <script id="sideBarElementTemplate" type="text/x-kendo-template">
-    <a href="#= href #">
-        <div class='sideBarElement' color='#= color #'>
-            <span class='icon' style="background: url('#= iconUrl #') #= bgX # #= bgY # no-repeat"></span>
-            <span>#= name #</span>
-        </div>
+    <!--href="#= href #"-->
+    <a class='sideBarElement' color='#= color #'>
+        <span class='icon' style="background: url('#= iconUrl #') #= bgX # #= bgY # no-repeat"></span>
+        <span>#= name #</span>
     </a>
 </script>
 </html>
