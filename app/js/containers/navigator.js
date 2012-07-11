@@ -21,9 +21,9 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
                 id: "navClient",
                 title: data.name,
                 contents: [
-                    {"name": "Settings"},
+                    {"name": "Settings", url: data.settingsUrl},
                     {"name": "Change Business", id: "changeBusiness"},
-                    {"name": "Logout"}
+                    {"name": "Logout", url: data.logoutUrl}
                 ]
             }
         ];
@@ -152,13 +152,15 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
             var popupDiv = $(document.createElement("div"));
             popupDiv.attr("id", "popupWrapper");
 
-            var s = "<div id='popup'><div id='popupArrow'></div>" +
+            var s = "<div id='popup'>" +
+                "<div id='currentPopupAction' style='display: none;'></div>" +
+                "<div id='popupArrow'></div>" +
                 "<div id='popupHeader'>" +
-                "<a id='popupBack' href='#'></a>" +
-                "<span id='popupTitle'></span>" +
-                "<a id='popupClose' href='#'></a>" +
-                "</div>" +
-                "<div id='popupContent'></div>" +
+                    "<a id='popupBack'></a>" +
+                    "<span id='popupTitle'></span>" +
+                    "<a id='popupClose'></a>" +
+                    "</div>" +
+                    "<div id='popupContent'></div>" +
                 "</div></div>";
             popupDiv.html(s);
             popupDiv.css("display", "none");
@@ -212,7 +214,14 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
                 })
                 .on('click', '.popupContentRow',
                 function () {
-                    //TODO: Fire event or change menu
+                    if($(this).hasClass("popupEvent")){
+                        //$(this).trigger("popupEvent!");
+
+                        if(thisPopup.getAction()==="changeBusiness"){
+                            thisPopup.changeBusiness($(this));
+                        }
+                    }
+
                     var newId = $(this).attr('id');
                     thisPopup.populate(newId);
                 });
@@ -242,28 +251,47 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
             this.setData(newMenu);
         };
 
+        //Links are given the popupEvent class if no url passed. If link has popupEvent,
+        // event is fired based on currentPopupAction.
         this.setData = function (data) {
             var contArray = data.contents;
             var c = "";
-            var menuId = "";
             var i;
             //popupContentDiv.html('');
             for (i = 0; i < contArray.length; i++) {
                 var lastElement = "";
-                menuId = "";
+                var popupEvent = "";
+                var menuId = "";
+                var menuUrl = "";
                 if (i === contArray.length - 1) {
-                    lastElement = "last";
+                    lastElement = " last";
                 }
-                //TODO: Fix undefined check.
-                if (contArray[i].id != undefined) {
-                    menuId = "id = '" + contArray[i].id + "'";
+
+                if (typeof(contArray[i].id) !== 'undefined') {
+                    menuId = " id='" + contArray[i].id + "'";
                 }
-                c += "<a href='#'" + menuId + " class='popupContentRow " + lastElement + "'>" +
+
+                if (typeof(contArray[i].url) !== 'undefined') {
+                    menuUrl = " href='"+contArray[i].url+"'";
+                }else{
+                    popupEvent = " popupEvent";
+                }
+
+                c += "<a" + menuUrl + menuId + " class='popupContentRow" + popupEvent + lastElement + "'>" +
                     contArray[i].name +
                     "</a>";
             }
+            this.setAction(data.id);
             this.setTitle(data.title);
             this.setContent(c);
+        };
+
+        this.getAction = function(){
+            return $("#currentPopupAction").html();
+        };
+
+        this.setAction = function(id){
+            $("#currentPopupAction").html(id);
         };
 
         //Public setter function for private var title and sets title of the html popup element.
@@ -300,6 +328,35 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
             //Null result returned if popup data object is not found.
             //console.log("No data found, returning null.");
             return null;
+        };
+
+        this.getBusiness = function(name){
+            //console.log("name: "+name);
+            var roles = data.roles;
+            var role;
+
+            for(role in roles){
+                //console.log(roles[role]);
+                if(roles[role].name === name)return roles[role];
+            }
+            return null;
+        };
+
+        this.changeBusiness = function(clicked){
+            var businessId = clicked.attr("id");
+            var name = clicked.html();
+            var business = this.getBusiness(name);
+            if(business===null){
+                console.log("Business not found!");
+                return;
+            }
+            this.changeBusinessLogo(business);
+            setSideBarSections(data, business.sections)
+        };
+
+        this.changeBusinessLogo = function(business){
+            $("#clientLogo").attr('src', business.businessLogoUrl);
+            console.log("Logo: "+business.businessLogoUrl);
         };
     }
 
@@ -388,10 +445,25 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
         );
     };
 
-    function toHoverImage(imgLoc) {
-        var extIndex = imgLoc.lastIndexOf('.');
-        return imgLoc.substring(0, extIndex) + "Color" + imgLoc.substring(extIndex);
-    }
+    /**
+     * Converts an image url to its colored version, for the hover url
+     * Ex. dispatcher.png -> dispatcherColor.png
+     */
+//    function toHoverImage(imgLoc) {
+//        var extIndex = imgLoc.lastIndexOf('.');
+//        return imgLoc.substring(0, extIndex) + "Color" + imgLoc.substring(extIndex);
+//    }
+
+//    var getSection = function(sections, name){
+//        var section;
+//        for(section in sections){
+//            //console.log(sections[section]);
+//            if(sections[section].name === name){
+//                return sections[section];
+//            }
+//        }
+//        return null;
+//    };
 
     var setSideBarSections = function(config, availableSections){
         var section;
@@ -404,8 +476,9 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
             var name = currentSection.name;
             var color = currentSection.color;
             var iconUrl = currentSection.iconUrl;
+            var iconHoverUrl = currentSection.iconHoverUrl;
             //TODO: Implement sprite selection.
-            $('<img/>').src = toHoverImage(iconUrl);
+            $('<img/>').src = iconHoverUrl;//toHoverImage(iconUrl);
             //Default values unless sprite.
             var bgX = 'center';
             var bgY = 'center';
@@ -416,22 +489,20 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
                 href: href,
                 color: color,
                 iconUrl: iconUrl,
+                iconHoverUrl: iconHoverUrl,
                 bgX: bgX,
                 bgY: bgY,
                 name: name
             };
             sBarElement += sideBarElementTemplate(templateData);
         }
-        $("#expandMenuButton").after(sBarElement);
+        $("#sideBarSections").html(sBarElement);
     };
 
     /** Initializes sidebar navigation **/
     var initSideBar = function (config) {
         //TODO: Error checking?
-        /**
-         * Converts an image url to its colored version, for the hover url
-         * Ex. dispatcher.png -> dispatcherColor.png
-         */
+
         var sections = config.sections;
 
         //setup the sidebar wrapper (for the scrollbar)
@@ -446,7 +517,7 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
         var expandTemplateHtml = $("#expandTemplate").html();
         var expandTemplate = kendo.template(expandTemplateHtml);
         sBar.html(expandTemplate);
-        //TODO: Possibly simplify sideBar creation.
+        sBar.append("<div id='sideBarSections'></div>");
         sBarWrapper.append(sBar);
         $('#nav').after(sBarWrapper);
 
@@ -457,19 +528,17 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
         var showMenuTemplate = kendo.template(showMenuTemplateHtml);
         $('#navContainer').after(showMenuTemplate);
 
-        $(".sideBarElement").on({
-            "touchstart mouseenter": function () {
-                $(this).stop(true, true).addClass($(this).attr('color'));
-                var image = $(this).find(".icon:first").css('background-image').replace(/^url|[\(\)]/g, '');
-                var hoverImg = toHoverImage(image);
+        $(document).on("touchstart mouseenter", ".sideBarElement", function(){
+                $(this).stop(true, true).addClass($(this).attr('data-color'));
+                //var image = $(this).find(".icon:first").css('background-image').replace(/^url|[\(\)]/g, '');
+                var hoverImg = $(this).attr("data-iconHoverUrl");//getSection(config.sections, $(this).find(".sectionName").html()).iconHoverUrl;//toHoverImage(image);
                 $(this).find(".icon").css('background-image', 'url(' + hoverImg + ')');
-            },
-            "touchend mouseleave mouseup": function () {
-                $(this).stop(true, true).removeClass($(this).attr('color'));
-                var image = $(this).find(".icon:first").css('background-image').replace(/^url|[\(\)]/g, '');
-                image = image.replace('Color.', '.');
+        });
+        $(document).on("touchend mouseleave mouseup", ".sideBarElement", function(){
+                $(this).stop(true, true).removeClass($(this).attr('data-color'));
+                var image = $(this).attr("data-iconUrl");//getSection(config.sections, $(this).find(".sectionName").html()).iconUrl;//$(this).find(".icon:first").css('background-image').replace(/^url|[\(\)]/g, '');
+                //image = image.replace('Color.', '.');
                 $(this).find(".icon").css('background-image', 'url(' + image + ')');
-            }
         });
 
         /** Initialize sidebar scrollbar **/
@@ -630,6 +699,10 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
             }
         );
     };
+
+    $(document).on('click', ".sideBarElement", function(){
+        console.log("sideBarElement event fired!: "+$(this));
+    });
 
     return Navigator;
 });

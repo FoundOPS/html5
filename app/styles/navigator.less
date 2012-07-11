@@ -110,7 +110,7 @@ body{
     margin: 0;
     height: 100%;
 
-    background: @red + #050505;
+    background: @lightGrey + #050505;
     color: @charcoal;
     font-family: segoe, verdana, sans-serif;
     font-size: 100%;
@@ -118,13 +118,18 @@ body{
     -webkit-tap-highlight-color: rgba(72,143,205,255);
     -webkit-touch-callout:none;
 }
+::selection{
+    text-shadow: none;
+    background: @orange;
+    color: white;
+}
 
 a{
     color: @lightGrey;
     text-decoration: none;
-
+    cursor: pointer;
     &:hover{
-        color: @darkGrey;
+        //color: @darkGrey;
     }
 }
 
@@ -394,8 +399,10 @@ zoom: 1;*/
 }
 
 .sideBarElement{
+    display: block;
     position: relative;
     margin: 0 5px;
+    font-weight: bold;
 
     span{
         vertical-align: middle;
@@ -467,12 +474,12 @@ zoom: 1;*/
 
 .iconExpand, .iconShow{
 //TODO: Fix problem w/ android 2.3 browser. http://jsfiddle.net/KrRsy/5/
-//    -webkit-transition: -webkit-transform .3s ease-in-out;
-//    -moz-transition: -moz-transform .3s ease-in-out;
-//    -ms-transition: -ms-transform .3s ease-in-out;
-//    -o-transition: -o-transform .3s ease-in-out;
-//    transition: transform .3s ease-in-out;
-//    zoom: 1;
+    -webkit-transition: -webkit-transform .3s ease-in-out;
+    -moz-transition: -moz-transform .3s ease-in-out;
+    -ms-transition: -ms-transform .3s ease-in-out;
+    -o-transition: -o-transform .3s ease-in-out;
+    transition: transform .3s ease-in-out;
+    zoom: 1;
 }
 
 //Mixin to rotate elements.
@@ -498,11 +505,10 @@ zoom: 1;*/
 
 .createColors(@color){
     (~".@{color}"){
-        color: #fff;
-        text-decoration: none;
-        text-shadow: none;
+        color: @@color;
         outline: 0 none;
-        text-shadow: 0px 2px 20px @@color, 0px 2px 30px @@color+#222;
+        //text-shadow: 0px 2px 20px @@color, 0px 2px 30px @@color+#222;
+        //text-shadow: 0px 0px 1px @lightGrey;
     }
 }
 

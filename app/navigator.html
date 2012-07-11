@@ -37,11 +37,7 @@
 
     <!-- Mobile IE allows us to activate ClearType technology for smoothing fonts for easy reading -->
     <meta http-equiv="cleartype" content="on">
-
     <!-- more tags for your 'head' to consider h5bp.com/d/head-Tips -->
-
-    <!-- Main Stylesheet -->
-    <!--link rel="stylesheet" href="css/style.css"-->
 
     <link rel="shortcut icon" href="./favicon_32.ico"/>
     <!--If debug-->
@@ -55,16 +51,18 @@
         window.navigatorConfig = {
             name:"Jordan Kelly",
             avatarUrl:"./img/david.png",
+            settingsUrl: "#settings",
+            logoutUrl: "#logout",
             roles:[
                 {name:"FoundOPS", id:"23144-24242-242442", businessLogoUrl:"./img/got-grease-logo.png", sections:["Employees", "Routes", "Regions", "Vehicles"]},
                 {name:"GotGrease", id:"95838-24242-242442", businessLogoUrl:"./img/got-grease-logo.png", sections:["Employees", "Routes", "Regions"]},
                 {name:"AB Couriers", id:"64729-24242-242442", businessLogoUrl:"./img/got-grease-logo.png", sections:["Employees"]}
             ],
             sections:[
-                {name:"Employees", url:"#Employees", color:"red", iconUrl:"img/employees.png"},
-                {name:"Routes", url:"#Routes", color:"green", iconUrl:"./img/routes.png"},
-                {name:"Regions", url:"#Regions", color:"orange", iconUrl:"./img/regions.png"},
-                {name:"Vehicles", url:"#Vehicles", color:"red", iconUrl:"./img/vehicles.png"}/*,
+                {name:"Employees", url:"#Employees", color:"red", iconUrl:"img/employees.png", iconHoverUrl: "img/employeesColor.png"},
+                {name:"Routes", url:"#Routes", color:"green", iconUrl:"./img/routes.png", iconHoverUrl: "img/routesColor.png"},
+                {name:"Regions", url:"#Regions", color:"orange", iconUrl:"./img/regions.png", iconHoverUrl: "img/regionsColor.png"},
+                {name:"Vehicles", url:"#Vehicles", color:"red", iconUrl:"./img/vehicles.png", iconHoverUrl: "img/vehiclesColor.png"}/*,
                  {name:"Logout", url:"#logout", color:"black", iconUrl:"./img/logout.png"}*/
             ]
         };
@@ -152,32 +150,33 @@ mathiasbynens.be/notes/async-analytics-snippet -->
 
 <script id="navTemplate" type="text/x-kendo-template">
     <div id='navContainer'>
-        <div id='navSearch' class='navElement'><input name='search' type='text' placeholder='Search...'/><a
-                href='\#'><img class='navIcon' src='img/search.png'/></a></div>
-        <div id='navClient' class='navElement popup last'><a href='\#'><img class='navIcon profile' src='#= data[0] #'/><img
-                id='clientLogo' src='#= data[1] #'/></a></div>
+        <div id='navSearch' class='navElement'><input name='search' type='text' placeholder='Search...'/>
+            <a><img class='navIcon' src='img/search.png'/></a>
+        </div>
+        <div id='navClient' class='navElement popup last'>
+            <a><img class='navIcon profile' src='#= data[0] #'/><img id='clientLogo' src='#= data[1] #'/></a>
+        </div>
     </div>
     <img id='logo' src='./img/Logo.png' alt='FoundOPS'/>
 </script>
 
 <script id="expandTemplate" type="text/x-kendo-template">
-    <a id="expandMenuButton" href='\#'>
+    <a id="expandMenuButton">
         <div id='slideMenu'><img class='iconExpand' src='img/Expand.png'/></div>
     </a>
 </script>
 
 <script id="showMenuTemplate" type="text/x-kendo-template">
     <div id="showMenu">
-        <a href='\#'><img class='iconShow rotateIcon' src='img/Expand.png'/></a>
+        <a><img class='iconShow rotateIcon' src='img/Expand.png'/></a>
     </div>
 </script>
 
 <script id="sideBarElementTemplate" type="text/x-kendo-template">
-    <a href="#= href #">
-        <div class='sideBarElement' color='#= color #'>
-            <span class='icon' style="background: url('#= iconUrl #') #= bgX # #= bgY # no-repeat"></span>
-            <span>#= name #</span>
-        </div>
+    <!--href="#= href #"-->
+    <a class='sideBarElement' data-color='#= color #' data-iconUrl='#= iconUrl #' data-iconHoverUrl='#= iconHoverUrl #'>
+        <span class='icon' style="background: url('#= iconUrl #') #= bgX # #= bgY # no-repeat"></span>
+        <span class='sectionName'>#= name #</span>
     </a>
 </script>
 </html>
