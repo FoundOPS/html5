@@ -46,7 +46,7 @@
 
     <script type="text/javascript">
         //If release
-        //window.navigatorConfig = @Html.Raw(Model.NavigatorConfig)
+        //window.navigatorConfig = @Html.Raw(((Dictionary<string, object>)@Model)["NavigatorConfig"]);
         //If debugging
         window.navigatorConfig = {
             name:"Jordan Kelly",
@@ -103,7 +103,7 @@
                 <!--}-->
 
                 <!--//Setup version-->
-                <!--var sourceParam = xapSource + "?ignore=" + Model.SilverlightVersion;-->
+                <!--var sourceParam = xapSource + "?ignore=" + Model["SilverlightVersion"];-->
                 <!--}-->
                 <!--<param name="splashscreensource" value="@splashSource" />-->
                 <!--<param name="source" value="@sourceParam"/>-->
