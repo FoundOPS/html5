@@ -65,13 +65,13 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
             if (popupDiv.is(":visible") && lastNavClick !== null) {
                 if (navElem.is("#" + lastNavClick)) {
                     //console.log("Clicked on same nav button!");
-                    this.hide();
+                    this.hidePopup();
                     lastNavClick = navElem.attr("id");
                     return;
                 }
                 //console.log("Clicked on different nav button!");
                 var thisPopup = this;
-                this.hide();
+                this.hidePopup();
                 //TODO: Make sure this doesn't cause animation problems.
                 /*popupDiv.promise("fx").done(function () {
                  left = thisPopup.getLeft(icon, popupDiv);
@@ -174,13 +174,13 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
 
             //Click listener for popup close button.
             $("#popupClose").click(function () {
-                thisPopup.hide();
+                thisPopup.hidePopup();
             });
 
             $("#popupBack").click(function () {
                 history.pop();
                 if (history.length <= 0) {
-                    thisPopup.hide();
+                    thisPopup.hidePopup();
                     return;
                 }
                 thisPopup.setData(history[history.length - 1]);
@@ -203,7 +203,7 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
                 var popupLen = clicked.parents("#popup").length + clicked.is("#popup") ? 1 : 0;
                 var navLen = clicked.parents(".navElement").length + clicked.is(".navElement") ? 1 : 0;
                 if (popupLen === 0 && navLen === 0) {
-                    thisPopup.hide();
+                    thisPopup.hidePopup();
                 }
             });
 
@@ -231,7 +231,7 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
                     var keepOpen = thisPopup.populate(newId);
 
                     if(!keepOpen)
-                        thisPopup.hide();
+                        thisPopup.hidePopup();
                 });
 
             //Sets global popup object, object, with the created div.
@@ -243,7 +243,7 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
             return popupDiv;
         };
 
-        this.hide = function () {
+        this.hidePopup = function () {
             history = [];
             $("#popup").stop(false, true).fadeOut('fast');
         };
@@ -389,7 +389,7 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
     function Navigator(config) {
         initTopNav(config);
         initSideBar(config);
-        new Popup(config);
+        this.popup = new Popup(config);
     }
 
     /** Initializes top navigation **/
@@ -634,7 +634,7 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
         };
 
         var slideMenuClosed = function () {
-            clearTimeout(slideMenuTimeout);
+            //clearTimeout(slideMenuTimeout);
             $("#sideBar, #sideBarWrapper, #sideBarWrapper .jspContainer")
                 .stop(true, false)
                 .animate({width: '55px'}, 'fast');
@@ -668,7 +668,7 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
                     sideBarDiv.removeClass("expand");
                 } else {
                     sideBarDiv.addClass("expand");
-                    clearTimeout(slideMenuTimeout);
+                    //clearTimeout(slideMenuTimeout);
                     slideMenuOpen();
                 }
             }
@@ -679,10 +679,10 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
             //Hover In
             function () {
                 if ($(document).width() > 800 && !sideBarDiv.hasClass("expand")) {
-                    slideMenuTimeout = setTimeout(function(){
+                    //slideMenuTimeout = setTimeout(function(){
                         sideBarDiv.addClass("hover");
                         slideMenuOpen();
-                    }, 2000);
+                    //}, 2000);
                 }
             },
             //Hover Out
