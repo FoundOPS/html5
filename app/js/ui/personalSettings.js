@@ -6,10 +6,17 @@
 
 define(['db/services'], function (services) {
     var personalSettings = {};
+    //keep track of if a new image has been selected
+    personalSettings.newImage = false;
 
     personalSettings.viewModel = kendo.observable({
         saveChanges: function () {
             services.updatePersonalSettings(this.get("settings"));
+
+            //check if image has been changed
+            if(personalSettings.newImage){
+                $("#imageUploadForm").submit();
+            }
         }
     });
 
@@ -66,6 +73,9 @@ define(['db/services'], function (services) {
 
             //set a hidden form to the file image's data (because we stole it with FileReader)
             $('#imageData').val(imageData);
+
+            //set so that the save changes event will also save the image
+            personalSettings.newImage = true;
         };
 
         //setup the FileReader on the imageUpload button
@@ -97,8 +107,6 @@ define(['db/services'], function (services) {
             reader.readAsDataURL(file);
             //set the form value
             $('#imageFileName').val(file.name);
-            //enable the "Crop Image" button
-            $('#uploadBtn').removeAttr('disabled');
         });
 
         //set the form action to the update image url

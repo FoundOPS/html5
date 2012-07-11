@@ -68,9 +68,15 @@ define(["developer", "db/services"], function (developer, services) {
             }
         });
 
+        var dataSource2 = [
+            {FirstName: "Oren", LastName: "Shatken", EmailAddress: "oshatken@foundops.com", Role: "Administrator"},
+            {FirstName: "Jon", LastName: "Prel", EmailAddress: "jperl@foundops.com", Role: "Mobile"},
+            {FirstName: "Zach", LastName: "Bright", EmailAddress: "zbright@foundops.com", Role: "Administrator"}
+        ];
+
         //add a grid to the #usersGrid div element
         $("#usersGrid").kendoGrid({
-            dataSource: dataSource,
+            dataSource: dataSource2,
             dataBound: onDataBound,
             editable: {
                 mode: "popup",
@@ -78,7 +84,6 @@ define(["developer", "db/services"], function (developer, services) {
                 confirmation: "Are you sure you want to delete this user?"
             },
             scrollable:false,
-            selectable: true,
             sortable: true,
             columns: [{
                     field: "FirstName",
@@ -94,32 +99,13 @@ define(["developer", "db/services"], function (developer, services) {
                 },
                 {
                     field: "Role"
-                }
-            ],
-            // The command buttons above the grid
-            toolbar: [
-                {
-                    name: "edit"
                 },
                 {
-                    name: "destroy"
+                    command: ["edit", "destroy"]
                 }
             ]
         });
         //endregion
-
-        $(".k-grid-edit").removeAttr("href");
-        $(".k-grid-delete").removeAttr("href");
-
-        //edit the selected row on edit button click
-        $(".k-grid-edit").click(function () {
-            editSelectedRow();
-        });
-
-        //delete the selected row on delete button click
-        $(".k-grid-delete").click(function () {
-            removeSelectedRow();
-        });
 
         $("#addUser").on("click", function(e) {
             var dataSrc = $("#usersGrid").data("kendoGrid").dataSource;
@@ -164,42 +150,21 @@ define(["developer", "db/services"], function (developer, services) {
 
             $("#btnCancel").on("click", function(e) {
                 dataSrc.cancelChanges(model); //cancel changes
-                window.close();
-                window.element.remove();
+                object.close();
+                object.element.remove();
             });
         });
     };
 
     //region Methods
-    //after the data is loaded, assign the color picker to each of the current color boxes
+    //after the data is loaded, add tooltips to the edit and delete buttons
     var onDataBound = function () {
-        //get a reference to the grid widget
-        grid = $("#usersGrid").data("kendoGrid");
-    };
-
-    //removes the selected row from the grid(stays in pending changes until changes are saved)
-    var editSelectedRow = function () {
-        //get selected row
-        var row = getSelectedRow(grid);
-        //remove selected row
-        grid.editRow(row);
-    };
-
-    //removes the selected row from the grid(stays in pending changes until changes are saved)
-    var removeSelectedRow = function () {
-        //get selected row
-        var row = getSelectedRow(grid);
-        //remove selected row
-        grid.removeRow(row);
-    };
-
-    /**
-     * Gets the selected row
-     * @param {object} g The grid
-     * @return {object}
-     */
-    var getSelectedRow = function (g) {
-        return g.tbody.find(".k-state-selected");
+        $(".k-grid-edit").each(function(){
+            $(this).attr("title", "Edit");
+        });
+        $(".k-grid-delete").each(function(){
+            $(this).attr("title", "Delete");
+        });
     };
     //endregion
 

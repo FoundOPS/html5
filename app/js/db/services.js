@@ -192,11 +192,11 @@ define(['lib/kendo.mobile.min', 'developer', 'tools'], function (k, developer, t
      */
     services.updateBusinessSettings = function (settings) {
         $.ajax({
-            url: services.API_URL + "settings/UpdateBusinessSettings",
+            url: services.API_URL + "settings/UpdateBusinessSettings?roleId=" + developer.GOTGREASE_ROLE_ID,
             type: "POST",
             dataType: "json",
             contentType: 'application/json',
-            data: JSON.stringify(developer.GOTGREASE_ROLE_ID, settings)
+            data: JSON.stringify(settings)
         });
     };
 

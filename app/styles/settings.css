@@ -28,6 +28,26 @@ table{border-collapse: collapse;border-spacing: 0;}
 input[type="button"], button{
     color:#111;
 }
+.k-grid tbody .k-button{min-width:0}
+.k-grid tbody button.k-button,#ie8#skips{min-width:0}
+*+html .k-grid tbody a.k-button{min-width:0}
+.k-edit, .k-delete{
+    background-image: none;
+}
+.k-grid-edit, .k-grid-delete, .k-grid-edit:hover, .k-grid-delete:hover{
+    background: none;
+    border: none;
+}
+.k-grid .k-button{
+    margin: 3px 0 0 0;
+}
+.k-grid td{
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
+.k-grid tbody td > .k-grid-delete{
+    margin-top: 0;
+}
 /*endregion*/
 /*region Generic */
 h1{
@@ -112,14 +132,14 @@ button:hover{
     padding: 15px 50px;
 }
 #personal table{
-    margin: 0 0 0 10px;
+    margin: 0 0 0 50px;
 }
 #personal td, #business td, #pass td{
     height: 30px;
     text-align: right;
     margin: 0 0 5px 0;
 }
-#personal td input, #business td input{
+#personal td input, #business td input, #pass td input{
     width: 190px;
     height: 20px;
     border: 1px inset #ccc;
@@ -150,7 +170,7 @@ button:hover{
 /*endregion*/
 /*region Business */
 #business table{
-    margin: 0 0 0 67px;
+    margin: 0 0 0 87px;
 }
 /*endregion*/
 /*region Users */
@@ -186,6 +206,18 @@ button:hover{
 }
 .k-grid-cancel{
     margin-left: 12px;
+}
+.k-grid-edit{
+    background: url("../img/editBtn.png") no-repeat;
+}
+.k-grid-edit:hover{
+    background: url("../img/editBtnHover.png") no-repeat;
+}
+.k-grid-delete{
+    background: url("../img/deleteBtn.png") no-repeat;
+}
+.k-grid-delete:hover{
+    background: url("../img/deleteBtnHover.png") no-repeat;
 }
 /*endregion*/
 /*region Password*/
