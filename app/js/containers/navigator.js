@@ -534,7 +534,7 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
     /** Initializes sidebar navigation **/
     var initSideBar = function (config) {
         //TODO: Error checking?
-
+        var slideMenuTimeout = null;
         var sections = config.sections;
 
         //setup the sidebar wrapper (for the scrollbar)
@@ -634,6 +634,7 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
         };
 
         var slideMenuClosed = function () {
+            clearTimeout(slideMenuTimeout);
             $("#sideBar, #sideBarWrapper, #sideBarWrapper .jspContainer")
                 .stop(true, false)
                 .animate({width: '55px'}, 'fast');
@@ -667,6 +668,7 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
                     sideBarDiv.removeClass("expand");
                 } else {
                     sideBarDiv.addClass("expand");
+                    clearTimeout(slideMenuTimeout);
                     slideMenuOpen();
                 }
             }
@@ -676,9 +678,11 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
         $("#sideBarWrapper").hover(
             //Hover In
             function () {
-                sideBarDiv.addClass("hover");
                 if ($(document).width() > 800 && !sideBarDiv.hasClass("expand")) {
-                    slideMenuOpen();
+                    slideMenuTimeout = setTimeout(function(){
+                        sideBarDiv.addClass("hover");
+                        slideMenuOpen();
+                    }, 2000);
                 }
             },
             //Hover Out
