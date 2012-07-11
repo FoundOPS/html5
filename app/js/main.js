@@ -33,6 +33,11 @@ require(["containers/navigator", "silverlight", "underscore", "lib/kendo.all.min
         silverlight.plugin.navigationVM.NavigateToView(section.name);
     });
 
+    //whenever a role is changed, choose it in the silverlight app
+    $(document).on("roleSelected", function(e, role){
+        silverlight.plugin.navigationVM.ChangeRole(role.id);
+    });
+
     var application = new kendo.mobile.Application($("#remoteContent"), { initial: "view/updates.html"});
     silverlight.show();
 //    _.delay(silverlight.show, 3000);
