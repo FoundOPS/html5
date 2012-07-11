@@ -29,13 +29,21 @@ require(["containers/navigator", "silverlight", "underscore", "lib/kendo.all.min
     n.hideSearch();
 
     //whenever a section is chosen, choose it in the silverlight app
-    $(document).on("sectionSelected", function(e, section){
-        silverlight.plugin.navigationVM.NavigateToView(section.name);
+    $(document).on("sectionSelected", function (e, section) {
+        try {
+            silverlight.plugin.navigationVM.NavigateToView(section.name);
+        }
+        catch (err) {
+        }
     });
 
     //whenever a role is changed, choose it in the silverlight app
-    $(document).on("roleSelected", function(e, role){
-        silverlight.plugin.navigationVM.ChangeRole(role.id);
+    $(document).on("roleSelected", function (e, role) {
+        try {
+            silverlight.plugin.navigationVM.ChangeRole(role.id);
+        }
+        catch (err) {
+        }
     });
 
     var application = new kendo.mobile.Application($("#remoteContent"), { initial: "view/updates.html"});
