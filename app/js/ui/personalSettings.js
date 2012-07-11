@@ -36,7 +36,7 @@ define(['db/services'], function (services) {
             cropbox.attr("height", personalSettings.newH);
         }
         //center the image
-        var margin = (320 - personalSettings.newW) / 2;
+        var margin = (420 - personalSettings.newW) / 2;
         cropbox.css("marginLeft", margin + "px");
 
         return cropbox;

@@ -52,7 +52,14 @@ hr{
     border: 1px solid #666;
 }
 button{
+    height: 25px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
     cursor: pointer;
+    background: url("../img/btnBg.png") repeat-x;
+}
+button:hover{
+    background: url("../img/btnBgHover.png") repeat-x;
 }
 #settingsList{
     position: absolute;
@@ -100,13 +107,14 @@ button{
 }
 /*endregion*/
 /*region Personal */
-#personal .wrap, #business .wrap{
-    width: 320px;
+#personal .wrap, #business .wrap, #pass .wrap{
+    width: 420px;
+    padding: 15px 50px;
 }
 #personal table{
     margin: 0 0 0 10px;
 }
-#personal td, #business td{
+#personal td, #business td, #pass td{
     height: 30px;
     text-align: right;
     margin: 0 0 5px 0;
@@ -116,12 +124,15 @@ button{
     height: 20px;
     border: 1px inset #ccc;
 }
+#personal form, #business form{
+    margin-left: 120px;
+}
 #personal button, #business button{
-    margin-left: 86px;
+    margin-left: 136px;
     padding: 2px 5px;
 }
 #personal .save, #business .save{
-    margin-left: 113px;
+    margin-left: 163px;
 }
 #imageUpload{
     margin-bottom: 5px;
@@ -175,5 +186,20 @@ button{
 }
 .k-grid-cancel{
     margin-left: 12px;
+}
+/*endregion*/
+/*region Password*/
+#pass h2{
+    margin-bottom: 30px;
+}
+#pass h2 a{
+    color: #488FCD;
+    text-decoration: none;
+}
+#pass h2 a:hover{
+    text-decoration: underline;
+}
+#pass form{
+    margin-left: 50px;
 }
 /*endregion*/

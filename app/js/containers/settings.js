@@ -23,8 +23,8 @@ require.config({
     }
 });
 
-require(["jquery", "lib/kendo.all.min", "ui/personalSettings", "ui/businessSettings", "ui/usersSettings", "lib/jquery-ui-1.8.21.core.min",
-    "lib/cordova", "lib/jquery.FileReader", "lib/swfobject", "session"], function ($, m, p, b, u, jqu, c, f, s, session) {
+require(["jquery", "lib/kendo.all.min", "ui/personalSettings", "ui/businessSettings", "ui/usersSettings", "ui/changePassword", "lib/jquery-ui-1.8.21.core.min",
+    "lib/cordova", "lib/jquery.FileReader", "lib/swfobject", "session"], function ($, m, p, b, u, cp, jqu, c, f, s, session) {
     var app;
     var settings = {};
 
@@ -44,19 +44,22 @@ require(["jquery", "lib/kendo.all.min", "ui/personalSettings", "ui/businessSetti
         li2.removeClass('active');
         li3.removeClass('active');
         li1.addClass('active');
-    }
+    };
     settings.business = function () {
         app.navigate("views/businessSettings.html");
         li1.removeClass('active');
         li3.removeClass('active');
         li2.addClass('active');
-    }
+    };
     settings.users = function () {
         app.navigate("views/usersSettings.html");
         li1.removeClass('active');
         li2.removeClass('active');
         li3.addClass('active');
-    }
+    };
+    settings.changePassword = function () {
+        app.navigate("views/changePassword.html");
+    };
 
     window.settings = settings;
 
