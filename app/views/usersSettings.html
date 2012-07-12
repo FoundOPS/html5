@@ -26,17 +26,24 @@
             <label for="EmailAddress">Email</label>
         </div>
         <div data-container-for="EmailAddress" class="k-edit-field">
-            <input type="email" id="EmailAddress" name="EmailAddress" required="required" data-type="text" data-bind="value:EmailAddress">
+            <input type="email" id="EmailAddress" name="EmailAddress" required data-type="text" data-bind="value:EmailAddress">
         </div>
         <div class="k-edit-label">
             <label for="Role">Role</label>
         </div>
         <div data-container-for="Role" class="k-edit-field">
-            <select id="Role" name="Role" data-type="text" required="required" data-bind="value:Role">
+            <select id="Role" name="Role" data-type="text" required data-bind="value:Role">
                 <option>Administrator</option>
                 <option>Regular</option>
                 <option>Mobile</option>
             </select>
+        </div>
+        <div class="k-edit-label">
+            <label for="Employee">Employee</label>
+        </div>
+        <div data-container-for="Employee" class="k-edit-field">
+            <input id="Employee" name="Employee" data-bind="value:Employee" data-value-field="EmployeeId"
+                   data-text-field="EmployeeName" data-source="usersSettings.dropDownDataSource" data-role="dropdownlist" />
         </div>
         <a class="k-button k-button-icontext" id="btnAdd">
             <span class="k-icon k-update"></span>
@@ -54,13 +61,13 @@
             <label for="First">First Name</label>
         </div>
         <div data-container-for="FirstName" class="k-edit-field">
-            <input type="text" id="First" name="First" required="required" data-type="text" data-bind="value:FirstName" data-role="textbox"/>
+            <input type="text" id="First" name="First" required data-type="text" data-bind="value:FirstName" data-role="textbox"/>
         </div>
         <div class="k-edit-label">
             <label for="Last">Last Name</label>
         </div>
         <div data-container-for="LastName" class="k-edit-field">
-            <input type="text" id="Last" name="Last" required="required" data-type="text" data-bind="value:LastName" data-role="textbox"/>
+            <input type="text" id="Last" name="Last" required data-type="text" data-bind="value:LastName" data-role="textbox"/>
         </div>
         <div class="k-edit-label">
             <label for="Email">Email</label>
@@ -77,6 +84,13 @@
                 <option>Regular</option>
                 <option>Mobile</option>
             </select>
+        </div>
+        <div class="k-edit-label">
+            <label for="ExistingEmployee">Employee</label>
+        </div>
+        <div data-container-for="Employee" class="k-edit-field">
+            <input id="ExistingEmployee" name="Employee" data-bind="value:Employee" data-value-field="EmployeeId"
+                   data-text-field="EmployeeName" data-source="usersSettings.dropDownDataSource" data-role="dropdownlist" />
         </div>
     </div>
 </script>

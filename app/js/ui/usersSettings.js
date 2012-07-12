@@ -11,6 +11,32 @@ define(["developer", "db/services"], function (developer, services) {
 
     usersSettings.initialize = function () {
         //region Setup Grid
+        var fields = {
+            FirstName: {
+                type: "string",
+                validation: { required: true },
+                defaultValue: ""
+            },
+            LastName: {
+                type: "string",
+                validation: { required: true },
+                defaultValue: ""
+            },
+            EmailAddress: {
+                type: "string",
+                validation: { required: true },
+                defaultValue: ""
+            },
+            Role: {
+                type: "string",
+                validation: { required: true },
+                defaultValue: ""
+            },
+            Employee: {
+                type: "string",
+                defaultValue: ""
+            }}
+
         var dataSource = new kendo.data.DataSource({
             transport: {
                 read: {
@@ -36,37 +62,32 @@ define(["developer", "db/services"], function (developer, services) {
                 model: {
                     // Necessary for inline editing to work
                     id: "Id",
-                    fields: {
-                        FirstName: {
-                            type: "string",
-                            validation: { required: true },
-                            defaultValue: ""
-                        },
-                        LastName: {
-                            type: "string",
-                            validation: { required: true },
-                            defaultValue: ""
-                        },
-                        EmailAddress: {
-                            type: "string",
-                            validation: { required: true },
-                            defaultValue: ""
-                        },
-                        Role: {
-                            type: "string",
-                            validation: { required: true },
-                            defaultValue: ""
-                        }
-                    }
+                    fields: fields
                 }
             }
         });
 
         var dataSource2 = [
-            {FirstName: "Oren", LastName: "Shatken", EmailAddress: "oshatken@foundops.com", Role: "Administrator"},
-            {FirstName: "Jon", LastName: "Perl", EmailAddress: "jperl@foundops.com", Role: "Mobile"},
-            {FirstName: "Zach", LastName: "Bright", EmailAddress: "zbright@foundops.com", Role: "Administrator"}
+            {FirstName: "Oren", LastName: "Shatken", EmailAddress: "oshatken@foundops.com", Role: "Administrator", Employee: { EmployeeName: "Oren Shatken", EmployeeId: 1 }},
+            {FirstName: "Jon", LastName: "Perl", EmailAddress: "jperl@foundops.com", Role: "Mobile", Employee: { EmployeeName: "Jon Perl", EmployeeId: 2 }},
+            {FirstName: "Zach", LastName: "Bright", EmailAddress: "zbright@foundops.com", Role: "Administrator", Employee: { EmployeeName: "Zach Bright", EmployeeId: 3 }}
         ];
+
+        var categories = [
+            { EmployeeName: "Oren Shatken", EmployeeId: 1 },
+            { EmployeeName: "Jon Perl", EmployeeId: 2 },
+            { EmployeeName: "Zach Bright", EmployeeId: 3 }
+        ];
+
+        usersSettings.dropDownDataSource = new kendo.data.DataSource({
+            //TODO: get api datasource
+            data: categories,
+            schema: {
+                model: {
+                    fields: fields
+                }
+            }
+        });
 
         //add a grid to the #usersGrid div element
         $("#usersGrid").kendoGrid({
@@ -76,6 +97,14 @@ define(["developer", "db/services"], function (developer, services) {
                 mode: "popup",
                 template: $("#editTemplate").html(),
                 confirmation: "Are you sure you want to delete this user?"
+            },
+            edit: function(e) {
+                $(e.container)
+                    .find("input[name='Employee']")
+                    .data("kendoDropDownList")
+                    .bind("change", function(e) {
+                        console.log("drop down changed");
+                    });
             },
             scrollable:false,
             sortable: true,
@@ -93,6 +122,12 @@ define(["developer", "db/services"], function (developer, services) {
                 },
                 {
                     field: "Role"
+                },
+                {
+                    field: "Employee",
+                    title: "Employee Record",
+                    //TODO:get correct link
+                    template: '<a href="http://www.google.com">#=Employee.EmployeeName#</a>'
                 },
                 {
                     command: ["edit", "destroy"],
