@@ -30,6 +30,8 @@ require(["jquery", "underscore", "lib/kendo.all.min", "developer", "db/services"
     //set services to a global function, so the functions are accessible from the HTML element
     window.services = services;
 
+    services.viewModel = kendo.observable({});
+
     services.initialize = function () {
         var resizeGrid = function () {
             var windowHeight = $(window).height();
@@ -73,6 +75,13 @@ require(["jquery", "underscore", "lib/kendo.all.min", "developer", "db/services"
 
             $("#grid").kendoGrid({
                 autoBind: true,
+                change: function (e) {
+                    var selectedItem = this.dataItem(this.select());
+                    //Load the service details, and update the view model
+                    dbServices.getServiceDetails(selectedItem.ServiceId, selectedItem.OccurDate, selectedItem.RecurringServiceId, function (service) {
+                        services.viewModel.set("selectedService", service);
+                    });
+                },
                 columns: columns,
                 dataSource: dataSource,
                 filterable: true,

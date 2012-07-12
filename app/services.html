@@ -8,9 +8,13 @@
     <link href="lib/kendo.default.min.css" rel="stylesheet"/>
     <link href="lib/kendo.metro.min.css" rel="stylesheet"/>
     <link href="styles/services.css" rel="stylesheet"/>
+    <script type="text/x-kendo-template" id="serviceTemplate">
+        <h1>${Service_Name}</h1>
+    </script>
 </head>
 <body>
-<div data-init="services.initialize" data-role="view" data-title="Services" data-stretch="true" id="services">
+<div data-init="services.initialize" data-role="view" data-title="Services" data-stretch="true"
+     data-model="services.viewModel" id="services">
     <div id="left">
         <div id="top">
             <input id="startDatePicker" style="width:150px;"/>
@@ -19,9 +23,10 @@
         </div>
         <div id="grid"></div>
     </div>
-    <div id="details">
-        LOAD THE SERVICE DETAILS VIEW HERE?
+    <div id="serviceDetails">
+        <input data-bind="value: selectedService.Name" />
     </div>
 </div>
 </body>
 </html>
+

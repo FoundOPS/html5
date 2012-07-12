@@ -207,6 +207,22 @@ define(['lib/kendo.mobile.min', 'developer', 'tools'], function (k, developer, t
     services.getResourcesWithLatestPoints = services._getHttp('trackpoint/GetResourcesWithLatestPoints', {}, false);
 
     /**
+     * Get the service and its fields.
+     * Need to pass the serviceId or the occurDate and the recurringServiceId.
+     * @param {?string} serviceId
+     * @param {?string} serviceDate
+     * @param {?string} recurringServiceId
+     * @param {!function(Object)} callback The callback to pass the Service it is loaded.
+     */
+    services.getServiceDetails = function (serviceId, serviceDate, recurringServiceId, callback) {
+        return services._getHttp('service/GetServiceDetails',
+            {serviceId: serviceId, serviceDate: serviceDate, recurringServiceId: recurringServiceId}, false)(function (data) {
+            //It will only have one item
+            callback(data[0]);
+        });
+    };
+
+    /**
      * Get the service provider's TrackPoints.
      * @param {string} serviceDate The service date to retrieve TrackPoints for (in Utc).
      * @param {string} routeId The Id of the route to retrieve TrackPoints for.
@@ -231,8 +247,8 @@ define(['lib/kendo.mobile.min', 'developer', 'tools'], function (k, developer, t
             contentType: 'application/json',
             data: JSON.stringify(trackPoints)
         }).success(function (response) {
-            callback(response);
-        });
+                callback(response);
+            });
     };
 
     /**
