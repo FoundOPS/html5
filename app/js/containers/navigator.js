@@ -510,7 +510,10 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
         for (section in availableSections) {
             //console.log(availableSections[section]);
             var currentSection = getSection(config.sections, availableSections[section]);//config.sections[section];
-            var href = currentSection.url;
+            var href = "";
+            if (typeof(currentSection.url) !== 'undefined') {
+                href = "href='"+currentSection.url+"'";
+            }
             var name = currentSection.name;
             var color = currentSection.color;
             var iconUrl = currentSection.iconUrl;
