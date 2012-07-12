@@ -506,8 +506,9 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
         var sBar = $("#sideBar");
         var sBarElement = "";
         //initialize the sections on the sidebar
+        //TODO: Take a look at this again.
         for (section in availableSections) {
-            console.log(section);
+            //console.log(availableSections[section]);
             var currentSection = getSection(config.sections, availableSections[section]);//config.sections[section];
             var href = currentSection.url;
             var name = currentSection.name;
@@ -535,7 +536,7 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
         }
         $("#sideBarSections").html(sBarElement);
 
-        $(".sideBarElement").on({
+        $(document).on({
             "touchstart mouseenter": function () {
                 $(this).stop(true, true).addClass($(this).attr('data-color'));
                 //var image = $(this).find(".icon:first").css('background-image').replace(/^url|[\(\)]/g, '');
@@ -547,8 +548,13 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
                 var image = $(this).attr("data-iconUrl");//getSection(config.sections, $(this).find(".sectionName").html()).iconUrl;//$(this).find(".icon:first").css('background-image').replace(/^url|[\(\)]/g, '');
                 //image = image.replace('Color.', '.');
                 $(this).find(".icon").css('background-image', 'url(' + image + ')');
+            },
+            "click": function() {
+                var name = $(this).find(".sectionName:first").html();
+                var section = getSection(config.sections, name);
+                $(this).trigger("sectionSelected", section);
             }
-        });
+        }, ".sideBarElement");
     };
 
     /** Initializes sidebar navigation **/
@@ -741,12 +747,6 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
                 toggleMenu();
             }
         );
-
-        $(document).on('click', ".sideBarElement", function(){
-            var name = $(this).find(".sectionName:first").html();
-            var section = getSection(config.sections, name);
-            $(this).trigger("sectionSelected", section);
-        });
     };
 
     return Navigator;

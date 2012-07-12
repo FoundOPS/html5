@@ -115,7 +115,8 @@ body{
     font-family: segoe, verdana, sans-serif;
     font-size: 100%;
     overflow: auto;
-    -webkit-tap-highlight-color: rgba(72,143,205,255);
+    //-webkit-tap-highlight-color: rgba(72,143,205,255);
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
     -webkit-touch-callout:none;
 }
 ::selection{
@@ -310,7 +311,7 @@ zoom: 1;*/
 //TODO: Simplify transparent on hover.
 .hover(){
     &:hover{
-        //opacity: @hoverOpacity;
+        opacity: @hoverOpacity;
     }
 }
 
@@ -457,11 +458,11 @@ zoom: 1;*/
 }
 
 #slideMenu:hover{
-    //opacity: @hoverOpacity;
+    opacity: @hoverOpacity;
 }
 
 .iconExpand:hover{
-    //opacity: @hoverOpacity;
+    opacity: @hoverOpacity;
 }
 
 .androidFixedPositionFix{
