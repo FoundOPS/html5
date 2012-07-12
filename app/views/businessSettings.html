@@ -2,12 +2,14 @@
     <h1>Your Business Settings</h1>
     <div class="wrap">
         <h2>The Basics</h2>
-        <table>
-            <tr>
-                <td>Name:&nbsp;</td>
-                <td><input type="text" data-bind="value: settings.Name"/></td>
-            </tr>
-        </table>
+        <form id="businessForm">
+            <table>
+                <tr>
+                    <td>Name:&nbsp;</td>
+                    <td><input type="text" name="Name" data-bind="value: settings.Name" required/></td>
+                </tr>
+            </table>
+        </form>
         <h2>Your Photo</h2>
         <img data-bind="attr: {src: settings.ImageUrl}" id="cropbox" onload="personalSettings.resize()"/>
         <form id="imageUploadForm" enctype="multipart/form-data" method="POST">

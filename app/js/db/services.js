@@ -181,6 +181,19 @@ define(['lib/kendo.mobile.min', 'developer', 'tools'], function (k, developer, t
     };
 
     /**
+     * Updates personal password.
+     * @param {string} oldPass.
+     * @param {string} newPass.
+     * @param {string} confirmPass.
+     */
+    services.updatePassword = function (oldPass, newPass, confirmPass) {
+        $.ajax({
+            url: services.API_URL + "settings/UpdatePassword?oldPass=" + oldPass + "&newPass=" + newPass + "&confirmPass=" + confirmPass,
+            type: "POST"
+        });
+    };
+
+    /**
      * Get business settings.
      * @param {!function(Array.<Object>)} callback A callback to pass the loaded settings.
      */

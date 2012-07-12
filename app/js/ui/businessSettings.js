@@ -13,8 +13,9 @@ define(['db/services', 'developer', 'ui/personalSettings'], function (services, 
 
     businessSettings.viewModel = kendo.observable({
         saveChanges: function () {
-            services.updateBusinessSettings(this.get("settings"));
-
+            if(personalSettings.validator.validate()){
+                services.updateBusinessSettings(this.get("settings"));
+            }
             //check if image has been changed
             if(businessSettings.newImage){
                 $("#imageUploadForm").submit();
@@ -23,6 +24,8 @@ define(['db/services', 'developer', 'ui/personalSettings'], function (services, 
     });
 
     businessSettings.initialize = function () {
+        businessSettings.validator = $("#businessForm").kendoValidator().data("kendoValidator");
+
         var fileLoaded = function (evt) {
             var imageData = evt.target.result;
 
@@ -93,6 +96,4 @@ define(['db/services', 'developer', 'ui/personalSettings'], function (services, 
     };
 
     window.businessSettings = businessSettings;
-
-    return businessSettings;
 });

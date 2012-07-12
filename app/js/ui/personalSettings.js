@@ -11,8 +11,9 @@ define(['db/services'], function (services) {
 
     personalSettings.viewModel = kendo.observable({
         saveChanges: function () {
-            services.updatePersonalSettings(this.get("settings"));
-
+            if(personalSettings.validator.validate()){
+                services.updatePersonalSettings(this.get("settings"));
+            }
             //check if image has been changed
             if(personalSettings.newImage){
                 $("#imageUploadForm").submit();
@@ -50,6 +51,8 @@ define(['db/services'], function (services) {
     };
 
     personalSettings.initialize = function () {
+        personalSettings.validator = $("#personalForm").kendoValidator().data("kendoValidator");
+
         var fileLoaded = function (evt) {
             var imageData = evt.target.result;
 

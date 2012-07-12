@@ -3,20 +3,22 @@
 
     <div class="wrap">
         <h2>The Basics</h2>
-        <table>
-            <tr>
-                <td>First Name:&nbsp;</td>
-                <td><input type="text" data-bind="value: settings.FirstName"/></td>
-            </tr>
-            <tr>
-                <td>Last Name:&nbsp;</td>
-                <td><input type="text" data-bind="value: settings.LastName"/></td>
-            </tr>
-            <tr>
-                <td>Email Address:&nbsp;</td>
-                <td><input type="text" data-bind="value: settings.EmailAddress"/></td>
-            </tr>
-        </table>
+        <form id="personalForm">
+            <table>
+                <tr>
+                    <td>First Name:&nbsp;</td>
+                    <td><input type="text" name="FirstName" data-bind="value: settings.FirstName" required/></td>
+                </tr>
+                <tr>
+                    <td>Last Name:&nbsp;</td>
+                    <td><input type="text" name="LastName" data-bind="value: settings.LastName" required/></td>
+                </tr>
+                <tr>
+                    <td>Email Address:&nbsp;</td>
+                    <td><input type="email" name="EmailAddress" data-bind="value: settings.EmailAddress" required/></td>
+                </tr>
+            </table>
+        </form>
         <h2>Your Photo</h2>
         <img data-bind="attr: {src: settings.ImageUrl}" id="cropbox" onload="personalSettings.resize()"/>
         <form id="imageUploadForm" enctype="multipart/form-data" method="POST">

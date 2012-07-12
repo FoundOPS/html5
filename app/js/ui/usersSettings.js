@@ -9,12 +9,6 @@
 define(["developer", "db/services"], function (developer, services) {
     var usersSettings = {};
 
-    //region Locals
-    var grid;
-    //keep track of the last selected item, for color selector
-    var selectedItem;
-    //endregion
-
     usersSettings.initialize = function () {
         //region Setup Grid
         var dataSource = new kendo.data.DataSource({
@@ -70,7 +64,7 @@ define(["developer", "db/services"], function (developer, services) {
 
         var dataSource2 = [
             {FirstName: "Oren", LastName: "Shatken", EmailAddress: "oshatken@foundops.com", Role: "Administrator"},
-            {FirstName: "Jon", LastName: "Prel", EmailAddress: "jperl@foundops.com", Role: "Mobile"},
+            {FirstName: "Jon", LastName: "Perl", EmailAddress: "jperl@foundops.com", Role: "Mobile"},
             {FirstName: "Zach", LastName: "Bright", EmailAddress: "zbright@foundops.com", Role: "Administrator"}
         ];
 
@@ -101,13 +95,14 @@ define(["developer", "db/services"], function (developer, services) {
                     field: "Role"
                 },
                 {
-                    command: ["edit", "destroy"]
+                    command: ["edit", "destroy"],
+                    width: "80px"
                 }
             ]
         });
         //endregion
 
-        $("#addUser").on("click", function(e) {
+        $("#addUser").on("click", function() {
             var dataSrc = $("#usersGrid").data("kendoGrid").dataSource;
 
             var object = $("<div id='popupEditor'>")
@@ -138,7 +133,7 @@ define(["developer", "db/services"], function (developer, services) {
             //initialize the validator
             var validator = $(object.element).kendoValidator().data("kendoValidator");
 
-            $("#btnAdd").on("click", function(e) {
+            $("#btnAdd").on("click", function() {
                 if (validator.validate()) {
                     dataSrc.sync(); //sync changes
                     object.close();
@@ -148,7 +143,7 @@ define(["developer", "db/services"], function (developer, services) {
 
             $("#btnAdd")[0].innerText = ("Send Invite Email");
 
-            $("#btnCancel").on("click", function(e) {
+            $("#btnCancel").on("click", function() {
                 dataSrc.cancelChanges(model); //cancel changes
                 object.close();
                 object.element.remove();
@@ -169,6 +164,4 @@ define(["developer", "db/services"], function (developer, services) {
     //endregion
 
     window.usersSettings = usersSettings;
-
-    return usersSettings;
 });

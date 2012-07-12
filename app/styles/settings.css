@@ -147,6 +147,9 @@ button:hover{
 #personal form, #business form{
     margin-left: 120px;
 }
+#personal form#personalForm, #business form#businessForm{
+    margin-left: 0;
+}
 #personal button, #business button{
     margin-left: 136px;
     padding: 2px 5px;
@@ -174,6 +177,9 @@ button:hover{
 }
 /*endregion*/
 /*region Users */
+#users tbody{
+    font-size: .9em;
+}
 #addNew{
     background: url('../img/addUser.png') no-repeat;
     height: 45px;
