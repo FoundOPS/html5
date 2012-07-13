@@ -65,7 +65,4 @@ require(["containers/navigator", "silverlight", "underscore", "lib/kendo.all.min
     }
     catch (err) {
     }
-
-    //for debugging
-    silverlight.show();
 });

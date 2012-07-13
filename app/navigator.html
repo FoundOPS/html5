@@ -55,7 +55,6 @@
                 {
                     "id": "1cee129c-c02f-4692-ba30-4abbe9b60262",
                     "name": "AB Couriers",
-                    "businessLogoUrl": "img/emptyBusiness.png",
                     "sections": [
                         "Clients",
                         "Dispatcher",
@@ -70,7 +69,6 @@
                 {
                     "id": "2c7483a7-a6ae-4759-9dcf-5d46b866ce46",
                     "name": "FoundOPS",
-                    "businessLogoUrl": "img/emptyBusiness.png",
                     "sections": [
                         "Business Accounts"
                     ]
@@ -78,7 +76,6 @@
                 {
                     "id": "dd598088-1de1-4047-9337-728456e5ca25",
                     "name": "Generic Oil Collector",
-                    "businessLogoUrl": "img/emptyBusiness.png",
                     "sections": [
                         "Clients",
                         "Dispatcher",
@@ -93,7 +90,6 @@
                 {
                     "id": "1ab525c7-8eaa-4437-8f51-4849f86644f9",
                     "name": "GotGrease?",
-                    "businessLogoUrl": "img/emptyBusiness.png",
                     "sections": [
                         "Clients",
                         "Dispatcher",
@@ -110,7 +106,8 @@
                 {
                     "name": "Business Accounts",
                     "iconUrl": "img/businessAccounts.png",
-                    "hoverIconUrl": "img/businessAccountsColor.png"
+                    "hoverIconUrl": "img/businessAccountsColor.png",
+                    "isSilverlight": true
                 },
                 {
                     "name": "Clients",
@@ -269,7 +266,7 @@ mathiasbynens.be/notes/async-analytics-snippet -->
 </script>
 
 <script id="sideBarElementTemplate" type="text/x-kendo-template">
-    <a #= href # class='sideBarElement' data-color='#= color #' data-iconUrl='#= iconUrl #' data-iconHoverUrl='#= iconHoverUrl #'>
+    <a #= href # class='sideBarElement' data-color='#= color #' data-iconUrl='#= iconUrl #' data-hoverIconUrl='#= hoverIconUrl #'>
         <span class='icon' style="background: url('#= iconUrl #') #= bgX # #= bgY # no-repeat"></span>
         <span class='sectionName'>#= name #</span>
     </a>
