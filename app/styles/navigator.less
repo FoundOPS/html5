@@ -125,6 +125,20 @@ body{
     color: white;
 }
 
+/* For modern browsers */
+.clearFix:before,
+.clearFix:after {
+    content:"";
+    display:table;
+}
+.clearFix:after {
+    clear:both;
+}
+/* For IE 6/7 (trigger hasLayout) */
+.clearFix {
+    zoom:1;
+}
+
 a{
     color: @lightGrey;
     text-decoration: none;
@@ -144,12 +158,12 @@ input:focus {
 
 #nav{
     position: fixed;
+    z-index: 1;
     width: 100%;
     height: @navHeightMax;
     line-height: @navHeightMax - 4;
     box-shadow: 0px 1px 6px #888;
     text-align: left;
-    z-index: 50;
 
     img{
         max-height: 100%;
@@ -259,46 +273,55 @@ zoom: 1;*/
     margin: 0 4px;
 }
 
+#popupWrapper{
+    .borderBox;
+    position: fixed;
+    height: 100%;
+    width: 305px;
+    padding-top: @navHeightMax+@popupCarrotHeight - 4;
+}
+
 #popup{
     position: relative;
-    margin-top: @popupCarrotHeight - 2;
-    left: 0;
-    top: @navHeightMax;
-    background: #efefef;
+    .borderBox;
+    height: 100%;
+    width: 100%;
+    z-index: 2;
     color: @charcoal;
-    //border: solid @charcoal 3px;
-    border: solid @darkGrey 2px;
-    border-radius: 5px;
-    box-shadow: 0px 0px 8px #888;
-    max-height: 100%;
 
+    visibility: visible;
     a{
         color: @charcoal;
     }
 }
 
-#popupWrapper{
-    position: fixed;
-    height: 100%;
-    width: 305px;
-    z-index: 10;
-}
-
 #popupHeader{
-    //padding: 10px;
-    text-align: center;
-
-    //border-bottom: 1px solid @charcoal;
+    position: absolute;
+    .borderBox;
+    width: 100%;
+        //TODO: Fix.
+    overflow: hidden;
+    z-index: 3;
+    border-bottom: 1px solid @charcoal;
     line-height: @popupHeaderHeight;
     font-size: 16px;
+    text-align: center;
+    background: #efefef;
     border-bottom: 1px solid @darkGrey;
     box-shadow: 0px 0px 5px #888;
-    overflow: hidden;
+    border-top-right-radius: 5px;
+    border-top-left-radius: 5px;
+    border-top: 2px solid @darkGrey;
+    border-right: 2px solid @darkGrey;
+    border-left: 2px solid @darkGrey;
 }
 
 #popupArrow{
+    float: left;
     position: absolute;
-    top: -1 * @popupCarrotHeight;
+    z-index: 50;
+    margin-top: -1* @popupCarrotHeight + 2;
+    visibility: visible;
     left: 50%;
     margin-left: -1 * (@popupCarrotWidth / 2)-2;     /* Half width */
 
@@ -331,13 +354,33 @@ zoom: 1;*/
     .hover;
 }
 
+#popupContentWrapper{
+    position: relative;
+    .borderBox;
+    height: 100%;
+    width: 100%;
+    padding-top: 44px;
+}
+
 #popupContent{
-    color: @charcoal;
+    position: relative;
+    .borderBox;
+    max-height: 100%;
     text-align: left;
     font-size: 18px;
-    height: 100%;
+    //max-height?
+        //TODO: Fix.
     overflow: auto;
+    background: #efefef;
+//border: solid @charcoal 3px;
+    border-right: 2px solid @darkGrey;
+    border-bottom: 2px solid @darkGrey;
+    border-left: 2px solid @darkGrey;
+    box-shadow: 0px 0px 8px #888;
+    border-bottom-right-radius: 5px;
+    border-bottom-left-radius: 5px;
 
+    color: @charcoal;
     .last{
         border-bottom: none;
     }
@@ -374,7 +417,7 @@ zoom: 1;*/
     right: 0;
     overflow-x: hidden;
     width: @sideBarWrapperWidth;
-	z-index: 2;
+	z-index: 1;
 	.navColor;
     /*TODO: Give box shadows vendor prefixes.*/
     box-shadow: -1px 4px 6px #888;
@@ -384,6 +427,7 @@ zoom: 1;*/
     position: relative;
     z-index: 1;
     overflow: hidden;
+    overflow-y: auto;
     width: @sideBarWrapperWidth;
     max-height: 100%;
     right: 0px;
@@ -439,11 +483,12 @@ zoom: 1;*/
     left: 0;
     height: 100%;
     width: 100%;
-    z-index:0;
+    visibility: hidden;
     //display: none;
 }
 
 #content{
+    visibility: visible;
     position: relative;
     padding: 8px;
     top: @navHeightMax;
@@ -464,6 +509,15 @@ zoom: 1;*/
 .iconExpand:hover{
     opacity: @hoverOpacity;
 }
+
+.borderBox{
+    -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box;
+}
+
+/*#popupContent, #popupContent .jspContainer, #popupContent .jspPane{
+    max-height: 100%;
+    width: 100%;
+}*/
 
 .androidFixedPositionFix{
     -webkit-transition: -webkit-transform .3s ease-in-out;
@@ -527,12 +581,11 @@ zoom: 1;*/
 
 
 @media only screen and (max-width:800px){
-    #popup{
+    #popupWrapper{
         position: absolute;
     }
 
     #popupWrapper{
-        width: 80%;
     }
 
     #nav{
@@ -599,7 +652,7 @@ zoom: 1;*/
     }
 
     #popup{
-        top: @navHeightMax;
+        position: relative;
     }
 
     #contentWrapper{
@@ -613,6 +666,10 @@ zoom: 1;*/
 }
 
 @media only screen and (max-width:390px){
+    #popup{
+        width: 80%;
+    }
+
     #logo{
         display: none;
     }
