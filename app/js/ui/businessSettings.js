@@ -13,7 +13,7 @@ define(['db/services', 'developer', 'ui/personalSettings'], function (services, 
 
     businessSettings.viewModel = kendo.observable({
         saveChanges: function () {
-            if(personalSettings.validator.validate()){
+            if(businessSettings.validator.validate()){
                 services.updateBusinessSettings(this.get("settings"));
             }
             //check if image has been changed

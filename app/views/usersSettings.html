@@ -32,19 +32,20 @@
             <label for="Role">Role</label>
         </div>
         <div data-container-for="Role" class="k-edit-field">
-            <select id="Role" name="Role" data-type="text" required data-bind="value:Role">
+            <select id="Role" name="Role" data-type="text" required data-bind="value:Role" onchange="usersSettings.setDefaultValue()">
                 <option>Administrator</option>
                 <option>Regular</option>
                 <option>Mobile</option>
             </select>
         </div>
         <div class="k-edit-label">
-            <label for="Employee">Employee</label>
+            <label for="Employee">Linked Employee</label>
         </div>
         <div data-container-for="Employee" class="k-edit-field">
             <input id="Employee" name="Employee" data-bind="value:Employee" data-value-field="EmployeeId"
                    data-text-field="EmployeeName" data-source="usersSettings.dropDownDataSource" data-role="dropdownlist" />
         </div>
+        <br /><br />
         <a class="k-button k-button-icontext" id="btnAdd">
             <span class="k-icon k-update"></span>
             Update
@@ -86,11 +87,12 @@
             </select>
         </div>
         <div class="k-edit-label">
-            <label for="ExistingEmployee">Employee</label>
+            <label for="linkedEmployee">Linked Employee</label>
         </div>
         <div data-container-for="Employee" class="k-edit-field">
-            <input id="ExistingEmployee" name="Employee" data-bind="value:Employee" data-value-field="EmployeeId"
+            <input id="linkedEmployee" name="Employee" data-bind="value:Employee" data-value-field="EmployeeId"
                    data-text-field="EmployeeName" data-source="usersSettings.dropDownDataSource" data-role="dropdownlist" />
         </div>
+        <br /><br />
     </div>
 </script>

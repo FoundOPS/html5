@@ -122,6 +122,11 @@ define(['db/services'], function (services) {
         });
     };
 
+    personalSettings.show = function() {
+//        console.log(personalSettings.viewModel.get("settings").get("FirstName"));
+        kendo.bind($("#personal"), personalSettings.viewModel);
+    }
+
     //set personalSettings to a global function, so the functions are accessible from the HTML element
     window.personalSettings = personalSettings;
 

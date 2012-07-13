@@ -2,12 +2,38 @@
 
 /**
  * @fileoverview Class to hold users settings logic.
+ *
+ * if admin or regular, default to empty linked employee
+ * if mobile, default to create new
+ * if name match, default to matched existing employee
+ *
+ * dropdownlist.refresh();
  */
 
 "use strict";
 
 define(["developer", "db/services"], function (developer, services) {
     var usersSettings = {};
+
+    //region Methods
+    usersSettings.setDefaultValue = function (){
+        if ($("#Role")[0].value == "Mobile"){
+            $("#Employee")[0].kendoBindingTarget.target.select(0);
+        }else{
+            $("#Employee")[0].kendoBindingTarget.target.select(1);
+        }
+    };
+
+    //after the data is loaded, add tooltips to the edit and delete buttons
+    var onDataBound = function () {
+        $(".k-grid-edit").each(function(){
+            $(this).attr("title", "Edit");
+        });
+        $(".k-grid-delete").each(function(){
+            $(this).attr("title", "Delete");
+        });
+    };
+    //endregion
 
     usersSettings.initialize = function () {
         //region Setup Grid
@@ -36,7 +62,6 @@ define(["developer", "db/services"], function (developer, services) {
                 type: "string",
                 defaultValue: ""
             }}
-
         var dataSource = new kendo.data.DataSource({
             transport: {
                 read: {
@@ -66,22 +91,21 @@ define(["developer", "db/services"], function (developer, services) {
                 }
             }
         });
-
         var dataSource2 = [
             {FirstName: "Oren", LastName: "Shatken", EmailAddress: "oshatken@foundops.com", Role: "Administrator", Employee: { EmployeeName: "Oren Shatken", EmployeeId: 1 }},
             {FirstName: "Jon", LastName: "Perl", EmailAddress: "jperl@foundops.com", Role: "Mobile", Employee: { EmployeeName: "Jon Perl", EmployeeId: 2 }},
             {FirstName: "Zach", LastName: "Bright", EmailAddress: "zbright@foundops.com", Role: "Administrator", Employee: { EmployeeName: "Zach Bright", EmployeeId: 3 }}
         ];
-
-        var categories = [
-            { EmployeeName: "Oren Shatken", EmployeeId: 1 },
-            { EmployeeName: "Jon Perl", EmployeeId: 2 },
-            { EmployeeName: "Zach Bright", EmployeeId: 3 }
+        var employees = [
+            { EmployeeName: "none", EmployeeId: 1 },
+            { EmployeeName: "Oren Shatken", EmployeeId: 2 },
+            { EmployeeName: "Jon Perl", EmployeeId: 3 },
+            { EmployeeName: "Zach Bright", EmployeeId: 4 }
         ];
 
         usersSettings.dropDownDataSource = new kendo.data.DataSource({
             //TODO: get api datasource
-            data: categories,
+            data: employees,
             schema: {
                 model: {
                     fields: fields
@@ -102,7 +126,7 @@ define(["developer", "db/services"], function (developer, services) {
                 $(e.container)
                     .find("input[name='Employee']")
                     .data("kendoDropDownList")
-                    .bind("change", function(e) {
+                    .bind("change", function() {
                         console.log("drop down changed");
                     });
             },
@@ -168,11 +192,17 @@ define(["developer", "db/services"], function (developer, services) {
             //initialize the validator
             var validator = $(object.element).kendoValidator().data("kendoValidator");
 
+            var createNew = [{ EmployeeName: "Create New", EmployeeId: 1 }];
+            usersSettings.dropDownDataSource.data(createNew.concat(usersSettings.dropDownDataSource.options.data));
+
+            usersSettings.setDefaultValue();
+
             $("#btnAdd").on("click", function() {
                 if (validator.validate()) {
                     dataSrc.sync(); //sync changes
                     object.close();
                     object.element.remove();
+                    usersSettings.dropDownDataSource.remove(usersSettings.dropDownDataSource.at(0));
                 }
             });
 
@@ -182,21 +212,10 @@ define(["developer", "db/services"], function (developer, services) {
                 dataSrc.cancelChanges(model); //cancel changes
                 object.close();
                 object.element.remove();
+                usersSettings.dropDownDataSource.remove(usersSettings.dropDownDataSource.at(0));
             });
         });
     };
-
-    //region Methods
-    //after the data is loaded, add tooltips to the edit and delete buttons
-    var onDataBound = function () {
-        $(".k-grid-edit").each(function(){
-            $(this).attr("title", "Edit");
-        });
-        $(".k-grid-delete").each(function(){
-            $(this).attr("title", "Delete");
-        });
-    };
-    //endregion
 
     window.usersSettings = usersSettings;
 });
