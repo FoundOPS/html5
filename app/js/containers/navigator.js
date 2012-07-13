@@ -76,7 +76,7 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
             if (popupDiv.length === 0) {
                 //console.log("Popup not initialized");
                 popupDiv = this.createPopup();
-                //initPopupScrollBar();
+                //this.initPopupScrollBar();
             }
             if (popupDiv.length === 0) {
                 /*console.log("ERROR: FAILED TO CREATE POPUP!!!");*/
@@ -163,14 +163,40 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
             return offset;
         };
 
-        /** Initializes scrollbar for sidebar navigation **/
-        var initPopupScrollBar = function () {
+        /** Initializes scrollbar for popup contents **/
+        this.initPopupScrollBar = function () {
             var popupContentDiv = $("#popupContent");
             popupContentDiv.jScrollPane({
                 horizontalGutter: 0,
                 verticalGutter: 0,
                 'showArrows': false
             });
+
+            var api = popupContentDiv.data('jsp');
+            var throttleTimeout;
+            $(window).bind(
+                'resize',
+                function()
+                {
+                    if ($.browser.msie) {
+                        // IE fires multiple resize events while you are dragging the browser window which
+                        // causes it to crash if you try to update the scrollpane on every one. So we need
+                        // to throttle it to fire a maximum of once every 50 milliseconds...
+                        if (!throttleTimeout) {
+                            throttleTimeout = setTimeout(
+                                function()
+                                {
+                                    api.reinitialise();
+                                    throttleTimeout = null;
+                                },
+                                50
+                            );
+                        }
+                    } else {
+                        api.reinitialise();
+                    }
+                }
+            );
             popupContentDiv.data('jsp').reinitialise();
         };
 
@@ -224,14 +250,21 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
             );
 
             //Click listener to detect clicks outside of popup
-            $('html').on('click touchend', function (e) {
-                var clicked = $(e.target);
-                //TODO: Return if not visible.
-                var popupLen = clicked.parents("#popup").length + clicked.is("#popup") ? 1 : 0;
-                var navLen = clicked.parents(".navElement").length + clicked.is(".navElement") ? 1 : 0;
-                if (popupLen === 0 && navLen === 0) {
-                    thisPopup.closePopup();
+            $('html')
+                .on('click touchend', function (e) {
+                    var clicked = $(e.target);
+                    //TODO: Return if not visible.
+                    var popupLen = clicked.parents("#popup").length + clicked.is("#popup") ? 1 : 0;
+                    var navLen = clicked.parents(".navElement").length + clicked.is(".navElement") ? 1 : 0;
+                    if (popupLen === 0 && navLen === 0) {
+                        thisPopup.closePopup();
+                    }
                 }
+            );
+
+            //TODO: Move to main.js or check if loaded.
+            $("#silverlightControlHost").focusin(function(e) {
+                thisPopup.closePopup();
             });
 
             $(document)
@@ -250,6 +283,7 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
                     if($(this).hasClass("popupEvent")){
                         $(this).trigger("popupEvent", $(this));
                         //console.log(thisPopup.getAction());
+                        //TODO: Move out of Popup and into listener for popupEvent.
                         if(thisPopup.getAction()==="changeBusiness"){
                             thisPopup.changeBusiness($(this));
                         }

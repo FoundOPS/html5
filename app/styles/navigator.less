@@ -427,6 +427,7 @@ zoom: 1;*/
     position: relative;
     z-index: 1;
     overflow: hidden;
+    overflow-y: auto;
     width: @sideBarWrapperWidth;
     max-height: 100%;
     right: 0px;
@@ -512,6 +513,11 @@ zoom: 1;*/
 .borderBox{
     -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box;
 }
+
+/*#popupContent, #popupContent .jspContainer, #popupContent .jspPane{
+    max-height: 100%;
+    width: 100%;
+}*/
 
 .androidFixedPositionFix{
     -webkit-transition: -webkit-transform .3s ease-in-out;
