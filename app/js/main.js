@@ -20,10 +20,11 @@ require(["containers/navigator", "silverlight", "underscore", "lib/kendo.all.min
     //whenever a section is chosen, choose it in the silverlight app
     $(document).on("sectionSelected", function (e, section) {
         if (!section.isSilverlight) {
-            silverlight.hide();
-
             if (section.name === "Feedback and Support") {
                 UserVoice.showPopupWidget();
+            }
+            else {
+                silverlight.hide();
             }
         }
         else {
