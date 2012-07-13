@@ -1,30 +1,51 @@
 define(function () {
     var silverlight = {};
 
+    /**
+     * Hide the silverlight plugin
+     */
     silverlight.hide = function () {
         document.getElementById("silverlightControlHost").style.visibility = "hidden";
         document.getElementById("remoteContent").style.visibility = "visible";
     };
 
+    /**
+     * Show the silverlight plugin
+     */
     silverlight.show = function () {
         document.getElementById("remoteContent").style.visibility = "hidden";
         document.getElementById("silverlightControlHost").style.visibility = "visible";
     };
 
-    //Access function for silverlight to get around a security exception for Http Gets that do not have a crossdomainpolicy
-    window.httpGet = function (url) {
-        var img = new Image();
-        img.src = url;
+    /**
+     * Navigate to a section
+     * @param {{name: string}}  section
+     */
+    silverlight.navigate = function (section) {
+        try {
+            silverlight.show();
+            silverlight.plugin.navigationVM.NavigateToView(section.name);
+        }
+        catch (err) {
+        }
     };
 
+    /**
+     * Change the current role
+     * @param {{id: string}} role
+     */
+    silverlight.setRole = function (role) {
+        try {
+            silverlight.plugin.navigationVM.ChangeRole(role.id);
+        }
+        catch (err) {
+        }
+    };
+
+    //#region Setup functions for the silverlight object
     window.onSilverlightPluginLoaded = function (sender, args) {
         silverlight.plugin = document.getElementById('silverlightPlugin').Content;
         $(silverlight).trigger('loaded');
-    };
-
-    //TODO MOVE TO NATIVE
-    window.openUserVoice = function () {
-        UserVoice.showPopupWidget();
     };
     window.onSilverlightError = function (sender, args) {
         var appSource = "";
@@ -65,6 +86,15 @@ define(function () {
         myText.Text = (Math.round(eventArgs.progress * 100)).toString();
         var myBar = sender.findName("ProgressBarTransform");
         myBar.ScaleX = eventArgs.progress;
+    };
+    //#endregion
+
+    //This is for invoking totango tracking events
+    //for silverlight to get around a security exception
+    //with cross-domain Http Gets that do not have a crossdomainpolicy
+    window.httpGetImage = function (url) {
+        var img = new Image();
+        img.src = url;
     };
 
     return silverlight;

@@ -553,9 +553,9 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
             var name = currentSection.name;
             var color = currentSection.color;
             var iconUrl = currentSection.iconUrl;
-            var iconHoverUrl = currentSection.iconHoverUrl;
+            var hoverIconUrl = currentSection.hoverIconUrl;
             //TODO: Implement sprite selection.
-            $('<img/>').src = iconHoverUrl;//toHoverImage(iconUrl);
+            $('<img/>').src = hoverIconUrl;//toHoverImage(iconUrl);
             //Default values unless sprite.
             var bgX = 'center';
             var bgY = 'center';
@@ -566,7 +566,7 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
                 href: href,
                 color: color,
                 iconUrl: iconUrl,
-                iconHoverUrl: iconHoverUrl,
+                hoverIconUrl: hoverIconUrl,
                 bgX: bgX,
                 bgY: bgY,
                 name: name
@@ -579,7 +579,7 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
             "touchstart mouseenter": function () {
                 $(this).stop(true, true).addClass($(this).attr('data-color'));
                 //var image = $(this).find(".icon:first").css('background-image').replace(/^url|[\(\)]/g, '');
-                var hoverImg = $(this).attr("data-iconHoverUrl");//getSection(config.sections, $(this).find(".sectionName").html()).iconHoverUrl;//toHoverImage(image);
+                var hoverImg = $(this).attr("data-hoverIconUrl");//getSection(config.sections, $(this).find(".sectionName").html()).iconHoverUrl;//toHoverImage(image);
                 $(this).find(".icon").css('background-image', 'url(' + hoverImg + ')');
             },
             "touchend mouseleave mouseup": function () {
