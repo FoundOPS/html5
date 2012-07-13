@@ -23,6 +23,31 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
                 contents: [
                     {"name": "Settings", url: data.settingsUrl},
                     {"name": "Change Business", id: "changeBusiness"},
+                    {"name": "Change Business", id: "changeBusiness"},
+                    {"name": "Change Business", id: "changeBusiness"},
+                    {"name": "Change Business", id: "changeBusiness"},
+                    {"name": "Change Business", id: "changeBusiness"},
+                    {"name": "Change Business", id: "changeBusiness"},
+                    {"name": "Change Business", id: "changeBusiness"},
+                    {"name": "Change Business", id: "changeBusiness"},
+                    {"name": "Change Business", id: "changeBusiness"},
+                    {"name": "Change Business", id: "changeBusiness"},
+                    {"name": "Change Business", id: "changeBusiness"},
+                    {"name": "Change Business", id: "changeBusiness"},
+                    {"name": "Change Business", id: "changeBusiness"},
+                    {"name": "Change Business", id: "changeBusiness"},
+                    {"name": "Change Business", id: "changeBusiness"},
+                    {"name": "Change Business", id: "changeBusiness"},
+                    {"name": "Change Business", id: "changeBusiness"},
+                    {"name": "Change Business", id: "changeBusiness"},
+                    {"name": "Change Business", id: "changeBusiness"},
+                    {"name": "Change Business", id: "changeBusiness"},
+                    {"name": "Change Business", id: "changeBusiness"},
+                    {"name": "Change Business", id: "changeBusiness"},
+                    {"name": "Change Business", id: "changeBusiness"},
+                    {"name": "Change Business", id: "changeBusiness"},
+                    {"name": "Change Business", id: "changeBusiness"},
+                    {"name": "Change Business", id: "changeBusiness"},
                     {"name": "Logout", url: data.logoutUrl}
                 ]
             }
@@ -157,15 +182,17 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
             popupDiv.attr("id", "popupWrapper");
 
             var s = "<div id='popup'>" +
-                "<div id='currentPopupAction' style='display: none;'></div>" +
-                "<div id='popupArrow'></div>" +
-                "<div id='popupHeader'>" +
-                    "<a id='popupBack'></a>" +
-                    "<span id='popupTitle'></span>" +
-                    "<a id='popupClose'></a>" +
-                    "</div>" +
-                    "<div id='popupContent'></div>" +
-                "</div></div>";
+                        "<div id='popupArrow'></div>" +
+                        "<div id='currentPopupAction' style='display: none;'></div>" +
+                        "<div id='popupHeader'>" +
+                            "<a id='popupBack'></a>" +
+                            "<span id='popupTitle'></span>" +
+                            "<a id='popupClose'></a>" +
+                        "</div>" +
+                        "<div id='popupContentWrapper'>" +
+                            "<div id='popupContent'></div>" +
+                        "</div>" +
+                    "</div>";
             popupDiv.html(s);
             popupDiv.css("display", "none");
 

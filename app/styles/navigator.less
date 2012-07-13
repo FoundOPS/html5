@@ -125,6 +125,20 @@ body{
     color: white;
 }
 
+/* For modern browsers */
+.clearFix:before,
+.clearFix:after {
+    content:"";
+    display:table;
+}
+.clearFix:after {
+    clear:both;
+}
+/* For IE 6/7 (trigger hasLayout) */
+.clearFix {
+    zoom:1;
+}
+
 a{
     color: @lightGrey;
     text-decoration: none;
@@ -260,50 +274,54 @@ zoom: 1;*/
 }
 
 #popupWrapper{
+    .borderBox;
     position: fixed;
-    visibility: hidden;
     height: 100%;
     width: 305px;
+    padding-top: @navHeightMax+@popupCarrotHeight - 4;
 }
 
 #popup{
-    visibility: visible;
-    float: left;
     position: relative;
-    z-index: 2;
-    margin-top: @popupCarrotHeight - 2;
-    left: 0;
-    top: @navHeightMax;
-    background: #efefef;
-    color: @charcoal;
-//border: solid @charcoal 3px;
-    border: solid @darkGrey 2px;
-    border-radius: 5px;
-    box-shadow: 0px 0px 8px #888;
-    max-height: 100%;
+    .borderBox;
+    height: 100%;
     width: 100%;
-    overflow: auto;
+    z-index: 2;
+    color: @charcoal;
 
+    visibility: visible;
     a{
         color: @charcoal;
     }
 }
-#popupHeader{
-    //padding: 10px;
-    text-align: center;
 
-    //border-bottom: 1px solid @charcoal;
+#popupHeader{
+    position: absolute;
+    .borderBox;
+    width: 100%;
+        //TODO: Fix.
+    overflow: hidden;
+    z-index: 3;
+    border-bottom: 1px solid @charcoal;
     line-height: @popupHeaderHeight;
     font-size: 16px;
+    text-align: center;
+    background: #efefef;
     border-bottom: 1px solid @darkGrey;
     box-shadow: 0px 0px 5px #888;
-    overflow: hidden;
+    border-top-right-radius: 5px;
+    border-top-left-radius: 5px;
+    border-top: 2px solid @darkGrey;
+    border-right: 2px solid @darkGrey;
+    border-left: 2px solid @darkGrey;
 }
 
 #popupArrow{
+    float: left;
     position: absolute;
+    z-index: 50;
+    margin-top: -1* @popupCarrotHeight + 2;
     visibility: visible;
-    top: -1 * @popupCarrotHeight;
     left: 50%;
     margin-left: -1 * (@popupCarrotWidth / 2)-2;     /* Half width */
 
@@ -336,14 +354,33 @@ zoom: 1;*/
     .hover;
 }
 
+#popupContentWrapper{
+    position: relative;
+    .borderBox;
+    height: 100%;
+    width: 100%;
+    padding-top: 44px;
+}
+
 #popupContent{
-    color: @charcoal;
+    position: relative;
+    .borderBox;
+    max-height: 100%;
     text-align: left;
     font-size: 18px;
     //max-height?
-    height: 100%;
+        //TODO: Fix.
     overflow: auto;
+    background: #efefef;
+//border: solid @charcoal 3px;
+    border-right: 2px solid @darkGrey;
+    border-bottom: 2px solid @darkGrey;
+    border-left: 2px solid @darkGrey;
+    box-shadow: 0px 0px 8px #888;
+    border-bottom-right-radius: 5px;
+    border-bottom-left-radius: 5px;
 
+    color: @charcoal;
     .last{
         border-bottom: none;
     }
@@ -472,6 +509,10 @@ zoom: 1;*/
     opacity: @hoverOpacity;
 }
 
+.borderBox{
+    -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box;
+}
+
 .androidFixedPositionFix{
     -webkit-transition: -webkit-transform .3s ease-in-out;
     -moz-transition: -moz-transform .3s ease-in-out;
@@ -534,12 +575,11 @@ zoom: 1;*/
 
 
 @media only screen and (max-width:800px){
-    #popup{
+    #popupWrapper{
         position: absolute;
     }
 
     #popupWrapper{
-        width: 80%;
     }
 
     #nav{
@@ -606,7 +646,7 @@ zoom: 1;*/
     }
 
     #popup{
-        top: @navHeightMax;
+        position: relative;
     }
 
     #contentWrapper{
@@ -620,6 +660,10 @@ zoom: 1;*/
 }
 
 @media only screen and (max-width:390px){
+    #popup{
+        width: 80%;
+    }
+
     #logo{
         display: none;
     }
