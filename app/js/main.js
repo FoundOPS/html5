@@ -11,7 +11,48 @@ require.config({
     }
 });
 
-require(["containers/navigator", "silverlight", "underscore", "lib/kendo.all.min"], function (Navigator, silverlight) {
+require(["containers/navigator", "silverlight", "underscore", "lib/kendo.all.min", "lib/userVoice"], function (Navigator, silverlight) {
+    //setup the navigator
+    var navigator = new Navigator(window.navigatorConfig);
+    navigator.hideSearch();
+
+    //TODO make sectionSelected a navigator event
+    //whenever a section is chosen, choose it in the silverlight app
+    $(document).on("sectionSelected", function (e, section) {
+        if (!section.isSilverlight) {
+            silverlight.hide();
+
+            if (section.name === "Feedback and Support") {
+                UserVoice.showPopupWidget();
+            }
+        }
+        else {
+            silverlight.navigate(section);
+        }
+    });
+
+    //TODO make roleSelected a navigator event
+    //whenever a role is changed, choose it in the silverlight app
+    $(document).on("roleSelected", function (e, role) {
+        silverlight.setRole(role);
+    });
+
+    //when the silverlight plugin loads:
+    //a) hook into the silverlight click events, and hide the navigator popup
+    //b) set the initial roleId
+    $(silverlight).bind('loaded', function () {
+        //a)
+        silverlight.plugin.mainPage.addEventListener("Clicked", function () {
+            navigator.closePopup();
+        });
+
+        //b)
+        silverlight.setRole(window.navigatorConfig.roles[0]);
+    });
+
+    //hookup remote loading into remoteContent, by using the kendo mobile application
+    var application = new kendo.mobile.Application($("#remoteContent"), { initial: "view/updates.html"});
+
     //setup page tracking
     try {
         var pageTracker = window._gat._getTracker("UA-25857232-1");
@@ -24,42 +65,6 @@ require(["containers/navigator", "silverlight", "underscore", "lib/kendo.all.min
     catch (err) {
     }
 
-    //setup the navigator
-    var navigator = new Navigator(window.navigatorConfig);
-    navigator.hideSearch();
-
-    //whenever a section is chosen, choose it in the silverlight app
-    $(document).on("sectionSelected", function (e, section) {
-        try {
-            if (section.isSilverlight) {
-                silverlight.show();
-                silverlight.plugin.navigationVM.NavigateToView(section.name);
-            }
-            else {
-                silverlight.hide();
-            }
-        }
-        catch (err) {
-        }
-    });
-
-    //whenever a role is changed, choose it in the silverlight app
-    $(document).on("roleSelected", function (e, role) {
-        try {
-            silverlight.plugin.navigationVM.ChangeRole(role.id);
-        }
-        catch (err) {
-        }
-    });
-
-    //hook into the silverlight click events, and hide the popup
-    $(silverlight).bind('loaded', function () {
-        silverlight.plugin.mainPage.addEventListener("Clicked", function () {
-            navigator.closePopup();
-        });
-    });
-
-    var application = new kendo.mobile.Application($("#remoteContent"), { initial: "view/updates.html"});
+    //for debugging
     silverlight.show();
-//    _.delay(silverlight.show, 3000);
 });

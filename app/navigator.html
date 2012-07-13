@@ -49,23 +49,116 @@
         //window.navigatorConfig = @Html.Raw(((Dictionary<string, object>)@Model)["NavigatorConfig"]);
         //If debugging
         window.navigatorConfig = {
-            name:"Jordan Kelly",
-            avatarUrl:"./img/david.png",
-            settingsUrl: "#settings",
-            logoutUrl: "#logout",
-            roles:[
-                    //TODO: Fix crash with no roles.
-                {name:"AB Couriers", id:"64729-24242-242442", businessLogoUrl:"./img/got-grease-logo.png", sections:["Dispatcher", "Regions", "Services", "Vehicles"]},
-                {name:"FoundOPS", id:"23144-24242-242442", businessLogoUrl:"./img/got-grease-logo.png", sections:["Business Accounts"]},
-                {name:"GotGrease", id:"95838-24242-242442", businessLogoUrl:"./img/got-grease-logo.png", sections:["Dispatcher", "Employees", "Regions", "Services", "Vehicles"]}
+            "name": "Jonathan Perl",
+            "avatarUrl": "img/emptyPerson.png",
+            "roles": [
+                {
+                    "id": "1cee129c-c02f-4692-ba30-4abbe9b60262",
+                    "name": "AB Couriers",
+                    "businessLogoUrl": "img/emptyBusiness.png",
+                    "sections": [
+                        "Clients",
+                        "Dispatcher",
+                        "Employees",
+                        "Feedback and Support",
+                        "Locations",
+                        "Regions",
+                        "Services",
+                        "Vehicles"
+                    ]
+                },
+                {
+                    "id": "2c7483a7-a6ae-4759-9dcf-5d46b866ce46",
+                    "name": "FoundOPS",
+                    "businessLogoUrl": "img/emptyBusiness.png",
+                    "sections": [
+                        "Business Accounts"
+                    ]
+                },
+                {
+                    "id": "dd598088-1de1-4047-9337-728456e5ca25",
+                    "name": "Generic Oil Collector",
+                    "businessLogoUrl": "img/emptyBusiness.png",
+                    "sections": [
+                        "Clients",
+                        "Dispatcher",
+                        "Employees",
+                        "Feedback and Support",
+                        "Locations",
+                        "Regions",
+                        "Services",
+                        "Vehicles"
+                    ]
+                },
+                {
+                    "id": "1ab525c7-8eaa-4437-8f51-4849f86644f9",
+                    "name": "GotGrease?",
+                    "businessLogoUrl": "img/emptyBusiness.png",
+                    "sections": [
+                        "Clients",
+                        "Dispatcher",
+                        "Employees",
+                        "Feedback and Support",
+                        "Locations",
+                        "Regions",
+                        "Services",
+                        "Vehicles"
+                    ]
+                }
             ],
-            sections:[
-                {name:"Business Accounts", color:"red", isSilverlight: true, iconUrl:"img/employees.png", iconHoverUrl: "img/employeesColor.png"},
-                {name:"Dispatcher", color:"green", isSilverlight: true, iconUrl:"img/dispatcher.png", iconHoverUrl: "img/dispatcherColor.png"},
-                {name:"Employees", color:"red", iconUrl:"img/employees.png", iconHoverUrl: "img/employeesColor.png"},
-                {name:"Regions", isSilverlight: true, color:"orange", iconUrl:"./img/regions.png", iconHoverUrl: "img/regionsColor.png"},
-                {name:"Services", url:"#services", color:"green", iconUrl:"./img/services.png", iconHoverUrl: "img/servicesColor.png"},
-                {name:"Vehicles", color:"red", isSilverlight: true, iconUrl:"./img/vehicles.png", iconHoverUrl: "img/vehiclesColor.png"}
+            "sections": [
+                {
+                    "name": "Business Accounts",
+                    "iconUrl": "img/businessAccounts.png",
+                    "hoverIconUrl": "img/businessAccountsColor.png"
+                },
+                {
+                    "name": "Clients",
+                    "iconUrl": "img/clients.png",
+                    "hoverIconUrl": "img/clientsColor.png",
+                    "isSilverlight": true
+                },
+                {
+                    "name": "Dispatcher",
+                    "iconUrl": "img/dispatcher.png",
+                    "hoverIconUrl": "img/dispatcherColor.png",
+                    "isSilverlight": true
+                },
+                {
+                    "name": "Employees",
+                    "iconUrl": "img/employees.png",
+                    "hoverIconUrl": "img/employeesColor.png",
+                    "isSilverlight": true
+                },
+                {
+                    "name": "Feedback and Support",
+                    "iconUrl": "img/uservoice.png",
+                    "hoverIconUrl": "img/uservoiceColor.png"
+                },
+                {
+                    "name": "Locations",
+                    "iconUrl": "img/locations.png",
+                    "hoverIconUrl": "img/locationsColor.png",
+                    "isSilverlight": true
+                },
+                {
+                    "name": "Regions",
+                    "iconUrl": "img/regions.png",
+                    "hoverIconUrl": "img/regionsColor.png",
+                    "isSilverlight": true
+                },
+                {
+                    "name": "Services",
+                    "iconUrl": "img/services.png",
+                    "hoverIconUrl": "img/servicesColor.png",
+                    "isSilverlight": true
+                },
+                {
+                    "name": "Vehicles",
+                    "iconUrl": "img/vehicles.png",
+                    "hoverIconUrl": "img/vehiclesColor.png",
+                    "isSilverlight": true
+                }
             ]
         };
     </script>
