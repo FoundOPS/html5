@@ -144,12 +144,12 @@ input:focus {
 
 #nav{
     position: fixed;
+    z-index: 1;
     width: 100%;
     height: @navHeightMax;
     line-height: @navHeightMax - 4;
     box-shadow: 0px 1px 6px #888;
     text-align: left;
-    z-index: 50;
 
     img{
         max-height: 100%;
@@ -259,31 +259,35 @@ zoom: 1;*/
     margin: 0 4px;
 }
 
+#popupWrapper{
+    position: fixed;
+    visibility: hidden;
+    height: 100%;
+    width: 305px;
+}
+
 #popup{
+    visibility: visible;
+    float: left;
     position: relative;
+    z-index: 2;
     margin-top: @popupCarrotHeight - 2;
     left: 0;
     top: @navHeightMax;
     background: #efefef;
     color: @charcoal;
-    //border: solid @charcoal 3px;
+//border: solid @charcoal 3px;
     border: solid @darkGrey 2px;
     border-radius: 5px;
     box-shadow: 0px 0px 8px #888;
     max-height: 100%;
+    width: 100%;
+    overflow: auto;
 
     a{
         color: @charcoal;
     }
 }
-
-#popupWrapper{
-    position: fixed;
-    height: 100%;
-    width: 305px;
-    z-index: 10;
-}
-
 #popupHeader{
     //padding: 10px;
     text-align: center;
@@ -298,6 +302,7 @@ zoom: 1;*/
 
 #popupArrow{
     position: absolute;
+    visibility: visible;
     top: -1 * @popupCarrotHeight;
     left: 50%;
     margin-left: -1 * (@popupCarrotWidth / 2)-2;     /* Half width */
@@ -335,6 +340,7 @@ zoom: 1;*/
     color: @charcoal;
     text-align: left;
     font-size: 18px;
+    //max-height?
     height: 100%;
     overflow: auto;
 
@@ -374,7 +380,7 @@ zoom: 1;*/
     right: 0;
     overflow-x: hidden;
     width: @sideBarWrapperWidth;
-	z-index: 2;
+	z-index: 1;
 	.navColor;
     /*TODO: Give box shadows vendor prefixes.*/
     box-shadow: -1px 4px 6px #888;
@@ -439,11 +445,12 @@ zoom: 1;*/
     left: 0;
     height: 100%;
     width: 100%;
-    z-index:0;
+    visibility: hidden;
     //display: none;
 }
 
 #content{
+    visibility: visible;
     position: relative;
     padding: 8px;
     top: @navHeightMax;
