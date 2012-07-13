@@ -3,8 +3,6 @@
 /**
  * @fileoverview Class to hold users settings logic.
  *
- * if admin or regular, default to empty linked employee
- * if mobile, default to create new
  * if name match, default to matched existing employee
  *
  * dropdownlist.refresh();
