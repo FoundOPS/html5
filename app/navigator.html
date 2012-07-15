@@ -166,12 +166,12 @@
     <div id="content">
         <div id="remoteContent">
         </div>
-        <div id="silverlightControlHost" style="visibility: hidden; z-index: 0;">
+        <div id="silverlightControlHost" style="z-index: 0;">
             <object id="silverlightPlugin" data="data:application/x-silverlight-2," type="application/x-silverlight-2" width="100%" height="100%">
                 <param name="onSourceDownloadProgressChanged" value="onSourceDownloadProgressChanged" />
                 <!--if debugging outside of VS-->
                 <param name="splashscreensource" value="http://localhost:31820/ClientBin/SplashScreen.xaml" />
-                <param name="source" value="http://localhost:31820/ClientBin/FoundOps.SLClient.Navigator.xap"/>
+                <param name="source" value="http://localhost:31820/ClientBin/FoundOps.SLClient.Navigator.xap?rev=1"/>
 
                 <!--if in VS-->
                 <!--@{-->

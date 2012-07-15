@@ -32,6 +32,12 @@ require(["containers/navigator", "silverlight", "underscore", "lib/kendo.all.min
         }
     });
 
+    //a workaround for opening the importer
+    //this is called when the importer view is shown
+    window.openImporter = function(){
+        silverlight.navigate("Importer");
+    };
+
     //TODO make roleSelected a navigator event
     //whenever a role is changed, choose it in the silverlight app
     $(document).on("roleSelected", function (e, role) {
@@ -39,15 +45,13 @@ require(["containers/navigator", "silverlight", "underscore", "lib/kendo.all.min
     });
 
     //when the silverlight plugin loads:
-    //a) hook into the silverlight click events, and hide the navigator popup
-    //b) set the initial roleId
     $(silverlight).bind('loaded', function () {
-        //a)
+        //a) hook into the silverlight click events, and hide the navigator popup
         silverlight.plugin.mainPage.addEventListener("Clicked", function () {
             navigator.closePopup();
         });
 
-        //b)
+        //b) set the initial roleId
         silverlight.setRole(window.navigatorConfig.roles[0]);
     });
 

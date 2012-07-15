@@ -1,11 +1,27 @@
 define(function () {
     var silverlight = {};
 
+    window.silverlight = silverlight;
+
+    //In case a section is not chosen start with the Dispatcher
+    var currentSection = "Dispatcher";
+    /**
+     * Returns the current section. When the silverlight client loads, it will open this section.
+     * @return {String}
+     */
+    silverlight.getCurrentSection = function () {
+        return currentSection;
+    }
+
     /**
      * Hide the silverlight plugin
      */
     silverlight.hide = function () {
-        document.getElementById("silverlightControlHost").style.visibility = "hidden";
+        //instead of hiding the silverlight (which will disable it), make it really small
+        document.getElementById("silverlightControlHost").style.height = "1px";
+        document.getElementById("silverlightControlHost").style.width = "1px";
+
+        //show the remote content
         document.getElementById("remoteContent").style.visibility = "visible";
     };
 
@@ -13,8 +29,11 @@ define(function () {
      * Show the silverlight plugin
      */
     silverlight.show = function () {
+        //show the silverlight client
+        document.getElementById("silverlightControlHost").style.height = "100%";
+        document.getElementById("silverlightControlHost").style.width = "100%";
+
         document.getElementById("remoteContent").style.visibility = "hidden";
-        document.getElementById("silverlightControlHost").style.visibility = "visible";
     };
 
     /**
@@ -22,6 +41,8 @@ define(function () {
      * @param {{name: string}}  section
      */
     silverlight.navigate = function (section) {
+        silverlight.currentSection = section;
+
         try {
             silverlight.show();
             silverlight.plugin.navigationVM.NavigateToView(section.name);
@@ -96,6 +117,8 @@ define(function () {
         var img = new Image();
         img.src = url;
     };
+
+    silverlight.hide();
 
     return silverlight;
 });
