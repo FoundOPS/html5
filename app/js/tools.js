@@ -28,11 +28,16 @@ define(['underscore', 'developer'], function (_, developer) {
 
     /**
      * Checks whether the date (without the time) are equal.
+     * Ignores UTC.  this is useful for choosing the client's
      * @param {Date} a
      * @param {Date} b
+     * @param {Boolean} ignoreUtc If true it will compare the straight date and ignore utc
      * @return {Boolean}
      */
-    tools.dateEqual = function (a, b) {
+    tools.dateEqual = function (a, b, ignoreUtc) {
+        if (ignoreUtc)
+            return a.getDate() === b.getDate() && a.getMonth() === b.getMonth() && a.getFullYear() === b.getFullYear();
+
         return a.getUTCDate() === b.getUTCDate() && a.getUTCMonth() === b.getUTCMonth() && a.getUTCFullYear() === b.getUTCFullYear();
     };
 
@@ -43,9 +48,9 @@ define(['underscore', 'developer'], function (_, developer) {
      * @return {string} The date formatted in "m-dd-yyyy".
      */
     tools.formatDate = function (date) {
-            var month = date.getUTCMonth() + 1,
-                day = date.getUTCDate(),
-                year = date.getUTCFullYear();
+        var month = date.getUTCMonth() + 1,
+            day = date.getUTCDate(),
+            year = date.getUTCFullYear();
         return month + "-" + day + "-" + year;
     };
 

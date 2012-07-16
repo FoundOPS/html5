@@ -19,7 +19,7 @@ define(['lib/kendo.mobile.min', 'developer', 'tools'], function (k, developer, t
     };
 
     var apiUrl;
-//setup the api url depending on the mode
+    //setup the api url depending on the mode
     var mode = developer.CURRENT_DATA_SOURCE;
     if (mode === developer.DataSource.LOCALAPI) {
         apiUrl = 'http://localhost:9711/api/';
@@ -158,6 +158,59 @@ define(['lib/kendo.mobile.min', 'developer', 'tools'], function (k, developer, t
         }).success(function (response) {
                 callback(response);
             });
+    };
+
+    /**
+     * Get personal user settings.
+     * @param {!function(Array.<Object>)} callback A callback to pass the loaded settings.
+     */
+    services.getPersonalSettings = services._getHttp('settings/GetPersonalSettings', {}, false);
+
+    /**
+     * Updates personal user settings.
+     * @param {!function(Array.<Object>)} settings The loaded settings.
+     */
+    services.updatePersonalSettings = function (settings) {
+        $.ajax({
+            url: services.API_URL + "settings/UpdatePersonalSettings",
+            type: "POST",
+            dataType: "json",
+            contentType: 'application/json',
+            data: JSON.stringify(settings)
+        });
+    };
+
+    /**
+     * Updates personal password.
+     * @param {string} oldPass.
+     * @param {string} newPass.
+     * @param {string} confirmPass.
+     */
+    services.updatePassword = function (oldPass, newPass, confirmPass) {
+        $.ajax({
+            url: services.API_URL + "settings/UpdatePassword?oldPass=" + oldPass + "&newPass=" + newPass + "&confirmPass=" + confirmPass,
+            type: "POST"
+        });
+    };
+
+    /**
+     * Get business settings.
+     * @param {!function(Array.<Object>)} callback A callback to pass the loaded settings.
+     */
+    services.getBusinessSettings = services._getHttp('settings/GetBusinessSettings', {roleId: developer.GOTGREASE_ROLE_ID}, false);
+
+    /**
+     * Updates businesssettings.
+     * @param {(Array.<Object>)} settings The updated settings.
+     */
+    services.updateBusinessSettings = function (settings) {
+        $.ajax({
+            url: services.API_URL + "settings/UpdateBusinessSettings?roleId=" + developer.GOTGREASE_ROLE_ID,
+            type: "POST",
+            dataType: "json",
+            contentType: 'application/json',
+            data: JSON.stringify(settings)
+        });
     };
 
     /**

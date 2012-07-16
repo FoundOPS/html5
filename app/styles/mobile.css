@@ -1,6 +1,23 @@
+body {
+    font-family: Roboto,HelveticaNeue,sans-serif;
+}
 #address-label {
     font-size: x-small;
-    position: absolute;
-    top: 21px;
-    left: 12px;
+    margin-bottom: -15px;
+    margin-top: -20px;
+ }
+#contactData {
+    font-size: x-small;
+    margin: -20px 0px -15px -1px;
+}
+#locationInfo p {
+    margin-top: -10px;
+    font-size: 1.3em;
+    font-weight: normal;
+}
+.km-listview-wrapper li {
+    margin-top: -5px;
+}
+.km-listview-wrapper li a {
+    text-decoration: none;
 }
