@@ -14,13 +14,15 @@
             <label for="FirstName">First Name</label>
         </div>
         <div data-container-for="FirstName" class="k-edit-field">
-            <input type="text" id="FirstName" name="FirstName" required="required" data-type="text" data-bind="value:FirstName" data-role="textbox"/>
+            <input type="text" id="FirstName" name="FirstName" required="required" data-type="text" data-bind="value:FirstName"
+                   data-role="textbox" onchange="usersSettings.matchEmployee('FirstName', 'LastName', 'Employee')"/>
         </div>
         <div class="k-edit-label">
             <label for="LastName">Last Name</label>
         </div>
         <div data-container-for="LastName" class="k-edit-field">
-            <input type="text" id="LastName" name="LastName" required="required" data-type="text" data-bind="value:LastName" data-role="textbox"/>
+            <input type="text" id="LastName" name="LastName" required="required" data-type="text" data-bind="value:LastName"
+                   data-role="textbox" onchange="usersSettings.matchEmployee('FirstName', 'LastName', 'Employee')"/>
         </div>
         <div class="k-edit-label">
             <label for="EmailAddress">Email</label>
@@ -62,13 +64,13 @@
             <label for="First">First Name</label>
         </div>
         <div data-container-for="FirstName" class="k-edit-field">
-            <input type="text" id="First" name="First" required data-type="text" data-bind="value:FirstName" data-role="textbox"/>
+            <input type="text" id="First" name="First" required data-type="text" data-bind="value:FirstName" data-role="textbox" onchange="usersSettings.matchEmployee('First', 'Last', 'linkedEmployee')"/>
         </div>
         <div class="k-edit-label">
             <label for="Last">Last Name</label>
         </div>
         <div data-container-for="LastName" class="k-edit-field">
-            <input type="text" id="Last" name="Last" required data-type="text" data-bind="value:LastName" data-role="textbox"/>
+            <input type="text" id="Last" name="Last" required data-type="text" data-bind="value:LastName" data-role="textbox" onchange="usersSettings.matchEmployee('First', 'Last', 'linkedEmployee')"/>
         </div>
         <div class="k-edit-label">
             <label for="Email">Email</label>

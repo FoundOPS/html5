@@ -2,10 +2,6 @@
 
 /**
  * @fileoverview Class to hold users settings logic.
- *
- * if name match, default to matched existing employee
- *
- * dropdownlist.refresh();
  */
 
 "use strict";
@@ -16,9 +12,26 @@ define(["developer", "db/services"], function (developer, services) {
     //region Methods
     usersSettings.setDefaultValue = function (){
         if ($("#Role")[0].value == "Mobile"){
+            //if the role is mobile, set the default linked employee to "none"
             $("#Employee")[0].kendoBindingTarget.target.select(0);
         }else{
+            //if the role is admin or regular, set the default linked employee to "Create New"
             $("#Employee")[0].kendoBindingTarget.target.select(1);
+        }
+    };
+
+    //on add and edit, select a linked employee if the name matches the name in the form
+    usersSettings.matchEmployee = function (first, last, employee) {
+        //get the items in the dropdownlist
+        var employees = this.dropDownDataSource._data;
+        //get the user's name from the form fields
+        var name = $("#" + first)[0].value + " " + $("#" + last)[0].value;
+        for(var emp in employees){
+            //check if the names match
+            if(name == employees[emp].EmployeeName){
+                //select the corresponding name from the dropdownlist
+                $("#" + employee)[0].kendoBindingTarget.target.select(parseInt(emp));
+            }
         }
     };
 
@@ -127,6 +140,8 @@ define(["developer", "db/services"], function (developer, services) {
                     .bind("change", function() {
                         console.log("drop down changed");
                     });
+                //TODO: sdd this add check if it works to re-get the list from the API
+                //usersSettings.dropDownDataSource.read();
             },
             scrollable:false,
             sortable: true,
@@ -160,6 +175,8 @@ define(["developer", "db/services"], function (developer, services) {
         //endregion
 
         $("#addUser").on("click", function() {
+            //TODO: sdd this add check if it works to re-get the list from the API
+            //usersSettings.dropDownDataSource.read();
             var dataSrc = $("#usersGrid").data("kendoGrid").dataSource;
 
             var object = $("<div id='popupEditor'>")
