@@ -32,6 +32,7 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
             menus.push({'id': id, 'title': title, 'contents': contents});
         };
 
+        //TODO: Maybe change to global listener. Currently has to be called after .navElement creation.
         $(".navElement").filter(".popup").click(function (e) {
             thisPopup.toggleVisible(e, $(this));
         });
@@ -139,7 +140,7 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
 
         /** Initializes scrollbar for popup contents **/
         this.initPopupScrollBar = function () {
-            var popupContentDiv = $("#popupContent");
+            var popupContentDiv = $("#popupContentWrapper");
             popupContentDiv.jScrollPane({
                 horizontalGutter: 0,
                 verticalGutter: 0,
@@ -190,7 +191,7 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
                             "<a id='popupClose'></a>" +
                         "</div>" +
                         "<div id='popupContentWrapper'>" +
-                            "<div id='popupContent'><a class='popupContentRow lastElement'>Test</a></div>" +
+                            "<div id='popupContent'></div>" +
                         "</div>" +
                     "</div>";
             popupDiv.html(s);
@@ -273,7 +274,7 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
             object = popupDiv;
 
             this.addMenu("changeBusiness", "Businesses", data.roles);
-            //this.initPopupScrollBar();
+            this.initPopupScrollBar();
 
             //Function also returns the popup div for ease of use.
             return popupDiv;
@@ -349,10 +350,10 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
         //Public setter function for private var content and sets content of the html popup element.
         this.setContent = function (cont) {
             content = cont;
-            var popupContentDiv = $("#popupContent");
-            popupContentDiv.html(content);
-            //popupContentDiv.data('jsp').getContentPane().html(content);
-            //popupContentDiv.data('jsp').reinitialise();
+            var popupContentDiv = $("#popupContentWrapper");
+            //popupContentDiv.html(content);
+            popupContentDiv.data('jsp').getContentPane().find("#popupContent").html(content);
+            popupContentDiv.data('jsp').reinitialise();
         };
 
         // Public getter function that returns a popup data object.

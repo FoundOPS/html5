@@ -7,121 +7,117 @@
 
 .jspContainer
 {
-	overflow: hidden;
-	position: relative;
+    overflow: hidden;
+    position: relative;
 }
 
 .jspPane
 {
-	position: absolute;
+    position: absolute;
 }
 
 .jspVerticalBar
 {
-	position: fixed;
-	top: 0;
-	right: 0;
-	width: 6px;
-	height: 100%;
-	background: red;
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 16px;
+    height: 100%;
+    background: red;
 }
 
 .jspHorizontalBar
 {
-	position: absolute;
-	bottom: 0;
-	left: 0;
-	width: 100%;
-	height: 16px;
-	background: red;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 16px;
+    background: red;
 }
 
 .jspVerticalBar *,
 .jspHorizontalBar *
 {
-	margin: 0;
-	padding: 0;
+    margin: 0;
+    padding: 0;
 }
 
 .jspCap
 {
-	display: none;
+    display: none;
 }
 
 .jspHorizontalBar .jspCap
 {
-	float: left;
+    float: left;
 }
 
 .jspTrack
 {
-	background: #dde;
-	position: relative;
+    background: #dde;
+    position: relative;
 }
 
 .jspDrag
 {
-	background: #bbd;
-	position: relative;
-	top: 0;
-	left: 0;
-	cursor: pointer;
+    background: #bbd;
+    position: relative;
+    top: 0;
+    left: 0;
+    cursor: pointer;
 }
 
 .jspHorizontalBar .jspTrack,
 .jspHorizontalBar .jspDrag
 {
-	float: left;
-	height: 100%;
+    float: left;
+    height: 100%;
 }
 
 .jspArrow
 {
-	background: #50506d;
-	text-indent: -20000px;
-	display: block;
-	cursor: pointer;
+    background: #50506d;
+    text-indent: -20000px;
+    display: block;
+    cursor: pointer;
 }
 
 .jspArrow.jspDisabled
 {
-	cursor: default;
-	background: #80808d;
+    cursor: default;
+    background: #80808d;
 }
 
 .jspVerticalBar .jspArrow
 {
-	height: 16px;
+    height: 16px;
 }
 
 .jspHorizontalBar .jspArrow
 {
-	width: 16px;
-	float: left;
-	height: 100%;
+    width: 16px;
+    float: left;
+    height: 100%;
 }
 
 .jspVerticalBar .jspArrow:focus
 {
-	outline: none;
+    outline: none;
 }
 
 .jspCorner
 {
-	background: #eeeef4;
-	float: left;
-	height: 100%;
+    background: #eeeef4;
+    float: left;
+    height: 100%;
 }
 
 /* Yuk! CSS Hack for IE6 3 pixel bug :( */
 * html .jspCorner
 {
-	margin: 0 -3px 0 0;
+    margin: 0 -3px 0 0;
 }
-
-
-
-
 
 /*scrollpane custom CSS*/
 /* URL: http://takien.com/980/styling-scrollbar-to-look-like-facebook-scrollablearea-using-jscrollpane.php */
@@ -135,7 +131,7 @@
     z-index: 4;
     /*right:10px;*/
 }
- 
+
 .jspHorizontalBar {
     display: none;
 }
@@ -143,7 +139,7 @@
     height: 100%;
     background: transparent;
 }
- 
+
 .jspDrag {
     /*background: url(img/transparent-black.png) repeat;*/
 	background: #fff;
