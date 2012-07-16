@@ -4,3 +4,5 @@ ops = {};
 ops.closeCell = function () {
     disableDefaultCheckboxes();
 };
+//in kendo.all.min.js, replace 'text:"Delete"' and 'text:"Edit"' with 'text:""'
+//in kendo.default.min.css, change image references to be ../img/
