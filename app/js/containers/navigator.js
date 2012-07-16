@@ -21,7 +21,7 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
                 id: "navClient",
                 title: data.name,
                 contents: [
-                    {"name": "Settings", url: data.settingsUrl},{"name": "Settings", url: data.settingsUrl},{"name": "Settings", url: data.settingsUrl},{"name": "Settings", url: data.settingsUrl},{"name": "Settings", url: data.settingsUrl},{"name": "Settings", url: data.settingsUrl},
+                    {"name": "Settings", url: data.settingsUrl},
                     {"name": "Change Business", id: "changeBusiness"},
                     {"name": "Logout", url: data.logoutUrl}
                 ]
