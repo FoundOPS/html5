@@ -1,3 +1,5 @@
+'use strict';
+
 require.config({
     baseUrl: 'js',
     paths: {
@@ -34,7 +36,7 @@ require(["containers/navigator", "silverlight", "underscore", "lib/kendo.all.min
 
     //a workaround for opening the importer
     //this is called when the importer view is shown
-    window.openImporter = function(){
+    window.openImporter = function () {
         silverlight.navigate("Importer");
     };
 

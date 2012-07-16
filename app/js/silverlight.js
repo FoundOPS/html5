@@ -1,3 +1,5 @@
+'use strict';
+
 define(function () {
     var silverlight = {};
 
@@ -11,18 +13,17 @@ define(function () {
      */
     silverlight.getCurrentSection = function () {
         return currentSection;
-    }
+    };
 
     /**
      * Hide the silverlight plugin
      */
     silverlight.hide = function () {
         //instead of hiding the silverlight (which will disable it), make it really small
-        document.getElementById("silverlightControlHost").style.height = "1px";
-        document.getElementById("silverlightControlHost").style.width = "1px";
+        $("#silverlightPlugin").css("height", "1px");
+        $("#silverlightPlugin").css("width", "1px");
 
-        //show the remote content
-        document.getElementById("remoteContent").style.visibility = "visible";
+        $("#remoteContent").css("visibility", "visible");
     };
 
     /**
@@ -30,10 +31,10 @@ define(function () {
      */
     silverlight.show = function () {
         //show the silverlight client
-        document.getElementById("silverlightControlHost").style.height = "100%";
-        document.getElementById("silverlightControlHost").style.width = "100%";
+        $("#silverlightPlugin").css("height", "100%");
+        $("#silverlightPlugin").css("width", "100%");
 
-        document.getElementById("remoteContent").style.visibility = "hidden";
+        $("#remoteContent").css("visibility", "hidden");
     };
 
     /**
@@ -46,9 +47,7 @@ define(function () {
         try {
             silverlight.show();
             silverlight.plugin.navigationVM.NavigateToView(section.name);
-        }
-        catch (err) {
-        }
+        } catch (err) { }
     };
 
     /**
@@ -58,9 +57,7 @@ define(function () {
     silverlight.setRole = function (role) {
         try {
             silverlight.plugin.navigationVM.ChangeRole(role.id);
-        }
-        catch (err) {
-        }
+        } catch (err) { }
     };
 
     //#region Setup functions for the silverlight object
