@@ -236,7 +236,7 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
                 }
             );
 
-            //TODO: Move to main.js or check if loaded.
+            //TODO: Remove for production.
             $("#silverlightControlHost").focusin(function(e) {
                 thisPopup.closePopup();
             });
@@ -401,8 +401,23 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
         };
 
         this.changeBusinessLogo = function(business){
-            $("#clientLogo").attr('src', business.businessLogoUrl);
-            console.log("Logo: "+business.businessLogoUrl);
+            var businessLogoUrl = business.businessLogoUrl;
+            var businessLogoEnabled = true;
+
+            if(typeof(businessLogoUrl) === 'undefined'){businessLogoEnabled = false; businessLogoUrl = "";}
+            var clientLogoDiv = $("#clientLogo");
+            clientLogoDiv.attr('src', businessLogoUrl);
+
+            //Hide business logo if undefined.
+            var navClientIconDiv = $("#navClient .navIcon");
+            if(!businessLogoEnabled){
+                navClientIconDiv.css("border", "0");
+                clientLogoDiv.css("display", "none");
+            }else{
+                navClientIconDiv.css("border", "");
+                clientLogoDiv.css("display", "");
+            }
+            console.log("Logo: "+businessLogoUrl);
         };
     }
 
@@ -437,8 +452,22 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
 
         var navTemplateHtml = $("#navTemplate").html();
         var navTemplate = kendo.template(navTemplateHtml);
-        var params = [config.avatarUrl, config.roles[0].businessLogoUrl];
+
+        var businessLogoEnabled = true;
+        var businessLogoUrl = config.roles[0].businessLogoUrl;
+
+        //TODO: Just call changeBusinessLogo after template init to simplify redundant code?
+        if(typeof(businessLogoUrl) === 'undefined'){businessLogoEnabled = false; businessLogoUrl = "";}
+
+        var params = [config.avatarUrl, businessLogoUrl];
         topNav.html(navTemplate(params));
+
+        //Hide business logo if undefined.
+        if(!businessLogoEnabled){
+            topNav.find("#navClient .navIcon").css("border", "0");
+            topNav.find("#clientLogo").css("display", "none");
+        }
+        /////////
 
         $('body').prepend(topNav);
 
