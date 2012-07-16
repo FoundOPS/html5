@@ -91,6 +91,7 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
             $(el).trigger("popupEvent", $(el));
 
             popupDiv.stop(false, true).fadeIn('fast');
+            $("#popupContentWrapper").data('jsp').reinitialise();
             lastNavClick = navElem.attr("id");
         };
 
@@ -796,6 +797,7 @@ define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.
                     },
                     'fast'
                 );
+                $("#sideBarWrapper").data('jsp').reinitialise();
             } else {
                 sideBarDiv.stop(false, true).animate(
                     {
