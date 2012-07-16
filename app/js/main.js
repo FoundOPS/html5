@@ -17,6 +17,7 @@ require(["containers/navigator", "silverlight", "ui/personalSettings", "ui/busin
     //setup the navigator
     var navigator = new Navigator(window.navigatorConfig);
     navigator.hideSearch();
+    var application;
 
     //TODO make sectionSelected a navigator event
     //whenever a section is chosen, choose it in the silverlight app
@@ -30,9 +31,21 @@ require(["containers/navigator", "silverlight", "ui/personalSettings", "ui/busin
             }
         }
         else {
+            //navigate to silverlight to clear the url
+            application.navigate("#silverlight");
             silverlight.navigate(section);
         }
     });
+
+    window.onhashchange = function () {
+        //Hide the silverlight control when settings is chosen
+        if (!location || !location.hash) {
+            return;
+        }
+        if (location.hash.indexOf("Settings") != -1) {
+            silverlight.hide();
+        }
+    };
 
     //a workaround for opening the importer
     //this is called when the importer view is shown
@@ -58,7 +71,7 @@ require(["containers/navigator", "silverlight", "ui/personalSettings", "ui/busin
     });
 
     //hookup remote loading into remoteContent, by using the kendo mobile application
-    var application = new kendo.mobile.Application($("#remoteContent"), { initial: "view/updates.html"});
+    application = new kendo.mobile.Application($("#remoteContent"), { initial: "view/updates.html"});
 
     //setup page tracking
     try {
