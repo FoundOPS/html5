@@ -4,7 +4,7 @@
  */
 "use strict";
 
-define(["db/services", "widgets/settingsMenu", "ui/changePassword", "lib/jquery-ui-1.8.21.core.min", "lib/cordova",
+define(["db/services", "widgets/settingsMenu", "lib/jquery-ui-1.8.21.core.min", "lib/cordova",
         "lib/jquery.FileReader", "lib/swfobject"], function (services) {
     var personalSettings = {};
     //keep track of if a new image has been selected
@@ -22,8 +22,21 @@ define(["db/services", "widgets/settingsMenu", "ui/changePassword", "lib/jquery-
         }
     });
 
+    personalSettings.fixImageBtnPosition = function () {
+        //if the Flash FileAPIProxy is being used, move the swf on top the moved input button
+        if (window.FileAPIProxy !== null) {
+            var input = $("#imageUpload");
+            window.FileAPIProxy.container
+                .height(input.outerHeight())
+                .width(input.outerWidth())
+                .position({of: input});
+        }
+    };
+
     //make sure the image fits into desired area
     personalSettings.resize = function () {
+        personalSettings.fixImageBtnPosition();
+
         var cropbox = $("#cropbox");
         //get the original dimensions of the image
         var width = cropbox[0].width;
@@ -55,8 +68,9 @@ define(["db/services", "widgets/settingsMenu", "ui/changePassword", "lib/jquery-
         personalSettings.validator = $("#personalForm").kendoValidator().data("kendoValidator");
 
         //setup menu
-        kendo.bind($("#settingsMenu"));
-        $("#settingsMenu").kendoSettingsMenu({selectedItem: "Personal"});
+        var menu = $("#personal .settingsMenu");
+        kendo.bind(menu);
+        menu.kendoSettingsMenu({selectedItem: "Personal"});
 
         var fileLoaded = function (evt) {
             var imageData = evt.target.result;
@@ -70,14 +84,7 @@ define(["db/services", "widgets/settingsMenu", "ui/changePassword", "lib/jquery-
             //make sure the image fits into desired area
             personalSettings.resize();
 
-            //if the Flash FileAPIProxy is being used, move the swf on top the moved input button
-            if (window.FileAPIProxy !== null) {
-                var input = $("#imageUpload");
-                window.FileAPIProxy.container
-                    .height(input.outerHeight())
-                    .width(input.outerWidth())
-                    .position({of: input});
-            }
+            personalSettings.fixImageBtnPosition();
 
             //set a hidden form to the file image's data (because we stole it with FileReader)
             $('#imageData').val(imageData);

@@ -1,5 +1,5 @@
 <div data-init="usersSettings.initialize" data-role="view" data-title="Users Settings" id="users">
-    <div id="settingsMenu"></div>
+    <div class="settingsMenu"></div>
     <h1>Manage Your Users</h1>
     <div class="wrap">
         <h2>New User</h2>
@@ -45,8 +45,8 @@
             <label for="Employee">Linked Employee</label>
         </div>
         <div data-container-for="Employee" class="k-edit-field">
-            <input id="Employee" name="Employee" data-bind="value:Employee" data-value-field="EmployeeId"
-                   data-text-field="EmployeeName" data-source="usersSettings.dropDownDataSource" data-role="dropdownlist" />
+            <input id="Employee" name="Employee" data-bind="value:Employee" data-value-field="DisplayName"
+                   data-text-field="DisplayName" data-source="usersSettings.dropDownDataSource" data-role="dropdownlist" />
         </div>
         <br /><br />
         <a class="k-button k-button-icontext" id="btnAdd">
@@ -93,8 +93,8 @@
             <label for="linkedEmployee">Linked Employee</label>
         </div>
         <div data-container-for="Employee" class="k-edit-field">
-            <input id="linkedEmployee" name="Employee" data-bind="value:Employee" data-value-field="EmployeeId"
-                   data-text-field="EmployeeName" data-source="usersSettings.dropDownDataSource" data-role="dropdownlist" />
+            <input id="linkedEmployee" name="Employee" data-bind="value:Employee" data-value-field="DisplayName"
+                   data-text-field="DisplayName" data-source="usersSettings.dropDownDataSource" data-role="dropdownlist" />
         </div>
         <br /><br />
     </div>

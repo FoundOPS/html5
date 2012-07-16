@@ -14,11 +14,11 @@ define(['db/services', 'developer', 'ui/personalSettings', "widgets/settingsMenu
 
     businessSettings.viewModel = kendo.observable({
         saveChanges: function () {
-            if(businessSettings.validator.validate()){
+            if (businessSettings.validator.validate()) {
                 services.updateBusinessSettings(this.get("settings"));
             }
             //check if image has been changed
-            if(businessSettings.newImage){
+            if (businessSettings.newImage) {
                 $("#imageUploadForm").submit();
             }
         }
@@ -28,8 +28,9 @@ define(['db/services', 'developer', 'ui/personalSettings', "widgets/settingsMenu
         businessSettings.validator = $("#businessForm").kendoValidator().data("kendoValidator");
 
         //setup menu
-        kendo.bind($("#settingsMenu"));
-        $("#settingsMenu").kendoSettingsMenu({selectedItem: "Business"});
+        var menu = $("#business .settingsMenu");
+        kendo.bind(menu);
+        menu.kendoSettingsMenu({selectedItem: "Business"});
 
         var fileLoaded = function (evt) {
             var imageData = evt.target.result;
@@ -43,14 +44,7 @@ define(['db/services', 'developer', 'ui/personalSettings', "widgets/settingsMenu
             //make sure the image fits into desired area
             personalSettings.resize();
 
-            //if the Flash FileAPIProxy is being used, move the swf on top the moved input button
-            if (window.FileAPIProxy !== null) {
-                var input = $("#imageUpload");
-                window.FileAPIProxy.container
-                    .height(input.outerHeight())
-                    .width(input.outerWidth())
-                    .position({of: input});
-            }
+            personalSettings.fixImageBtnPosition();
 
             //set a hidden form to the file image's data (because we stole it with FileReader)
             $('#imageData').val(imageData);

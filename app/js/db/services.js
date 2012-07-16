@@ -177,10 +177,7 @@ define(['developer', 'tools'], function (developer, tools) {
         });
     };
 
-    /**
-     * Get business settings.
-     * @param {!function(Array.<Object>)} callback A callback to pass the loaded settings.
-     */
+    // Get business settings.
     services.getBusinessSettings = services._getHttp('settings/GetBusinessSettings', {roleId: developer.GOTGREASE_ROLE_ID}, false);
 
     /**
@@ -196,6 +193,9 @@ define(['developer', 'tools'], function (developer, tools) {
             data: JSON.stringify(settings)
         });
     };
+
+    // Get Employees.
+    services.getAllEmployeesForBusiness = services._getHttp('settings/GetAllEmployeesForBusiness', {roleId: developer.GOTGREASE_ROLE_ID}, false);
 
     /**
      * Authenticate the user.

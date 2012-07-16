@@ -28,7 +28,7 @@ define(["developer", "db/services", "widgets/settingsMenu"], function (developer
         var name = $("#" + first)[0].value + " " + $("#" + last)[0].value;
         for(var emp in employees){
             //check if the names match
-            if(name == employees[emp].EmployeeName){
+            if(name == employees[emp].DisplayName){
                 //select the corresponding name from the dropdownlist
                 $("#" + employee)[0].kendoBindingTarget.target.select(parseInt(emp));
             }
@@ -47,9 +47,15 @@ define(["developer", "db/services", "widgets/settingsMenu"], function (developer
     //endregion
 
     usersSettings.initialize = function () {
+
+        services.getAllEmployeesForBusiness(function (employees){
+            usersSettings.employees = employees;
+        });
+
         //setup menu
-        kendo.bind($("#settingsMenu"));
-        $("#settingsMenu").kendoSettingsMenu({selectedItem: "Users"});
+        var menu = $("#users .settingsMenu");
+        kendo.bind(menu);
+        menu.kendoSettingsMenu({selectedItem: "Users"});
 
         //region Setup Grid
         var fields = {
@@ -106,21 +112,9 @@ define(["developer", "db/services", "widgets/settingsMenu"], function (developer
                 }
             }
         });
-        var dataSource2 = [
-            {FirstName: "Oren", LastName: "Shatken", EmailAddress: "oshatken@foundops.com", Role: "Administrator", Employee: { EmployeeName: "Oren Shatken", EmployeeId: 1 }},
-            {FirstName: "Jon", LastName: "Perl", EmailAddress: "jperl@foundops.com", Role: "Mobile", Employee: { EmployeeName: "Jon Perl", EmployeeId: 2 }},
-            {FirstName: "Zach", LastName: "Bright", EmailAddress: "zbright@foundops.com", Role: "Administrator", Employee: { EmployeeName: "Zach Bright", EmployeeId: 3 }}
-        ];
-        var employees = [
-            { EmployeeName: "none", EmployeeId: 1 },
-            { EmployeeName: "Oren Shatken", EmployeeId: 2 },
-            { EmployeeName: "Jon Perl", EmployeeId: 3 },
-            { EmployeeName: "Zach Bright", EmployeeId: 4 }
-        ];
 
         usersSettings.dropDownDataSource = new kendo.data.DataSource({
-            //TODO: get api datasource
-            data: employees,
+            data: usersSettings.employees,
             schema: {
                 model: {
                     fields: fields
@@ -130,7 +124,7 @@ define(["developer", "db/services", "widgets/settingsMenu"], function (developer
 
         //add a grid to the #usersGrid div element
         $("#usersGrid").kendoGrid({
-            dataSource: dataSource2,
+            dataSource: dataSource,
             dataBound: onDataBound,
             editable: {
                 mode: "popup",
@@ -168,7 +162,7 @@ define(["developer", "db/services", "widgets/settingsMenu"], function (developer
                     field: "Employee",
                     title: "Employee Record",
                     //TODO:get correct link
-                    template: '<a href="http://www.google.com">#=Employee.EmployeeName#</a>'
+                    template: '<a href="http://www.google.com">#= Employee.DisplayName #</a>'
                 },
                 {
                     command: ["edit", "destroy"],
@@ -211,7 +205,7 @@ define(["developer", "db/services", "widgets/settingsMenu"], function (developer
             //initialize the validator
             var validator = $(object.element).kendoValidator().data("kendoValidator");
 
-            var createNew = [{ EmployeeName: "Create New", EmployeeId: 1 }];
+            var createNew = [{ "DisplayName": "Create New", "FirstName": "", "Id": "1", "LastName": "", "LinkedUserAccountId": "" }];
             usersSettings.dropDownDataSource.data(createNew.concat(usersSettings.dropDownDataSource.options.data));
 
             usersSettings.setDefaultValue();

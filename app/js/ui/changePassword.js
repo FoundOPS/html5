@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(["db/services"], function (services) {
+define(["db/services", "widgets/settingsMenu"], function (services) {
     var changePassword = {};
 
     changePassword.save = function (){
@@ -19,6 +19,11 @@ define(["db/services"], function (services) {
     };
 
     changePassword.initialize = function () {
+        //setup menu
+        var menu = $("#pass .settingsMenu");
+        kendo.bind(menu);
+        menu.kendoSettingsMenu();
+
         changePassword.validator = $("#passForm").kendoValidator({
             rules: {
                 custom: function(input){
@@ -32,4 +37,6 @@ define(["db/services"], function (services) {
     };
 
     window.changePassword = changePassword;
+
+    return changePassword;
 });

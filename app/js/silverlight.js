@@ -30,9 +30,10 @@ define(function () {
      * Hide the silverlight plugin
      */
     silverlight.hide = function () {
+        //TODO try 0px
         //instead of hiding the silverlight (which will disable it), make it really small
-        $("#silverlightPlugin").css("height", "1px");
-        $("#silverlightPlugin").css("width", "1px");
+        $("#silverlightPlugin").css("height", "0px");
+        $("#silverlightPlugin").css("width", "0px");
 
         //for firefox
 //        $("#silverlightControlHost").css("position", "fixed");

@@ -1,11 +1,9 @@
 <div data-init="personalSettings.initialize" data-show="personalSettings.show"
      data-role="view" data-title="Personal User Settings" id="personal">
-    <div id="settingsMenu"></div>
+    <div class="settingsMenu"></div>
     <h1>Your Personal User Settings</h1>
-
     <div class="wrap">
         <h2>The Basics</h2>
-
         <form id="personalForm" data-model="personalSettings.viewModel">
             <table>
                 <tr>
@@ -24,7 +22,6 @@
         </form>
         <h2>Your Photo</h2>
         <img data-bind="attr: {src: settings.ImageUrl}" id="cropbox" onload="personalSettings.resize()"/>
-
         <form id="imageUploadForm" enctype="multipart/form-data" method="POST">
             <input id="imageUpload" type="file"/><br/>
             <input type="hidden" id="imageFileName" name="imageFileName"/>
