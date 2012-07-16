@@ -1,5 +1,4 @@
 define(["lib/jquery.mousewheel", "lib/jquery.jScrollPane"], function () {
-    var popup;
     /** Popup Constructor **/
     function Popup(data) {
         var title = "";
@@ -20,7 +19,7 @@ define(["lib/jquery.mousewheel", "lib/jquery.jScrollPane"], function () {
                 id: "navClient",
                 title: data.name,
                 contents: [
-                    {"name": "Settings", url: data.settingsUrl},
+                    {"name": "Settings", url: data.settingsUrl}, {"name": "Settings", url: data.settingsUrl}, {"name": "Settings", url: data.settingsUrl}, {"name": "Settings", url: data.settingsUrl}, {"name": "Settings", url: data.settingsUrl}, {"name": "Settings", url: data.settingsUrl},
                     {"name": "Change Business", id: "changeBusiness"},
                     {"name": "Logout", url: data.logoutUrl}
                 ]
@@ -258,10 +257,6 @@ define(["lib/jquery.mousewheel", "lib/jquery.jScrollPane"], function () {
                     if($(this).hasClass("popupEvent")){
                         $(this).trigger("popupEvent", $(this));
                         //console.log(thisPopup.getAction());
-                        //TODO: Move out of Popup and into listener for popupEvent.
-                        if(thisPopup.getAction()==="changeBusiness"){
-                            thisPopup.changeBusiness($(this));
-                        }
                     }
 
                     var keepOpen = thisPopup.populate(newId);
@@ -273,6 +268,7 @@ define(["lib/jquery.mousewheel", "lib/jquery.jScrollPane"], function () {
             //Sets global popup object, object, with the created div.
             object = popupDiv;
 
+            //TODO: Refactor.
             this.addMenu("changeBusiness", "Businesses", data.roles);
             this.initPopupScrollBar();
 
@@ -290,6 +286,7 @@ define(["lib/jquery.mousewheel", "lib/jquery.jScrollPane"], function () {
         this.populate = function (id) {
             var newMenu = this.getMenu(id);
             if (newMenu === null) {
+                //TODO: Possibly add a boolean to pass to indicate link or end of menu action.
                 console.log("ID not found.");
                 return false;
             }
@@ -376,50 +373,7 @@ define(["lib/jquery.mousewheel", "lib/jquery.jScrollPane"], function () {
             //console.log("No data found, returning null.");
             return null;
         };
-
-        this.getBusiness = function(name){
-            //console.log("name: "+name);
-            var roles = data.roles;
-            var role;
-
-            for(role in roles){
-                //console.log(roles[role]);
-                if(roles[role].name === name)return roles[role];
-            }
-            return null;
-        };
-
-        this.changeBusiness = function(clicked){
-            var businessId = clicked.attr("id");
-            var name = clicked.html();
-            var business = this.getBusiness(name);
-            if(business===null){
-                console.log("Business not found!");
-                return;
-            }
-            this.changeBusinessLogo(business);
-            setSideBarSections(data, business.sections);
-        };
-
-        this.changeBusinessLogo = function(business){
-            var businessLogoUrl = business.businessLogoUrl;
-            var businessLogoEnabled = true;
-
-            if(typeof(businessLogoUrl) === 'undefined'){businessLogoEnabled = false; businessLogoUrl = "";}
-            var clientLogoDiv = $("#clientLogo");
-            clientLogoDiv.attr('src', businessLogoUrl);
-
-            //Hide business logo if undefined.
-            var navClientIconDiv = $("#navClient .navIcon");
-            if(!businessLogoEnabled){
-                navClientIconDiv.css("border", "0");
-                clientLogoDiv.css("display", "none");
-            }else{
-                navClientIconDiv.css("border", "");
-                clientLogoDiv.css("display", "");
-            }
-            console.log("Logo: "+businessLogoUrl);
-        };
     }
-    return popup;
+
+    return Popup;
 });
