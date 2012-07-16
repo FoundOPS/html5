@@ -6,7 +6,8 @@
 
 "use strict";
 
-define(['db/services', 'developer', 'ui/personalSettings'], function (services, developer, personalSettings) {
+define(['db/services', 'developer', 'ui/personalSettings', "widgets/settingsMenu", "lib/jquery-ui-1.8.21.core.min",
+    "lib/cordova", "lib/jquery.FileReader", "lib/swfobject"], function (services, developer, personalSettings) {
     var businessSettings = {};
     //keep track of if a new image has been selected
     businessSettings.newImage = false;
@@ -25,6 +26,10 @@ define(['db/services', 'developer', 'ui/personalSettings'], function (services, 
 
     businessSettings.initialize = function () {
         businessSettings.validator = $("#businessForm").kendoValidator().data("kendoValidator");
+
+        //setup menu
+        kendo.bind($("#settingsMenu"));
+        $("#settingsMenu").kendoSettingsMenu({selectedItem: "Business"});
 
         var fileLoaded = function (evt) {
             var imageData = evt.target.result;

@@ -34,6 +34,9 @@ define(function () {
         $("#silverlightPlugin").css("height", "1px");
         $("#silverlightPlugin").css("width", "1px");
 
+        //for firefox
+//        $("#silverlightControlHost").css("position", "fixed");
+
         $("#remoteContent").css("display", "");
     };
 
