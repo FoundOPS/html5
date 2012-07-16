@@ -13,7 +13,7 @@ require.config({
     }
 });
 
-require(["containers/navigator", "silverlight", "underscore", "lib/kendo.all.min", "lib/userVoice"], function (Navigator, silverlight) {
+require(["containers/navigator", "silverlight", "ui/personalSettings", "ui/businessSettings", "ui/usersSettings", "underscore", "lib/kendo.all", "lib/userVoice"], function (Navigator, silverlight) {
     //setup the navigator
     var navigator = new Navigator(window.navigatorConfig);
     navigator.hideSearch();
@@ -71,4 +71,18 @@ require(["containers/navigator", "silverlight", "underscore", "lib/kendo.all.min
     }
     catch (err) {
     }
+
+    //TODO replace with events
+    window.personal = function () {
+        application.navigate("view/personalSettings.html");
+    };
+    window.business = function () {
+        application.navigate("view/businessSettings.html");
+    };
+    window.users = function () {
+        application.navigate("view/usersSettings.html");
+    };
+    window.changePassword = function () {
+        application.navigate("view/changePassword.html");
+    };
 });

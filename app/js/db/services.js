@@ -6,7 +6,7 @@
 
 'use strict';
 
-define(['lib/kendo.mobile.min', 'developer', 'tools'], function (k, developer, tools) {
+define(['developer', 'tools'], function (developer, tools) {
     var services = {};
 
     /**
@@ -102,22 +102,6 @@ define(['lib/kendo.mobile.min', 'developer', 'tools'], function (k, developer, t
     services.getRoutes = function (serviceDateUtc, callback) {
         return services._getHttp('routes/GetRoutes', {serviceDateUtc: serviceDateUtc}, false)(callback);
     };
-
-    /**
-     * A kendo data source for Routes for the current user's routes.
-     * @type {kendo.data.DataSource}
-     */
-    services.routesDataSource = new kendo.data.DataSource({
-        transport: {
-            read: {
-                //Get the routes based on the phone's date for today
-                url: apiUrl + "routes/GetRoutes?serviceDateUtc=" + tools.formatDate(new Date()),
-                type: "GET",
-                dataType: "jsonp",
-                contentType: "application/json; charset=utf-8"
-            }
-        }
-    });
 
     /**
      * Get the service provider's depots.

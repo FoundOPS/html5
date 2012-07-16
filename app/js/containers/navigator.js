@@ -1,6 +1,6 @@
 "use strict";
 
-define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.all.min"], function ($) {
+define(["jquery", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.all"], function ($) {
     /** Popup Constructor **/
     function Popup(data) {
         var title = "";

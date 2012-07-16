@@ -4,18 +4,19 @@
  */
 "use strict";
 
-define(['db/services'], function (services) {
+define(["db/services", "widgets/settingsMenu", "ui/changePassword", "lib/jquery-ui-1.8.21.core.min", "lib/cordova",
+        "lib/jquery.FileReader", "lib/swfobject"], function (services) {
     var personalSettings = {};
     //keep track of if a new image has been selected
     personalSettings.newImage = false;
 
     personalSettings.viewModel = kendo.observable({
         saveChanges: function () {
-            if(personalSettings.validator.validate()){
+            if (personalSettings.validator.validate()) {
                 services.updatePersonalSettings(this.get("settings"));
             }
             //check if image has been changed
-            if(personalSettings.newImage){
+            if (personalSettings.newImage) {
                 $("#imageUploadForm").submit();
             }
         }
@@ -52,6 +53,10 @@ define(['db/services'], function (services) {
 
     personalSettings.initialize = function () {
         personalSettings.validator = $("#personalForm").kendoValidator().data("kendoValidator");
+
+        //setup menu
+        kendo.bind($("#settingsMenu"));
+        $("#settingsMenu").kendoSettingsMenu({selectedItem: "Personal"});
 
         var fileLoaded = function (evt) {
             var imageData = evt.target.result;
@@ -122,7 +127,7 @@ define(['db/services'], function (services) {
         });
     };
 
-    personalSettings.show = function() {
+    personalSettings.show = function () {
 //        console.log(personalSettings.viewModel.get("settings").get("FirstName"));
         kendo.bind($("#personal"), personalSettings.viewModel);
     }

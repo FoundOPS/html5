@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(["developer", "db/services"], function (developer, services) {
+define(["developer", "db/services", "widgets/settingsMenu"], function (developer, services) {
     var usersSettings = {};
 
     //region Methods
@@ -47,6 +47,10 @@ define(["developer", "db/services"], function (developer, services) {
     //endregion
 
     usersSettings.initialize = function () {
+        //setup menu
+        kendo.bind($("#settingsMenu"));
+        $("#settingsMenu").kendoSettingsMenu({selectedItem: "Users"});
+
         //region Setup Grid
         var fields = {
             FirstName: {
