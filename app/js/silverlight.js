@@ -5,6 +5,17 @@ define(function () {
 
     window.silverlight = silverlight;
 
+
+    //resize the silverlight container to the proper size according to the window size
+    var resizeSilverlightContainer = function () {
+        //from navigator.less: @navHeight = 45px, @sideBarWrapperWidth = 55px
+        var height = $(document).height() - 45;
+        var width = $(document).width() - 55;
+        $("#silverlightControlHost").height(height);
+        $("#silverlightControlHost").width(width);
+    };
+    $(window).resize(resizeSilverlightContainer);
+
     //In case a section is not chosen start with the Dispatcher
     var currentSection = "Dispatcher";
     /**
@@ -47,7 +58,8 @@ define(function () {
         try {
             silverlight.show();
             silverlight.plugin.navigationVM.NavigateToView(section.name);
-        } catch (err) { }
+        } catch (err) {
+        }
     };
 
     /**
@@ -57,7 +69,8 @@ define(function () {
     silverlight.setRole = function (role) {
         try {
             silverlight.plugin.navigationVM.ChangeRole(role.id);
-        } catch (err) { }
+        } catch (err) {
+        }
     };
 
     //#region Setup functions for the silverlight object
@@ -115,6 +128,7 @@ define(function () {
         img.src = url;
     };
 
+    resizeSilverlightContainer();
     silverlight.hide();
 
     return silverlight;

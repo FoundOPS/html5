@@ -99,8 +99,7 @@ table {
 @borderSize: 2px;
 
 /*  Positioning  */
-@navHeightMax: 45px;
-@navHeightMin: 38px;
+@navHeight: 45px;
 
 /*  MAIN  */
 html {
@@ -167,8 +166,8 @@ input:focus {
     position: fixed;
     z-index: 1;
     width: 100%;
-    height: @navHeightMax;
-    line-height: @navHeightMax - 4;
+    height: @navHeight;
+    line-height: @navHeight - 4;
     box-shadow: 0px 1px 6px #888;
     text-align: left;
 
@@ -276,7 +275,7 @@ zoom: 1;*/
     position: fixed;
     height: 100%;
     width: 305px;
-    padding-top: @navHeightMax+@popupCarrotHeight - 4;
+    padding-top: @navHeight+@popupCarrotHeight - 4;
 }
 
 #popup {
@@ -407,7 +406,7 @@ zoom: 1;*/
 
 #sideBarWrapper {
     position: fixed;
-    top: @navHeightMax;
+    top: @navHeight;
     bottom: 0;
     right: 0;
     overflow-x: hidden;
@@ -485,7 +484,7 @@ zoom: 1;*/
     visibility: visible;
     position: relative;
     padding: 8px;
-    top: @navHeightMax;
+    top: @navHeight;
     padding-right: @sideBarWrapperWidth + 8;
     background: @lightGrey + #050505;
 }
@@ -601,11 +600,11 @@ zoom: 1;*/
 
     #nav {
         position: absolute;
-        height: @navHeightMax;
+        height: @navHeight;
     }
 
     #navContainer {
-        line-height: @navHeightMax - 5px;
+        line-height: @navHeight - 5px;
     }
 
     #logo {
@@ -650,7 +649,7 @@ zoom: 1;*/
     #sideBarWrapper {
         position: absolute;
         display: inline-block;
-        top: @navHeightMax;
+        top: @navHeight;
         height: auto;
         background: transparent;
         width: @sideBarExpandedWidth;
@@ -670,7 +669,7 @@ zoom: 1;*/
     }
 
     #content {
-        top: @navHeightMax;
+        top: @navHeight;
         padding-right: 8px;
         background: #00f;
     }
@@ -716,8 +715,6 @@ zoom: 1;*/
 #silverlightControlHost {
     position: fixed; //for firefox
     left: 0;
-    top: 0;
-    height: 100%;
-    width: 100%;
+    top: @navHeight;
     z-index: 0;
 }
