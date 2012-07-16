@@ -23,7 +23,7 @@ define(function () {
         $("#silverlightPlugin").css("height", "1px");
         $("#silverlightPlugin").css("width", "1px");
 
-        $("#remoteContent").css("visibility", "visible");
+        $("#remoteContent").css("display", "");
     };
 
     /**
@@ -34,7 +34,7 @@ define(function () {
         $("#silverlightPlugin").css("height", "100%");
         $("#silverlightPlugin").css("width", "100%");
 
-        $("#remoteContent").css("visibility", "hidden");
+        $("#remoteContent").css("display", "none");
     };
 
     /**

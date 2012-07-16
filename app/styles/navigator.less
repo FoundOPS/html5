@@ -25,25 +25,31 @@ time, mark, audio, video {
     font: inherit;
     vertical-align: baseline;
 }
+
 /* HTML5 display-role reset for older browsers */
 article, aside, details, figcaption, figure,
 footer, header, hgroup, menu, nav, section {
     display: block;
 }
+
 body {
     line-height: 1;
 }
+
 ol, ul {
     list-style: none;
 }
+
 blockquote, q {
     quotes: none;
 }
+
 blockquote:before, blockquote:after,
 q:before, q:after {
     content: '';
     content: none;
 }
+
 table {
     border-collapse: collapse;
     border-spacing: 0;
@@ -97,7 +103,7 @@ table {
 @navHeightMin: 38px;
 
 /*  MAIN  */
-html{
+html {
     padding: 0;
     margin: 0;
     height: 100%;
@@ -105,7 +111,7 @@ html{
     overflow: auto;
 }
 
-body{
+body {
     padding: 0;
     margin: 0;
     height: 100%;
@@ -114,12 +120,12 @@ body{
     color: @charcoal;
     font-family: segoe, verdana, sans-serif;
     font-size: 100%;
-    overflow: auto;
-    //-webkit-tap-highlight-color: rgba(72,143,205,255);
-    -webkit-tap-highlight-color: rgba(0,0,0,0);
-    -webkit-touch-callout:none;
+    overflow: auto; //-webkit-tap-highlight-color: rgba(72,143,205,255);
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    -webkit-touch-callout: none;
 }
-::selection{
+
+::selection {
     text-shadow: none;
     background: @orange;
     color: white;
@@ -128,23 +134,24 @@ body{
 /* For modern browsers */
 .clearFix:before,
 .clearFix:after {
-    content:"";
-    display:table;
-}
-.clearFix:after {
-    clear:both;
-}
-/* For IE 6/7 (trigger hasLayout) */
-.clearFix {
-    zoom:1;
+    content: "";
+    display: table;
 }
 
-a{
+.clearFix:after {
+    clear: both;
+}
+
+/* For IE 6/7 (trigger hasLayout) */
+.clearFix {
+    zoom: 1;
+}
+
+a {
     color: @lightGrey;
     text-decoration: none;
     cursor: pointer;
-    &:hover{
-        //color: @darkGrey;
+    &:hover { //color: @darkGrey;
     }
 }
 
@@ -152,11 +159,11 @@ input:focus {
     outline: none;
 }
 
-.navColor{
+.navColor {
     background: @charcoal;
 }
 
-#nav{
+#nav {
     position: fixed;
     z-index: 1;
     width: 100%;
@@ -165,51 +172,43 @@ input:focus {
     box-shadow: 0px 1px 6px #888;
     text-align: left;
 
-    img{
+    img {
         max-height: 100%;
         vertical-align: middle;
     }
-	
-	.navColor;
 
-    background-image: linear-gradient(bottom, rgb(34,34,36) 0%, rgb(85,85,86) 100%);
-    background-image: -o-linear-gradient(bottom, rgb(34,34,36) 0%, rgb(85,85,86) 100%);
-    background-image: -moz-linear-gradient(bottom, rgb(34,34,36) 0%, rgb(85,85,86) 100%);
-    background-image: -webkit-linear-gradient(bottom, rgb(34,34,36) 0%, rgb(85,85,86) 100%);
-    background-image: -ms-linear-gradient(bottom, rgb(34,34,36) 0%, rgb(85,85,86) 100%);
+    .navColor;
 
-    background-image: -webkit-gradient(
-        linear,
-        left bottom,
-        left top,
-        color-stop(0, @charcoal),
-        color-stop(1, rgb(85,85,86))
-    );
+    background-image: linear-gradient(bottom, rgb(34, 34, 36) 0%, rgb(85, 85, 86) 100%);
+    background-image: -o-linear-gradient(bottom, rgb(34, 34, 36) 0%, rgb(85, 85, 86) 100%);
+    background-image: -moz-linear-gradient(bottom, rgb(34, 34, 36) 0%, rgb(85, 85, 86) 100%);
+    background-image: -webkit-linear-gradient(bottom, rgb(34, 34, 36) 0%, rgb(85, 85, 86) 100%);
+    background-image: -ms-linear-gradient(bottom, rgb(34, 34, 36) 0%, rgb(85, 85, 86) 100%);
+
+    background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0, @charcoal), color-stop(1, rgb(85, 85, 86)));
 }
 
-#navContainer{
+#navContainer {
     height: 100%;
     display: inline-block;
 /* ie 6/7 fix
 *display: inline;
 zoom: 1;*/
     padding-left: 50px;
-    font-size:100%;
-//TODO: Make this dynamic.
-    //line-height: @navHeightMax - 4;
+    font-size: 100%; //TODO: Make this dynamic.
+//line-height: @navHeightMax - 4;
 
-    .last{
+    .last {
         margin-right: 0;
     }
 }
 
-
-.roundedIcon{
+.roundedIcon {
     border: @borderSize solid @navBorderColor;
     border-radius: 6px;
 }
 
-.navElement{
+.navElement {
     &:focus {
         outline: white solid thin;
     }
@@ -218,62 +217,61 @@ zoom: 1;*/
     background: white;
     display: inline-block;
     vertical-align: middle;
-    margin-right: 60px;        /*Spacing between nav elements*/
+    margin-right: 60px; /*Spacing between nav elements*/
     line-height: normal;
 
-    a{
+    a {
         display: block;
     }
 
-    .navIcon{
+    .navIcon {
         padding: @iconPadding;
     }
 
-    input{
+    input {
         border: 0;
         line-height: 100%;
         height: @imageHeight + @iconPadding*2 - 2;
-        font-size: 12px;    /*TODO: Change to relative font size (.75em)*/
+        font-size: 12px; /*TODO: Change to relative font size (.75em)*/
         color: @charcoal;
         margin: 0 0 0 2px;
         padding-left: 4px;
         background: transparent;
     }
 
-    img{
+    img {
         height: @imageHeight;
         vertical-align: middle;
     }
 
-    &:hover{
+    &:hover {
     }
 }
 
-#navClient{
+#navClient {
     padding: 0;
-    .navIcon{
+    .navIcon {
         padding: 0;
         border-right: @borderSize solid @navBorderColor;
         height: @imageHeight + @iconPadding*2;
-        overflow:hidden;
+        overflow: hidden;
     }
 }
 
-#navSearch{
-    a{
+#navSearch {
+    a {
         float: right;
     }
-    .navIcon{
-        //border-left: @borderSize solid @navBorderColor;
+    .navIcon { //border-left: @borderSize solid @navBorderColor;
     }
 }
 
-#clientLogo{
+#clientLogo {
     background: #fff;
     margin: 0 4px;
 }
 
-#popupWrapper{
+#popupWrapper {
     .borderBox;
     position: fixed;
     height: 100%;
@@ -281,7 +279,7 @@ zoom: 1;*/
     padding-top: @navHeightMax+@popupCarrotHeight - 4;
 }
 
-#popup{
+#popup {
     position: relative;
     .borderBox;
     height: 100%;
@@ -290,16 +288,15 @@ zoom: 1;*/
     color: @charcoal;
 
     visibility: visible;
-    a{
+    a {
         color: @charcoal;
     }
 }
 
-#popupHeader{
+#popupHeader {
     position: absolute;
     .borderBox;
-    width: 100%;
-        //TODO: Fix.
+    width: 100%; //TODO: Fix.
     overflow: hidden;
     z-index: 3;
     border-bottom: 1px solid @charcoal;
@@ -316,14 +313,14 @@ zoom: 1;*/
     border-left: 2px solid @darkGrey;
 }
 
-#popupArrow{
+#popupArrow {
     float: left;
     position: absolute;
     z-index: 50;
     margin-top: -1* @popupCarrotHeight + 2;
     visibility: visible;
     left: 50%;
-    margin-left: -1 * (@popupCarrotWidth / 2)-2;     /* Half width */
+    margin-left: -1 * (@popupCarrotWidth / 2)-2; /* Half width */
 
     height: @popupCarrotHeight;
     width: @popupCarrotWidth;
@@ -333,12 +330,12 @@ zoom: 1;*/
 
 //TODO: Simplify transparent on hover.
 .hover(){
-    &:hover{
+    &:hover {
         opacity: @hoverOpacity;
     }
 }
 
-#popupBack{
+#popupBack {
     float: left;
     height: @popupHeaderHeight;
     width: @popupHeaderHeight+10;
@@ -346,7 +343,7 @@ zoom: 1;*/
     .hover;
 }
 
-#popupClose{
+#popupClose {
     float: right;
     height: @popupHeaderHeight;
     width: @popupHeaderHeight;
@@ -354,7 +351,7 @@ zoom: 1;*/
     .hover;
 }
 
-#popupContentWrapper{
+#popupContentWrapper {
     position: relative;
     .borderBox;
     height: 100%;
@@ -362,17 +359,15 @@ zoom: 1;*/
     padding-top: 44px;
 }
 
-#popupContent{
+#popupContent {
     position: relative;
     .borderBox;
     max-height: 100%;
     text-align: left;
-    font-size: 18px;
-    //max-height?
-        //TODO: Fix.
+    font-size: 18px; //max-height?
+//TODO: Fix.
     overflow: auto;
-    background: #efefef;
-//border: solid @charcoal 3px;
+    background: #efefef; //border: solid @charcoal 3px;
     border-right: 2px solid @darkGrey;
     border-bottom: 2px solid @darkGrey;
     border-left: 2px solid @darkGrey;
@@ -381,18 +376,18 @@ zoom: 1;*/
     border-bottom-left-radius: 5px;
 
     color: @charcoal;
-    .last{
+    .last {
         border-bottom: none;
     }
 }
 
-.popupContentRow{
+.popupContentRow {
     border-bottom: 1px solid @darkGrey;
     display: block;
     padding: 12px 23px;
 }
 
-#logo{
+#logo {
     position: absolute;
     right: 10px;
     top: 2px;
@@ -400,7 +395,7 @@ zoom: 1;*/
     margin: auto;
 }
 
-#showMenu{
+#showMenu {
     display: none;
     position: absolute;
     top: 0;
@@ -410,20 +405,20 @@ zoom: 1;*/
     height: 100%;
 }
 
-#sideBarWrapper{
+#sideBarWrapper {
     position: fixed;
     top: @navHeightMax;
     bottom: 0;
     right: 0;
     overflow-x: hidden;
     width: @sideBarWrapperWidth;
-	z-index: 1;
-	.navColor;
-    /*TODO: Give box shadows vendor prefixes.*/
+    z-index: 1;
+    .navColor;
+/*TODO: Give box shadows vendor prefixes.*/
     box-shadow: -1px 4px 6px #888;
 }
 
-#sideBar{
+#sideBar {
     position: relative;
     z-index: 1;
     overflow: hidden;
@@ -438,22 +433,22 @@ zoom: 1;*/
     white-space: nowrap;
     -webkit-overflow-scrolling: touch;
     line-height: 1;
-	
-	.navColor;
+
+    .navColor;
 
 }
 
-.sideBarElement{
+.sideBarElement {
     display: block;
     position: relative;
     margin: 0 5px;
     font-weight: bold;
 
-    span{
+    span {
         vertical-align: middle;
     }
 
-    img{
+    img {
         display: inline;
         max-width: 100%;
         min-width: 20px;
@@ -463,12 +458,12 @@ zoom: 1;*/
         height: 25px;
         vertical-align: middle;
         padding: 5px 10px;
-        text-decoration:none;
+        text-decoration: none;
         border: 0;
     }
 
-    //TODO: Eliminate most of this.
-    .icon{
+//TODO: Eliminate most of this.
+    .icon {
         width: 25px;
         height: 25px;
         display: inline-block;
@@ -477,17 +472,16 @@ zoom: 1;*/
     }
 }
 
-#contentWrapper{
+#contentWrapper {
     position: absolute;
     top: 0;
     left: 0;
     height: 100%;
     width: 100%;
-    visibility: hidden;
-    //display: none;
+    visibility: hidden; //display: none;
 }
 
-#content{
+#content {
     visibility: visible;
     position: relative;
     padding: 8px;
@@ -496,22 +490,24 @@ zoom: 1;*/
     background: @lightGrey + #050505;
 }
 
-#slideMenu{
+#slideMenu {
     border-top: 1px solid @darkGrey;
     border-bottom: 1px solid @darkGrey;
     .sideBarElement;
 }
 
-#slideMenu:hover{
+#slideMenu:hover {
     opacity: @hoverOpacity;
 }
 
-.iconExpand:hover{
+.iconExpand:hover {
     opacity: @hoverOpacity;
 }
 
-.borderBox{
-    -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box;
+.borderBox {
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
 }
 
 /*#popupContent, #popupContent .jspContainer, #popupContent .jspPane{
@@ -519,7 +515,7 @@ zoom: 1;*/
     width: 100%;
 }*/
 
-.androidFixedPositionFix{
+.androidFixedPositionFix {
     -webkit-transition: -webkit-transform .3s ease-in-out;
     -moz-transition: -moz-transform .3s ease-in-out;
     -ms-transition: -ms-transform .3s ease-in-out;
@@ -529,8 +525,7 @@ zoom: 1;*/
     .rotate(0deg);
 }
 
-.iconExpand, .iconShow{
-//TODO: Fix problem w/ android 2.3 browser. http://jsfiddle.net/KrRsy/5/
+.iconExpand, .iconShow { //TODO: Fix problem w/ android 2.3 browser. http://jsfiddle.net/KrRsy/5/
     -webkit-transition: -webkit-transform .3s ease-in-out;
     -moz-transition: -moz-transform .3s ease-in-out;
     -ms-transition: -ms-transform .3s ease-in-out;
@@ -540,7 +535,7 @@ zoom: 1;*/
 }
 
 //Mixin to rotate elements.
-.rotate(@deg) {
+.rotate(@deg){
     -webkit-transform: rotate(@deg);
     -ms-transform: rotate(@deg); /* IE 9 */
     -o-transform: rotate(@deg); /* Opera */
@@ -548,7 +543,7 @@ zoom: 1;*/
     transform: rotate(@deg);
 }
 
-.rotateIcon{
+.rotateIcon {
     .rotate(-90deg);
 }
 
@@ -561,54 +556,70 @@ zoom: 1;*/
 }
 
 .createColors(@color){
-    (~".@{color}"){
+    (~".@{color}") {
         color: @@color;
-        outline: 0 none;
-        //text-shadow: 0px 2px 20px @@color, 0px 2px 30px @@color+#222;
-        //text-shadow: 0px 0px 1px @lightGrey;
+        outline: 0 none; //text-shadow: 0px 2px 20px @@color, 0px 2px 30px @@color+#222;
+    //text-shadow: 0px 0px 1px @lightGrey;
     }
 }
 
-.createColors('lightGrey');
-.createColors('darkGrey');
-.createColors('red');
-.createColors('orange');
-.createColors('green');
-.createColors('blue');
-.createColors('lightCharcoal');
-.createColors('charcoal');
-.createColors('black');
+.createColors('lightGrey')
 
+;
+.createColors('darkGrey')
 
-@media only screen and (max-width:800px){
-    #popupWrapper{
+;
+.createColors('red')
+
+;
+.createColors('orange')
+
+;
+.createColors('green')
+
+;
+.createColors('blue')
+
+;
+.createColors('lightCharcoal')
+
+;
+.createColors('charcoal')
+
+;
+.createColors('black')
+
+;
+
+@media only screen and (max-width:800px) {
+    #popupWrapper {
         position: absolute;
     }
 
-    #popupWrapper{
+    #popupWrapper {
     }
 
-    #nav{
+    #nav {
         position: absolute;
         height: @navHeightMax;
     }
 
-    #navContainer{
+    #navContainer {
         line-height: @navHeightMax - 5px;
     }
 
-    #logo{
+    #logo {
         display: none;
     }
 
-    #navClient{
-        .navIcon{
+    #navClient {
+        .navIcon {
             border: 0;
             padding: 0;
         }
     }
 
-    #clientLogo{
+    #clientLogo {
         display: none;
         height: 100%;
         width: 0;
@@ -616,19 +627,19 @@ zoom: 1;*/
         padding: 0;
     }
 
-    #navSearch input{
+    #navSearch input {
         display: none;
     }
 
-    #navSearch{
+    #navSearch {
         display: none;
     }
 
-    #showMenu{
+    #showMenu {
         display: inline;
     }
-	
-    #sideBar{
+
+    #sideBar {
         right: 0;
         height: auto;
         width: @sideBarExpandedWidth;
@@ -636,7 +647,7 @@ zoom: 1;*/
         box-shadow: 0px 0px 10px #888;
     }
 
-    #sideBarWrapper{
+    #sideBarWrapper {
         position: absolute;
         display: inline-block;
         top: @navHeightMax;
@@ -647,63 +658,66 @@ zoom: 1;*/
         box-shadow: none;
     }
 
-    #slideMenu{
+    #slideMenu {
         display: none;
     }
 
-    #popup{
+    #popup {
         position: relative;
     }
 
-    #contentWrapper{
+    #contentWrapper {
     }
 
-    #content{
+    #content {
         top: @navHeightMax;
         padding-right: 8px;
         background: #00f;
     }
 }
 
-@media only screen and (max-width:390px){
-    #popup{
+@media only screen and (max-width:390px) {
+    #popup {
         width: 80%;
     }
 
-    #logo{
+    #logo {
         display: none;
     }
 
-    #showMenu{
+    #showMenu {
         display: inline;
     }
 
-    #navContainer{
-        //width: 100%;
+    #navContainer { //width: 100%;
     }
 
-    .navElement{
+    .navElement {
         margin-right: 10%;
     }
 
-    #nav .last{
+    #nav .last {
         margin-right: 0px;
     }
 
-    #popup{
-        //width: 80%;
+    #popup { //width: 80%;
     }
 
-    #content{
+    #content {
         background: #0f0;
     }
 }
+
 //--------------------------------------------------------------------------------------------------------------------//
 //--------------------------------------------------------------------------------------------------------------------//
 //                               Silverlight View                                                                      //
 //--------------------------------------------------------------------------------------------------------------------//
 //--------------------------------------------------------------------------------------------------------------------//
-#silverlightControlHost
-{
+#silverlightControlHost {
+    position: fixed; //for firefox
+    left: 0;
+    top: 0;
     height: 100%;
+    width: 100%;
+    z-index: 0;
 }
