@@ -10,25 +10,33 @@ define(["developer", "db/services", "widgets/settingsMenu"], function (developer
     var usersSettings = {};
 
     //region Methods
-    usersSettings.setDefaultValue = function (){
-        if ($("#Role")[0].value == "Mobile"){
-            //if the role is mobile, set the default linked employee to "none"
-            $("#Employee")[0].kendoBindingTarget.target.select(0);
-        }else{
+    usersSettings.setDefaultValue = function () {
+        var index;
+        //get the index of the empty employee
+        for (var employee in this.employees) {
+            if (this.employees[employee].FirstName === "None") {
+                index = parseInt(employee);
+            }
+        }
+
+        if ($("#Role")[0].value === "Mobile") {
+            //if the role is mobile, set the default linked employee to "None"
+            $("#Employee")[0].kendoBindingTarget.target.select(index);
+        } else {
             //if the role is admin or regular, set the default linked employee to "Create New"
-            $("#Employee")[0].kendoBindingTarget.target.select(1);
+            $("#Employee")[0].kendoBindingTarget.target.select(this.employees.length - 1);
         }
     };
 
     //on add and edit, select a linked employee if the name matches the name in the form
     usersSettings.matchEmployee = function (first, last, employee) {
         //get the items in the dropdownlist
-        var employees = this.dropDownDataSource._data;
+        var employees = this.employees;
         //get the user's name from the form fields
         var name = $("#" + first)[0].value + " " + $("#" + last)[0].value;
-        for(var emp in employees){
+        for (var emp in employees) {
             //check if the names match
-            if(name == employees[emp].DisplayName){
+            if (name === employees[emp].DisplayName) {
                 //select the corresponding name from the dropdownlist
                 $("#" + employee)[0].kendoBindingTarget.target.select(parseInt(emp));
             }
@@ -37,10 +45,10 @@ define(["developer", "db/services", "widgets/settingsMenu"], function (developer
 
     //after the data is loaded, add tooltips to the edit and delete buttons
     var onDataBound = function () {
-        $(".k-grid-edit").each(function(){
+        $(".k-grid-edit").each(function () {
             $(this).attr("title", "Edit");
         });
-        $(".k-grid-delete").each(function(){
+        $(".k-grid-delete").each(function () {
             $(this).attr("title", "Delete");
         });
     };
@@ -48,9 +56,12 @@ define(["developer", "db/services", "widgets/settingsMenu"], function (developer
 
     usersSettings.initialize = function () {
 
-        services.getAllEmployeesForBusiness(function (employees){
-            usersSettings.employees = employees;
-        });
+        //get the list of employees without linked user accounts
+        var getEmployees = function () {
+            services.getAllEmployeesForBusiness(function (employees) {
+                usersSettings.employees = employees;
+            });
+        };
 
         //setup menu
         var menu = $("#users .settingsMenu");
@@ -80,9 +91,9 @@ define(["developer", "db/services", "widgets/settingsMenu"], function (developer
                 defaultValue: ""
             },
             Employee: {
-                type: "string",
                 defaultValue: ""
-            }}
+            }};
+
         var dataSource = new kendo.data.DataSource({
             transport: {
                 read: {
@@ -113,15 +124,6 @@ define(["developer", "db/services", "widgets/settingsMenu"], function (developer
             }
         });
 
-        usersSettings.dropDownDataSource = new kendo.data.DataSource({
-            data: usersSettings.employees,
-            schema: {
-                model: {
-                    fields: fields
-                }
-            }
-        });
-
         //add a grid to the #usersGrid div element
         $("#usersGrid").kendoGrid({
             dataSource: dataSource,
@@ -131,19 +133,20 @@ define(["developer", "db/services", "widgets/settingsMenu"], function (developer
                 template: $("#editTemplate").html(),
                 confirmation: "Are you sure you want to delete this user?"
             },
-            edit: function(e) {
+            edit: function (e) {
                 $(e.container)
                     .find("input[name='Employee']")
                     .data("kendoDropDownList")
-                    .bind("change", function() {
+                    .bind("change", function () {
                         console.log("drop down changed");
                     });
-                //TODO: sdd this add check if it works to re-get the list from the API
-                //usersSettings.dropDownDataSource.read();
+                //TODO:
+                getEmployees();
             },
-            scrollable:false,
+            scrollable: false,
             sortable: true,
-            columns: [{
+            columns: [
+                {
                     field: "FirstName",
                     title: "First Name"
                 },
@@ -158,11 +161,13 @@ define(["developer", "db/services", "widgets/settingsMenu"], function (developer
                 {
                     field: "Role"
                 },
+                //TODO: V2 add an employee records link
                 {
                     field: "Employee",
                     title: "Employee Record",
-                    //TODO:get correct link
-                    template: '<a href="http://www.google.com">#= Employee.DisplayName #</a>'
+                    template: "# if (Employee && Employee.DisplayName) {#" +
+                                "#= Employee.DisplayName #" +
+                              "# } #"
                 },
                 {
                     command: ["edit", "destroy"],
@@ -170,12 +175,16 @@ define(["developer", "db/services", "widgets/settingsMenu"], function (developer
                 }
             ]
         });
-        //endregion
+//endregion
 
-        $("#addUser").on("click", function() {
-            //TODO: sdd this add check if it works to re-get the list from the API
-            //usersSettings.dropDownDataSource.read();
+        $("#addUser").on("click", function () {
+            //TODO: see if this happens in time
+            getEmployees();
+
             var dataSrc = $("#usersGrid").data("kendoGrid").dataSource;
+
+            var createNew = {DisplayName: "Create New", FirstName: "", Id: "1", LastName: "", LinkedUserAccountId: ""};
+            usersSettings.employees.push(createNew);
 
             var object = $("<div id='popupEditor'>")
                 .appendTo($("body"))
@@ -205,30 +214,40 @@ define(["developer", "db/services", "widgets/settingsMenu"], function (developer
             //initialize the validator
             var validator = $(object.element).kendoValidator().data("kendoValidator");
 
-            var createNew = [{ "DisplayName": "Create New", "FirstName": "", "Id": "1", "LastName": "", "LinkedUserAccountId": "" }];
-            usersSettings.dropDownDataSource.data(createNew.concat(usersSettings.dropDownDataSource.options.data));
-
             usersSettings.setDefaultValue();
 
-            $("#btnAdd").on("click", function() {
+            $("#btnAdd").on("click", function () {
                 if (validator.validate()) {
+                    var employee = $("#Employee")[0].value;
+                    if (employee === "None") {
+                        dataSrc._data[0].Employee = {FirstName: "None", Id: " ", LastName: " ", LinkedUserAccountId: " "};
+                    } else if (employee === "Create New") {
+                        dataSrc._data[0].Employee = {FirstName: "Create", Id: " ", LastName: " ", LinkedUserAccountId: " "};
+                    } else {
+                        var name = employee.split(" ");
+                        dataSrc._data[0].Employee = {FirstName: name[0], Id: " ", LastName: name[1], LinkedUserAccountId: " "};
+                    }
                     dataSrc.sync(); //sync changes
                     object.close();
                     object.element.remove();
-                    usersSettings.dropDownDataSource.remove(usersSettings.dropDownDataSource.at(0));
+                    usersSettings.employees.splice(-1, 1);
                 }
             });
 
             $("#btnAdd")[0].innerText = ("Send Invite Email");
 
-            $("#btnCancel").on("click", function() {
+            $("#btnCancel").on("click", function () {
                 dataSrc.cancelChanges(model); //cancel changes
                 object.close();
                 object.element.remove();
-                usersSettings.dropDownDataSource.remove(usersSettings.dropDownDataSource.at(0));
+                usersSettings.employees.splice(-1, 1);
             });
         });
-    };
+
+        getEmployees();
+    }
+    ;
 
     window.usersSettings = usersSettings;
-});
+})
+;
