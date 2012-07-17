@@ -18,6 +18,7 @@
 
 .jspVerticalBar
 {
+    visibility: visible;
     position: absolute;
     top: 0;
     right: 0;
@@ -41,11 +42,6 @@
 {
     margin: 0;
     padding: 0;
-}
-
-.jspCap
-{
-    display: none;
 }
 
 .jspHorizontalBar .jspCap
@@ -123,7 +119,6 @@
 /* URL: http://takien.com/980/styling-scrollbar-to-look-like-facebook-scrollablearea-using-jscrollpane.php */
 .jspVerticalBar {
     position: absolute;
-    float: right;
     top: 0;
     right: 2px;
     width: 6px;
@@ -136,13 +131,11 @@
     display: none;
 }
 .jspTrack {
-    height: 100%;
     background: transparent;
 }
 
 .jspDrag {
     /*background: url(img/transparent-black.png) repeat;*/
-	background: #fff;
     opacity: .5;
     -webkit-border-radius:4px;
     -moz-border-radius:4px;
@@ -156,5 +149,3 @@
 .jspVerticalBar, .jspTrack {
     background: none repeat scroll 0 0 transparent;
 }
-
-.jspPane{}
