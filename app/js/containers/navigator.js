@@ -175,6 +175,8 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
         }
         $("#sideBarSections").html(sBarElement);
 
+        //TODO: Reuse sideBarWrapperDiv object.
+
         $(".sideBarElement").on({
             "touchstart mouseenter": function () {
                 $(this).stop(true, true).addClass($(this).attr('data-color'));
@@ -411,6 +413,7 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
         }
         changeBusinessLogo(business);
         setSideBarSections(config, business.sections);
+        $("#sideBarWrapper").data('jsp').reinitialise();
     };
 
     var changeBusinessLogo = function(business){

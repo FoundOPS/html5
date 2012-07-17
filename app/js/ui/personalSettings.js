@@ -5,7 +5,7 @@
 "use strict";
 
 define(["db/services", "widgets/settingsMenu", "lib/jquery-ui-1.8.21.core.min",
-        "lib/jquery.FileReader", "lib/swfobject"], function (services) {
+    "lib/jquery.FileReader", "lib/swfobject"], function (services) {
     var personalSettings = {};
     //keep track of if a new image has been selected
     personalSettings.newImage = false;
@@ -138,7 +138,7 @@ define(["db/services", "widgets/settingsMenu", "lib/jquery-ui-1.8.21.core.min",
     personalSettings.show = function () {
 //        console.log(personalSettings.viewModel.get("settings").get("FirstName"));
         kendo.bind($("#personal"), personalSettings.viewModel);
-    }
+    };
 
     //set personalSettings to a global function, so the functions are accessible from the HTML element
     window.personalSettings = personalSettings;
