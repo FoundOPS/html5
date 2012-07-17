@@ -19,7 +19,7 @@ define(["lib/jquery.mousewheel", "lib/jquery.jScrollPane"], function () {
                 id: "navClient",
                 title: data.name,
                 contents: [
-                    {"name": "Settings", url: data.settingsUrl}, {"name": "Settings", url: data.settingsUrl}, {"name": "Settings", url: data.settingsUrl}, {"name": "Settings", url: data.settingsUrl}, {"name": "Settings", url: data.settingsUrl}, {"name": "Settings", url: data.settingsUrl},
+                    {"name": "Settings", url: data.settingsUrl}, //{"name": "Settings", url: data.settingsUrl}, {"name": "Settings", url: data.settingsUrl}, {"name": "Settings", url: data.settingsUrl}, {"name": "Settings", url: data.settingsUrl}, {"name": "Settings", url: data.settingsUrl},
                     {"name": "Change Business", id: "changeBusiness"},
                     {"name": "Logout", url: data.logoutUrl}
                 ]

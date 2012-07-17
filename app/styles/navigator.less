@@ -354,8 +354,7 @@ zoom: 1;*/
 #popupContentWrapper {
     position: relative;
     .borderBox;
-    height: 100%;
-    //TODO: Find better fix
+    height: 100%; //TODO: Find better fix
     width: 100%;
     padding-top: 44px;
     visibility: hidden;
@@ -385,19 +384,17 @@ zoom: 1;*/
     }
 }
 
-#popupContentWrapper .jspContainer{
-    //TODO: Find better fix.
+#popupContentWrapper .jspContainer { //TODO: Find better fix.
     height: 100% !important;
     width: 100%;
 }
 
-#popupContentWrapper .jspDrag{
+#popupContentWrapper .jspDrag {
     background: #777779;
 }
 
-#popupContentWrapper .jspCapTop{
-    display: block;
-    //TODO: Give variable for popup header height.
+#popupContentWrapper .jspCapTop {
+    display: block; //TODO: Give variable for popup header height.
     height: 47px;
 }
 
@@ -438,7 +435,7 @@ zoom: 1;*/
     box-shadow: -1px 4px 6px #888;
 }
 
-#sideBarWrapper .jspDrag{
+#sideBarWrapper .jspDrag {
     background: #fff;
 }
 
@@ -508,9 +505,8 @@ zoom: 1;*/
 #content {
     visibility: visible;
     position: relative;
-    padding: 8px;
     top: @navHeight;
-    padding-right: @sideBarWrapperWidth + 8;
+    margin-right: @sideBarWrapperWidth;
 }
 
 #slideMenu {
@@ -586,15 +582,33 @@ zoom: 1;*/
     }
 }
 
-.createColors('lightGrey');
-.createColors('darkGrey');
-.createColors('red');
-.createColors('orange');
-.createColors('green');
-.createColors('blue');
-.createColors('lightCharcoal');
-.createColors('charcoal');
-.createColors('black');
+.createColors('lightGrey')
+
+;
+.createColors('darkGrey')
+
+;
+.createColors('red')
+
+;
+.createColors('orange')
+
+;
+.createColors('green')
+
+;
+.createColors('blue')
+
+;
+.createColors('lightCharcoal')
+
+;
+.createColors('charcoal')
+
+;
+.createColors('black')
+
+;
 
 @media only screen and (max-width:800px) {
     #popupWrapper {
@@ -673,7 +687,6 @@ zoom: 1;*/
 
     #content {
         top: @navHeight;
-        padding-right: 8px;
         background: #00f;
     }
 }
@@ -683,7 +696,7 @@ zoom: 1;*/
         width: 250px;
     }
 
-    #popupContentWrapper{
+    #popupContentWrapper {
         width: 250px;
     }
 
@@ -722,4 +735,6 @@ zoom: 1;*/
 #silverlightControlHost {
     left: 0;
     top: @navHeight;
+    //for internet explorer/firefox, to hide scroll. it will be within bounds
+    overflow: hidden;
 }
