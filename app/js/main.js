@@ -13,11 +13,17 @@ require.config({
     }
 });
 
-require(["containers/navigator", "silverlight", "lib/kendo.all", "ui/personalSettings", "ui/businessSettings", "ui/usersSettings", "ui/changePassword",
-    "underscore", "lib/userVoice"], function (Navigator, silverlight) {
-    //setup the navigator
-    var navigator = new Navigator(window.navigatorConfig);
-    navigator.hideSearch();
+require(["containers/navigator", "silverlight", "session", "lib/kendo.all", "ui/personalSettings", "ui/businessSettings", "ui/usersSettings", "ui/changePassword",
+    "underscore", "lib/userVoice"], function (Navigator, silverlight, session) {
+    session.get(function (data) {
+        //setup the navigator
+        var navigator = new Navigator(data);
+        navigator.hideSearch();
+
+        //set the role
+        silverlight.setRole(session.getSelectedRole());
+    });
+
     var application;
 
     //TODO make sectionSelected a navigator event
@@ -37,6 +43,13 @@ require(["containers/navigator", "silverlight", "lib/kendo.all", "ui/personalSet
             silverlight.navigate(section);
         }
     });
+
+    //fix problems with console not on IE
+    if(typeof window.console === "undefined") {
+        window.console = {
+            log:function(){}
+        };
+    }
 
     window.onhashchange = function () {
         //Hide the silverlight control when settings is chosen
@@ -67,8 +80,11 @@ require(["containers/navigator", "silverlight", "lib/kendo.all", "ui/personalSet
             navigator.closePopup();
         });
 
-        //b) set the initial roleId
-        silverlight.setRole(window.navigatorConfig.roles[0]);
+        //b) set the role
+        var selectedRole = session.getSelectedRole();
+        if (selectedRole) {
+            silverlight.setRole(selectedRole);
+        }
     });
 
     //hookup remote loading into remoteContent, by using the kendo mobile application

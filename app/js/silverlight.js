@@ -111,6 +111,7 @@ define(function () {
             errMsg += "MethodName: " + args.methodName + "     \n";
         }
 
+        //TODO track this, then restart the app if it crashed
         throw new Error(errMsg);
     };
     window.onSourceDownloadProgressChanged = function (sender, eventArgs) {

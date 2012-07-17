@@ -95,6 +95,11 @@ define(['developer', 'tools'], function (developer, tools) {
     };
 
     /**
+     * Get the current session for the user
+     */
+    services.getSession =  services._getHttp('settings/GetSession', {}, false);
+
+    /**
      * Get the current service provider's Routes.
      * @param {string} serviceDateUtc The service date to get routes for (in Utc).
      * @param {!function(Array.<Object>)} callback A callback to pass the loaded routes to.
