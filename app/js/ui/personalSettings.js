@@ -17,7 +17,7 @@ define(["db/services", "widgets/settingsMenu", "lib/jquery-ui-1.8.21.core.min", 
             }
             //check if image has been changed
             if (personalSettings.newImage) {
-                $("#imageUploadForm").submit();
+                $("#personalImageUploadForm").submit();
             }
         }
     });
@@ -25,7 +25,7 @@ define(["db/services", "widgets/settingsMenu", "lib/jquery-ui-1.8.21.core.min", 
     personalSettings.fixImageBtnPosition = function () {
         //if the Flash FileAPIProxy is being used, move the swf on top the moved input button
         if (window.FileAPIProxy !== null) {
-            var input = $("#imageUpload");
+            var input = $("#personalImageUpload");
             window.FileAPIProxy.container
                 .height(input.outerHeight())
                 .width(input.outerWidth())
@@ -95,14 +95,14 @@ define(["db/services", "widgets/settingsMenu", "lib/jquery-ui-1.8.21.core.min", 
 
         //setup the FileReader on the imageUpload button
         //this will enable the flash FileReader polyfill from https://github.com/Jahdrien/FileReader
-        $("#imageUpload").fileReader({
+        $("#personalImageUpload").fileReader({
             id: "fileReaderSWFObject",
             filereader: "../../lib/filereader.swf",
             debugMode: false,
             multiple: false
         });
 
-        $("#imageUpload").on('change', function (evt) {
+        $("#personalImageUpload").on('change', function (evt) {
             var reader = new FileReader();
             reader.onload = fileLoaded;
 
@@ -125,7 +125,7 @@ define(["db/services", "widgets/settingsMenu", "lib/jquery-ui-1.8.21.core.min", 
         });
 
         //set the form action to the update image url
-        $('#imageUploadForm').attr("action", services.API_URL + "settings/UpdateUserImage");
+        $('#personalImageUploadForm').attr("action", services.API_URL + "settings/UpdateUserImage");
 
         //retrieve the settings and bind them to the form
         services.getPersonalSettings(function (settings) {

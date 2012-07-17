@@ -86,16 +86,16 @@ require(["containers/navigator", "silverlight", "lib/kendo.all", "ui/personalSet
     catch (err) {
     }
 
-    window.personal = function () {
+    window.navigateToPersonal = function () {
         application.navigate("view/personalSettings.html");
     };
-    window.business = function () {
+    window.navigateToBusiness = function () {
         application.navigate("view/businessSettings.html");
     };
-    window.users = function () {
+    window.navigateToUsers = function () {
         application.navigate("view/usersSettings.html");
     };
-    window.changePassword = function () {
+    window.navigateToChangePassword = function () {
         application.navigate("view/changePassword.html");
     };
 });

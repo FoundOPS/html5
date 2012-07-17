@@ -15,6 +15,9 @@ define(["db/services", "widgets/settingsMenu"], function (services) {
         var confirmPass = $("#confirm")[0].value;
         if(changePassword.validator.validate){
             services.updatePassword(oldPass, newPass, confirmPass);
+            $("#old")[0].value = "";
+            $("#new")[0].value = "";
+            $("#confirm")[0].value = "";
         }
     };
 

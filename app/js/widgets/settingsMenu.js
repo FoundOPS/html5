@@ -19,9 +19,9 @@ define(["jquery", "session", "lib/kendo.all"], function ($, session) {
 
             // append the element that will be the menu
             _menu = $('<ul id="settingsList"> ' +
-                '<li class="active" onclick="window.personal()"><a>Personal</a></li>' +
-                '<li onclick="window.business()"><a>Business</a></li>' +
-                '<li onclick="window.users()"><a>Users</a></li>' +
+                '<li class="active" onclick="window.navigateToPersonal()"><a>Personal</a></li>' +
+                '<li onclick="window.navigateToBusiness()"><a>Business</a></li>' +
+                '<li onclick="window.navigateToUsers()"><a>Users</a></li>' +
                 '</ul>');
 
             var personalLi = _menu.find("li:nth-child(1)");

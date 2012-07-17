@@ -19,10 +19,21 @@ define(['db/services', 'developer', 'ui/personalSettings', "widgets/settingsMenu
             }
             //check if image has been changed
             if (businessSettings.newImage) {
-                $("#imageUploadForm").submit();
+                $("#businessImageUploadForm").submit();
             }
         }
     });
+
+    businessSettings.fixImageBtnPosition = function () {
+        //if the Flash FileAPIProxy is being used, move the swf on top the moved input button
+        if (window.FileAPIProxy !== null) {
+            var input = $("#businessImageUpload");
+            window.FileAPIProxy.container
+                .height(input.outerHeight())
+                .width(input.outerWidth())
+                .position({of: input});
+        }
+    };
 
     businessSettings.initialize = function () {
         businessSettings.validator = $("#businessForm").kendoValidator().data("kendoValidator");
@@ -44,7 +55,7 @@ define(['db/services', 'developer', 'ui/personalSettings', "widgets/settingsMenu
             //make sure the image fits into desired area
             personalSettings.resize();
 
-            personalSettings.fixImageBtnPosition();
+            businessSettings.fixImageBtnPosition();
 
             //set a hidden form to the file image's data (because we stole it with FileReader)
             $('#imageData').val(imageData);
@@ -55,14 +66,14 @@ define(['db/services', 'developer', 'ui/personalSettings', "widgets/settingsMenu
 
         //setup the FileReader on the imageUpload button
         //this will enable the flash FileReader polyfill from https://github.com/Jahdrien/FileReader
-        $("#imageUpload").fileReader({
+        $("#businessImageUpload").fileReader({
             id: "fileReaderSWFObject",
             filereader: "../../lib/filereader.swf",
             debugMode: false,
             multiple: false
         });
 
-        $("#imageUpload").on('change', function (evt) {
+        $("#businessImageUpload").on('change', function (evt) {
             var reader = new FileReader();
             reader.onload = fileLoaded;
 
@@ -85,7 +96,7 @@ define(['db/services', 'developer', 'ui/personalSettings', "widgets/settingsMenu
         });
 
         //set the form action to the update image url
-        $('#imageUploadForm').attr("action", services.API_URL + "settings/UpdateBusinessImage?roleId=" + developer.GOTGREASE_ROLE_ID);
+        $('#businessImageUploadForm').attr("action", services.API_URL + "settings/UpdateBusinessImage?roleId=" + developer.GOTGREASE_ROLE_ID);
 
         //retrieve the settings and bind them to the form
         services.getBusinessSettings(function (settings) {
