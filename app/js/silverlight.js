@@ -5,12 +5,11 @@ define(function () {
 
     window.silverlight = silverlight;
 
-
     //resize the silverlight container to the proper size according to the window size
     var resizeSilverlightContainer = function () {
-        //from navigator.less: @navHeight = 45px, @sideBarWrapperWidth = 55px
-        var height = $(document).height() - 45;
-        var width = $(document).width() - 55;
+        //from navigator.less: navHeight = 45px
+        var height = $(window).height() - 45;
+        var width = $("#content").width();
         $("#silverlightControlHost").height(height);
         $("#silverlightControlHost").width(width);
     };
@@ -35,9 +34,6 @@ define(function () {
         $("#silverlightPlugin").css("height", "0px");
         $("#silverlightPlugin").css("width", "0px");
 
-        //for firefox
-//        $("#silverlightControlHost").css("position", "fixed");
-
         $("#remoteContent").css("display", "");
     };
 
@@ -48,6 +44,7 @@ define(function () {
         //show the silverlight client
         $("#silverlightPlugin").css("height", "100%");
         $("#silverlightPlugin").css("width", "100%");
+        resizeSilverlightContainer();
 
         $("#remoteContent").css("display", "none");
     };
