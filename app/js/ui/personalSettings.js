@@ -4,7 +4,7 @@
  */
 "use strict";
 
-define(["db/services", "widgets/settingsMenu", "lib/jquery-ui-1.8.21.core.min", "lib/cordova",
+define(["db/services", "widgets/settingsMenu", "lib/jquery-ui-1.8.21.core.min",
         "lib/jquery.FileReader", "lib/swfobject"], function (services) {
     var personalSettings = {};
     //keep track of if a new image has been selected
