@@ -1,17 +1,23 @@
 define(["lib/jquery.mousewheel", "lib/jquery.jScrollPane"], function () {
     /** Popup Constructor **/
     function Popup(data) {
+        var thisPopup = this;
         var title = "";
         var content = "";
         var object = null;
-
-        var lastNavClick = null;
-        var offScreen = false;
-        var carrotPos = "50%";
-        var thisPopup = this;
-        var currentIconTarget = null;
-
         var history = [];
+        var lastElementClick = null;
+        var currentTarget = null;
+
+        //TODO: Passed as object until jQuery plugin is written.
+        if(typeof(data.popupListener)==='undefined'){
+            console.log("ERROR: No listener passed!");
+            return;
+        }
+        var listenerElements = $(data.popupListener);
+        listenerElements.filter(".popup").click(function (e) {
+            thisPopup.toggleVisible(e, $(this));
+        });
 
         //Static data objects, could be removed in future iterations.
         var menus = [
@@ -19,7 +25,7 @@ define(["lib/jquery.mousewheel", "lib/jquery.jScrollPane"], function () {
                 id: "navClient",
                 title: data.name,
                 contents: [
-                    {"name": "Settings", url: data.settingsUrl}, //{"name": "Settings", url: data.settingsUrl}, {"name": "Settings", url: data.settingsUrl}, {"name": "Settings", url: data.settingsUrl}, {"name": "Settings", url: data.settingsUrl}, {"name": "Settings", url: data.settingsUrl},
+                    {"name": "Settings", url: data.settingsUrl},
                     {"name": "Change Business", id: "changeBusiness"},
                     {"name": "Logout", url: data.logoutUrl}
                 ]
@@ -30,87 +36,63 @@ define(["lib/jquery.mousewheel", "lib/jquery.jScrollPane"], function () {
             menus.push({'id': id, 'title': title, 'contents': contents});
         };
 
-        //TODO: Maybe change to global listener. Currently has to be called after .navElement creation.
-        $(".navElement").filter(".popup").click(function (e) {
-            thisPopup.toggleVisible(e, $(this));
-        });
-
-        /*TODO: Break toggleVisible into generic functions (eg. Should not expect el=navElement)*/
-        this.toggleVisible = function (e, el) {
-            var icon = $(el).find("img.navIcon").first();
-            if (icon === null) {
-                //console.log("ERROR: Cannot locate nav icon in element!");
-                return;
-            }
-            //console.log("Found navIcon in element.");
-            //console.log("Looking for existing popup...");
-
-            var popupDiv = $("#popup");
-
-            if (popupDiv.length === 0) {
-                //console.log("Popup not initialized");
-                popupDiv = this.createPopup();
-            }
-            if (popupDiv.length === 0) {
-                /*console.log("ERROR: FAILED TO CREATE POPUP!!!");*/
+        this.toggleVisible = function (e, clicked) {
+            var clickedDiv = $(clicked);
+            if (clickedDiv === null) {
+                //console.log("ERROR: No element clicked!");
                 return;
             }
 
-            var navElem = $(el).closest(".navElement");
-            var left = "50%";
-            var id = navElem.attr("id");
-            //TODO: Fix repetition.
-            if (popupDiv.is(":visible") && lastNavClick !== null) {
-                if (navElem.is("#" + lastNavClick)) {
-                    //console.log("Clicked on same nav button!");
-                    this.closePopup();
-                    lastNavClick = navElem.attr("id");
+            var popupWrapperDiv = $("#popupWrapper");
+            if (popupWrapperDiv.length === 0) {
+                //console.log("Popup not initialized; initializing.");
+                popupWrapperDiv = this.createPopup();
+                if (popupWrapperDiv.length === 0) {
+                    //console.log("ERROR: Failed to create Popup!");
                     return;
                 }
-                //console.log("Clicked on different nav button!");
-                var thisPopup = this;
-                this.closePopup();
-                //TODO: Make sure this doesn't cause animation problems.
-                /*popupDiv.promise("fx").done(function () {
-                 left = thisPopup.getLeft(icon, popupDiv);
-                 popupDiv.css("left", left);
-                 thisPopup.populate(id);
-                 popupDiv.stop(false, true).fadeIn('fast');
-                 });
-                 lastNavClick = navElem.attr("id");
-                 return;*/
             }
-            left = this.getLeft(icon, popupDiv);
-            popupDiv.css("left", left);
-            popupDiv.css("top", $("nav").height());
+
+            var id = clickedDiv.attr("id");
+            //TODO: Fix repetition.
+            if ($("#popup").is(":visible") && lastElementClick !== null) {
+                if (clickedDiv.is("#" + lastElementClick)) {
+                    //console.log("Clicked on same element!");
+                    this.closePopup();
+                    lastElementClick = clickedDiv.attr("id");
+                    return;
+                }
+                //console.log("Clicked on different element!");
+                this.closePopup();
+            }
+            var left = this.getLeft(clickedDiv, popupWrapperDiv);
+            popupWrapperDiv.css("left", left);
+
+            var top = clickedDiv.offset().top + clickedDiv.height() + $("#popupArrow").height();
+            popupWrapperDiv.css("padding-top", top + "px");
             this.populate(id);
 
-            //console.log(el);
-            $(el).trigger("popupEvent", $(el));
+            clickedDiv.trigger("popupEvent", clickedDiv);
 
-            popupDiv.stop(false, true).fadeIn('fast');
+            $("#popup").stop(false, true).fadeIn('fast');
+            //TODO: Fire event here and reinit on in in navigator.js
             $("#popupContentWrapper").data('jsp').reinitialise();
-            lastNavClick = navElem.attr("id");
+            lastElementClick = clickedDiv.attr("id");
         };
 
         //Function returns the left offset of the popup and sets the carrot element's position.
-        this.getLeft = function (iconTarget, popupDiv) {
-            currentIconTarget = iconTarget;
-            //console.log("IconTarget Offset: " + iconTarget.offset().left);
-            //console.log("IconTarget Width: " + iconTarget.width());
-            var x = iconTarget.offset().left + iconTarget.width() / 2;
-            //console.log("x: " + x);
-            //TODO: Should this be outerWidth()?
-            var rightOffset = x + popupDiv.width() / 2 + 4;
+        this.getLeft = function (target, popupDiv) {
+            var padding = 4;
+            currentTarget = target;
+            var x = target.offset().left + target.width() / 2;
+            var rightOffset = x + popupDiv.outerWidth() / 2 + padding;
             var offset = x - popupDiv.width() / 2;
             var windowWidth = $(window).width();
-            //console.log("Window width: " + windowWidth);
-            //console.log("Right popup offset: " + rightOffset);
 
             //Sets popup variables referenced in resize listener.
-            offScreen = false;
-            carrotPos = "50%";
-            var padding = 4;
+            var offScreen = false;
+
+            var carrotPos = "50%";
             if (offset < 0) {
                 offScreen = true;
                 offset = padding;
@@ -121,15 +103,8 @@ define(["lib/jquery.mousewheel", "lib/jquery.jScrollPane"], function () {
 
             var carrot = $("#popupArrow");
             if (offScreen) {
-                //console.log("Offscreen popup.");
-
-                carrotPos = (x - offset);
-                //console.log("x: " + x);
-                //console.log("Carrot width: " + carrot.width());
-                //console.log("Popup offset: " + popupDiv.offset().left);
-                //console.log("Carrot position: " + carrotPos);
+                carrotPos = (x - offset + padding);
             }
-
             //Moves carrot on popup div.
             carrot.css("left", carrotPos);
 
@@ -148,38 +123,26 @@ define(["lib/jquery.mousewheel", "lib/jquery.jScrollPane"], function () {
 
             var api = popupContentDiv.data('jsp');
             var throttleTimeout;
-            $(window).bind(
-                'resize',
-                function()
-                {
-                    if ($.browser.msie) {
-                        // IE fires multiple resize events while you are dragging the browser window which
-                        // causes it to crash if you try to update the scrollpane on every one. So we need
-                        // to throttle it to fire a maximum of once every 50 milliseconds...
-                        if (!throttleTimeout) {
-                            throttleTimeout = setTimeout(
-                                function()
-                                {
-                                    api.reinitialise();
-                                    throttleTimeout = null;
-                                },
-                                50
-                            );
-                        }
-                    } else {
-                        api.reinitialise();
+            $(window).bind('resize', function(){
+                if ($.browser.msie) {
+                    if (!throttleTimeout) {
+                        throttleTimeout = setTimeout(function(){
+                                api.reinitialise();
+                                throttleTimeout = null;
+                            }, 50
+                        );
                     }
+                } else {
+                    api.reinitialise();
                 }
-            );
-            //popupContentDiv.data('jsp').reinitialise();
+            });
         };
 
-
-        // createPopup: Appends popup to the nav
+        // createPopup: Prepends popup to dom
         this.createPopup = function () {
             //Creates popup div that will be populated in the future.
-            var popupDiv = $(document.createElement("div"));
-            popupDiv.attr("id", "popupWrapper");
+            var popupWrapperDiv = $(document.createElement("div"));
+            popupWrapperDiv.attr("id", "popupWrapper");
 
             var s = "<div id='popup'>" +
                 "<div id='popupArrow'></div>" +
@@ -193,11 +156,11 @@ define(["lib/jquery.mousewheel", "lib/jquery.jScrollPane"], function () {
                 "<div id='popupContent'></div>" +
                 "</div>" +
                 "</div>";
-            popupDiv.html(s);
-            popupDiv.css("display", "none");
+            popupWrapperDiv.html(s);
+            popupWrapperDiv.find("#popup").css("display", "none");
 
             //Appends created div to page.
-            popupDiv.insertAfter("#nav");
+            $("body").prepend(popupWrapperDiv);
 
             //Click listener for popup close button.
             $("#popupClose").click(function () {
@@ -215,10 +178,10 @@ define(["lib/jquery.mousewheel", "lib/jquery.jScrollPane"], function () {
 
             //Window resize listener to check if popup is off screen.
             $(window).on('resize', function () {
-                    var popupDiv = $("#popup");
-                    if (popupDiv.is(":visible")) {
-                        var left = thisPopup.getLeft(currentIconTarget, popupDiv);
-                        popupDiv.css("left", left);
+                    var popupWrapperDiv = $("#popupWrapper");
+                    if ($("#popup").is(":visible")) {
+                        var left = thisPopup.getLeft(currentTarget, popupWrapperDiv);
+                        popupWrapperDiv.css("left", left);
                     }
                 }
             );
@@ -237,7 +200,7 @@ define(["lib/jquery.mousewheel", "lib/jquery.jScrollPane"], function () {
             );
 
             //TODO: Remove for production.
-            $("#silverlightControlHost").focusin(function(e) {
+            $("#silverlightControlHost").focusin(function() {
                 thisPopup.closePopup();
             });
 
@@ -256,29 +219,29 @@ define(["lib/jquery.mousewheel", "lib/jquery.jScrollPane"], function () {
 
                     if($(this).hasClass("popupEvent")){
                         $(this).trigger("popupEvent", $(this));
-                        //console.log(thisPopup.getAction());
                     }
 
                     var keepOpen = thisPopup.populate(newId);
-
-                    if(!keepOpen)
-                        thisPopup.closePopup();
+                    if(!keepOpen) thisPopup.closePopup();
                 });
 
             //Sets global popup object, object, with the created div.
-            object = popupDiv;
+            //TODO: Rename of remove.
+            object = popupWrapperDiv;
 
             //TODO: Refactor.
             this.addMenu("changeBusiness", "Businesses", data.roles);
             this.initPopupScrollBar();
 
             //Function also returns the popup div for ease of use.
-            return popupDiv;
+            return popupWrapperDiv;
         };
 
         //Closes the popup
         this.closePopup = function () {
             history = [];
+
+            //TODO: Make close synchronous
             $("#popup").stop(false, true).fadeOut('fast');
         };
 
@@ -349,6 +312,7 @@ define(["lib/jquery.mousewheel", "lib/jquery.jScrollPane"], function () {
             content = cont;
             var popupContentDiv = $("#popupContentWrapper");
             //popupContentDiv.html(content);
+            //TODO: This should be abstracted.
             popupContentDiv.data('jsp').getContentPane().find("#popupContent").html(content);
             popupContentDiv.data('jsp').reinitialise();
         };
