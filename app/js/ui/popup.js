@@ -191,9 +191,11 @@ define(["lib/jquery.mousewheel", "lib/jquery.jScrollPane"], function () {
                 .on('click touchend', function (e) {
                     var clicked = $(e.target);
                     //TODO: Return if not visible.
-                    var popupLen = clicked.parents("#popup").length + clicked.is("#popup") ? 1 : 0;
+                    //TODO: Also add arrow click detection?
+                    var popupHeaderLen = clicked.parents("#popupHeader").length + clicked.is("#popupHeader") ? 1 : 0;
+                    var popupContentLen = clicked.parents("#popupContent").length + clicked.is("#popupContent") ? 1 : 0;
                     var navLen = clicked.parents(".navElement").length + clicked.is(".navElement") ? 1 : 0;
-                    if (popupLen === 0 && navLen === 0) {
+                    if (popupHeaderLen === 0 && popupContentLen === 0 && navLen === 0) {
                         thisPopup.closePopup();
                     }
                 }
