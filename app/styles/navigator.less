@@ -96,6 +96,8 @@ table {
 
 @imageHeight: 20px;
 @iconPadding: 4px;
+
+@borderRadius: 4px;
 @borderSize: 2px;
 
 /*  Positioning  */
@@ -220,11 +222,13 @@ zoom: 1;*/
     line-height: normal;
 
     a {
-        display: block;
+        //Allows links to take up 100% of clickable space.
+        display: inline-block;
     }
 
     .navIcon {
-        padding: @iconPadding;
+        height: 28px;
+        //padding: @iconPadding;
     }
 
     input {
@@ -253,22 +257,29 @@ zoom: 1;*/
     .navIcon {
         padding: 0;
         border-right: @borderSize solid @navBorderColor;
-        height: @imageHeight + @iconPadding*2;
+        border-radius: @borderRadius;
         overflow: hidden;
     }
 }
 
 #navSearch {
     a {
-        float: right;
+        //float: right;
     }
     .navIcon { //border-left: @borderSize solid @navBorderColor;
+    }
+
+    img{
+        padding: 4px;
     }
 }
 
 #clientLogo {
     background: #fff;
-    margin: 0 4px;
+    //margin: 0 4px;
+    height: @imageHeight + 8px;
+    border-top-right-radius: @borderRadius;
+    border-bottom-right-radius: @borderRadius;
 }
 
 #popupWrapper {
@@ -304,8 +315,10 @@ zoom: 1;*/
     font-size: 16px;
     text-align: center;
     background: #efefef;
-    border-bottom: 1px solid @darkGrey;
-    box-shadow: 0px 0px 5px #888;
+    border-bottom: 2px solid @darkGrey;
+
+    //box-shadow: 0px 0px 5px #888;
+
     border-top-right-radius: 5px;
     border-top-left-radius: 5px;
     border-top: 2px solid @darkGrey;
@@ -314,13 +327,13 @@ zoom: 1;*/
 }
 
 #popupArrow {
-    float: left;
     position: absolute;
-    z-index: 50;
+    float: left;
+    z-index: 5;
     margin-top: -1* @popupCarrotHeight + 2;
+    margin-left: -1 * (@popupCarrotWidth / 2)-2; /* Half width */
     visibility: visible;
     left: 50%;
-    margin-left: -1 * (@popupCarrotWidth / 2)-2; /* Half width */
 
     height: @popupCarrotHeight;
     width: @popupCarrotWidth;
@@ -355,10 +368,9 @@ zoom: 1;*/
     position: relative;
     .borderBox;
     height: 100%;
-    //TODO: Find better fix
     width: 100%;
     padding-top: 44px;
-    visibility: hidden;
+    //visibility: hidden;
 }
 
 #popupContent {
@@ -375,7 +387,7 @@ zoom: 1;*/
     border-right: 2px solid @darkGrey;
     border-bottom: 2px solid @darkGrey;
     border-left: 2px solid @darkGrey;
-    box-shadow: 0px 0px 8px #888;
+    //box-shadow: 0px 0px 8px #888;
     border-bottom-right-radius: 5px;
     border-bottom-left-radius: 5px;
 
@@ -386,9 +398,12 @@ zoom: 1;*/
 }
 
 #popupContentWrapper .jspContainer{
-    //TODO: Find better fix.
-    height: 100% !important;
-    width: 100%;
+    overflow: visible;
+}
+
+#popupContentWrapper .jspPane{
+    border-radius: 6px;
+    box-shadow: 0px 0px 10px #888;
 }
 
 #popupContentWrapper .jspDrag{
@@ -623,6 +638,8 @@ zoom: 1;*/
 
     #clientLogo {
         display: none;
+
+        //TODO: Find out what the height declaration was for.
         height: 100%;
         width: 0;
         margin-left: 0;
