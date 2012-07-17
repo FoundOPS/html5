@@ -6,14 +6,16 @@ define(function () {
     window.silverlight = silverlight;
 
     //resize the silverlight container to the proper size according to the window size
-    var resizeSilverlightContainer = function () {
+    var resizeContainers = function () {
         //from navigator.less: navHeight = 45px
         var height = $(window).height() - 45;
         var width = $("#content").width();
         $("#silverlightControlHost").height(height);
         $("#silverlightControlHost").width(width);
+        $("#remoteContent").height(height);
+        $("#remoteContent").width(width);
     };
-    $(window).resize(resizeSilverlightContainer);
+    $(window).resize(resizeContainers);
 
     //In case a section is not chosen start with the Dispatcher
     var currentSection = "Dispatcher";
@@ -31,6 +33,7 @@ define(function () {
     silverlight.hide = function () {
         //TODO try 0px
         //instead of hiding the silverlight (which will disable it), make it really small
+        $("#silverlightControlHost").css("display", "none");
         $("#silverlightPlugin").css("height", "0px");
         $("#silverlightPlugin").css("width", "0px");
 
@@ -42,9 +45,10 @@ define(function () {
      */
     silverlight.show = function () {
         //show the silverlight client
+        $("#silverlightControlHost").css("display", "");
         $("#silverlightPlugin").css("height", "100%");
         $("#silverlightPlugin").css("width", "100%");
-        resizeSilverlightContainer();
+        resizeContainers();
 
         $("#remoteContent").css("display", "none");
     };
@@ -129,7 +133,7 @@ define(function () {
         img.src = url;
     };
 
-    resizeSilverlightContainer();
+    resizeContainers();
     silverlight.hide();
 
     return silverlight;

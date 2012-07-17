@@ -10,21 +10,21 @@ define(["developer", "db/services", "widgets/settingsMenu"], function (developer
     var usersSettings = {};
 
     //region Methods
-    usersSettings.setDefaultValue = function () {
+    usersSettings.setDefaultValue = function (role, employee) {
         var index;
         //get the index of the empty employee
-        for (var employee in this.employees) {
-            if (this.employees[employee].FirstName === "None") {
-                index = parseInt(employee);
+        for (var i in this.employees) {
+            if (this.employees[i].FirstName === "None") {
+                index = parseInt(i);
             }
         }
 
-        if ($("#Role")[0].value === "Mobile") {
+        if ($("#" + role)[0].value === "Mobile") {
             //if the role is mobile, set the default linked employee to "None"
-            $("#Employee")[0].kendoBindingTarget.target.select(index);
+            $("#" + employee)[0].kendoBindingTarget.target.select(index);
         } else {
             //if the role is admin or regular, set the default linked employee to "Create New"
-            $("#Employee")[0].kendoBindingTarget.target.select(this.employees.length - 1);
+            $("#" + employee)[0].kendoBindingTarget.target.select(this.employees.length - 1);
         }
     };
 
@@ -140,8 +140,20 @@ define(["developer", "db/services", "widgets/settingsMenu"], function (developer
                     .bind("change", function () {
                         console.log("drop down changed");
                     });
-                //TODO:
                 getEmployees();
+
+                usersSettings.setDefaultValue("RoleEdit", "linkedEmployee");
+                //e.model.Employee
+
+                $(".k-grid-update").on("click", function () {
+                    var employee = $("#linkedEmployee")[0].value;
+                    if (employee === "None") {
+                        dataSource._data[0].Employee = {FirstName: "None", Id: " ", LastName: " ", LinkedUserAccountId: " "};
+                    } else {
+                        var name = employee.split(" ");
+                        dataSource._data[0].Employee = {FirstName: name[0], Id: " ", LastName: name[1], LinkedUserAccountId: " "};
+                    }
+                });
             },
             scrollable: false,
             sortable: true,
@@ -214,7 +226,7 @@ define(["developer", "db/services", "widgets/settingsMenu"], function (developer
             //initialize the validator
             var validator = $(object.element).kendoValidator().data("kendoValidator");
 
-            usersSettings.setDefaultValue();
+            usersSettings.setDefaultValue("Role", "Employee");
 
             $("#btnAdd").on("click", function () {
                 if (validator.validate()) {
@@ -230,7 +242,7 @@ define(["developer", "db/services", "widgets/settingsMenu"], function (developer
                     dataSrc.sync(); //sync changes
                     object.close();
                     object.element.remove();
-                    usersSettings.employees.splice(-1, 1);
+                    usersSettings.employees.splice(usersSettings.employees.length - 1, 1);
                 }
             });
 
@@ -240,7 +252,7 @@ define(["developer", "db/services", "widgets/settingsMenu"], function (developer
                 dataSrc.cancelChanges(model); //cancel changes
                 object.close();
                 object.element.remove();
-                usersSettings.employees.splice(-1, 1);
+                usersSettings.employees.splice(usersSettings.employees.length - 1, 1);
             });
         });
 

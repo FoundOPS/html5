@@ -25,6 +25,8 @@ define(['db/services', 'developer', 'ui/personalSettings', "widgets/settingsMenu
     });
 
     businessSettings.fixImageBtnPosition = function () {
+        personalSettings.resize('businessCropbox');
+
         //if the Flash FileAPIProxy is being used, move the swf on top the moved input button
         if (window.FileAPIProxy !== null) {
             var input = $("#businessImageUpload");
@@ -49,11 +51,11 @@ define(['db/services', 'developer', 'ui/personalSettings', "widgets/settingsMenu
             if (imageData == null)
                 return;
 
-            var cropbox = $("#cropbox");
+            var cropbox = $("#businessCropbox");
             //set the source of the image element to be the newly uploaded image
             cropbox.attr("src", imageData);
             //make sure the image fits into desired area
-            personalSettings.resize();
+            personalSettings.resize('businessCropbox');
 
             businessSettings.fixImageBtnPosition();
 

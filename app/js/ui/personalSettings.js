@@ -23,6 +23,8 @@ define(["db/services", "widgets/settingsMenu", "lib/jquery-ui-1.8.21.core.min",
     });
 
     personalSettings.fixImageBtnPosition = function () {
+        personalSettings.resize('personalCropbox');
+
         //if the Flash FileAPIProxy is being used, move the swf on top the moved input button
         if (window.FileAPIProxy !== null) {
             var input = $("#personalImageUpload");
@@ -34,10 +36,9 @@ define(["db/services", "widgets/settingsMenu", "lib/jquery-ui-1.8.21.core.min",
     };
 
     //make sure the image fits into desired area
-    personalSettings.resize = function () {
-        personalSettings.fixImageBtnPosition();
+    personalSettings.resize = function (id) {
 
-        var cropbox = $("#cropbox");
+        var cropbox = $("#" + id);
         //get the original dimensions of the image
         var width = cropbox[0].width;
         var height = cropbox[0].height;
@@ -58,7 +59,7 @@ define(["db/services", "widgets/settingsMenu", "lib/jquery-ui-1.8.21.core.min",
             cropbox.attr("height", personalSettings.newH);
         }
         //center the image
-        var margin = (420 - personalSettings.newW) / 2;
+        var margin = (500 - personalSettings.newW) / 2;
         cropbox.css("marginLeft", margin + "px");
 
         return cropbox;
@@ -78,11 +79,11 @@ define(["db/services", "widgets/settingsMenu", "lib/jquery-ui-1.8.21.core.min",
             if (imageData == null)
                 return;
 
-            var cropbox = $("#cropbox");
+            var cropbox = $("#personalCropbox");
             //set the source of the image element to be the newly uploaded image
             cropbox.attr("src", imageData);
             //make sure the image fits into desired area
-            personalSettings.resize();
+            personalSettings.resize('personalCropbox');
 
             personalSettings.fixImageBtnPosition();
 

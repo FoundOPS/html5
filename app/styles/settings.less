@@ -63,6 +63,31 @@ input[type="button"], button{
     vertical-align: middle;
 }
 /*endregion*/
+/*region Variables*/
+@blue:#488FCD;
+@green:#659A41;
+@red:#991A36;
+@orange:#D9591E;
+@charcoal:#333335;
+@buttonLight:#a7ff6c;
+@buttonDark:#8dd85b;
+@buttonHoverLight:#9cee65;
+@buttonHoverDark:#7ec152;
+.buttonGradient{
+    background: -moz-linear-gradient(top, @buttonLight, @buttonDark);
+    filter: progid:dximagetransform.microsoft.gradient(startColorstr=@buttonLight, endColorstr=@buttonDark);
+    background: -webkit-gradient(linear, left top, left bottom, from(@buttonLight), to(@buttonDark));
+    background: -moz-linear-gradient(top, @buttonLight, @buttonDark);
+    filter: progid:dximagetransform.microsoft.gradient(startColorstr='@buttonLight', endColorstr='@buttonDark');
+}
+.buttonGradientHover{
+    background: -moz-linear-gradient(top, @buttonHoverLight, @buttonHoverDark);
+    filter: progid:dximagetransform.microsoft.gradient(startColorstr=@buttonHoverLight, endColorstr=@buttonHoverDark);
+    background: -webkit-gradient(linear, left top, left bottom, from(@buttonHoverLight), to(@buttonHoverDark));
+    background: -moz-linear-gradient(top, @buttonHoverLight, @buttonHoverDark);
+    filter: progid:dximagetransform.microsoft.gradient(startColorstr='@buttonHoverLight', endColorstr='@buttonHoverDark');
+}
+/*endregion*/
 /*region Settings -Menu*/
 .settingsMenu{
     position: absolute;
@@ -89,19 +114,19 @@ input[type="button"], button{
     border-bottom: none;
 }
 .settingsMenu li a{
-    color: #333335;
+    color: @charcoal;
 }
 .settingsMenu li:nth-child(2), .settingsMenu li:nth-child(3){
     display: none;
 }
 .settingsMenu li:nth-child(1):hover a, .settingsMenu li:nth-child(1).active a{
-    color:#659A41;
+    color:@green;
 }
 .settingsMenu li:nth-child(2):hover a, .settingsMenu li:nth-child(2).active a{
-    color:#991A36;
+    color:@red;
 }
 .settingsMenu li:nth-child(3):hover a, .settingsMenu li:nth-child(3).active a{
-    color:#488FCD;
+    color:@blue;
 }
 /*endregion*/
 /*region Settings -All */
@@ -121,7 +146,7 @@ h2{
 body{
     font-family: PTSans;
     background-color: #eee;
-    color: #333335;
+    color: @charcoal;
 }
 hr{
     border: 1px solid #666;
@@ -147,11 +172,11 @@ button:hover{
 /*endregion*/
 /*region Settings -Personal */
 #personal .wrap, #business .wrap, #pass .wrap{
-    width: 420px;
-    padding: 15px 50px;
+    width: 500px;
+    padding: 15px;
 }
 #personal table{
-    margin: 0 0 0 50px;
+    margin: 0 0 0 102px;
 }
 #personal td, #business td, #pass td{
     height: 30px;
@@ -170,14 +195,18 @@ button:hover{
     margin-left: 0;
 }
 #personal button, #business button{
-    margin-left: 136px;
+    margin-left: 176px;
     padding: 2px 5px;
 }
 #personal .save, #business .save{
-    margin-left: 163px;
+    margin-left: 203px;
+    .buttonGradient;
+}
+#personal .save:hover, #business .save:hover{
+    .buttonGradientHover;
 }
 #personalImageUpload, #businessImageUpload{
-    margin-bottom: 5px;
+    margin: 0 0 5px 85px;
 }
 #personal #uploadBtn, #business #uploadBtn{
     width: 95px;
@@ -191,7 +220,7 @@ button:hover{
     margin-bottom: 30px;
 }
 #pass h2 a{
-    color: #488FCD;
+    color: @blue;
     text-decoration: none;
 }
 #pass h2 a:hover{
@@ -204,7 +233,7 @@ button:hover{
 /*endregion*/
 /*region Settings -Business */
 #business table{
-    margin: 0 0 0 87px;
+    margin: 0 0 0 129px;
 }
 /*endregion*/
 /*region Settings -Users */
@@ -229,7 +258,7 @@ button:hover{
 #addUser{
     margin: 0 0 25px 70px;
     cursor: pointer;
-    color: #488FCD;
+    color: @blue;
     display: block;
     font-size: 1.1em;
 }
@@ -243,10 +272,17 @@ button:hover{
 }
 .k-edit-form-container .k-grid-update{
     margin-left: 120px;
+    .buttonGradient;
+}
+.k-edit-form-container .k-grid-update:hover{
+    .buttonGradientHover;
 }
 #btnAdd{
-     margin-left: 87px;
-    color:#659A41;
+    margin-left: 87px;
+    .buttonGradient;
+}
+#btnAdd:hover{
+    .buttonGradientHover;
 }
 #btnCancel{
     margin-left: 5px;
@@ -272,7 +308,7 @@ button:hover{
     text-align: left;
     padding-bottom: 0;
     margin-bottom: 10px;
-    border-bottom: 1px solid #333335;
+    border-bottom: 1px solid @charcoal;
 }
 .k-edit-form-container p{
     font-size: 1.2em;
