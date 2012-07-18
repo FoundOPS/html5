@@ -41,7 +41,7 @@ input[type="button"], button{
 .k-grid tbody .k-button{min-width:0}
 .k-grid tbody button.k-button,#ie8#skips{min-width:0}
 *+html .k-grid tbody a.k-button{min-width:0}
-.k-edit, .k-delete{
+#users .k-edit, #users .k-delete{
     background-image: none;
 }
 .k-grid-edit, .k-grid-delete, .k-grid-edit:hover, .k-grid-delete:hover{
@@ -61,6 +61,10 @@ input[type="button"], button{
 .k-button-icontext .k-icon {
     margin: -2px 3px 0 -3px;
     vertical-align: middle;
+}
+span.k-tooltip {
+    position: relative;
+    display: block;
 }
 /*endregion*/
 /*region Variables*/
@@ -151,13 +155,6 @@ body{
 hr{
     border: 1px solid #666;
 }
-button{
-    height: 25px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    cursor: pointer;
-    background: url("../img/btnBg.png") repeat-x;
-}
 button:hover{
     background: url("../img/btnBgHover.png") repeat-x;
 }
@@ -171,63 +168,85 @@ button:hover{
 }
 /*endregion*/
 /*region Settings -Personal */
-#personal .wrap, #business .wrap, #pass .wrap{
+#personal .wrap, #business .wrap, #pass .wrap, #createPass .wrap{
     width: 500px;
     padding: 15px;
 }
 #personal table{
     margin: 0 0 0 102px;
 }
-#personal td, #business td, #pass td{
+#personal td, #business td, #pass td, #createPass td{
     height: 30px;
     text-align: right;
     margin: 0 0 5px 0;
 }
-#personal td input, #business td input, #pass td input{
+#personal td.right, #business td.right, #pass td.right, #createPass td.right{
+    text-align: left;
+}
+#personal td input, #business td input, #pass td input, #createPass td input{
     width: 190px;
     height: 20px;
     border: 1px inset #ccc;
 }
-#personal form, #business form{
-    margin-left: 120px;
+#personal form:not(#personalForm), #business form:not(#businessForm){
+    margin-left: 185px;
+    width: 130px;
+    z-index: 5;
 }
 #personal form#personalForm, #business form#businessForm{
     margin-left: 0;
 }
-#personal button, #business button{
-    margin-left: 176px;
-    padding: 2px 5px;
+#personal .changePassword{
+    margin-left: 157px;
 }
 #personal .save, #business .save{
-    margin-left: 203px;
+    margin-left: 146px;
     .buttonGradient;
 }
-#personal .save:hover, #business .save:hover{
+#personal .save:hover, #business .save:hover, #pass .save:hover, #createPass .save:hover{
     .buttonGradientHover;
 }
-#personalImageUpload, #businessImageUpload{
-    margin: 0 0 5px 85px;
+#personal #personalImageUpload, #business #businessImageUpload{
+    margin: 0 0 5px 0;
+    height: 32px;
+    width: 130px;
+    opacity: 0;
+}
+#personal #personalImageUpload:hover, #business #businessImageUpload:hover{
+    background-image: url("../img/highlight.png");
+}
+#personal .upload, #business .upload{
+    margin-bottom: -44px;
+    margin-left: 185px;
+    z-index: -1;
+}
+#personal .k-image, #business .k-image{
+    background-position: -115px -91px;
 }
 #personal #uploadBtn, #business #uploadBtn{
     width: 95px;
     margin-bottom: 10px;
 }
-#personal #fileName, #business #fileName{
-    background-color: #fff;
-}
 /*region Change Password*/
-#pass h2{
-    margin-bottom: 30px;
-}
-#pass h2 a{
+#pass h2 a, #createPass h2 a{
     color: @blue;
     text-decoration: none;
 }
-#pass h2 a:hover{
+#pass h2 a:hover, #createPass h2 a:hover{
     text-decoration: underline;
 }
-#pass form{
-    margin-left: 50px;
+#pass form, #createPass form{
+    margin-left: 89px;
+}
+#pass .k-edit, #createPass .k-edit {
+    background-position: -32px 0px;
+}
+#pass .save, #createPass .save{
+    margin-left: 187px;
+    .buttonGradient;
+}
+#createPass .save{
+    margin-left: 217px;
 }
 /*endregion*/
 /*endregion*/

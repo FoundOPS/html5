@@ -161,11 +161,27 @@ define(['developer', 'tools'], function (developer, tools) {
      */
     services.updatePersonalSettings = function (settings) {
         $.ajax({
-            url: services.API_URL + "settings/UpdatePersonalSettings",
+            url: services.API_URL + "settings/UpdatePersonalSettings?roleId=" + developer.GOTGREASE_ROLE_ID,
             type: "POST",
             dataType: "json",
             contentType: 'application/json',
             data: JSON.stringify(settings)
+        });
+        //TODO
+//            .success(function (response) {
+//                return response;
+//            });
+    };
+
+    /**
+     * Creates personal password(for initial login).
+     * @param {string} newPass.
+     * @param {string} confirmPass.
+     */
+    services.createPassword = function (newPass, confirmPass) {
+        $.ajax({
+            url: services.API_URL + "settings/CreatePassword?newPass=" + newPass + "&confirmPass=" + confirmPass,
+            type: "POST"
         });
     };
 
