@@ -1,4 +1,4 @@
-define(["lib/jquery.mousewheel", "lib/jquery.jScrollPane"], function () {
+//define(["lib/jquery.mousewheel", "lib/jquery.jScrollPane"], function () {
     (function( $ ){
 
         $.fn.popup = function( options ) {
@@ -33,14 +33,14 @@ define(["lib/jquery.mousewheel", "lib/jquery.jScrollPane"], function () {
         var lastElementClick = null;
         var currentTarget = null;
 
-        //TODO: Passed as object until jQuery plugin is written.
         if((typeof(popupListener)==='undefined') || popupListener === null){
             console.log("ERROR: No listener passed!");
             return;
         }
         var listenerElements = $(popupListener);
         //TODO: Specify class filter with options.
-        listenerElements.filter(".popup").click(function (e) {
+        listenerElements.click(function (e) {
+            console.log("click");
             thisPopup.toggleVisible(e, $(this));
         });
 
@@ -51,18 +51,19 @@ define(["lib/jquery.mousewheel", "lib/jquery.jScrollPane"], function () {
         };
 
         this.toggleVisible = function (e, clicked) {
+            console.log("Toggling visibility.");
             var clickedDiv = $(clicked);
             if (clickedDiv === null) {
-                //console.log("ERROR: No element clicked!");
+                console.log("ERROR: No element clicked!");
                 return;
             }
 
             var popupWrapperDiv = $("#popupWrapper");
             if (popupWrapperDiv.length === 0) {
-                //console.log("Popup not initialized; initializing.");
+                console.log("Popup not initialized; initializing.");
                 popupWrapperDiv = this.createPopup();
                 if (popupWrapperDiv.length === 0) {
-                    //console.log("ERROR: Failed to create Popup!");
+                    console.log("ERROR: Failed to create Popup!");
                     return;
                 }
             }
@@ -71,26 +72,26 @@ define(["lib/jquery.mousewheel", "lib/jquery.jScrollPane"], function () {
             //TODO: Fix repetition.
             if ($("#popup").is(":visible") && lastElementClick !== null) {
                 if (clickedDiv.is("#" + lastElementClick)) {
-                    //console.log("Clicked on same element!");
+                    console.log("Clicked on same element!");
                     this.closePopup();
                     lastElementClick = clickedDiv.attr("id");
                     return;
                 }
-                //console.log("Clicked on different element!");
+                console.log("Clicked on different element!");
                 this.closePopup();
             }
             var left = this.getLeft(clickedDiv, popupWrapperDiv);
             popupWrapperDiv.css("left", left);
 
-            var top = clickedDiv.offset().top + clickedDiv.height() + $("#popupArrow").height();
+            var top = clickedDiv.outerHeight(true) + $("#popupArrow").outerHeight();
             popupWrapperDiv.css("padding-top", top + "px");
             this.populate(id);
 
             clickedDiv.trigger("popupEvent", clickedDiv);
 
             $("#popup").stop(false, true).fadeIn('fast');
-            //TODO: Fire event here and reinit on in in navigator.js
-            $("#popupContentWrapper").data('jsp').reinitialise();
+            //TODO: Change namespace.
+            popupWrapperDiv.trigger("popup.visible");
             lastElementClick = clickedDiv.attr("id");
         };
 
@@ -126,28 +127,23 @@ define(["lib/jquery.mousewheel", "lib/jquery.jScrollPane"], function () {
             return offset;
         };
 
+        //TODO: Refactor.
         /** Initializes scrollbar for popup contents **/
         this.initPopupScrollBar = function () {
-            var popupContentDiv = $("#popupContentWrapper");
-            popupContentDiv.jScrollPane({
-                horizontalGutter: 0,
-                verticalGutter: 0,
-                'showArrows': false
-            });
+            var popupContentWrapperDiv = $("#popupContentWrapper");
 
-            var api = popupContentDiv.data('jsp');
             var throttleTimeout;
             $(window).bind('resize', function(){
                 if ($.browser.msie) {
                     if (!throttleTimeout) {
                         throttleTimeout = setTimeout(function(){
-                                api.reinitialise();
+                                $(popupContentWrapperDiv).trigger("popup.resize");
                                 throttleTimeout = null;
                             }, 50
                         );
                     }
                 } else {
-                    api.reinitialise();
+                    $(popupContentWrapperDiv).trigger("popup.resize");
                 }
             });
         };
@@ -206,10 +202,10 @@ define(["lib/jquery.mousewheel", "lib/jquery.jScrollPane"], function () {
                     var clicked = $(e.target);
                     //TODO: Return if not visible.
                     //TODO: Also add arrow click detection?
-                    //TODO: Find better way than adding filter to every listener.
                     var popupHeaderLen = clicked.parents("#popupHeader").length + clicked.is("#popupHeader") ? 1 : 0;
                     var popupContentLen = clicked.parents("#popupContent").length + clicked.is("#popupContent") ? 1 : 0;
-                    var listenerLen = clicked.parents(".popup").length + clicked.is(".popup") ? 1 : 0;
+                    //TODO: Is passing a jQuery object and grabbing its selector the best way to do this?
+                    var listenerLen = clicked.parents(popupListener.selector).length + clicked.is(popupListener.selector) ? 1 : 0;
                     //console.log(popupHeaderLen + " " + popupContentLen + " " + listenerLen);
                     //console.log(popupListener);
                     if (popupHeaderLen === 0 && popupContentLen === 0 && listenerLen === 0) {
@@ -248,6 +244,8 @@ define(["lib/jquery.mousewheel", "lib/jquery.jScrollPane"], function () {
             //TODO: Rename of remove.
             object = popupWrapperDiv;
             this.initPopupScrollBar();
+            //TODO: Is this the safest way?
+            $("#popupContentWrapper").trigger("popup.created");
 
             //Function also returns the popup div for ease of use.
             return popupWrapperDiv;
@@ -256,8 +254,6 @@ define(["lib/jquery.mousewheel", "lib/jquery.jScrollPane"], function () {
         //Closes the popup
         this.closePopup = function () {
             history = [];
-
-            //TODO: Make close synchronous
             $("#popup").stop(false, true).fadeOut('fast');
         };
 
@@ -326,11 +322,12 @@ define(["lib/jquery.mousewheel", "lib/jquery.jScrollPane"], function () {
         //Public setter function for private var content and sets content of the html popup element.
         this.setContent = function (cont) {
             content = cont;
-            var popupContentDiv = $("#popupContentWrapper");
-            //popupContentDiv.html(content);
-            //TODO: This should be abstracted.
-            popupContentDiv.data('jsp').getContentPane().find("#popupContent").html(content);
-            popupContentDiv.data('jsp').reinitialise();
+            var popupContentWrapperDiv = $("#popupContentWrapper");
+            //popupContentDiv.data('jsp').getContentPane().find("#popupContent").html(content);
+            //TODO: Is setting the content w/o using the jScrollPane api safe to do?
+            $("#popupContent").html(content);
+            //TODO: Change event namespace.
+            popupContentWrapperDiv.trigger("popup.setContent", $(this));
         };
 
         // Public getter function that returns a popup data object.
@@ -355,5 +352,5 @@ define(["lib/jquery.mousewheel", "lib/jquery.jScrollPane"], function () {
         };
     }
 
-    return Popup;
-});
+//    return Popup;
+//});

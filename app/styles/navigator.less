@@ -1,4 +1,6 @@
 @import "jquery.jscrollpane.less";
+@import "popup.less";
+
 /* navigator css stylesheet */
 
 /* http://meyerweb.com/eric/tools/css/reset/
@@ -289,6 +291,7 @@ zoom: 1;*/
     height: 100%;
     width: 305px;
     padding-top: @navHeight+@popupCarrotHeight - 4;
+    visibility: hidden;
 }
 
 #popup {
@@ -298,6 +301,7 @@ zoom: 1;*/
     width: 100%;
     z-index: 2;
     color: @charcoal;
+    visibility: visible;
 
     a {
         color: @charcoal;
