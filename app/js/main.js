@@ -15,16 +15,16 @@ require.config({
 
 require(["containers/navigator", "silverlight", "session", "lib/kendo.all", "ui/personalSettings", "ui/businessSettings", "ui/usersSettings", "ui/changePassword",
     "underscore", "lib/userVoice"], function (Navigator, silverlight, session) {
+    var application, navigator;
+
     session.get(function (data) {
         //setup the navigator
-        var navigator = new Navigator(data);
+        navigator = new Navigator(data);
         navigator.hideSearch();
 
         //set the role
-        silverlight.setRole(session.getSelectedRole());
+        silverlight.updateRole();
     });
-
-    var application;
 
     //TODO make sectionSelected a navigator event
     //whenever a section is chosen, choose it in the silverlight app
@@ -45,9 +45,10 @@ require(["containers/navigator", "silverlight", "session", "lib/kendo.all", "ui/
     });
 
     //fix problems with console not on IE
-    if(typeof window.console === "undefined") {
+    if (typeof window.console === "undefined") {
         window.console = {
-            log:function(){}
+            log: function () {
+            }
         };
     }
 
@@ -70,21 +71,15 @@ require(["containers/navigator", "silverlight", "session", "lib/kendo.all", "ui/
     //TODO make roleSelected a navigator event
     //whenever a role is changed, choose it in the silverlight app
     $(document).on("roleSelected", function (e, role) {
-        silverlight.setRole(role);
+        session.setRole(role);
+        silverlight.updateRole();
     });
 
-    //when the silverlight plugin loads:
+    //when the silverlight plugin loads hook into the silverlight click events, and hide the navigator popup
     $(silverlight).bind('loaded', function () {
-        //a) hook into the silverlight click events, and hide the navigator popup
         silverlight.plugin.mainPage.addEventListener("Clicked", function () {
             navigator.closePopup();
         });
-
-        //b) set the role
-        var selectedRole = session.getSelectedRole();
-        if (selectedRole) {
-            silverlight.setRole(selectedRole);
-        }
     });
 
     //hookup remote loading into remoteContent, by using the kendo mobile application

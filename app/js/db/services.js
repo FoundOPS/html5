@@ -97,7 +97,7 @@ define(['developer', 'tools'], function (developer, tools) {
     /**
      * Get the current session for the user
      */
-    services.getSession =  services._getHttp('settings/GetSession', {}, false);
+    services.getSession = services._getHttp('settings/GetSession', {}, false);
 
     /**
      * Get the current service provider's Routes.
@@ -214,6 +214,18 @@ define(['developer', 'tools'], function (developer, tools) {
 
     services.logout = function (callback) {
         return services._getHttp('auth/LogOut')(callback);
+    };
+
+    services.trackError = function (error, business, section) {
+        $.ajax({
+            url: services.API_URL + "Error/Track?business=" + business + "&section=" + section,
+            type: "POST",
+            dataType: "json",
+            contentType: 'application/json',
+            data: error
+        }).success(function (response) {
+                callback(response);
+            });
     };
 
     return services;
