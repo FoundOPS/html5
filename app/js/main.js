@@ -40,7 +40,7 @@ require(["containers/navigator", "silverlight", "session", "lib/kendo.all", "ui/
         else {
             //navigate to silverlight to clear the url
             application.navigate("#silverlight");
-            silverlight.navigate(section);
+            silverlight.navigate(section.name);
         }
     });
 
