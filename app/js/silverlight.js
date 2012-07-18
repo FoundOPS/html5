@@ -1,9 +1,13 @@
 'use strict';
 
 define(['db/services', 'session'], function (dbservices, session) {
-    var silverlight = {};
+    var silverlight = {},
+    //In case a section is not chosen start with the Dispatcher
+        currentSection = "Dispatcher";
 
     window.silverlight = silverlight;
+
+    //region private
 
     //resize the silverlight container to the proper size according to the window size
     var resizeContainers = function () {
@@ -17,75 +21,12 @@ define(['db/services', 'session'], function (dbservices, session) {
     };
     $(window).resize(resizeContainers);
 
-    /**
-     * Hide the silverlight plugin
-     */
-    silverlight.hide = function () {
-        //TODO try 0px
-        //instead of hiding the silverlight (which will disable it), make it really small
-//        $("#silverlightControlHost").css("display", "none");
-        $("#silverlightPlugin").css("height", "1px");
-        $("#silverlightPlugin").css("width", "1px");
+    //endregion
 
-        $("#remoteContent").css("display", "");
-    };
+    //region functions for the silverlight object
 
-    /**
-     * Show the silverlight plugin
-     */
-    silverlight.show = function () {
-        //show the silverlight client
-        $("#silverlightControlHost").css("display", "");
-        $("#silverlightPlugin").css("height", "100%");
-        $("#silverlightPlugin").css("width", "100%");
-        resizeContainers();
-
-        $("#remoteContent").css("display", "none");
-    };
-
-    //In case a section is not chosen start with the Dispatcher
-    var currentSection = "Dispatcher";
-    /**
-     * Returns the current section. When the silverlight client loads, it will open this section.
-     * @return {String}
-     */
-    silverlight.getCurrentSection = function () {
-        return currentSection;
-    };
-
-    /**
-     * Navigate to a section
-     * @param {{name: string}}  section
-     */
-    silverlight.navigate = function (section) {
-        currentSection = section.name;
-
-        try {
-            silverlight.show();
-            silverlight.plugin.navigationVM.NavigateToView(section.name);
-        } catch (err) {
-        }
-    };
-
-    /**
-     * Update the silverlight app's role to the session's selected role
-     * @param {{id: string}} role
-     */
-    silverlight.updateRole = function () {
-        try {
-
-            var selectedRole = session.getRole();
-            if (selectedRole) {
-                silverlight.plugin.navigationVM.ChangeRole(selectedRole.id);
-            }
-        } catch (err) {
-        }
-    };
-
-    //#region Setup functions for the silverlight object
     window.onSilverlightPluginLoaded = function (sender, args) {
         silverlight.plugin = document.getElementById('silverlightPlugin').Content;
-        $(silverlight).trigger('loaded');
     };
     window.onSilverlightError = function (sender, args) {
         var appSource = "";
@@ -125,7 +66,7 @@ define(['db/services', 'session'], function (dbservices, session) {
         //for IE
         throw new Error(errMsg);
 
-        dbservices.trackError(errMsg, silverlight.getCurrentSection(), session.getRole().name);
+        dbservices.trackError(errMsg, currentSection, session.getRole().name);
     };
     window.onSourceDownloadProgressChanged = function (sender, eventArgs) {
         var myText = sender.findName("progressText");
@@ -133,14 +74,82 @@ define(['db/services', 'session'], function (dbservices, session) {
         var myBar = sender.findName("ProgressBarTransform");
         myBar.ScaleX = eventArgs.progress;
     };
+
     //#endregion
 
-    //This is for invoking totango tracking events
-    //for silverlight to get around a security exception
-    //with cross-domain Http Gets that do not have a crossdomainpolicy
-    window.httpGetImage = function (url) {
+    //region functions only accessed by the silverlight application when it is loaded
+
+    silverlight.onLoaded = function () {
+        silverlight.updateRole();
+        silverlight.navigate(currentSection);
+        resizeContainers();
+
+        $(silverlight).trigger('loaded');
+    };
+
+    //for silverlight to get around a security exception with
+    //cross-domain Http Gets that do not have a crossdomainpolicy
+    //this is for invoking totango tracking events
+    silverlight.httpGetImage = function (url) {
         var img = new Image();
         img.src = url;
+    };
+
+    //endregion
+
+    /**
+     * Hide the silverlight plugin
+     */
+    silverlight.hide = function () {
+        //TODO try 0px
+        //instead of hiding the silverlight (which will disable it), make it really small
+//        $("#silverlightControlHost").css("display", "none");
+        $("#silverlightPlugin").css("height", "1px");
+        $("#silverlightPlugin").css("width", "1px");
+
+        $("#remoteContent").css("display", "");
+    };
+
+    /**
+     * Show the silverlight plugin
+     */
+    silverlight.show = function () {
+        //show the silverlight client
+        $("#silverlightControlHost").css("display", "");
+        $("#silverlightPlugin").css("height", "100%");
+        $("#silverlightPlugin").css("width", "100%");
+        resizeContainers();
+
+        $("#remoteContent").css("display", "none");
+    };
+
+    /**
+     * Navigate to a section
+     * @param {{name: string}}  section
+     */
+    silverlight.navigate = function (section) {
+        currentSection = section.name;
+
+        try {
+            silverlight.show();
+            silverlight.plugin.navigationVM.NavigateToView(section.name);
+        } catch (err) {
+        }
+    };
+
+    /**
+     * Update the silverlight app's role to the session's selected role
+     * @param {{id: string}} role
+     */
+    silverlight.updateRole = function () {
+        try {
+
+            var selectedRole = session.getRole();
+            if (selectedRole) {
+                silverlight.plugin.navigationVM.ChangeRole(selectedRole.id);
+            }
+        } catch (err) {
+        }
     };
 
     resizeContainers();

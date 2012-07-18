@@ -75,15 +75,11 @@ require(["containers/navigator", "silverlight", "session", "lib/kendo.all", "ui/
         silverlight.updateRole();
     });
 
-    //when the silverlight plugin loads:
+    //when the silverlight plugin loads hook into the silverlight click events, and hide the navigator popup
     $(silverlight).bind('loaded', function () {
-        //a) hook into the silverlight click events, and hide the navigator popup
         silverlight.plugin.mainPage.addEventListener("Clicked", function () {
             navigator.closePopup();
         });
-
-        //b) update its role
-        silverlight.updateRole();
     });
 
     //hookup remote loading into remoteContent, by using the kendo mobile application
