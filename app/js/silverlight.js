@@ -1,6 +1,6 @@
 'use strict';
 
-define(function () {
+define(['db/services', 'session'], function (dbservices, session) {
     var silverlight = {};
 
     window.silverlight = silverlight;
@@ -17,25 +17,15 @@ define(function () {
     };
     $(window).resize(resizeContainers);
 
-    //In case a section is not chosen start with the Dispatcher
-    var currentSection = "Dispatcher";
-    /**
-     * Returns the current section. When the silverlight client loads, it will open this section.
-     * @return {String}
-     */
-    silverlight.getCurrentSection = function () {
-        return currentSection;
-    };
-
     /**
      * Hide the silverlight plugin
      */
     silverlight.hide = function () {
         //TODO try 0px
         //instead of hiding the silverlight (which will disable it), make it really small
-        $("#silverlightControlHost").css("display", "none");
-        $("#silverlightPlugin").css("height", "0px");
-        $("#silverlightPlugin").css("width", "0px");
+//        $("#silverlightControlHost").css("display", "none");
+        $("#silverlightPlugin").css("height", "1px");
+        $("#silverlightPlugin").css("width", "1px");
 
         $("#remoteContent").css("display", "");
     };
@@ -53,12 +43,22 @@ define(function () {
         $("#remoteContent").css("display", "none");
     };
 
+    //In case a section is not chosen start with the Dispatcher
+    var currentSection = "Dispatcher";
+    /**
+     * Returns the current section. When the silverlight client loads, it will open this section.
+     * @return {String}
+     */
+    silverlight.getCurrentSection = function () {
+        return currentSection;
+    };
+
     /**
      * Navigate to a section
      * @param {{name: string}}  section
      */
     silverlight.navigate = function (section) {
-        silverlight.currentSection = section;
+        currentSection = section.name;
 
         try {
             silverlight.show();
@@ -68,12 +68,16 @@ define(function () {
     };
 
     /**
-     * Change the current role
+     * Update the silverlight app's role to the session's selected role
      * @param {{id: string}} role
      */
-    silverlight.setRole = function (role) {
+    silverlight.updateRole = function () {
         try {
-            silverlight.plugin.navigationVM.ChangeRole(role.id);
+
+            var selectedRole = session.getRole();
+            if (selectedRole) {
+                silverlight.plugin.navigationVM.ChangeRole(selectedRole.id);
+            }
         } catch (err) {
         }
     };
@@ -115,8 +119,13 @@ define(function () {
             errMsg += "MethodName: " + args.methodName + "     \n";
         }
 
-        //TODO track this, then restart the app if it crashed
+        //for chrome
+        console.log(errMsg);
+
+        //for IE
         throw new Error(errMsg);
+
+        dbservices.trackError(errMsg, silverlight.getCurrentSection(), session.getRole().name);
     };
     window.onSourceDownloadProgressChanged = function (sender, eventArgs) {
         var myText = sender.findName("progressText");

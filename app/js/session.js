@@ -5,11 +5,17 @@
 define(['db/services'], function (dbservices) {
     var session = {};
 
+    window.session = session;
+
     /**
      * The selected role
      */
-    session.getSelectedRole = function () {
-        return session._selectedRole;
+    session.getRole = function () {
+        return session._role;
+    };
+
+    session.setRole = function (role) {
+        return session._role = role;
     };
 
     /**
@@ -26,7 +32,7 @@ define(['db/services'], function (dbservices) {
         //load the config
         dbservices.getSession(function (data) {
             session._data = data;
-            session._selectedRole = data.roles[0];
+            session._role = data.roles[0];
 
             callback(session._data);
         });
@@ -159,7 +165,7 @@ define(['db/services'], function (dbservices) {
 //            }
 //        ]
 //    };
-//    session._selectedRole = session._data.roles[0];
+//    session._role = session._data.roles[0];
 
     return session;
 });
