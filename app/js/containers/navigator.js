@@ -19,7 +19,8 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
      * @constructor
      */
     var config = null;
-    function Navigator(conf){
+
+    function Navigator(conf) {
         config = conf;
         var thisNavigator = this;
         initTopNav(config);
@@ -40,13 +41,16 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
         var businessLogoUrl = config.roles[0].businessLogoUrl;
 
         //TODO: Just call changeBusinessLogo after template init to simplify redundant code?
-        if(typeof(businessLogoUrl) === 'undefined'){businessLogoEnabled = false; businessLogoUrl = "";}
+        if (typeof(businessLogoUrl) === 'undefined') {
+            businessLogoEnabled = false;
+            businessLogoUrl = "";
+        }
 
         var params = [config.avatarUrl, businessLogoUrl];
         topNav.html(navTemplate(params));
 
         //Hide business logo if undefined.
-        if(!businessLogoEnabled){
+        if (!businessLogoEnabled) {
             topNav.find("#navClient .navIcon").css("border", "0");
             topNav.find("#clientLogo").css("display", "none");
         }
@@ -113,29 +117,29 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
 //        return imgLoc.substring(0, extIndex) + "Color" + imgLoc.substring(extIndex);
 //    }
 
-    var getSection = function(sections, name){
+    var getSection = function (sections, name) {
         var section;
-        for(section in sections){
+        for (section in sections) {
             //console.log("Sections: " + sections[section]);
-            if(sections[section].name === name){
+            if (sections[section].name === name) {
                 return sections[section];
             }
         }
         return null;
     };
 
-    var getRole = function(roles, name){
+    var getRole = function (roles, name) {
         var role;
-        for(role in roles){
+        for (role in roles) {
             //console.log("Roles: " + roles[role].name);
-            if(roles[role].name === name){
+            if (roles[role].name === name) {
                 return roles[role];
             }
         }
         return null;
     };
 
-    var setSideBarSections = function(config, availableSections){
+    var setSideBarSections = function (config, availableSections) {
         $(".sideBarElement").off();
 
         var section;
@@ -148,7 +152,7 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
             var currentSection = getSection(config.sections, availableSections[section]);//config.sections[section];
             var href = "";
             if (typeof(currentSection.url) !== 'undefined') {
-                href = "href='"+currentSection.url+"'";
+                href = "href='" + currentSection.url + "'";
             }
             var name = currentSection.name;
             var color = currentSection.color;
@@ -190,7 +194,7 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
                 //image = image.replace('Color.', '.');
                 $(this).find(".icon").css('background-image', 'url(' + image + ')');
             },
-            "click": function() {
+            "click": function () {
                 var name = $(this).find(".sectionName:first").html();
                 var section = getSection(config.sections, name);
                 $(this).trigger("sectionSelected", section);
@@ -391,23 +395,23 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
         );
     };
 
-    var getBusiness = function(name, config){
+    var getBusiness = function (name, config) {
         //console.log("name: "+name);
         var roles = config.roles;
         var role;
 
-        for(role in roles){
+        for (role in roles) {
             //console.log(roles[role]);
-            if(roles[role].name === name)return roles[role];
+            if (roles[role].name === name)return roles[role];
         }
         return null;
     };
 
-    var changeBusiness = function(clicked, config){
+    var changeBusiness = function (clicked, config) {
         //var businessId = clicked.attr("id");
         var name = clicked.html();
         var business = getBusiness(name, config);
-        if(business===null){
+        if (business === null) {
             console.log("Business not found!");
             return;
         }
@@ -416,40 +420,43 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
         $("#sideBarWrapper").data('jsp').reinitialise();
     };
 
-    var changeBusinessLogo = function(business){
+    var changeBusinessLogo = function (business) {
         var businessLogoUrl = business.businessLogoUrl;
         var businessLogoEnabled = true;
 
-        if(typeof(businessLogoUrl) === 'undefined'){businessLogoEnabled = false; businessLogoUrl = "";}
+        if (typeof(businessLogoUrl) === 'undefined') {
+            businessLogoEnabled = false;
+            businessLogoUrl = "";
+        }
         var clientLogoDiv = $("#clientLogo");
         clientLogoDiv.attr('src', businessLogoUrl);
 
         //Hide business logo if undefined.
         var navClientIconDiv = $("#navClient .navIcon");
-        if(!businessLogoEnabled){
+        if (!businessLogoEnabled) {
             navClientIconDiv.css("border", "0");
             clientLogoDiv.css("display", "none");
-        }else{
+        } else {
             navClientIconDiv.css("border", "");
             clientLogoDiv.css("display", "");
         }
-        console.log("Logo: "+businessLogoUrl);
+        console.log("Logo: " + businessLogoUrl);
     };
 
-    var initPopup = function(config){
-        var popup = new Popup(config);
-        $(document).on("popupEvent", function(e, data){
+    var initPopup = function (config) {
+        var popup = new Popup(config, ".navElement");
+        $(document).on("popupEvent", function (e, data) {
             //console.log(data);
-            if(($(data).attr("id") === "navClient") && config.roles.length<=1){
+            if (($(data).attr("id") === "navClient") && config.roles.length <= 1) {
                 $("#changeBusiness").css("display", "none");
             }
             var name = $(data).html();
             var role = getRole(config.roles, name);
-            if(role!==null){
+            if (role !== null) {
                 $(e.target).trigger("roleSelected", role);
             }
 
-            if(popup.getAction()==="changeBusiness"){
+            if (popup.getAction() === "changeBusiness") {
                 changeBusiness($(e.target), config);
             }
         });

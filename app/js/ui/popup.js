@@ -1,6 +1,6 @@
 define(["lib/jquery.mousewheel", "lib/jquery.jScrollPane"], function () {
     /** Popup Constructor **/
-    function Popup(data) {
+    function Popup(data, popupListener) {
         var thisPopup = this;
         var title = "";
         var content = "";
@@ -10,11 +10,11 @@ define(["lib/jquery.mousewheel", "lib/jquery.jScrollPane"], function () {
         var currentTarget = null;
 
         //TODO: Passed as object until jQuery plugin is written.
-        if(typeof(data.popupListener)==='undefined'){
+        if(typeof(popupListener)==='undefined'){
             console.log("ERROR: No listener passed!");
             return;
         }
-        var listenerElements = $(data.popupListener);
+        var listenerElements = $(popupListener);
         listenerElements.filter(".popup").click(function (e) {
             thisPopup.toggleVisible(e, $(this));
         });
@@ -27,7 +27,7 @@ define(["lib/jquery.mousewheel", "lib/jquery.jScrollPane"], function () {
                 contents: [
                     {"name": "Settings", url: data.settingsUrl},
                     {"name": "Change Business", id: "changeBusiness"},
-                    {"name": "Logout", url: data.logoutUrl}
+                    {"name": "Log Out", url: data.logOutUrl}
                 ]
             }
         ];
