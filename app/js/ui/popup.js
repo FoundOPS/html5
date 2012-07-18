@@ -1,6 +1,30 @@
 define(["lib/jquery.mousewheel", "lib/jquery.jScrollPane"], function () {
+    (function( $ ){
+
+        $.fn.popup = function( options ) {
+            //console.log("Popup initiated!");
+
+            // Create some defaults, extending them with any options that were provided
+            var settings = $.extend( {
+
+            }, options);
+
+            //console.log(this);
+
+            var popup = new Popup(this);
+            return popup;
+
+            /*return this.each(function() {
+
+                // Tooltip plugin code here
+
+            });*/
+
+        };
+    })( jQuery );
+
     /** Popup Constructor **/
-    function Popup(data, popupListener) {
+    function Popup(popupListener) {
         var thisPopup = this;
         var title = "";
         var content = "";
@@ -10,27 +34,17 @@ define(["lib/jquery.mousewheel", "lib/jquery.jScrollPane"], function () {
         var currentTarget = null;
 
         //TODO: Passed as object until jQuery plugin is written.
-        if(typeof(popupListener)==='undefined'){
+        if((typeof(popupListener)==='undefined') || popupListener === null){
             console.log("ERROR: No listener passed!");
             return;
         }
         var listenerElements = $(popupListener);
+        //TODO: Specify class filter with options.
         listenerElements.filter(".popup").click(function (e) {
             thisPopup.toggleVisible(e, $(this));
         });
 
-        //Static data objects, could be removed in future iterations.
-        var menus = [
-            {
-                id: "navClient",
-                title: data.name,
-                contents: [
-                    {"name": "Settings", url: data.settingsUrl},
-                    {"name": "Change Business", id: "changeBusiness"},
-                    {"name": "Log Out", url: data.logOutUrl}
-                ]
-            }
-        ];
+        var menus = [];
 
         this.addMenu = function (id, title, contents) {
             menus.push({'id': id, 'title': title, 'contents': contents});
@@ -192,10 +206,13 @@ define(["lib/jquery.mousewheel", "lib/jquery.jScrollPane"], function () {
                     var clicked = $(e.target);
                     //TODO: Return if not visible.
                     //TODO: Also add arrow click detection?
+                    //TODO: Find better way than adding filter to every listener.
                     var popupHeaderLen = clicked.parents("#popupHeader").length + clicked.is("#popupHeader") ? 1 : 0;
                     var popupContentLen = clicked.parents("#popupContent").length + clicked.is("#popupContent") ? 1 : 0;
-                    var navLen = clicked.parents(".navElement").length + clicked.is(".navElement") ? 1 : 0;
-                    if (popupHeaderLen === 0 && popupContentLen === 0 && navLen === 0) {
+                    var listenerLen = clicked.parents(".popup").length + clicked.is(".popup") ? 1 : 0;
+                    //console.log(popupHeaderLen + " " + popupContentLen + " " + listenerLen);
+                    //console.log(popupListener);
+                    if (popupHeaderLen === 0 && popupContentLen === 0 && listenerLen === 0) {
                         thisPopup.closePopup();
                     }
                 }
@@ -230,9 +247,6 @@ define(["lib/jquery.mousewheel", "lib/jquery.jScrollPane"], function () {
             //Sets global popup object, object, with the created div.
             //TODO: Rename of remove.
             object = popupWrapperDiv;
-
-            //TODO: Refactor.
-            this.addMenu("changeBusiness", "Businesses", data.roles);
             this.initPopupScrollBar();
 
             //Function also returns the popup div for ease of use.
