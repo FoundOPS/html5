@@ -1,25 +1,10 @@
 //define(["lib/jquery.mousewheel", "lib/jquery.jScrollPane"], function () {
     (function( $ ){
-
         $.fn.popup = function( options ) {
-            //console.log("Popup initiated!");
-
             // Create some defaults, extending them with any options that were provided
-            var settings = $.extend( {
-
-            }, options);
-
-            //console.log(this);
-
+            var settings = $.extend({}, options);
             var popup = new Popup(this);
             return popup;
-
-            /*return this.each(function() {
-
-                // Tooltip plugin code here
-
-            });*/
-
         };
     })( jQuery );
 
@@ -189,11 +174,6 @@
                     }
                 }
             );
-
-            //TODO: Remove for production.
-            $("#silverlightControlHost").focusin(function() {
-                thisPopup.closePopup();
-            });
 
             $(document)
                 .on('touchstart mousedown', '#popup a',
