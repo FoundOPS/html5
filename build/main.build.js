@@ -1,7 +1,5 @@
 ({
-    appDir: "../app",
-    baseUrl: "js",
-    dir: "../builds",
+    baseUrl: "../app/js",
     paths: {
         lib: '../lib',
         jquery: 'empty:',
@@ -13,10 +11,8 @@
         }
     },
     optimize: "uglify",
-    optimizeCss: "standard",
-    modules: [
-        {
-            name: "main"
-        }
-    ]
+    optimizeCss: "none",
+	
+	name: "main",
+	out: "../app/built/main-built.js"
 })

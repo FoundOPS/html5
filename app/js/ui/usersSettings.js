@@ -10,7 +10,7 @@ define(["developer", "db/services", "widgets/settingsMenu"], function (developer
     var usersSettings = {};
 
     //region Methods
-    usersSettings.setDefaultValue = function (role, employee) {
+    usersSettings.setDefaultValue = function () {
         var index;
         //get the index of the empty employee
         for (var i in this.employees) {
@@ -19,26 +19,32 @@ define(["developer", "db/services", "widgets/settingsMenu"], function (developer
             }
         }
 
-        if ($("#" + role)[0].value === "Mobile") {
+        if ($("#Role")[0].value === "Mobile") {
             //if the role is mobile, set the default linked employee to "None"
-            $("#" + employee)[0].kendoBindingTarget.target.select(index);
+            if($("#Employee")[0].kendoBindingTarget){
+                $("#Employee")[0].kendoBindingTarget.target.select(index);
+            }
         } else {
             //if the role is admin or regular, set the default linked employee to "Create New"
-            $("#" + employee)[0].kendoBindingTarget.target.select(this.employees.length - 1);
+            if($("#Employee")[0].kendoBindingTarget){
+                $("#Employee")[0].kendoBindingTarget.target.select(this.employees.length - 1);
+            }
         }
     };
 
     //on add and edit, select a linked employee if the name matches the name in the form
-    usersSettings.matchEmployee = function (first, last, employee) {
+    usersSettings.matchEmployee = function () {
         //get the items in the dropdownlist
         var employees = this.employees;
         //get the user's name from the form fields
-        var name = $("#" + first)[0].value + " " + $("#" + last)[0].value;
+        var name = $("#FirstName")[0].value + " " + $("#LastName")[0].value;
         for (var emp in employees) {
             //check if the names match
             if (name === employees[emp].DisplayName) {
                 //select the corresponding name from the dropdownlist
-                $("#" + employee)[0].kendoBindingTarget.target.select(parseInt(emp));
+                if($("#Employee")[0].kendoBindingTarget){
+                    $("#Employee")[0].kendoBindingTarget.target.select(parseInt(emp));
+                }
             }
         }
     };
@@ -62,6 +68,8 @@ define(["developer", "db/services", "widgets/settingsMenu"], function (developer
                 usersSettings.employees = employees;
             });
         };
+
+        getEmployees();
 
         //setup menu
         var menu = $("#users .settingsMenu");
@@ -135,25 +143,23 @@ define(["developer", "db/services", "widgets/settingsMenu"], function (developer
             },
             edit: function (e) {
                 $(e.container)
-                    .find("input[name='Employee']")
-                    .data("kendoDropDownList")
-                    .bind("change", function () {
-                        console.log("drop down changed");
-                    });
-                getEmployees();
-
-                usersSettings.setDefaultValue("RoleEdit", "linkedEmployee");
-                //e.model.Employee
-
-                $(".k-grid-update").on("click", function () {
-                    var employee = $("#linkedEmployee")[0].value;
-                    if (employee === "None") {
-                        dataSource._data[0].Employee = {FirstName: "None", Id: " ", LastName: " ", LinkedUserAccountId: " "};
-                    } else {
-                        var name = employee.split(" ");
-                        dataSource._data[0].Employee = {FirstName: name[0], Id: " ", LastName: name[1], LinkedUserAccountId: " "};
+                    .find("input[name='linkedEmployee']")
+                    .data("kendoDropDownList");
+                if(e.model.Employee){
+                    $("#linkedEmployee")[0].value = e.model.Employee.DisplayName;
+                }else{
+                    var index;
+                    //get the index of the empty employee
+                    for (var i in usersSettings.employees) {
+                        if (usersSettings.employees[i].FirstName === "None") {
+                            index = parseInt(i);
+                        }
                     }
-                });
+                    //set the dropdownlist option to the correct value
+                    if($("#linkedEmployee")[0].kendoBindingTarget){
+                        $("#linkedEmployee")[0].kendoBindingTarget.target.select(index);
+                    }
+                }
             },
             scrollable: false,
             sortable: true,
@@ -190,7 +196,7 @@ define(["developer", "db/services", "widgets/settingsMenu"], function (developer
 //endregion
 
         $("#addUser").on("click", function () {
-            //TODO: see if this happens in time
+            //refresh the list of unlinked employees
             getEmployees();
 
             var dataSrc = $("#usersGrid").data("kendoGrid").dataSource;
@@ -226,7 +232,7 @@ define(["developer", "db/services", "widgets/settingsMenu"], function (developer
             //initialize the validator
             var validator = $(object.element).kendoValidator().data("kendoValidator");
 
-            usersSettings.setDefaultValue("Role", "Employee");
+            usersSettings.setDefaultValue();
 
             $("#btnAdd").on("click", function () {
                 if (validator.validate()) {
@@ -246,8 +252,6 @@ define(["developer", "db/services", "widgets/settingsMenu"], function (developer
                 }
             });
 
-            $("#btnAdd")[0].innerText = ("Send Invite Email");
-
             $("#btnCancel").on("click", function () {
                 dataSrc.cancelChanges(model); //cancel changes
                 object.close();
@@ -255,8 +259,6 @@ define(["developer", "db/services", "widgets/settingsMenu"], function (developer
                 usersSettings.employees.splice(usersSettings.employees.length - 1, 1);
             });
         });
-
-        getEmployees();
     }
     ;
 

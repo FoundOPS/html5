@@ -1,9 +1,7 @@
 'use strict';
 
-define(['db/services', 'session'], function (dbservices, session) {
-    var silverlight = {},
-    //In case a section is not chosen start with the Dispatcher
-        currentSection = "Dispatcher";
+define(['underscore', 'db/services', 'session'], function (dbservices, session) {
+    var silverlight = {}, currentSection;
 
     window.silverlight = silverlight;
 
@@ -11,6 +9,9 @@ define(['db/services', 'session'], function (dbservices, session) {
 
     //resize the silverlight container to the proper size according to the window size
     var resizeContainers = function () {
+        if(!currentSection || !currentSection.isSilverlight){
+            return;
+        }
         //from navigator.less: navHeight = 45px
         var height = $(window).height() - 45;
         var width = $("#content").width();
@@ -19,7 +20,44 @@ define(['db/services', 'session'], function (dbservices, session) {
         $("#remoteContent").height(height);
         $("#remoteContent").width(width);
     };
-    $(window).resize(resizeContainers);
+
+    //hide the silverlight plugin
+    var hide = function () {
+        $("#silverlightControlHost").css("height", "0px");
+        $("#silverlightControlHost").css("width", "0px");
+
+        //instead of hiding the silverlight (which will disable it), make it really small
+        $("#silverlightPlugin").css("height", "1px");
+        $("#silverlightPlugin").css("width", "1px");
+
+        $("#remoteContent").css("display", "");
+    };
+
+    //show the silverlight plugin
+    var show = function () {
+        //show the silverlight client
+        $("#silverlightPlugin").css("height", "100%");
+        $("#silverlightPlugin").css("width", "100%");
+
+        $("#remoteContent").css("display", "none");
+        _.delay(resizeContainers, 150);
+    };
+
+    //if the section isn't silverlight, hide the silverlight control
+    window.onhashchange = function () {
+        if (!location || !location.hash) {
+            return;
+        }
+        if (location.hash.indexOf("silverlight") == -1) {
+            hide();
+        }
+    };
+
+    //a workaround for opening the importer
+    //this is called when the importer view is shown
+    window.openImporter = function () {
+        silverlight.setSection({name: "Importer", isSilverlight: true});
+    };
 
     //endregion
 
@@ -81,8 +119,10 @@ define(['db/services', 'session'], function (dbservices, session) {
 
     silverlight.onLoaded = function () {
         silverlight.updateRole();
-        silverlight.navigate(currentSection);
-        resizeContainers();
+        //if there is a current section, navigate to it
+        if (currentSection) {
+            silverlight.setSection(currentSection);
+        }
 
         $(silverlight).trigger('loaded');
     };
@@ -97,41 +137,23 @@ define(['db/services', 'session'], function (dbservices, session) {
 
     //endregion
 
-    /**
-     * Hide the silverlight plugin
-     */
-    silverlight.hide = function () {
-        //TODO try 0px
-        //instead of hiding the silverlight (which will disable it), make it really small
-//        $("#silverlightControlHost").css("display", "none");
-        $("#silverlightPlugin").css("height", "1px");
-        $("#silverlightPlugin").css("width", "1px");
-
-        $("#remoteContent").css("display", "");
-    };
+//region Public
 
     /**
-     * Show the silverlight plugin
+     * Sets the section.
+     * If it is a silverlight section this will navigate the silverlight control to that section.
+     * @param {{name: string, isSilverlight: boolean}} section
      */
-    silverlight.show = function () {
-        //show the silverlight client
-        $("#silverlightControlHost").css("display", "");
-        $("#silverlightPlugin").css("height", "100%");
-        $("#silverlightPlugin").css("width", "100%");
-        resizeContainers();
+    silverlight.setSection = function (section) {
+        currentSection = section;
 
-        $("#remoteContent").css("display", "none");
-    };
+        if (!section.isSilverlight) {
+            hide();
+            return;
+        }
 
-    /**
-     * Navigate to a section
-     * @param {{name: string}}  section
-     */
-    silverlight.navigate = function (section) {
-        currentSection = section.name;
-
+        show();
         try {
-            silverlight.show();
             silverlight.plugin.navigationVM.NavigateToView(section.name);
         } catch (err) {
         }
@@ -152,8 +174,10 @@ define(['db/services', 'session'], function (dbservices, session) {
         }
     };
 
+//#endregion
+
     resizeContainers();
-    silverlight.hide();
+    hide();
 
     return silverlight;
 });

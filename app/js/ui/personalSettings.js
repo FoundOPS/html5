@@ -13,12 +13,15 @@ define(["db/services", "widgets/settingsMenu", "lib/jquery-ui-1.8.21.core.min",
     personalSettings.viewModel = kendo.observable({
         saveChanges: function () {
             if (personalSettings.validator.validate()) {
-                services.updatePersonalSettings(this.get("settings"));
+                personalSettings.status = services.updatePersonalSettings(this.get("settings"));
             }
             //check if image has been changed
             if (personalSettings.newImage) {
                 $("#personalImageUploadForm").submit();
             }
+        },
+        cancelChanges: function () {
+            this.set("settings", personalSettings.settings);
         }
     });
 
@@ -90,6 +93,10 @@ define(["db/services", "widgets/settingsMenu", "lib/jquery-ui-1.8.21.core.min",
             //set a hidden form to the file image's data (because we stole it with FileReader)
             $('#imageData').val(imageData);
 
+            //show the image
+            $(".upload").css("margin-left", "185px");
+            $("#personalCropbox").css("visibility", "visible");
+
             //set so that the save changes event will also save the image
             personalSettings.newImage = true;
         };
@@ -130,13 +137,18 @@ define(["db/services", "widgets/settingsMenu", "lib/jquery-ui-1.8.21.core.min",
 
         //retrieve the settings and bind them to the form
         services.getPersonalSettings(function (settings) {
+            //set this so cancelChanges has a reference to the original settings
+            personalSettings.settings = settings;
             personalSettings.viewModel.set("settings", settings);
             kendo.bind($("#personal"), personalSettings.viewModel);
+            if(!settings.ImageUrl){
+                $("#personal .upload").css("margin-left", "163px");
+                $("#personalCropbox").css("visibility", "hidden");
+            }
         });
     };
 
     personalSettings.show = function () {
-//        console.log(personalSettings.viewModel.get("settings").get("FirstName"));
         kendo.bind($("#personal"), personalSettings.viewModel);
     };
 

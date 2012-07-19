@@ -9,6 +9,7 @@
 define(['db/services', 'developer', 'ui/personalSettings', "widgets/settingsMenu", "lib/jquery-ui-1.8.21.core.min",
     "lib/jquery.FileReader", "lib/swfobject"], function (services, developer, personalSettings) {
     var businessSettings = {};
+
     //keep track of if a new image has been selected
     businessSettings.newImage = false;
 
@@ -21,6 +22,9 @@ define(['db/services', 'developer', 'ui/personalSettings', "widgets/settingsMenu
             if (businessSettings.newImage) {
                 $("#businessImageUploadForm").submit();
             }
+        },
+        cancelChanges: function () {
+            this.set("settings", businessSettings.settings);
         }
     });
 
@@ -39,6 +43,15 @@ define(['db/services', 'developer', 'ui/personalSettings', "widgets/settingsMenu
 
     businessSettings.initialize = function () {
         businessSettings.validator = $("#businessForm").kendoValidator().data("kendoValidator");
+
+        //TODO:
+//        $("#businessImageUpload").on("mouseover", function(){
+//            $(".upload").css("background-color", "#cccccc").css("border-color", "#aaaaaa");
+//        });
+//
+//        $("#businessImageUpload").on("mouseout", function(){
+//            $(".upload").css("background-color", "#e3e3e3").css("border-color", "#c5c5c5");
+//        });
 
         //setup menu
         var menu = $("#business .settingsMenu");
@@ -61,6 +74,10 @@ define(['db/services', 'developer', 'ui/personalSettings', "widgets/settingsMenu
 
             //set a hidden form to the file image's data (because we stole it with FileReader)
             $('#imageData').val(imageData);
+
+            //show the image
+            $(".upload").css("margin-left", "185px");
+            $("#businessCropbox").css("visibility", "visible");
 
             //set so that the save changes event will also save the image
             businessSettings.newImage = true;
@@ -102,8 +119,14 @@ define(['db/services', 'developer', 'ui/personalSettings', "widgets/settingsMenu
 
         //retrieve the settings and bind them to the form
         services.getBusinessSettings(function (settings) {
+            //set this so cancelChanges has a reference to the original settings
+            businessSettings.settings = settings;
             businessSettings.viewModel.set("settings", settings);
             kendo.bind($("#business"), businessSettings.viewModel);
+            if(!settings.ImageUrl){
+                $("#business .upload").css("margin-left", "163px");
+                $("#businessCropbox").css("visibility", "hidden");
+            }
         });
     };
 
