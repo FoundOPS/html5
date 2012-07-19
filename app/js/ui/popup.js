@@ -1,25 +1,10 @@
 //define(["lib/jquery.mousewheel", "lib/jquery.jScrollPane"], function () {
     (function( $ ){
-
         $.fn.popup = function( options ) {
-            //console.log("Popup initiated!");
-
             // Create some defaults, extending them with any options that were provided
-            var settings = $.extend( {
-
-            }, options);
-
-            //console.log(this);
-
+            var settings = $.extend({}, options);
             var popup = new Popup(this);
             return popup;
-
-            /*return this.each(function() {
-
-                // Tooltip plugin code here
-
-            });*/
-
         };
     })( jQuery );
 
@@ -96,9 +81,9 @@
         this.getLeft = function (target, popupDiv) {
             var padding = 4;
             currentTarget = target;
-            var x = target.offset().left + target.width() / 2;
+            var x = target.offset().left + target.outerWidth() / 2;
             var rightOffset = x + popupDiv.outerWidth() / 2 + padding;
-            var offset = x - popupDiv.width() / 2;
+            var offset = x - popupDiv.outerWidth() / 2 + padding;
             var windowWidth = $(window).width();
 
             //Sets popup variables referenced in resize listener.
@@ -110,7 +95,7 @@
                 offset = padding;
             } else if (rightOffset > windowWidth) {
                 offScreen = true;
-                offset = windowWidth - popupDiv.width() - padding;
+                offset = windowWidth - popupDiv.outerWidth();
             }
 
             var carrot = $("#popupArrow");
@@ -189,11 +174,6 @@
                     }
                 }
             );
-
-            //TODO: Remove for production.
-            $("#silverlightControlHost").focusin(function() {
-                thisPopup.closePopup();
-            });
 
             $(document)
                 .on('touchstart mousedown', '#popup a',
