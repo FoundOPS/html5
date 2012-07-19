@@ -444,7 +444,32 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
     };
 
     var initPopup = function (config) {
-        var popup = new Popup(config, ".navElement");
+        //var popup = new Popup(config, ".navElement");
+        var popup = $(".popup").popup();
+
+        $(document).on("popup.created", function(){
+            $("#popupContentWrapper").jScrollPane({
+                horizontalGutter: 0,
+                verticalGutter: 0,
+                'showArrows': false
+            });
+        });
+
+        $(document).on('popup.setContent popup.visible popup.resize', function(e){
+            $("#popupContentWrapper").data('jsp').reinitialise();
+        });
+
+        popup.addMenu("navClient", config.name,
+            [
+                    {"name": "Settings", url: config.settingsUrl},
+                    {"name": "Change Business", id: "changeBusiness"},
+                    {"name": "Log Out", url: config.logOutUrl}
+            ]
+        );
+
+        popup.addMenu("changeBusiness", "Businesses", config.roles);
+
+
         $(document).on("popupEvent", function (e, data) {
             //console.log(data);
             if (($(data).attr("id") === "navClient") && config.roles.length <= 1) {
@@ -463,7 +488,6 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
 
         return popup;
     };
-
 
     return Navigator;
 });

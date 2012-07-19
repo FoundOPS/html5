@@ -46,7 +46,7 @@ define(["jquery", "session", "lib/kendo.all"], function ($, session) {
             }
 
             //Show all settings if user is admin
-            if (session._selectedRole.type == "Administrator") {
+            if (session.getRole().type == "Administrator") {
                 businessLi.css("display", "block");
                 usersLi.css("display", "block");
             }
