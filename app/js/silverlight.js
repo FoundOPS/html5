@@ -1,6 +1,6 @@
 'use strict';
 
-define(['underscore', 'db/services', 'session'], function (dbservices, session) {
+define(['db/services', 'session', 'underscore'], function (dbservices, session) {
     var silverlight = {}, currentSection;
 
     window.silverlight = silverlight;
@@ -176,8 +176,9 @@ define(['underscore', 'db/services', 'session'], function (dbservices, session) 
 
 //#endregion
 
-    resizeContainers();
     hide();
+    $(window).resize(resizeContainers);
+    resizeContainers();
 
     return silverlight;
 });
