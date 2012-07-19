@@ -81,9 +81,9 @@
         this.getLeft = function (target, popupDiv) {
             var padding = 4;
             currentTarget = target;
-            var x = target.offset().left + target.width() / 2;
+            var x = target.offset().left + target.outerWidth() / 2;
             var rightOffset = x + popupDiv.outerWidth() / 2 + padding;
-            var offset = x - popupDiv.width() / 2;
+            var offset = x - popupDiv.outerWidth() / 2 + padding;
             var windowWidth = $(window).width();
 
             //Sets popup variables referenced in resize listener.
@@ -95,7 +95,7 @@
                 offset = padding;
             } else if (rightOffset > windowWidth) {
                 offScreen = true;
-                offset = windowWidth - popupDiv.width() - padding;
+                offset = windowWidth - popupDiv.outerWidth();
             }
 
             var carrot = $("#popupArrow");
