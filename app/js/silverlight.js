@@ -1,9 +1,7 @@
 'use strict';
 
-define(['db/services', 'session'], function (dbservices, session) {
-    var silverlight = {},
-    //In case a section is not chosen start with the Dispatcher
-        currentSection = "Dispatcher";
+define(['underscore', 'db/services', 'session'], function (dbservices, session) {
+    var silverlight = {}, currentSection;
 
     window.silverlight = silverlight;
 
@@ -81,8 +79,10 @@ define(['db/services', 'session'], function (dbservices, session) {
 
     silverlight.onLoaded = function () {
         silverlight.updateRole();
-        silverlight.navigate(currentSection);
-        resizeContainers();
+        //if there is a current section, navigate to it
+        if (currentSection) {
+            silverlight.navigate(currentSection);
+        }
 
         $(silverlight).trigger('loaded');
     };
@@ -118,21 +118,21 @@ define(['db/services', 'session'], function (dbservices, session) {
         $("#silverlightControlHost").css("display", "");
         $("#silverlightPlugin").css("height", "100%");
         $("#silverlightPlugin").css("width", "100%");
-        resizeContainers();
 
         $("#remoteContent").css("display", "none");
+        _.delay(resizeContainers, 150);
     };
 
     /**
      * Navigate to a section
-     * @param {{name: string}}  section
+     * @param {string}  sectionName
      */
-    silverlight.navigate = function (section) {
-        currentSection = section.name;
+    silverlight.navigate = function (sectionName) {
+        currentSection = sectionName;
 
         try {
             silverlight.show();
-            silverlight.plugin.navigationVM.NavigateToView(section.name);
+            silverlight.plugin.navigationVM.NavigateToView(sectionName);
         } catch (err) {
         }
     };
