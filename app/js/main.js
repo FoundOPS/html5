@@ -33,15 +33,13 @@ require(["containers/navigator", "silverlight", "session", "lib/kendo.all", "ui/
             if (section.name === "Feedback and Support") {
                 UserVoice.showPopupWidget();
             }
-            else {
-                silverlight.hide();
-            }
         }
-        else {
+        else{
             //navigate to silverlight to clear the url
             application.navigate("#silverlight");
-            silverlight.navigate(section.name);
         }
+
+        silverlight.setSection(section);
     });
 
     //fix problems with console not on IE
@@ -51,22 +49,6 @@ require(["containers/navigator", "silverlight", "session", "lib/kendo.all", "ui/
             }
         };
     }
-
-    window.onhashchange = function () {
-        //Hide the silverlight control when settings is chosen
-        if (!location || !location.hash) {
-            return;
-        }
-        if (location.hash.indexOf("Settings") != -1) {
-            silverlight.hide();
-        }
-    };
-
-    //a workaround for opening the importer
-    //this is called when the importer view is shown
-    window.openImporter = function () {
-        silverlight.navigate("Importer");
-    };
 
     //TODO make roleSelected a navigator event
     //whenever a role is changed, choose it in the silverlight app
