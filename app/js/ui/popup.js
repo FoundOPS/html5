@@ -38,9 +38,7 @@
             return;
         }
         var listenerElements = $(popupListener);
-        //TODO: Specify class filter with options.
         listenerElements.click(function (e) {
-            console.log("click");
             thisPopup.toggleVisible(e, $(this));
         });
 
@@ -51,7 +49,6 @@
         };
 
         this.toggleVisible = function (e, clicked) {
-            console.log("Toggling visibility.");
             var clickedDiv = $(clicked);
             if (clickedDiv === null) {
                 console.log("ERROR: No element clicked!");
@@ -60,7 +57,7 @@
 
             var popupWrapperDiv = $("#popupWrapper");
             if (popupWrapperDiv.length === 0) {
-                console.log("Popup not initialized; initializing.");
+                //console.log("Popup not initialized; initializing.");
                 popupWrapperDiv = this.createPopup();
                 if (popupWrapperDiv.length === 0) {
                     console.log("ERROR: Failed to create Popup!");
@@ -125,27 +122,6 @@
 
             //Returns left offset of popup from window.
             return offset;
-        };
-
-        //TODO: Refactor.
-        /** Initializes scrollbar for popup contents **/
-        this.initPopupScrollBar = function () {
-            var popupContentWrapperDiv = $("#popupContentWrapper");
-
-            var throttleTimeout;
-            $(window).bind('resize', function(){
-                if ($.browser.msie) {
-                    if (!throttleTimeout) {
-                        throttleTimeout = setTimeout(function(){
-                                $(popupContentWrapperDiv).trigger("popup.resize");
-                                throttleTimeout = null;
-                            }, 50
-                        );
-                    }
-                } else {
-                    $(popupContentWrapperDiv).trigger("popup.resize");
-                }
-            });
         };
 
         // createPopup: Prepends popup to dom
@@ -241,11 +217,27 @@
                 });
 
             //Sets global popup object, object, with the created div.
-            //TODO: Rename of remove.
+            //TODO: Rename or remove.
             object = popupWrapperDiv;
-            this.initPopupScrollBar();
+
+            var popupContentWrapperDiv = $("#popupContentWrapper");
+            var throttleTimeout;
+            $(window).bind('resize', function(){
+                if ($.browser.msie) {
+                    if (!throttleTimeout) {
+                        throttleTimeout = setTimeout(function(){
+                                popupContentWrapperDiv.trigger("popup.resize");
+                                throttleTimeout = null;
+                            }, 50
+                        );
+                    }
+                } else {
+                    popupContentWrapperDiv.trigger("popup.resize");
+                }
+            });
+
             //TODO: Is this the safest way?
-            $("#popupContentWrapper").trigger("popup.created");
+            popupContentWrapperDiv.trigger("popup.created");
 
             //Function also returns the popup div for ease of use.
             return popupWrapperDiv;
@@ -262,7 +254,7 @@
             var newMenu = this.getMenu(id);
             if (newMenu === null) {
                 //TODO: Possibly add a boolean to pass to indicate link or end of menu action.
-                console.log("ID not found.");
+                //console.log("ID not found.");
                 return false;
             }
             history.push(newMenu);
