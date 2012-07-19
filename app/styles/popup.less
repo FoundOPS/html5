@@ -1,0 +1,204 @@
+/*  Colors */
+@lightCharcoal: #777779;
+@lightGrey: #F1F2F2;
+@darkGrey: #CCCCCC;
+@charcoal: #333335;
+@orange: #D9591E;
+@green: #659A41;
+@blue: #488FCD;
+@red: #991A36;
+@black: #000;
+
+@hoverOpacity: .5;
+@popupCarrotHeight: 14px;
+@popupCarrotWidth: 28px;
+@popupHeaderHeight: 43px;
+
+html{
+    font-size: 100%;
+}
+
+.borderBox {
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+.hover(){
+     &:hover {
+         opacity: @hoverOpacity;
+     }
+ }
+
+#popupWrapper {
+    font-family: verdana, sans-serif;
+
+    .borderBox;
+    position: fixed;
+    height: 100%;
+    width: 305px;
+    padding-top: @popupCarrotHeight - 4;
+    visibility: hidden;
+    top: 0;
+    left: 0;
+}
+
+#popup {
+    position: relative;
+    .borderBox;
+    height: 100%;
+    width: 100%;
+    z-index: 2;
+    color: @charcoal;
+    visibility: visible;
+
+    a {
+        color: @charcoal;
+    }
+}
+
+#popupHeader {
+    position: absolute;
+    .borderBox;
+    width: 100%; //TODO: Fix.
+    overflow: hidden;
+    z-index: 3;
+    border-bottom: 1px solid @charcoal;
+    line-height: @popupHeaderHeight;
+    font-size: 16/18em;
+    background: #efefef;
+    border-bottom: 2px solid @darkGrey;
+    visibility: visible;
+
+//box-shadow: 0px 0px 5px #888;
+
+    border-top-right-radius: 5px;
+    border-top-left-radius: 5px;
+    border-top: 2px solid @darkGrey;
+    border-right: 2px solid @darkGrey;
+    border-left: 2px solid @darkGrey;
+}
+
+#popupArrow {
+    position: absolute;
+    float: left;
+    z-index: 5;
+    margin-top: -1* @popupCarrotHeight + 2;
+    margin-left: -1 * (@popupCarrotWidth / 2)-2; /* Half width */
+    visibility: visible;
+    left: 50%;
+
+    height: @popupCarrotHeight;
+    width: @popupCarrotWidth;
+
+    background: url('../img/popupArrow.png') no-repeat;
+}
+
+//TODO: Simplify transparent on hover.
+.hover(){
+    &:hover {
+        opacity: @hoverOpacity;
+    }
+}
+
+#popupBack {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    height: @popupHeaderHeight;
+    width: @popupHeaderHeight;
+    background: url('../img/popupBack.png') center center no-repeat;
+    .hover;
+}
+
+#popupTitle{
+    padding-right: @popupHeaderHeight - 10;
+    padding-left: @popupHeaderHeight - 10;
+    text-align: center;
+    max-width: 204px;
+    overflow: hidden;
+    margin: 0 auto;
+    .borderBox;
+    width: 100%;
+}
+
+#popupClose {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    right: 0;
+    height: @popupHeaderHeight;
+    width: @popupHeaderHeight;
+    background: url('../img/popupClose.png') center center no-repeat;
+    .hover;
+}
+
+#popupContentWrapper {
+    position: relative;
+    .borderBox;
+    height: 100%; //TODO: Find better fix
+    width: 100%;
+    padding-top: 44px;
+//visibility: hidden;
+}
+
+#popupContent {
+    visibility: visible;
+    position: relative;
+    .borderBox;
+    width: 100%;
+    max-height: 100%;
+    text-align: left;
+    font-size: 1em; //max-height?
+//TODO: Fix.
+    overflow: auto;
+    background: #efefef; //border: solid @charcoal 3px;
+    border-right: 2px solid @darkGrey;
+    border-bottom: 2px solid @darkGrey;
+    border-left: 2px solid @darkGrey;
+    border-bottom-right-radius: 5px;
+    border-bottom-left-radius: 5px;
+
+    color: @charcoal;
+    .last {
+        border-bottom: none;
+    }
+}
+
+#popupContentWrapper .jspContainer { //TODO: Find better fix.
+    overflow: visible;
+}
+
+#popupContentWrapper .jspPane{
+    border-radius: 6px;
+    box-shadow: 0px 0px 10px #888;
+}
+
+#popupContentWrapper .jspDrag {
+    background: #777779;
+}
+
+#popupContentWrapper .jspCapTop {
+    display: block; //TODO: Give variable for popup header height.
+    height: 47px;
+}
+
+.popupContentRow {
+    cursor: pointer;
+    border-bottom: 1px solid @darkGrey;
+    display: block;
+    padding: 12px 23px;
+}
+
+@media only screen and (max-width:800px) {
+    #popupWrapper {
+        position: absolute;
+    }
+}
+
+@media only screen and (max-width:390px) {
+    #popupWrapper {
+        width: 90%;
+    }
+}

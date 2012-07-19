@@ -159,7 +159,7 @@
                 "<div id='currentPopupAction' style='display: none;'></div>" +
                 "<div id='popupHeader'>" +
                 "<a id='popupBack'></a>" +
-                "<span id='popupTitle'></span>" +
+                "<div id='popupTitle'></div>" +
                 "<a id='popupClose'></a>" +
                 "</div>" +
                 "<div id='popupContentWrapper'>" +
