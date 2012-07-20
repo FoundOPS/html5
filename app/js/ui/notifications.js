@@ -8,14 +8,9 @@ define(['lib/noty'], function(){
         $.noty({
             type : 'success',
             layout : 'topCenter',
+            easing : 'swing',
             text : text,
-            timeout: false,
-            animation: {
-                open: {height: 'toggle'},
-                close: {height: 'toggle'},
-                easing: 'swing',
-                speed: 300 // opening & closing animation speed
-            }
+            speed : 300
         });
     };
 
@@ -35,14 +30,9 @@ define(['lib/noty'], function(){
         $.noty({
             type : 'error',
             layout : 'topCenter',
+            easing : 'swing',
             text : text,
-            timeout: false,
-            animation: {
-                open: {height: 'toggle'},
-                close: {height: 'toggle'},
-                easing: 'swing',
-                speed: 300 // opening & closing animation speed
-            }
+            speed : 300
         });
     };
 
