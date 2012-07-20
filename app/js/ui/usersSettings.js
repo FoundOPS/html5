@@ -50,7 +50,16 @@ define(["developer", "db/services", "ui/notifications", "widgets/settingsMenu"],
     };
 
     //after the data is loaded, add tooltips to the edit and delete buttons
-    var onDataBound = function () {
+    var onDataBound = function (e) {
+        usersSettings.linkedEmployees = {};
+        var data = e.sender._data;
+        //http://stackoverflow.com/questions/6715641/an-efficient-way-to-get-the-difference-between-two-arrays-of-objects
+        data.forEach(function(obj){
+            if(obj.Employee){
+                usersSettings.linkedEmployees[obj.Employee.Id] = obj;
+            }
+        });
+
         $(".k-grid-edit").each(function () {
             $(this).attr("title", "Edit");
         });
@@ -60,14 +69,10 @@ define(["developer", "db/services", "ui/notifications", "widgets/settingsMenu"],
     };
     //endregion
 
-    var vm = kendo.observable({});
-    usersSettings.vm = vm;
-
     usersSettings.initialize = function () {
 
         //get the list of employees
         services.getAllEmployeesForBusiness(function (employees) {
-            usersSettings.vm.set("employees", employees);
             usersSettings.employees = employees;
         });
 
@@ -78,6 +83,10 @@ define(["developer", "db/services", "ui/notifications", "widgets/settingsMenu"],
 
         //region Setup Grid
         var fields = {
+            Id: {
+                type: "hidden",
+                defaultValue: ""
+            },
             FirstName: {
                 type: "string",
                 validation: { required: true },
@@ -172,26 +181,26 @@ define(["developer", "db/services", "ui/notifications", "widgets/settingsMenu"],
                 confirmation: "Are you sure you want to delete this user?"
             },
             edit: function (e) {
-                $(e.container)
-                    .find("input[name='linkedEmployee']")
-                    .data("kendoDropDownList");
+                //set the available employees
+                var availableEmployees = usersSettings.employees.filter(function (employee){
+                    return !(employee.Id in usersSettings.linkedEmployees);
+                });
+                if (e.model.Employee) {
+                    availableEmployees.push(e.model.Employee);
+                }
 
-                var dropdownlist;
+                var dropdownlist = $("#linkedEmployee").kendoDropDownList({
+                    dataSource: availableEmployees,
+                    dataTextField: "DisplayName",
+                    dataValueField: "DisplayName"
+                });
 
                 if (e.model.Employee) {
-                    //set the available employees based on employees without linked user accounts
-                    var availableEmployees = vm.get("employees");
-
-                    usersSettings.vm.set("availableEmployees", e.model);
-
-                    dropdownlist = $("#linkedEmployee").data("kendoDropDownList");
-
                     //set the default linked employee to the employee's name
                     dropdownlist.select(function (dataItem) {
                         return dataItem.text === e.model.Employee.DisplayName;
                     });
                 } else {
-                    dropdownlist = $("#linkedEmployee").data("kendoDropDownList");
                     //set the linked employee to "None"
                     dropdownlist.select(function (dataItem) {
                         return dataItem.text === "None";
