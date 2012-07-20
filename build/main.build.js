@@ -14,5 +14,5 @@
     optimizeCss: "none",
 	
 	name: "main",
-	out: "../app/built/main-built.js"
+	out: "main/main-built.js"
 })

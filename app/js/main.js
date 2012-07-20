@@ -34,7 +34,7 @@ require(["containers/navigator", "silverlight", "session", "lib/kendo.all", "ui/
                 UserVoice.showPopupWidget();
             }
         }
-        else{
+        else {
             //navigate to silverlight to clear the url
             application.navigate("#silverlight");
         }

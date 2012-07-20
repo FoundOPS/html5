@@ -89,12 +89,7 @@ table {
 /*  Other Vars  */
 @hoverOpacity: .5;
 
-@popupCarrotHeight: 14px;
-@popupCarrotWidth: 28px;
-@popupHeaderHeight: 43px;
-
 @sideBarWrapperWidth: 55px;
-
 @sideBarExpandedWidth: 159px;
 
 @imageHeight: 20px;
@@ -283,146 +278,6 @@ zoom: 1;*/
     height: @imageHeight + 8px;
     border-top-right-radius: @borderRadius;
     border-bottom-right-radius: @borderRadius;
-}
-
-#popupWrapper {
-    .borderBox;
-    position: fixed;
-    height: 100%;
-    width: 305px;
-    padding-top: @navHeight+@popupCarrotHeight - 4;
-    visibility: hidden;
-}
-
-#popup {
-    position: relative;
-    .borderBox;
-    height: 100%;
-    width: 100%;
-    z-index: 2;
-    color: @charcoal;
-    visibility: visible;
-
-    a {
-        color: @charcoal;
-    }
-}
-
-#popupHeader {
-    position: absolute;
-    .borderBox;
-    width: 100%; //TODO: Fix.
-    overflow: hidden;
-    z-index: 3;
-    border-bottom: 1px solid @charcoal;
-    line-height: @popupHeaderHeight;
-    font-size: 16px;
-    text-align: center;
-    background: #efefef;
-    border-bottom: 2px solid @darkGrey;
-    visibility: visible;
-
-    //box-shadow: 0px 0px 5px #888;
-
-    border-top-right-radius: 5px;
-    border-top-left-radius: 5px;
-    border-top: 2px solid @darkGrey;
-    border-right: 2px solid @darkGrey;
-    border-left: 2px solid @darkGrey;
-}
-
-#popupArrow {
-    position: absolute;
-    float: left;
-    z-index: 5;
-    margin-top: -1* @popupCarrotHeight + 2;
-    margin-left: -1 * (@popupCarrotWidth / 2)-2; /* Half width */
-    visibility: visible;
-    left: 50%;
-
-    height: @popupCarrotHeight;
-    width: @popupCarrotWidth;
-
-    background: url('../img/popupArrow.png') no-repeat;
-}
-
-//TODO: Simplify transparent on hover.
-.hover(){
-    &:hover {
-        opacity: @hoverOpacity;
-    }
-}
-
-#popupBack {
-    float: left;
-    height: @popupHeaderHeight;
-    width: @popupHeaderHeight+10;
-    background: url('../img/popupBack.png') center center no-repeat;
-    .hover;
-}
-
-#popupClose {
-    float: right;
-    height: @popupHeaderHeight;
-    width: @popupHeaderHeight;
-    background: url('../img/popupClose.png') center center no-repeat;
-    .hover;
-}
-
-#popupContentWrapper {
-    position: relative;
-    .borderBox;
-    height: 100%; //TODO: Find better fix
-    width: 100%;
-    padding-top: 44px;
-    //visibility: hidden;
-}
-
-#popupContent {
-    visibility: visible;
-    position: relative;
-    .borderBox;
-    width: 100%;
-    max-height: 100%;
-    text-align: left;
-    font-size: 18px; //max-height?
-//TODO: Fix.
-    overflow: auto;
-    background: #efefef; //border: solid @charcoal 3px;
-    border-right: 2px solid @darkGrey;
-    border-bottom: 2px solid @darkGrey;
-    border-left: 2px solid @darkGrey;
-    border-bottom-right-radius: 5px;
-    border-bottom-left-radius: 5px;
-
-    color: @charcoal;
-    .last {
-        border-bottom: none;
-    }
-}
-
-#popupContentWrapper .jspContainer { //TODO: Find better fix.
-    overflow: visible;
-}
-
-#popupContentWrapper .jspPane{
-    border-radius: 6px;
-    box-shadow: 0px 0px 10px #888;
-}
-
-#popupContentWrapper .jspDrag {
-    background: #777779;
-}
-
-#popupContentWrapper .jspCapTop {
-    display: block; //TODO: Give variable for popup header height.
-    height: 47px;
-}
-
-.popupContentRow {
-    border-bottom: 1px solid @darkGrey;
-    display: block;
-    padding: 12px 23px;
 }
 
 #logo {
@@ -636,10 +491,6 @@ zoom: 1;*/
 ;
 
 @media only screen and (max-width:800px) {
-    #popupWrapper {
-        position: absolute;
-    }
-
     #nav {
         position: absolute;
         height: @navHeight;
@@ -705,13 +556,6 @@ zoom: 1;*/
         display: none;
     }
 
-    #popup {
-        position: relative;
-    }
-
-    #contentWrapper {
-    }
-
     #content {
         top: @navHeight;
         background: #00f;
@@ -720,14 +564,6 @@ zoom: 1;*/
 }
 
 @media only screen and (max-width:390px) {
-    #popup {
-        width: 250px;
-    }
-
-    #popupContentWrapper {
-        width: 250px;
-    }
-
     #logo {
         display: none;
     }
@@ -747,12 +583,30 @@ zoom: 1;*/
         margin-right: 0px;
     }
 
-    #popup { //width: 80%;
-    }
-
     #content {
         background: #0f0;
     }
+}
+
+// ========================================================================
+//                        jScrollPane Specific Css
+// ========================================================================
+#popupContentWrapper .jspPane{
+    width: 100% !important;
+    border-radius: @borderRadius;
+    box-shadow: 0px 0px 10px @lightCharcoal;
+}
+
+#popupContentWrapper .jspContainer { //TODO: Find better fix.
+    overflow: visible;
+}
+#popupContentWrapper .jspDrag {
+    background: @lightCharcoal;
+}
+
+#popupContentWrapper .jspCapTop {
+    display: block;
+    height: @popupHeaderHeight;
 }
 
 //--------------------------------------------------------------------------------------------------------------------//

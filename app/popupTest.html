@@ -5,8 +5,11 @@
     <title>Popup Test</title>
     <meta name="HandheldFriendly" content="True">
     <meta name="MobileOptimized" content="320">
-    <meta name="viewport" content="width=100%, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0"/>
-    <link rel="stylesheet" type="text/css" href="styles/jquery.jscrollpane.css" media="all"/>
+    <!-- userScalable=no gives odd bug in android 2.3 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0"/>
+    <link rel="stylesheet/less" type="text/css" href="styles/jquery.jscrollpane.less" media="all"/>
+
+    <link rel="stylesheet/less" type="text/css" href="styles/popup.less">
     <style type="text/css">
         html, body{
             padding:0;
@@ -23,152 +26,6 @@
             height: 50px;
             background: red;
         }
-
-        #popupWrapper {
-            -moz-box-sizing: border-box;
-            -webkit-box-sizing: border-box;
-            box-sizing: border-box;
-            position: fixed;
-            height: 100%;
-            width: 300px;
-            padding-top: 10px;
-            visibility: hidden;
-            /*TODO: FIXES*/
-            top: 0;
-            left: 0;
-
-        }
-
-        #popup {
-            position: relative;
-            -moz-box-sizing: border-box;
-            -webkit-box-sizing: border-box;
-            box-sizing: border-box;
-            height: 100%;
-            width: 100%;
-            z-index: 2;
-            color: #333;
-            visibility: visible;
-        }
-
-        #popupHeader {
-            position: absolute;
-            -moz-box-sizing: border-box;
-            -webkit-box-sizing: border-box;
-            box-sizing: border-box;
-            width: 100%;
-            overflow: hidden;
-            z-index: 3;
-            border-bottom: 1px solid #333;
-            line-height: 45px;
-            font-size: 16px;
-            text-align: center;
-            background: #efefef;
-            border-bottom: 2px solid #777;
-            visibility: visible;
-            border-top-right-radius: 5px;
-            border-top-left-radius: 5px;
-            border-top: 2px solid #777;
-            border-right: 2px solid #777;
-            border-left: 2px solid #777;
-        }
-
-        #popupArrow {
-            position: absolute;
-            float: left;
-            z-index: 5;
-            margin-top: -12px;
-            margin-left: -9px; /* Half width */
-            visibility: visible;
-            left: 50%;
-
-            height: 14px;
-            width: 28px;
-
-            background: url('./img/popupArrow.png') no-repeat;
-        }
-
-        #popupBack {
-            float: left;
-            height: 45px;
-            width: 55px;
-            background: url('./img/popupBack.png') center center no-repeat;
-        }
-
-        #popupBack:hover{
-            opacity: .6;
-        }
-
-        #popupClose {
-            float: right;
-            height: 45px;
-            width: 45px;
-            background: url('./img/popupClose.png') center center no-repeat;
-        }
-
-        #popupClose:hover{
-            opacity: .6;
-        }
-
-        #popupContentWrapper {
-            position: relative;
-            -moz-box-sizing: border-box;
-            -webkit-box-sizing: border-box;
-            box-sizing: border-box;
-            height: 100%;
-            width: 100%;
-            padding-top: 44px;
-         }
-
-        #popupContent {
-            visibility: visible;
-            position: relative;
-            -moz-box-sizing: border-box;
-            -webkit-box-sizing: border-box;
-            box-sizing: border-box;
-            width: 100%;
-            max-height: 100%;
-            text-align: left;
-            font-size: 18px;
-            overflow: auto;
-            background: #efefef;
-            border-right: 2px solid #777779;
-            border-bottom: 2px solid #777779;
-            border-left: 2px solid #777779;
-            border-bottom-right-radius: 5px;
-            border-bottom-left-radius: 5px;
-            color: #333;
-        }
-
-        #popupContent .last {
-            border-bottom: none;
-        }
-
-        #popupContentWrapper .jspContainer {
-            overflow: visible;
-        }
-
-        #popupContentWrapper .jspPane{
-            border-radius: 6px;
-            box-shadow: 0px 0px 10px #888;
-        }
-
-        #popupContentWrapper .jspDrag {
-            background: #777779;
-        }
-
-        #popupContentWrapper .jspCapTop {
-            display: block;
-            height: 47px;
-        }
-
-        .popupContentRow {
-            border-bottom: 1px solid #777779;
-            display: block;
-            padding: 12px 23px;
-        }
-
-
     </style>
 </head>
 <body>
@@ -178,17 +35,17 @@
     </div>
     <script type="text/javascript" src="./lib/jquery.js"></script>
     <script type="text/javascript" src="./lib/jquery.jScrollPane.js"></script>
+    <script type="text/javascript" src="lib/less.min.js"></script>
     <script type="text/javascript" src="./lib/jquery.mousewheel.js"></script>
     <script type="text/javascript" src="js/ui/popup.js"></script>
     <script>
-        console.log("here");
         var p = $("#box").popup();
 
         $(document).on("popup.created", function(){
             $("#popupContentWrapper").jScrollPane({
                 horizontalGutter: 0,
                 verticalGutter: 0,
-                'showArrows': false
+                showArrows: false
             });
         });
 
@@ -198,27 +55,27 @@
 
         p.addMenu("box", 'Pick a box',
             [
-                    {"name": "Widgets", id: "chooseWidget"},
-                    {"name": "Change Business", id: "changeBusiness"},
-                    {"name": "Log Out", url: '#box2'}
+                    {name: "Widgets", id: "chooseWidget"},
+                    {name: "Change Business", id: "changeBusiness"},
+                    {name: "Log Out", url: '#box2'}
             ]
         );
         p.addMenu('changeBusiness', "Change Businesses",
                 [
-                    {"name": "Company 1", url: '#c1'},
-                    {"name": "Company 3", url: '#c3'},
-                    {"name": "Company 2", url: '#c2'}
+                    {name: "Company 1", url: '#c1'},
+                    {name: "Company 3", url: '#c3'},
+                    {name: "Company 2", url: '#c2'}
                 ]
         );
 
         p.addMenu('chooseWidget', "Choose a widget",
                 [
-                    {"name": "Foo", url: '#w1'},
-                    {"name": "Bar", url: '#w2'},
-                    {"name": "Baz", url: '#w3'},
-                    {"name": "Widget 4", url: '#w4'},
-                    {"name": "Hello", url: '#w5'},
-                    {"name": "World", url: '#w6'}
+                    {name: "Foo", url: '#w1'},
+                    {name: "Bar", url: '#w2'},
+                    {name: "Baz", url: '#w3'},
+                    {name: "Widget 4", url: '#w4'},
+                    {name: "Hello", url: '#w5'},
+                    {name: "World", url: '#w6'}
                 ]
         );
     </script>
