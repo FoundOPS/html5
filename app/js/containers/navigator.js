@@ -195,7 +195,7 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
                 $(this).find(".icon").css('background-image', 'url(' + image + ')');
             },
             "click": function () {
-                var name = $(this).find(".sectionName:first").html();
+                var name = decodeURI($(this).find(".sectionName:first").html());
                 var section = getSection(config.sections, name);
                 $(this).trigger("sectionSelected", section);
             }
@@ -409,7 +409,7 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
 
     var changeBusiness = function (clicked, config) {
         //var businessId = clicked.attr("id");
-        var name = clicked.html();
+        var name = decodeURI(clicked.html());
         var business = getBusiness(name, config);
         if (business === null) {
             console.log("Business not found!");
@@ -447,7 +447,7 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
         //var popup = new Popup(config, ".navElement");
         var popup = $(".popup").popup();
 
-        $(document).on("popup.created", function(){
+        $(document).on("popup.created", function () {
             $("#popupContentWrapper").jScrollPane({
                 horizontalGutter: 0,
                 verticalGutter: 0,
@@ -455,15 +455,15 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
             });
         });
 
-        $(document).on('popup.setContent popup.visible popup.resize', function(e){
+        $(document).on('popup.setContent popup.visible popup.resize', function (e) {
             $("#popupContentWrapper").data('jsp').reinitialise();
         });
 
         popup.addMenu("navClient", config.name,
             [
-                    {"name": "Settings", url: config.settingsUrl},
-                    {"name": "Change Business", id: "changeBusiness"},
-                    {"name": "Log Out", url: config.logOutUrl}
+                {"name": "Settings", url: config.settingsUrl},
+                {"name": "Change Business", id: "changeBusiness"},
+                {"name": "Log Out", url: config.logOutUrl}
             ]
         );
 
@@ -475,7 +475,7 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
             if (($(data).attr("id") === "navClient") && config.roles.length <= 1) {
                 $("#changeBusiness").css("display", "none");
             }
-            var name = $(data).html();
+            var name = decodeURI($(data).html());
             var role = getRole(config.roles, name);
             if (role !== null) {
                 $(e.target).trigger("roleSelected", role);
