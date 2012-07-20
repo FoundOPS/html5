@@ -6,40 +6,12 @@
 
 "use strict";
 
-define(['db/services', 'developer', "ui/notifications", "widgets/settingsMenu", "lib/jquery-ui-1.8.21.core.min",
+define(["db/services", "developer", "ui/notifications", "widgets/settingsMenu", "lib/jquery-ui-1.8.21.core.min",
     "lib/jquery.FileReader", "lib/swfobject"], function (services, developer, notifications) {
     var businessSettings = {};
 
     //keep track of if a new image has been selected
     businessSettings.newImage = false;
-
-    //make sure the image fits into desired area
-    businessSettings.resize = function (id) {
-
-        var cropbox = $("#" + id);
-        //get the original dimensions of the image
-        var width = cropbox[0].width;
-        var height = cropbox[0].height;
-        //get the ratio for each dimension
-        var w = 200 / width;
-        var h = 200 / height;
-        //find the lowest ratio(will be the shortest dimension)
-        var ratio = Math.min(w, h);
-        //use the ratio to set the new dimensions
-        businessSettings.newW = ratio * width;
-        businessSettings.newH = ratio * height;
-        businessSettings.ratio = ratio;
-
-        //set the largest dimension of the image to be the desired size
-        if (width > height) {
-            cropbox.attr("width", businessSettings.newW);
-        } else {
-            cropbox.attr("height", businessSettings.newH);
-        }
-        //center the image
-        var margin = (500 - businessSettings.newW) / 2;
-        cropbox.css("marginLeft", margin + "px");
-    };
 
     businessSettings.viewModel = kendo.observable({
         saveChanges: function () {
@@ -58,12 +30,38 @@ define(['db/services', 'developer', "ui/notifications", "widgets/settingsMenu", 
         },
         cancelChanges: function () {
             this.set("settings", businessSettings.settings);
-            businessSettings.resize('businessCropbox');
+            businessSettings.resize();
         }
     });
 
+    //make sure the image fits into desired area
+    businessSettings.resize = function () {
+        var cropbox = $("#businessCropbox");
+        //get the original dimensions of the image
+        var width = cropbox[0].width;
+        var height = cropbox[0].height;
+        //get the ratio for each dimension
+        var w = 200 / width;
+        var h = 200 / height;
+        //find the lowest ratio(will be the shortest dimension)
+        var ratio = Math.min(w, h);
+        //use the ratio to set the new dimensions
+        var newW = ratio * width;
+        var newH = ratio * height;
+
+        //set the largest dimension of the image to be the desired size
+        if (width > height) {
+            cropbox.attr("width", newW);
+        } else {
+            cropbox.attr("height", newH);
+        }
+        //center the image
+        var margin = (500 - newW) / 2;
+        cropbox.css("marginLeft", margin + "px");
+    };
+
     businessSettings.fixImageBtnPosition = function () {
-        businessSettings.resize('businessCropbox');
+        businessSettings.resize();
 
         //if the Flash FileAPIProxy is being used, move the swf on top the moved input button
         if (window.FileAPIProxy !== null) {
@@ -133,12 +131,12 @@ define(['db/services', 'developer', "ui/notifications", "widgets/settingsMenu", 
             var file = evt.target.files[0];
             //check that the file is an image
             if (!file.name.match(/(.*\.png$)/) && !file.name.match(/(.*\.jpg$)/) && !file.name.match(/(.*\.JPG$)/) && !file.name.match(/(.*\.gif$)/)) {
-                alert("Only .jpg, .png, and .gif files types allowed!");
+                notifications.error("File Type");
                 return;
             }
             //check that the image is no larger than 10MB
             if (file.size > 5000000) {
-                alert("File is too large! Maximum allowed is 5MB.");
+                notifications.error("File Size");
                 return;
             }
 

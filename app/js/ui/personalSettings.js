@@ -1,19 +1,22 @@
 // Copyright 2012 FoundOPS LLC. All Rights Reserved.
+
 /**
  * @fileoverview Class to hold personal settings logic.
  */
+
 "use strict";
 
 define(["db/services", "ui/notifications", "widgets/settingsMenu", "lib/jquery-ui-1.8.21.core.min",
     "lib/jquery.FileReader", "lib/swfobject"], function (services, notifications) {
     var personalSettings = {};
+
     //keep track of if a new image has been selected
     personalSettings.newImage = false;
 
     personalSettings.viewModel = kendo.observable({
         saveChanges: function () {
             if (personalSettings.validator.validate()) {
-                personalSettings.status = services.updatePersonalSettings(this.get("settings"))
+                services.updatePersonalSettings(this.get("settings"))
                     .success(function (data, textStatus, jqXHR) {
                         notifications.success(jqXHR);
                     }).error(function (data, textStatus, jqXHR) {
@@ -27,27 +30,13 @@ define(["db/services", "ui/notifications", "widgets/settingsMenu", "lib/jquery-u
         },
         cancelChanges: function () {
             this.set("settings", personalSettings.settings);
-            personalSettings.resize('personalCropbox');
+            personalSettings.resize();
         }
     });
 
-    personalSettings.fixImageBtnPosition = function () {
-        personalSettings.resize('personalCropbox');
-
-        //if the Flash FileAPIProxy is being used, move the swf on top the moved input button
-        if (window.FileAPIProxy !== null) {
-            var input = $("#personalImageUpload");
-            window.FileAPIProxy.container
-                .height(input.outerHeight())
-                .width(input.outerWidth())
-                .position({of: input});
-        }
-    };
-
     //make sure the image fits into desired area
-    personalSettings.resize = function (id) {
-
-        var cropbox = $("#" + id);
+    personalSettings.resize = function () {
+        var cropbox = $("#personalCropbox");
         //get the original dimensions of the image
         var width = cropbox[0].width;
         var height = cropbox[0].height;
@@ -57,19 +46,31 @@ define(["db/services", "ui/notifications", "widgets/settingsMenu", "lib/jquery-u
         //find the lowest ratio(will be the shortest dimension)
         var ratio = Math.min(w, h);
         //use the ratio to set the new dimensions
-        personalSettings.newW = ratio * width;
-        personalSettings.newH = ratio * height;
-        personalSettings.ratio = ratio;
+        var newW = ratio * width;
+        var newH = ratio * height;
 
         //set the largest dimension of the image to be the desired size
         if (width > height) {
-            cropbox.attr("width", personalSettings.newW);
+            cropbox.attr("width", newW);
         } else {
-            cropbox.attr("height", personalSettings.newH);
+            cropbox.attr("height", newH);
         }
         //center the image
-        var margin = (500 - personalSettings.newW) / 2;
+        var margin = (500 - newW) / 2;
         cropbox.css("marginLeft", margin + "px");
+    };
+
+    personalSettings.fixImageBtnPosition = function () {
+        personalSettings.resize();
+
+        //if the Flash FileAPIProxy is being used, move the swf on top the moved input button
+        if (window.FileAPIProxy !== null) {
+            var input = $("#personalImageUpload");
+            window.FileAPIProxy.container
+                .height(input.outerHeight())
+                .width(input.outerWidth())
+                .position({of: input});
+        }
     };
 
     personalSettings.initialize = function () {
@@ -121,12 +122,12 @@ define(["db/services", "ui/notifications", "widgets/settingsMenu", "lib/jquery-u
             var file = evt.target.files[0];
             //check that the file is an image
             if (!file.name.match(/(.*\.png$)/) && !file.name.match(/(.*\.jpg$)/) && !file.name.match(/(.*\.JPG$)/) && !file.name.match(/(.*\.gif$)/)) {
-                alert("Only .jpg, .png, and .gif files types allowed!");
+                notifications.error("File Type");
                 return;
             }
             //check that the image is no larger than 10MB
             if (file.size > 5000000) {
-                alert("File is too large! Maximum allowed is 5MB.");
+                notifications.error("File Size");
                 return;
             }
 
@@ -152,10 +153,6 @@ define(["db/services", "ui/notifications", "widgets/settingsMenu", "lib/jquery-u
                 $("#personalImageUpload").css("margin-top", "5px");
             }
         })
-    };
-
-    personalSettings.show = function () {
-        kendo.bind($("#personal"), personalSettings.viewModel);
     };
 
     //set personalSettings to a global function, so the functions are accessible from the HTML element

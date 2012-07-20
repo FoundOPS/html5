@@ -8,9 +8,14 @@ define(['lib/noty'], function(){
         $.noty({
             type : 'success',
             layout : 'topCenter',
-            easing : 'swing',
             text : text,
-            speed : 300
+            timeout: false,
+            animation: {
+                open: {height: 'toggle'},
+                close: {height: 'toggle'},
+                easing: 'swing',
+                speed: 300 // opening & closing animation speed
+            }
         });
     };
 
@@ -22,13 +27,22 @@ define(['lib/noty'], function(){
             text = "Error - A User Already Exists With That Email Address";
         }else if(code === "Get"){
             text = "Connection Error";
+        }else if(code === "File Size"){
+            text = "File is too large! Maximum allowed is 5MB.";
+        }else if(code === "File Type"){
+            text = "Only .jpg, .png, and .gif files types allowed!";
         }
         $.noty({
             type : 'error',
             layout : 'topCenter',
-            easing : 'swing',
             text : text,
-            speed : 300
+            timeout: false,
+            animation: {
+                open: {height: 'toggle'},
+                close: {height: 'toggle'},
+                easing: 'swing',
+                speed: 300 // opening & closing animation speed
+            }
         });
     };
 

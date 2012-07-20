@@ -21,12 +21,12 @@ define(["developer", "db/services", "ui/notifications", "widgets/settingsMenu"],
 
         if ($("#Role")[0].value === "Mobile") {
             //if the role is mobile, set the default linked employee to "None"
-            if($("#Employee")[0].kendoBindingTarget){
+            if ($("#Employee")[0].kendoBindingTarget) {
                 $("#Employee")[0].kendoBindingTarget.target.select(index);
             }
         } else {
             //if the role is admin or regular, set the default linked employee to "Create New"
-            if($("#Employee")[0].kendoBindingTarget){
+            if ($("#Employee")[0].kendoBindingTarget) {
                 $("#Employee")[0].kendoBindingTarget.target.select(this.employees.length - 1);
             }
         }
@@ -42,7 +42,7 @@ define(["developer", "db/services", "ui/notifications", "widgets/settingsMenu"],
             //check if the names match
             if (name === employees[emp].DisplayName) {
                 //select the corresponding name from the dropdownlist
-                if($("#Employee")[0].kendoBindingTarget){
+                if ($("#Employee")[0].kendoBindingTarget) {
                     $("#Employee")[0].kendoBindingTarget.target.select(parseInt(emp));
                 }
             }
@@ -60,16 +60,16 @@ define(["developer", "db/services", "ui/notifications", "widgets/settingsMenu"],
     };
     //endregion
 
+    var vm = kendo.observable({});
+    usersSettings.vm = vm;
+
     usersSettings.initialize = function () {
 
-        //get the list of employees without linked user accounts
-        var getEmployees = function () {
-            services.getAllEmployeesForBusiness(function (employees) {
-                usersSettings.employees = employees;
-            });
-        };
-
-        getEmployees();
+        //get the list of employees
+        services.getAllEmployeesForBusiness(function (employees) {
+            usersSettings.vm.set("employees", employees);
+            usersSettings.employees = employees;
+        });
 
         //setup menu
         var menu = $("#users .settingsMenu");
@@ -110,8 +110,8 @@ define(["developer", "db/services", "ui/notifications", "widgets/settingsMenu"],
                     dataType: "jsonp",
                     contentType: "application/json; charset=utf-8",
                     //TODO: set a timeout and notify if it is reached('complete' doesn't regester a timeout error)
-                    complete: function (jqXHR, textStatus){
-                        if(textStatus == "error"){
+                    complete: function (jqXHR, textStatus) {
+                        if (textStatus == "error") {
                             notifications.error("Get")
                         }
                     }
@@ -119,10 +119,10 @@ define(["developer", "db/services", "ui/notifications", "widgets/settingsMenu"],
                 update: {
                     url: services.API_URL + "settings/UpdateUserSettings?roleId=" + developer.GOTGREASE_ROLE_ID,
                     type: "POST",
-                    complete: function (jqXHR, textStatus){
-                        if(textStatus == "success"){
+                    complete: function (jqXHR, textStatus) {
+                        if (textStatus == "success") {
                             notifications.success(jqXHR.statusText)
-                        }else{
+                        } else {
                             dataSource.cancelChanges();
                             notifications.error(jqXHR.statusText)
                         }
@@ -131,10 +131,10 @@ define(["developer", "db/services", "ui/notifications", "widgets/settingsMenu"],
                 destroy: {
                     url: services.API_URL + "settings/DeleteUserSettings?roleId=" + developer.GOTGREASE_ROLE_ID,
                     type: "POST",
-                    complete: function (jqXHR, textStatus){
-                        if(textStatus == "success"){
+                    complete: function (jqXHR, textStatus) {
+                        if (textStatus == "success") {
                             notifications.success(jqXHR.statusText)
-                        }else{
+                        } else {
                             dataSource.cancelChanges();
                             notifications.error(jqXHR.statusText)
                         }
@@ -143,10 +143,10 @@ define(["developer", "db/services", "ui/notifications", "widgets/settingsMenu"],
                 create: {
                     url: services.API_URL + "settings/InsertUserSettings?roleId=" + developer.GOTGREASE_ROLE_ID,
                     type: "POST",
-                    complete: function (jqXHR, textStatus){
-                        if(textStatus == "success"){
+                    complete: function (jqXHR, textStatus) {
+                        if (textStatus == "success") {
                             notifications.success(jqXHR.statusText)
-                        }else{
+                        } else {
                             dataSource.cancelChanges();
                             notifications.error(jqXHR.statusText)
                         }
@@ -175,10 +175,27 @@ define(["developer", "db/services", "ui/notifications", "widgets/settingsMenu"],
                 $(e.container)
                     .find("input[name='linkedEmployee']")
                     .data("kendoDropDownList");
-                if(e.model.Employee){
-                    $("#linkedEmployee")[0].innerHTML = e.model.Employee.DisplayName;
-                }else{
-                    $("#linkedEmployee")[0].innerHTML = "";
+
+                var dropdownlist;
+
+                if (e.model.Employee) {
+                    //set the available employees based on employees without linked user accounts
+                    var availableEmployees = vm.get("employees");
+
+                    usersSettings.vm.set("availableEmployees", e.model);
+
+                    dropdownlist = $("#linkedEmployee").data("kendoDropDownList");
+
+                    //set the default linked employee to the employee's name
+                    dropdownlist.select(function (dataItem) {
+                        return dataItem.text === e.model.Employee.DisplayName;
+                    });
+                } else {
+                    dropdownlist = $("#linkedEmployee").data("kendoDropDownList");
+                    //set the linked employee to "None"
+                    dropdownlist.select(function (dataItem) {
+                        return dataItem.text === "None";
+                    });
                 }
             },
             scrollable: false,
@@ -204,8 +221,8 @@ define(["developer", "db/services", "ui/notifications", "widgets/settingsMenu"],
                     field: "Employee",
                     title: "Employee Record",
                     template: "# if (Employee && Employee.DisplayName) {#" +
-                                "#= Employee.DisplayName #" +
-                              "# } #"
+                        "#= Employee.DisplayName #" +
+                        "# } #"
                 },
                 {
                     command: ["edit", "destroy"],
@@ -216,9 +233,6 @@ define(["developer", "db/services", "ui/notifications", "widgets/settingsMenu"],
 //endregion
 
         $("#addUser").on("click", function () {
-            //refresh the list of unlinked employees
-            getEmployees();
-
             var dataSrc = $("#usersGrid").data("kendoGrid").dataSource;
 
             var createNew = {DisplayName: "Create New", FirstName: "", Id: "1", LastName: "", LinkedUserAccountId: ""};

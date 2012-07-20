@@ -112,22 +112,22 @@
 			}
 
 	  	$noty.bind('noty.setText', function(event, text) {
-	  		$noty.find('.noty_text').html(text); 
-	  		
+	  		$noty.find('.noty_text').html(text);
+
 	  		if (base.options.layout == 'noty_layout_topCenter' || base.options.layout == 'noty_layout_center') {
 	  			$.noty.reCenter($noty);
 	  		}
 	  	});
 
 	  	$noty.bind('noty.setType', function(event, type) {
-	  		$noty.removeClass($noty.data('noty_options').type); 
+	  		$noty.removeClass($noty.data('noty_options').type);
 
 			type = $noty.data('noty_options').cssPrefix+type;
 
 			$noty.data('noty_options').type = type;
 
 			$noty.addClass(type);
-	  		
+
 	  		if (base.options.layout == 'noty_layout_topCenter' || base.options.layout == 'noty_layout_center') {
 	  			$.noty.reCenter($noty);
 	  		}
@@ -208,7 +208,7 @@
 	$.noty.clearQueue = function() {
 		$.noty.queue = [];
 	};
-  
+
   var windowAlert = window.alert;
   $.noty.consumeAlert = function(options){
     window.alert = function(text){

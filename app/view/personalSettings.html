@@ -1,4 +1,4 @@
-<div data-init="personalSettings.initialize" data-show="personalSettings.show" data-role="view" data-title="Personal User Settings" id="personal">
+<div data-init="personalSettings.initialize" data-role="view" data-title="Personal User Settings" id="personal">
     <div class="settingsMenu"></div>
     <h1>Your Personal User Settings</h1>
     <div class="wrap">
@@ -20,7 +20,7 @@
             </table>
         </form>
         <h2 class="middle">Your Photo</h2>
-        <img data-bind="attr: {src: settings.ImageUrl}" id="personalCropbox" onload="window.personalSettings.fixImageBtnPosition()"/>
+        <img id="personalCropbox" data-bind="attr: {src: settings.ImageUrl}" onload="window.personalSettings.fixImageBtnPosition()" alt=""/>
         <a class="k-button k-button-icontext upload"><span class="k-icon k-image"></span>Upload Image</a>
         <form id="personalImageUploadForm" enctype="multipart/form-data" method="POST">
             <input id="personalImageUpload" type="file" class="file"/><br/>
