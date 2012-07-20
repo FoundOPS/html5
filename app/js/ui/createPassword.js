@@ -6,14 +6,19 @@
 
 "use strict";
 
-define(["db/services", "widgets/settingsMenu"], function (services) {
+define(["db/services", "ui/notifications", "widgets/settingsMenu"], function (services, notifications) {
     var createPassword = {};
 
     createPassword.save = function (){
         var newPass = $("#createNew")[0].value;
         var confirmPass = $("#createConfirm")[0].value;
         if(createPassword.validator.validate){
-            services.createPassword(newPass, confirmPass);
+            services.createPassword(newPass, confirmPass)
+                .success(function (data, textStatus, jqXHR) {
+                    notifications.success(jqXHR);
+                }).error(function (data, textStatus, jqXHR) {
+                    notifications.error(jqXHR);
+                });
             $("#createNew")[0].value = "";
             $("#createConfirm")[0].value = "";
         }

@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(["db/services", "widgets/settingsMenu"], function (services) {
+define(["db/services", "ui/notifications", "widgets/settingsMenu"], function (services, notifications) {
     var changePassword = {};
 
     changePassword.save = function (){
@@ -14,7 +14,12 @@ define(["db/services", "widgets/settingsMenu"], function (services) {
         var newPass = $("#new")[0].value;
         var confirmPass = $("#confirm")[0].value;
         if(changePassword.validator.validate){
-            services.updatePassword(oldPass, newPass, confirmPass);
+            services.updatePassword(oldPass, newPass, confirmPass)
+                .success(function (data, textStatus, jqXHR) {
+                    notifications.success(jqXHR);
+                }).error(function (data, textStatus, jqXHR) {
+                    notifications.error(jqXHR);
+                });
             $("#old")[0].value = "";
             $("#new")[0].value = "";
             $("#confirm")[0].value = "";

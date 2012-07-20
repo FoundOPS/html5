@@ -160,17 +160,13 @@ define(['developer', 'tools'], function (developer, tools) {
      * @param {!function(Array.<Object>)} settings The loaded settings.
      */
     services.updatePersonalSettings = function (settings) {
-        $.ajax({
+        return $.ajax({
             url: services.API_URL + "settings/UpdatePersonalSettings?roleId=" + developer.GOTGREASE_ROLE_ID,
             type: "POST",
             dataType: "json",
             contentType: 'application/json',
             data: JSON.stringify(settings)
         });
-        //TODO
-//            .success(function (response) {
-//                return response;
-//            });
     };
 
     /**

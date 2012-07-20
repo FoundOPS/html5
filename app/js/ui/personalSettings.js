@@ -4,8 +4,8 @@
  */
 "use strict";
 
-define(["db/services", "widgets/settingsMenu", "lib/jquery-ui-1.8.21.core.min",
-    "lib/jquery.FileReader", "lib/swfobject"], function (services) {
+define(["db/services", "ui/notifications", "widgets/settingsMenu", "lib/jquery-ui-1.8.21.core.min",
+    "lib/jquery.FileReader", "lib/swfobject"], function (services, notifications) {
     var personalSettings = {};
     //keep track of if a new image has been selected
     personalSettings.newImage = false;
@@ -13,7 +13,12 @@ define(["db/services", "widgets/settingsMenu", "lib/jquery-ui-1.8.21.core.min",
     personalSettings.viewModel = kendo.observable({
         saveChanges: function () {
             if (personalSettings.validator.validate()) {
-                personalSettings.status = services.updatePersonalSettings(this.get("settings"));
+                personalSettings.status = services.updatePersonalSettings(this.get("settings"))
+                    .success(function (data, textStatus, jqXHR) {
+                        notifications.success(jqXHR);
+                    }).error(function (data, textStatus, jqXHR) {
+                        notifications.error(jqXHR);
+                    });
             }
             //check if image has been changed
             if (personalSettings.newImage) {
@@ -22,6 +27,7 @@ define(["db/services", "widgets/settingsMenu", "lib/jquery-ui-1.8.21.core.min",
         },
         cancelChanges: function () {
             this.set("settings", personalSettings.settings);
+            personalSettings.resize('personalCropbox');
         }
     });
 
@@ -64,8 +70,6 @@ define(["db/services", "widgets/settingsMenu", "lib/jquery-ui-1.8.21.core.min",
         //center the image
         var margin = (500 - personalSettings.newW) / 2;
         cropbox.css("marginLeft", margin + "px");
-
-        return cropbox;
     };
 
     personalSettings.initialize = function () {
@@ -85,20 +89,20 @@ define(["db/services", "widgets/settingsMenu", "lib/jquery-ui-1.8.21.core.min",
             var cropbox = $("#personalCropbox");
             //set the source of the image element to be the newly uploaded image
             cropbox.attr("src", imageData);
-            //make sure the image fits into desired area
-            personalSettings.resize('personalCropbox');
-
-            personalSettings.fixImageBtnPosition();
 
             //set a hidden form to the file image's data (because we stole it with FileReader)
-            $('#imageData').val(imageData);
+            $('#personal #imageData').val(imageData);
 
             //show the image
-            $(".upload").css("margin-left", "185px");
-            $("#personalCropbox").css("visibility", "visible");
+            $("#personal .upload").css("margin-left", "185px").css("margin-bottom", "-15px");
+            $("#personalCropbox").css("visibility", "visible").removeAttr("width").removeAttr("height");
+            $("#personalImageUploadForm").css("margin-top", "0");
+            $("#personalImageUpload").css("margin-top", "0");
 
             //set so that the save changes event will also save the image
             personalSettings.newImage = true;
+
+            personalSettings.fixImageBtnPosition();
         };
 
         //setup the FileReader on the imageUpload button
@@ -129,7 +133,7 @@ define(["db/services", "widgets/settingsMenu", "lib/jquery-ui-1.8.21.core.min",
             //Read the file to trigger onLoad
             reader.readAsDataURL(file);
             //set the form value
-            $('#imageFileName').val(file.name);
+            $('#personal #imageFileName').val(file.name);
         });
 
         //set the form action to the update image url
@@ -141,11 +145,13 @@ define(["db/services", "widgets/settingsMenu", "lib/jquery-ui-1.8.21.core.min",
             personalSettings.settings = settings;
             personalSettings.viewModel.set("settings", settings);
             kendo.bind($("#personal"), personalSettings.viewModel);
-            if(!settings.ImageUrl){
-                $("#personal .upload").css("margin-left", "163px");
-                $("#personalCropbox").css("visibility", "hidden");
+            if (!settings.ImageUrl) {
+                $("#personal .upload").css("margin-left", "181px").css("margin-bottom", "-15px");
+                $("#personalCropbox").css("visibility", "hidden").css("width", "0px").css("height", "0px");
+                $("#personalImageUploadForm").css("margin-top", "-22px");
+                $("#personalImageUpload").css("margin-top", "5px");
             }
-        });
+        })
     };
 
     personalSettings.show = function () {

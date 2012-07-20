@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(["developer", "db/services", "widgets/settingsMenu"], function (developer, services) {
+define(["developer", "db/services", "ui/notifications", "widgets/settingsMenu"], function (developer, services, notifications) {
     var usersSettings = {};
 
     //region Methods
@@ -108,19 +108,49 @@ define(["developer", "db/services", "widgets/settingsMenu"], function (developer
                     url: services.API_URL + "settings/GetAllUserSettings?roleId=" + developer.GOTGREASE_ROLE_ID,
                     type: "GET",
                     dataType: "jsonp",
-                    contentType: "application/json; charset=utf-8"
+                    contentType: "application/json; charset=utf-8",
+                    //TODO: set a timeout and notify if it is reached('complete' doesn't regester a timeout error)
+                    complete: function (jqXHR, textStatus){
+                        if(textStatus == "error"){
+                            notifications.error("Get")
+                        }
+                    }
                 },
                 update: {
                     url: services.API_URL + "settings/UpdateUserSettings?roleId=" + developer.GOTGREASE_ROLE_ID,
-                    type: "POST"
+                    type: "POST",
+                    complete: function (jqXHR, textStatus){
+                        if(textStatus == "success"){
+                            notifications.success(jqXHR.statusText)
+                        }else{
+                            dataSource.cancelChanges();
+                            notifications.error(jqXHR.statusText)
+                        }
+                    }
                 },
                 destroy: {
                     url: services.API_URL + "settings/DeleteUserSettings?roleId=" + developer.GOTGREASE_ROLE_ID,
-                    type: "POST"
+                    type: "POST",
+                    complete: function (jqXHR, textStatus){
+                        if(textStatus == "success"){
+                            notifications.success(jqXHR.statusText)
+                        }else{
+                            dataSource.cancelChanges();
+                            notifications.error(jqXHR.statusText)
+                        }
+                    }
                 },
                 create: {
                     url: services.API_URL + "settings/InsertUserSettings?roleId=" + developer.GOTGREASE_ROLE_ID,
-                    type: "POST"
+                    type: "POST",
+                    complete: function (jqXHR, textStatus){
+                        if(textStatus == "success"){
+                            notifications.success(jqXHR.statusText)
+                        }else{
+                            dataSource.cancelChanges();
+                            notifications.error(jqXHR.statusText)
+                        }
+                    }
                 }
             },
             schema: {
@@ -146,19 +176,9 @@ define(["developer", "db/services", "widgets/settingsMenu"], function (developer
                     .find("input[name='linkedEmployee']")
                     .data("kendoDropDownList");
                 if(e.model.Employee){
-                    $("#linkedEmployee")[0].value = e.model.Employee.DisplayName;
+                    $("#linkedEmployee")[0].innerHTML = e.model.Employee.DisplayName;
                 }else{
-                    var index;
-                    //get the index of the empty employee
-                    for (var i in usersSettings.employees) {
-                        if (usersSettings.employees[i].FirstName === "None") {
-                            index = parseInt(i);
-                        }
-                    }
-                    //set the dropdownlist option to the correct value
-                    if($("#linkedEmployee")[0].kendoBindingTarget){
-                        $("#linkedEmployee")[0].kendoBindingTarget.target.select(index);
-                    }
+                    $("#linkedEmployee")[0].innerHTML = "";
                 }
             },
             scrollable: false,
@@ -189,7 +209,7 @@ define(["developer", "db/services", "widgets/settingsMenu"], function (developer
                 },
                 {
                     command: ["edit", "destroy"],
-                    width: "80px"
+                    width: "81px"
                 }
             ]
         });
@@ -246,6 +266,9 @@ define(["developer", "db/services", "widgets/settingsMenu"], function (developer
                         dataSrc._data[0].Employee = {FirstName: name[0], Id: " ", LastName: name[1], LinkedUserAccountId: " "};
                     }
                     dataSrc.sync(); //sync changes
+                    var grid = $("#usersGrid").data("kendoGrid");
+                    $("#usersGrid")[0].childNodes[0].childNodes[2].childNodes[0].childNodes[4].innerText = employee;
+                    grid._data[0].Employee.DisplayName = employee;
                     object.close();
                     object.element.remove();
                     usersSettings.employees.splice(usersSettings.employees.length - 1, 1);
@@ -259,9 +282,11 @@ define(["developer", "db/services", "widgets/settingsMenu"], function (developer
                 usersSettings.employees.splice(usersSettings.employees.length - 1, 1);
             });
         });
-    }
-    ;
+
+        $(".k-grid-cancel").on("click", function () {
+            dataSource.cancelChanges();
+        });
+    };
 
     window.usersSettings = usersSettings;
-})
-;
+});

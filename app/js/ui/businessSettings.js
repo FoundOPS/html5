@@ -1,22 +1,55 @@
 // Copyright 2012 FoundOPS LLC. All Rights Reserved.
 
 /**
- * @fileoverview Class to hold personal settings logic.
+ * @fileoverview Class to hold business settings logic.
  */
 
 "use strict";
 
-define(['db/services', 'developer', 'ui/personalSettings', "widgets/settingsMenu", "lib/jquery-ui-1.8.21.core.min",
-    "lib/jquery.FileReader", "lib/swfobject"], function (services, developer, personalSettings) {
+define(['db/services', 'developer', "ui/notifications", "widgets/settingsMenu", "lib/jquery-ui-1.8.21.core.min",
+    "lib/jquery.FileReader", "lib/swfobject"], function (services, developer, notifications) {
     var businessSettings = {};
 
     //keep track of if a new image has been selected
     businessSettings.newImage = false;
 
+    //make sure the image fits into desired area
+    businessSettings.resize = function (id) {
+
+        var cropbox = $("#" + id);
+        //get the original dimensions of the image
+        var width = cropbox[0].width;
+        var height = cropbox[0].height;
+        //get the ratio for each dimension
+        var w = 200 / width;
+        var h = 200 / height;
+        //find the lowest ratio(will be the shortest dimension)
+        var ratio = Math.min(w, h);
+        //use the ratio to set the new dimensions
+        businessSettings.newW = ratio * width;
+        businessSettings.newH = ratio * height;
+        businessSettings.ratio = ratio;
+
+        //set the largest dimension of the image to be the desired size
+        if (width > height) {
+            cropbox.attr("width", businessSettings.newW);
+        } else {
+            cropbox.attr("height", businessSettings.newH);
+        }
+        //center the image
+        var margin = (500 - businessSettings.newW) / 2;
+        cropbox.css("marginLeft", margin + "px");
+    };
+
     businessSettings.viewModel = kendo.observable({
         saveChanges: function () {
             if (businessSettings.validator.validate()) {
-                services.updateBusinessSettings(this.get("settings"));
+                services.updateBusinessSettings(this.get("settings"))
+                    .success(function (data, textStatus, jqXHR) {
+                        notifications.success(jqXHR);
+                    }).error(function (data, textStatus, jqXHR) {
+                        notifications.error(jqXHR);
+                    });
             }
             //check if image has been changed
             if (businessSettings.newImage) {
@@ -25,11 +58,12 @@ define(['db/services', 'developer', 'ui/personalSettings', "widgets/settingsMenu
         },
         cancelChanges: function () {
             this.set("settings", businessSettings.settings);
+            businessSettings.resize('businessCropbox');
         }
     });
 
     businessSettings.fixImageBtnPosition = function () {
-        personalSettings.resize('businessCropbox');
+        businessSettings.resize('businessCropbox');
 
         //if the Flash FileAPIProxy is being used, move the swf on top the moved input button
         if (window.FileAPIProxy !== null) {
@@ -67,20 +101,20 @@ define(['db/services', 'developer', 'ui/personalSettings', "widgets/settingsMenu
             var cropbox = $("#businessCropbox");
             //set the source of the image element to be the newly uploaded image
             cropbox.attr("src", imageData);
-            //make sure the image fits into desired area
-            personalSettings.resize('businessCropbox');
-
-            businessSettings.fixImageBtnPosition();
 
             //set a hidden form to the file image's data (because we stole it with FileReader)
-            $('#imageData').val(imageData);
+            $('#business #imageData').val(imageData);
 
             //show the image
-            $(".upload").css("margin-left", "185px");
-            $("#businessCropbox").css("visibility", "visible");
+            $("#business .upload").css("margin-left", "185px").css("margin-bottom", "-15px");
+            $("#businessCropbox").css("visibility", "visible").css("width", "auto").css("height", "auto");
+            $("#businessImageUploadForm").css("margin-top", "0");
+            $("#businessImageUpload").css("margin-top", "0");
 
             //set so that the save changes event will also save the image
             businessSettings.newImage = true;
+
+            businessSettings.fixImageBtnPosition();
         };
 
         //setup the FileReader on the imageUpload button
@@ -111,7 +145,7 @@ define(['db/services', 'developer', 'ui/personalSettings', "widgets/settingsMenu
             //Read the file to trigger onLoad
             reader.readAsDataURL(file);
             //set the form value
-            $('#imageFileName').val(file.name);
+            $('#business #imageFileName').val(file.name);
         });
 
         //set the form action to the update image url
@@ -124,8 +158,10 @@ define(['db/services', 'developer', 'ui/personalSettings', "widgets/settingsMenu
             businessSettings.viewModel.set("settings", settings);
             kendo.bind($("#business"), businessSettings.viewModel);
             if(!settings.ImageUrl){
-                $("#business .upload").css("margin-left", "163px");
-                $("#businessCropbox").css("visibility", "hidden");
+                $("#business .upload").css("margin-left", "181px").css("margin-bottom", "-15px");
+                $("#businessCropbox").css("visibility", "hidden").css("width", "0px").css("height", "0px");
+                $("#businessImageUploadForm").css("margin-top", "-22px");
+                $("#businessImageUpload").css("margin-top", "5px");
             }
         });
     };
