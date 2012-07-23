@@ -7,11 +7,11 @@
 "use strict";
 
 define(["db/services", "ui/notifications", "widgets/settingsMenu", "lib/jquery-ui-1.8.21.core.min",
-    "lib/jquery.FileReader", "lib/swfobject"], function (services, notifications) {
+    "lib/jquery.FileReader", "lib/swfobject", "lib/jquery.form"], function (services, notifications) {
     var personalSettings = {};
 
     //keep track of if a new image has been selected
-    personalSettings.newImage = false;
+    var newImage = false;
 
     personalSettings.viewModel = kendo.observable({
         saveChanges: function () {
@@ -24,7 +24,7 @@ define(["db/services", "ui/notifications", "widgets/settingsMenu", "lib/jquery-u
                     });
             }
             //check if image has been changed
-            if (personalSettings.newImage) {
+            if (newImage) {
                 $("#personalImageUploadForm").submit();
             }
         },
@@ -60,19 +60,6 @@ define(["db/services", "ui/notifications", "widgets/settingsMenu", "lib/jquery-u
         cropbox.css("marginLeft", margin + "px");
     };
 
-    personalSettings.fixImageBtnPosition = function () {
-        personalSettings.resize();
-
-        //if the Flash FileAPIProxy is being used, move the swf on top the moved input button
-        if (window.FileAPIProxy !== null) {
-            var input = $("#personalImageUpload");
-            window.FileAPIProxy.container
-                .height(input.outerHeight())
-                .width(input.outerWidth())
-                .position({of: input});
-        }
-    };
-
     personalSettings.initialize = function () {
         personalSettings.validator = $("#personalForm").kendoValidator().data("kendoValidator");
 
@@ -101,16 +88,15 @@ define(["db/services", "ui/notifications", "widgets/settingsMenu", "lib/jquery-u
             $("#personalImageUpload").css("margin-top", "0");
 
             //set so that the save changes event will also save the image
-            personalSettings.newImage = true;
-
-            personalSettings.fixImageBtnPosition();
+            newImage = true;
+            personalSettings.resize();
         };
 
         //setup the FileReader on the imageUpload button
         //this will enable the flash FileReader polyfill from https://github.com/Jahdrien/FileReader
-        $("#personalImageUpload").fileReader();
+        $("#personalImageUploadButton").fileReader();
 
-        $("#personalImageUpload").on('change', function (evt) {
+        $("#personalImageUploadButton").on('change', function (evt) {
             var reader = new FileReader();
             reader.onload = fileLoaded;
 
@@ -132,8 +118,16 @@ define(["db/services", "ui/notifications", "widgets/settingsMenu", "lib/jquery-u
             $('#personal #imageFileName').val(file.name);
         });
 
-        //set the form action to the update image url
-        $('#personalImageUploadForm').attr("action", services.API_URL + "settings/UpdateUserImage");
+        //setup the form
+        $('#personalImageUploadForm').ajaxForm({
+            //from http://stackoverflow.com/questions/8151138/ie-jquery-form-multipart-json-response-ie-tries-to-download-response
+            dataType: "text",
+            contentType: "multipart/form-data",
+            url: services.API_URL + "settings/UpdateUserImage",
+            success: function (response) {
+                var url = response.replace(/['"]/g,'');
+                personalSettings.viewModel.get("settings").set("ImageUrl", url);
+            }});
 
         //retrieve the settings and bind them to the form
         services.getPersonalSettings(function (settings) {
@@ -145,7 +139,7 @@ define(["db/services", "ui/notifications", "widgets/settingsMenu", "lib/jquery-u
                 $("#personal .upload").css("margin-left", "181px").css("margin-bottom", "-15px");
                 $("#personalCropbox").css("visibility", "hidden").css("width", "0px").css("height", "0px");
                 $("#personalImageUploadForm").css("margin-top", "-22px");
-                $("#personalImageUpload").css("margin-top", "5px");
+                //$("#personalImageUpload").css("margin-top", "5px");
             }
         })
     };
