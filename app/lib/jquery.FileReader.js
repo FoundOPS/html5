@@ -9,11 +9,11 @@
     $.fn.fileReader = function( options ) {
         options = $.extend({
             id              : 'fileReaderSWFObject', // ID for the created swf object container,
-            multiple        : null,
             accept          : null,
             label           : null,
             extensions      : null,
-            filereader      : 'filereader.swf', // The path to the filereader swf file
+            multiple        : false,
+            filereader      : 'lib/filereader.swf', // The path to the filereader swf file
             expressInstall  : null, // The path to the express install swf file
             debugMode       : false,
             callback        : false // Callback function when Filereader is ready

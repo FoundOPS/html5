@@ -117,12 +117,7 @@ define(["db/services", "developer", "ui/notifications", "widgets/settingsMenu", 
 
         //setup the FileReader on the imageUpload button
         //this will enable the flash FileReader polyfill from https://github.com/Jahdrien/FileReader
-        $("#businessImageUpload").fileReader({
-            id: "fileReaderSWFObject",
-            filereader: "../../lib/filereader.swf",
-            debugMode: false,
-            multiple: false
-        });
+        $("#businessImageUpload").fileReader();
 
         $("#businessImageUpload").on('change', function (evt) {
             var reader = new FileReader();
@@ -150,7 +145,7 @@ define(["db/services", "developer", "ui/notifications", "widgets/settingsMenu", 
         $('#businessImageUploadForm').attr("action", services.API_URL + "settings/UpdateBusinessImage?roleId=" + developer.GOTGREASE_ROLE_ID);
 
         //retrieve the settings and bind them to the form
-        services.getBusinessSettings(function (settings) {
+        services.getBusinessSettings(session.getRole().id, function (settings) {
             //set this so cancelChanges has a reference to the original settings
             businessSettings.settings = settings;
             businessSettings.viewModel.set("settings", settings);
