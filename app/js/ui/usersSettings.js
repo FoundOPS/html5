@@ -11,42 +11,33 @@ define(["developer", "db/services", "ui/notifications", "widgets/settingsMenu"],
 
     //region Methods
     usersSettings.setDefaultValue = function () {
-        var index;
-        //get the index of the empty employee
-        for (var i in this.employees) {
-            if (this.employees[i].FirstName === "None") {
-                index = parseInt(i);
-            }
-        }
+        var dropDownList = $("#Employee").data("kendoDropDownList");
 
         if ($("#Role")[0].value === "Mobile") {
             //if the role is mobile, set the default linked employee to "None"
-            if ($("#Employee")[0].kendoBindingTarget) {
-                $("#Employee")[0].kendoBindingTarget.target.select(index);
-            }
+            dropDownList.select(function (dataItem) {
+                return dataItem.DisplayName === "None ";
+            });
         } else {
             //if the role is admin or regular, set the default linked employee to "Create New"
-            if ($("#Employee")[0].kendoBindingTarget) {
-                $("#Employee")[0].kendoBindingTarget.target.select(this.employees.length - 1);
-            }
+            dropDownList.select(function (dataItem) {
+                return dataItem.DisplayName === "Create New";
+            });
         }
     };
 
     //on add and edit, select a linked employee if the name matches the name in the form
     usersSettings.matchEmployee = function () {
+        var dropDownList = $("#Employee").data("kendoDropDownList");
+
         //get the items in the dropdownlist
         var employees = this.employees;
         //get the user's name from the form fields
         var name = $("#FirstName")[0].value + " " + $("#LastName")[0].value;
-        for (var emp in employees) {
-            //check if the names match
-            if (name === employees[emp].DisplayName) {
-                //select the corresponding name from the dropdownlist
-                if ($("#Employee")[0].kendoBindingTarget) {
-                    $("#Employee")[0].kendoBindingTarget.target.select(parseInt(emp));
-                }
-            }
-        }
+        //select it in the dropDownList
+        dropDownList.select(function (dataItem) {
+            return dataItem.DisplayName === name;
+        });
     };
 
     //after the data is loaded, add tooltips to the edit and delete buttons
@@ -135,6 +126,7 @@ define(["developer", "db/services", "ui/notifications", "widgets/settingsMenu"],
                             dataSource.cancelChanges();
                             notifications.error(jqXHR.statusText)
                         }
+                        dataSource.read();
                     }
                 },
                 destroy: {
@@ -159,6 +151,7 @@ define(["developer", "db/services", "ui/notifications", "widgets/settingsMenu"],
                             dataSource.cancelChanges();
                             notifications.error(jqXHR.statusText)
                         }
+                        dataSource.read();
                     }
                 }
             },
@@ -189,7 +182,7 @@ define(["developer", "db/services", "ui/notifications", "widgets/settingsMenu"],
                     availableEmployees.push(e.model.Employee);
                 }
 
-                var dropdownlist = $("#linkedEmployee").kendoDropDownList({
+                var dropDownList = $("#linkedEmployee").kendoDropDownList({
                     dataSource: availableEmployees,
                     dataTextField: "DisplayName",
                     dataValueField: "DisplayName"
@@ -197,12 +190,12 @@ define(["developer", "db/services", "ui/notifications", "widgets/settingsMenu"],
 
                 if (e.model.Employee) {
                     //set the default linked employee to the employee's name
-                    dropdownlist.select(function (dataItem) {
+                    dropDownList.select(function (dataItem) {
                         return dataItem.text === e.model.Employee.DisplayName;
                     });
                 } else {
                     //set the linked employee to "None"
-                    dropdownlist.select(function (dataItem) {
+                    dropDownList.select(function (dataItem) {
                         return dataItem.text === "None";
                     });
                 }
@@ -244,8 +237,13 @@ define(["developer", "db/services", "ui/notifications", "widgets/settingsMenu"],
         $("#addUser").on("click", function () {
             var dataSrc = $("#usersGrid").data("kendoGrid").dataSource;
 
+            //set the available employees
+            var availableEmployees = usersSettings.employees.filter(function (employee){
+                return !(employee.Id in usersSettings.linkedEmployees);
+            });
+
             var createNew = {DisplayName: "Create New", FirstName: "", Id: "1", LastName: "", LinkedUserAccountId: ""};
-            usersSettings.employees.push(createNew);
+            availableEmployees.push(createNew);
 
             var object = $("<div id='popupEditor'>")
                 .appendTo($("body"))
@@ -275,6 +273,12 @@ define(["developer", "db/services", "ui/notifications", "widgets/settingsMenu"],
             //initialize the validator
             var validator = $(object.element).kendoValidator().data("kendoValidator");
 
+            var dropDownList = $("#Employee").kendoDropDownList({
+                dataSource: availableEmployees,
+                dataTextField: "DisplayName",
+                dataValueField: "DisplayName"
+            });
+
             usersSettings.setDefaultValue();
 
             $("#btnAdd").on("click", function () {
@@ -294,7 +298,6 @@ define(["developer", "db/services", "ui/notifications", "widgets/settingsMenu"],
                     grid._data[0].Employee.DisplayName = employee;
                     object.close();
                     object.element.remove();
-                    usersSettings.employees.splice(usersSettings.employees.length - 1, 1);
                 }
             });
 
@@ -302,7 +305,10 @@ define(["developer", "db/services", "ui/notifications", "widgets/settingsMenu"],
                 dataSrc.cancelChanges(model); //cancel changes
                 object.close();
                 object.element.remove();
-                usersSettings.employees.splice(usersSettings.employees.length - 1, 1);
+            });
+
+            $("#Role").on("change", function () {
+                usersSettings.setDefaultValue();
             });
         });
 
