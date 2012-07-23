@@ -194,8 +194,13 @@ define(['developer', 'tools'], function (developer, tools) {
         });
     };
 
-    // Get business settings.
-    services.getBusinessSettings = services._getHttp('settings/GetBusinessSettings', {roleId: developer.GOTGREASE_ROLE_ID}, false);
+    /**
+     * Get business settings
+     * @param roleId The role to get the business settings for
+     */
+    services.getBusinessSettings = function (roleId, callback) {
+        services._getHttp('settings/GetBusinessSettings', {roleId: roleId}, false)(callback);
+    };
 
     /**
      * Updates businesssettings.

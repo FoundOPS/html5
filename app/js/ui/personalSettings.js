@@ -108,12 +108,7 @@ define(["db/services", "ui/notifications", "widgets/settingsMenu", "lib/jquery-u
 
         //setup the FileReader on the imageUpload button
         //this will enable the flash FileReader polyfill from https://github.com/Jahdrien/FileReader
-        $("#personalImageUpload").fileReader({
-            id: "fileReaderSWFObject",
-            filereader: "../../lib/filereader.swf",
-            debugMode: false,
-            multiple: false
-        });
+        $("#personalImageUpload").fileReader();
 
         $("#personalImageUpload").on('change', function (evt) {
             var reader = new FileReader();
