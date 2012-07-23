@@ -15,7 +15,7 @@
             multiple        : false,
             filereader      : 'lib/filereader.swf', // The path to the filereader swf file
             expressInstall  : null, // The path to the express install swf file
-            debugMode       : false,
+            debugMode       : false, // Console logging
             callback        : false // Callback function when Filereader is ready
         }, options);
 
@@ -52,7 +52,8 @@
 
             input.css('z-index', 0)
                 .mouseover(function (e) {
-                    if (id !== currentTarget) {
+                    //FoundOPS change
+//                    if (id !== currentTarget) {
                         e = e || window.event;
                         currentTarget = id;
                         FileAPIProxy.swfObject.mouseover(id);
@@ -60,7 +61,7 @@
                             .height(input.outerHeight())
                             .width(input.outerWidth())
                             .position({of:input});
-                    }
+//                    }
                 })
                 .click(function(e) {
                     e.preventDefault();
@@ -83,9 +84,6 @@
                 .wrap('<div>')
                 .parent()
                 .css({
-                    //foundops change - next 2 lines
-                    position:'absolute',
-                    top:'-22px',
                     width:'1px',
                     height:'1px',
                     display:'inline-block',

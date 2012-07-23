@@ -51,6 +51,7 @@ define(["developer", "tools"], function (developer, tools) {
         for (var i in roleIdFunctionQueue) {
             roleIdFunctionQueue[i]();
         }
+        roleIdFunctionQueue.length = 0;
     };
 
     /**
