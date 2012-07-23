@@ -46,10 +46,10 @@ define(["jquery", "session", "lib/kendo.all"], function ($, session) {
             }
 
             //Show all settings if user is admin
-            if (session._role.type == "Administrator") {
+//            if (session._role.type == "Administrator") {
                 businessLi.css("display", "block");
                 usersLi.css("display", "block");
-            }
+//            }
 
             this.element.append(_menu);
         },

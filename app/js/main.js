@@ -17,7 +17,7 @@ require(["containers/navigator", "silverlight", "session", "lib/kendo.all", "ui/
     "ui/changePassword", "ui/createPassword", "underscore", "lib/userVoice"], function (Navigator, silverlight, session) {
     var application, navigator;
 
-    session.get(function (data) {
+    session.load(function (data) {
         //setup the navigator
         navigator = new Navigator(data);
         navigator.hideSearch();

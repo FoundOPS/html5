@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(["developer", "db/services", "ui/notifications", "widgets/settingsMenu"], function (developer, services, notifications) {
+define(["developer", "db/services", "session", "ui/notifications", "widgets/settingsMenu"], function (developer, dbServices, session, notifications) {
     var usersSettings = {};
 
     //region Methods
@@ -45,9 +45,9 @@ define(["developer", "db/services", "ui/notifications", "widgets/settingsMenu"],
         usersSettings.linkedEmployees = {};
         var data = e.sender._data;
         //http://stackoverflow.com/questions/6715641/an-efficient-way-to-get-the-difference-between-two-arrays-of-objects
-        data.forEach(function(obj){
-            if(obj.Employee){
-                usersSettings.linkedEmployees[obj.Employee.Id] = obj;
+        data.forEach(function (obj) {
+            if (obj.Employee) {
+                usersSettings.linkedEmployees[obj.Employee.LinkedUserAccountId] = obj;
             }
         });
 
@@ -61,9 +61,8 @@ define(["developer", "db/services", "ui/notifications", "widgets/settingsMenu"],
     //endregion
 
     usersSettings.initialize = function () {
-
         //get the list of employees
-        services.getAllEmployeesForBusiness(function (employees) {
+        dbServices.getAllEmployeesForBusiness(function (employees) {
             usersSettings.employees = employees;
         });
 
@@ -105,7 +104,6 @@ define(["developer", "db/services", "ui/notifications", "widgets/settingsMenu"],
         var dataSource = new kendo.data.DataSource({
             transport: {
                 read: {
-                    url: services.API_URL + "settings/GetAllUserSettings?roleId=" + developer.GOTGREASE_ROLE_ID,
                     type: "GET",
                     dataType: "jsonp",
                     contentType: "application/json; charset=utf-8",
@@ -117,7 +115,6 @@ define(["developer", "db/services", "ui/notifications", "widgets/settingsMenu"],
                     }
                 },
                 update: {
-                    url: services.API_URL + "settings/UpdateUserSettings?roleId=" + developer.GOTGREASE_ROLE_ID,
                     type: "POST",
                     complete: function (jqXHR, textStatus) {
                         if (textStatus == "success") {
@@ -130,7 +127,6 @@ define(["developer", "db/services", "ui/notifications", "widgets/settingsMenu"],
                     }
                 },
                 destroy: {
-                    url: services.API_URL + "settings/DeleteUserSettings?roleId=" + developer.GOTGREASE_ROLE_ID,
                     type: "POST",
                     complete: function (jqXHR, textStatus) {
                         if (textStatus == "success") {
@@ -142,7 +138,6 @@ define(["developer", "db/services", "ui/notifications", "widgets/settingsMenu"],
                     }
                 },
                 create: {
-                    url: services.API_URL + "settings/InsertUserSettings?roleId=" + developer.GOTGREASE_ROLE_ID,
                     type: "POST",
                     complete: function (jqXHR, textStatus) {
                         if (textStatus == "success") {
@@ -164,6 +159,27 @@ define(["developer", "db/services", "ui/notifications", "widgets/settingsMenu"],
             }
         });
 
+        var setupDataSourceUrls = function () {
+            var roleId = session.get("role.id");
+            if (!roleId) {
+                return;
+            }
+            dataSource.transport.options.read.url = dbServices.API_URL + "settings/GetAllUserSettings?roleId=" + roleId;
+            dataSource.transport.options.update.url = dbServices.API_URL + "settings/UpdateUserSettings?roleId=" + roleId;
+            dataSource.transport.options.destroy.url = dbServices.API_URL + "settings/DeleteUserSettings?roleId=" + roleId;
+            dataSource.transport.options.create.url = dbServices.API_URL + "settings/InsertUserSettings?roleId=" + roleId;
+            dataSource.read();
+        };
+        //set the dataSource urls initially, and when the role is changed
+        setupDataSourceUrls();
+        session.bind("change", function (e) {
+            if (e.field == "role") {
+                setupDataSourceUrls();
+            }
+        });
+
+        usersSettings.availableEmployeesDataSource = new kendo.data.DataSource({});
+
         //add a grid to the #usersGrid div element
         $("#usersGrid").kendoGrid({
             dataSource: dataSource,
@@ -174,31 +190,40 @@ define(["developer", "db/services", "ui/notifications", "widgets/settingsMenu"],
                 confirmation: "Are you sure you want to delete this user?"
             },
             edit: function (e) {
-                //set the available employees
-                var availableEmployees = usersSettings.employees.filter(function (employee){
-                    return !(employee.Id in usersSettings.linkedEmployees);
+                //set the available employees(filter out the linked employees from the list of all employees)
+                var availableEmployees = usersSettings.employees.filter(function (employee) {
+                    return !(employee.LinkedUserAccountId in usersSettings.linkedEmployees);
                 });
+                //if there is a linked employee, add it to the list
                 if (e.model.Employee) {
                     availableEmployees.push(e.model.Employee);
                 }
+                //update the datsSource
+                usersSettings.availableEmployeesDataSource.data(availableEmployees);
 
-                var dropDownList = $("#linkedEmployee").kendoDropDownList({
-                    dataSource: availableEmployees,
-                    dataTextField: "DisplayName",
-                    dataValueField: "DisplayName"
-                });
+                var dropDownList = $("#linkedEmployee").data("kendoDropDownList");
+                dropDownList.refresh();
 
                 if (e.model.Employee) {
-                    //set the default linked employee to the employee's name
+                    //set the default value of the dropdownlist to the employee's name
                     dropDownList.select(function (dataItem) {
-                        return dataItem.text === e.model.Employee.DisplayName;
+                        return dataItem.Id === e.model.Employee.Id;
                     });
                 } else {
-                    //set the linked employee to "None"
+                    //set the default value of the dropdownlist to "None"
                     dropDownList.select(function (dataItem) {
-                        return dataItem.text === "None";
+                        return dataItem.Id === "00000000-0000-0000-0000-000000000000";
                     });
                 }
+
+                //cancel the changes on cancel button click
+                $(".k-grid-cancel").on("click", function () {
+                    e.sender.cancelChanges();
+                });
+                //cancel the changes on 'X' button click
+                $(".k-i-close").on("click", function () {
+                    e.sender.cancelChanges();
+                });
             },
             scrollable: false,
             sortable: true,
@@ -238,7 +263,7 @@ define(["developer", "db/services", "ui/notifications", "widgets/settingsMenu"],
             var dataSrc = $("#usersGrid").data("kendoGrid").dataSource;
 
             //set the available employees
-            var availableEmployees = usersSettings.employees.filter(function (employee){
+            var availableEmployees = usersSettings.employees.filter(function (employee) {
                 return !(employee.Id in usersSettings.linkedEmployees);
             });
 

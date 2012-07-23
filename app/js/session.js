@@ -2,8 +2,8 @@
 
 'use strict';
 
-define(['db/services'], function (dbservices) {
-    var session = {};
+define(['db/services', "lib/kendo.all"], function (dbservices) {
+    var session = new kendo.data.ObservableObject({});
 
     window.session = session;
 
@@ -11,11 +11,11 @@ define(['db/services'], function (dbservices) {
      * The selected role
      */
     session.getRole = function () {
-        return session._role;
+        return session.get("role");
     };
 
     session.setRole = function (role) {
-        session._role = role;
+        session.set("role", role);
 
         dbservices.setRoleId(role.id);
     };
@@ -24,7 +24,7 @@ define(['db/services'], function (dbservices) {
      * Gets the current session information
      * @param {function({Object})} callback Invoked with the config when it is loaded
      */
-    session.get = function (callback) {
+    session.load = function (callback) {
         //if the _config is already loaded return it
         if (session._data) {
             callback(session._data);

@@ -234,9 +234,7 @@ define(["developer", "tools"], function (developer, tools) {
     };
 
     // Get Employees.
-    services.getAllEmployeesForBusiness = function () {
-        services._getHttp('settings/GetAllEmployeesForBusiness');
-    };
+    services.getAllEmployeesForBusiness = services._getHttp('settings/GetAllEmployeesForBusiness', {}, false);
 
     /**
      * Authenticate the user.
