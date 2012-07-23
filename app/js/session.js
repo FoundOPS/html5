@@ -15,7 +15,9 @@ define(['db/services'], function (dbservices) {
     };
 
     session.setRole = function (role) {
-        return session._role = role;
+        session._role = role;
+
+        dbservices.setRoleId(role.id);
     };
 
     /**
@@ -32,14 +34,14 @@ define(['db/services'], function (dbservices) {
         //load the config
         dbservices.getSession(function (data) {
             session._data = data;
-            session._role = data.roles[0];
+            session.setRole(data.roles[0]);
 
             callback(session._data);
         });
     };
 
-    //for debugging when the API is turned off
-    //set static values set for config & selected role
+//    //for debugging when the API is turned off
+//    //set static values set for config & selected role
 //    session._data = {
 //        "name": "Jonathan Perl",
 //        "settingsUrl": "#view/personalSettings.html",

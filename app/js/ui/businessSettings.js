@@ -145,7 +145,7 @@ define(["db/services", "developer", "ui/notifications", "widgets/settingsMenu", 
         $('#businessImageUploadForm').attr("action", services.API_URL + "settings/UpdateBusinessImage?roleId=" + developer.GOTGREASE_ROLE_ID);
 
         //retrieve the settings and bind them to the form
-        services.getBusinessSettings(session.getRole().id, function (settings) {
+        services.getBusinessSettings(function (settings) {
             //set this so cancelChanges has a reference to the original settings
             businessSettings.settings = settings;
             businessSettings.viewModel.set("settings", settings);

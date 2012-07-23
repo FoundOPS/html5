@@ -6,7 +6,7 @@
 
 'use strict';
 
-define(['developer', 'tools'], function (developer, tools) {
+define(["developer", "tools"], function (developer, tools) {
     var services = {};
 
     /**
@@ -38,12 +38,19 @@ define(['developer', 'tools'], function (developer, tools) {
      */
     services.API_URL = apiUrl;
 
+    //functions to queue until after the role id is initially set
+    var roleIdFunctionQueue = [];
     /**
      * Set the current RoleId.
      * @param {string} The roleId.
      */
     services.setRoleId = function (roleId) {
         services.RoleId = roleId;
+
+        //invoke any function in the queue
+        for (var i in roleIdFunctionQueue) {
+            roleIdFunctionQueue[i]();
+        }
     };
 
     /**
@@ -64,31 +71,43 @@ define(['developer', 'tools'], function (developer, tools) {
         var getThenInvokeCallback = function (callback) {
             var params = opt_params || {};
 
-            //if opt_excludeRoleId was not set or true and the RoleId exists add it as a parameter
-            if (!opt_excludeRoleId && services.RoleId) {
+            var invokeAjax = function (params) {
+                var url = services.API_URL + queryString;
+
+                $.ajax({
+                    //must use JSONP because the javascript may be hosted on a different url than the api
+                    type: "GET",
+                    dataType: 'JSONP',
+                    url: url,
+                    data: params
+                }).success(function (response) {
+                        var convertedData = response;
+
+                        //if there is a converter, convert the data
+                        if (opt_convertItem) {
+                            convertedData = tools.convertArray(response, opt_convertItem);
+                        }
+
+                        //perform the callback function by passing the response data
+                        callback(convertedData);
+                    });
+            };
+
+            //if opt_excludeRoleId was not set add it as a parameter
+            if (!opt_excludeRoleId) {
+                //if the roleId is not loaded yet, add it to the roleId function queue
+                if (!services.RoleId) {
+                    roleIdFunctionQueue.push(function () {
+                        params.roleId = services.RoleId.toString();
+                        invokeAjax(params)
+                    });
+                    return;
+                }
+
                 params.roleId = services.RoleId.toString();
             }
 
-            var url = services.API_URL + queryString;
-
-            $.ajax({
-                //must use JSONP because the javascript may be hosted on a different url than the api
-                type: "GET",
-                dataType: 'JSONP',
-                url: url,
-                data: params
-            })
-                .success(function (response) {
-                    var convertedData = response;
-
-                    //if there is a converter, convert the data
-                    if (opt_convertItem) {
-                        convertedData = tools.convertArray(response, opt_convertItem);
-                    }
-
-                    //perform the callback function by passing the response data
-                    callback(convertedData);
-                });
+            invokeAjax(params);
         };
 
         return getThenInvokeCallback;
@@ -97,7 +116,7 @@ define(['developer', 'tools'], function (developer, tools) {
     /**
      * Get the current session for the user
      */
-    services.getSession = services._getHttp('settings/GetSession', {}, false);
+    services.getSession = services._getHttp('settings/GetSession', {}, true);
 
     /**
      * Get the current service provider's Routes.
@@ -161,7 +180,7 @@ define(['developer', 'tools'], function (developer, tools) {
      */
     services.updatePersonalSettings = function (settings) {
         return $.ajax({
-            url: services.API_URL + "settings/UpdatePersonalSettings?roleId=" + developer.GOTGREASE_ROLE_ID,
+            url: services.API_URL + "settings/UpdatePersonalSettings?roleId=" + services.RoleId,
             type: "POST",
             dataType: "json",
             contentType: 'application/json',
@@ -198,9 +217,7 @@ define(['developer', 'tools'], function (developer, tools) {
      * Get business settings
      * @param roleId The role to get the business settings for
      */
-    services.getBusinessSettings = function (roleId, callback) {
-        services._getHttp('settings/GetBusinessSettings', {roleId: roleId}, false)(callback);
-    };
+    services.getBusinessSettings = services._getHttp('settings/GetBusinessSettings', {}, false);
 
     /**
      * Updates businesssettings.
@@ -208,7 +225,7 @@ define(['developer', 'tools'], function (developer, tools) {
      */
     services.updateBusinessSettings = function (settings) {
         $.ajax({
-            url: services.API_URL + "settings/UpdateBusinessSettings?roleId=" + developer.GOTGREASE_ROLE_ID,
+            url: services.API_URL + "settings/UpdateBusinessSettings?roleId=" + services.RoleId,
             type: "POST",
             dataType: "json",
             contentType: 'application/json',
@@ -217,7 +234,9 @@ define(['developer', 'tools'], function (developer, tools) {
     };
 
     // Get Employees.
-    services.getAllEmployeesForBusiness = services._getHttp('settings/GetAllEmployeesForBusiness', {roleId: developer.GOTGREASE_ROLE_ID}, false);
+    services.getAllEmployeesForBusiness = function () {
+        services._getHttp('settings/GetAllEmployeesForBusiness');
+    };
 
     /**
      * Authenticate the user.
