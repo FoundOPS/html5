@@ -21,9 +21,6 @@ require(["containers/navigator", "silverlight", "session", "lib/kendo.all", "ui/
         //setup the navigator
         navigator = new Navigator(data);
         navigator.hideSearch();
-
-        //set the role
-        silverlight.updateRole();
     });
 
     //TODO make sectionSelected a navigator event
@@ -51,10 +48,26 @@ require(["containers/navigator", "silverlight", "session", "lib/kendo.all", "ui/
     }
 
     //TODO make roleSelected a navigator event
-    //whenever a role is changed, choose it in the silverlight app
+    //whenever a role is changed
+    //1) clear the previous views
+    //2) reload the view (if it is not silverlight)
+    //3) set the session's role
     $(document).on("roleSelected", function (e, role) {
+        //clear previous views
+        $('div[data-role=view]').each(function (i, elem) {
+            $(elem).remove();
+        });
+
+        //reload the current page if it is not on silverlight
+        var hash = location.hash;
+        if (hash !== "#silverlight") {
+            location.hash = "";
+            _.delay(function () {
+                location.hash = hash;
+            }, 200);
+        }
+
         session.setRole(role);
-        silverlight.updateRole();
     });
 
     //when the silverlight plugin loads hook into the silverlight click events, and hide the navigator popup

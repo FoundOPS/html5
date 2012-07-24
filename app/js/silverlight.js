@@ -43,6 +43,17 @@ define(['db/services', 'session', 'underscore'], function (dbservices, session) 
         _.delay(resizeContainers, 150);
     };
 
+    //Update the silverlight app's role to the session's selected role
+    var updateRole = function () {
+        try {
+            var selectedRole = session.getRole();
+            if (selectedRole) {
+                silverlight.plugin.navigationVM.ChangeRole(selectedRole.id);
+            }
+        } catch (err) {
+        }
+    };
+
     //if the section isn't silverlight, hide the silverlight control
     window.onhashchange = function () {
         if (!location || !location.hash) {
@@ -63,9 +74,6 @@ define(['db/services', 'session', 'underscore'], function (dbservices, session) 
 
     //region functions for the silverlight object
 
-    window.onSilverlightPluginLoaded = function (sender, args) {
-        silverlight.plugin = document.getElementById('silverlightPlugin').Content;
-    };
     window.onSilverlightError = function (sender, args) {
         var appSource = "";
         if (sender != null && sender != 0) {
@@ -118,7 +126,8 @@ define(['db/services', 'session', 'underscore'], function (dbservices, session) 
     //region functions only accessed by the silverlight application when it is loaded
 
     silverlight.onLoaded = function () {
-        silverlight.updateRole();
+        silverlight.plugin = document.getElementById('silverlightPlugin').Content;
+
         //if there is a current section, navigate to it
         if (currentSection) {
             silverlight.setSection(currentSection);
@@ -159,26 +168,17 @@ define(['db/services', 'session', 'underscore'], function (dbservices, session) 
         }
     };
 
-    /**
-     * Update the silverlight app's role to the session's selected role
-     * @param {{id: string}} role
-     */
-    silverlight.updateRole = function () {
-        try {
-
-            var selectedRole = session.getRole();
-            if (selectedRole) {
-                silverlight.plugin.navigationVM.ChangeRole(selectedRole.id);
-            }
-        } catch (err) {
-        }
-    };
-
 //#endregion
 
     hide();
     $(window).resize(resizeContainers);
     resizeContainers();
+    updateRole();
+    session.bind("change", function (e) {
+        if (e.field == "role") {
+            updateRole();
+        }
+    });
 
     return silverlight;
 });
