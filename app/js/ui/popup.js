@@ -2,9 +2,8 @@
     (function( $ ){
         $.fn.popup = function( options ) {
             // Create some defaults, extending them with any options that were provided
-            var settings = $.extend({}, options);
-            var popup = new Popup(this.selector);
-            return popup;
+            //var settings = $.extend({}, options);
+            return new Popup(this.selector);
         };
     })( jQuery );
 

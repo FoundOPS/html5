@@ -269,19 +269,28 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
             if ($(window).width() <= 800) {
                 sideBarDiv.css("width", "");
                 sideBarDiv.removeClass("hover");
+                if(sideBarDiv.hasClass("cover")){
+                    sideBarDiv.removeClass("cover");
+                    sideBarDiv.attr("style", "");
+                    $("#sideBarWrapper").attr("style", "");
+                    $("#sideBarInnerWrapper").attr("style", "");
+                }
+                $("#sideBarWrapper").removeAttr("style");
                 if (sideBarDiv.hasClass("expand")) {
                     sideBarDiv.removeClass("expand");
                     sideBarDiv.attr("style", "");
-                    $("#sideBarWrapper").attr("style", "");
+                    $("#sideBarInnerWrapper").attr("style", "");
                 }
                 if (!sideBarDiv.hasClass("hidden")) {
                     $(".iconShow").addClass('rotateIcon');
                 }
+                $(".iconExpand").removeClass("flip");
             } else if ($(window).width() > 800) {
                 if (sideBarDiv.hasClass("hidden")) {
                     sideBarDiv.removeClass("hidden");
                     sideBarDiv.attr("style", "");
                     $("#sideBarWrapper").attr("style", "");
+                    $("#sideBarInnerWrapper").attr("style", "");
                     //$(".iconShow").removeClass('rotateIcon');
                 }
                 if (sideBarDiv.hasClass("hover")) {
@@ -351,6 +360,7 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
                     sideBarDiv.removeClass("cover");
                 } else{
                     $("#sideBar").removeClass("hover");
+                    $("#sideBar").removeClass("expand");
                     coverWindow();
                 }
             }
@@ -413,7 +423,7 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
                     },
                     'fast'
                 );
-                $("#sideBarWrapperInner").data('jsp').reinitialise();
+                $("#sideBarInnerWrapper").data('jsp').reinitialise();
             } else {
                 sideBarDiv.stop(false, true).animate(
                     {

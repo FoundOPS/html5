@@ -325,7 +325,7 @@ zoom: 1;*/
 #sideBarInnerWrapper{
     position: relative;
     height: 100%;
-    width: 100%;
+    width: 200px;
     border-right: @borderSize solid @darkGrey;
     z-index: 1;
 }
@@ -567,6 +567,7 @@ zoom: 1;*/
         width: @sideBarExpandedWidth;
 
         box-shadow: 0px 0px 10px #888;
+        padding: 0;
     }
 
     #sideBarWrapper {
@@ -580,6 +581,10 @@ zoom: 1;*/
         box-shadow: none;
     }
 
+    #sideBarInnerWrapper{
+        width: auto;
+    }
+
     #slideMenu {
         display: none;
     }
@@ -588,6 +593,10 @@ zoom: 1;*/
         top: @navHeight;
         background: @blue;
         margin-right: 0;
+    }
+
+    #coverWindowButton{
+        display: none;
     }
 }
 
