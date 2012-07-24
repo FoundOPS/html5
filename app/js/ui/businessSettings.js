@@ -6,31 +6,35 @@
 
 "use strict";
 
-define(["db/services", "developer", "ui/notifications", "widgets/settingsMenu", "lib/jquery-ui-1.8.21.core.min",
-    "lib/jquery.FileReader", "lib/swfobject"], function (services, developer, notifications) {
+define(["db/services", "developer", "ui/notifications", "session", "widgets/settingsMenu", "lib/jquery-ui-1.8.21.core.min",
+    "lib/jquery.FileReader", "lib/swfobject"], function (dbServices, developer, notifications, session) {
     var businessSettings = {};
 
     //keep track of if a new image has been selected
-    businessSettings.newImage = false;
+    var newImage = false;
 
     businessSettings.viewModel = kendo.observable({
         saveChanges: function () {
             if (businessSettings.validator.validate()) {
-                services.updateBusinessSettings(this.get("settings"))
-                    .success(function (data, textStatus, jqXHR) {
-                        notifications.success(jqXHR);
-                    }).error(function (data, textStatus, jqXHR) {
-                        notifications.error(jqXHR);
-                    });
+                dbServices.updateBusinessSettings(this.get("settings"))
+//                    .success(function (data, textStatus, jqXHR) {
+//                        notifications.success(jqXHR);
+//                    }).error(function (data, textStatus, jqXHR) {
+//                        notifications.error(jqXHR);
+//                    });
             }
             //check if image has been changed
-            if (businessSettings.newImage) {
+            if (newImage) {
                 $("#businessImageUploadForm").submit();
             }
         },
-        cancelChanges: function () {
+        cancelChanges: function (e) {
             this.set("settings", businessSettings.settings);
             businessSettings.resize();
+            if (!e.data.settings.ImageUrl){
+                $("#businessCropbox").css("visibility", "hidden").css("width", "0px").css("height", "0px")
+                    .css("margin-left", "0px");
+            }
         }
     });
 
@@ -60,30 +64,8 @@ define(["db/services", "developer", "ui/notifications", "widgets/settingsMenu", 
         cropbox.css("marginLeft", margin + "px");
     };
 
-    businessSettings.fixImageBtnPosition = function () {
-        businessSettings.resize();
-
-        //if the Flash FileAPIProxy is being used, move the swf on top the moved input button
-        if (window.FileAPIProxy !== null) {
-            var input = $("#businessImageUpload");
-            window.FileAPIProxy.container
-                .height(input.outerHeight())
-                .width(input.outerWidth())
-                .position({of: input});
-        }
-    };
-
     businessSettings.initialize = function () {
         businessSettings.validator = $("#businessForm").kendoValidator().data("kendoValidator");
-
-        //TODO:
-//        $("#businessImageUpload").on("mouseover", function(){
-//            $(".upload").css("background-color", "#cccccc").css("border-color", "#aaaaaa");
-//        });
-//
-//        $("#businessImageUpload").on("mouseout", function(){
-//            $(".upload").css("background-color", "#e3e3e3").css("border-color", "#c5c5c5");
-//        });
 
         //setup menu
         var menu = $("#business .settingsMenu");
@@ -104,22 +86,18 @@ define(["db/services", "developer", "ui/notifications", "widgets/settingsMenu", 
             $('#business #imageData').val(imageData);
 
             //show the image
-            $("#business .upload").css("margin-left", "185px").css("margin-bottom", "-15px");
             $("#businessCropbox").css("visibility", "visible").css("width", "auto").css("height", "auto");
-            $("#businessImageUploadForm").css("margin-top", "0");
-            $("#businessImageUpload").css("margin-top", "0");
 
             //set so that the save changes event will also save the image
-            businessSettings.newImage = true;
-
-            businessSettings.fixImageBtnPosition();
+            newImage = true;
+            businessSettings.resize();
         };
 
         //setup the FileReader on the imageUpload button
         //this will enable the flash FileReader polyfill from https://github.com/Jahdrien/FileReader
-        $("#businessImageUpload").fileReader();
+        $("#businessImageUploadButton").fileReader();
 
-        $("#businessImageUpload").on('change', function (evt) {
+        $("#businessImageUploadButton").on('change', function (evt) {
             var reader = new FileReader();
             reader.onload = fileLoaded;
 
@@ -141,23 +119,40 @@ define(["db/services", "developer", "ui/notifications", "widgets/settingsMenu", 
             $('#business #imageFileName').val(file.name);
         });
 
-        //set the form action to the update image url
-        $('#businessImageUploadForm').attr("action", services.API_URL + "settings/UpdateBusinessImage?roleId=" + developer.GOTGREASE_ROLE_ID);
+        var setupDataSourceUrls = function () {
+            var roleId = session.get("role.id");
+            if (!roleId) {
+                return;
+            }
+            //setup the form
+            $('#businessImageUploadForm').ajaxForm({
+                //from http://stackoverflow.com/questions/8151138/ie-jquery-form-multipart-json-response-ie-tries-to-download-response
+                dataType: "text",
+                contentType: "multipart/form-data",
+                url: dbServices.API_URL + "settings/UpdateBusinessImage?roleId=" + roleId,
+                success: function (response) {
+                    var url = response.replace(/['"]/g,'');
+                    businessSettings.viewModel.get("settings").set("ImageUrl", url);
+                }});
+        };
+        session.bind("change", function (e) {
+            if (e.field == "role") {
+                setupDataSourceUrls();
+            }
+        });
 
         //retrieve the settings and bind them to the form
-        services.getBusinessSettings(function (settings) {
+        dbServices.getBusinessSettings(function (settings) {
             //set this so cancelChanges has a reference to the original settings
             businessSettings.settings = settings;
             businessSettings.viewModel.set("settings", settings);
             kendo.bind($("#business"), businessSettings.viewModel);
-            if(!settings.ImageUrl){
-                $("#business .upload").css("margin-left", "181px").css("margin-bottom", "-15px");
+            if (!settings.ImageUrl){
                 $("#businessCropbox").css("visibility", "hidden").css("width", "0px").css("height", "0px");
-                $("#businessImageUploadForm").css("margin-top", "-22px");
-                $("#businessImageUpload").css("margin-top", "5px");
             }
         });
     };
 
+    //set businessSettings to a global function, so the functions are accessible from the HTML element
     window.businessSettings = businessSettings;
 });
