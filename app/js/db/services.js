@@ -225,7 +225,7 @@ define(["developer", "tools"], function (developer, tools) {
      * @param {(Array.<Object>)} settings The updated settings.
      */
     services.updateBusinessSettings = function (settings) {
-        $.ajax({
+       return $.ajax({
             url: services.API_URL + "settings/UpdateBusinessSettings?roleId=" + services.RoleId,
             type: "POST",
             dataType: "json",

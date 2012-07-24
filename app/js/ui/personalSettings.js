@@ -23,14 +23,19 @@ define(["db/services", "ui/notifications", "widgets/settingsMenu", "lib/jquery-u
                         notifications.error(jqXHR);
                     });
             }
-            //check if image has been changed
-            if (newImage) {
+            //check if image has been changed and changes have not been canceled
+            if (newImage && $("#imageData")[0].value != "") {
                 $("#personalImageUploadForm").submit();
             }
         },
         cancelChanges: function (e) {
             personalSettings.viewModel.set("settings", personalSettings.settings);
-            personalSettings.resize();
+            //clear the new image data
+            $("#imageData")[0].value = "";
+            $("#personalCropbox").css("width", personalSettings.imageWidth);
+            $("#personalCropbox").css("height", personalSettings.imageHeight);
+            personalSettings.resizeImage("#personalCropbox");
+            //if there is no image, hide the container
             if (!e.data.settings.ImageUrl){
                 $("#personalCropbox").css("visibility", "hidden").css("width", "0px").css("height", "0px")
                     .css("margin-left", "0px");
@@ -39,8 +44,8 @@ define(["db/services", "ui/notifications", "widgets/settingsMenu", "lib/jquery-u
     });
 
     //make sure the image fits into desired area
-    personalSettings.resize = function () {
-        var cropbox = $("#personalCropbox");
+    personalSettings.resizeImage = function (element) {
+        var cropbox = $(element);
         //get the original dimensions of the image
         var width = cropbox[0].width;
         var height = cropbox[0].height;
@@ -53,15 +58,20 @@ define(["db/services", "ui/notifications", "widgets/settingsMenu", "lib/jquery-u
         var newW = ratio * width;
         var newH = ratio * height;
 
-        //set the largest dimension of the image to be the desired size
-        if (width > height) {
-            cropbox.attr("width", newW);
-        } else {
-            cropbox.attr("height", newH);
-        }
+        //set the final sizes
+        cropbox.css("width", newW + "px");
+        cropbox.css("height", newH + "px");
         //center the image
         var margin = (500 - newW) / 2;
         cropbox.css("marginLeft", margin + "px");
+    };
+
+    personalSettings.onImageLoad = function () {
+        personalSettings.resizeImage("#personalCropbox");
+        if(!newImage){
+            personalSettings.imageWidth = $("#personalCropbox")[0].width;
+            personalSettings.imageHeight = $("#personalCropbox")[0].height;
+        }
     };
 
     personalSettings.initialize = function () {
@@ -91,7 +101,7 @@ define(["db/services", "ui/notifications", "widgets/settingsMenu", "lib/jquery-u
 
             //set so that the save changes event will also save the image
             newImage = true;
-            personalSettings.resize();
+            personalSettings.resizeImage("#personalCropbox");
         };
 
         //setup the FileReader on the imageUpload button
@@ -118,6 +128,7 @@ define(["db/services", "ui/notifications", "widgets/settingsMenu", "lib/jquery-u
             reader.readAsDataURL(file);
             //set the form value
             $('#personal #imageFileName').val(file.name);
+            personalSettings.resizeImage("#personalCropbox");
         });
 
         //setup the form
@@ -137,6 +148,7 @@ define(["db/services", "ui/notifications", "widgets/settingsMenu", "lib/jquery-u
             personalSettings.settings = settings;
             personalSettings.viewModel.set("settings", settings);
             kendo.bind($("#personal"), personalSettings.viewModel);
+            //if there is no image, hide the container
             if (!settings.ImageUrl) {
                 $("#personalCropbox").css("visibility", "hidden").css("width", "0px").css("height", "0px");
             }
@@ -145,4 +157,6 @@ define(["db/services", "ui/notifications", "widgets/settingsMenu", "lib/jquery-u
 
     //set personalSettings to a global function, so the functions are accessible from the HTML element
     window.personalSettings = personalSettings;
+
+    return personalSettings;
 });

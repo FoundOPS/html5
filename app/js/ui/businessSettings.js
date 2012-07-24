@@ -6,8 +6,8 @@
 
 "use strict";
 
-define(["db/services", "developer", "ui/notifications", "session", "widgets/settingsMenu", "lib/jquery-ui-1.8.21.core.min",
-    "lib/jquery.FileReader", "lib/swfobject"], function (dbServices, developer, notifications, session) {
+define(["db/services", "developer", "ui/notifications", "session", "ui/personalSettings", "widgets/settingsMenu", "lib/jquery-ui-1.8.21.core.min",
+    "lib/jquery.FileReader", "lib/swfobject"], function (dbServices, developer, notifications, session, personalSettings) {
     var businessSettings = {};
 
     //keep track of if a new image has been selected
@@ -17,20 +17,25 @@ define(["db/services", "developer", "ui/notifications", "session", "widgets/sett
         saveChanges: function () {
             if (businessSettings.validator.validate()) {
                 dbServices.updateBusinessSettings(this.get("settings"))
-//                    .success(function (data, textStatus, jqXHR) {
-//                        notifications.success(jqXHR);
-//                    }).error(function (data, textStatus, jqXHR) {
-//                        notifications.error(jqXHR);
-//                    });
+                    .success(function (data, textStatus, jqXHR) {
+                        notifications.success(jqXHR);
+                    }).error(function (data, textStatus, jqXHR) {
+                        notifications.error(jqXHR);
+                    });
             }
-            //check if image has been changed
-            if (newImage) {
+            //check if image has been changed and changes have not been canceled
+            if (newImage && $("#imageData")[0].value != "") {
                 $("#businessImageUploadForm").submit();
             }
         },
         cancelChanges: function (e) {
             this.set("settings", businessSettings.settings);
-            businessSettings.resize();
+            //clear the new image data
+            $("#imageData")[0].value = "";
+            $("#businessCropbox").css("width", businessSettings.imageWidth);
+            $("#businessCropbox").css("height", businessSettings.imageHeight);
+            personalSettings.resizeImage("#businessCropbox");
+            //if there is no image, hide the container
             if (!e.data.settings.ImageUrl){
                 $("#businessCropbox").css("visibility", "hidden").css("width", "0px").css("height", "0px")
                     .css("margin-left", "0px");
@@ -38,30 +43,12 @@ define(["db/services", "developer", "ui/notifications", "session", "widgets/sett
         }
     });
 
-    //make sure the image fits into desired area
-    businessSettings.resize = function () {
-        var cropbox = $("#businessCropbox");
-        //get the original dimensions of the image
-        var width = cropbox[0].width;
-        var height = cropbox[0].height;
-        //get the ratio for each dimension
-        var w = 200 / width;
-        var h = 200 / height;
-        //find the lowest ratio(will be the shortest dimension)
-        var ratio = Math.min(w, h);
-        //use the ratio to set the new dimensions
-        var newW = ratio * width;
-        var newH = ratio * height;
-
-        //set the largest dimension of the image to be the desired size
-        if (width > height) {
-            cropbox.attr("width", newW);
-        } else {
-            cropbox.attr("height", newH);
+    businessSettings.onImageLoad = function () {
+        personalSettings.resizeImage("#businessCropbox");
+        if(!newImage){
+            businessSettings.imageWidth = $("#businessCropbox")[0].width;
+            businessSettings.imageHeight = $("#businessCropbox")[0].height;
         }
-        //center the image
-        var margin = (500 - newW) / 2;
-        cropbox.css("marginLeft", margin + "px");
     };
 
     businessSettings.initialize = function () {
@@ -90,7 +77,7 @@ define(["db/services", "developer", "ui/notifications", "session", "widgets/sett
 
             //set so that the save changes event will also save the image
             newImage = true;
-            businessSettings.resize();
+            personalSettings.resizeImage("#businessCropbox");
         };
 
         //setup the FileReader on the imageUpload button
@@ -117,6 +104,7 @@ define(["db/services", "developer", "ui/notifications", "session", "widgets/sett
             reader.readAsDataURL(file);
             //set the form value
             $('#business #imageFileName').val(file.name);
+            personalSettings.resizeImage("#businessCropbox");
         });
 
         var setupDataSourceUrls = function () {
@@ -135,6 +123,7 @@ define(["db/services", "developer", "ui/notifications", "session", "widgets/sett
                     businessSettings.viewModel.get("settings").set("ImageUrl", url);
                 }});
         };
+        //update the form url after the role has been set
         session.bind("change", function (e) {
             if (e.field == "role") {
                 setupDataSourceUrls();
@@ -147,6 +136,7 @@ define(["db/services", "developer", "ui/notifications", "session", "widgets/sett
             businessSettings.settings = settings;
             businessSettings.viewModel.set("settings", settings);
             kendo.bind($("#business"), businessSettings.viewModel);
+            //if there is no image, hide the container
             if (!settings.ImageUrl){
                 $("#businessCropbox").css("visibility", "hidden").css("width", "0px").css("height", "0px");
             }

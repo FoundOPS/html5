@@ -86,6 +86,9 @@ require(["containers/navigator", "silverlight", "session", "lib/kendo.all", "ui/
         application.navigate("view/businessSettings.html");
     };
     window.navigateToUsers = function () {
+        if($(".km-touch-container")){
+            $(".km-touch-container").remove();
+        }
         application.navigate("view/usersSettings.html");
     };
     window.navigateToChangePassword = function () {

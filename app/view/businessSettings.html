@@ -12,7 +12,7 @@
             </table>
         </form>
         <h2 class="middle">Your Logo</h2>
-        <img id="businessCropbox" data-bind="attr: {src: settings.ImageUrl}" onload="businessSettings.resize()" alt=""/>
+        <img id="businessCropbox" data-bind="attr: {src: settings.ImageUrl}" onload="businessSettings.onImageLoad()" alt=""/>
         <a id="businessImageUploadButton" class="k-button k-button-icontext"><span class="k-icon k-image"></span>Upload Image</a>
         <form id="businessImageUploadForm" enctype="multipart/form-data" method="POST">
             <input type="hidden" id="imageFileName" name="imageFileName"/>
