@@ -6,8 +6,8 @@
 
 "use strict";
 
-define(["db/services", "developer", "ui/notifications", "session", "ui/personalSettings", "widgets/settingsMenu", "lib/jquery-ui-1.8.21.core.min",
-    "lib/jquery.FileReader", "lib/swfobject"], function (dbServices, developer, notifications, session, personalSettings) {
+define(["db/services", "developer", "ui/notifications", "session", "tools", "widgets/settingsMenu", "lib/jquery-ui-1.8.21.core.min",
+    "lib/jquery.FileReader", "lib/swfobject"], function (dbServices, developer, notifications, session, tools) {
     var businessSettings = {};
 
     //keep track of if a new image has been selected
@@ -16,12 +16,7 @@ define(["db/services", "developer", "ui/notifications", "session", "ui/personalS
     businessSettings.viewModel = kendo.observable({
         saveChanges: function () {
             if (businessSettings.validator.validate()) {
-                dbServices.updateBusinessSettings(this.get("settings"))
-                    .success(function (data, textStatus, jqXHR) {
-                        notifications.success(jqXHR);
-                    }).error(function (data, textStatus, jqXHR) {
-                        notifications.error(jqXHR);
-                    });
+                dbServices.updateBusinessSettings(this.get("settings"));
             }
             //check if image has been changed and changes have not been canceled
             if (newImage && $("#imageData")[0].value != "") {
@@ -34,9 +29,10 @@ define(["db/services", "developer", "ui/notifications", "session", "ui/personalS
             $("#imageData")[0].value = "";
             $("#businessCropbox").css("width", businessSettings.imageWidth);
             $("#businessCropbox").css("height", businessSettings.imageHeight);
-            personalSettings.resizeImage("#businessCropbox");
+            tools.resizeImage("#businessCropbox", 200, 500);
+
             //if there is no image, hide the container
-            if (!e.data.settings.ImageUrl){
+            if (!e.data.settings.ImageUrl) {
                 $("#businessCropbox").css("visibility", "hidden").css("width", "0px").css("height", "0px")
                     .css("margin-left", "0px");
             }
@@ -44,8 +40,9 @@ define(["db/services", "developer", "ui/notifications", "session", "ui/personalS
     });
 
     businessSettings.onImageLoad = function () {
-        personalSettings.resizeImage("#businessCropbox");
-        if(!newImage){
+        tools.resizeImage("#businessCropbox", 200, 500);
+
+        if (!newImage) {
             businessSettings.imageWidth = $("#businessCropbox")[0].width;
             businessSettings.imageHeight = $("#businessCropbox")[0].height;
         }
@@ -77,7 +74,8 @@ define(["db/services", "developer", "ui/notifications", "session", "ui/personalS
 
             //set so that the save changes event will also save the image
             newImage = true;
-            personalSettings.resizeImage("#businessCropbox");
+
+            tools.resizeImage("#businessCropbox", 200, 500);
         };
 
         //setup the FileReader on the imageUpload button
@@ -104,7 +102,7 @@ define(["db/services", "developer", "ui/notifications", "session", "ui/personalS
             reader.readAsDataURL(file);
             //set the form value
             $('#business #imageFileName').val(file.name);
-            personalSettings.resizeImage("#businessCropbox");
+            tools.resizeImage("#businessCropbox", 200, 500);
         });
 
         var setupDataSourceUrls = function () {
@@ -119,7 +117,7 @@ define(["db/services", "developer", "ui/notifications", "session", "ui/personalS
                 contentType: "multipart/form-data",
                 url: dbServices.API_URL + "settings/UpdateBusinessImage?roleId=" + roleId,
                 success: function (response) {
-                    var url = response.replace(/['"]/g,'');
+                    var url = response.replace(/['"]/g, '');
                     businessSettings.viewModel.get("settings").set("ImageUrl", url);
                 }});
         };
@@ -137,7 +135,7 @@ define(["db/services", "developer", "ui/notifications", "session", "ui/personalS
             businessSettings.viewModel.set("settings", settings);
             kendo.bind($("#business"), businessSettings.viewModel);
             //if there is no image, hide the container
-            if (!settings.ImageUrl){
+            if (!settings.ImageUrl) {
                 $("#businessCropbox").css("visibility", "hidden").css("width", "0px").css("height", "0px");
             }
         });

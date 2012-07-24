@@ -6,8 +6,8 @@
 
 "use strict";
 
-define(["db/services", "ui/notifications", "widgets/settingsMenu", "lib/jquery-ui-1.8.21.core.min",
-    "lib/jquery.FileReader", "lib/swfobject", "lib/jquery.form"], function (dbServices, notifications) {
+define(["db/services", "ui/notifications", "tools", "widgets/settingsMenu", "lib/jquery-ui-1.8.21.core.min",
+    "lib/jquery.FileReader", "lib/swfobject", "lib/jquery.form"], function (dbServices, notifications, tools) {
     var personalSettings = {};
 
     //keep track of if a new image has been selected
@@ -43,31 +43,8 @@ define(["db/services", "ui/notifications", "widgets/settingsMenu", "lib/jquery-u
         }
     });
 
-    //make sure the image fits into desired area
-    personalSettings.resizeImage = function (element) {
-        var cropbox = $(element);
-        //get the original dimensions of the image
-        var width = cropbox[0].width;
-        var height = cropbox[0].height;
-        //get the ratio for each dimension
-        var w = 200 / width;
-        var h = 200 / height;
-        //find the lowest ratio(will be the shortest dimension)
-        var ratio = Math.min(w, h);
-        //use the ratio to set the new dimensions
-        var newW = ratio * width;
-        var newH = ratio * height;
-
-        //set the final sizes
-        cropbox.css("width", newW + "px");
-        cropbox.css("height", newH + "px");
-        //center the image
-        var margin = (500 - newW) / 2;
-        cropbox.css("marginLeft", margin + "px");
-    };
-
     personalSettings.onImageLoad = function () {
-        personalSettings.resizeImage("#personalCropbox");
+        tools.resizeImage("#personalCropbox", 200, 500);
         if(!newImage){
             personalSettings.imageWidth = $("#personalCropbox")[0].width;
             personalSettings.imageHeight = $("#personalCropbox")[0].height;
@@ -101,7 +78,7 @@ define(["db/services", "ui/notifications", "widgets/settingsMenu", "lib/jquery-u
 
             //set so that the save changes event will also save the image
             newImage = true;
-            personalSettings.resizeImage("#personalCropbox");
+            tools.resizeImage("#personalCropbox", 200, 500);
         };
 
         //setup the FileReader on the imageUpload button
@@ -128,7 +105,7 @@ define(["db/services", "ui/notifications", "widgets/settingsMenu", "lib/jquery-u
             reader.readAsDataURL(file);
             //set the form value
             $('#personal #imageFileName').val(file.name);
-            personalSettings.resizeImage("#personalCropbox");
+            tools.resizeImage("#personalCropbox", 200, 500);
         });
 
         //setup the form

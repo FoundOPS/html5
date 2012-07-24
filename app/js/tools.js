@@ -155,5 +155,34 @@ define(['underscore', 'developer'], function (_, developer) {
         return this.values[valueIndex];
     };
 
+    /**
+     * Resize an image using the proper ratio to have no dimension larger than maxSize
+     * Then center the image based on the parent container's width
+     * @param element The name of the element
+     * @param {number} maxSize
+     * @param {number} containerWidth
+     */
+    tools.resizeImage = function (element, maxSize, containerWidth) {
+        var imageDiv = $(element);
+        //get the original dimensions of the image
+        var width = imageDiv[0].width;
+        var height = imageDiv[0].height;
+        //get the ratio for each dimension
+        var w = maxSize / width;
+        var h = maxSize / height;
+        //find the lowest ratio(will be the shortest dimension)
+        var ratio = Math.min(w, h);
+        //use the ratio to set the new dimensions
+        var newW = ratio * width;
+        var newH = ratio * height;
+
+        //set the final sizes
+        imageDiv.css("width", newW + "px");
+        imageDiv.css("height", newH + "px");
+        //center the image
+        var margin = (containerWidth - newW) / 2;
+        imageDiv.css("marginLeft", margin + "px");
+    };
+
     return tools;
 });

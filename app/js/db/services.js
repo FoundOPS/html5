@@ -225,13 +225,14 @@ define(["developer", "tools", "ui/notifications"], function (developer, tools, n
      * @param {(Array.<Object>)} settings The updated settings.
      */
     services.updateBusinessSettings = function (settings) {
-       return $.ajax({
-            url: services.API_URL + "settings/UpdateBusinessSettings?roleId=" + services.RoleId,
-            type: "POST",
-            dataType: "json",
-            contentType: 'application/json',
-            data: JSON.stringify(settings)
-        });
+        return notifications.linkNotification(
+            $.ajax({
+                url: services.API_URL + "settings/UpdateBusinessSettings?roleId=" + services.RoleId,
+                type: "POST",
+                dataType: "json",
+                contentType: 'application/json',
+                data: JSON.stringify(settings)
+            }));
     };
 
     // Get Employees.

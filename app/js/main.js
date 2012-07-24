@@ -105,7 +105,6 @@ require(["containers/navigator", "silverlight", "session", "lib/kendo.all", "ui/
         application.navigate("view/changePassword.html");
     };
 
-
     //set the height to make sure the horizontal scrollbar is on the bottom
     var setHeight = function () {
         var height = $(window).height() - 45;
