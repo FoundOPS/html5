@@ -1,10 +1,10 @@
 define(['lib/noty'], function(){
     var notifications = {};
-    var succesText = "Changes Saved";
+    var successText = "Changes Saved";
     var errorText = "Error - Your Changes May Not Have Been Saved";
 
     notifications.success = function(code){
-        var text = succesText;
+        var text = successText;
         $.noty({
             type : 'success',
             layout : 'topCenter',
