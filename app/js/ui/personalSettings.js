@@ -16,12 +16,7 @@ define(["db/services", "ui/notifications", "tools", "widgets/settingsMenu", "lib
     personalSettings.viewModel = kendo.observable({
         saveChanges: function () {
             if (personalSettings.validator.validate()) {
-                dbServices.updatePersonalSettings(this.get("settings"))
-                    .success(function (data, textStatus, jqXHR) {
-                        notifications.success(jqXHR);
-                    }).error(function (data, textStatus, jqXHR) {
-                        notifications.error(jqXHR);
-                    });
+                dbServices.updatePersonalSettings(this.get("settings"));
             }
             //check if image has been changed and changes have not been canceled
             if (newImage && $("#imageData")[0].value != "") {

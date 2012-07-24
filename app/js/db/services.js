@@ -180,13 +180,14 @@ define(["developer", "tools", "ui/notifications"], function (developer, tools, n
      * @param {!function(Array.<Object>)} settings The loaded settings.
      */
     services.updatePersonalSettings = function (settings) {
-        return $.ajax({
-            url: services.API_URL + "settings/UpdatePersonalSettings?roleId=" + services.RoleId,
-            type: "POST",
-            dataType: "json",
-            contentType: 'application/json',
-            data: JSON.stringify(settings)
-        });
+        return notifications.linkNotification(
+            $.ajax({
+                url: services.API_URL + "settings/UpdatePersonalSettings?roleId=" + services.RoleId,
+                type: "POST",
+                dataType: "json",
+                contentType: 'application/json',
+                data: JSON.stringify(settings)
+            }));
     };
 
     /**
@@ -195,10 +196,11 @@ define(["developer", "tools", "ui/notifications"], function (developer, tools, n
      * @param {string} confirmPass.
      */
     services.createPassword = function (newPass, confirmPass) {
-        $.ajax({
-            url: services.API_URL + "settings/CreatePassword?newPass=" + newPass + "&confirmPass=" + confirmPass,
-            type: "POST"
-        });
+        return notifications.linkNotification(
+            $.ajax({
+                url: services.API_URL + "settings/CreatePassword?newPass=" + newPass + "&confirmPass=" + confirmPass,
+                type: "POST"
+            }));
     };
 
     /**
@@ -208,10 +210,11 @@ define(["developer", "tools", "ui/notifications"], function (developer, tools, n
      * @param {string} confirmPass.
      */
     services.updatePassword = function (oldPass, newPass, confirmPass) {
-        $.ajax({
-            url: services.API_URL + "settings/UpdatePassword?oldPass=" + oldPass + "&newPass=" + newPass + "&confirmPass=" + confirmPass,
-            type: "POST"
-        });
+        return notifications.linkNotification(
+            $.ajax({
+                url: services.API_URL + "settings/UpdatePassword?oldPass=" + oldPass + "&newPass=" + newPass + "&confirmPass=" + confirmPass,
+                type: "POST"
+            }));
     };
 
     /**

@@ -6,19 +6,14 @@
 
 "use strict";
 
-define(["db/services", "ui/notifications", "widgets/settingsMenu"], function (services, notifications) {
+define(["db/services", "widgets/settingsMenu"], function (services) {
     var createPassword = {};
 
-    createPassword.save = function (){
+    createPassword.save = function () {
         var newPass = $("#createNew")[0].value;
         var confirmPass = $("#createConfirm")[0].value;
-        if(createPassword.validator.validate){
-            services.createPassword(newPass, confirmPass)
-                .success(function (data, textStatus, jqXHR) {
-                    notifications.success(jqXHR);
-                }).error(function (data, textStatus, jqXHR) {
-                    notifications.error(jqXHR);
-                });
+        if (createPassword.validator.validate) {
+            services.createPassword(newPass, confirmPass);
             $("#createNew")[0].value = "";
             $("#createConfirm")[0].value = "";
         }
@@ -32,7 +27,7 @@ define(["db/services", "ui/notifications", "widgets/settingsMenu"], function (se
 
         createPassword.validator = $("#createPassForm").kendoValidator({
             rules: {
-                custom: function(input){
+                custom: function (input) {
                     return (input.is("[name=createConfirm]") && input.val() === $("#createNew")[0].value) || !(input.is("[name=createConfirm]"))
                 }
             },
