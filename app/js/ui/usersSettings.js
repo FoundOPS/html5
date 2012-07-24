@@ -23,7 +23,7 @@ define(["developer", "db/services", "session", "ui/notifications", "widgets/sett
         });
     };
 
-    //the datasource for the Linked Employee drop down on the edit user poup
+    //the datasource for the Linked Employee drop down on the edit user popup
     usersSettings.availableEmployeesDataSource = new kendo.data.DataSource({});
 
     //endregion
@@ -225,6 +225,7 @@ define(["developer", "db/services", "session", "ui/notifications", "widgets/sett
             }
         });
 
+        //add a popup to the edit and delete buttons
         $(".k-grid-edit").each(function () {
             $(this).attr("title", "Edit");
         });
@@ -296,11 +297,9 @@ define(["developer", "db/services", "session", "ui/notifications", "widgets/sett
                 }
             ]
         });
-
-//endregion
     };
 
-    //#endregion
+    //endregion
 
     usersSettings.initialize = function () {
         //get the list of employees
