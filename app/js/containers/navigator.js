@@ -302,10 +302,9 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
 
         //TODO: Set max and min values at top of function.
         var slideMenuOpen = function () {
-            console.log("Hello");
             $(" #sideBarInnerWrapper, #sideBarWrapper, #sideBar, #sideBarWrapper .jspContainer")
                 .stop(true, false)
-                .animate({width: '200px'}, 'fast');
+                .animate({width: '159px'}, 'fast');
             $(".iconExpand").addClass("flip");
         };
 
@@ -313,7 +312,7 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
             //clearTimeout(slideMenuTimeout);
             $("#sideBar, #sideBarWrapper, #sideBarWrapper .jspContainer, #sideBarInnerWrapper")
                 .stop(true, false)
-                .animate({width: '55px'}, 'fast');
+                .animate({width: '55px'}, 350); //TODO: Figure out why fast causes leftover artifacts/redraw problems.
             $(".iconExpand").removeClass("flip");
         };
 
