@@ -45,11 +45,24 @@ define(["jquery", "session", "lib/kendo.all"], function ($, session) {
                 businessLi.removeClass('active');
             }
 
-            //Show all settings if user is admin
-//            if (session._role.type == "Administrator") {
-                businessLi.css("display", "block");
-                usersLi.css("display", "block");
-//            }
+            var adjustForRole = function () {
+                var role = session.getRole();
+                if (!role || role.type != "Administrator") {
+                    businessLi.css("display", "none");
+                    usersLi.css("display", "none");
+                } else {
+                    //Show all settings if user is admin
+                    businessLi.css("display", "block");
+                    usersLi.css("display", "block");
+                }
+            };
+
+            session.bind("change", function (e) {
+                if (e.field == "role") {
+                    adjustForRole();
+                }
+            });
+            adjustForRole();
 
             this.element.append(_menu);
         },
