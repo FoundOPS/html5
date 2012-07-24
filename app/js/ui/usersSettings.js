@@ -7,9 +7,7 @@
 "use strict";
 
 define(["developer", "db/services", "session", "ui/notifications", "widgets/settingsMenu"], function (developer, dbServices, session, notifications) {
-    var usersSettings = {}, usersDataSource;
-
-    //region Public
+    var usersSettings = {}, usersDataSource, linkedEmployees;
 
     //on add and edit, select a linked employee if the name matches the name in the form
     usersSettings.matchEmployee = function () {
@@ -25,8 +23,6 @@ define(["developer", "db/services", "session", "ui/notifications", "widgets/sett
 
     //the datasource for the Linked Employee drop down on the edit user popup
     usersSettings.availableEmployeesDataSource = new kendo.data.DataSource({});
-
-    //endregion
 
     //region Setup users dataSource
 
@@ -58,6 +54,7 @@ define(["developer", "db/services", "session", "ui/notifications", "widgets/sett
         Employee: {
             defaultValue: ""
         }};
+
     usersDataSource = new kendo.data.DataSource({
         transport: {
             read: {
@@ -87,6 +84,15 @@ define(["developer", "db/services", "session", "ui/notifications", "widgets/sett
                 id: "Id",
                 fields: fields
             }
+        },
+        change: function (e) {
+            linkedEmployees = {};
+
+            _.each(e.items, function (obj) {
+                if (obj.Employee) {
+                    linkedEmployees[obj.Employee.LinkedUserAccountId] = obj;
+                }
+            });
         }
     });
     dbServices.hookupDefaultComplete(usersDataSource);
@@ -112,29 +118,12 @@ define(["developer", "db/services", "session", "ui/notifications", "widgets/sett
 
     //endregion
 
-    //region Add New User
-
-    var selectDefaultEmployee = function () {
-        var dropDownList = $("#Employee").data("kendoDropDownList");
-
-        if ($("#Role")[0].value === "Mobile") {
-            //if the role is mobile, set the default linked employee to "None"
-            dropDownList.select(function (dataItem) {
-                return dataItem.DisplayName === "None ";
-            });
-        } else {
-            //if the role is admin or regular, set the default linked employee to "Create New"
-            dropDownList.select(function (dataItem) {
-                return dataItem.DisplayName === "Create New";
-            });
-        }
-    };
-
+    //sets up the add new user popup
     var setupAddNewUser = function () {
         $("#addUser").on("click", function () {
-            //set the available employees
+            //choose the non-linked employees
             var availableEmployees = usersSettings.employees.filter(function (employee) {
-                return !(employee.Id in usersSettings.linkedEmployees);
+                return !(employee.Id in linkedEmployees);
             });
 
             var createNew = {DisplayName: "Create New", FirstName: "", Id: "1", LastName: "", LinkedUserAccountId: ""};
@@ -167,13 +156,29 @@ define(["developer", "db/services", "session", "ui/notifications", "widgets/sett
             model.Role = "Administrator";
             //initialize the validator
             var validator = $(object.element).kendoValidator().data("kendoValidator");
-            var dropDownList = $("#Employee").kendoDropDownList({
+            $("#Employee").kendoDropDownList({
                 dataSource: availableEmployees,
                 dataTextField: "DisplayName",
                 dataValueField: "DisplayName"
             });
-            selectDefaultEmployee();
 
+            //whenever the Role Type changes, select the default employee
+            var selectDefaultEmployee = function () {
+                var dropDownList = $("#Employee").data("kendoDropDownList");
+
+                if ($("#Role")[0].value === "Mobile") {
+                    //if the role is mobile, set the default linked employee to "None"
+                    dropDownList.select(function (dataItem) {
+                        return dataItem.DisplayName === "None ";
+                    });
+                } else {
+                    //if the role is admin or regular, set the default linked employee to "Create New"
+                    dropDownList.select(function (dataItem) {
+                        return dataItem.DisplayName === "Create New";
+                    });
+                }
+            };
+            selectDefaultEmployee();
             $("#Role").on("change", function () {
                 selectDefaultEmployee();
             });
@@ -210,44 +215,30 @@ define(["developer", "db/services", "session", "ui/notifications", "widgets/sett
         });
     };
 
-    //#endregion
-
     //region Users Grid
-
-    //after the data is loaded, add tooltips to the edit and delete buttons
-    var onDataBound = function (e) {
-        usersSettings.linkedEmployees = {};
-        var data = e.sender._data;
-        //http://stackoverflow.com/questions/6715641/an-efficient-way-to-get-the-difference-between-two-arrays-of-objects
-        data.forEach(function (obj) {
-            if (obj.Employee) {
-                usersSettings.linkedEmployees[obj.Employee.LinkedUserAccountId] = obj;
-            }
-        });
-
-        //add a popup to the edit and delete buttons
-        $(".k-grid-edit").each(function () {
-            $(this).attr("title", "Edit");
-        });
-        $(".k-grid-delete").each(function () {
-            $(this).attr("title", "Delete");
-        });
-    };
 
     var setupUsersGrid = function () {
         //add a grid to the #usersGrid div element
         $("#usersGrid").kendoGrid({
             dataSource: usersDataSource,
-            dataBound: onDataBound,
+            dataBound: function () {
+                //after the data is loaded, add tooltips to the edit and delete buttons
+                $(".k-grid-edit").each(function () {
+                    $(this).attr("title", "Edit");
+                });
+                $(".k-grid-delete").each(function () {
+                    $(this).attr("title", "Delete");
+                });
+            },
             editable: {
                 mode: "popup",
                 template: $("#editTemplate").html(),
                 confirmation: "Are you sure you want to delete this user?"
             },
             edit: function (e) {
-                //set the available employees(filter out the linked employees from the list of all employees)
+                //choose the non-linked employees
                 var availableEmployees = usersSettings.employees.filter(function (employee) {
-                    return !(employee.LinkedUserAccountId in usersSettings.linkedEmployees);
+                    return !(employee.LinkedUserAccountId in linkedEmployees);
                 });
                 //if there is a linked employee, add it to the list
                 if (e.model.Employee) {
