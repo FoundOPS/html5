@@ -6,7 +6,7 @@
 
 'use strict';
 
-define(["developer", "tools"], function (developer, tools) {
+define(["developer", "tools", "ui/notifications"], function (developer, tools, notifications) {
     var services = {};
 
     /**
@@ -261,6 +261,28 @@ define(["developer", "tools"], function (developer, tools) {
         }).success(function (response) {
                 callback(response);
             });
+    };
+
+    /**
+     * Hookup to DataSources Create, Update, Delete complete functions:
+     * 1) provide notifications for failure and success
+     * 2) reload the data
+     * @param dataSource
+     */
+    services.hookupDefaultComplete = function (dataSource) {
+        var onComplete = function (jqXHR, textStatus) {
+            if (textStatus == "success") {
+                notifications.success(jqXHR.statusText)
+            } else {
+                dataSource.cancelChanges();
+                notifications.error(jqXHR.statusText);
+            }
+            dataSource.read();
+        };
+
+        dataSource.transport.options.create.complete = onComplete;
+        dataSource.transport.options.update.complete = onComplete;
+        dataSource.transport.options.destroy.complete = onComplete;
     };
 
     return services;
