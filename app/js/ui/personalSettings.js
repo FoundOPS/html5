@@ -7,7 +7,7 @@
 "use strict";
 
 define(["db/services", "ui/notifications", "widgets/settingsMenu", "lib/jquery-ui-1.8.21.core.min",
-    "lib/jquery.FileReader", "lib/swfobject", "lib/jquery.form"], function (services, notifications) {
+    "lib/jquery.FileReader", "lib/swfobject", "lib/jquery.form"], function (dbServices, notifications) {
     var personalSettings = {};
 
     //keep track of if a new image has been selected
@@ -16,7 +16,7 @@ define(["db/services", "ui/notifications", "widgets/settingsMenu", "lib/jquery-u
     personalSettings.viewModel = kendo.observable({
         saveChanges: function () {
             if (personalSettings.validator.validate()) {
-                services.updatePersonalSettings(this.get("settings"))
+                dbServices.updatePersonalSettings(this.get("settings"))
                     .success(function (data, textStatus, jqXHR) {
                         notifications.success(jqXHR);
                     }).error(function (data, textStatus, jqXHR) {
@@ -28,9 +28,13 @@ define(["db/services", "ui/notifications", "widgets/settingsMenu", "lib/jquery-u
                 $("#personalImageUploadForm").submit();
             }
         },
-        cancelChanges: function () {
-            this.set("settings", personalSettings.settings);
+        cancelChanges: function (e) {
+            personalSettings.viewModel.set("settings", personalSettings.settings);
             personalSettings.resize();
+            if (!e.data.settings.ImageUrl){
+                $("#personalCropbox").css("visibility", "hidden").css("width", "0px").css("height", "0px")
+                    .css("margin-left", "0px");
+            }
         }
     });
 
@@ -82,10 +86,8 @@ define(["db/services", "ui/notifications", "widgets/settingsMenu", "lib/jquery-u
             $('#personal #imageData').val(imageData);
 
             //show the image
-            $("#personal .upload").css("margin-left", "185px").css("margin-bottom", "-15px");
-            $("#personalCropbox").css("visibility", "visible").removeAttr("width").removeAttr("height");
-            $("#personalImageUploadForm").css("margin-top", "0");
-            $("#personalImageUpload").css("margin-top", "0");
+            $("#personalCropbox").css("visibility", "visible").css("width", "auto").css("height", "auto")
+                .css("margin-left", "0px");
 
             //set so that the save changes event will also save the image
             newImage = true;
@@ -123,29 +125,24 @@ define(["db/services", "ui/notifications", "widgets/settingsMenu", "lib/jquery-u
             //from http://stackoverflow.com/questions/8151138/ie-jquery-form-multipart-json-response-ie-tries-to-download-response
             dataType: "text",
             contentType: "multipart/form-data",
-            url: services.API_URL + "settings/UpdateUserImage",
+            url: dbServices.API_URL + "settings/UpdateUserImage",
             success: function (response) {
                 var url = response.replace(/['"]/g,'');
                 personalSettings.viewModel.get("settings").set("ImageUrl", url);
             }});
 
         //retrieve the settings and bind them to the form
-        services.getPersonalSettings(function (settings) {
+        dbServices.getPersonalSettings(function (settings) {
             //set this so cancelChanges has a reference to the original settings
             personalSettings.settings = settings;
             personalSettings.viewModel.set("settings", settings);
             kendo.bind($("#personal"), personalSettings.viewModel);
             if (!settings.ImageUrl) {
-                $("#personal .upload").css("margin-left", "181px").css("margin-bottom", "-15px");
                 $("#personalCropbox").css("visibility", "hidden").css("width", "0px").css("height", "0px");
-                $("#personalImageUploadForm").css("margin-top", "-22px");
-                //$("#personalImageUpload").css("margin-top", "5px");
             }
-        })
+        });
     };
 
     //set personalSettings to a global function, so the functions are accessible from the HTML element
     window.personalSettings = personalSettings;
-
-    return personalSettings;
 });
