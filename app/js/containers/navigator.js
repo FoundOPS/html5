@@ -304,7 +304,7 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
         var slideMenuOpen = function () {
             $(" #sideBarInnerWrapper, #sideBarWrapper, #sideBar, #sideBarWrapper .jspContainer")
                 .stop(true, false)
-                .animate({width: '159px'}, 'fast');
+                .animate({width: '200px'}, 'fast');
             $(".iconExpand").addClass("flip");
         };
 
