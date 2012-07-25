@@ -27,7 +27,7 @@ require(["containers/navigator", "silverlight", "session", "lib/kendo.all", "ui/
     //whenever a section is chosen, choose it in the silverlight app
     $(document).on("sectionSelected", function (e, section) {
         if (!section.isSilverlight) {
-            if (section.name === "Feedback and Support") {
+            if (section.name === "Support") {
                 UserVoice.showPopupWidget();
             }
         }

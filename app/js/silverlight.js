@@ -128,6 +128,8 @@ define(['db/services', 'session', 'underscore'], function (dbservices, session) 
     silverlight.onLoaded = function () {
         silverlight.plugin = document.getElementById('silverlightPlugin').Content;
 
+        updateRole();
+
         //if there is a current section, navigate to it
         if (currentSection) {
             silverlight.setSection(currentSection);
@@ -173,7 +175,6 @@ define(['db/services', 'session', 'underscore'], function (dbservices, session) 
     hide();
     $(window).resize(resizeContainers);
     resizeContainers();
-    updateRole();
     session.bind("change", function (e) {
         if (e.field == "role") {
             updateRole();

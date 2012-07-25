@@ -195,7 +195,7 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
                 $(this).find(".icon").css('background-image', 'url(' + image + ')');
             },
             "click": function () {
-                var name = decodeURI($(this).find(".sectionName:first").html());
+                var name = $(this).find(".sectionName:first").text();
                 var section = getSection(config.sections, name);
                 $(this).trigger("sectionSelected", section);
             }
@@ -409,7 +409,7 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
 
     var changeBusiness = function (clicked, config) {
         //var businessId = clicked.attr("id");
-        var name = decodeURI(clicked.html());
+        var name = clicked.text();
         var business = getBusiness(name, config);
         if (business === null) {
             console.log("Business not found!");
@@ -475,7 +475,7 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
             if (($(data).attr("id") === "navClient") && config.roles.length <= 1) {
                 $("#changeBusiness").css("display", "none");
             }
-            var name = decodeURI($(data).html());
+            var name = $(data).text();
             var role = getRole(config.roles, name);
             if (role !== null) {
                 $(e.target).trigger("roleSelected", role);
