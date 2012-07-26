@@ -180,13 +180,14 @@ define(["developer", "tools", "ui/notifications"], function (developer, tools, n
      * @param {!function(Array.<Object>)} settings The loaded settings.
      */
     services.updatePersonalSettings = function (settings) {
-        return $.ajax({
-            url: services.API_URL + "settings/UpdatePersonalSettings?roleId=" + services.RoleId,
-            type: "POST",
-            dataType: "json",
-            contentType: 'application/json',
-            data: JSON.stringify(settings)
-        });
+        return notifications.linkNotification(
+            $.ajax({
+                url: services.API_URL + "settings/UpdatePersonalSettings?roleId=" + services.RoleId,
+                type: "POST",
+                dataType: "json",
+                contentType: 'application/json',
+                data: JSON.stringify(settings)
+            }));
     };
 
     /**

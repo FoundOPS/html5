@@ -23,9 +23,11 @@ define(['lib/noty'], function () {
         } else if (code === "Get") {
             text = "Connection Error";
         } else if (code === "File Size") {
-            text = "File is too large! Maximum allowed is 5MB.";
+            text = "File Is Too Large! Maximum Allowed Is 5MB.";
         } else if (code === "File Type") {
-            text = "Only .jpg, .png, and .gif files types allowed!";
+            text = "Only .jpg, .png, and .gif Files Types Allowed!";
+        } else if (code === "Image") {
+            text = "Your Image May Not Have Saved Properly";
         }
         $.noty({
             type: 'error',
