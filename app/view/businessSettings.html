@@ -12,12 +12,7 @@
             </table>
         </form>
         <h2 class="middle">Your Logo</h2>
-        <img id="businessCropbox" data-bind="attr: {src: settings.ImageUrl}" onload="businessSettings.onImageLoad()" alt=""/>
-        <a id="businessImageUploadButton" class="k-button k-button-icontext"><span class="k-icon k-image"></span>Upload Image</a>
-        <form id="businessImageUploadForm" enctype="multipart/form-data" method="POST">
-            <input type="hidden" id="imageFileName" name="imageFileName"/>
-            <input type="hidden" id="imageData" name="imageData"/>
-        </form>
+        <div id="businessImageUpload"></div>
         <h2 style="height: 17px;">&nbsp;</h2>
         <a class="k-button k-button-icontext save" data-bind="click: saveChanges"><span class="k-icon k-update"></span>Save</a>
         <a class="k-button k-button-icontext" data-bind="click: cancelChanges"><span class="k-icon k-cancel"></span>Cancel Changes</a>

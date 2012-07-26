@@ -2,9 +2,8 @@
     (function( $ ){
         $.fn.popup = function( options ) {
             // Create some defaults, extending them with any options that were provided
-            var settings = $.extend({}, options);
-            var popup = new Popup(this);
-            return popup;
+            //var settings = $.extend({}, options);
+            return new Popup(this.selector);
         };
     })( jQuery );
 
@@ -23,6 +22,7 @@
             return;
         }
         var listenerElements = $(popupListener);
+		listenerElements.css("cursor", "pointer");
         listenerElements.click(function (e) {
             thisPopup.toggleVisible(e, $(this));
         });
@@ -50,6 +50,7 @@
                 }
             }
 
+            //TODO: Possibly change this to a data-* field.
             var id = clickedDiv.attr("id");
             //TODO: Fix repetition.
             if ($("#popup").is(":visible") && lastElementClick !== null) {
@@ -65,7 +66,8 @@
             var left = this.getLeft(clickedDiv, popupWrapperDiv);
             popupWrapperDiv.css("left", left);
 
-            var top = clickedDiv.outerHeight(true) + $("#popupArrow").outerHeight();
+			//console.log("scroll top: "+$(window).scrollTop());
+            var top = clickedDiv.outerHeight() + clickedDiv.offset().top - $(window).scrollTop() + (-1*parseInt($("#popupArrow").css("margin-top"),10)); //popupArrow is offset over the border, so this gives easier measurements.
             popupWrapperDiv.css("padding-top", top + "px");
             this.populate(id);
 
@@ -79,11 +81,11 @@
 
         //Function returns the left offset of the popup and sets the carrot element's position.
         this.getLeft = function (target, popupDiv) {
-            var padding = 4;
+            var padding = 3;
             currentTarget = target;
             var x = target.offset().left + target.outerWidth() / 2;
-            var rightOffset = x + popupDiv.outerWidth() / 2 + padding;
-            var offset = x - popupDiv.outerWidth() / 2 + padding;
+            var rightOffset = x + popupDiv.outerWidth() / 2;
+            var offset = x - popupDiv.outerWidth() / 2 + padding + 1; //TODO: Figure out where the 1 extra pixel is.. could just be rounding.
             var windowWidth = $(window).width();
 
             //Sets popup variables referenced in resize listener.
@@ -153,6 +155,9 @@
                     if ($("#popup").is(":visible")) {
                         var left = thisPopup.getLeft(currentTarget, popupWrapperDiv);
                         popupWrapperDiv.css("left", left);
+						//TODO: Move to getTop.
+						var top = $(currentTarget).outerHeight() + $(currentTarget).offset().top - $(window).scrollTop() + (-1*parseInt($("#popupArrow").css("margin-top"),10)); //popupArrow is offset over the border, so this gives easier measurements.
+						popupWrapperDiv.css("padding-top", top + "px");
                     }
                 }
             );
@@ -166,7 +171,7 @@
                     var popupHeaderLen = clicked.parents("#popupHeader").length + clicked.is("#popupHeader") ? 1 : 0;
                     var popupContentLen = clicked.parents("#popupContent").length + clicked.is("#popupContent") ? 1 : 0;
                     //TODO: Is passing a jQuery object and grabbing its selector the best way to do this?
-                    var listenerLen = clicked.parents(popupListener.selector).length + clicked.is(popupListener.selector) ? 1 : 0;
+                    var listenerLen = clicked.parents(popupListener).length + clicked.is(popupListener) ? 1 : 0;
                     //console.log(popupHeaderLen + " " + popupContentLen + " " + listenerLen);
                     //console.log(popupListener);
                     if (popupHeaderLen === 0 && popupContentLen === 0 && listenerLen === 0) {

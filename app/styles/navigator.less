@@ -101,6 +101,8 @@ table {
 /*  Positioning  */
 @navHeight: 45px;
 
+@coverWindowButtonHeight: 40px;
+
 /*  MAIN  */
 html {
     padding: 0;
@@ -164,7 +166,7 @@ input:focus {
 
 #nav {
     position: fixed;
-    z-index: 1;
+    z-index: 2;
     width: 100%;
     height: @navHeight;
     line-height: @navHeight - 4;
@@ -309,10 +311,23 @@ zoom: 1;*/
     .navColor;
 /*TODO: Give box shadows vendor prefixes.*/
     box-shadow: -1px 4px 6px #888;
+    color: @lightGrey;
 }
 
 #sideBarWrapper .jspDrag {
     background: #fff;
+}
+
+#sideBarWrapper .jspCapBottom{
+    height: @coverWindowButtonHeight;
+}
+
+#sideBarInnerWrapper{
+    position: relative;
+    height: 100%;
+    width: 200px;
+    border-right: @borderSize solid @darkGrey;
+    z-index: 1;
 }
 
 #sideBar {
@@ -324,9 +339,7 @@ zoom: 1;*/
     max-height: 100%;
     right: 0px;
 
-    color: @lightGrey;
-
-    padding: 0 0;
+    padding: 0 0 40px 0;
     white-space: nowrap;
     -webkit-overflow-scrolling: touch;
     line-height: 1;
@@ -367,6 +380,21 @@ zoom: 1;*/
         padding: 6px 10px;
         margin-right: 5px;
     }
+}
+
+#coverWindowButton {
+    position: absolute;
+    .borderBox;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    max-width: 200px;
+    height: @coverWindowButtonHeight;
+    border-top: 1px solid @darkGrey;
+    background: @charcoal;
+    z-index: 1;
+    padding: 0 5px;
+    cursor: pointer;
 }
 
 #contentWrapper {
@@ -539,6 +567,7 @@ zoom: 1;*/
         width: @sideBarExpandedWidth;
 
         box-shadow: 0px 0px 10px #888;
+        padding: 0;
     }
 
     #sideBarWrapper {
@@ -552,6 +581,10 @@ zoom: 1;*/
         box-shadow: none;
     }
 
+    #sideBarInnerWrapper{
+        width: auto;
+    }
+
     #slideMenu {
         display: none;
     }
@@ -560,6 +593,15 @@ zoom: 1;*/
         top: @navHeight;
         margin-right: 0;
     }
+
+    #coverWindowButton{
+        display: none;
+    }
+
+    #sideBarWrapper .jspCapBottom{
+        height: 0;
+        display: none;
+     }
 }
 
 @media only screen and (max-width:390px) {
@@ -580,6 +622,10 @@ zoom: 1;*/
 
     #nav .last {
         margin-right: 0px;
+    }
+
+    #content {
+        background: @green;
     }
 }
 
