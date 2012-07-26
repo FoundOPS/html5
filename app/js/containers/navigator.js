@@ -79,16 +79,17 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
     };
 
     /** Initializes scrollbar for sidebar navigation **/
+    //TODO: Rename.
     var initSideBarScrollBar = function () {
-        var sideBarWrapperDiv = $("#sideBarWrapper");
-        sideBarWrapperDiv.jScrollPane({
+        var sideBarWrapperInnerDiv = $("#sideBarInnerWrapper");
+        sideBarWrapperInnerDiv.jScrollPane({
             horizontalGutter: 0,
             verticalGutter: 0,
             verticalDragMinHeight: 25,
             'showArrows': false
         });
 
-        var sideBarScrollBar = sideBarWrapperDiv.data('jsp');
+        var sideBarScrollBar = sideBarWrapperInnerDiv.data('jsp');
         //From jScrollPane examples: http://jscrollpane.kelvinluck.com/dynamic_height.html
         var throttleTimeout;
         $(window).bind('resize', function () {
@@ -208,9 +209,13 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
         var slideMenuTimeout = null;
         var sections = config.sections;
 
+        //TODO: Remove duplicate naming.
         //setup the sidebar wrapper (for the scrollbar)
         var sBarWrapper = $(document.createElement('div'));
         sBarWrapper.attr('id', 'sideBarWrapper');
+
+        var sBarInnerWrapper = $(document.createElement('div'));
+        sBarInnerWrapper.attr('id', 'sideBarInnerWrapper');
 
         //setup the sidebar (the place for buttons)
         var sBar = $(document.createElement('div'));
@@ -221,7 +226,9 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
         var expandTemplate = kendo.template(expandTemplateHtml);
         sBar.html(expandTemplate);
         sBar.append("<div id='sideBarSections'></div>");
-        sBarWrapper.append(sBar);
+        sBarInnerWrapper.append(sBar);
+        sBarWrapper.append(sBarInnerWrapper);
+        $(sBarInnerWrapper).after("<div id='coverWindowButton'>Cover Window</div>");
         $('#nav').after(sBarWrapper);
 
         setSideBarSections(config, config.roles[0].sections);
@@ -262,19 +269,28 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
             if ($(window).width() <= 800) {
                 sideBarDiv.css("width", "");
                 sideBarDiv.removeClass("hover");
+                if(sideBarDiv.hasClass("cover")){
+                    sideBarDiv.removeClass("cover");
+                    sideBarDiv.attr("style", "");
+                    $("#sideBarWrapper").attr("style", "");
+                    $("#sideBarInnerWrapper").attr("style", "");
+                }
+                $("#sideBarWrapper").removeAttr("style");
                 if (sideBarDiv.hasClass("expand")) {
                     sideBarDiv.removeClass("expand");
                     sideBarDiv.attr("style", "");
-                    $("#sideBarWrapper").attr("style", "");
+                    $("#sideBarInnerWrapper").attr("style", "");
                 }
                 if (!sideBarDiv.hasClass("hidden")) {
                     $(".iconShow").addClass('rotateIcon');
                 }
+                $(".iconExpand").removeClass("flip");
             } else if ($(window).width() > 800) {
                 if (sideBarDiv.hasClass("hidden")) {
                     sideBarDiv.removeClass("hidden");
                     sideBarDiv.attr("style", "");
                     $("#sideBarWrapper").attr("style", "");
+                    $("#sideBarInnerWrapper").attr("style", "");
                     //$(".iconShow").removeClass('rotateIcon');
                 }
                 if (sideBarDiv.hasClass("hover")) {
@@ -284,18 +300,19 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
             }
         });
 
+        //TODO: Set max and min values at top of function.
         var slideMenuOpen = function () {
-            $("#sideBar, #sideBarWrapper, #sideBarWrapper .jspContainer")
+            $(" #sideBarInnerWrapper, #sideBarWrapper, #sideBar, #sideBarWrapper .jspContainer")
                 .stop(true, false)
-                .animate({width: '159px'}, 'fast');
+                .animate({width: '200px'}, 'fast');
             $(".iconExpand").addClass("flip");
         };
 
         var slideMenuClosed = function () {
             //clearTimeout(slideMenuTimeout);
-            $("#sideBar, #sideBarWrapper, #sideBarWrapper .jspContainer")
+            $("#sideBar, #sideBarWrapper, #sideBarWrapper .jspContainer, #sideBarInnerWrapper")
                 .stop(true, false)
-                .animate({width: '55px'}, 'fast');
+                .animate({width: '55px'}, 350); //TODO: Figure out why fast causes leftover artifacts/redraw problems.
             $(".iconExpand").removeClass("flip");
         };
 
@@ -324,6 +341,9 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
                 } else if (sideBarDiv.hasClass("expand")) {
                     slideMenuClosed();
                     sideBarDiv.removeClass("expand");
+                } else if (sideBarDiv.hasClass("cover")) {
+                    slideMenuClosed();
+                    sideBarDiv.removeClass("cover");
                 } else {
                     sideBarDiv.addClass("expand");
                     //clearTimeout(slideMenuTimeout);
@@ -332,11 +352,41 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
             }
         );
 
+        $("#coverWindowButton").stop().click(
+            function(){
+                if (sideBarDiv.hasClass("cover")) {
+                    slideMenuClosed();
+                    sideBarDiv.removeClass("cover");
+                } else{
+                    $("#sideBar").removeClass("hover");
+                    $("#sideBar").removeClass("expand");
+                    coverWindow();
+                }
+            }
+        );
+
+        var coverWindow = function(){
+            $("#sideBarWrapper")
+                .stop(false, true)
+                .animate({width: '100%'}, 'fast');
+            $("#sideBar").addClass("cover");
+        };
+
+        var resetSideBar = function(){
+            $("#sideBarWrapper")
+                .stop(false, true)
+                .animate({width: '55px'}, 'fast');
+            $("#sideBar").addClass("cover");
+        };
+
+        Navigator.prototype.coverWindow = coverWindow;
+        Navigator.prototype.resetSideBar = resetSideBar;
+
         //Hover listener that expands/contracts sideBar.
         $("#sideBarWrapper").hover(
             //Hover In
             function () {
-                if ($(document).width() > 800 && !sideBarDiv.hasClass("expand")) {
+                if ($(document).width() > 800 && !sideBarDiv.hasClass("expand") && !sideBarDiv.hasClass("cover")) {
                     //slideMenuTimeout = setTimeout(function(){
                     sideBarDiv.addClass("hover");
                     slideMenuOpen();
@@ -372,7 +422,7 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
                     },
                     'fast'
                 );
-                $("#sideBarWrapper").data('jsp').reinitialise();
+                $("#sideBarInnerWrapper").data('jsp').reinitialise();
             } else {
                 sideBarDiv.stop(false, true).animate(
                     {
@@ -417,7 +467,7 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
         }
         changeBusinessLogo(business);
         setSideBarSections(config, business.sections);
-        $("#sideBarWrapper").data('jsp').reinitialise();
+        $("#sideBarInnerWrapper").data('jsp').reinitialise();
     };
 
     var changeBusinessLogo = function (business) {
@@ -468,7 +518,6 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
         );
 
         popup.addMenu("changeBusiness", "Businesses", config.roles);
-
 
         $(document).on("popupEvent", function (e, data) {
             //console.log(data);

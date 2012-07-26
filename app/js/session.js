@@ -40,8 +40,8 @@ define(['db/services', "lib/kendo.all"], function (dbservices) {
         });
     };
 
-//    //for debugging when the API is turned off
-//    //set static values set for config & selected role
+//    for debugging when the API is turned off
+//    set static values set for config & selected role
 //    session._data = {
 //        "name": "Jonathan Perl",
 //        "settingsUrl": "#view/personalSettings.html",
