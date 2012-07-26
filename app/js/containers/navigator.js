@@ -233,10 +233,20 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
 
         setSideBarSections(config, config.roles[0].sections);
 
+        if($(document).width()<=800){
+            //TODO: Condense into another function?
+            sBar.addClass("hidden");
+            var offset = -1 * (sBar.offset().top + sBar.outerHeight());
+            sBar.css("top", offset);
+        }else{
+            //$(".iconShow").addClass("rotateIcon");
+        }
+
         //Add showMenuSpan to topNav.
         var showMenuTemplateHtml = $("#showMenuTemplate").html();
         var showMenuTemplate = kendo.template(showMenuTemplateHtml);
         $('#navContainer').after(showMenuTemplate);
+
 
         /** Initialize sidebar scrollbar **/
         initSideBarScrollBar();
@@ -268,21 +278,30 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
         $(window).resize(function () {
             if ($(window).width() <= 800) {
                 sideBarDiv.css("width", "");
+
+                sideBarDiv.addClass("hidden");
+                sideBarDiv.removeClass("shown");
+
                 sideBarDiv.removeClass("hover");
                 if(sideBarDiv.hasClass("cover")){
                     sideBarDiv.removeClass("cover");
                     sideBarDiv.attr("style", "");
                     $("#sideBarWrapper").attr("style", "");
                     $("#sideBarInnerWrapper").attr("style", "");
+
                 }
-                $("#sideBarWrapper").removeAttr("style");
+
+                if(!sideBarDiv.hasClass("shown")){
+                    $("#sideBarWrapper").css("width", "");
+                    sideBarDiv.css("top", "-9999px");
+                    sideBarDiv.addClass("hidden");
+                    $(".iconShow").removeClass('rotateIcon');
+                }
+
                 if (sideBarDiv.hasClass("expand")) {
                     sideBarDiv.removeClass("expand");
                     sideBarDiv.attr("style", "");
                     $("#sideBarInnerWrapper").attr("style", "");
-                }
-                if (!sideBarDiv.hasClass("hidden")) {
-                    $(".iconShow").addClass('rotateIcon');
                 }
                 $(".iconExpand").removeClass("flip");
             } else if ($(window).width() > 800) {
