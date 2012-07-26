@@ -6,8 +6,14 @@
 
 'use strict';
 
-define(["developer", "tools", "ui/notifications"], function (developer, tools, notifications) {
+define(["developer", "tools", "ui/notifications", "lib/xdr"], function (developer, tools, notifications) {
     var services = {};
+
+    $.support.cors = true;
+    $.ajaxSetup({
+        xhrFields: {
+            withCredentials: true
+        }});
 
     /**
      * Enum for loading statuses.
