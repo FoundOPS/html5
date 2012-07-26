@@ -197,10 +197,27 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
             },
             "click": function () {
                 var name = $(this).find(".sectionName:first").text();
+                //TODO: Will this work every time?
                 var section = getSection(config.sections, name);
                 $(this).trigger("sectionSelected", section);
             }
         });
+    };
+
+    //TODO: Set max and min values at top of function.
+    var slideMenuOpen = function () {
+        $(" #sideBarInnerWrapper, #sideBarWrapper, #sideBar, #sideBarWrapper .jspContainer")
+            .stop(true, false)
+            .animate({width: '200px'}, 'fast');
+        $(".iconExpand").addClass("flip");
+    };
+
+    var slideMenuClosed = function () {
+        //clearTimeout(slideMenuTimeout);
+        $("#sideBar, #sideBarWrapper, #sideBarWrapper .jspContainer, #sideBarInnerWrapper")
+            .stop(true, false)
+            .animate({width: '55px'}, 350); //TODO: Figure out why fast causes leftover artifacts/redraw problems.
+        $(".iconExpand").removeClass("flip");
     };
 
     /** Initializes sidebar navigation **/
@@ -247,7 +264,6 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
         var showMenuTemplate = kendo.template(showMenuTemplateHtml);
         $('#navContainer').after(showMenuTemplate);
 
-
         /** Initialize sidebar scrollbar **/
         initSideBarScrollBar();
 
@@ -285,13 +301,13 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
                     sideBarDiv.attr("style", "");
                     $("#sideBarWrapper").attr("style", "");
                     $("#sideBarInnerWrapper").attr("style", "");
-
                 }
 
                 if(!sideBarDiv.hasClass("shown")){
                     $("#sideBarWrapper").css("width", "");
                     sideBarDiv.css("top", "-9999px");
                     sideBarDiv.addClass("hidden");
+                    $("#sideBarWrapper").css('display', 'none');
                     $(".iconShow").removeClass('rotateIcon');
                 }
 
@@ -316,22 +332,6 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
                 }
             }
         });
-
-        //TODO: Set max and min values at top of function.
-        var slideMenuOpen = function () {
-            $(" #sideBarInnerWrapper, #sideBarWrapper, #sideBar, #sideBarWrapper .jspContainer")
-                .stop(true, false)
-                .animate({width: '200px'}, 'fast');
-            $(".iconExpand").addClass("flip");
-        };
-
-        var slideMenuClosed = function () {
-            //clearTimeout(slideMenuTimeout);
-            $("#sideBar, #sideBarWrapper, #sideBarWrapper .jspContainer, #sideBarInnerWrapper")
-                .stop(true, false)
-                .animate({width: '55px'}, 350); //TODO: Figure out why fast causes leftover artifacts/redraw problems.
-            $(".iconExpand").removeClass("flip");
-        };
 
         /* Explanation of hover/click states.
          onhoverin:
@@ -430,7 +430,6 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
         //TODO: Get rotation to work on default android 2.3 browser http://jsfiddle.net/KrRsy/
         var toggleMenu = function () {
             $(".iconShow").toggleClass("rotateIcon");
-            var offset = -1 * (sideBarDiv.offset().top + sideBarDiv.outerHeight());
             if (sideBarDiv.hasClass("hidden")) {
                 sideBarWrapperDiv.css('display', 'inline-block');
                 sideBarDiv.stop(false, true).animate(
@@ -441,6 +440,7 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
                 );
                 $("#sideBarInnerWrapper").data('jsp').reinitialise();
             } else {
+                var offset = -1 * (sideBarDiv.offset().top + sideBarDiv.outerHeight());
                 sideBarDiv.stop(false, true).animate(
                     {
                         top: offset
