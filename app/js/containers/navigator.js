@@ -279,9 +279,6 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
             if ($(window).width() <= 800) {
                 sideBarDiv.css("width", "");
 
-                sideBarDiv.addClass("hidden");
-                sideBarDiv.removeClass("shown");
-
                 sideBarDiv.removeClass("hover");
                 if(sideBarDiv.hasClass("cover")){
                     sideBarDiv.removeClass("cover");
@@ -305,12 +302,13 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
                 }
                 $(".iconExpand").removeClass("flip");
             } else if ($(window).width() > 800) {
-                if (sideBarDiv.hasClass("hidden")) {
+                if (sideBarDiv.hasClass("hidden")||sideBarDiv.hasClass("shown")) {
                     sideBarDiv.removeClass("hidden");
+                    sideBarDiv.removeClass("shown");
                     sideBarDiv.attr("style", "");
                     $("#sideBarWrapper").attr("style", "");
                     $("#sideBarInnerWrapper").attr("style", "");
-                    //$(".iconShow").removeClass('rotateIcon');
+                    $(".iconShow").removeClass('rotateIcon');
                 }
                 if (sideBarDiv.hasClass("hover")) {
                     slideMenuClosed();
@@ -453,6 +451,7 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
                     }
                 );
             }
+            sideBarDiv.toggleClass("shown");
             sideBarDiv.toggleClass("hidden");
         };
 
