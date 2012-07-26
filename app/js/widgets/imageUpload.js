@@ -3,7 +3,8 @@ define(["tools", "ui/notifications", "db/services", "jquery", "lib/kendo.all", "
     // shorten references to variables. this is better for uglification
     var kendo = window.kendo,
         ui = kendo.ui,
-        Widget = ui.Widget;
+        Widget = ui.Widget,
+        upload = {};
 
     var ImageUpload = Widget.extend({
         // method called when a new widget is created
@@ -24,12 +25,12 @@ define(["tools", "ui/notifications", "db/services", "jquery", "lib/kendo.all", "
                 '</form>');
 
             //keep track of if a new image has been selected
-            Widget.newImage = false;
-            Widget.form = $(_imageElements[2]);
-            Widget.fileName = $(Widget.form[0][0]);
-            Widget.imageButton = $(_imageElements[1]);
-            Widget.imageData = $(Widget.form[0][1]);
-            Widget.cropbox = $(_imageElements[0])
+            upload.newImage = false;
+            upload.form = $(_imageElements[2]);
+            upload.fileName = $(upload.form[0][0]);
+            upload.imageButton = $(_imageElements[1]);
+            upload.imageData = $(upload.form[0][1]);
+            upload.cropbox = $(_imageElements[0])
                 //TODO: make sure this is getting called
                 .on("load", function () {
                     ImageUpload.fn._load();
@@ -37,8 +38,8 @@ define(["tools", "ui/notifications", "db/services", "jquery", "lib/kendo.all", "
 
             //setup the FileReader on the imageUpload button
             //this will enable the flash FileReader polyfill from https://github.com/Jahdrien/FileReader
-            Widget.imageButton.fileReader();
-            Widget.imageButton.on('change', function (evt) {
+            upload.imageButton.fileReader();
+            upload.imageButton.on('change', function (evt) {
                 ImageUpload.fn._changeImage(evt);
             });
 
@@ -47,7 +48,7 @@ define(["tools", "ui/notifications", "db/services", "jquery", "lib/kendo.all", "
 
         _addAjaxForm: function () {
             //setup the form
-            Widget.form.ajaxForm({
+            upload.form.ajaxForm({
                 //from http://stackoverflow.com/questions/8151138/ie-jquery-form-multipart-json-response-ie-tries-to-download-response
                 dataType: "text",
                 contentType: "multipart/form-data",
@@ -63,10 +64,10 @@ define(["tools", "ui/notifications", "db/services", "jquery", "lib/kendo.all", "
 
         cancel: function () {
             //clear the new image data
-            Widget.imageData[0].value = "";
-            Widget.cropbox.css("width", Widget.imageWidth);
-            Widget.cropbox.css("height", Widget.imageHeight);
-            tools.resizeImage(Widget.cropbox, ImageUpload.fn.options.imageWidth, ImageUpload.fn.options.containerWidth);
+            upload.imageData[0].value = "";
+            upload.cropbox.css("width", upload.imageWidth);
+            upload.cropbox.css("height", upload.imageHeight);
+            tools.resizeImage(upload.cropbox, ImageUpload.fn.options.imageWidth, ImageUpload.fn.options.containerWidth);
         },
 
         _changeImage: function (evt) {
@@ -88,8 +89,8 @@ define(["tools", "ui/notifications", "db/services", "jquery", "lib/kendo.all", "
             //Read the file to trigger onLoad
             reader.readAsDataURL(file);
             //set the form value
-            Widget.fileName.val(file.name);
-            tools.resizeImage(Widget.cropbox, ImageUpload.fn.options.imageWidth, ImageUpload.fn.options.containerWidth);
+            upload.fileName.val(file.name);
+            tools.resizeImage(upload.cropbox, ImageUpload.fn.options.imageWidth, ImageUpload.fn.options.containerWidth);
         },
 
         _fileLoaded: function (evt) {
@@ -99,36 +100,36 @@ define(["tools", "ui/notifications", "db/services", "jquery", "lib/kendo.all", "
                 return;
 
             //set the source of the image element to be the newly uploaded image
-            Widget.cropbox.attr("src", imageData);
+            upload.cropbox.attr("src", imageData);
 
             //set a hidden form to the file image's data (because we stole it with FileReader)
-            Widget.imageData.val(imageData);
+            upload.imageData.val(imageData);
 
             //show the image
-            Widget.cropbox.css("width", "auto").css("height", "auto").css("margin-left", "0px");
+            upload.cropbox.css("width", "auto").css("height", "auto").css("margin-left", "0px");
 
             //set so that the save changes event will also save the image
-            Widget.newImage = true;
+            upload.newImage = true;
 
-            tools.resizeImage(Widget.cropbox, ImageUpload.fn.options.imageWidth, ImageUpload.fn.options.containerWidth);
+            tools.resizeImage(upload.cropbox, ImageUpload.fn.options.imageWidth, ImageUpload.fn.options.containerWidth);
 
-            Widget.cropbox.css("visibility", "visible");
+            upload.cropbox.css("visibility", "visible");
         },
 
         hideImage: function () {
-            Widget.cropbox.css("visibility", "hidden").css("width", "0px").css("height", "0px");
+            upload.cropbox.css("visibility", "hidden").css("width", "0px").css("height", "0px");
         },
 
         _load: function () {
-            tools.resizeImage(Widget.cropbox, this.options.imageWidth, this.options.containerWidth);
-            if (!Widget.newImage) {
-                Widget.imageWidth = Widget.cropbox[0].width;
-                Widget.imageHeight = Widget.cropbox[0].height;
+            tools.resizeImage(upload.cropbox, ImageUpload.fn.options.imageWidth, ImageUpload.fn.options.containerWidth);
+            if (!upload.newImage) {
+                upload.imageWidth = upload.cropbox[0].width;
+                upload.imageHeight = upload.cropbox[0].height;
             }
         },
 
         setImageUrl: function (url) {
-            Widget.cropbox.attr("src", url);
+            upload.cropbox.attr("src", url);
         },
 
         setUploadUrl: function (url) {
@@ -139,8 +140,8 @@ define(["tools", "ui/notifications", "db/services", "jquery", "lib/kendo.all", "
 
         submitForm: function () {
             //check if image has been changed and changes have not been canceled
-            if (Widget.newImage && Widget.imageData[0].value != "") {
-                Widget.form.submit();
+            if (upload.newImage && upload.imageData[0].value != "") {
+                upload.form.submit();
             }
         },
 
