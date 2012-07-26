@@ -106,10 +106,10 @@ require(["containers/navigator", "silverlight", "session", "lib/kendo.all", "ui/
     };
 
     //set the height to make sure the horizontal scrollbar is on the bottom
-    var setHeight = function () {
+    /*var setHeight = function () {
         var height = $(window).height() - 45;
         $("#content").css("height", height + "px");
     };
     setHeight();
-    $(window).resize(setHeight);
+    $(window).resize(setHeight);*/
 });
