@@ -1,0 +1,15 @@
+<div data-init="dispatcherSettings.initialize" data-role="view" data-title="dispatcher Settings" id="dispatcher" data-stretch="true">
+    <div class="settingsMenu"></div>
+    <h1>Dispatcher Settings</h1>
+    <div class="wrap">
+        <div class="addDeleteBtns">
+            <button class='k-button k-button-icontext k-grid-add'><span class='k-icon k-add'></span></button>
+            <button class='k-button k-button-icontext k-grid-delete' onclick='dispatcherSettings.removeSelectedRow()' disabled><span class='k-icon k-delete'></span></button>
+        </div>
+        <h2>Task Statuses</h2>
+        <div id="dispatcherGrid"></div>
+        <h2 style="height:15px;">&nbsp;</h2>
+        <button class="k-button k-button-icontext saveBtn" disabled><span class="k-icon k-update"></span>Save</button>
+        <button class="k-button k-button-icontext cancelBtn" disabled><span class="k-icon k-cancel"></span>Cancel Changes</button>
+    </div>
+</div>

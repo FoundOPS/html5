@@ -20022,6 +20022,8 @@ function pad(number) {
             if (cell.hasClass("k-dirty-cell")) {
                 $('<span class="k-dirty"/>').prependTo(cell);
             }
+			//foundops change
+			ops.closeCell();
         },
 
         _displayCell: function(cell, column, dataItem) {

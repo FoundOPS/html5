@@ -287,7 +287,6 @@ define(["developer", "tools", "ui/notifications", "lib/xdr"], function (develope
                 dataSource.cancelChanges();
                 notifications.error(jqXHR.statusText);
             }
-            dataSource.read();
         };
 
         dataSource.transport.options.create.complete = onComplete;

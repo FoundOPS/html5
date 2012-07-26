@@ -1,17 +1,15 @@
-'use strict';
+// Copyright 2012 FoundOPS LLC. All Rights Reserved.
 
-require.config({
-    waitSeconds: 10,
-    baseUrl: 'js',
-    paths: {
-        // JavaScript folders
-        lib: "../lib",
-        ui: "ui",
-        db: "db"
-    }
-});
+/**
+ * @fileoverview Class to hold dispatcher settings logic.
+ */
 
-require(["jquery", "developer", "lib/kendo.web.min", "ui/colorPicker", "ui/kendoChanges"], function ($, developer, k, c, changes) {
+"use strict";
+
+define(["developer", "tools", "db/services", "session", "widgets/settingsMenu", "ui/colorPicker",
+        "ui/kendoChanges"], function (developer, tools, dbServices, session) {
+    var dispatcherSettings = {};
+
     //region Locals
     var grid;
     //keep track of the business account id to be used for new items
@@ -21,32 +19,26 @@ require(["jquery", "developer", "lib/kendo.web.min", "ui/colorPicker", "ui/kendo
     //endregion
 
     //region Setup Grid
-    $(document).ready(function () {
-        var baseUrl;
-        if(developer.CURRENT_FRAME === developer.Frame.SILVERLIGHT){
-            baseUrl = "";
-        }else{
-            baseUrl = "http://localhost:9711/api/TaskStatus/";
-        }
-        var roleId = developer.GOTGREASE_ROLE_ID;
+    dispatcherSettings.initialize = function () {
+        //setup menu
+        var menu = $("#dispatcher .settingsMenu");
+        kendo.bind(menu);
+        menu.kendoSettingsMenu({selectedItem: "Dispatcher"});
+
         var dataSource = new kendo.data.DataSource({
             transport: {
                 read: {
-                    url: baseUrl + "GetStatuses?roleId=" + roleId,
                     type: "GET",
                     dataType: "jsonp",
                     contentType: "application/json; charset=utf-8"
                 },
                 update: {
-                    url: baseUrl + "UpdateTaskStatus",
                     type: "POST"
                 },
                 destroy: {
-                    url: baseUrl + "DeleteTaskStatus",
                     type: "POST"
                 },
                 create: {
-                    url: baseUrl + "InsertTaskStatus",
                     type: "POST"
                 }
             },
@@ -84,7 +76,28 @@ require(["jquery", "developer", "lib/kendo.web.min", "ui/colorPicker", "ui/kendo
                 }
             }
         });
-        $("#grid").kendoGrid({
+        dbServices.hookupDefaultComplete(dataSource);
+
+        //set the dataSource urls initially, and when the role is changed
+        var setupDataSourceUrls = function () {
+            var roleId = session.get("role.id");
+            if (!roleId) {
+                return;
+            }
+            dataSource.transport.options.read.url = dbServices.API_URL + "taskStatuses/GetStatuses?roleId=" + roleId;
+            dataSource.transport.options.update.url = dbServices.API_URL + "taskStatuses/UpdateTaskStatus?roleId=" + roleId;
+            dataSource.transport.options.destroy.url = dbServices.API_URL + "taskStatuses/DeleteTaskStatus?roleId=" + roleId;
+            dataSource.transport.options.create.url = dbServices.API_URL + "taskStatuses/InsertTaskStatus?roleId=" + roleId;
+            dataSource.read();
+        };
+        setupDataSourceUrls();
+        session.bind("change", function (e) {
+            if (e.field == "role") {
+                setupDataSourceUrls();
+            }
+        });
+
+        $("#dispatcherGrid").kendoGrid({
             columns: [
                 {
                     field: "Name",
@@ -101,12 +114,12 @@ require(["jquery", "developer", "lib/kendo.web.min", "ui/colorPicker", "ui/kendo
                 {
                     field: "RouteRequired",
                     title: "Remove from Route on Selection",
-                    template: "#= getChecked(RouteRequired)#"
+                    template: "#= dispatcherSettings.getChecked(RouteRequired)#"
                 },
                 {
                     field: "DefaultTypeInt",
                     title: "Attributes",
-                    template: '#= getAttributeText(DefaultTypeInt) #'
+                    template: '#= dispatcherSettings.getAttributeText(DefaultTypeInt) #'
                 }],
             dataSource: dataSource,
             dataBound: onDataBound,
@@ -114,7 +127,7 @@ require(["jquery", "developer", "lib/kendo.web.min", "ui/colorPicker", "ui/kendo
             //called when a row it removed from the grid
             remove: function () {
                 //hide the save and cencel buttons
-                hideOrShowSaveCancel(true);
+                enableOrDisableSaveCancel(true);
             },
             scrollable: false,
             selectable: true,
@@ -122,72 +135,54 @@ require(["jquery", "developer", "lib/kendo.web.min", "ui/colorPicker", "ui/kendo
             //called when the grid detects changes to the data
             save: function () {
                 //hide the save and cencel buttons
-                hideOrShowSaveCancel(true);
+                enableOrDisableSaveCancel(true);
             },
             //called when the changes are synced with the served
             saveChanges: function () {
                 //show the save and cencel buttons
-                hideOrShowSaveCancel(false);
-            },
-            // The command buttons above the grid
-            toolbar: [
-                {
-                    name: "create",
-                    text: "Add New Row"
-                },
-                {
-                    name: "save",
-                    text: "Save Changes"
-                },
-                {
-                    name: "cancel",
-                    text: "Cancel Changes"
-                },
-                {
-                    name: "destroy",
-                    // Use a template so "removeSelectedRow()" can be called
-                    template: "<a class='k-button k-button-icontext k-grid-delete' onclick='removeSelectedRow()'><span class='k-icon k-delete'></span>Delete</a>"
-                }
-            ]
+                enableOrDisableSaveCancel(false);
+            }
         });
-    }); //end document.ready
+
+    }; //end initialize
+
     //endregion
 
     //region Methods
 
     //region Checkbox
-    //disable the checkboxes for the default rows
-    var disableDefaultCheckboxes = function () {
-        $("input[type='checkbox']").each(function (i) {
-            // Get the DefaultTypeInt for the row
-            var int = grid._data[i].DefaultTypeInt;
-            // Check if the row is a default type
-            if (int !== null) {
-                //disable checkbox
-                this.disabled = true;
-            }
-        });
-    };
 
     /**
      * Takes a boolean and converts it to a checked(if true) or unchecked(if false) checkbox
      * @param {boolean} checked
      * @return {string}
      */
-    var getChecked = function (checked) {
+    dispatcherSettings.getChecked = function (checked) {
         if (checked === true) {
-            return "<input type='checkbox' checked onclick='updateCheckbox(checked)'/>";
+            return "<input type='checkbox' checked onclick='dispatcherSettings.updateCheckbox(checked)'/>";
         } else {
-            return "<input type='checkbox' onclick='updateCheckbox(checked)' />";
+            return "<input type='checkbox' onclick='dispatcherSettings.updateCheckbox(checked)' />";
         }
+    };
+    //disable the checkboxes for the default rows
+    dispatcherSettings.disableDefaultCheckboxes = function () {
+        $("#dispatcher input[type='checkbox']").each(function (i) {
+            // Get the DefaultTypeInt for the row
+            var typeInt = grid._data[i].DefaultTypeInt;
+            // Check if the row is a default type
+            if (typeInt !== null) {
+                //disable checkbox
+                this.disabled = true;
+            }
+        });
     };
 
     //update the selected checkbox with the new value
-    var updateCheckbox = function (checked) {
+    dispatcherSettings.updateCheckbox = function (checked) {
         //update the model with the new RouteRequired value
         selectedItem.set('RouteRequired', checked);
         //show save and cancel buttons
-        hideOrShowSaveCancel(true);
+        enableOrDisableSaveCancel(true);
     };
     //endregion
 
@@ -238,21 +233,21 @@ require(["jquery", "developer", "lib/kendo.web.min", "ui/colorPicker", "ui/kendo
         //update the current model with the new color value
         selectedItem.set('Color', color);
         // Show save and cancel buttons
-        hideOrShowSaveCancel(true);
+        enableOrDisableSaveCancel(true);
     };
     //endregion
 
     /**
      * Takes a number and converts it to one of three default strings
-     * @param {number} int
+     * @param {number} typeInt
      * @return {string}
      */
-    var getAttributeText = function (int) {
-        if (int === 1) {
+    dispatcherSettings.getAttributeText = function (typeInt) {
+        if (typeInt === 1) {
             return "Default status for newly created tasks";
-        } else if (int === 2) {
+        } else if (typeInt === 2) {
             return "Default status when placed into a route";
-        } else if (int === 3) {
+        } else if (typeInt === 3) {
             return "Task completed";
         } else {
             return "";
@@ -262,33 +257,39 @@ require(["jquery", "developer", "lib/kendo.web.min", "ui/colorPicker", "ui/kendo
     //after the data is loaded, assign the color picker to each of the current color boxes
     var onDataBound = function () {
         //get a reference to the grid widget
-        grid = $("#grid").data("kendoGrid");
+        grid = $("#dispatcherGrid").data("kendoGrid");
         //disable the checkboxes for the default rows
-        disableDefaultCheckboxes();
+        dispatcherSettings.disableDefaultCheckboxes();
         //get the BusinessAccountId from another row to be used to set in new rows
         busAcctId = grid._data[1].BusinessAccountId;
         //bind to the selection change event
         grid.bind("change", function () {
-            hideOrShowDeleteBtn();
+            enableOrDisableDelete();
             selectedItem = grid.dataItem(grid.select());
         });
         //detect cancel button click
-        $(".k-grid-cancel-changes").click(function () {
+        $("#dispatcher .cancelBtn").click(function () {
             //hide save and cancel buttons
-            hideOrShowSaveCancel(false);
+            enableOrDisableSaveCancel(false);
             //hide the delete button(there isn't a selected row after cancel is clicked)
-            $('.k-grid-delete').css('display', "none");
-            grid.dataSource.read();
+            $('#dispatcher .cancelBtn').attr("disabled", "disabled");
+            grid.dataSource.cancelChanges();
         });
         //detect add button click
-        $(".k-grid-add").click(function () {
-            // Show save and cancel buttons
-            hideOrShowSaveCancel(true);
+        $("#dispatcher .k-grid-add").click(function () {
+            grid.addRow();
+            //show save and cancel buttons
+            enableOrDisableSaveCancel(true);
+        });
+        $("#dispatcher .saveBtn").click(function () {
+            grid.saveChanges();
+            //hide save and cancel buttons
+            enableOrDisableSaveCancel(false);
         });
         //bind to grid edit event
         grid.bind("edit", function (e) {
             //disable the checkboxes for the default rows
-            disableDefaultCheckboxes();
+            dispatcherSettings.disableDefaultCheckboxes();
             if (e.sender._editContainer.context) {
                 if (e.sender._editContainer.context.cellIndex == 1) {
                     $('.colorSelector2').ColorPickerShow();
@@ -300,38 +301,27 @@ require(["jquery", "developer", "lib/kendo.web.min", "ui/colorPicker", "ui/kendo
             }
             //set the Id if it is empty
             if (!e.model.Id) {
-                e.model.Id = guidGenerator();
+                e.model.Id = tools.newGuid();
             }
         });
     };
 
     //removes the selected row from the grid(stays in pending changes until changes are saved)
-    var removeSelectedRow = function () {
+    dispatcherSettings.removeSelectedRow = function () {
         //get selected row
         var row = getSelectedRow(grid);
         //remove selected row
         grid.removeRow(row);
     };
 
-    /**
-     * Create a new unique Guid.
-     * @return {string} newGuidString
-     */
-    var guidGenerator = function () {
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-            var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
-            return v.toString(16);
-        });
-    };
-
     //hide the delete button if a default row is selected, otherwise show it
-    var hideOrShowDeleteBtn = function () {
+    var enableOrDisableDelete = function () {
         //get the selected row
         var row = getSelectedRow(grid);
         if (row[0].cells[3].innerHTML !== "") {
-            $('.k-grid-delete').css('display', "none");
+            $('#dispatcher .k-grid-delete').attr("disabled", "disabled");
         } else {
-            $('.k-grid-delete').css('display', "inline-block");
+            $('#dispatcher .k-grid-delete').removeAttr("disabled");
         }
     };
 
@@ -339,13 +329,13 @@ require(["jquery", "developer", "lib/kendo.web.min", "ui/colorPicker", "ui/kendo
      * Show the save button only if there are changes
      * @param {boolean} hasChanges
      */
-    var hideOrShowSaveCancel = function (hasChanges) {
+    var enableOrDisableSaveCancel = function (hasChanges) {
         if (hasChanges) {
-            $('.k-grid-save-changes').css('display', "inline-block");
-            $('.k-grid-cancel-changes').css('display', "inline-block");
+            $("#dispatcher .saveBtn").removeAttr("disabled");
+            $("#dispatcher .cancelBtn").removeAttr("disabled");
         } else {
-            $('.k-grid-save-changes').css('display', "none");
-            $('.k-grid-cancel-changes').css('display', "none");
+            $("#dispatcher .saveBtn").attr("disabled", "disabled");
+            $("#dispatcher .cancelBtn").attr("disabled", "disabled");
         }
     };
 
@@ -358,4 +348,6 @@ require(["jquery", "developer", "lib/kendo.web.min", "ui/colorPicker", "ui/kendo
         return g.tbody.find(".k-state-selected");
     };
     //endregion
+
+    window.dispatcherSettings = dispatcherSettings;
 });

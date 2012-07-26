@@ -5,9 +5,6 @@ define(["jquery", "session", "lib/kendo.all"], function ($, session) {
         Widget = ui.Widget;
 
     var SettingsMenu = Widget.extend({
-        //TODO some kind of navigate event
-        //onclick="settings.personal()"
-
         // method called when a new widget is created
         init: function (element, options) {
             var _menu, options;
@@ -22,27 +19,38 @@ define(["jquery", "session", "lib/kendo.all"], function ($, session) {
                 '<li class="active" onclick="window.navigateToPersonal()"><a>Personal</a></li>' +
                 '<li onclick="window.navigateToBusiness()"><a>Business</a></li>' +
                 '<li onclick="window.navigateToUsers()"><a>Users</a></li>' +
+                '<li onclick="window.navigateToDispatcher()"><a>Dispatcher</a></li>' +
                 '</ul>');
 
             var personalLi = _menu.find("li:nth-child(1)");
             var businessLi = _menu.find("li:nth-child(2)");
             var usersLi = _menu.find("li:nth-child(3)");
+            var dispatcherLi = _menu.find("li:nth-child(4)");
 
             if (options.selectedItem === "Personal") {
                 personalLi.addClass('active');
 
                 businessLi.removeClass('active');
                 usersLi.removeClass('active');
+                dispatcherLi.removeClass('active');
             } else if (options.selectedItem === "Business") {
                 businessLi.addClass('active');
 
                 personalLi.removeClass('active');
                 usersLi.removeClass('active');
+                dispatcherLi.removeClass('active');
             } else if (options.selectedItem === "Users") {
                 usersLi.addClass('active');
 
                 personalLi.removeClass('active');
                 businessLi.removeClass('active');
+                dispatcherLi.removeClass('active');
+            } else if (options.selectedItem === "Dispatcher") {
+                dispatcherLi.addClass('active');
+
+                personalLi.removeClass('active');
+                businessLi.removeClass('active');
+                usersLi.removeClass('active');
             }
 
             var adjustForRole = function () {
@@ -50,10 +58,12 @@ define(["jquery", "session", "lib/kendo.all"], function ($, session) {
                 if (!role || role.type != "Administrator") {
                     businessLi.css("display", "none");
                     usersLi.css("display", "none");
+                    dispatcherLi.css("display", "none");
                 } else {
                     //Show all settings if user is admin
                     businessLi.css("display", "block");
                     usersLi.css("display", "block");
+                    dispatcherLi.css("display", "block");
                 }
             };
 
