@@ -255,6 +255,7 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
             sBar.addClass("hidden");
             var offset = -1 * (sBar.offset().top + sBar.outerHeight());
             sBar.css("top", offset);
+            $("#sideBarWrapper").css('display', 'none');
         }else{
             //$(".iconShow").addClass("rotateIcon");
         }
