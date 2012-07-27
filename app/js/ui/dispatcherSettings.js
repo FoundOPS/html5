@@ -6,9 +6,13 @@
 
 "use strict";
 
-define(["developer", "tools", "db/services", "session", "widgets/settingsMenu", "ui/colorPicker",
+define(["developer", "tools", "db/services", "session", "widgets/settingsMenu", "widgets/saveCancel", "ui/colorPicker",
         "ui/kendoChanges"], function (developer, tools, dbServices, session) {
     var dispatcherSettings = {};
+
+    //add these for the SaveCancel widget(even thought they"re empty) so it won"t cause an error
+    dispatcherSettings.save = function () {};
+    dispatcherSettings.cancel = function () {};
 
     //region Locals
     var grid;
@@ -24,6 +28,11 @@ define(["developer", "tools", "db/services", "session", "widgets/settingsMenu", 
         var menu = $("#dispatcher .settingsMenu");
         kendo.bind(menu);
         menu.kendoSettingsMenu({selectedItem: "Dispatcher"});
+
+        //setup saveCancel widget
+        $("#dispatcher .saveCancel").kendoSaveCancel({
+            page: "dispatcher"
+        });
 
         var dataSource = new kendo.data.DataSource({
             transport: {
@@ -144,12 +153,43 @@ define(["developer", "tools", "db/services", "session", "widgets/settingsMenu", 
             }
         });
 
+        //center save/cancel buttons
+        var positionBtns = function () {
+            var gridWidth = $("#dispatcherGrid")[0].clientWidth;
+            $("#dispatcher .saveBtn").css("margin-left", gridWidth / 2 - 104 + "px");
+        };
+
+        positionBtns();
+
+        $(window).resize(function () {
+            positionBtns();
+        });
+
+        //detect cancel button click
+        $("#dispatcher .cancelBtn").click(function () {
+            //hide save and cancel buttons
+            enableOrDisableSaveCancel(false);
+            //hide the delete button(there isn't a selected row after cancel is clicked)
+            $('#dispatcher .cancelBtn').attr("disabled", "disabled");
+            $('#dispatcher .k-grid-delete').attr("disabled", "disabled");
+            grid.dataSource.cancelChanges();
+        });
+        //detect add button click
+        $("#dispatcher .k-grid-add").click(function () {
+            grid.addRow();
+            //show save and cancel buttons
+            enableOrDisableSaveCancel(true);
+        });
+        $("#dispatcher .saveBtn").click(function () {
+            grid.saveChanges();
+            //hide save and cancel buttons
+            enableOrDisableSaveCancel(false);
+        });
     }; //end initialize
 
     //endregion
 
     //region Methods
-
     //region Checkbox
 
     /**
@@ -266,25 +306,6 @@ define(["developer", "tools", "db/services", "session", "widgets/settingsMenu", 
         grid.bind("change", function () {
             enableOrDisableDelete();
             selectedItem = grid.dataItem(grid.select());
-        });
-        //detect cancel button click
-        $("#dispatcher .cancelBtn").click(function () {
-            //hide save and cancel buttons
-            enableOrDisableSaveCancel(false);
-            //hide the delete button(there isn't a selected row after cancel is clicked)
-            $('#dispatcher .cancelBtn').attr("disabled", "disabled");
-            grid.dataSource.cancelChanges();
-        });
-        //detect add button click
-        $("#dispatcher .k-grid-add").click(function () {
-            grid.addRow();
-            //show save and cancel buttons
-            enableOrDisableSaveCancel(true);
-        });
-        $("#dispatcher .saveBtn").click(function () {
-            grid.saveChanges();
-            //hide save and cancel buttons
-            enableOrDisableSaveCancel(false);
         });
         //bind to grid edit event
         grid.bind("edit", function (e) {

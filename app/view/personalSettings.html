@@ -1,6 +1,6 @@
-<div data-init="personalSettings.initialize" data-role="view" data-title="Personal User Settings" id="personal" data-stretch="true">
+<div data-init="personalSettings.initialize" data-role="view" data-title="Personal User Settings" id="personal">
     <div class="settingsMenu"></div>
-    <h1>Your Personal User Settings</h1>
+    <h1 class="title">Your Personal User Settings</h1>
     <div class="wrap">
         <h2>The Basics</h2>
         <form id="personalForm">
@@ -29,7 +29,6 @@
         <h2 class="middle">Password</h2>
         <button class="k-button k-button-icontext changePassword" onclick="window.navigateToChangePassword()"><span class="k-icon k-edit"></span>Change Your Password</button>
         <h2 style="height:15px;">&nbsp;</h2>
-        <button class="k-button k-button-icontext saveBtn" data-bind="click: saveChanges" disabled><span class="k-icon k-update"></span>Save</button>
-        <button class="k-button k-button-icontext cancelBtn" data-bind="click: cancelChanges" disabled><span class="k-icon k-cancel"></span>Cancel Changes</button>
+        <div class="saveCancel"></div>
     </div>
 </div>

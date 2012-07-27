@@ -103,6 +103,9 @@ require(["containers/navigator", "silverlight", "session", "lib/kendo.all", "ui/
     };
     window.navigateToDispatcher = function () {
         application.navigate("view/dispatcherSettings.html");
+        //center save/cancel buttons
+        var gridWidth = $("#dispatcherGrid")[0].clientWidth;
+        $("#dispatcher .saveBtn").css("margin-left", gridWidth / 2 - 104 + "px");
     };
     window.navigateToChangePassword = function () {
         application.navigate("view/changePassword.html");

@@ -1,6 +1,6 @@
-<div data-init="businessSettings.initialize" data-role="view" data-title="Business Settings" id="business" data-stretch="true">
+<div data-init="businessSettings.initialize" data-role="view" data-title="Business Settings" id="business">
     <div class="settingsMenu"></div>
-    <h1>Your Business Settings</h1>
+    <h1 class="title">Your Business Settings</h1>
     <div class="wrap">
         <h2>The Basics</h2>
         <form id="businessForm">
@@ -19,7 +19,6 @@
             <input type="hidden" id="imageData" name="imageData"/>
         </form>
         <h2 style="height: 17px;">&nbsp;</h2>
-        <button class="k-button k-button-icontext saveBtn" data-bind="click: saveChanges" disabled><span class="k-icon k-update"></span>Save</button>
-        <button class="k-button k-button-icontext cancelBtn" data-bind="click: cancelChanges" disabled><span class="k-icon k-cancel"></span>Cancel Changes</button>
+        <div class="saveCancel"></div>
     </div>
 </div>

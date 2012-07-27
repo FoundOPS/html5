@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(["db/services", "widgets/settingsMenu"], function (services) {
+define(["db/services", "tools", "widgets/settingsMenu", "widgets/saveCancel"], function (services, tools) {
     var changePassword = {};
 
     changePassword.save = function () {
@@ -18,16 +18,33 @@ define(["db/services", "widgets/settingsMenu"], function (services) {
             $("#old")[0].value = "";
             $("#new")[0].value = "";
             $("#confirm")[0].value = "";
+            tools.disableButtons("#changePassword");
+            window.navigateToPersonal();
         }
+    };
+
+    changePassword.cancel = function () {
+        $("#old")[0].value = "";
+        $("#new")[0].value = "";
+        $("#confirm")[0].value = "";
+        tools.disableButtons("#changePassword");
+        window.navigateToPersonal();
     };
 
     changePassword.initialize = function () {
         //setup menu
-        var menu = $("#pass .settingsMenu");
+        var menu = $("#changePassword .settingsMenu");
         kendo.bind(menu);
         menu.kendoSettingsMenu();
 
-        changePassword.validator = $("#passForm").kendoValidator({
+        //setup saveCancel widget
+        $("#changePassword .saveCancel").kendoSaveCancel({
+            page: "changePassword"
+        });
+
+        tools.observeInput("#changePassword");
+
+        changePassword.validator = $("#changePasswordForm").kendoValidator({
             rules: {
                 custom: function (input) {
                     return (input.is("[name=confirm]") && input.val() === $("#new")[0].value) || !(input.is("[name=confirm]"))

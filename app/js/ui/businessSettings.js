@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(["db/services", "developer", "ui/notifications", "session", "tools", "widgets/settingsMenu", "lib/jquery-ui-1.8.21.core.min",
+define(["db/services", "developer", "ui/notifications", "session", "tools", "widgets/settingsMenu", "widgets/saveCancel", "lib/jquery-ui-1.8.21.core.min",
     "lib/jquery.FileReader", "lib/swfobject"], function (dbServices, developer, notifications, session, tools) {
     var businessSettings = {};
 
@@ -16,15 +16,16 @@ define(["db/services", "developer", "ui/notifications", "session", "tools", "wid
     businessSettings.viewModel = kendo.observable({
         saveChanges: function () {
             if (businessSettings.validator.validate()) {
-                dbServices.updateBusinessSettings(this.get("settings"));
+                dbServices.updateBusinessSettings(businessSettings.viewModel.get("settings"));
             }
             //check if image has been changed and changes have not been canceled
             if (newImage && $("#imageData")[0].value != "") {
                 $("#businessImageUploadForm").submit();
             }
+            tools.disableButtons("#business");
         },
         cancelChanges: function (e) {
-            this.set("settings", businessSettings.settings);
+            businessSettings.viewModel.set("settings", businessSettings.settings);
             //clear the new image data
             $("#imageData")[0].value = "";
             $("#businessCropbox").css("width", businessSettings.imageWidth);
@@ -32,12 +33,21 @@ define(["db/services", "developer", "ui/notifications", "session", "tools", "wid
             tools.resizeImage("#businessCropbox", 200, 500);
 
             //if there is no image, hide the container
-            if (!e.data.settings.ImageUrl) {
+            if (!businessSettings.settings.ImageUrl) {
                 $("#businessCropbox").css("visibility", "hidden").css("width", "0px").css("height", "0px")
                     .css("margin-left", "0px");
             }
+            tools.disableButtons("#business");
         }
     });
+
+    //add these so save and cancel can be called from the SaveCancel widget
+    businessSettings.save = function () {
+        businessSettings.viewModel.saveChanges();
+    };
+    businessSettings.cancel = function () {
+        businessSettings.viewModel.cancelChanges();
+    };
 
     businessSettings.onImageLoad = function () {
         tools.resizeImage("#businessCropbox", 200, 500);
@@ -55,6 +65,13 @@ define(["db/services", "developer", "ui/notifications", "session", "tools", "wid
         var menu = $("#business .settingsMenu");
         kendo.bind(menu);
         menu.kendoSettingsMenu({selectedItem: "Business"});
+
+        //setup saveCancel widget
+        $("#business .saveCancel").kendoSaveCancel({
+            page: "businessSettings"
+        });
+
+        tools.observeInput("#business");
 
         var fileLoaded = function (evt) {
             var imageData = evt.target.result;
@@ -74,6 +91,7 @@ define(["db/services", "developer", "ui/notifications", "session", "tools", "wid
 
             //set so that the save changes event will also save the image
             newImage = true;
+            tools.enableButtons("#business");
 
             tools.resizeImage("#businessCropbox", 200, 500);
         };

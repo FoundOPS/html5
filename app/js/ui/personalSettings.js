@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(["db/services", "ui/notifications", "tools", "widgets/settingsMenu", "lib/jquery-ui-1.8.21.core.min",
+define(["db/services", "ui/notifications", "tools", "widgets/settingsMenu", "widgets/saveCancel", "lib/jquery-ui-1.8.21.core.min",
     "lib/jquery.FileReader", "lib/swfobject", "lib/jquery.form"], function (dbServices, notifications, tools) {
     var personalSettings = {};
 
@@ -22,21 +22,31 @@ define(["db/services", "ui/notifications", "tools", "widgets/settingsMenu", "lib
             if (newImage && $("#imageData")[0].value != "") {
                 $("#personalImageUploadForm").submit();
             }
+            tools.disableButtons("#personal");
         },
-        cancelChanges: function (e) {
+        cancelChanges: function () {
             personalSettings.viewModel.set("settings", personalSettings.settings);
             //clear the new image data
             $("#imageData")[0].value = "";
             $("#personalCropbox").css("width", personalSettings.imageWidth);
             $("#personalCropbox").css("height", personalSettings.imageHeight);
-            personalSettings.resizeImage("#personalCropbox");
+            tools.resizeImage("#personalCropbox");
             //if there is no image, hide the container
-            if (!e.data.settings.ImageUrl){
+            if (!personalSettings.settings.ImageUrl){
                 $("#personalCropbox").css("visibility", "hidden").css("width", "0px").css("height", "0px")
                     .css("margin-left", "0px");
             }
+            tools.disableButtons("#personal");
         }
     });
+
+    //add these so save and cancel can be called from the SaveCancel widget
+    personalSettings.save = function () {
+        personalSettings.viewModel.saveChanges();
+    };
+    personalSettings.cancel = function () {
+        personalSettings.viewModel.cancelChanges();
+    };
 
     personalSettings.onImageLoad = function () {
         tools.resizeImage("#personalCropbox", 200, 500);
@@ -53,6 +63,13 @@ define(["db/services", "ui/notifications", "tools", "widgets/settingsMenu", "lib
         var menu = $("#personal .settingsMenu");
         kendo.bind(menu);
         menu.kendoSettingsMenu({selectedItem: "Personal"});
+
+        //setup saveCancel widget
+        $("#personal .saveCancel").kendoSaveCancel({
+            page: "personalSettings"
+        });
+
+        tools.observeInput("#personal");
 
         var fileLoaded = function (evt) {
             var imageData = evt.target.result;
@@ -73,6 +90,7 @@ define(["db/services", "ui/notifications", "tools", "widgets/settingsMenu", "lib
 
             //set so that the save changes event will also save the image
             newImage = true;
+            tools.enableButtons("#personal");
             tools.resizeImage("#personalCropbox", 200, 500);
         };
 

@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(["db/services", "widgets/settingsMenu"], function (services) {
+define(["db/services", "tools", "widgets/settingsMenu"], function (services, tools) {
     var createPassword = {};
 
     createPassword.save = function () {
@@ -16,16 +16,21 @@ define(["db/services", "widgets/settingsMenu"], function (services) {
             services.createPassword(newPass, confirmPass);
             $("#createNew")[0].value = "";
             $("#createConfirm")[0].value = "";
+            tools.disableButtons("#createPassword");
         }
     };
 
     createPassword.initialize = function () {
         //setup menu
-        var menu = $("#createPass .settingsMenu");
+        var menu = $("#createPassword .settingsMenu");
         kendo.bind(menu);
         menu.kendoSettingsMenu();
 
-        createPassword.validator = $("#createPassForm").kendoValidator({
+        $("#createPassword input").on("change", function(){
+            tools.enableButtons("#createPassword");
+        });
+
+        createPassword.validator = $("#createPasswordForm").kendoValidator({
             rules: {
                 custom: function (input) {
                     return (input.is("[name=createConfirm]") && input.val() === $("#createNew")[0].value) || !(input.is("[name=createConfirm]"))
