@@ -14,18 +14,12 @@ define(["db/services", "widgets/imageUpload"], function (dbServices) {
             if (personalSettings.validator.validate()) {
                 dbServices.updatePersonalSettings(this.get("settings"));
             }
-            //upload image if it has been changed
             imageUpload.submitForm();
         },
         cancelChanges: function (e) {
             personalSettings.viewModel.set("settings", personalSettings.settings);
             imageUpload.setImageUrl(personalSettings.viewModel.get("settings.ImageUrl"));
             imageUpload.cancel();
-
-            //if there is no image, hide the container
-            if (!e.data.settings.ImageUrl) {
-                imageUpload.hideImage();
-            }
         }
     });
 
@@ -43,10 +37,6 @@ define(["db/services", "widgets/imageUpload"], function (dbServices) {
             personalSettings.settings = settings;
             personalSettings.viewModel.set("settings", settings);
             kendo.bind($("#personal"), personalSettings.viewModel);
-            //if there is no image, hide the container
-            if (!settings.ImageUrl) {
-                imageUpload.hideImage();
-            }
         });
 
         //setup image upload
@@ -57,7 +47,7 @@ define(["db/services", "widgets/imageUpload"], function (dbServices) {
         }).data("kendoImageUpload");
 
         personalSettings.viewModel.bind("change", function (e) {
-            if (e.field == "settings") {
+            if (e.field === "settings") {
                 //update the image url after it has been set
                 imageUpload.setImageUrl(personalSettings.viewModel.get("settings.ImageUrl"));
             }

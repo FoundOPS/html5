@@ -21,37 +21,20 @@ define(["tools", "ui/notifications", "db/services", "jquery", "lib/kendo.all", "
             templateElement = $(template);
 
             that.cropBox = $(templateElement[0]);
-            form = $(templateElement[2]);
+            that.form = $(templateElement[2]);
             that.imageFileNameField = templateElement.find("input[name=imageFileName]");
             that.imageDataField = templateElement.find("input[name=imageData]");
 
             //track if the image has changed
-            that._newImage = false;
-
-            //setup the form
-            that._ajaxForm = form.ajaxForm({
-                //from http://stackoverflow.com/questions/8151138/ie-jquery-form-multipart-json-response-ie-tries-to-download-response
-                dataType: "text",
-                contentType: "multipart/form-data",
-                url: that.options.uploadUrl,
-                success: function (response) {
-                    //get rid of the quotes, then set the image url
-                    var url = response.replace(/['"]/g, '');
-                    that.setImageUrl(url);
-                    that._newImage = false;
-                },
-                error: function () {
-                    notifications.error("Image");
-                }
-            });
+            that.newImage = false;
 
             that.cropBox.on("load", function () {
-                tools.resizeImage(that.cropBox, that.cropBox[0].width, that.options.containerWidth);
+                tools.resizeImage(that.cropBox, that.cropBox[0].naturalWidth, that.options.containerWidth);
             });
 
             //setup the FileReader on the imageUpload button
             //this will enable the flash FileReader polyfill from https://github.com/Jahdrien/FileReader
-            imageUploadButton = $(element[1]);
+            imageUploadButton = $(templateElement[1]);
             imageUploadButton.fileReader();
             imageUploadButton.on('change', function (evt) {
                 that._changeImage(evt);
@@ -62,11 +45,11 @@ define(["tools", "ui/notifications", "db/services", "jquery", "lib/kendo.all", "
         cancel: function () {
             var that = this;
             //clear the new image data
-            that.imageDataField.value("");
-//TODO store current user image
-//            that.cropBox.css("width", that.imageWidth);
-//            that.cropBox.css("height", that.imageHeight);
-//            tools.resizeImage(that.cropbox, ImageUpload.fn.options.imageWidth, ImageUpload.fn.options.containerWidth);
+            that.imageDataField.val("");
+            if (that.imageUrl) {
+                that.setImageUrl(that.imageUrl);
+            }
+            that.newImage = false;
         },
 
         _changeImage: function (evt) {
@@ -90,9 +73,7 @@ define(["tools", "ui/notifications", "db/services", "jquery", "lib/kendo.all", "
                 that.cropBox.css("visibility", "visible").css("width", "auto").css("height", "auto");
 
                 //set so that the save changes event will also save the image
-                that._newImage = true;
-
-                tools.resizeImage(that.cropBox, 200, 500);
+                that.newImage = true;
             };
 
             var file = evt.target.files[0];
@@ -114,34 +95,41 @@ define(["tools", "ui/notifications", "db/services", "jquery", "lib/kendo.all", "
             that.imageFileNameField.val(file.name);
         },
 
-//        hideImage:function () {
-//            upload.cropbox.css("visibility", "hidden").css("width", "0px").css("height", "0px");
-//        },
-
-//        setUploadUrl:function (url) {
-//            ImageUpload.fn.options.uploadUrl = url;
-//
-//            ImageUpload.fn._addAjaxForm();
-//        },
+        setUploadUrl: function (url) {
+            this.options.uploadUrl = url;
+        },
 
         submitForm: function () {
+            var that = this;
             //check if image has been changed, and image data was set
-            if (this._newImage && this.imageDataField.value !== "") {
-                this.form.submit();
+            if (that.newImage && that.imageDataField.val() !== "") {
+                that.form.ajaxSubmit({
+                    //from http://stackoverflow.com/questions/8151138/ie-jquery-form-multipart-json-response-ie-tries-to-download-response
+                    dataType: "text",
+                    contentType: "multipart/form-data",
+                    url: that.options.uploadUrl,
+                    success: function (response) {
+                        //get rid of the quotes, then set the image url
+                        var url = response.replace(/['"]/g, '');
+                        that.setImageUrl(url);
+                        that.newImage = false;
+                    },
+                    error: function () {
+                        notifications.error("Image");
+                    }
+                });
             }
         },
         setImageUrl: function (imageUrl) {
+            //store the current image url
+            this.imageUrl = imageUrl;
             this.cropBox.attr("src", imageUrl);
         },
         options: new kendo.data.ObservableObject({
             name: "ImageUpload",
             uploadUrl: "",
-            imageWidth: 0,
-            containerWidth: 0
-        }),
-        items: function () {
-            return this.element.children();
-        }
+            containerWidth: 500
+        })
     });
 
     ui.plugin(ImageUpload);

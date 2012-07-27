@@ -7,25 +7,19 @@
 "use strict";
 
 define(["db/services", "developer", "ui/notifications", "session", "tools", "widgets/imageUpload", "widgets/settingsMenu"], function (dbServices, developer, notifications, session, tools, upload) {
-    var businessSettings = {};
+    var businessSettings = {}, imageUpload;
 
     businessSettings.viewModel = kendo.observable({
         saveChanges: function () {
             if (businessSettings.validator.validate()) {
                 dbServices.updateBusinessSettings(this.get("settings"));
             }
-            //upload image if it has been changed
-            upload.submitForm();
+            imageUpload.submitForm();
         },
         cancelChanges: function (e) {
             businessSettings.viewModel.set("settings", businessSettings.settings);
-            upload.setImageUrl(businessSettings.viewModel.get("settings.ImageUrl"));
-            upload.cancel();
-
-            //if there is no image, hide the container
-            if (!e.data.settings.ImageUrl) {
-                upload.hideImage();
-            }
+            imageUpload.setImageUrl(businessSettings.viewModel.get("settings.ImageUrl"));
+            imageUpload.cancel();
         }
     });
 
@@ -43,41 +37,30 @@ define(["db/services", "developer", "ui/notifications", "session", "tools", "wid
             businessSettings.settings = settings;
             businessSettings.viewModel.set("settings", settings);
             kendo.bind($("#business"), businessSettings.viewModel);
-            //if there is no image, hide the container
-            if (!settings.ImageUrl) {
-                upload.hideImage();
-            }
         });
 
         //setup image upload
-        var imageUpload = $("#businessImageUpload");
-        kendo.bind(imageUpload);
-
-        imageUpload.kendoImageUpload({
+        imageUpload = $("#businessImageUpload").kendoImageUpload({
             uploadUrl: dbServices.API_URL + "settings/UpdateBusinessImage",
             imageWidth: 200,
             containerWidth: 500
-        });
+        }).data("kendoImageUpload");
 
         businessSettings.viewModel.bind("change", function (e) {
-            if(e.field == "settings"){
+            if (e.field === "settings") {
                 //update the image url after it has been set
-                upload.setImageUrl(businessSettings.viewModel.get("settings.ImageUrl"));
+                imageUpload.setImageUrl(businessSettings.viewModel.get("settings.ImageUrl"));
             }
         });
 
-        var setupDataSourceUrls = function () {
-            var roleId = session.get("role.id");
-            if (!roleId) {
-                return;
-            }
-            //set the roleId in the form action
-            upload.setUploadUrl(dbServices.API_URL + "settings/UpdateBusinessImage?roleId=" + roleId);
-        };
-        //update the form url after the role has been set
+        //update the imageUploadUrl after the role has been set
         session.bind("change", function (e) {
-            if (e.field == "role") {
-                setupDataSourceUrls();
+            if (e.field === "role") {
+                var roleId = session.get("role.id");
+                if (!roleId) {
+                    return;
+                }
+                imageUpload.setUploadUrl(dbServices.API_URL + "settings/UpdateBusinessImage?roleId=" + roleId);
             }
         });
     };

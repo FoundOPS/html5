@@ -9,7 +9,7 @@ define(['db/services', 'session', 'underscore'], function (dbservices, session) 
 
     //resize the silverlight container to the proper size according to the window size
     var resizeContainers = function () {
-        if(!currentSection || !currentSection.isSilverlight){
+        if (!currentSection || !currentSection.isSilverlight) {
             return;
         }
         //from navigator.less: navHeight = 45px
