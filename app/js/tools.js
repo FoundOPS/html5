@@ -158,15 +158,14 @@ define(['underscore', 'developer'], function (_, developer) {
     /**
      * Resize an image using the proper ratio to have no dimension larger than maxSize
      * Then center the image based on the parent container's width
-     * @param element The name of the element
+     * @param element The jQuery element selector
      * @param {number} maxSize
      * @param {number} containerWidth
      */
     tools.resizeImage = function (element, maxSize, containerWidth) {
-        var imageDiv = $(element);
         //get the original dimensions of the image
-        var width = imageDiv[0].width;
-        var height = imageDiv[0].height;
+        var width = element[0].width;
+        var height = element[0].height;
         //get the ratio for each dimension
         var w = maxSize / width;
         var h = maxSize / height;
@@ -177,11 +176,11 @@ define(['underscore', 'developer'], function (_, developer) {
         var newH = ratio * height;
 
         //set the final sizes
-        imageDiv.css("width", newW + "px");
-        imageDiv.css("height", newH + "px");
+        element.css("width", newW + "px");
+        element.css("height", newH + "px");
         //center the image
         var margin = (containerWidth - newW) / 2;
-        imageDiv.css("marginLeft", margin + "px");
+        element.css("marginLeft", margin + "px");
     };
 
     return tools;

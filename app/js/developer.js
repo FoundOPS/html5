@@ -38,7 +38,7 @@ define(function () {
      * The current web service source.
      * @type {developer.DataSource}
      */
-    developer.CURRENT_DATA_SOURCE = developer.DataSource.LIVE;
+    developer.CURRENT_DATA_SOURCE = developer.DataSource.LOCALAPI;
 
     /**
      * This is for sections that are in the Silverlight application and is used for debugging.

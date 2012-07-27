@@ -6,8 +6,8 @@
 
 "use strict";
 
-define(["db/services", "ui/notifications", "widgets/imageUpload", "widgets/settingsMenu"], function (dbServices, notifications, upload) {
-    var personalSettings = {};
+define(["db/services", "widgets/imageUpload"], function (dbServices) {
+    var personalSettings = {}, imageUpload;
 
     personalSettings.viewModel = kendo.observable({
         saveChanges: function () {
@@ -15,16 +15,16 @@ define(["db/services", "ui/notifications", "widgets/imageUpload", "widgets/setti
                 dbServices.updatePersonalSettings(this.get("settings"));
             }
             //upload image if it has been changed
-            upload.submitForm();
+            imageUpload.submitForm();
         },
         cancelChanges: function (e) {
             personalSettings.viewModel.set("settings", personalSettings.settings);
-            upload.setImageUrl(personalSettings.viewModel.get("settings.ImageUrl"));
-            upload.cancel();
+            imageUpload.setImageUrl(personalSettings.viewModel.get("settings.ImageUrl"));
+            imageUpload.cancel();
 
             //if there is no image, hide the container
             if (!e.data.settings.ImageUrl) {
-                upload.hideImage();
+                imageUpload.hideImage();
             }
         }
     });
@@ -45,24 +45,21 @@ define(["db/services", "ui/notifications", "widgets/imageUpload", "widgets/setti
             kendo.bind($("#personal"), personalSettings.viewModel);
             //if there is no image, hide the container
             if (!settings.ImageUrl) {
-                upload.hideImage();
+                imageUpload.hideImage();
             }
         });
 
         //setup image upload
-        var imageUpload = $("#personalImageUpload");
-        kendo.bind(imageUpload);
-
-        imageUpload.kendoImageUpload({
+        imageUpload = $("#personalImageUpload").kendoImageUpload({
             uploadUrl: dbServices.API_URL + "settings/UpdateUserImage",
             imageWidth: 200,
             containerWidth: 500
-        });
+        }).data("kendoImageUpload");
 
         personalSettings.viewModel.bind("change", function (e) {
             if (e.field == "settings") {
                 //update the image url after it has been set
-                upload.setImageUrl(personalSettings.viewModel.get("settings.ImageUrl"));
+                imageUpload.setImageUrl(personalSettings.viewModel.get("settings.ImageUrl"));
             }
         });
     };
