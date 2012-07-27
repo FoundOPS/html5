@@ -29,9 +29,6 @@ table{border-collapse: collapse;border-spacing: 0;}
 .k-slider-vertical .k-tick{background-image:url('img/slider-v.gif')}
 .k-tile .k-folder{background-image:url('img/imagebrowser.png')}
 
-.km-vertical-scrollbar, .km-horizontal-scrollbar{
-    height: 0;
-}
 .km-view{
     z-index: 1;
 }
@@ -168,7 +165,7 @@ button:hover{
 /*endregion*/
 /*region Settings -Personal */
 #personal .wrap, #business .wrap, #pass .wrap, #createPass .wrap{
-    width: 500px;
+    max-width: 500px;
     padding: 15px;
 }
 #personal h2.middle, #business h2.middle{
@@ -327,6 +324,28 @@ button:hover{
 .k-edit-form-container .k-dropdown{
     width: 157px;
 }
+
+.km-scroll-container{
+    -webkit-user-select: auto;
+    -moz-user-select: auto;
+}
+
+.km-vertical-scrollbar, .km-horizontal-scrollbar{
+    display: none;
+    height: 0;
+}
+
+/* Stretched View */
+.km-stretched-view {
+    display: block;
+    overflow: visible;
+    height: auto;
+}
+.km-stretched-view > * {
+    width: auto;
+}
+
+
 /*endregion*/
 /*region Noty*/
 /*region Noty Base*/
