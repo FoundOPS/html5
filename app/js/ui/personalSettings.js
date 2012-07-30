@@ -57,7 +57,7 @@ define(["db/services", "ui/notifications", "tools", "widgets/settingsMenu", "wid
     };
 
     personalSettings.initialize = function () {
-        personalSettings.validator = $("#personalForm").kendoValidator().data("kendoValidator");
+        personalSettings.validator = $(".personalForm").kendoValidator().data("kendoValidator");
 
         //setup menu
         var menu = $("#personal .settingsMenu");
@@ -142,6 +142,43 @@ define(["db/services", "ui/notifications", "tools", "widgets/settingsMenu", "wid
             if (!settings.ImageUrl) {
                 $("#personalCropbox").css("visibility", "hidden").css("width", "0px").css("height", "0px");
             }
+
+            //get the list of timezones
+            dbServices.getTimeZones(function (timeZones) {
+                personalSettings.timeZones = timeZones;
+
+                $("#TimeZone").kendoDropDownList({
+                    dataSource: personalSettings.timeZones,
+                    dataTextField: "DisplayName",
+                    dataValueField: "DisplayName"
+                });
+
+                if(!personalSettings.viewModel.get("settings.TimeZoneInfo")){
+                    var today = new Date().toString();
+
+                    var timezone;
+                    if(today.match(/Eastern/)){
+                        timezone = "(UTC-05:00) Eastern Time (US & Canada)";
+                    }else if(today.match(/Central/)){
+                        timezone = "(UTC-06:00) Central Time (US & Canada)";
+                    }else if(today.match(/Mountain/)){
+                        timezone = "(UTC-07:00) Mountain Time (US & Canada)";
+                    }else if(today.match(/Pacific/)){
+                        timezone = "(UTC-08:00) Pacific Time (US & Canada)";
+                    }else if(today.match(/Alaska/)){
+                        timezone = "(UTC-09:00) Alaska";
+                    }else if(today.match(/Hawaii/)){
+                        timezone = "(UTC-10:00) Hawaii";
+                    }
+
+                    var dropDownList = $("#TimeZone").data("kendoDropDownList");
+                    dropDownList.select(function (dataItem) {
+                        return dataItem.DisplayName === timezone;
+                    });
+
+                    tools.enableButtons("#personal");
+                }
+            });
         });
     };
 

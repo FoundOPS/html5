@@ -205,7 +205,7 @@ define(['underscore', 'developer'], function (_, developer) {
             // Save current value of element
             $(this).data('oldVal', $(this).val());
             // Look for changes in the value
-            $(this).bind("propertychange keyup input paste", function(){
+            $(this).bind("propertychange keyup input paste change", function(){
                 // If value has changed...
                 if ($(this).data('oldVal') != $(this).val()) {
                     // Updated stored value

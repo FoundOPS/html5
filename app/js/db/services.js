@@ -196,6 +196,9 @@ define(["developer", "tools", "ui/notifications", "lib/xdr"], function (develope
             }));
     };
 
+    // Get TimeZones.
+    services.getTimeZones = services._getHttp('settings/GetTimeZones', {}, false);
+
     /**
      * Creates personal password(for initial login).
      * @param {string} newPass.

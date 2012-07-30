@@ -21,7 +21,7 @@ define(["developer", "db/services", "session", "ui/notifications", "widgets/sett
         });
     };
 
-    //the datasource for the Linked Employee drop down on the edit user popup
+    //the datasource for the Linked Employee dropdown on the edit user popup
     usersSettings.availableEmployeesDataSource = new kendo.data.DataSource({});
 
     //region Setup users dataSource
