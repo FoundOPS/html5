@@ -63,6 +63,25 @@ span.k-tooltip {
     position: relative;
     display: block;
 }
+
+.km-scroll-container{
+    -webkit-user-select: auto;
+    -moz-user-select: auto;
+}
+
+#remoteContent{
+    height: 100%;
+}
+.km-view{
+    height: 100%;
+}
+.km-content{
+    height: 100%;
+}
+.km-scroll-container{
+    height: 100%;
+}
+
 /*endregion*/
 /*region Variables*/
 @blue:#488FCD;
@@ -165,7 +184,7 @@ button:hover{
 /*endregion*/
 /*region Settings -Personal */
 #personal .wrap, #business .wrap, #pass .wrap, #createPass .wrap{
-    max-width: 500px;
+    width: 500px;
     padding: 15px;
 }
 #personal h2.middle, #business h2.middle{
@@ -324,28 +343,6 @@ button:hover{
 .k-edit-form-container .k-dropdown{
     width: 157px;
 }
-
-.km-scroll-container{
-    -webkit-user-select: auto;
-    -moz-user-select: auto;
-}
-
-.km-vertical-scrollbar, .km-horizontal-scrollbar{
-    display: none;
-    height: 0;
-}
-
-/* Stretched View */
-.km-stretched-view {
-    display: block;
-    overflow: visible;
-    height: auto;
-}
-.km-stretched-view > * {
-    width: auto;
-}
-
-
 /*endregion*/
 /*region Noty*/
 /*region Noty Base*/
