@@ -78,7 +78,7 @@ require(["containers/navigator", "silverlight", "session", "lib/kendo.all", "ui/
     });
 
     //hookup remote loading into remoteContent, by using the kendo mobile application
-    application = new kendo.mobile.Application($("#remoteContent"), { initial: "view/updates.html"});
+    window.application = application = new kendo.mobile.Application($("#remoteContent"), { initial: "view/updates.html"});
 
     //setup page tracking
     try {
