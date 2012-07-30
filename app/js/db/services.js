@@ -120,19 +120,7 @@ define(["developer", "tools", "ui/notifications", "lib/xdr"], function (develope
         return getThenInvokeCallback;
     };
 
-    /**
-     * Get the current session for the user
-     */
-    services.getSession = services._getHttp('settings/GetSession', {}, true);
-
-    /**
-     * Get the current service provider's Routes.
-     * @param {string} serviceDateUtc The service date to get routes for (in Utc).
-     * @param {!function(Array.<Object>)} callback A callback to pass the loaded routes to.
-     */
-    services.getRoutes = function (serviceDateUtc, callback) {
-        return services._getHttp('routes/GetRoutes', {serviceDateUtc: serviceDateUtc}, false)(callback);
-    };
+    //region Depots, Routes, TrackPoints
 
     /**
      * Get the service provider's depots.
@@ -145,6 +133,15 @@ define(["developer", "tools", "ui/notifications", "lib/xdr"], function (develope
      * @param {!function(Array.<Object>)} callback The callback to pass the resources with latest points after they are loaded.
      */
     services.getResourcesWithLatestPoints = services._getHttp('trackpoint/GetResourcesWithLatestPoints', {}, false);
+
+    /**
+     * Get the current service provider's Routes.
+     * @param {string} serviceDateUtc The service date to get routes for (in Utc).
+     * @param {!function(Array.<Object>)} callback A callback to pass the loaded routes to.
+     */
+    services.getRoutes = function (serviceDateUtc, callback) {
+        return services._getHttp('routes/GetRoutes', {serviceDateUtc: serviceDateUtc}, false)(callback);
+    };
 
     /**
      * Get the service provider's TrackPoints.
@@ -175,26 +172,29 @@ define(["developer", "tools", "ui/notifications", "lib/xdr"], function (develope
             });
     };
 
-    /**
-     * Get personal user settings.
-     * @param {!function(Array.<Object>)} callback A callback to pass the loaded settings.
-     */
-    services.getPersonalSettings = services._getHttp('settings/GetPersonalSettings', {}, false);
+    //endregion
+
+    //region Services
 
     /**
-     * Updates personal user settings.
-     * @param {!function(Array.<Object>)} settings The loaded settings.
+     * Get the service and its fields.
+     * Need to pass the serviceId or the occurDate and the recurringServiceId.
+     * @param {?string} serviceId
+     * @param {?string} serviceDate
+     * @param {?string} recurringServiceId
+     * @param {!function(Object)} callback The callback to pass the Service it is loaded.
      */
-    services.updatePersonalSettings = function (settings) {
-        return notifications.linkNotification(
-            $.ajax({
-                url: services.API_URL + "settings/UpdatePersonalSettings?roleId=" + services.RoleId,
-                type: "POST",
-                dataType: "json",
-                contentType: 'application/json',
-                data: JSON.stringify(settings)
-            }));
+    services.getServiceDetails = function (serviceId, serviceDate, recurringServiceId, callback) {
+        return services._getHttp('service/GetServiceDetails',
+            {serviceId: serviceId, serviceDate: serviceDate, recurringServiceId: recurringServiceId}, false)(function (data) {
+            //It will only have one item
+            callback(data[0]);
+        });
     };
+
+    //endregion
+
+    //region Settings
 
     /**
      * Creates personal password(for initial login).
@@ -208,6 +208,21 @@ define(["developer", "tools", "ui/notifications", "lib/xdr"], function (develope
                 type: "POST"
             }));
     };
+
+    // Get Employees.
+    services.getAllEmployeesForBusiness = services._getHttp('settings/GetAllEmployeesForBusiness', {}, false);
+
+    /**
+     * Get business settings
+     * @param roleId The role to get the business settings for
+     */
+    services.getBusinessSettings = services._getHttp('settings/GetBusinessSettings', {}, false);
+
+    /**
+     * Get personal user settings.
+     * @param {!function(Array.<Object>)} callback A callback to pass the loaded settings.
+     */
+    services.getPersonalSettings = services._getHttp('settings/GetPersonalSettings', {}, false);
 
     /**
      * Updates personal password.
@@ -224,12 +239,6 @@ define(["developer", "tools", "ui/notifications", "lib/xdr"], function (develope
     };
 
     /**
-     * Get business settings
-     * @param roleId The role to get the business settings for
-     */
-    services.getBusinessSettings = services._getHttp('settings/GetBusinessSettings', {}, false);
-
-    /**
      * Updates businesssettings.
      * @param {(Array.<Object>)} settings The updated settings.
      */
@@ -244,8 +253,24 @@ define(["developer", "tools", "ui/notifications", "lib/xdr"], function (develope
             }));
     };
 
-    // Get Employees.
-    services.getAllEmployeesForBusiness = services._getHttp('settings/GetAllEmployeesForBusiness', {}, false);
+    /**
+     * Updates personal user settings.
+     * @param {!function(Array.<Object>)} settings The loaded settings.
+     */
+    services.updatePersonalSettings = function (settings) {
+        return notifications.linkNotification(
+            $.ajax({
+                url: services.API_URL + "settings/UpdatePersonalSettings?roleId=" + services.RoleId,
+                type: "POST",
+                dataType: "json",
+                contentType: 'application/json',
+                data: JSON.stringify(settings)
+            }));
+    };
+
+    //endregion
+
+    //region User
 
     /**
      * Authenticate the user.
@@ -257,9 +282,16 @@ define(["developer", "tools", "ui/notifications", "lib/xdr"], function (develope
         return services._getHttp('auth/Login', {email: email, pass: password}, true, null)(callback);
     };
 
+    /**
+     * Get the current session for the user
+     */
+    services.getSession = services._getHttp('settings/GetSession', {}, true);
+
     services.logout = function (callback) {
         return services._getHttp('auth/LogOut')(callback);
     };
+
+    //endregion
 
     services.trackError = function (error, business, section) {
         $.ajax({

@@ -24,13 +24,98 @@ require.config({
     }
 });
 
-require(["jquery", "underscore", "lib/kendo.all.min", "developer", "db/services", "tools", "lib/moment"], function ($, u, k, developer, dbServices, tools, m) {
-    var services = {};
+require(["jquery", "underscore", "lib/kendo.all.min", "developer", "db/services", "tools", "lib/moment"], function ($, _, k, developer, dbServices, tools) {
+    var services = {}, serviceHoldersDataSource;
 
     //set services to a global function, so the functions are accessible from the HTML element
     window.services = services;
 
     services.viewModel = kendo.observable({});
+
+    /**
+     * A kendo data source for Services for the current business account.
+     * It is initialized every time the data is loaded because the data schema is dynamic
+     * and kendo datasource does not allow you to change the schema.
+     * @param {Date} startDate The first date to load services for
+     * @param {Date} endDate The last date to load services for
+     * @param {!function(kendo.data.DataSource, Array.<Object>, Array.<Object>} callback When the data is loaded it will call
+     * this function and pass 3 parameters: the datasource, the fields, and the formatted data
+     */
+    var getDataSource = function (startDate, endDate, callback) {
+        var formatResponse = function (data) {
+            //The types will be returned in the first row
+            var types = _.first(data);
+
+            //Setup the data source fields info
+            var fields = {};
+            _.each(types, function (type, name) {
+                //Example ShipCity: { type: "string" }
+                var field = {};
+                var jType;
+                if (type === "System.Decimal") {
+                    jType = "number";
+                } else if (type === "System.DateTime") {
+                    jType = "date";
+                } else if (type === "System.String" || type === "System.Guid") {
+                    jType = "string";
+                } else {
+                    return;
+                }
+                var fieldValues = {type: jType, defaultValue: ""};
+
+                if (type === "System.Guid") {
+                    fieldValues.hidden = true;
+                }
+
+                //Add the type to fields
+                fields[name] = fieldValues;
+            });
+
+            //format the data
+            var formattedData = [];
+            //exclude the type data in the first row
+            _.each(_.rest(data), function (row) {
+                var formattedRow = {};
+                //go through each field type, and convert the data to the proper type
+                _.each(fields, function (value, key) {
+                    var originalValue = row[key];
+                    var convertedValue;
+                    if (originalValue === null) {
+                        convertedValue = "";
+                    } else if (value.type === "number") {
+                        convertedValue = parseFloat(originalValue);
+                    } else if (value.type === "date") {
+                        convertedValue = new Date(originalValue);
+                    } else if (value.type === "string") {
+                        convertedValue = originalValue.toString();
+                    } else {
+                        return;
+                    }
+
+                    formattedRow[key] = convertedValue;
+                });
+
+                formattedData.push(formattedRow);
+            });
+
+            //Setup the datasource
+            serviceHoldersDataSource = new kendo.data.DataSource({
+                data: formattedData,
+                schema: {
+                    model: {
+                        id: "ServiceId",
+                        fields: fields
+                    }
+                }
+            });
+
+            serviceHoldersDataSource.sort({ field: "OccurDate", dir: "asc" });
+
+            callback(fields, formattedData);
+        };
+
+        dbServices._getHttp("service/GetServicesHoldersWithFields", {startDate: tools.formatDate(startDate), endDate: tools.formatDate(endDate)}, false)(formatResponse);
+    };
 
     services.initialize = function () {
         var resizeGrid = function () {
@@ -44,9 +129,7 @@ require(["jquery", "underscore", "lib/kendo.all.min", "developer", "db/services"
             var tableContentHeight = contentHeight - (gridPagerHeight + gridHeaderHeight);
             $('#grid .k-grid-content').css("height", tableContentHeight + 'px');
         };
-        var setupGrid = function (dataSource, fields) {
-            services.dataSource = dataSource;
-
+        var setupGrid = function (fields) {
             //Setup the columns based on the fields
             var columns = [];
             _.each(fields, function (value, key) {
@@ -83,7 +166,7 @@ require(["jquery", "underscore", "lib/kendo.all.min", "developer", "db/services"
                     });
                 },
                 columns: columns,
-                dataSource: dataSource,
+                dataSource: serviceHoldersDataSource,
                 filterable: true,
                 sortable: {
                     mode: "multiple"
@@ -100,7 +183,7 @@ require(["jquery", "underscore", "lib/kendo.all.min", "developer", "db/services"
             var startDate = startDatePicker.data("kendoDatePicker").value();
             var endDate = endDatePicker.data("kendoDatePicker").value();
 
-            dbServices.servicesDataSource(startDate, endDate, setupGrid);
+            getDataSource(startDate, endDate, setupGrid);
         };
 
         startDatePicker.kendoDatePicker({
@@ -127,12 +210,6 @@ require(["jquery", "underscore", "lib/kendo.all.min", "developer", "db/services"
     };
 
     services.exportToCSV = function () {
-        tools.toCSV(services.dataSource.view(), "Services", true, ['RecurringServiceId', 'ServiceId']);
+        tools.toCSV(serviceHoldersDataSource.view(), "Services", true, ['RecurringServiceId', 'ServiceId']);
     };
-
-    //for debugging
-    dbServices.setRoleId(developer.GOTGREASE_ROLE_ID);
-
-    //Start the mobile application - must be at the bottom of the code.
-    var app = new kendo.mobile.Application($(document.body));
 });

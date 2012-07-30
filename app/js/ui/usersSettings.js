@@ -111,7 +111,7 @@ define(["developer", "db/services", "session", "ui/notifications", "widgets/sett
     };
     setupDataSourceUrls();
     session.bind("change", function (e) {
-        if (e.field == "role") {
+        if (e.field === "role") {
             setupDataSourceUrls();
         }
     });

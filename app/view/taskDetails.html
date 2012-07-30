@@ -1,0 +1,121 @@
+<div id="taskDetailsView" data-role="view" data-layout="mobile-view" data-model="mobile.viewModel"
+     data-title="Task Details" data-transition="slide">
+
+    <ul id="fieldsFormListView "data-bind="source:taskFieldsSource" data-role="listview"
+        data-style="inset" data-template="taskFieldsTemplate"></ul>
+
+    <p style="margin-bottom: -3px;">Task Status</p>
+    <hr style="width:90%;"/>
+    <p>
+    <a data-role="button" data-rel="actionsheet" href="\\#statuses">Open Actionsheet</a>
+    <ul data-role="actionsheet" id="statuses" data-open="mobile.onOpen" data-popup='{"direction": "up"}'>
+        <li class="km-actionsheet-title">Task Status</li>
+        <li><a href="#" data-action="mobile.complete">Complete</a></li>
+        <li><a href="#" data-action="mobile.onHold">On Hold</a></li>
+        <li><a href="#" data-action="mobile.incomplete">Incomplete</a></li>
+    </ul>
+    </p>
+</div>
+<script type="text/x-kendo-template" id="taskFieldsTemplate">
+    <p id="taskFieldName" style="line-height:0;">${data.Name}</p>
+        # switch (data.Type) {
+        case "TextBoxField":
+            if (data.IsMultiLine) {
+                if(data.Value) { #
+                    <textarea id="textarea" data-fieldId="${data.Id}" name="notes" cols="32" rows="5" onchange="mobile.pushServiceData(this);">${data.Value}</textarea>
+                # } else { #
+                    <textarea id="textarea" data-fieldId="${data.Id}" name="notes" cols="32" rows="5" onchange="mobile.pushServiceData(this);"></textarea>
+                # }
+            } else {
+                if (data.Value) { #
+                    <input id="textbox" data-fieldId="${data.Id}" type="text" value="${data.Value}" onchange="mobile.pushServiceData(this);"/>
+                # } else { #
+                    <input id="textbox" data-fieldId="${data.Id}" type="text" value="" onchange="mobile.pushServiceData(this);"/>
+                # }
+            }
+            break;
+        case "NumericField":
+            if(data.Value) { #
+                <input id="number" data-fieldId="${data.Id}" type="number" step="1" value="${data.Value}" onchange="mobile.pushServiceData(this);"/>
+            # } else { #
+                <input id="number" data-fieldId="${data.Id}" type="number" step="1" value="" onchange="mobile.pushServiceData(this);"/>
+            # }
+            break;
+        case "OptionsField":
+            if (data.TypeInt === 0) { #
+                <select id="dropdown" data-fieldId="${data.Id}" onchange="mobile.pushServiceData(this);">
+                    # for (var i = 0; i<data.Options.length; i++) {
+                        if (data.Options[i].IsChecked === true) { #
+                            <option value="${data.Options[i].Name}" data-optionid="${data.Options[i].Id}" selected="true">
+                                <span>${data.Options[i].Name}</span>
+                            </option>
+                        # } else { #
+                            <option value="${data.Options[i].Name}" data-optionid="${data.Options[i].Id}">
+                                <span>${data.Options[i].Name}</span>
+                            </option>
+                        # }
+                    } #
+                </select>
+            # } else if (data.TypeInt === 1) { #
+                <ul data-role="listview" data-style="inset">
+                    # for (var i = 0; i<data.Options.length; i++) {
+                        if(data.Options[i].IsChecked) { #
+                            <li style="line-height:.5em; font-size:1em;"><label>
+                                <input style="width:10px; height:10px; top:15px;" id="checkbox" data-fieldId="${data.Id}" data-optionid="${data.Options[i].Id}" type="checkbox" value="${data.Options[i].Name}" checked="checked" onchange="mobile.pushServiceData(this);"/>
+                                <span>${data.Options[i].Name}</span>
+                            </label></li>
+                        # } else { #
+                            <li style="line-height:.5em; font-size:1em;"><label>
+                                <input style="width:10px; height:10px; top:15px;" id="checkbox" data-fieldId="${data.Id}" data-optionid="${data.Options[i].Id}" type="checkbox" value="${data.Options[i].Name}" onchange="mobile.pushServiceData(this);"/>
+                                <span>${data.Options[i].Name}</span>
+                            </label></li>
+                        # }
+                    } #
+                </ul>
+            # } else if (data.TypeInt === 2) { #
+                <ul data-role="listview" data-style="inset" style="">
+                    # for (var i = 0; i<data.Options.length; i++) {
+                        if(data.Options[i].IsChecked) { #
+                            <li style="line-height:.5em; font-size:1em;"><label>
+                                <input style="width:10px; height:10px; top:15px;" id="checklist" data-fieldId="${data.Id}" data-optionid="${data.Options[i].Id}" type="checkbox" value="${data.Options[i].Name}" checked="checked" onchange="mobile.pushServiceData(this);"/>
+                                <span>${data.Options[i].Name}</span>
+                            </label></li>
+                        # } else { #
+                            <li style="line-height:.5em; font-size:1em;"><label>
+                                <input style="width:10px; height:10px; top:15px;" id="checklist" data-fieldId="${data.Id}" data-optionid="${data.Options[i].Id}" type="checkbox" value="${data.Options[i].Name}" onchange="mobile.pushServiceData(this);"/>
+                                <span>${data.Options[i].Name}</span>
+                            </label></li>
+                        # }
+                    } #
+                </ul>
+            # }
+            break;
+        case "DateTimeField": #
+            <div style="width:110px; height:55px; float:left; text-align:center; font-size:12px; margin-bottom:-10px">
+                # if (data.Earliest) {
+                    mobile.earlDate = new Date(data.Earliest);#
+                    <input id="earliest-textbox" data-fieldId="${data.Id}" type="text" value="${data.Earliest}" size="5" onchange="mobile.pushServiceData(this);"/>
+                # } else { #
+                    <input id="earliest-textbox" data-fieldId="${data.Id}" type="text" value="" size="5" onchange="mobile.pushServiceData(this);"/>
+                # } #
+                <label id="earl-text-label" for="earliest-textbox">Earliest</label>
+            </div>
+            <div style="width:110px; height:55px; float:left; text-align:center; font-size:12px; margin-bottom:-10px">
+                # if (data.Value) { #
+                    <input id="default-textbox" data-fieldId="${data.Id}" type="text" value="${data.Value}" size="5" onchange="mobile.pushServiceData(this);"/>
+                # } else { #
+                    <input id="default-textbox" data-fieldId="${data.Id}" type="text" value="" size="5" onchange="mobile.pushServiceData(this);"/>
+                # } #
+                <label id="def-text-label" for="default-textbox">Default</label>
+            </div>
+            <div style="width:110px; height:55px; float:left; text-align:center; font-size:12px; margin-bottom:-10px">
+                # if (data.Latest) { #
+                    <input id="latest-textbox" style="margin-bottom:-10px;" data-fieldId="${data.Id}" type="text" value="${data.Latest}" size="5" onchange="mobile.pushServiceData(this);"/>
+                # } else { #
+                    <input id="latest-textbox" data-fieldId="${data.Id}" type="text" value="" size="5" onchange="mobile.pushServiceData(this);"/>
+                # } #
+                <label id="late-text-label" for="latest-textbox">Latest</label>
+            </div>
+            # break;
+        } #
+</script>

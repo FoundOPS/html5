@@ -14,7 +14,7 @@ require.config({
 });
 
 require(["containers/navigator", "silverlight", "session", "lib/kendo.all", "ui/personalSettings", "ui/businessSettings", "ui/usersSettings",
-    "ui/changePassword", "ui/createPassword", "underscore", "lib/userVoice"], function (Navigator, silverlight, session) {
+    "ui/changePassword", "containers/services", "ui/createPassword", "underscore", "lib/userVoice"], function (Navigator, silverlight, session) {
     var application, navigator;
 
     session.load(function (data) {
