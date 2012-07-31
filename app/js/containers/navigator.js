@@ -217,7 +217,7 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
         //clearTimeout(slideMenuTimeout);
         $("#sideBar, #sideBarWrapper, #sideBarWrapper .jspContainer, #sideBarInnerWrapper")
             .stop(true, false)
-            .animate({width: '55px'}, 350); //TODO: Figure out why fast causes leftover artifacts/redraw problems.
+            .animate({width: '55px'}, 'fast');
         $(".iconExpand").removeClass("flip");
     };
 
