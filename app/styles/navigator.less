@@ -403,9 +403,9 @@ zoom: 1;*/
     position: absolute;
     top: 0;
     left: 0;
+    visibility: hidden; //display: none;
     height: 100%;
     width: 100%;
-    visibility: hidden; //display: none;
 }
 
 #content {
@@ -415,7 +415,6 @@ zoom: 1;*/
     position: relative;
     padding-top: @navHeight;
     padding-right: @sideBarWrapperWidth;
-    height: 100%;
 }
 
 #updates{
@@ -606,6 +605,11 @@ zoom: 1;*/
         height: 0;
         display: none;
      }
+
+    //BUG FIX: Fix for kinetic scrollbars on mobile only.
+    #content{
+        height: 100%;
+    }
 }
 
 @media only screen and (max-width:390px) {

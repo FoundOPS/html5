@@ -69,23 +69,26 @@ span.k-tooltip {
     -moz-user-select: auto;
 }
 
-#remoteContent{
-    height: 100%;
-}
-.km-view{
-    height: 100%;
-}
-.km-content{
-    height: 100%;
-    //padding-bottom: 18px;  //BUG FIX: This fixes Kendo scrollbar bug! (disabled for second bugfix)
-}
-.km-scroll-container{
-    height: 100%;
-}
-
 //BUG FIX: This fixes Kendo scrollbar bug!
 .km-horizontal-scrollbar{
     width: auto;
+}
+
+//BUG FIX: Fix for kinetic scrollbars on mobile only.
+@media only screen and (max-width:800px) {
+    #remoteContent{
+        height: 100%;
+    }
+    .km-view{
+        height: 100%;
+    }
+    .km-content{
+        height: 100%;
+    //padding-bottom: 18px;  //BUG FIX: This fixes Kendo scrollbar bug! (disabled for second bugfix)
+    }
+    .km-scroll-container{
+        height: 100%;
+    }
 }
 
 /*endregion*/
