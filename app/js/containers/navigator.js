@@ -107,6 +107,7 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
                 }
             }
         );
+        sideBarScrollBar.reinitialise();
     };
 
     /**
@@ -250,15 +251,16 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
 
         setSideBarSections(config, config.roles[0].sections);
 
-        if($(document).width()<=800){
-            //TODO: Condense into another function?
-            sBar.addClass("hidden");
-            var offset = -1 * (sBar.offset().top + sBar.outerHeight());
-            sBar.css("top", offset);
-            $("#sideBarWrapper").css('display', 'none');
-        }else{
-            //$(".iconShow").addClass("rotateIcon");
-        }
+        $(window).load(function() {
+            if($(document).width()<=800){
+                //TODO: Condense into another function?
+                sBar.addClass("hidden");
+                var offset = -1 * (sBar.offset().top + sBar.outerHeight());
+                sBar.css("top", offset);
+            }else{
+                //$(".iconShow").addClass("rotateIcon");
+            }
+        });
 
         //Add showMenuSpan to topNav.
         var showMenuTemplateHtml = $("#showMenuTemplate").html();
@@ -295,8 +297,9 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
         $(window).resize(function () {
             if ($(window).width() <= 800) {
                 sideBarDiv.css("width", "");
-
                 sideBarDiv.removeClass("hover");
+                $(".iconExpand").removeClass("flip");
+
                 if(sideBarDiv.hasClass("cover")){
                     sideBarDiv.removeClass("cover");
                     sideBarDiv.attr("style", "");
@@ -306,9 +309,17 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
 
                 if(!sideBarDiv.hasClass("shown")){
                     $("#sideBarWrapper").css("width", "");
-                    sideBarDiv.css("top", "-9999px");
+
+                    //TODO: Condense.
                     sideBarDiv.addClass("hidden");
-                    $("#sideBarWrapper").css('display', 'none');
+                    console.log("sBar.offset().top: " + sBar.offset().top);
+                    if(sBar.offset().top>=0){
+                        var offset = -1 * (sBar.offset().top + sBar.outerHeight());
+                        console.log("Offset: "+ offset);
+                        sBar.css("top", offset);
+                    }
+
+                    $("#sideBarWrapper").css('visibility', 'hidden');
                     $(".iconShow").removeClass('rotateIcon');
                 }
 
@@ -317,7 +328,6 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
                     sideBarDiv.attr("style", "");
                     $("#sideBarInnerWrapper").attr("style", "");
                 }
-                $(".iconExpand").removeClass("flip");
             } else if ($(window).width() > 800) {
                 if (sideBarDiv.hasClass("hidden")||sideBarDiv.hasClass("shown")) {
                     sideBarDiv.removeClass("hidden");
@@ -432,7 +442,7 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
         var toggleMenu = function () {
             $(".iconShow").toggleClass("rotateIcon");
             if (sideBarDiv.hasClass("hidden")) {
-                sideBarWrapperDiv.css('display', 'inline-block');
+                sideBarWrapperDiv.css('visibility', 'visible');
                 sideBarDiv.stop(false, true).animate(
                     {
                         top: 0
@@ -440,6 +450,8 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
                     'fast'
                 );
                 $("#sideBarInnerWrapper").data('jsp').reinitialise();
+                sideBarDiv.removeClass("hidden");
+                sideBarDiv.addClass("shown");
             } else {
                 var offset = -1 * (sideBarDiv.offset().top + sideBarDiv.outerHeight());
                 sideBarDiv.stop(false, true).animate(
@@ -448,12 +460,12 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
                     },
                     'fast',
                     function () {
-                        $("#sideBarWrapper").css('display', 'none');
+                        $("#sideBarWrapper").css('visibility', 'hidden');
                     }
                 );
+                sideBarDiv.addClass("hidden");
+                sideBarDiv.removeClass("shown");
             }
-            sideBarDiv.toggleClass("shown");
-            sideBarDiv.toggleClass("hidden");
         };
 
         //Click listener that toggles menu visibility.

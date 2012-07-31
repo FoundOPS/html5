@@ -327,7 +327,6 @@ zoom: 1;*/
     position: relative;
     height: 100%;
     width: 100%;
-    width: @sideBarWrapperWidth;
     border-right: @borderSize solid @darkGrey;
     z-index: 1;
 }
@@ -583,8 +582,8 @@ zoom: 1;*/
         height: auto;
         background: transparent;
         width: @sideBarExpandedWidth;
-
         box-shadow: none;
+        visibility: hidden;
     }
 
     #sideBarInnerWrapper{
