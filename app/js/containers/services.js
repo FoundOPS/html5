@@ -2,13 +2,13 @@
 
 'use strict';
 
-require(["jquery", "underscore", "lib/kendo.all.min", "developer", "db/services", "tools", "lib/moment", "widgets/serviceDetails"], function ($, _, k, developer, dbServices, tools) {
+require(["jquery", "underscore", "lib/kendo.all", "developer", "db/services", "tools", "lib/moment", "widgets/serviceDetails"], function ($, _, k, developer, dbServices, tools) {
     var services = {}, serviceHoldersDataSource;
 
     //set services to a global function, so the functions are accessible from the HTML element
     window.services = services;
 
-    services.viewModel = kendo.observable({});
+    services.viewModel = kendo.observable({selectedService: {}});
 
     /**
      * A kendo data source for Services for the current business account.
@@ -178,16 +178,17 @@ require(["jquery", "underscore", "lib/kendo.all.min", "developer", "db/services"
         });
 
         services.viewModel.bind("change", function (e) {
-            console.log(e.field);
+            //console.log(e.field);
             if (e.field === "selectedService") {
-                $("#serviceDetails").kendoServiceDetails({
-                    service: services.viewModel.get("selectedService")
-                });
             }
         });
 
         //Start loading the initial services
         updateDateRange();
+
+        $("#serviceDetails").kendoServiceDetails({
+            source: services.viewModel.get("selectedService")
+        });
 
         $(window).resize(function () {
             resizeGrid();
