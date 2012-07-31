@@ -1,35 +1,31 @@
 <div data-init="personalSettings.initialize" data-role="view" data-title="Personal User Settings" id="personal">
     <div class="settingsMenu"></div>
-    <h1>Your Personal User Settings</h1>
+    <h1 class="title">Your Personal Settings</h1>
     <div class="wrap">
         <h2>The Basics</h2>
         <form id="personalForm">
             <table>
                 <tr>
                     <td>First Name:&nbsp;</td>
-                    <td class="right"><input type="text" name="FirstName" data-bind="value: settings.FirstName"
-                                             required/></td>
+                    <td class="right"><input type="text" name="FirstName" data-bind="value: settings.FirstName" required/></td>
                 </tr>
                 <tr>
                     <td>Last Name:&nbsp;</td>
-                    <td class="right"><input type="text" name="LastName" data-bind="value: settings.LastName" required/>
-                    </td>
+                    <td class="right"><input type="text" name="LastName" data-bind="value: settings.LastName" required/></td>
                 </tr>
                 <tr>
                     <td>Email Address:&nbsp;</td>
-                    <td class="right"><input type="email" name="EmailAddress" data-bind="value: settings.EmailAddress"
-                                             required/></td>
+                    <td class="right"><input type="email" name="EmailAddress" data-bind="value: settings.EmailAddress" required/></td>
                 </tr>
             </table>
         </form>
         <h2 class="middle">Your Photo</h2>
         <div id="personalImageUpload"></div>
         <h2 class="middle">Password</h2>
-        <a class="k-button k-button-icontext changePassword" onclick="window.navigateToChangePassword()"><span
-                class="k-icon k-edit"></span>Change Your Password</a>
-        <h2 style="height:15px;">&nbsp;</h2>
-        <a class="k-button k-button-icontext save" data-bind="click: saveChanges"><span class="k-icon k-update"></span>Save</a>
-        <a class="k-button k-button-icontext" data-bind="click: cancelChanges"><span class="k-icon k-cancel"></span>Cancel
-            Changes</a>
+        <button class="k-button k-button-icontext changePassword" onclick="window.navigateToChangePassword()"><span class="k-icon k-edit"></span>Change Your Password</button>
+        <h2 class="middle">Time Zone</h2>
+        <form id="timeZoneForm">
+            <input id="TimeZone" name="TimeZone" data-bind="value: settings.TimeZoneInfo" required/>
+        </form>
     </div>
 </div>

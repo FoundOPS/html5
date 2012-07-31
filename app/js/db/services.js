@@ -6,7 +6,7 @@
 
 'use strict';
 
-define(["developer", "tools", "ui/notifications", "lib/xdr"], function (developer, tools, notifications) {
+define(["developer", "tools", "ui/saveHistory", "lib/xdr"], function (developer, tools, saveHistory) {
     var services = {};
 
     $.support.cors = true;
@@ -186,7 +186,7 @@ define(["developer", "tools", "ui/notifications", "lib/xdr"], function (develope
      * @param {!function(Array.<Object>)} settings The loaded settings.
      */
     services.updatePersonalSettings = function (settings) {
-        return notifications.linkNotification(
+        return saveHistory.linkNotification(
             $.ajax({
                 url: services.API_URL + "settings/UpdatePersonalSettings?roleId=" + services.RoleId,
                 type: "POST",
@@ -196,13 +196,16 @@ define(["developer", "tools", "ui/notifications", "lib/xdr"], function (develope
             }));
     };
 
+    // Get TimeZones.
+    services.getTimeZones = services._getHttp('settings/GetTimeZones', {}, false);
+
     /**
      * Creates personal password(for initial login).
      * @param {string} newPass.
      * @param {string} confirmPass.
      */
     services.createPassword = function (newPass, confirmPass) {
-        return notifications.linkNotification(
+        return saveHistory.linkNotification(
             $.ajax({
                 url: services.API_URL + "settings/CreatePassword?newPass=" + newPass + "&confirmPass=" + confirmPass,
                 type: "POST"
@@ -216,7 +219,7 @@ define(["developer", "tools", "ui/notifications", "lib/xdr"], function (develope
      * @param {string} confirmPass.
      */
     services.updatePassword = function (oldPass, newPass, confirmPass) {
-        return notifications.linkNotification(
+        return saveHistory.linkNotification(
             $.ajax({
                 url: services.API_URL + "settings/UpdatePassword?oldPass=" + oldPass + "&newPass=" + newPass + "&confirmPass=" + confirmPass,
                 type: "POST"
@@ -234,7 +237,7 @@ define(["developer", "tools", "ui/notifications", "lib/xdr"], function (develope
      * @param {(Array.<Object>)} settings The updated settings.
      */
     services.updateBusinessSettings = function (settings) {
-        return notifications.linkNotification(
+        return saveHistory.linkNotification(
             $.ajax({
                 url: services.API_URL + "settings/UpdateBusinessSettings?roleId=" + services.RoleId,
                 type: "POST",
@@ -282,12 +285,11 @@ define(["developer", "tools", "ui/notifications", "lib/xdr"], function (develope
     services.hookupDefaultComplete = function (dataSource) {
         var onComplete = function (jqXHR, textStatus) {
             if (textStatus == "success") {
-                notifications.success(jqXHR.statusText)
+                saveHistory.success(jqXHR.statusText)
             } else {
                 dataSource.cancelChanges();
-                notifications.error(jqXHR.statusText);
+                saveHistory.error(jqXHR.statusText);
             }
-            dataSource.read();
         };
 
         dataSource.transport.options.create.complete = onComplete;

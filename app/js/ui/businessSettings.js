@@ -6,22 +6,30 @@
 
 "use strict";
 
-define(["db/services", "developer", "ui/notifications", "session", "tools", "widgets/imageUpload", "widgets/settingsMenu"], function (dbServices, developer, notifications, session, tools, upload) {
+define(["db/services", "developer", "ui/saveHistory, "ui/notifications", "session", "tools", "widgets/imageUpload", "widgets/settingsMenu"], function (dbServices, developer, saveHistory, notifications, session, tools, upload) {
     var businessSettings = {}, imageUpload;
 
     businessSettings.viewModel = kendo.observable({
         saveChanges: function () {
             if (businessSettings.validator.validate()) {
-                dbServices.updateBusinessSettings(this.get("settings"));
+                dbServices.updateBusinessSettings(businessSettings.viewModel.get("settings"));
             }
             imageUpload.submitForm();
-        },
+       },
         cancelChanges: function (e) {
             businessSettings.viewModel.set("settings", businessSettings.settings);
             imageUpload.setImageUrl(businessSettings.viewModel.get("settings.ImageUrl"));
             imageUpload.cancel();
         }
     });
+
+    //add these so save and cancel can be called from the SaveCancel widget
+    businessSettings.save = function () {
+        businessSettings.viewModel.saveChanges();
+    };
+    businessSettings.cancel = function () {
+        businessSettings.viewModel.cancelChanges();
+    };
 
     businessSettings.initialize = function () {
         businessSettings.validator = $("#businessForm").kendoValidator().data("kendoValidator");
@@ -30,9 +38,11 @@ define(["db/services", "developer", "ui/notifications", "session", "tools", "wid
         var menu = $("#business .settingsMenu");
         kendo.bind(menu);
         menu.kendoSettingsMenu({selectedItem: "Business"});
+   
+        saveHistory.observeInput("#business");
 
         //retrieve the settings and bind them to the form
-        dbServices.getBusinessSettings(function (settings) {
+        dbServices.getBusinessSettings(function (settings) { 
             //set this so cancelChanges has a reference to the original settings
             businessSettings.settings = settings;
             businessSettings.viewModel.set("settings", settings);
@@ -50,6 +60,8 @@ define(["db/services", "developer", "ui/notifications", "session", "tools", "wid
             if (e.field === "settings") {
                 //update the image url after it has been set
                 imageUpload.setImageUrl(businessSettings.viewModel.get("settings.ImageUrl"));
+//saveHistory.error("File Type");
+//saveHistory.error("File Size");
             }
         });
 
@@ -62,6 +74,14 @@ define(["db/services", "developer", "ui/notifications", "session", "tools", "wid
                 }
                 imageUpload.setUploadUrl(dbServices.API_URL + "settings/UpdateBusinessImage?roleId=" + roleId);
             }
+
+            saveHistory.setCurrentSection({
+                page:"Business Settings",
+                onSave: businessSettings.viewModel.saveChanges,
+                onCancel: businessSettings.viewModel.cancelChanges,
+                section: businessSettings,
+                state: businessSettings.viewModel.get("settings")
+            });v
         });
     };
 

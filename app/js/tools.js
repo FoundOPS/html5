@@ -183,5 +183,38 @@ define(['underscore', 'developer'], function (_, developer) {
         element.css("marginLeft", margin + "px");
     };
 
+    //enable the save and cancel buttons
+    tools.enableButtons = function (page) {
+        $(page + " .cancelBtn").removeAttr("disabled");
+        $(page + " .saveBtn").removeAttr("disabled");
+    };
+
+    //disable the save and cancel buttons
+    tools.disableButtons = function (page) {
+        $(page + " .cancelBtn").attr("disabled", "disabled");
+        $(page + " .saveBtn").attr("disabled", "disabled");
+    };
+
+    /**
+    * watches all input elements on page for value change
+    * param {string} pageDiv the id of the view. ex: "#personal"
+    */
+    tools.observeInput = function (pageDiv) {
+        $(pageDiv + ' input').each(function() {
+            // Save current value of element
+            $(this).data('oldVal', $(this).val());
+            // Look for changes in the value
+            $(this).bind("propertychange keyup input paste change", function(){
+                // If value has changed...
+                if ($(this).data('oldVal') != $(this).val()) {
+                    // Updated stored value
+                    $(this).data('oldVal', $(this).val());
+                    //enable save and cancel buttons
+                    tools.enableButtons(pageDiv);
+                }
+            });
+        });
+    };
+
     return tools;
 });
