@@ -417,6 +417,11 @@ zoom: 1;*/
     padding-right: @sideBarWrapperWidth;
 }
 
+#remoteContent{
+    width: 100%;
+    height: 100%;
+}
+
 #updates{
     padding: 15px;
 }
@@ -595,6 +600,9 @@ zoom: 1;*/
 
     #content {
         padding-right: 0;
+
+        //BUG FIX: Fix for kinetic scrollbars on mobile only.
+        height: 100%;
     }
 
     #coverWindowButton{
@@ -605,11 +613,6 @@ zoom: 1;*/
         height: 0;
         display: none;
      }
-
-    //BUG FIX: Fix for kinetic scrollbars on mobile only.
-    #content{
-        height: 100%;
-    }
 }
 
 @media only screen and (max-width:390px) {
@@ -633,7 +636,7 @@ zoom: 1;*/
     }
 
     #content {
-        background: @green;
+        //background: @green;
     }
 }
 
