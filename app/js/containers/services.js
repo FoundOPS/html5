@@ -1,30 +1,8 @@
 // Copyright 2012 FoundOPS LLC. All Rights Reserved.
 
-/**
- * @fileoverview Class to hold mobile models/logic.
- */
-
 'use strict';
 
-require.config({
-    waitSeconds: 10,
-    baseUrl: 'js',
-    paths: {
-        // JavaScript folders
-        lib: "../lib",
-        ui: "ui",
-        db: "db",
-
-        underscore: "../lib/underscore"
-    },
-    shim: {
-        underscore: {
-            exports: "_"
-        }
-    }
-});
-
-require(["jquery", "underscore", "lib/kendo.all.min", "developer", "db/services", "tools", "lib/moment"], function ($, _, k, developer, dbServices, tools) {
+require(["jquery", "underscore", "lib/kendo.all.min", "developer", "db/services", "tools", "lib/moment", "widgets/serviceDetails"], function ($, _, k, developer, dbServices, tools) {
     var services = {}, serviceHoldersDataSource;
 
     //set services to a global function, so the functions are accessible from the HTML element
@@ -199,6 +177,15 @@ require(["jquery", "underscore", "lib/kendo.all.min", "developer", "db/services"
             change: updateDateRange
         });
 
+        services.viewModel.bind("change", function (e) {
+            console.log(e.field);
+            if (e.field === "selectedService") {
+                $("#serviceDetails").kendoServiceDetails({
+                    service: services.viewModel.get("selectedService")
+                });
+            }
+        });
+
         //Start loading the initial services
         updateDateRange();
 
@@ -212,4 +199,5 @@ require(["jquery", "underscore", "lib/kendo.all.min", "developer", "db/services"
     services.exportToCSV = function () {
         tools.toCSV(serviceHoldersDataSource.view(), "Services", true, ['RecurringServiceId', 'ServiceId']);
     };
-});
+})
+;

@@ -186,7 +186,7 @@ define(["developer", "tools", "ui/notifications", "lib/xdr"], function (develope
      */
     services.getServiceDetails = function (serviceId, serviceDate, recurringServiceId, callback) {
         return services._getHttp('service/GetServiceDetails',
-            {serviceId: serviceId, serviceDate: serviceDate, recurringServiceId: recurringServiceId}, false)(function (data) {
+            {serviceId: serviceId, serviceDate: tools.formatDate(serviceDate), recurringServiceId: recurringServiceId}, false)(function (data) {
             //It will only have one item
             callback(data[0]);
         });
