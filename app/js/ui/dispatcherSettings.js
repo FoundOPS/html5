@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(["developer", "tools", "db/services", "session", "widgets/settingsMenu", "widgets/saveCancel", "ui/colorPicker",
+define(["developer", "tools", "db/services", "session", "widgets/settingsMenu", "ui/colorPicker",
         "ui/kendoChanges"], function (developer, tools, dbServices, session) {
     var dispatcherSettings = {};
 
@@ -28,11 +28,6 @@ define(["developer", "tools", "db/services", "session", "widgets/settingsMenu", 
         var menu = $("#dispatcher .settingsMenu");
         kendo.bind(menu);
         menu.kendoSettingsMenu({selectedItem: "Dispatcher"});
-
-        //setup saveCancel widget
-        $("#dispatcher .saveCancel").kendoSaveCancel({
-            page: "dispatcher"
-        });
 
         var dataSource = new kendo.data.DataSource({
             transport: {

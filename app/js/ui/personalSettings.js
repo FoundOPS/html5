@@ -6,8 +6,8 @@
 
 "use strict";
 
-define(["db/services", "ui/notifications", "tools", "widgets/settingsMenu", "widgets/saveCancel", "lib/jquery-ui-1.8.21.core.min",
-    "lib/jquery.FileReader", "lib/swfobject", "lib/jquery.form"], function (dbServices, notifications, tools) {
+define(["db/services", "tools", "ui/saveHistory", "widgets/settingsMenu", "lib/jquery-ui-1.8.21.core.min",
+    "lib/jquery.FileReader", "lib/swfobject", "lib/jquery.form"], function (dbServices, tools, saveHistory) {
     var personalSettings = {};
 
     //keep track of if a new image has been selected
@@ -15,14 +15,13 @@ define(["db/services", "ui/notifications", "tools", "widgets/settingsMenu", "wid
 
     personalSettings.viewModel = kendo.observable({
         saveChanges: function () {
-            if (personalSettings.validator.validate()) {
-                dbServices.updatePersonalSettings(this.get("settings"));
+            if (personalSettings.validator.validate() && personalSettings.validator2.validate()) {
+                dbServices.updatePersonalSettings(personalSettings.viewModel.get("settings"));
             }
             //check if image has been changed and changes have not been canceled
             if (newImage && $("#imageData")[0].value != "") {
                 $("#personalImageUploadForm").submit();
             }
-            tools.disableButtons("#personal");
         },
         cancelChanges: function () {
             personalSettings.viewModel.set("settings", personalSettings.settings);
@@ -32,44 +31,45 @@ define(["db/services", "ui/notifications", "tools", "widgets/settingsMenu", "wid
             $("#personalCropbox").css("height", personalSettings.imageHeight);
             tools.resizeImage("#personalCropbox");
             //if there is no image, hide the container
-            if (!personalSettings.settings.ImageUrl){
+            if (!personalSettings.settings.ImageUrl) {
                 $("#personalCropbox").css("visibility", "hidden").css("width", "0px").css("height", "0px")
                     .css("margin-left", "0px");
             }
-            tools.disableButtons("#personal");
         }
     });
 
-    //add these so save and cancel can be called from the SaveCancel widget
-    personalSettings.save = function () {
-        personalSettings.viewModel.saveChanges();
-    };
-    personalSettings.cancel = function () {
-        personalSettings.viewModel.cancelChanges();
+    personalSettings.undo = function () {
+        saveHistory.states.pop();
+        if(saveHistory.states.length !== 0){
+            personalSettings.viewModel.set("settings", saveHistory.states[saveHistory.states.length - 1]);
+            if(saveHistory.states.length === 1){
+                saveHistory.multiple = false;
+                saveHistory.close();
+                saveHistory.success();
+            }
+        }else{
+            saveHistory.cancel();
+        }
     };
 
     personalSettings.onImageLoad = function () {
         tools.resizeImage("#personalCropbox", 200, 500);
-        if(!newImage){
+        if (!newImage) {
             personalSettings.imageWidth = $("#personalCropbox")[0].width;
             personalSettings.imageHeight = $("#personalCropbox")[0].height;
         }
     };
 
     personalSettings.initialize = function () {
-        personalSettings.validator = $(".personalForm").kendoValidator().data("kendoValidator");
+        personalSettings.validator = $("#personalForm").kendoValidator().data("kendoValidator");
+        personalSettings.validator2 = $("#timeZoneForm").kendoValidator().data("kendoValidator");
 
         //setup menu
         var menu = $("#personal .settingsMenu");
         kendo.bind(menu);
         menu.kendoSettingsMenu({selectedItem: "Personal"});
 
-        //setup saveCancel widget
-        $("#personal .saveCancel").kendoSaveCancel({
-            page: "personalSettings"
-        });
-
-        tools.observeInput("#personal");
+        saveHistory.observeInput("#personal");
 
         var fileLoaded = function (evt) {
             var imageData = evt.target.result;
@@ -90,7 +90,7 @@ define(["db/services", "ui/notifications", "tools", "widgets/settingsMenu", "wid
 
             //set so that the save changes event will also save the image
             newImage = true;
-            tools.enableButtons("#personal");
+            saveHistory.save();
             tools.resizeImage("#personalCropbox", 200, 500);
         };
 
@@ -128,7 +128,7 @@ define(["db/services", "ui/notifications", "tools", "widgets/settingsMenu", "wid
             contentType: "multipart/form-data",
             url: dbServices.API_URL + "settings/UpdateUserImage",
             success: function (response) {
-                var url = response.replace(/['"]/g,'');
+                var url = response.replace(/['"]/g, '');
                 personalSettings.viewModel.get("settings").set("ImageUrl", url);
             }});
 
@@ -150,24 +150,24 @@ define(["db/services", "ui/notifications", "tools", "widgets/settingsMenu", "wid
                 $("#TimeZone").kendoDropDownList({
                     dataSource: personalSettings.timeZones,
                     dataTextField: "DisplayName",
-                    dataValueField: "DisplayName"
+                    dataValueField: "TimeZoneId"
                 });
 
-                if(!personalSettings.viewModel.get("settings.TimeZoneInfo")){
+                if (!personalSettings.viewModel.get("settings.TimeZoneInfo")) {
                     var today = new Date().toString();
 
                     var timezone;
-                    if(today.match(/Eastern/)){
+                    if (today.match(/Eastern/)) {
                         timezone = "(UTC-05:00) Eastern Time (US & Canada)";
-                    }else if(today.match(/Central/)){
+                    } else if (today.match(/Central/)) {
                         timezone = "(UTC-06:00) Central Time (US & Canada)";
-                    }else if(today.match(/Mountain/)){
+                    } else if (today.match(/Mountain/)) {
                         timezone = "(UTC-07:00) Mountain Time (US & Canada)";
-                    }else if(today.match(/Pacific/)){
+                    } else if (today.match(/Pacific/)) {
                         timezone = "(UTC-08:00) Pacific Time (US & Canada)";
-                    }else if(today.match(/Alaska/)){
+                    } else if (today.match(/Alaska/)) {
                         timezone = "(UTC-09:00) Alaska";
-                    }else if(today.match(/Hawaii/)){
+                    } else if (today.match(/Hawaii/)) {
                         timezone = "(UTC-10:00) Hawaii";
                     }
 
@@ -176,8 +176,18 @@ define(["db/services", "ui/notifications", "tools", "widgets/settingsMenu", "wid
                         return dataItem.DisplayName === timezone;
                     });
 
-                    tools.enableButtons("#personal");
+                    saveHistory.save();
                 }
+
+                saveHistory.setCurrentSection({
+                    page: "Personal Settings",
+                    onSave: personalSettings.viewModel.saveChanges,
+                    onCancel: personalSettings.viewModel.cancelChanges,
+                    section: personalSettings,
+                    state: function () {
+                        return personalSettings.viewModel.get("settings");
+                    }
+                });
             });
         });
     };

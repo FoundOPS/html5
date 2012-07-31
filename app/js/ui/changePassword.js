@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(["db/services", "tools", "widgets/settingsMenu", "widgets/saveCancel"], function (services, tools) {
+define(["db/services", "tools", "ui/saveHistory", "widgets/settingsMenu"], function (services, tools, saveHistory) {
     var changePassword = {};
 
     changePassword.save = function () {
@@ -36,11 +36,6 @@ define(["db/services", "tools", "widgets/settingsMenu", "widgets/saveCancel"], f
         var menu = $("#changePassword .settingsMenu");
         kendo.bind(menu);
         menu.kendoSettingsMenu();
-
-        //setup saveCancel widget
-        $("#changePassword .saveCancel").kendoSaveCancel({
-            page: "changePassword"
-        });
 
         tools.observeInput("#changePassword");
 

@@ -3,7 +3,7 @@
     <h1 class="title">Your Personal Settings</h1>
     <div class="wrap">
         <h2>The Basics</h2>
-        <form class="personalForm">
+        <form id="personalForm">
             <table>
                 <tr>
                     <td>First Name:&nbsp;</td>
@@ -29,10 +29,8 @@
         <h2 class="middle">Password</h2>
         <button class="k-button k-button-icontext changePassword" onclick="window.navigateToChangePassword()"><span class="k-icon k-edit"></span>Change Your Password</button>
         <h2 class="middle">Time Zone</h2>
-        <form class="personalForm">
-            <input id="TimeZone" name="TimeZone" data-bind="value: settings.TimeZoneInfo.DisplayName" required/>
+        <form id="timeZoneForm">
+            <input id="TimeZone" name="TimeZone" data-bind="value: settings.TimeZoneInfo" required/>
         </form>
-        <h2 style="height:15px;">&nbsp;</h2>
-        <div class="saveCancel"></div>
     </div>
 </div>
