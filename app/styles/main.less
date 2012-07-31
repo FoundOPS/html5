@@ -81,6 +81,8 @@ span.k-tooltip {
     }
     .km-content{
         height: 100%;
+        //BUG FIX: Required to fix content size in firefox.
+        overflow: visible !important;
     //padding-bottom: 18px;  //BUG FIX: This fixes Kendo scrollbar bug! (disabled for second bugfix)
     }
     .km-scroll-container{
