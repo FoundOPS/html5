@@ -13,7 +13,7 @@
     <meta name="HandheldFriendly" content="True">
     <meta name="MobileOptimized" content="320">
     <!-- Enabling user-scalable=no or calling $("#nav").toggleClass("androidFixedPositionFix"); fixes fixed position bug in android 2.3 -->
-    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0"/>
     <link rel="apple-touch-icon-precomposed" sizes="114x114" href="img/Icon-96x96.png">
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="img/Icon-72x72.png">
     <link rel="apple-touch-icon-precomposed" href="img/Icon-36x36.png">
@@ -33,8 +33,7 @@
 <body ontouchstart="">
 <div id="contentWrapper">
     <div id="content">
-        <div id="remoteContent">
-        </div>
+        <div id="remoteContent"></div>
         <div id="silverlightControlHost">
             <object id="silverlightPlugin" data="data:application/x-silverlight-2," type="application/x-silverlight-2"
                     style="height: 1px; width: 1px">
@@ -93,7 +92,7 @@
 </script>
 <script id="showMenuTemplate" type="text/x-kendo-template">
     <div id="showMenu">
-        <a><img class='iconShow rotateIcon' src='img/Expand.png'/></a>
+        <a><img class='iconShow' src='img/Expand.png'/></a>
     </div>
 </script>
 <script id="sideBarElementTemplate" type="text/x-kendo-template">

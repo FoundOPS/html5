@@ -107,6 +107,7 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
                 }
             }
         );
+        sideBarScrollBar.reinitialise();
     };
 
     /**
@@ -197,10 +198,27 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
             },
             "click": function () {
                 var name = $(this).find(".sectionName:first").text();
+                //TODO: Will this work every time?
                 var section = getSection(config.sections, name);
                 $(this).trigger("sectionSelected", section);
             }
         });
+    };
+
+    //TODO: Set max and min values at top of function.
+    var slideMenuOpen = function () {
+        $(" #sideBarInnerWrapper, #sideBarWrapper, #sideBar, #sideBarWrapper .jspContainer")
+            .stop(true, false)
+            .animate({width: '200px'}, 'fast');
+        $(".iconExpand").addClass("flip");
+    };
+
+    var slideMenuClosed = function () {
+        //clearTimeout(slideMenuTimeout);
+        $("#sideBar, #sideBarWrapper, #sideBarWrapper .jspContainer, #sideBarInnerWrapper")
+            .stop(true, false)
+            .animate({width: '55px'}, 'fast');
+        $(".iconExpand").removeClass("flip");
     };
 
     /** Initializes sidebar navigation **/
@@ -232,6 +250,17 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
         $('#nav').after(sBarWrapper);
 
         setSideBarSections(config, config.roles[0].sections);
+
+        $(window).load(function() {
+            if($(document).width()<=800){
+                //TODO: Condense into another function?
+                sBar.addClass("hidden");
+                var offset = -1 * (sBar.offset().top + sBar.outerHeight());
+                sBar.css("top", offset);
+            }else{
+                //$(".iconShow").addClass("rotateIcon");
+            }
+        });
 
         //Add showMenuSpan to topNav.
         var showMenuTemplateHtml = $("#showMenuTemplate").html();
@@ -269,29 +298,44 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
             if ($(window).width() <= 800) {
                 sideBarDiv.css("width", "");
                 sideBarDiv.removeClass("hover");
+                $(".iconExpand").removeClass("flip");
+
                 if(sideBarDiv.hasClass("cover")){
                     sideBarDiv.removeClass("cover");
                     sideBarDiv.attr("style", "");
                     $("#sideBarWrapper").attr("style", "");
                     $("#sideBarInnerWrapper").attr("style", "");
                 }
-                $("#sideBarWrapper").removeAttr("style");
+
+                if(!sideBarDiv.hasClass("shown")){
+                    $("#sideBarWrapper").css("width", "");
+
+                    //TODO: Condense.
+                    sideBarDiv.addClass("hidden");
+                    console.log("sBar.offset().top: " + sBar.offset().top);
+                    if(sBar.offset().top>=0){
+                        var offset = -1 * (sBar.offset().top + sBar.outerHeight());
+                        console.log("Offset: "+ offset);
+                        sBar.css("top", offset);
+                    }
+
+                    $("#sideBarWrapper").css('visibility', 'hidden');
+                    $(".iconShow").removeClass('rotateIcon');
+                }
+
                 if (sideBarDiv.hasClass("expand")) {
                     sideBarDiv.removeClass("expand");
                     sideBarDiv.attr("style", "");
                     $("#sideBarInnerWrapper").attr("style", "");
                 }
-                if (!sideBarDiv.hasClass("hidden")) {
-                    $(".iconShow").addClass('rotateIcon');
-                }
-                $(".iconExpand").removeClass("flip");
             } else if ($(window).width() > 800) {
-                if (sideBarDiv.hasClass("hidden")) {
+                if (sideBarDiv.hasClass("hidden")||sideBarDiv.hasClass("shown")) {
                     sideBarDiv.removeClass("hidden");
+                    sideBarDiv.removeClass("shown");
                     sideBarDiv.attr("style", "");
                     $("#sideBarWrapper").attr("style", "");
                     $("#sideBarInnerWrapper").attr("style", "");
-                    //$(".iconShow").removeClass('rotateIcon');
+                    $(".iconShow").removeClass('rotateIcon');
                 }
                 if (sideBarDiv.hasClass("hover")) {
                     slideMenuClosed();
@@ -299,22 +343,6 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
                 }
             }
         });
-
-        //TODO: Set max and min values at top of function.
-        var slideMenuOpen = function () {
-            $(" #sideBarInnerWrapper, #sideBarWrapper, #sideBar, #sideBarWrapper .jspContainer")
-                .stop(true, false)
-                .animate({width: '200px'}, 'fast');
-            $(".iconExpand").addClass("flip");
-        };
-
-        var slideMenuClosed = function () {
-            //clearTimeout(slideMenuTimeout);
-            $("#sideBar, #sideBarWrapper, #sideBarWrapper .jspContainer, #sideBarInnerWrapper")
-                .stop(true, false)
-                .animate({width: '55px'}, 350); //TODO: Figure out why fast causes leftover artifacts/redraw problems.
-            $(".iconExpand").removeClass("flip");
-        };
 
         /* Explanation of hover/click states.
          onhoverin:
@@ -413,9 +441,8 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
         //TODO: Get rotation to work on default android 2.3 browser http://jsfiddle.net/KrRsy/
         var toggleMenu = function () {
             $(".iconShow").toggleClass("rotateIcon");
-            var offset = -1 * (sideBarDiv.offset().top + sideBarDiv.outerHeight());
             if (sideBarDiv.hasClass("hidden")) {
-                sideBarWrapperDiv.css('display', 'inline-block');
+                sideBarWrapperDiv.css('visibility', 'visible');
                 sideBarDiv.stop(false, true).animate(
                     {
                         top: 0
@@ -423,18 +450,22 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
                     'fast'
                 );
                 $("#sideBarInnerWrapper").data('jsp').reinitialise();
+                sideBarDiv.removeClass("hidden");
+                sideBarDiv.addClass("shown");
             } else {
+                var offset = -1 * (sideBarDiv.offset().top + sideBarDiv.outerHeight());
                 sideBarDiv.stop(false, true).animate(
                     {
                         top: offset
                     },
                     'fast',
                     function () {
-                        $("#sideBarWrapper").css('display', 'none');
+                        $("#sideBarWrapper").css('visibility', 'hidden');
                     }
                 );
+                sideBarDiv.addClass("hidden");
+                sideBarDiv.removeClass("shown");
             }
-            sideBarDiv.toggleClass("hidden");
         };
 
         //Click listener that toggles menu visibility.

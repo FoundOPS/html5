@@ -90,7 +90,7 @@ table {
 @hoverOpacity: .5;
 
 @sideBarWrapperWidth: 55px;
-@sideBarExpandedWidth: 159px;
+@sideBarExpandedWidth: 200px;
 
 @imageHeight: 20px;
 @iconPadding: 4px;
@@ -107,21 +107,20 @@ table {
 html {
     padding: 0;
     margin: 0;
+
     height: 100%;
-    width: 100%;
-    overflow: auto;
 }
 
 body {
+    height: 100%;
+
     padding: 0;
     margin: 0;
-    height: 100%;
 
     background: @lightGrey + #050505;
     color: @charcoal;
     font-family: segoe, verdana, sans-serif;
-    font-size: 100%;
-    overflow: auto; //-webkit-tap-highlight-color: rgba(72,143,205,255);
+    font-size: 100%;//-webkit-tap-highlight-color: rgba(72,143,205,255);
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
     -webkit-touch-callout: none;
 }
@@ -166,6 +165,8 @@ input:focus {
 
 #nav {
     position: fixed;
+    top: 0;
+    left: 0;
     z-index: 2;
     width: 100%;
     height: @navHeight;
@@ -325,7 +326,7 @@ zoom: 1;*/
 #sideBarInnerWrapper{
     position: relative;
     height: 100%;
-    width: 200px;
+    width: 100%;
     border-right: @borderSize solid @darkGrey;
     z-index: 1;
 }
@@ -398,6 +399,7 @@ zoom: 1;*/
 }
 
 #contentWrapper {
+    overflow: visible;
     position: absolute;
     top: 0;
     left: 0;
@@ -407,10 +409,13 @@ zoom: 1;*/
 }
 
 #content {
+    .borderBox;
+    overflow: visible;
     visibility: visible;
     position: relative;
-    top: @navHeight;
-    margin-right: @sideBarWrapperWidth;
+    padding-top: @navHeight;
+    padding-right: @sideBarWrapperWidth;
+    height: 100%;
 }
 
 #updates{
@@ -577,12 +582,12 @@ zoom: 1;*/
         height: auto;
         background: transparent;
         width: @sideBarExpandedWidth;
-
         box-shadow: none;
+        visibility: hidden;
     }
 
     #sideBarInnerWrapper{
-        width: auto;
+        width: @sideBarExpandedWidth;
     }
 
     #slideMenu {
@@ -590,8 +595,7 @@ zoom: 1;*/
     }
 
     #content {
-        top: @navHeight;
-        margin-right: 0;
+        padding-right: 0;
     }
 
     #coverWindowButton{

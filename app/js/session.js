@@ -56,7 +56,7 @@ define(['db/services', "lib/kendo.all"], function (dbservices) {
 //                    "Clients",
 //                    "Dispatcher",
 //                    "Employees",
-//                    "Feedback and Support",
+//                    "Support",
 //                    "Locations",
 //                    "Regions",
 //                    "Services",
@@ -78,7 +78,7 @@ define(['db/services', "lib/kendo.all"], function (dbservices) {
 //                    "Clients",
 //                    "Dispatcher",
 //                    "Employees",
-//                    "Feedback and Support",
+//                    "Support",
 //                    "Locations",
 //                    "Regions",
 //                    "Services",
@@ -94,7 +94,7 @@ define(['db/services', "lib/kendo.all"], function (dbservices) {
 //                    "Clients",
 //                    "Dispatcher",
 //                    "Employees",
-//                    "Feedback and Support",
+//                    "Support",
 //                    "Locations",
 //                    "Regions",
 //                    "Services",
@@ -132,7 +132,7 @@ define(['db/services', "lib/kendo.all"], function (dbservices) {
 //                "isSilverlight": true
 //            },
 //            {
-//                "name": "Feedback and Support",
+//                "name": "Support",
 //                "color": "blue",
 //                "iconUrl": "img/uservoice.png",
 //                "hoverIconUrl": "img/uservoiceColor.png"
