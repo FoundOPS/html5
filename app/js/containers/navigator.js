@@ -201,13 +201,16 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
                 //TODO: Will this work every time?
                 var section = getSection(config.sections, name);
                 $(this).trigger("sectionSelected", section);
+                if($("#sideBar").hasClass("cover")){
+                    closeCoverWindow();
+                }
             }
         });
     };
 
     //TODO: Set max and min values at top of function.
     var slideMenuOpen = function () {
-        $(" #sideBarInnerWrapper, #sideBarWrapper, #sideBar, #sideBarWrapper .jspContainer")
+        $("#sideBarWrapper, #sideBarInnerWrapper, #sideBarWrapper .jspContainer, #sideBar")
             .stop(true, false)
             .animate({width: '200px'}, 'fast');
         $(".iconExpand").addClass("flip");
@@ -215,11 +218,35 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
 
     var slideMenuClosed = function () {
         //clearTimeout(slideMenuTimeout);
-        $("#sideBar, #sideBarWrapper, #sideBarWrapper .jspContainer, #sideBarInnerWrapper")
+        $("#sideBarWrapper, #sideBarInnerWrapper, #sideBarWrapper .jspContainer, #sideBar")
             .stop(true, false)
             .animate({width: '55px'}, 'fast');
         $(".iconExpand").removeClass("flip");
+
     };
+
+    var coverWindow = function(){
+        var sideBarDiv = $("#sideBar");
+        sideBarDiv.removeClass("hover");
+        sideBarDiv.removeClass("expand");
+        $("#sideBarWrapper")
+            .stop(false, true)
+            .animate({width: '100%'}, 'fast');
+        $("#sideBarInnerWrapper, #sideBarWrapper .jspContainer, #sideBar")
+            .stop(false, true)
+            .animate({width: "200px"}, 'fast');
+        sideBarDiv.addClass("cover");
+        $(".iconExpand").addClass("flip");
+    };
+
+    var closeCoverWindow = function(){
+        slideMenuClosed();
+        $("#sideBar").removeClass("cover");
+        $(".iconExpand").removeClass("flip");
+    };
+
+    Navigator.prototype.coverWindow = coverWindow;
+    Navigator.prototype.closeCoverWindow = closeCoverWindow;
 
     /** Initializes sidebar navigation **/
     var initSideBar = function (config) {
@@ -246,7 +273,11 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
         sBar.append("<div id='sideBarSections'></div>");
         sBarInnerWrapper.append(sBar);
         sBarWrapper.append(sBarInnerWrapper);
-        $(sBarInnerWrapper).after("<div id='coverWindowButton'>Cover Window</div>");
+
+        if(typeof(config.coverWindow)=='undefined' || config.coverWindow==true){
+            $(sBarInnerWrapper).after("<div id='coverWindowButton'>Cover Window</div>");
+        }
+
         $('#nav').after(sBarWrapper);
 
         setSideBarSections(config, config.roles[0].sections);
@@ -383,32 +414,12 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
         $("#coverWindowButton").stop().click(
             function(){
                 if (sideBarDiv.hasClass("cover")) {
-                    slideMenuClosed();
-                    sideBarDiv.removeClass("cover");
+                    closeCoverWindow();
                 } else{
-                    $("#sideBar").removeClass("hover");
-                    $("#sideBar").removeClass("expand");
                     coverWindow();
                 }
             }
         );
-
-        var coverWindow = function(){
-            $("#sideBarWrapper")
-                .stop(false, true)
-                .animate({width: '100%'}, 'fast');
-            $("#sideBar").addClass("cover");
-        };
-
-        var resetSideBar = function(){
-            $("#sideBarWrapper")
-                .stop(false, true)
-                .animate({width: '55px'}, 'fast');
-            $("#sideBar").addClass("cover");
-        };
-
-        Navigator.prototype.coverWindow = coverWindow;
-        Navigator.prototype.resetSideBar = resetSideBar;
 
         //Hover listener that expands/contracts sideBar.
         $("#sideBarWrapper").hover(

@@ -47,6 +47,7 @@ define(['db/services', "lib/kendo.all"], function (dbservices) {
 //        "settingsUrl": "#view/personalSettings.html",
 //        "logOutUrl": "../Account/LogOut",
 //        "avatarUrl": "img/emptyPerson.png",
+//        "coverWindow": false,
 //        "roles": [
 //            {
 //                "id": "50f2551f-d3fd-4372-b5ed-b85f2cda95bb",
