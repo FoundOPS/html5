@@ -274,7 +274,7 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
         sBarInnerWrapper.append(sBar);
         sBarWrapper.append(sBarInnerWrapper);
 
-        if(typeof(config.coverWindow)=='undefined' || config.coverWindow==true){
+        if(typeof(config.coverWindow)!=='undefined' && config.coverWindow==true){
             $(sBarInnerWrapper).after("<div id='coverWindowButton'>Cover Window</div>");
         }
 
