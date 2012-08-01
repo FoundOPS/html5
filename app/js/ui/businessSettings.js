@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(["db/services", "developer", "ui/saveHistory, "ui/notifications", "session", "tools", "widgets/imageUpload", "widgets/settingsMenu"], function (dbServices, developer, saveHistory, notifications, session, tools, upload) {
+define(["db/services", "developer", "ui/saveHistory", "session", "widgets/imageUpload", "widgets/settingsMenu"], function (dbServices, developer, saveHistory, session) {
     var businessSettings = {}, imageUpload;
 
     businessSettings.viewModel = kendo.observable({
@@ -16,19 +16,37 @@ define(["db/services", "developer", "ui/saveHistory, "ui/notifications", "sessio
             }
             imageUpload.submitForm();
        },
-        cancelChanges: function (e) {
+        cancelChanges: function () {
             businessSettings.viewModel.set("settings", businessSettings.settings);
             imageUpload.setImageUrl(businessSettings.viewModel.get("settings.ImageUrl"));
             imageUpload.cancel();
         }
     });
 
-    //add these so save and cancel can be called from the SaveCancel widget
-    businessSettings.save = function () {
-        businessSettings.viewModel.saveChanges();
+    businessSettings.undo = function () {
+        saveHistory.states.pop();
+        if(saveHistory.states.length !== 0){
+            businessSettings.viewModel.set("settings", saveHistory.states[saveHistory.states.length - 1]);
+            if(saveHistory.states.length === 1){
+                saveHistory.multiple = false;
+                saveHistory.close();
+                saveHistory.success();
+            }
+        }else{
+            saveHistory.cancel();
+        }
     };
-    businessSettings.cancel = function () {
-        businessSettings.viewModel.cancelChanges();
+
+    businessSettings.setupSaveHistory = function () {
+        saveHistory.setCurrentSection({
+            page: "Business Settings",
+            onSave: businessSettings.viewModel.saveChanges,
+            onCancel: businessSettings.viewModel.cancelChanges,
+            section: businessSettings,
+            state: function () {
+                return businessSettings.viewModel.get("settings");
+            }
+        });
     };
 
     businessSettings.initialize = function () {
@@ -60,8 +78,6 @@ define(["db/services", "developer", "ui/saveHistory, "ui/notifications", "sessio
             if (e.field === "settings") {
                 //update the image url after it has been set
                 imageUpload.setImageUrl(businessSettings.viewModel.get("settings.ImageUrl"));
-//saveHistory.error("File Type");
-//saveHistory.error("File Size");
             }
         });
 
@@ -75,13 +91,7 @@ define(["db/services", "developer", "ui/saveHistory, "ui/notifications", "sessio
                 imageUpload.setUploadUrl(dbServices.API_URL + "settings/UpdateBusinessImage?roleId=" + roleId);
             }
 
-            saveHistory.setCurrentSection({
-                page:"Business Settings",
-                onSave: businessSettings.viewModel.saveChanges,
-                onCancel: businessSettings.viewModel.cancelChanges,
-                section: businessSettings,
-                state: businessSettings.viewModel.get("settings")
-            });v
+            businessSettings.setupSaveHistory();
         });
     };
 

@@ -1,5 +1,5 @@
-define(["tools", "ui/notifications", "db/services", "jquery", "lib/kendo.all", "lib/jquery-ui-1.8.21.core.min",
-    "lib/jquery.FileReader", "lib/swfobject", "lib/jquery.form"], function (tools, notifications, dbServices, $) {
+define(["tools", "ui/saveHistory", "db/services", "jquery", "lib/kendo.all", "lib/jquery-ui-1.8.21.core.min",
+    "lib/jquery.FileReader", "lib/swfobject", "lib/jquery.form"], function (tools, saveHistory, dbServices, $) {
     // shorten references to variables. this is better for uglification
     var kendo = window.kendo,
         ui = kendo.ui,
@@ -29,7 +29,7 @@ define(["tools", "ui/notifications", "db/services", "jquery", "lib/kendo.all", "
             that.newImage = false;
 
             that.cropBox.on("load", function () {
-                tools.resizeImage(that.cropBox, that.cropBox[0].naturalWidth, that.options.containerWidth);
+                tools.resizeImage(that.cropBox, that.options.imageWidth, that.options.containerWidth);
             });
 
             //setup the FileReader on the imageUpload button
@@ -50,6 +50,7 @@ define(["tools", "ui/notifications", "db/services", "jquery", "lib/kendo.all", "
                 that.setImageUrl(that.imageUrl);
             }
             that.newImage = false;
+            tools.resizeImage(that.cropBox, that.options.imageWidth, that.options.containerWidth);
         },
 
         _changeImage: function (evt) {
@@ -74,17 +75,19 @@ define(["tools", "ui/notifications", "db/services", "jquery", "lib/kendo.all", "
 
                 //set so that the save changes event will also save the image
                 that.newImage = true;
+                tools.resizeImage(that.cropBox, that.options.imageWidth, that.options.containerWidth);
+                saveHistory.save();
             };
 
             var file = evt.target.files[0];
             //check that the file is an image
             if (!file.name.match(/(.*\.png$)/) && !file.name.match(/(.*\.jpg$)/) && !file.name.match(/(.*\.JPG$)/) && !file.name.match(/(.*\.gif$)/)) {
-                notifications.error("File Type");
+                saveHistory.error("File Type");
                 return;
             }
             //check that the image is no larger than 10MB
             if (file.size > 5000000) {
-                notifications.error("File Size");
+                saveHistory.error("File Size");
                 return;
             }
 
@@ -93,6 +96,7 @@ define(["tools", "ui/notifications", "db/services", "jquery", "lib/kendo.all", "
 
             //set the form value
             that.imageFileNameField.val(file.name);
+            tools.resizeImage(that.cropBox, that.options.imageWidth, that.options.containerWidth);
         },
 
         setUploadUrl: function (url) {
@@ -115,7 +119,7 @@ define(["tools", "ui/notifications", "db/services", "jquery", "lib/kendo.all", "
                         that.newImage = false;
                     },
                     error: function () {
-                        notifications.error("Image");
+                        saveHistory.error("Image");
                     }
                 });
             }
@@ -128,6 +132,7 @@ define(["tools", "ui/notifications", "db/services", "jquery", "lib/kendo.all", "
         options: new kendo.data.ObservableObject({
             name: "ImageUpload",
             uploadUrl: "",
+            imageWidth: 200,
             containerWidth: 500
         })
     });

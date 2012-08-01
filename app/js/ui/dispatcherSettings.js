@@ -6,16 +6,11 @@
 
 "use strict";
 
-define(["developer", "tools", "db/services", "session", "widgets/settingsMenu", "ui/colorPicker",
-        "ui/kendoChanges"], function (developer, tools, dbServices, session) {
+define(["developer", "tools", "db/services", "session", "ui/saveHistory", "widgets/settingsMenu", "ui/colorPicker",
+        "ui/kendoChanges"], function (developer, tools, dbServices, session, saveHistory) {
     var dispatcherSettings = {};
 
-    //add these for the SaveCancel widget(even thought they"re empty) so it won"t cause an error
-    dispatcherSettings.save = function () {};
-    dispatcherSettings.cancel = function () {};
-
     //region Locals
-    var grid;
     //keep track of the business account id to be used for new items
     var busAcctId;
     //keep track of the last selected item, for color selector
@@ -130,55 +125,27 @@ define(["developer", "tools", "db/services", "session", "widgets/settingsMenu", 
             editable: true,
             //called when a row it removed from the grid
             remove: function () {
-                //hide the save and cencel buttons
-                enableOrDisableSaveCancel(true);
+                //dispatcherSettings.grid.saveChanges();
             },
             scrollable: false,
             selectable: true,
             sortable: true,
             //called when the grid detects changes to the data
             save: function () {
-                //hide the save and cencel buttons
-                enableOrDisableSaveCancel(true);
-            },
-            //called when the changes are synced with the served
-            saveChanges: function () {
-                //show the save and cencel buttons
-                enableOrDisableSaveCancel(false);
+                dispatcherSettings.grid.saveChanges();
             }
         });
 
-        //center save/cancel buttons
-        var positionBtns = function () {
-            var gridWidth = $("#dispatcherGrid")[0].clientWidth;
-            $("#dispatcher .saveBtn").css("margin-left", gridWidth / 2 - 104 + "px");
-        };
-
-        positionBtns();
-
-        $(window).resize(function () {
-            positionBtns();
-        });
-
         //detect cancel button click
-        $("#dispatcher .cancelBtn").click(function () {
-            //hide save and cancel buttons
-            enableOrDisableSaveCancel(false);
+        dispatcherSettings.cancel = function () {
             //hide the delete button(there isn't a selected row after cancel is clicked)
-            $('#dispatcher .cancelBtn').attr("disabled", "disabled");
             $('#dispatcher .k-grid-delete').attr("disabled", "disabled");
-            grid.dataSource.cancelChanges();
-        });
+            dispatcherSettings.grid.dataSource.cancelChanges();
+        };
         //detect add button click
         $("#dispatcher .k-grid-add").click(function () {
-            grid.addRow();
-            //show save and cancel buttons
-            enableOrDisableSaveCancel(true);
-        });
-        $("#dispatcher .saveBtn").click(function () {
-            grid.saveChanges();
-            //hide save and cancel buttons
-            enableOrDisableSaveCancel(false);
+            dispatcherSettings.grid.addRow();
+            //dispatcherSettings.grid.saveChanges();
         });
     }; //end initialize
 
@@ -203,7 +170,7 @@ define(["developer", "tools", "db/services", "session", "widgets/settingsMenu", 
     dispatcherSettings.disableDefaultCheckboxes = function () {
         $("#dispatcher input[type='checkbox']").each(function (i) {
             // Get the DefaultTypeInt for the row
-            var typeInt = grid._data[i].DefaultTypeInt;
+            var typeInt = dispatcherSettings.grid._data[i].DefaultTypeInt;
             // Check if the row is a default type
             if (typeInt !== null) {
                 //disable checkbox
@@ -216,8 +183,7 @@ define(["developer", "tools", "db/services", "session", "widgets/settingsMenu", 
     dispatcherSettings.updateCheckbox = function (checked) {
         //update the model with the new RouteRequired value
         selectedItem.set('RouteRequired', checked);
-        //show save and cancel buttons
-        enableOrDisableSaveCancel(true);
+        //dispatcherSettings.grid.saveChanges();
     };
     //endregion
 
@@ -226,7 +192,7 @@ define(["developer", "tools", "db/services", "session", "widgets/settingsMenu", 
     var addColorPicker = function () {
         $('.colorSelector2').ColorPicker({
             //set the initial color of the picker to be the current color
-            color: grid.dataItem(grid.select()).Color, // rgbToHex($('.innerSelector').eq(i))
+            color: dispatcherSettings.grid.dataItem(dispatcherSettings.grid.select()).Color, // rgbToHex($('.innerSelector').eq(i))
             onShow: function (colpkr) {
                 //set a high z-index so picker show up above the grid
                 $(colpkr).css('z-index', "1000");
@@ -267,8 +233,7 @@ define(["developer", "tools", "db/services", "session", "widgets/settingsMenu", 
     var updateColor = function (color) {
         //update the current model with the new color value
         selectedItem.set('Color', color);
-        // Show save and cancel buttons
-        enableOrDisableSaveCancel(true);
+        //dispatcherSettings.grid.saveChanges();
     };
     //endregion
 
@@ -292,18 +257,18 @@ define(["developer", "tools", "db/services", "session", "widgets/settingsMenu", 
     //after the data is loaded, assign the color picker to each of the current color boxes
     var onDataBound = function () {
         //get a reference to the grid widget
-        grid = $("#dispatcherGrid").data("kendoGrid");
+        dispatcherSettings.grid = $("#dispatcherGrid").data("kendoGrid");
         //disable the checkboxes for the default rows
         dispatcherSettings.disableDefaultCheckboxes();
         //get the BusinessAccountId from another row to be used to set in new rows
-        busAcctId = grid._data[1].BusinessAccountId;
+        busAcctId = dispatcherSettings.grid._data[1].BusinessAccountId;
         //bind to the selection change event
-        grid.bind("change", function () {
+        dispatcherSettings.grid.bind("change", function () {
             enableOrDisableDelete();
-            selectedItem = grid.dataItem(grid.select());
+            selectedItem = dispatcherSettings.grid.dataItem(dispatcherSettings.grid.select());
         });
         //bind to grid edit event
-        grid.bind("edit", function (e) {
+        dispatcherSettings.grid.bind("edit", function (e) {
             //disable the checkboxes for the default rows
             dispatcherSettings.disableDefaultCheckboxes();
             if (e.sender._editContainer.context) {
@@ -320,38 +285,56 @@ define(["developer", "tools", "db/services", "session", "widgets/settingsMenu", 
                 e.model.Id = tools.newGuid();
             }
         });
+
+        if(saveHistory.options){
+            if(saveHistory.options.page != "Dispatcher Settings"){
+                dispatcherSettings.setupSaveHistory();
+            }
+        }
+    };
+
+    dispatcherSettings.undo = function () {
+        saveHistory.states.pop();
+        if(saveHistory.states.length !== 0){
+            dispatcherSettings.grid.setDataSource(saveHistory.states[saveHistory.states.length - 1]);
+            if(saveHistory.states.length === 1){
+                saveHistory.multiple = false;
+                saveHistory.close();
+                saveHistory.success();
+            }
+        }else{
+            saveHistory.cancel();
+        }
+    };
+
+    dispatcherSettings.setupSaveHistory = function () {
+        saveHistory.setCurrentSection({
+            page: "Dispatcher Settings",
+            onSave: dispatcherSettings.grid.saveChanges(),
+            onCancel: dispatcherSettings.cancel,
+            section: dispatcherSettings,
+            state: function () {
+                return dispatcherSettings.grid.dataSource;
+            }
+        });
     };
 
     //removes the selected row from the grid(stays in pending changes until changes are saved)
     dispatcherSettings.removeSelectedRow = function () {
         //get selected row
-        var row = getSelectedRow(grid);
+        var row = getSelectedRow(dispatcherSettings.grid);
         //remove selected row
-        grid.removeRow(row);
+        dispatcherSettings.grid.removeRow(row);
     };
 
     //hide the delete button if a default row is selected, otherwise show it
     var enableOrDisableDelete = function () {
         //get the selected row
-        var row = getSelectedRow(grid);
+        var row = getSelectedRow(dispatcherSettings.grid);
         if (row[0].cells[3].innerHTML !== "") {
             $('#dispatcher .k-grid-delete').attr("disabled", "disabled");
         } else {
             $('#dispatcher .k-grid-delete').removeAttr("disabled");
-        }
-    };
-
-    /**
-     * Show the save button only if there are changes
-     * @param {boolean} hasChanges
-     */
-    var enableOrDisableSaveCancel = function (hasChanges) {
-        if (hasChanges) {
-            $("#dispatcher .saveBtn").removeAttr("disabled");
-            $("#dispatcher .cancelBtn").removeAttr("disabled");
-        } else {
-            $("#dispatcher .saveBtn").attr("disabled", "disabled");
-            $("#dispatcher .cancelBtn").attr("disabled", "disabled");
         }
     };
 

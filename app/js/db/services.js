@@ -285,7 +285,7 @@ define(["developer", "tools", "ui/saveHistory", "lib/xdr"], function (developer,
     services.hookupDefaultComplete = function (dataSource) {
         var onComplete = function (jqXHR, textStatus) {
             if (textStatus == "success") {
-                saveHistory.success(jqXHR.statusText)
+                saveHistory.success()
             } else {
                 dataSource.cancelChanges();
                 saveHistory.error(jqXHR.statusText);

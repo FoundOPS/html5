@@ -89,20 +89,22 @@ require(["containers/navigator", "silverlight", "session", "lib/kendo.all", "ui/
             pageTracker._trackEvent(section, action, label);
         };
     }
-    catch (err) {
-    }
+    catch (err) {}
 
     window.navigateToPersonal = function () {
         application.navigate("view/personalSettings.html");
+        personalSettings.setupSaveHistory();
     };
     window.navigateToBusiness = function () {
         application.navigate("view/businessSettings.html");
+        businessSettings.setupSaveHistory();
     };
     window.navigateToUsers = function () {
         application.navigate("view/usersSettings.html");
     };
     window.navigateToDispatcher = function () {
         application.navigate("view/dispatcherSettings.html");
+        dispatcherSettings.setupSaveHistory();
     };
     window.navigateToChangePassword = function () {
         application.navigate("view/changePassword.html");
