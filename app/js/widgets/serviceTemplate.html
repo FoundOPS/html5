@@ -1,0 +1,62 @@
+<form>
+    <ul>
+    # for (var i = 0; i < service.Fields.length; i++) {
+        var field = service.Fields[i]; #
+        <li>
+            # switch (field.Type) {
+            case "TextBoxField":
+                if (field.IsMultiLine) { #
+                    <textarea id="textarea" name="notes" cols="32" rows="5"></textarea>
+                # } else { #
+                    <input id="textbox" type="text" value=""/>
+                # }
+                break;
+            case "NumericField": #
+                <input id="number" type="number" step="1" value=""/>
+                # break;
+            case "OptionsField":
+                if (field.TypeInt === 0) { #
+                    <select id="dropdown">
+                        # for (var i = 0; i < field.Options.length ; i++) {
+                            <option selected="true">
+                                <span>#=field.Options[i].Name#</span>
+                            </option>
+                        # }
+                    </select>
+                # } else if (TypeInt === 1) { #
+                    <ul data-role="listview" data-style="inset">
+                        # for (var i = 0; i< field.Options.length; i++) {
+                            <li style="line-height:.5em; font-size:1em;">
+                                <label>
+                                    <input style="width:10px; height:10px; top:15px;" id="checkbox"
+                                           type="checkbox" value="#=field.Options[i].Name#" checked="checked"/>
+                                        <span>#=Options[i].Name#</span>
+                                </label>
+                            </li>
+                        } #
+                        </ul>
+                # } else if (TypeInt === 2) { #
+                    <ul data-role="listview" data-style="inset" style="">
+                    # for (var i = 0; i< Options.length; i++) {
+                        <li style="line-height:.5em; font-size:1em;">
+                            <label>
+                                <input style="width:10px; height:10px; top:15px;" id="checklist" data-fieldId="#=Id#"
+                                    type="checkbox" checked="checked"/>
+                                <span>#=field.Options[i].Name#</span>
+                            </label>
+                        </li>
+                    } #
+                    </ul>
+                # }
+                break;
+            case "DateTimeField": #
+                <div style="width:110px; height:55px; float:left; text-align:center; font-size:12px; margin-bottom:-10px">
+                    <input type="text" size="5"/>
+                </div>
+                # break;
+            } #
+            #= field.Name #
+        </li>
+    # } #
+    </ul>
+</form>

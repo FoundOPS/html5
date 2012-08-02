@@ -1,24 +1,22 @@
 'use strict';
-define(["jquery", "lib/kendo.all"], function ($) {
+define(["lib/text!widgets/serviceTemplate.html", "jquery", "lib/kendo.all"], function (serviceTemplate, $) {
 
     var kendo = window.kendo,
         ui = kendo.ui,
         Widget = ui.Widget,
         DATABINDING = "dataBinding",
         DATABOUND = "dataBound",
-        CHANGE = "change",
-        textBoxTemplate = "<input id='textbox' type='text'/>",
-        multiLineTextBoxTemplate = "<textarea id='textarea'></textarea>";
+        inputTemplate = "<input />",
+        multiLineTextTemplate = "<textarea id='textarea'></textarea>";
 
     var ServiceDetails = Widget.extend({
         init: function (element, options) {
             var that = this;
 
+            that.options.template = serviceTemplate;
+
             Widget.fn.init.call(that, element, options);
-
-            console.log("testing");
-
-            that.setDataSource();
+            that.render();
         },
 
         events: [
@@ -29,27 +27,17 @@ define(["jquery", "lib/kendo.all"], function ($) {
         items: function () {
             return this.element.children();
         },
-        // for supporting changing o the datasource via MVVM
-        setDataSource: function (dataSource) {
-            var that = this;
-            that.options.dataSource = dataSource;
 
-            that._refreshHandler = $.proxy(that.refresh, that);
-
-            that.refresh();
-            console.log("2");
-        },
-        refresh: function () {
-            console.log("1");
+        render: function (service) {
             var that = this;
 
             that.trigger(DATABINDING);
 
             that.element.empty();
 
-            var fieldsListView = $("<ul></ul>");
+//            var fieldsListView = $("<ul data-role='listview' data-style='inset'></ul>").appendTo(that.element).wrap("<form></form>");
+            var fieldsListView = $("<ul></ul>").appendTo(that.element).wrap("<form></form>");
 
-            var service = that.element.value;
             if (service) {
                 for (var i = 0; i < service.Fields.length; i++) {
                     var field = service.Fields[i];
@@ -57,30 +45,50 @@ define(["jquery", "lib/kendo.all"], function ($) {
                     switch (field.Type) {
                         case "TextBoxField":
                             if (field.IsMultiLine) {
-                                fieldElement = $(multiLineTextBoxTemplate);
+                                fieldElement = $(multiLineTextTemplate);
                             }
                             else {
-                                fieldElement = $(textBoxTemplate);
+                                fieldElement = $(inputTemplate);
+                                fieldElement.attr("type", "text");
                             }
+                            fieldElement.appendTo(fieldsListView).wrap("<li></li>");
                             break;
+                        case "NumericField":
+                            fieldElement = $(inputTemplate).attr("type", "number");
+                            var step = 1 / Math.pow(10, field.DecimalPlaces);
+                            fieldElement.attr("step", step);
+                            fieldElement.attr("min", field.Minimum);
+                            fieldElement.attr("max", field.Maximum);
+                            fieldElement.appendTo(fieldsListView).wrap("<li></li>");
+                            break;
+                        case "DateTimeField":
+                            fieldElement = $(inputTemplate).appendTo(fieldsListView).wrap("<li></li>");
+                            if (field.TypeInt === 0) {
+                                //DateTime
+                                fieldElement.kendoDateTimePicker();
+                            } else if (field.TypeInt === 1) {
+                                //TimeOnly
+                                fieldElement.kendoTimePicker();
+                            } else if (field.TypeInt === 2) {
+                                //DateOnly
+                                fieldElement.kendoDatePicker();
+                            }
                     }
 
                     if (fieldElement) {
-                        //Set the source relative to the service
-                        var dataBindAttr = "source: Fields[" + i + "], value: Value";
+                        //setup the tooltip
+                        if (field.ToolTip) {
+                            fieldElement.attr("text", field.ToolTip);
+                        }
+
+                        //setup the value binding
+                        var dataBindAttr = "value: Fields[" + i + "].Value";
                         fieldElement.attr("data-bind", dataBindAttr);
-
-                        console.log(fieldElement);
-
-                        //add the element to the fieldsListView
-                        fieldElement.appendTo(fieldsListView);
                     }
                 }
             }
 
-            var html = fieldsListView.kendoMobileListView({style: "inset"}).wrap("<form></form>").html();
-
-            that.element.html(html);
+            kendo.bind(fieldsListView, service, kendo.mobile.ui);
 
             that.trigger(DATABOUND);
         },
@@ -90,4 +98,18 @@ define(["jquery", "lib/kendo.all"], function ($) {
     });
 
     ui.plugin(ServiceDetails);
+
+    kendo.data.binders.service = kendo.data.Binder.extend(({
+        init: function (element, bindings, options) {
+            kendo.data.Binder.fn.init.call(this, element, bindings, options);
+        },
+
+        refresh: function (e) {
+            var service = this.bindings.service.get();
+            var serviceDetails = $(this.element).data("kendoServiceDetails");
+            if (serviceDetails) {
+                serviceDetails.render(service);
+            }
+        }
+    }));
 });
