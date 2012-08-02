@@ -6,7 +6,7 @@
 
 'use strict';
 
-define(["developer", "tools", "ui/notifications", "lib/xdr"], function (developer, tools, notifications) {
+define(["developer", "tools", "ui/notifications"], function (developer, tools, notifications) {
     var services = {};
 
     $.support.cors = true;
@@ -188,7 +188,17 @@ define(["developer", "tools", "ui/notifications", "lib/xdr"], function (develope
         return services._getHttp('service/GetServiceDetails',
             {serviceId: serviceId, serviceDate: tools.formatDate(serviceDate), recurringServiceId: recurringServiceId}, false)(function (data) {
             //It will only have one item
-            callback(data[0]);
+            var service = data[0];
+
+            //convert the all the dates
+            for (var i = 0; i < service.Fields.length; i++) {
+                var field = service.Fields[i];
+                if (field.Type === "DateTimeField") {
+                    field.Value = new Date(field.Value);
+                }
+            }
+
+            callback(service);
         });
     };
 
