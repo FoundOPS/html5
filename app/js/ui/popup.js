@@ -17,6 +17,8 @@
         var lastElementClick = null;
         var currentTarget = null;
 
+        var menus = [];
+
         if((typeof(popupListener)==='undefined') || popupListener === null){
             console.log("ERROR: No listener passed!");
             return;
@@ -26,8 +28,6 @@
         listenerElements.click(function (e) {
             thisPopup.toggleVisible(e, $(this));
         });
-
-        var menus = [];
 
         this.addMenu = function (id, title, contents) {
             menus.push({'id': id, 'title': title, 'contents': contents});
@@ -193,6 +193,7 @@
                 function () {
                     var newId = $(this).attr('id');
 
+                    //TODO: Refactor
                     if($(this).hasClass("popupEvent")){
                         $(this).trigger("popupEvent", $(this));
                     }
@@ -314,6 +315,7 @@
         //      title: Display text for popup header
         //      contents: Array of objects, included identifiers below
         //          name: Display text for links
+        //TODO: Refactor
         this.getMenu = function (id) {
             //Searches for a popup data object by the id passed, returns data object if found.
             var i;

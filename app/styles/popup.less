@@ -132,7 +132,8 @@ html{
 
 #popupContentWrapper {
     position: relative;
-    padding-top: 44px;
+    overflow: visible !important;
+    padding-top: 49px;
     height: 100%;
     width: 100%;
     .borderBox;
@@ -160,14 +161,15 @@ html{
 
     .last {
         border-bottom: none;
+        padding-bottom: 13px;
     }
 }
 
 .popupContentRow {
-    border-bottom: 1px solid @darkGrey;
-    padding: 12px 23px;
-    cursor: pointer;
     display: block;
+    cursor: pointer;
+    padding: 12px 23px;
+    border-bottom: 1px solid @darkGrey;
 }
 
 @media only screen and (max-width:800px) {
