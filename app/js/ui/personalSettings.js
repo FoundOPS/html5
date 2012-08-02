@@ -18,15 +18,23 @@ define(["db/services", "ui/saveHistory", "tools", "widgets/imageUpload"], functi
         },
         cancelChanges: function () {
             personalSettings.viewModel.set("settings", personalSettings.settings);
-            imageUpload.setImageUrl(personalSettings.viewModel.get("settings.ImageUrl"));
             imageUpload.cancel();
+            if (personalSettings.settings.ImageUrl) {
+                imageUpload.setImageUrl(personalSettings.settings.ImageUrl);
+                imageUpload.setImageFields(personalSettings.imageData, personalSettings.imageFileName);
+            }
+            imageUpload.submitForm();
         }
     });
 
     personalSettings.undo = function () {
         saveHistory.states.pop();
         if(saveHistory.states.length !== 0){
-            personalSettings.viewModel.set("settings", saveHistory.states[saveHistory.states.length - 1]);
+            var state = saveHistory.states[saveHistory.states.length - 1];
+            personalSettings.viewModel.set("settings", state);
+            imageUpload.cancel();
+            imageUpload.setImageFields(state.imageData, state.imageFileName);
+            imageUpload.submitForm();
             if(saveHistory.states.length === 1){
                 saveHistory.multiple = false;
                 saveHistory.close();
@@ -98,6 +106,34 @@ define(["db/services", "ui/saveHistory", "tools", "widgets/imageUpload"], functi
             imageWidth: 200,
             containerWidth: 500
         }).data("kendoImageUpload");
+
+        imageUpload.bind("uploaded", function (e) {
+            businessSettings.viewModel.set("settings.imageData", e.data);
+            businessSettings.viewModel.set("settings.imageFileName", e.fileName);
+        });
+
+        var firstLoad = true;
+        var img = imageUpload.cropBox.get(0);
+        imageUpload.cropBox.on("load", function () {
+            if (firstLoad) {
+                //set the initial image data
+                firstLoad = false;
+
+                //get the image data from http://stackoverflow.com/questions/934012/get-image-data-in-javascript
+                var canvas = document.createElement("canvas");
+                canvas.width = img.width;
+                canvas.height = img.height;
+                var ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0);
+                var data = canvas.toDataURL("image/png");
+                //data = data.replace(/^data:image\/(png|jpg);base64,/, "");
+
+                personalSettings.viewModel.set("settings.imageData", data);
+                personalSettings.viewModel.set("settings.imageFileName", "newImage.png");
+                personalSettings.imageData = data;
+                personalSettings.imageFileName = "resetImage.png";
+            }
+        });
 
         personalSettings.viewModel.bind("change", function (e) {
             if (e.field === "settings") {

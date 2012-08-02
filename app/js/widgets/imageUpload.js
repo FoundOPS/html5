@@ -14,7 +14,7 @@ define(["tools", "ui/saveHistory", "db/services", "jquery", "lib/kendo.all", "li
 
     var ImageUpload = Widget.extend({
         init: function (element, options) {
-            var that = this, templateElement, form, imageUploadButton;
+            var that = this, templateElement, imageUploadButton;
 
             Widget.fn.init.call(that, element, options);
 
@@ -42,15 +42,6 @@ define(["tools", "ui/saveHistory", "db/services", "jquery", "lib/kendo.all", "li
 
             that.element.append(templateElement);
         },
-        cancel: function () {
-            var that = this;
-            //clear the new image data
-            that.imageFileNameField.val("");
-            that.imageDataField.val("");
-            that.newImage = false;
-            tools.resizeImage(that.cropBox, that.options.imageWidth, that.options.containerWidth);
-        },
-
         _changeImage: function (evt) {
             var that = this;
 
@@ -97,8 +88,20 @@ define(["tools", "ui/saveHistory", "db/services", "jquery", "lib/kendo.all", "li
             tools.resizeImage(that.cropBox, that.options.imageWidth, that.options.containerWidth);
         },
 
+        events: ["uploaded"],
+
         setUploadUrl: function (url) {
             this.options.uploadUrl = url;
+        },
+
+        //manually set the image (used when undoing)
+        setImageFields: function (data, fileName) {
+            var that = this;
+            that.imageDataField.val(data);
+            that.imageFileNameField.val(fileName);
+            that.setImageUrl(data);
+            that.newImage = true;
+            tools.resizeImage(that.cropBox, that.options.imageWidth, that.options.containerWidth);
         },
 
         submitForm: function () {
@@ -115,6 +118,7 @@ define(["tools", "ui/saveHistory", "db/services", "jquery", "lib/kendo.all", "li
                         var url = response.replace(/['"]/g, '');
                         that.setImageUrl(url);
                         that.newImage = false;
+                        that.trigger("uploaded", {data: that.imageDataField[0].value, fileName: that.imageFileNameField[0].value});
                     },
                     error: function () {
                         saveHistory.error("Image");
@@ -126,6 +130,8 @@ define(["tools", "ui/saveHistory", "db/services", "jquery", "lib/kendo.all", "li
             //store the current image url
             this.imageUrl = imageUrl;
             this.cropBox.attr("src", imageUrl);
+            this.options.imageDataBinding = this.imageDataField;
+            this.options.imageFileNameBinding = this.imageFileNameField;
         },
         options: new kendo.data.ObservableObject({
             name: "ImageUpload",
