@@ -29,17 +29,25 @@ require(["jquery", "underscore", "lib/kendo.all", "developer", "db/services", "t
             _.each(types, function (type, name) {
                 //Example ShipCity: { type: "string" }
                 var field = {};
-                var jType;
+                var jType; //the datasource type
+                var detail; //details about the type
                 if (type === "System.Decimal") {
                     jType = "number";
                 } else if (type === "System.DateTime") {
                     jType = "date";
+                    detail = "datetime";
+                } else if (type === "Time") {
+                    jType = "date";
+                    detail = "time";
+                } else if (type === "Date") {
+                    jType = "date";
+                    detail = "date";
                 } else if (type === "System.String" || type === "System.Guid") {
                     jType = "string";
                 } else {
                     return;
                 }
-                var fieldValues = {type: jType, defaultValue: ""};
+                var fieldValues = {type: jType, defaultValue: "", detail: detail};
 
                 if (type === "System.Guid") {
                     fieldValues.hidden = true;
@@ -125,7 +133,13 @@ require(["jquery", "underscore", "lib/kendo.all", "developer", "db/services", "t
                 if (column.type === "number") {
                     column.template = "#= (" + key + "== null) ? ' ' : " + key + " #";
                 } else if (column.type === "date") {
-                    column.template = '#= kendo.toString(' + key + ', "dd MMMM yyyy") #';
+                    if (value.detail === "datetime") {
+                        column.template = '#= moment(' + key + ').format("LLL") #';
+                    } else if (value.detail === "time") {
+                        column.template = '#= moment(' + key + ').format("LT") #';
+                    } else if (value.detail === "date") {
+                        column.template = '#= moment(' + key + ').format("LL") #';
+                    }
                 }
 
                 //TODO calculate width based on title
