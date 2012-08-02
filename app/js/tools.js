@@ -183,5 +183,65 @@ define(['underscore', 'developer'], function (_, developer) {
         element.css("marginLeft", margin + "px");
     };
 
+    //enable the save and cancel buttons
+    tools.enableButtons = function (page) {
+        $(page + " .cancelBtn").removeAttr("disabled");
+        $(page + " .saveBtn").removeAttr("disabled");
+    };
+
+    //disable the save and cancel buttons
+    tools.disableButtons = function (page) {
+        $(page + " .cancelBtn").attr("disabled", "disabled");
+        $(page + " .saveBtn").attr("disabled", "disabled");
+    };
+
+    /**
+    * watches all input elements on page for value change
+    * param {string} pageDiv the id of the view. ex: "#personal"
+    */
+    tools.observeInput = function (pageDiv) {
+        $(pageDiv + ' input').each(function() {
+            // Save current value of element
+            $(this).data('oldVal', $(this).val());
+            // Look for changes in the value
+            $(this).bind("propertychange keyup input paste change", function(){
+                // If value has changed...
+                if ($(this).data('oldVal') != $(this).val()) {
+                    // Updated stored value
+                    $(this).data('oldVal', $(this).val());
+                    //enable save and cancel buttons
+                    tools.enableButtons(pageDiv);
+                }
+            });
+        });
+    };
+
+    tools.getLocalTimeZone = function () {
+        var today = new Date().toString();
+
+        var timezone, id;
+        if (today.match(/Eastern/)) {
+            timezone = "(UTC-05:00) Eastern Time (US & Canada)";
+            id = "Eastern Standard Time";
+        } else if (today.match(/Central/)) {
+            timezone = "(UTC-06:00) Central Time (US & Canada)";
+            id = "Central Standard Time";
+        } else if (today.match(/Mountain/)) {
+            timezone = "(UTC-07:00) Mountain Time (US & Canada)";
+            id = "Mountain Standard Time";
+        } else if (today.match(/Pacific/)) {
+            timezone = "(UTC-08:00) Pacific Time (US & Canada)";
+            id = "Pacific Standard Time";
+        } else if (today.match(/Alaska/)) {
+            timezone = "(UTC-09:00) Alaska";
+            id = "Alaskan Standard Time";
+        } else if (today.match(/Hawaii/)) {
+            timezone = "(UTC-10:00) Hawaii";
+            id = "Hawaiian Standard Time";
+        }
+
+        return {DisplayName: timezone, TimeZoneId: id};
+    };
+
     return tools;
 });

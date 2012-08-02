@@ -1,5 +1,5 @@
-define(["tools", "ui/notifications", "db/services", "jquery", "lib/kendo.all", "lib/jquery-ui-1.8.21.core.min",
-    "lib/jquery.FileReader", "lib/swfobject", "lib/jquery.form"], function (tools, notifications, dbServices, $) {
+define(["tools", "ui/saveHistory", "db/services", "jquery", "lib/kendo.all", "lib/jquery-ui-1.8.21.core.min",
+    "lib/jquery.FileReader", "lib/swfobject", "lib/jquery.form"], function (tools, saveHistory, dbServices, $) {
     // shorten references to variables. this is better for uglification
     var kendo = window.kendo,
         ui = kendo.ui,
@@ -14,7 +14,7 @@ define(["tools", "ui/notifications", "db/services", "jquery", "lib/kendo.all", "
 
     var ImageUpload = Widget.extend({
         init: function (element, options) {
-            var that = this, templateElement, form, imageUploadButton;
+            var that = this, templateElement, imageUploadButton;
 
             Widget.fn.init.call(that, element, options);
 
@@ -29,7 +29,7 @@ define(["tools", "ui/notifications", "db/services", "jquery", "lib/kendo.all", "
             that.newImage = false;
 
             that.cropBox.on("load", function () {
-                tools.resizeImage(that.cropBox, that.cropBox[0].naturalWidth, that.options.containerWidth);
+                tools.resizeImage(that.cropBox, that.options.imageWidth, that.options.containerWidth);
             });
 
             //setup the FileReader on the imageUpload button
@@ -42,16 +42,6 @@ define(["tools", "ui/notifications", "db/services", "jquery", "lib/kendo.all", "
 
             that.element.append(templateElement);
         },
-        cancel: function () {
-            var that = this;
-            //clear the new image data
-            that.imageDataField.val("");
-            if (that.imageUrl) {
-                that.setImageUrl(that.imageUrl);
-            }
-            that.newImage = false;
-        },
-
         _changeImage: function (evt) {
             var that = this;
 
@@ -74,17 +64,19 @@ define(["tools", "ui/notifications", "db/services", "jquery", "lib/kendo.all", "
 
                 //set so that the save changes event will also save the image
                 that.newImage = true;
+                tools.resizeImage(that.cropBox, that.options.imageWidth, that.options.containerWidth);
+                saveHistory.save();
             };
 
             var file = evt.target.files[0];
             //check that the file is an image
             if (!file.name.match(/(.*\.png$)/) && !file.name.match(/(.*\.jpg$)/) && !file.name.match(/(.*\.JPG$)/) && !file.name.match(/(.*\.gif$)/)) {
-                notifications.error("File Type");
+                saveHistory.error("File Type");
                 return;
             }
             //check that the image is no larger than 10MB
             if (file.size > 5000000) {
-                notifications.error("File Size");
+                saveHistory.error("File Size");
                 return;
             }
 
@@ -93,10 +85,23 @@ define(["tools", "ui/notifications", "db/services", "jquery", "lib/kendo.all", "
 
             //set the form value
             that.imageFileNameField.val(file.name);
+            tools.resizeImage(that.cropBox, that.options.imageWidth, that.options.containerWidth);
         },
+
+        events: ["uploaded"],
 
         setUploadUrl: function (url) {
             this.options.uploadUrl = url;
+        },
+
+        //manually set the image (used when undoing)
+        setImageFields: function (data, fileName) {
+            var that = this;
+            that.imageDataField.val(data);
+            that.imageFileNameField.val(fileName);
+            that.setImageUrl(data);
+            that.newImage = true;
+            tools.resizeImage(that.cropBox, that.options.imageWidth, that.options.containerWidth);
         },
 
         submitForm: function () {
@@ -113,9 +118,10 @@ define(["tools", "ui/notifications", "db/services", "jquery", "lib/kendo.all", "
                         var url = response.replace(/['"]/g, '');
                         that.setImageUrl(url);
                         that.newImage = false;
+                        that.trigger("uploaded", {data: that.imageDataField[0].value, fileName: that.imageFileNameField[0].value});
                     },
                     error: function () {
-                        notifications.error("Image");
+                        saveHistory.error("Image");
                     }
                 });
             }
@@ -124,10 +130,13 @@ define(["tools", "ui/notifications", "db/services", "jquery", "lib/kendo.all", "
             //store the current image url
             this.imageUrl = imageUrl;
             this.cropBox.attr("src", imageUrl);
+            this.options.imageDataBinding = this.imageDataField;
+            this.options.imageFileNameBinding = this.imageFileNameField;
         },
         options: new kendo.data.ObservableObject({
             name: "ImageUpload",
             uploadUrl: "",
+            imageWidth: 200,
             containerWidth: 500
         })
     });

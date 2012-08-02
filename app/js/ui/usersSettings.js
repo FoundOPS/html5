@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(["developer", "db/services", "session", "ui/notifications", "widgets/settingsMenu"], function (developer, dbServices, session, notifications) {
+define(["developer", "db/services", "session", "ui/saveHistory", "tools", "widgets/settingsMenu"], function (developer, dbServices, session, saveHistory, tools) {
     var usersSettings = {}, usersDataSource, linkedEmployees;
 
     //on add and edit, select a linked employee if the name matches the name in the form
@@ -21,7 +21,14 @@ define(["developer", "db/services", "session", "ui/notifications", "widgets/sett
         });
     };
 
-    //the datasource for the Linked Employee drop down on the edit user popup
+    usersSettings.setupSaveHistory = function () {
+        saveHistory.setCurrentSection({
+            page: "Users Settings",
+            section: usersSettings
+        });
+    };
+
+    //the datasource for the Linked Employee dropdown on the edit user popup
     usersSettings.availableEmployeesDataSource = new kendo.data.DataSource({});
 
     //region Setup users dataSource
@@ -53,7 +60,11 @@ define(["developer", "db/services", "session", "ui/notifications", "widgets/sett
         },
         Employee: {
             defaultValue: ""
-        }};
+        },
+        TimeZoneInfo:{
+            defaultValue: ""
+        }
+    };
 
     usersDataSource = new kendo.data.DataSource({
         transport: {
@@ -64,7 +75,7 @@ define(["developer", "db/services", "session", "ui/notifications", "widgets/sett
                 //TODO: set a timeout and notify if it is reached('complete' doesn't register a timeout error)
                 complete: function (jqXHR, textStatus) {
                     if (textStatus == "error") {
-                        notifications.error("Get")
+                        saveHistory.error("Get")
                     }
                 }
             },
@@ -194,6 +205,8 @@ define(["developer", "db/services", "session", "ui/notifications", "widgets/sett
                         var name = employee.split(" ");
                         usersDataSource._data[0].Employee = {FirstName: name[0], Id: " ", LastName: name[1], LinkedUserAccountId: " "};
                     }
+                    //add timezone to new user
+                    usersDataSource._data[0].TimeZoneInfo = tools.getLocalTimeZone();
                     usersDataSource.sync(); //sync changes
                     var grid = $("#usersGrid").data("kendoGrid");
                     $("#usersGrid")[0].childNodes[0].childNodes[2].childNodes[0].childNodes[4].innerText = employee;
@@ -256,6 +269,9 @@ define(["developer", "db/services", "session", "ui/notifications", "widgets/sett
                     e.sender.cancelChanges();
                 });
             },
+            saveChanges: function () {
+                saveHistory.success();
+            },
             scrollable: false,
             sortable: true,
             columns: [
@@ -305,6 +321,8 @@ define(["developer", "db/services", "session", "ui/notifications", "widgets/sett
 
         setupAddNewUser();
         setupUsersGrid();
+
+        usersSettings.setupSaveHistory();
     };
 
     window.usersSettings = usersSettings;
