@@ -18,15 +18,24 @@ define(["db/services", "developer", "ui/saveHistory", "session", "widgets/imageU
        },
         cancelChanges: function () {
             businessSettings.viewModel.set("settings", businessSettings.settings);
-            imageUpload.setImageUrl(businessSettings.viewModel.get("settings.ImageUrl"));
+            if(businessSettings.settings.ImageUrl){
+                imageUpload.setImageUrl(businessSettings.settings.ImageUrl);
+            }
             imageUpload.cancel();
+            imageUpload.submitForm();
         }
     });
 
     businessSettings.undo = function () {
         saveHistory.states.pop();
         if(saveHistory.states.length !== 0){
-            businessSettings.viewModel.set("settings", saveHistory.states[saveHistory.states.length - 1]);
+            var state = saveHistory.states[saveHistory.states.length - 1];
+            businessSettings.viewModel.set("settings", state);
+            if(state.ImageUrl){
+                imageUpload.setImageUrl(state.ImageUrl);
+            }
+            imageUpload.cancel();
+            imageUpload.submitForm();
             if(saveHistory.states.length === 1){
                 saveHistory.multiple = false;
                 saveHistory.close();
@@ -65,6 +74,8 @@ define(["db/services", "developer", "ui/saveHistory", "session", "widgets/imageU
             businessSettings.settings = settings;
             businessSettings.viewModel.set("settings", settings);
             kendo.bind($("#business"), businessSettings.viewModel);
+
+            businessSettings.setupSaveHistory();
         });
 
         //setup image upload
@@ -90,8 +101,6 @@ define(["db/services", "developer", "ui/saveHistory", "session", "widgets/imageU
                 }
                 imageUpload.setUploadUrl(dbServices.API_URL + "settings/UpdateBusinessImage?roleId=" + roleId);
             }
-
-            businessSettings.setupSaveHistory();
         });
     };
 

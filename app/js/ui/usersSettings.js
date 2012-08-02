@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(["developer", "db/services", "session", "ui/saveHistory", "widgets/settingsMenu"], function (developer, dbServices, session, saveHistory) {
+define(["developer", "db/services", "session", "ui/saveHistory", "tools", "widgets/settingsMenu"], function (developer, dbServices, session, saveHistory, tools) {
     var usersSettings = {}, usersDataSource, linkedEmployees;
 
     //on add and edit, select a linked employee if the name matches the name in the form
@@ -18,6 +18,13 @@ define(["developer", "db/services", "session", "ui/saveHistory", "widgets/settin
         //select it in the dropDownList
         dropDownList.select(function (dataItem) {
             return dataItem.DisplayName === name;
+        });
+    };
+
+    usersSettings.setupSaveHistory = function () {
+        saveHistory.setCurrentSection({
+            page: "Users Settings",
+            section: usersSettings
         });
     };
 
@@ -53,7 +60,11 @@ define(["developer", "db/services", "session", "ui/saveHistory", "widgets/settin
         },
         Employee: {
             defaultValue: ""
-        }};
+        },
+        TimeZoneInfo:{
+            defaultValue: ""
+        }
+    };
 
     usersDataSource = new kendo.data.DataSource({
         transport: {
@@ -194,6 +205,8 @@ define(["developer", "db/services", "session", "ui/saveHistory", "widgets/settin
                         var name = employee.split(" ");
                         usersDataSource._data[0].Employee = {FirstName: name[0], Id: " ", LastName: name[1], LinkedUserAccountId: " "};
                     }
+                    //add timezone to new user
+                    usersDataSource._data[0].TimeZoneInfo = tools.getLocalTimeZone();
                     usersDataSource.sync(); //sync changes
                     var grid = $("#usersGrid").data("kendoGrid");
                     $("#usersGrid")[0].childNodes[0].childNodes[2].childNodes[0].childNodes[4].innerText = employee;
@@ -256,6 +269,9 @@ define(["developer", "db/services", "session", "ui/saveHistory", "widgets/settin
                     e.sender.cancelChanges();
                 });
             },
+            saveChanges: function () {
+                saveHistory.success();
+            },
             scrollable: false,
             sortable: true,
             columns: [
@@ -305,6 +321,8 @@ define(["developer", "db/services", "session", "ui/saveHistory", "widgets/settin
 
         setupAddNewUser();
         setupUsersGrid();
+
+        usersSettings.setupSaveHistory();
     };
 
     window.usersSettings = usersSettings;

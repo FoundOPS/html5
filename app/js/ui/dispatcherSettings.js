@@ -7,7 +7,7 @@
 "use strict";
 
 define(["developer", "tools", "db/services", "session", "ui/saveHistory", "widgets/settingsMenu", "ui/colorPicker",
-        "ui/kendoChanges"], function (developer, tools, dbServices, session, saveHistory) {
+    "ui/kendoChanges"], function (developer, tools, dbServices, session, saveHistory) {
     var dispatcherSettings = {};
 
     //region Locals
@@ -119,34 +119,30 @@ define(["developer", "tools", "db/services", "session", "ui/saveHistory", "widge
                     field: "DefaultTypeInt",
                     title: "Attributes",
                     template: '#= dispatcherSettings.getAttributeText(DefaultTypeInt) #'
-                }],
+                }
+            ],
             dataSource: dataSource,
             dataBound: onDataBound,
             editable: true,
-            //called when a row it removed from the grid
-            remove: function () {
-                //dispatcherSettings.grid.saveChanges();
-            },
             scrollable: false,
             selectable: true,
             sortable: true,
-            //called when the grid detects changes to the data
+            //called when the grid detects changes to the data()
             save: function () {
-                dispatcherSettings.grid.saveChanges();
+                //need to delay because the name binding takes some time to update
+                _.delay(function () {
+                    saveHistory.save();
+                }, 200);
             }
         });
 
-        //detect cancel button click
-        dispatcherSettings.cancel = function () {
-            //hide the delete button(there isn't a selected row after cancel is clicked)
-            $('#dispatcher .k-grid-delete').attr("disabled", "disabled");
-            dispatcherSettings.grid.dataSource.cancelChanges();
-        };
         //detect add button click
         $("#dispatcher .k-grid-add").click(function () {
             dispatcherSettings.grid.addRow();
-            //dispatcherSettings.grid.saveChanges();
+            saveHistory.save();
         });
+
+        dispatcherSettings.setupSaveHistory();
     }; //end initialize
 
     //endregion
@@ -183,7 +179,7 @@ define(["developer", "tools", "db/services", "session", "ui/saveHistory", "widge
     dispatcherSettings.updateCheckbox = function (checked) {
         //update the model with the new RouteRequired value
         selectedItem.set('RouteRequired', checked);
-        //dispatcherSettings.grid.saveChanges();
+        saveHistory.save();
     };
     //endregion
 
@@ -233,7 +229,7 @@ define(["developer", "tools", "db/services", "session", "ui/saveHistory", "widge
     var updateColor = function (color) {
         //update the current model with the new color value
         selectedItem.set('Color', color);
-        //dispatcherSettings.grid.saveChanges();
+        saveHistory.save();
     };
     //endregion
 
@@ -258,6 +254,8 @@ define(["developer", "tools", "db/services", "session", "ui/saveHistory", "widge
     var onDataBound = function () {
         //get a reference to the grid widget
         dispatcherSettings.grid = $("#dispatcherGrid").data("kendoGrid");
+        //set the original data(used for canceling changes)
+        dispatcherSettings.originalData = dispatcherSettings.grid._data;
         //disable the checkboxes for the default rows
         dispatcherSettings.disableDefaultCheckboxes();
         //get the BusinessAccountId from another row to be used to set in new rows
@@ -285,37 +283,38 @@ define(["developer", "tools", "db/services", "session", "ui/saveHistory", "widge
                 e.model.Id = tools.newGuid();
             }
         });
-
-        if(saveHistory.options){
-            if(saveHistory.options.page != "Dispatcher Settings"){
-                dispatcherSettings.setupSaveHistory();
-            }
-        }
     };
 
-    dispatcherSettings.undo = function () {
-        saveHistory.states.pop();
-        if(saveHistory.states.length !== 0){
-            dispatcherSettings.grid.setDataSource(saveHistory.states[saveHistory.states.length - 1]);
-            if(saveHistory.states.length === 1){
-                saveHistory.multiple = false;
-                saveHistory.close();
-                saveHistory.success();
-            }
-        }else{
-            saveHistory.cancel();
-        }
-    };
+//    //detect cancel button click
+//    dispatcherSettings.cancel = function () {
+//        //disable the delete button(there isn't a selected row after cancel is clicked)
+//        $('#dispatcher .k-grid-delete').attr("disabled", "disabled");
+//        dispatcherSettings.grid.dataSource.data(dispatcherSettings.originalData);
+//        dispatcherSettings.grid.dataSource.read();
+//    };
+//
+//    dispatcherSettings.undo = function () {
+//        saveHistory.states.pop();
+//        if(saveHistory.states.length !== 0){
+//            dispatcherSettings.grid.dataSource.data(saveHistory.states[saveHistory.states.length - 1]._data);
+//            dispatcherSettings.grid.dataSource.read();
+//            if(saveHistory.states.length === 1){
+//                saveHistory.multiple = false;
+//                saveHistory.close();
+//                saveHistory.success();
+//            }
+//        }else{
+//            saveHistory.cancel();
+//        }
+//    };
 
     dispatcherSettings.setupSaveHistory = function () {
         saveHistory.setCurrentSection({
             page: "Dispatcher Settings",
-            onSave: dispatcherSettings.grid.saveChanges(),
-            onCancel: dispatcherSettings.cancel,
-            section: dispatcherSettings,
-            state: function () {
-                return dispatcherSettings.grid.dataSource;
-            }
+            onSave: function () {
+                dispatcherSettings.grid.saveChanges();
+            },
+            section: dispatcherSettings
         });
     };
 
@@ -325,6 +324,7 @@ define(["developer", "tools", "db/services", "session", "ui/saveHistory", "widge
         var row = getSelectedRow(dispatcherSettings.grid);
         //remove selected row
         dispatcherSettings.grid.removeRow(row);
+        saveHistory.save();
     };
 
     //hide the delete button if a default row is selected, otherwise show it

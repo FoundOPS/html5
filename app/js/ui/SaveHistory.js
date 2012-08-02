@@ -21,22 +21,26 @@ define(['lib/noty'], function () {
     //opens a save changes notification with undo links
     saveHistory.success = function () {
         var text = successText;
+        var timeout = 0;
         if (saveHistory.states.length !== 0) {
             if (saveHistory.multiple) {
                 text += "&nbsp;&nbsp;&nbsp;<a onclick='window.saveHistory.cancel()'>Undo All Changes to " + saveHistory.options.page + "</a>&nbsp;&nbsp;&nbsp;<a onclick='window.saveHistory.options.section.undo()'>Undo Last Change</a>";
             } else {
                 text += "&nbsp;&nbsp;&nbsp;<a onclick='window.saveHistory.cancel()'>Undo</a>";
             }
-            $.noty({
-                type: 'success',
-                layout: 'topCenter',
-                easing: 'swing',
-                text: text,
-                speed: 300,
-                timeout: 0,
-                closeOnSelfClick: false
-            });
+        } else {
+            timeout = 5000;
         }
+
+        $.noty({
+            type: 'success',
+            layout: 'topCenter',
+            easing: 'swing',
+            text: text,
+            speed: 300,
+            timeout: timeout,
+            closeOnSelfClick: false
+        });
     };
 
     /**
@@ -81,19 +85,20 @@ define(['lib/noty'], function () {
     };
 
     saveHistory.save = function () {
-        var state = saveHistory.options.state();
-        //deep copy
-        state = jQuery.extend(true, {}, state);
+        if (saveHistory.options.page !== "Dispatcher Settings") {
+            var state = saveHistory.options.state();
+            //deep copy
+            state = jQuery.extend(true, {}, state);
 
-        saveHistory.states.push(state);
+            saveHistory.states.push(state);
 
-        var numChanges = saveHistory.states.length;
-        if (numChanges > 1) {
-            saveHistory.multiple = true;
-        }else{
-            saveHistory.multiple = false;
+            var numChanges = saveHistory.states.length;
+            if (numChanges > 1) {
+                saveHistory.multiple = true;
+            } else {
+                saveHistory.multiple = false;
+            }
         }
-
         saveHistory.close();
         saveHistory.options.onSave();
     };

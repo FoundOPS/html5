@@ -45,10 +45,8 @@ define(["tools", "ui/saveHistory", "db/services", "jquery", "lib/kendo.all", "li
         cancel: function () {
             var that = this;
             //clear the new image data
+            that.imageFileNameField.val("");
             that.imageDataField.val("");
-            if (that.imageUrl) {
-                that.setImageUrl(that.imageUrl);
-            }
             that.newImage = false;
             tools.resizeImage(that.cropBox, that.options.imageWidth, that.options.containerWidth);
         },

@@ -225,7 +225,7 @@ define(['underscore', 'developer'], function (_, developer) {
             id = "Eastern Standard Time";
         } else if (today.match(/Central/)) {
             timezone = "(UTC-06:00) Central Time (US & Canada)";
-            id = "Central Standard Tim";e
+            id = "Central Standard Time";
         } else if (today.match(/Mountain/)) {
             timezone = "(UTC-07:00) Mountain Time (US & Canada)";
             id = "Mountain Standard Time";
