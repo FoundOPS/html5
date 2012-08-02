@@ -324,10 +324,11 @@ zoom: 1;*/
 }
 
 #sideBarInnerWrapper{
+    .borderBox;
     position: relative;
     height: 100%;
     width: 100%;
-    border-right: @borderSize solid @darkGrey;
+    //border-right: @borderSize solid @darkGrey;
     z-index: 1;
 }
 
@@ -441,9 +442,8 @@ zoom: 1;*/
 }
 
 .borderBox {
-    -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
-    -ms-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
     box-sizing: border-box;
 }
 
@@ -592,7 +592,6 @@ zoom: 1;*/
     }
 
     #sideBarInnerWrapper{
-        .borderBox;
         width: @sideBarExpandedWidth;
     }
 
