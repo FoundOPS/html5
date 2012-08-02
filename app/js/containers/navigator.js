@@ -25,8 +25,8 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
         var thisNavigator = this;
         initTopNav(config);
         initSideBar(config);
-        this.popup = initPopup(config);
-        this.closePopup = this.popup.closePopup;
+        var popup = initPopup(config);
+        this.closePopup = popup.closePopup;
     }
 
     /** Initializes top navigation **/
@@ -537,7 +537,46 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
 
     var initPopup = function (config) {
         //var popup = new Popup(config, ".navElement");
-        var popup = $(".popup").popup();
+
+        var popup = $("#navClient").popup({
+            id: "navClient",
+            title: config.name,
+            contents: [
+                {"name": "Settings", url: config.settingsUrl},
+                {"name": "Change Business", id: "changeBusiness"},
+                {"name": "Log Out", url: config.logOutUrl}
+            ]
+        });
+        //popup.addMenu("changeBusiness", "Businesses", config.roles);
+
+        /*var popup2 = $("#logo").popup({
+            id: "logo",
+            title: config.name,
+            contents: [
+                {"name": "Test", url: config.settingsUrl},
+                {"name": "Test 2", id: "test2"},
+                {"name": "Test 3", url: config.logOutUrl}
+            ]
+        });*/
+
+        var menu2 = {
+            id: "logo",
+            title: config.name,
+            contents: [
+            {"name": "Test", url: config.settingsUrl},
+            {"name": "Test 2", id: "test2"},
+            {"name": "Test 3", url: config.logOutUrl}
+        ]
+        };
+        $("#navClient").popup('addMenu', menu2);
+
+        /*popup.addMenu("navClient", config.name,
+         [
+         {"name": "Settings", url: config.settingsUrl},
+         {"name": "Change Business", id: "changeBusiness"},
+         {"name": "Log Out", url: config.logOutUrl}
+         ]
+         );*/
 
         $(document).on("popup.created", function () {
             $("#popupContentWrapper").jScrollPane({
@@ -550,16 +589,6 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
         $(document).on('popup.setContent popup.visible popup.resize', function (e) {
             $("#popupContentWrapper").data('jsp').reinitialise();
         });
-
-        popup.addMenu("navClient", config.name,
-            [
-                {"name": "Settings", url: config.settingsUrl},
-                {"name": "Change Business", id: "changeBusiness"},
-                {"name": "Log Out", url: config.logOutUrl}
-            ]
-        );
-
-        popup.addMenu("changeBusiness", "Businesses", config.roles);
 
         $(document).on("popupEvent", function (e, data) {
             //console.log(data);
@@ -576,7 +605,6 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
                 changeBusiness($(e.target), config);
             }
         });
-
         return popup;
     };
 
