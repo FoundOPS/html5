@@ -547,36 +547,33 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
                 {"name": "Log Out", url: config.logOutUrl}
             ]
         });
-        //popup.addMenu();
 
-        /*var popup2 = $("#logo").popup({
-            id: "logo",
-            title: config.name,
-            contents: [
-                {"name": "Test", url: config.settingsUrl},
-                {"name": "Test 2", id: "test2"},
-                {"name": "Test 3", url: config.logOutUrl}
-            ]
-        });*/
-
-        var menu2 = {
-            id: "logo",
-            title: config.name,
-            contents: [
-            {"name": "Test", url: config.settingsUrl},
-            {"name": "Test 2", id: "test2"},
-            {"name": "Test 3", url: config.logOutUrl}
-        ]
+        var changeBusinessMenu = {
+            id:"changeBusiness",
+            title:"Businesses",
+            contents:config.roles
         };
-        $("#navClient").popup('addMenu', {id:"changeBusiness", title:"Businesses", contents:config.roles});
+        $("#navClient").popup('addMenu', changeBusinessMenu);
 
-        /*popup.addMenu("navClient", config.name,
-         [
-         {"name": "Settings", url: config.settingsUrl},
-         {"name": "Change Business", id: "changeBusiness"},
-         {"name": "Log Out", url: config.logOutUrl}
-         ]
-         );*/
+        /*$("#logo").popup({
+            id: "navClient",
+            title: config.name,
+            contents: [
+                {"name": "Testing long menu names..............", url: config.settingsUrl},
+                {"name": "Test 1", id: "test1"},
+                {"name": "Log Out", url: ""}
+            ]
+        });
+        $("#logo").popup('addMenu',{
+                id:"test1",
+                title: "Testing 1",
+                contents:
+                    [
+                        {"name": "Test a"},
+                        {"name": "Test b"},
+                        {"name": "Test c"}
+                    ]
+         });*/
 
         $(document).on("popup.created", function () {
             $("#popupContentWrapper").jScrollPane({

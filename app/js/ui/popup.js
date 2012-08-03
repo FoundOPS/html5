@@ -8,10 +8,8 @@
                 return popup;
             },
             addMenu : function(menu) {
-                console.log("ADD MENU!");
                 if(popup===null)return;
                 popup.addMenu(menu.id, menu.title, menu.contents);
-                console.log("Menu added.");
             }
         };
 
