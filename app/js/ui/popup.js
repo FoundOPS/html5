@@ -197,11 +197,6 @@
                     var popupHeaderLen = clicked.parents("#popupHeader").length + clicked.is("#popupHeader") ? 1 : 0;
                     var popupContentLen = clicked.parents("#popupContent").length + clicked.is("#popupContent") ? 1 : 0;
                     var isListener = clicked.parents(".popupListener").length + clicked.is(".popupListener") ? 1 : 0;
-
-                    //TODO: Is passing a jQuery object and grabbing its selector the best way to do this? no
-                    //var listenerLen = clicked.parents(popupListener).length + clicked.is(popupListener) ? 1 : 0;
-                    //console.log(popupHeaderLen + " " + popupContentLen + " " + listenerLen);
-                    //console.log(popupListener);
                     if (popupHeaderLen === 0 && popupContentLen === 0 && isListener === 0) {
                         thisPopup.closePopup();
                     }

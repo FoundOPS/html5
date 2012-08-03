@@ -556,8 +556,8 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
         $("#navClient").popup('addMenu', changeBusinessMenu);
 
         /*$("#logo").popup({
-            id: "navClient",
-            title: config.name,
+            id: "logo",
+            title: "Test Menu",
             contents: [
                 {"name": "Testing long menu names..............", url: config.settingsUrl},
                 {"name": "Test 1", id: "test1"},
