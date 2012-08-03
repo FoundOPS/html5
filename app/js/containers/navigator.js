@@ -547,7 +547,7 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
                 {"name": "Log Out", url: config.logOutUrl}
             ]
         });
-        //popup.addMenu("changeBusiness", "Businesses", config.roles);
+        //popup.addMenu();
 
         /*var popup2 = $("#logo").popup({
             id: "logo",
@@ -568,7 +568,7 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
             {"name": "Test 3", url: config.logOutUrl}
         ]
         };
-        $("#navClient").popup('addMenu', menu2);
+        $("#navClient").popup('addMenu', {id:"changeBusiness", title:"Businesses", contents:config.roles});
 
         /*popup.addMenu("navClient", config.name,
          [

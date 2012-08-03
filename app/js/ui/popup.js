@@ -1,13 +1,17 @@
 //define(["lib/jquery.mousewheel", "lib/jquery.jScrollPane"], function () {
     (function( $ ){
+        var popup = null;
         var methods = {
             init : function( options ) {
-                var popup = new Popup(this.selector);
+                popup = new Popup(this.selector);
                 popup.addMenu(options.id, options.title, options.contents);
                 return popup;
             },
-            addMenu : function( ) {
+            addMenu : function(menu) {
                 console.log("ADD MENU!");
+                if(popup===null)return;
+                popup.addMenu(menu.id, menu.title, menu.contents);
+                console.log("Menu added.");
             }
         };
 

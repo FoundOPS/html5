@@ -67,8 +67,6 @@ table {
                   (#nav height + #nav padding-top/bottom) = #sideBar top = #content padding-top
                   #sideBar width = #rightColumn .columnContent padding-right
                   #sideBar width = (#nav height + #nav padding-top/bottom) ?
-
-                  TODO: To fix vertical centering when client logo is removed, add line height to container, and change element centering to middle.
 */
 
 /*  CONSTANTS  */
@@ -276,7 +274,7 @@ zoom: 1;*/
 }
 
 #clientLogo {
-    background: #fff;
+    background: @lightGrey;
     //margin: 0 4px;
     height: @imageHeight + 8px;
     border-top-right-radius: @borderRadius;
@@ -578,8 +576,8 @@ zoom: 1;*/
 
         box-shadow: 0px 0px 10px #888;
         padding: 0;
-        background: @lightGrey;
-        color: @charcoal;
+        /*background: @lightGrey;
+        color: @charcoal;*/
 
         -webkit-border-bottom-right-radius: 6px;
         -webkit-border-bottom-left-radius: 6px;
