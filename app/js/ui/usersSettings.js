@@ -321,7 +321,9 @@ define(["developer", "db/services", "session", "ui/saveHistory", "tools", "widge
 
         setupAddNewUser();
         setupUsersGrid();
+    };
 
+    usersSettings.show = function () {
         usersSettings.setupSaveHistory();
     };
 

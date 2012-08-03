@@ -126,6 +126,7 @@ define(["tools", "ui/saveHistory", "db/services", "jquery", "lib/kendo.all", "li
                 });
             }
         },
+
         setImageUrl: function (imageUrl) {
             //store the current image url
             this.imageUrl = imageUrl;
@@ -133,6 +134,7 @@ define(["tools", "ui/saveHistory", "db/services", "jquery", "lib/kendo.all", "li
             this.options.imageDataBinding = this.imageDataField;
             this.options.imageFileNameBinding = this.imageFileNameField;
         },
+
         options: new kendo.data.ObservableObject({
             name: "ImageUpload",
             uploadUrl: "",

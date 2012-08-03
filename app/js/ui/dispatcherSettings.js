@@ -141,9 +141,11 @@ define(["developer", "tools", "db/services", "session", "ui/saveHistory", "widge
             dispatcherSettings.grid.addRow();
             saveHistory.save();
         });
-
-        dispatcherSettings.setupSaveHistory();
     }; //end initialize
+
+    dispatcherSettings.show = function () {
+        dispatcherSettings.setupSaveHistory();
+    };
 
     //endregion
 
@@ -311,7 +313,7 @@ define(["developer", "tools", "db/services", "session", "ui/saveHistory", "widge
     dispatcherSettings.setupSaveHistory = function () {
         saveHistory.setCurrentSection({
             page: "Dispatcher Settings",
-            onSave: function () {
+            save: function () {
                 dispatcherSettings.grid.saveChanges();
             },
             section: dispatcherSettings
