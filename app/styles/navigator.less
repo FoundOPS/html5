@@ -67,8 +67,6 @@ table {
                   (#nav height + #nav padding-top/bottom) = #sideBar top = #content padding-top
                   #sideBar width = #rightColumn .columnContent padding-right
                   #sideBar width = (#nav height + #nav padding-top/bottom) ?
-
-                  TODO: To fix vertical centering when client logo is removed, add line height to container, and change element centering to middle.
 */
 
 /*  CONSTANTS  */
@@ -181,14 +179,14 @@ input:focus {
     }
 
     .navColor;
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#555556', endColorstr='#222224'); /* IE6-9 */
-    background-image: linear-gradient(bottom, rgb(34, 34, 36) 0%, rgb(85, 85, 86) 100%);
-    background-image: -o-linear-gradient(bottom, rgb(34, 34, 36) 0%, rgb(85, 85, 86) 100%);
-    background-image: -moz-linear-gradient(bottom, rgb(34, 34, 36) 0%, rgb(85, 85, 86) 100%);
-    background-image: -webkit-linear-gradient(bottom, rgb(34, 34, 36) 0%, rgb(85, 85, 86) 100%);
-    background-image: -ms-linear-gradient(bottom, rgb(34, 34, 36) 0%, rgb(85, 85, 86) 100%);
 
     /*background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0, @charcoal), color-stop(1, rgb(85, 85, 86)));*/
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#555556', endColorstr='#222224'); /* IE6-9 */
+    background-image: -webkit-linear-gradient(bottom, rgb(34, 34, 36) 0%, rgb(85, 85, 86) 100%);
+    background-image: -moz-linear-gradient(bottom, rgb(34, 34, 36) 0%, rgb(85, 85, 86) 100%);
+    background-image: -ms-linear-gradient(bottom, rgb(34, 34, 36) 0%, rgb(85, 85, 86) 100%);
+    background-image: -o-linear-gradient(bottom, rgb(34, 34, 36) 0%, rgb(85, 85, 86) 100%);
+    background-image: linear-gradient(bottom, rgb(34, 34, 36) 0%, rgb(85, 85, 86) 100%);
 }
 
 #navContainer {
@@ -277,7 +275,7 @@ zoom: 1;*/
 }
 
 #clientLogo {
-    background: #fff;
+    background: @lightGrey;
     //margin: 0 4px;
     height: @imageHeight + 8px;
     border-top-right-radius: @borderRadius;
@@ -579,6 +577,19 @@ zoom: 1;*/
 
         box-shadow: 0px 0px 10px #888;
         padding: 0;
+        /*background: @lightGrey;
+        color: @charcoal;*/
+
+        -webkit-border-bottom-right-radius: 6px;
+        -webkit-border-bottom-left-radius: 6px;
+        -moz-border-bottom-right-radius: 6px;
+        -moz-border-bottom-left-radius: 6px;
+        -ms-border-bottom-right-radius: 6px;
+        -ms-border-bottom-left-radius: 6px;
+        -o-border-bottom-right-radius: 6px;
+        -o-border-bottom-left-radius: 6px;
+        border-bottom-right-radius: 6px;
+        border-bottom-left-radius: 6px;
     }
 
     #sideBarWrapper {
@@ -590,10 +601,19 @@ zoom: 1;*/
         width: @sideBarExpandedWidth;
         box-shadow: none;
         visibility: hidden;
+        //Allows jScrollPane to respect box shadow outside of wrapper
+        //overflow: visible !important;
     }
 
     #sideBarInnerWrapper{
         width: @sideBarExpandedWidth;
+        //Allows jScrollPane to respect box shadow outside of wrapper
+        //overflow: visible !important;
+    }
+
+    #sideBarWrapper .jspContainer{
+        //Allows jScrollPane to respect box shadow outside of wrapper
+        //overflow: visible !important;
     }
 
     #slideMenu {

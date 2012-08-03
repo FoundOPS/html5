@@ -25,8 +25,8 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
         var thisNavigator = this;
         initTopNav(config);
         initSideBar(config);
-        this.popup = initPopup(config);
-        this.closePopup = this.popup.closePopup;
+        initPopup(config);
+        this.closePopup = $(document).popup('closePopup');
     }
 
     /** Initializes top navigation **/
@@ -537,7 +537,43 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
 
     var initPopup = function (config) {
         //var popup = new Popup(config, ".navElement");
-        var popup = $(".popup").popup();
+
+        $("#navClient").popup({
+            id: "navClient",
+            title: config.name,
+            contents: [
+                {"name": "Settings", url: config.settingsUrl},
+                {"name": "Change Business", id: "changeBusiness"},
+                {"name": "Log Out", url: config.logOutUrl}
+            ]
+        });
+
+        var changeBusinessMenu = {
+            id:"changeBusiness",
+            title:"Businesses",
+            contents:config.roles
+        };
+        $("#navClient").popup('addMenu', changeBusinessMenu);
+
+        /*$("#logo").popup({
+            id: "logo",
+            title: "Test Menu",
+            contents: [
+                {"name": "Testing long menu names..............", url: config.settingsUrl},
+                {"name": "Test 1", id: "test1"},
+                {"name": "Log Out", url: ""}
+            ]
+        });
+        $("#logo").popup('addMenu',{
+                id:"test1",
+                title: "Testing 1",
+                contents:
+                    [
+                        {"name": "Test a"},
+                        {"name": "Test b"},
+                        {"name": "Test c"}
+                    ]
+         });*/
 
         $(document).on("popup.created", function () {
             $("#popupContentWrapper").jScrollPane({
@@ -551,16 +587,6 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
             $("#popupContentWrapper").data('jsp').reinitialise();
         });
 
-        popup.addMenu("navClient", config.name,
-            [
-                {"name": "Settings", url: config.settingsUrl},
-                {"name": "Change Business", id: "changeBusiness"},
-                {"name": "Log Out", url: config.logOutUrl}
-            ]
-        );
-
-        popup.addMenu("changeBusiness", "Businesses", config.roles);
-
         $(document).on("popupEvent", function (e, data) {
             //console.log(data);
             if (($(data).attr("id") === "navClient") && config.roles.length <= 1) {
@@ -572,12 +598,11 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
                 $(e.target).trigger("roleSelected", role);
             }
 
-            if (popup.getAction() === "changeBusiness") {
+            //TODO: Make a getAction method for popup which does the same thing?
+            if ($("#popup").children("#currentPopupAction").text() === "changeBusiness") {
                 changeBusiness($(e.target), config);
             }
         });
-
-        return popup;
     };
 
     return Navigator;
