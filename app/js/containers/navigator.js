@@ -25,8 +25,8 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
         var thisNavigator = this;
         initTopNav(config);
         initSideBar(config);
-        var popup = initPopup(config);
-        this.closePopup = popup.closePopup;
+        initPopup(config);
+        this.closePopup = $(document).popup('closePopup');
     }
 
     /** Initializes top navigation **/
@@ -538,7 +538,7 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
     var initPopup = function (config) {
         //var popup = new Popup(config, ".navElement");
 
-        var popup = $("#navClient").popup({
+        $("#navClient").popup({
             id: "navClient",
             title: config.name,
             contents: [
@@ -598,11 +598,11 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
                 $(e.target).trigger("roleSelected", role);
             }
 
-            if (popup.getAction() === "changeBusiness") {
+            //TODO: Make a getAction method for popup which does the same thing?
+            if ($("#popup").children("#currentPopupAction").text() === "changeBusiness") {
                 changeBusiness($(e.target), config);
             }
         });
-        return popup;
     };
 
     return Navigator;

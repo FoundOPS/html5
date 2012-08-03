@@ -5,11 +5,13 @@
             init : function( options ) {
                 popup = new Popup(this.selector);
                 popup.addMenu(options.id, options.title, options.contents);
-                return popup;
             },
             addMenu : function(menu) {
                 if(popup===null)return;
                 popup.addMenu(menu.id, menu.title, menu.contents);
+            },
+            closePopup : function(){
+                popup.closePopup();
             }
         };
 
@@ -25,9 +27,7 @@
                 $.error( 'Method ' +  method + ' does not exist on jQuery.popup' );
             }
 
-            /*return this.each(function() {
-
-            });*/
+            return this.each(function() {});
         };
     })( jQuery );
 
