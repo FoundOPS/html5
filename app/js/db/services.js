@@ -194,6 +194,8 @@ define(["developer", "tools", "ui/notifications"], function (developer, tools, n
             for (var i = 0; i < service.Fields.length; i++) {
                 var field = service.Fields[i];
                 if (field.Type === "DateTimeField") {
+                    field.Earliest = new Date(field.Earliest);
+                    field.Latest = new Date(field.Latest);
                     field.Value = new Date(field.Value);
                 }
             }

@@ -1,5 +1,5 @@
 'use strict';
-define(["lib/text!widgets/serviceTemplate.html", "jquery", "lib/kendo.all"], function (serviceTemplate, $) {
+define(["lib/text!widgets/serviceTemplate.html", "jquery", "lib/kendo.all", "lib/jquery.maskMoney"], function (serviceTemplate, $) {
 
     var kendo = window.kendo,
         ui = kendo.ui,
@@ -37,34 +37,61 @@ define(["lib/text!widgets/serviceTemplate.html", "jquery", "lib/kendo.all"], fun
                 fieldElement = $(inputTemplate);
                 fieldElement.attr("type", "text");
             }
-            fieldElement.appendTo(listView).wrap("<li></li>");
+            fieldElement.appendTo(listView).wrap("<li>" + field.Name + "</li>");
             return fieldElement;
         },
 
         _createNumericField: function (field, fieldIndex, listView) {
-            var fieldElement = $(inputTemplate).attr("type", "number");
+            var fieldElement = $(inputTemplate);
+
+            if (field.Mask === "g" || field.Mask === "p") {
+                //number or percentage
+                fieldElement.attr("type", "number");
+            }
+            fieldElement.appendTo(listView).wrap("<li>" + field.Name + "</li>");
+
+            if (field.Mask === "c") {
+                //currency
+                var options = { showSymbol: true};
+                if (field.Minimum <= 0) {
+                    options.allowZero = true;
+                    if (field.Minimum < 0) {
+                        options.allowNegative = true;
+                    }
+                }
+                options.precision = field.DecimalPlaces;
+                fieldElement.maskMoney(options);
+            } else if (field.Mask === "p") {
+                //percentage
+                //TODO: improve using http://stackoverflow.com/questions/7933505/mask-input-for-number-percent
+                $("<span>%</span>").insertAfter(fieldElement);
+            }
+
             var step = 1 / Math.pow(10, field.DecimalPlaces);
             fieldElement.attr("step", step);
             fieldElement.attr("min", field.Minimum);
             fieldElement.attr("max", field.Maximum);
-            fieldElement.appendTo(listView).wrap("<li></li>");
             return fieldElement;
         },
 
         _createDateTimeField: function (field, fieldIndex, listView) {
-            var fieldElement = $(inputTemplate).appendTo(listView).wrap("<li></li>");
+            var fieldElement = $(inputTemplate).appendTo(listView).wrap("<li>" + field.Name + "</li>");
+
+            console.log(field);
+
+            var options = {min: field.Earliest, max: field.Latest};
             if (field.TypeInt === 0) {
                 //DateTime
                 field.Value = moment(field.Value).format("LLL");
-                fieldElement.kendoDateTimePicker();
+                fieldElement.kendoDateTimePicker(options);
             } else if (field.TypeInt === 1) {
                 //TimeOnly
                 field.Value = moment(field.Value).format("LT");
-                fieldElement.kendoTimePicker();
+                fieldElement.kendoTimePicker(options);
             } else if (field.TypeInt === 2) {
                 //DateOnly
                 field.Value = moment(field.Value).format("LL");
-                fieldElement.kendoDatePicker();
+                fieldElement.kendoDatePicker(options);
             }
 
             return fieldElement;
@@ -74,7 +101,7 @@ define(["lib/text!widgets/serviceTemplate.html", "jquery", "lib/kendo.all"], fun
             var fieldElement;
             if (field.TypeInt === 0) {
                 //ComboBox
-                fieldElement = $(inputTemplate).appendTo(listView).wrap("<li></li>");
+                fieldElement = $(inputTemplate).appendTo(listView).wrap("<li>" + field.Name + "</li>");
                 fieldElement.kendoComboBox({
                     change: function (e) {
                         var index = this.selectedIndex;
@@ -104,7 +131,7 @@ define(["lib/text!widgets/serviceTemplate.html", "jquery", "lib/kendo.all"], fun
                 });
             } else {
                 //Checkbox (1) or checklist (2)
-                fieldElement = $("<ul data-role='listview' data-style='inset'></ul>").appendTo(listView);
+                fieldElement = $("<ul data-role='listview' data-style='inset'>" + field.Name + "</ul>").appendTo(listView);
 
                 for (var optionIndex = 0; optionIndex < field.Options.length; optionIndex++) {
                     var optionElement = $(inputTemplate).attr("type", "checkbox");
