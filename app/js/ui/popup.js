@@ -1,29 +1,61 @@
 //define(["lib/jquery.mousewheel", "lib/jquery.jScrollPane"], function () {
+/* Known bugs:
+        * showMenu button toggle on nav click.
+ */
     (function( $ ){
-        $.fn.popup = function( options ) {
+        var popup = null;
+        var methods = {
+            init : function( options ) {
+                popup = new Popup(this.selector);
+                popup.addMenu(options.id, options.title, options.contents);
+            },
+            addMenu : function(menu) {
+                if(popup===null)return;
+                popup.addMenu(menu.id, menu.title, menu.contents);
+            },
+            closePopup : function(){
+                popup.closePopup();
+            }
+        };
+
+        $.fn.popup = function( method ) {
             // Create some defaults, extending them with any options that were provided
             //var settings = $.extend({}, options);
-            return new Popup(this.selector);
+            // Method calling logic
+            if ( methods[method] ) {
+                return methods[ method ].apply( this, Array.prototype.slice.call( arguments, 1 ));
+            } else if ( typeof method === 'object' || ! method ) {
+                return methods.init.apply( this, arguments );
+            } else {
+                $.error( 'Method ' +  method + ' does not exist on jQuery.popup' );
+            }
+
+            return this.each(function() {});
         };
     })( jQuery );
 
+    //TODO: Refactor; Give a namespace.
+    var menus = [];
+    var lastElementClick = null;
     /** Popup Constructor **/
     function Popup(popupListener) {
+        //Note: Making history a global broke on Android 2.3
+        var history = [];
         var thisPopup = this;
         var title = "";
         var content = "";
         var object = null;
-        var history = [];
-        var lastElementClick = null;
         var currentTarget = null;
-
-        var menus = [];
 
         if((typeof(popupListener)==='undefined') || popupListener === null){
             console.log("ERROR: No listener passed!");
             return;
         }
         var listenerElements = $(popupListener);
+
+        //Class added to detect clicks on primary buttons triggering popups.
+        listenerElements.addClass("popupListener");
+
 		listenerElements.css("cursor", "pointer");
         listenerElements.click(function (e) {
             thisPopup.toggleVisible(e, $(this));
@@ -57,12 +89,13 @@
                 if (clickedDiv.is("#" + lastElementClick)) {
                     console.log("Clicked on same element!");
                     this.closePopup();
-                    lastElementClick = clickedDiv.attr("id");
+                    //lastElementClick = clickedDiv.attr("id");
                     return;
                 }
                 console.log("Clicked on different element!");
                 this.closePopup();
             }
+            $("#popup").promise().done(function(){});
             var left = this.getLeft(clickedDiv, popupWrapperDiv);
             popupWrapperDiv.css("left", left);
 
@@ -170,11 +203,8 @@
                     //TODO: Also add arrow click detection?
                     var popupHeaderLen = clicked.parents("#popupHeader").length + clicked.is("#popupHeader") ? 1 : 0;
                     var popupContentLen = clicked.parents("#popupContent").length + clicked.is("#popupContent") ? 1 : 0;
-                    //TODO: Is passing a jQuery object and grabbing its selector the best way to do this?
-                    var listenerLen = clicked.parents(popupListener).length + clicked.is(popupListener) ? 1 : 0;
-                    //console.log(popupHeaderLen + " " + popupContentLen + " " + listenerLen);
-                    //console.log(popupListener);
-                    if (popupHeaderLen === 0 && popupContentLen === 0 && listenerLen === 0) {
+                    var isListener = clicked.parents(".popupListener").length + clicked.is(".popupListener") ? 1 : 0;
+                    if (popupHeaderLen === 0 && popupContentLen === 0 && isListener === 0) {
                         thisPopup.closePopup();
                     }
                 }
@@ -255,6 +285,7 @@
             var c = "";
             var i;
             //popupContentDiv.html('');
+            //TODO: Refactor popupEvent
             for (i = 0; i < contArray.length; i++) {
                 var lastElement = "";
                 var popupEvent = "";
