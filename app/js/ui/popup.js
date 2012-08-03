@@ -1,4 +1,7 @@
 //define(["lib/jquery.mousewheel", "lib/jquery.jScrollPane"], function () {
+/* Known bugs:
+        * showMenu button toggle on nav click.
+ */
     (function( $ ){
         var popup = null;
         var methods = {
@@ -33,10 +36,11 @@
 
     //TODO: Refactor; Give a namespace.
     var menus = [];
-    var history = [];
     var lastElementClick = null;
     /** Popup Constructor **/
     function Popup(popupListener) {
+        //Note: Making history a global broke on Android 2.3
+        var history = [];
         var thisPopup = this;
         var title = "";
         var content = "";
@@ -48,7 +52,10 @@
             return;
         }
         var listenerElements = $(popupListener);
+
+        //Class added to detect clicks on primary buttons triggering popups.
         listenerElements.addClass("popupListener");
+
 		listenerElements.css("cursor", "pointer");
         listenerElements.click(function (e) {
             thisPopup.toggleVisible(e, $(this));
