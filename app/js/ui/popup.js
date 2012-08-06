@@ -285,7 +285,6 @@
             var c = "";
             var i;
             //popupContentDiv.html('');
-            //TODO: Refactor popupEvent
             for (i = 0; i < contArray.length; i++) {
                 var lastElement = "";
                 var popupEvent = "";
