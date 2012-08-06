@@ -1,5 +1,5 @@
 'use strict';
-define(["lib/text!widgets/serviceTemplate.html", "jquery", "lib/kendo.all", "lib/jquery.maskMoney"], function (serviceTemplate, $) {
+define(["jquery", "lib/kendo.all", "lib/jquery.maskMoney"], function ($) {
 
     var kendo = window.kendo,
         ui = kendo.ui,
@@ -7,13 +7,11 @@ define(["lib/text!widgets/serviceTemplate.html", "jquery", "lib/kendo.all", "lib
         DATABINDING = "dataBinding",
         DATABOUND = "dataBound",
         inputTemplate = "<input />",
-        multiLineTextTemplate = "<textarea id='textarea'></textarea>";
+        multiLineTextTemplate = "<textarea class='textarea'></textarea>";
 
     var ServiceDetails = Widget.extend({
         init: function (element, options) {
             var that = this;
-
-            that.options.template = serviceTemplate;
 
             Widget.fn.init.call(that, element, options);
             that.render();
@@ -32,12 +30,15 @@ define(["lib/text!widgets/serviceTemplate.html", "jquery", "lib/kendo.all", "lib
             var fieldElement;
             if (field.IsMultiLine) {
                 fieldElement = $(multiLineTextTemplate);
+                fieldElement.appendTo(listView).wrap("<li style='margin-bottom: 22px'>" + field.Name + "</li>");
             }
             else {
                 fieldElement = $(inputTemplate);
                 fieldElement.attr("type", "text");
+                fieldElement.appendTo(listView).wrap("<li>" + field.Name + "</li>");
+
             }
-            fieldElement.appendTo(listView).wrap("<li>" + field.Name + "</li>");
+
             return fieldElement;
         },
 
@@ -77,7 +78,7 @@ define(["lib/text!widgets/serviceTemplate.html", "jquery", "lib/kendo.all", "lib
         _createDateTimeField: function (field, fieldIndex, listView) {
             var fieldElement = $(inputTemplate).appendTo(listView).wrap("<li>" + field.Name + "</li>");
 
-            console.log(field);
+            //console.log(field);
 
             var options = {min: field.Earliest, max: field.Latest};
             if (field.TypeInt === 0) {

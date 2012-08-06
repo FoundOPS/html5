@@ -104,17 +104,20 @@ require(["jquery", "underscore", "lib/kendo.all", "developer", "db/services", "t
     };
 
     services.initialize = function () {
-        var resizeGrid = function () {
+        var resizeGrid = function (initialLoad) {
+            var extraMargin;
+            if(initialLoad){
+                extraMargin = 50;
+            }else{
+                extraMargin = 85;
+            }
             var windowHeight = $(window).height();
             var topHeight = $('#top').outerHeight(true);
-            var contentHeight = windowHeight - topHeight;
+            var contentHeight = windowHeight - topHeight - extraMargin;
             $('#grid').css("height", contentHeight + 'px');
-
-            var gridPagerHeight = $('.k-grid-pager').outerHeight(true);
-            var gridHeaderHeight = $('.t-grid-header').outerHeight(true);
-            var tableContentHeight = contentHeight - (gridPagerHeight + gridHeaderHeight);
-            $('#grid .k-grid-content').css("height", tableContentHeight + 'px');
+            $('#grid .k-grid-content').css("height", contentHeight + 'px');
         };
+
         var setupGrid = function (fields) {
             //Setup the columns based on the fields
             var columns = [];
@@ -142,8 +145,8 @@ require(["jquery", "underscore", "lib/kendo.all", "developer", "db/services", "t
                     }
                 }
 
-                //TODO calculate width based on title
-                column.width = "110px";
+                var titleLength = column.title.length * 7.5 + 35;
+                column.width = titleLength + "px";
 
                 columns.push(column);
             });
@@ -160,6 +163,9 @@ require(["jquery", "underscore", "lib/kendo.all", "developer", "db/services", "t
                 columns: columns,
                 dataSource: serviceHoldersDataSource,
                 filterable: true,
+                columnMenu: true,
+                resizable: true,
+                reorderable: true,
                 sortable: {
                     mode: "multiple"
                 },
@@ -205,14 +211,13 @@ require(["jquery", "underscore", "lib/kendo.all", "developer", "db/services", "t
         });
 
         $(window).resize(function () {
-            resizeGrid();
+            resizeGrid(false);
         });
 
-        resizeGrid();
+        resizeGrid(true);
     };
 
     services.exportToCSV = function () {
         tools.toCSV(serviceHoldersDataSource.view(), "Services", true, ['RecurringServiceId', 'ServiceId']);
     };
-})
-;
+});

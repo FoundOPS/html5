@@ -157,7 +157,7 @@ hr{
     border: 1px solid #666;
 }
 button:hover{
-    background: url("img/btnBgHover.png") repeat-x;
+    background: url("../img/btnBgHover.png") repeat-x;
 }
 .wrap{
     margin: 0 20px 10px 180px;
@@ -168,7 +168,6 @@ button:hover{
     background-color: #fff;
 }
 /*endregion*/
-
 /*region ImageUploadButton */
 .imageupload-button{
     margin-left: 185px;
@@ -181,7 +180,6 @@ button:hover{
     margin-bottom: 10px;
 }
 /*endregion*/
-
 /*region Settings -Personal */
 #personal .wrap, #business .wrap, #pass .wrap, #createPass .wrap{
     width: 500px;
@@ -335,23 +333,55 @@ button:hover{
     width: 157px;
 }
 /*endregion*/
-
 //region Services
-
-#left {
-    margin-right: 350px;
-    height: 100%;
+#services{
+    #left {
+        height: 100%;
+        margin-right: 280px;
+    }
+    .k-datepicker{
+        padding: 7px 7px 7px 0;
+    }
+    .k-grid td{
+        line-height: 1.3em;
+        font-size: 14px;
+    }
+    input[type="checkbox"]{
+        vertical-align: middle;
+    }
+    .k-dropdown-wrap{
+        padding: 0 22px 0 0;
+        border-radius: 0;
+    }
 }
-
 #serviceDetails {
     position: absolute;
-    top: 20px;
-    right: 0px;
-    width: 300px;
+    top: 50px;
+    right: 0;
+    width: 250px;
+    #startDatePicker{
+        width:150px;
+    }
+    #endDatePicker{
+        width:150px;
+    }
+    .km-listview .km-listview li{
+        padding-left: 15px;
+        font-size: .9em;
+    }
+    .textarea{
+        width: 168px !important;
+        margin: 0 0 -22px 5px;
+    }
+    li{
+        padding: 2px 0;
+    }
+    .k-timepicker, .k-combobox{
+        width: 218px;
+        margin-top: 2px;
+    }
 }
-
 //endregion
-
 /*region Noty*/
 /*region Noty Base*/
 /* noty bar */

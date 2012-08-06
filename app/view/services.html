@@ -1,10 +1,9 @@
-<div data-init="services.initialize" data-role="view" data-title="Services" data-stretch="true"
-     data-model="services.viewModel" id="services">
+<div data-init="services.initialize" data-role="view" data-title="Services" data-model="services.viewModel" id="services" data-stretch="true">
     <div id="left">
         <div id="top">
-            <input id="startDatePicker" style="width:150px;"/>
-            <input id="endDatePicker" style="width:150px;"/>
-            <button type="export" onclick="services.exportToCSV()">Export</button>
+            <input id="startDatePicker" />
+            <input id="endDatePicker" />
+            <button class="k-button k-button-icontext" type="export" onclick="services.exportToCSV()"><span class="k-icon k-goup"></span>Export</button>
         </div>
         <div id="grid"></div>
     </div>
