@@ -13,8 +13,6 @@ define(["db/services", "developer", "ui/saveHistory", "session", "widgets/imageU
 
     businessSettings.undo = function (state) {
         vm.set("settings", state);
-        imageUpload.setImageFields(state.imageData, state.imageFileName);
-        imageUpload.submitForm();
         businessSettings.save();
     };
 
@@ -22,8 +20,6 @@ define(["db/services", "developer", "ui/saveHistory", "session", "widgets/imageU
         if (businessSettings.validator.validate()) {
             dbServices.updateBusinessSettings(vm.get("settings"));
         }
-        imageUpload.setImageUrl(dbServices.API_URL + "settings/UpdateBusinessImage?roleId="+ session.getRole().id);
-        imageUpload.submitForm();
     };
 
     businessSettings.initialize = function () {
@@ -42,6 +38,10 @@ define(["db/services", "developer", "ui/saveHistory", "session", "widgets/imageU
             businessSettings.settings = settings;
             vm.set("settings", settings);
             kendo.bind($("#business"), vm);
+
+            //set the image url after it was initially loaded
+            imageUpload.setImageUrl(vm.get("settings.ImageUrl"));
+
             saveHistory.resetHistory();
         });
 
@@ -52,27 +52,8 @@ define(["db/services", "developer", "ui/saveHistory", "session", "widgets/imageU
             containerWidth: 500
         }).data("kendoImageUpload");
 
-        imageUpload.bind("uploaded", function (e) {
-            vm.set("settings.imageData", e.data);
-            vm.set("settings.imageFileName", e.fileName);
-        });
-
-        vm.bind("change", function (e) {
-            if (e.field === "settings") {
-                //update the image url after it has been set
-                imageUpload.setImageUrl(vm.get("settings.ImageUrl"));
-            }
-        });
-
-        //update the imageUploadUrl after the role has been set
-        session.bind("change", function (e) {
-            if (e.field === "role") {
-                var roleId = session.get("role.id");
-                if (!roleId) {
-                    return;
-                }
-                imageUpload.setUploadUrl(dbServices.API_URL + "settings/UpdateBusinessImage?roleId=" + roleId);
-            }
+        session.followRole(function (role) {
+            imageUpload.setUploadUrl(dbServices.API_URL + "settings/UpdateBusinessImage?roleId=" + role.get("id"));
         });
     };
 

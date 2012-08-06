@@ -14,15 +14,12 @@ define(["db/services", "ui/saveHistory", "tools", "widgets/imageUpload"], functi
     personalSettings.undo = function (state) {
         vm.set("settings", state);
         personalSettings.save();
-        imageUpload.setImageFields(state.imageData, state.imageFileName);
-        imageUpload.submitForm();
     };
 
     personalSettings.save = function () {
         if (personalSettings.validator.validate() && personalSettings.validator2.validate()) {
             dbServices.updatePersonalSettings(vm.get("settings"));
         }
-        imageUpload.submitForm();
     };
 
     personalSettings.initialize = function () {
@@ -42,6 +39,9 @@ define(["db/services", "ui/saveHistory", "tools", "widgets/imageUpload"], functi
             personalSettings.settings = settings;
             vm.set("settings", settings);
             kendo.bind($("#personal"), vm);
+
+            //set the image url after it was initially loaded
+            imageUpload.setImageUrl(vm.get("settings.ImageUrl"));
 
             //get the list of timezones
             dbServices.getTimeZones(function (timeZones) {
@@ -72,18 +72,6 @@ define(["db/services", "ui/saveHistory", "tools", "widgets/imageUpload"], functi
             imageWidth: 200,
             containerWidth: 500
         }).data("kendoImageUpload");
-
-        imageUpload.bind("uploaded", function (e) {
-            vm.set("settings.imageData", e.data);
-            vm.set("settings.imageFileName", e.fileName);
-        });
-
-        vm.bind("change", function (e) {
-            if (e.field === "settings") {
-                //update the image url after it has been set
-                imageUpload.setImageUrl(vm.get("settings.ImageUrl"));
-            }
-        });
     };
 
     personalSettings.show = function () {

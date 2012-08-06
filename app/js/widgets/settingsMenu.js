@@ -53,9 +53,8 @@ define(["jquery", "session", "lib/kendo.all"], function ($, session) {
                 usersLi.removeClass('active');
             }
 
-            var adjustForRole = function () {
-                var role = session.getRole();
-                if (!role || role.type != "Administrator") {
+            session.followRole(function (role) {
+                if (!role || role.type !== "Administrator") {
                     businessLi.css("display", "none");
                     usersLi.css("display", "none");
                     dispatcherLi.css("display", "none");
@@ -65,14 +64,7 @@ define(["jquery", "session", "lib/kendo.all"], function ($, session) {
                     usersLi.css("display", "block");
                     dispatcherLi.css("display", "block");
                 }
-            };
-
-            session.bind("change", function (e) {
-                if (e.field == "role") {
-                    adjustForRole();
-                }
             });
-            adjustForRole();
 
             this.element.append(_menu);
         },

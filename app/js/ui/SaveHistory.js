@@ -28,8 +28,11 @@ define(['lib/noty'], function () {
     };
 
     //opens a save changes notification with undo links
-    saveHistory.success = function () {
-        var text = successText;
+    saveHistory.success = function (text) {
+        if (!text) {
+            text = successText;
+        }
+
         var timeout = 0;
 
         //if there are changes to undo

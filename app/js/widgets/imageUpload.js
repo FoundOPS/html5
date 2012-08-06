@@ -62,21 +62,20 @@ define(["tools", "ui/saveHistory", "db/services", "jquery", "lib/kendo.all", "li
                 //show the image
                 that.cropBox.css("visibility", "visible").css("width", "auto").css("height", "auto");
 
-                //set so that the save changes event will also save the image
                 that.newImage = true;
                 tools.resizeImage(that.cropBox, that.options.imageWidth, that.options.containerWidth);
-                saveHistory.save();
+                that.submitForm();
             };
 
             var file = evt.target.files[0];
             //check that the file is an image
             if (!file.name.match(/(.*\.png$)/) && !file.name.match(/(.*\.jpg$)/) && !file.name.match(/(.*\.JPG$)/) && !file.name.match(/(.*\.gif$)/)) {
-                saveHistory.error("File Type");
+                saveHistory.error("The File Type must be .png, .jpg, or .gif");
                 return;
             }
             //check that the image is no larger than 10MB
             if (file.size > 5000000) {
-                saveHistory.error("File Size");
+                saveHistory.error("File Size cannot be larger than 10MB");
                 return;
             }
 
@@ -122,9 +121,10 @@ define(["tools", "ui/saveHistory", "db/services", "jquery", "lib/kendo.all", "li
                         that.setImageUrl(url);
                         that.newImage = false;
                         that.trigger("uploaded", {data: that.imageDataField[0].value, fileName: that.imageFileNameField[0].value});
+                        saveHistory.success();
                     },
                     error: function () {
-                        saveHistory.error("Image");
+                        saveHistory.error("Image upload failed");
                     }
                 });
             }
