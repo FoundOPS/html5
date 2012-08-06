@@ -61,7 +61,7 @@ define(["developer", "db/services", "session", "ui/saveHistory", "tools", "widge
         Employee: {
             defaultValue: ""
         },
-        TimeZoneInfo:{
+        TimeZoneInfo: {
             defaultValue: ""
         }
     };
@@ -109,7 +109,7 @@ define(["developer", "db/services", "session", "ui/saveHistory", "tools", "widge
     dbServices.hookupDefaultComplete(usersDataSource);
 
     //set the dataSource urls initially, and when the role is changed
-    var setupDataSourceUrls = function () {
+    session.followRole(function (role) {
         var roleId = session.get("role.id");
         if (!roleId) {
             return;
@@ -119,12 +119,6 @@ define(["developer", "db/services", "session", "ui/saveHistory", "tools", "widge
         usersDataSource.transport.options.destroy.url = dbServices.API_URL + "settings/DeleteUserSettings?roleId=" + roleId;
         usersDataSource.transport.options.create.url = dbServices.API_URL + "settings/InsertUserSettings?roleId=" + roleId;
         usersDataSource.read();
-    };
-    setupDataSourceUrls();
-    session.bind("change", function (e) {
-        if (e.field == "role") {
-            setupDataSourceUrls();
-        }
     });
 
     //endregion
@@ -321,7 +315,9 @@ define(["developer", "db/services", "session", "ui/saveHistory", "tools", "widge
 
         setupAddNewUser();
         setupUsersGrid();
+    };
 
+    usersSettings.show = function () {
         usersSettings.setupSaveHistory();
     };
 

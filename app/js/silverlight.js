@@ -43,17 +43,6 @@ define(['db/services', 'session', 'underscore'], function (dbservices, session) 
         _.delay(resizeContainers, 150);
     };
 
-    //Update the silverlight app's role to the session's selected role
-    var updateRole = function () {
-        try {
-            var selectedRole = session.getRole();
-            if (selectedRole) {
-                silverlight.plugin.navigationVM.ChangeRole(selectedRole.id);
-            }
-        } catch (err) {
-        }
-    };
-
     //if the section isn't silverlight, hide the silverlight control
     window.onhashchange = function () {
         if (!location || !location.hash) {
@@ -69,7 +58,7 @@ define(['db/services', 'session', 'underscore'], function (dbservices, session) 
     //a workaround for opening the importer
     //this is called when the importer view is shown
     window.openImporter = function () {
-        silverlight.setSection({name:"Importer", isSilverlight:true});
+        silverlight.setSection({name: "Importer", isSilverlight: true});
     };
 
     //endregion
@@ -95,7 +84,7 @@ define(['db/services', 'session', 'underscore'], function (dbservices, session) 
         errMsg += "Category: " + errorType + "       \n";
         errMsg += "Message: " + args.ErrorMessage + "     \n";
 
-        if (errorType == "ParserError") {
+        if (errorType === "ParserError") {
             errMsg += "File: " + args.xamlFile + "     \n";
             errMsg += "Line: " + args.lineNumber + "     \n";
             errMsg += "Position: " + args.charPosition + "     \n";
@@ -114,7 +103,7 @@ define(['db/services', 'session', 'underscore'], function (dbservices, session) 
         //for IE
         throw new Error(errMsg);
 
-        dbservices.trackError(errMsg, currentSection, session.getRole().name);
+        dbservices.trackError(errMsg, currentSection, session.get("role.name"));
     };
     window.onSourceDownloadProgressChanged = function (sender, eventArgs) {
         var myText = sender.findName("progressText");
@@ -130,7 +119,15 @@ define(['db/services', 'session', 'underscore'], function (dbservices, session) 
     silverlight.onLoaded = function () {
         silverlight.plugin = document.getElementById('silverlightPlugin').Content;
 
-        updateRole();
+        //Update the silverlight app's role to the session's selected role
+        session.followRole(function (role) {
+            try {
+                if (role) {
+                    silverlight.plugin.navigationVM.ChangeRole(role.get("id"));
+                }
+            } catch (err) {
+            }
+        });
 
         //if there is a current section, navigate to it
         if (currentSection) {
@@ -177,11 +174,6 @@ define(['db/services', 'session', 'underscore'], function (dbservices, session) 
     hide();
     $(window).resize(resizeContainers);
     resizeContainers();
-    session.bind("change", function (e) {
-        if (e.field == "role") {
-            updateRole();
-        }
-    });
 
     return silverlight;
 });

@@ -78,7 +78,7 @@ define(["developer", "tools", "db/services", "session", "ui/saveHistory", "widge
         dbServices.hookupDefaultComplete(dataSource);
 
         //set the dataSource urls initially, and when the role is changed
-        var setupDataSourceUrls = function () {
+        session.followRole(function (role) {
             var roleId = session.get("role.id");
             if (!roleId) {
                 return;
@@ -88,12 +88,6 @@ define(["developer", "tools", "db/services", "session", "ui/saveHistory", "widge
             dataSource.transport.options.destroy.url = dbServices.API_URL + "taskStatuses/DeleteTaskStatus?roleId=" + roleId;
             dataSource.transport.options.create.url = dbServices.API_URL + "taskStatuses/InsertTaskStatus?roleId=" + roleId;
             dataSource.read();
-        };
-        setupDataSourceUrls();
-        session.bind("change", function (e) {
-            if (e.field == "role") {
-                setupDataSourceUrls();
-            }
         });
 
         $("#dispatcherGrid").kendoGrid({
@@ -141,9 +135,11 @@ define(["developer", "tools", "db/services", "session", "ui/saveHistory", "widge
             dispatcherSettings.grid.addRow();
             saveHistory.save();
         });
-
-        dispatcherSettings.setupSaveHistory();
     }; //end initialize
+
+    dispatcherSettings.show = function () {
+        dispatcherSettings.setupSaveHistory();
+    };
 
     //endregion
 
@@ -311,7 +307,7 @@ define(["developer", "tools", "db/services", "session", "ui/saveHistory", "widge
     dispatcherSettings.setupSaveHistory = function () {
         saveHistory.setCurrentSection({
             page: "Dispatcher Settings",
-            onSave: function () {
+            save: function () {
                 dispatcherSettings.grid.saveChanges();
             },
             section: dispatcherSettings

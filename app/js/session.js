@@ -7,13 +7,6 @@ define(['db/services', "lib/kendo.all"], function (dbservices) {
 
     window.session = session;
 
-    /**
-     * The selected role
-     */
-    session.getRole = function () {
-        return session.get("role");
-    };
-
     session.setRole = function (role) {
         session.set("role", role);
 
@@ -39,6 +32,29 @@ define(['db/services', "lib/kendo.all"], function (dbservices) {
             callback(session._data);
         });
     };
+
+    var roleFunctions = [];
+    /**
+     * A method which will set the RoleId initially and whenever it changes.
+     * @param {function(roleId: string)} setProperty A function to set the value to the roleId
+     */
+    session.followRole = function (setProperty) {
+        roleFunctions.push(setProperty);
+        var role = session.get("role");
+        if (role) {
+            setProperty(role);
+        }
+    };
+    session.bind("change", function (e) {
+        if (e.field === "role") {
+            var role = session.get("role");
+            if (role) {
+                for (var i = 0; i < roleFunctions.length; i++) {
+                    roleFunctions[i](role);
+                }
+            }
+        }
+    });
 
 //    for debugging when the API is turned off
 //    set static values set for config & selected role
