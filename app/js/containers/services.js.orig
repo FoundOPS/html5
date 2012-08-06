@@ -225,4 +225,8 @@ require(["jquery", "underscore", "lib/kendo.all", "developer", "db/services", "t
         form[0].action = dbServices.ROOT_API_URL + "Helper/Download";
         form.submit();
     };
+<<<<<<< HEAD
 });
+=======
+});
+>>>>>>> origin/newServices

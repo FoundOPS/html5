@@ -1,9 +1,14 @@
 <div data-init="services.initialize" data-role="view" data-title="Services" data-model="services.viewModel" id="services" data-stretch="true">
     <div id="left">
         <div id="top">
+<<<<<<< HEAD
             <input id="startDatePicker" />
             <input id="endDatePicker" />
             <button class="k-button k-button-icontext" type="export" onclick="services.exportToCSV()"><span class="k-icon k-goup"></span>Export</button>
+=======
+            <input id="startDatePicker" style="width:150px;"/>
+            <input id="endDatePicker" style="width:150px;"/>
+            <button type="export" onclick="services.exportToCSV()">Export</button>
             <form id="csvForm" enctype="multipart/form-data" method="POST" target="csvFrame">
                 <input type="hidden" name="content"/>
                 <input type="hidden" name="contentType" value="text/csv"/>
@@ -11,6 +16,7 @@
             </form>
             <iframe id="csvFrame" style="display:none;">
             </iframe>
+>>>>>>> origin/newServices
         </div>
         <div id="grid"></div>
     </div>
