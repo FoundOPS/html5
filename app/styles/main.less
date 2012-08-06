@@ -221,13 +221,13 @@ hr{
 }
 .addDeleteBtns{
     float: right;
-    margin-top: -4px;
+    margin: -8px 0 0 0;
 }
 .addDeleteBtns .k-grid-delete, .addDeleteBtns .k-grid-add{
     padding-right: 6px;
 }
 .addDeleteBtns .k-grid-delete{
-    margin: 0 -5px;
+    margin: 0;
 }
 .saveBtn{
     margin-left: 145.5px;
@@ -258,8 +258,12 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
     border-color: #c5c5c5;
     color: #999;
 }
-.k-grid-delete[disabled], .k-grid-delete[disabled]:hover{
-    background: url("../img/disabledDelete.png") no-repeat;
+.k-grid-edit, .k-grid-edit:hover, .k-grid-delete, .k-grid-delete:hover, .k-grid-add,
+.k-grid-add:hover, .k-grid-delete[disabled], .k-grid-delete[disabled]:hover{
+    background: url("../img/btnSprite.png") no-repeat;
+    width: 22px;
+    height: 22px;
+    background-position: 0 -132px;
 }
 /*endregion*/
 
@@ -398,17 +402,18 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
 .k-grid-cancel{
     margin-left: 12px;
 }
-.k-grid-edit{
-    background: url("../img/editBtn.png") no-repeat;
+.k-grid .k-grid-edit{
+    background-position: 0 -66px;
+    margin-right: 4px;
 }
 .k-grid-edit:hover{
-    background: url("../img/editBtnHover.png") no-repeat;
+    background-position: 0 -44px;
 }
 .k-grid-delete{
-    background: url("../img/deleteBtn.png") no-repeat;
+    background-position: 0 -110px;
 }
 .k-grid-delete:hover{
-    background: url("../img/deleteBtnHover.png") no-repeat;
+    background-position: 0 -88px;
 }
 .k-edit-label.title{
     width:95%;
@@ -461,10 +466,10 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
 }
 
 .k-grid-add{
-    background: url("../img/addBtn.png") no-repeat;
+    background-position: 0 -22px;
 }
 .k-grid-add:hover{
-    background: url("../img/addBtnHover.png") no-repeat;
+    background-position: 0 0;
 }
 /*region COLOR PICKER*/
 .colorpicker {
