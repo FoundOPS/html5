@@ -131,7 +131,6 @@ define(['underscore', 'developer', 'lib/moment'], function (_, developer, m) {
     /**
      * Converts a datasource's view to CSV and saves it using data URI.
      * Uses moment.js for date parsing (you can change this if you would like)
-     * TODO save it using Downloadify to save the file name https://github.com/dcneiner/Downloadify
      * @param {Array.<Object>} data The data to convert.
      * @param {boolean} humanize If true, it will humanize the column header names.
      * It will replace _ with a space and split CamelCase naming to have a space in between names -> Camel Case
@@ -189,15 +188,14 @@ define(['underscore', 'developer', 'lib/moment'], function (_, developer, m) {
 
                 value = value.replace(/"/g, '""');
                 csv += '"' + value + '"';
-                if (col != data[row].length - 1) {
+                if (col !== data[row].length - 1) {
                     csv += ",";
                 }
             }
             csv += "\n";
         }
 
-        //TODO replace with downloadify so we can get proper file naming
-        window.open("data:text/csv;charset=utf-8," + escape(csv))
+        return csv;
     };
 
     /**

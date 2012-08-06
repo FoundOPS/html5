@@ -5,6 +5,13 @@
             <input id="startDatePicker" style="width:150px;"/>
             <input id="endDatePicker" style="width:150px;"/>
             <button type="export" onclick="services.exportToCSV()">Export</button>
+            <form id="csvForm" enctype="multipart/form-data" method="POST" target="csvFrame">
+                <input type="hidden" name="content"/>
+                <input type="hidden" name="contentType" value="text/csv"/>
+                <input type="hidden" name="fileName"/>
+            </form>
+            <iframe id="csvFrame" style="display:none;">
+            </iframe>
         </div>
         <div id="grid"></div>
     </div>

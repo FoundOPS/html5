@@ -44,6 +44,8 @@ define(["developer", "tools", "ui/notifications"], function (developer, tools, n
      */
     services.API_URL = apiUrl;
 
+    services.ROOT_API_URL = apiUrl.replace("api/", "");
+
     //functions to queue until after the role id is initially set
     var roleIdFunctionQueue = [];
     /**

@@ -2,7 +2,7 @@
 
 'use strict';
 
-require(["jquery", "underscore", "lib/kendo.all", "developer", "db/services", "tools", "lib/moment", "widgets/serviceDetails"], function ($, _, k, developer, dbServices, tools) {
+require(["jquery", "underscore", "lib/kendo.all", "developer", "db/services", "tools", "lib/moment", "widgets/serviceDetails", "lib/jquery.form"], function ($, _, k, developer, dbServices, tools) {
     var services = {}, serviceHoldersDataSource;
 
     //set services to a global function, so the functions are accessible from the HTML element
@@ -212,7 +212,11 @@ require(["jquery", "underscore", "lib/kendo.all", "developer", "db/services", "t
     };
 
     services.exportToCSV = function () {
-        tools.toCSV(serviceHoldersDataSource.view(), "Services", true, ['RecurringServiceId', 'ServiceId']);
+        var content = tools.toCSV(serviceHoldersDataSource.view(), "Services", true, ['RecurringServiceId', 'ServiceId']);
+        var form = $("#csvForm");
+        form.find("input[name=content]").val(content);
+        form.find("input[name=fileName]").val("services.csv");
+        form[0].action = dbServices.ROOT_API_URL + "Helper/Download";
+        form.submit();
     };
-})
-;
+});
