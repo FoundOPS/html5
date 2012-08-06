@@ -22,6 +22,7 @@ define(["db/services", "developer", "ui/saveHistory", "session", "widgets/imageU
         if (businessSettings.validator.validate()) {
             dbServices.updateBusinessSettings(vm.get("settings"));
         }
+        imageUpload.setImageUrl(dbServices.API_URL + "settings/UpdateBusinessImage?roleId="+ session.getRole().id);
         imageUpload.submitForm();
     };
 
@@ -54,25 +55,6 @@ define(["db/services", "developer", "ui/saveHistory", "session", "widgets/imageU
         imageUpload.bind("uploaded", function (e) {
             vm.set("settings.imageData", e.data);
             vm.set("settings.imageFileName", e.fileName);
-        });
-
-        var img = imageUpload.cropBox.get(0);
-        imageUpload.cropBox.on("load", function () {
-            //if the image data was not set on the settings (on the first load), create it from the image
-            //http://stackoverflow.com/questions/934012/get-image-data-in-javascript
-            if (vm.get("settings.imageData") == null) {
-                var canvas = document.createElement("canvas");
-                canvas.width = img.width;
-                canvas.height = img.height;
-                var ctx = canvas.getContext("2d");
-                ctx.drawImage(img, 0, 0);
-                var data = canvas.toDataURL("image/png");
-                data = data.replace(/^data:image\/(png|jpg|gif);base64,/, "");
-
-                vm.set("settings.imageData", data);
-                vm.set("settings.imageFileName", "resetImage.png");
-                saveHistory.resetHistory();
-            }
         });
 
         vm.bind("change", function (e) {

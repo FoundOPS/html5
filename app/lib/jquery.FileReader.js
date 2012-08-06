@@ -88,6 +88,8 @@
                     height:'1px',
                     display:'inline-block',
                     background:'transparent',
+                    //FOUNDOPS CHANGE
+                    position: 'absolute',
                     'z-index':99999
                 })
                 // Hands over mouse events to original input for css styles

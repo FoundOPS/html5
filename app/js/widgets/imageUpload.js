@@ -97,17 +97,20 @@ define(["tools", "ui/saveHistory", "db/services", "jquery", "lib/kendo.all", "li
         //manually set the image (used when undoing)
         setImageFields: function (data, fileName) {
             var that = this;
+            that.newImage = true;
             that.imageDataField.val(data);
             that.imageFileNameField.val(fileName);
-            that.setImageUrl(data);
-            that.newImage = true;
+            if (data !== null) {
+                that.setImageUrl(data);
+            }
+
             tools.resizeImage(that.cropBox, that.options.imageWidth, that.options.containerWidth);
         },
 
         submitForm: function () {
             var that = this;
             //check if image has been changed, and image data was set
-            if (that.newImage && that.imageDataField.val() !== "") {
+            if (that.newImage && that.imageDataField.val()) {
                 that.form.ajaxSubmit({
                     //from http://stackoverflow.com/questions/8151138/ie-jquery-form-multipart-json-response-ie-tries-to-download-response
                     dataType: "text",

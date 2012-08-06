@@ -13,9 +13,9 @@ define(["db/services", "ui/saveHistory", "tools", "widgets/imageUpload"], functi
 
     personalSettings.undo = function (state) {
         vm.set("settings", state);
+        personalSettings.save();
         imageUpload.setImageFields(state.imageData, state.imageFileName);
         imageUpload.submitForm();
-        personalSettings.save();
     };
 
     personalSettings.save = function () {
@@ -76,25 +76,6 @@ define(["db/services", "ui/saveHistory", "tools", "widgets/imageUpload"], functi
         imageUpload.bind("uploaded", function (e) {
             vm.set("settings.imageData", e.data);
             vm.set("settings.imageFileName", e.fileName);
-        });
-
-        var img = imageUpload.cropBox.get(0);
-        imageUpload.cropBox.on("load", function () {
-            //if the image data was not set on the settings (on the first load), create it from the image
-            //http://stackoverflow.com/questions/934012/get-image-data-in-javascript
-            if (vm.get("settings.imageData") == null) {
-                var canvas = document.createElement("canvas");
-                canvas.width = img.width;
-                canvas.height = img.height;
-                var ctx = canvas.getContext("2d");
-                ctx.drawImage(img, 0, 0);
-                var data = canvas.toDataURL("image/png");
-                data = data.replace(/^data:image\/(png|jpg|gif);base64,/, "");
-
-                vm.set("settings.imageData", data);
-                vm.set("settings.imageFileName", "newImage.png");
-                saveHistory.resetHistory();
-            }
         });
 
         vm.bind("change", function (e) {
