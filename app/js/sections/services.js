@@ -3,17 +3,25 @@
 'use strict';
 
 require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widgets/serviceDetails", "lib/jquery.form"], function ($, dbServices, tools, saveHistory) {
-    var services = {}, serviceHoldersDataSource, vm = kendo.observable();
+    var services = {}, serviceHoldersDataSource, vm = kendo.observable(), grid;
 
     services.vm = vm;
 
     services.undo = function (state) {
         vm.set("selectedService", state);
-        businessSettings.save();
+        services.save();
     };
 
     services.save = function () {
-        dbServices.updateServiceDetails(vm.get("selectedService"));
+        dbServices.updateService(vm.get("selectedService")).success(function (e) {
+            //Change the current row's ServiceId to match this Id in case this was a newly inserted service
+            if (grid) {
+                var selectedItem = grid.dataItem(grid.select());
+                selectedItem.set("ServiceId", vm.get("selectedService.Id"));
+
+                //TODO update all the columns
+            }
+        });
     };
 
     /**
@@ -114,7 +122,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
             dataTextField: "Name",
             dataValueField: "Id",
             dataSource: services.serviceTypes,
-            change: function(e) {
+            change: function (e) {
                 //reload the services
                 services.updateServices();
             }
@@ -124,9 +132,9 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
     services.initialize = function () {
         var resizeGrid = function (initialLoad) {
             var extraMargin;
-            if(initialLoad){
+            if (initialLoad) {
                 extraMargin = 50;
-            }else{
+            } else {
                 extraMargin = 85;
             }
             var windowHeight = $(window).height();
@@ -155,11 +163,11 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
                     column.template = "#= (" + key + "== null) ? ' ' : " + key + " #";
                 } else if (column.type === "date") {
                     if (value.detail === "datetime") {
-                        column.template = '#= moment(' + key + ').format("LLL") #';
+                        column.template = "#= (" + key + "== null) ? ' ' : moment(" + key + ").format('LLL') #";
                     } else if (value.detail === "time") {
-                        column.template = '#= moment(' + key + ').format("LT") #';
+                        column.template = "#= (" + key + "== null) ? ' ' : moment(" + key + ").format('LT') #";
                     } else if (value.detail === "date") {
-                        column.template = '#= moment(' + key + ').format("LL") #';
+                        column.template = "#= (" + key + "== null) ? ' ' : moment(" + key + ").format('LL') #";
                     }
                 }
 
@@ -169,16 +177,25 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
                 columns.push(column);
             });
 
-            services.grid = $("#grid").kendoGrid({
+            grid = $("#grid").kendoGrid({
                 autoBind: true,
                 change: function (e) {
                     var selectedItem = this.dataItem(this.select());
                     //Load the service details, and update the view model
                     dbServices.getServiceDetails(selectedItem.ServiceId, selectedItem.OccurDate, selectedItem.RecurringServiceId, function (service) {
                         services.vm.set("selectedService", service);
+
+                        saveHistory.close();
+                        saveHistory.resetHistory();
+
+                        //watch for input changes
+                        saveHistory.saveInputChanges("#serviceDetails");
                     });
                 },
                 columns: columns,
+                reorderColumn: function () {
+                    alert("yo");
+                },
                 dataSource: serviceHoldersDataSource,
                 filterable: true,
                 columnMenu: true,
@@ -189,7 +206,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
                 },
                 selectable: true,
                 scrollable: true
-            });
+            }).data("kendoGrid");
         };
 
         dbServices.getServiceTypes(function (serviceTypes) {
@@ -210,9 +227,6 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
             var serviceType = $("#serviceTypes").data("kendoDropDownList").value();
 
             getDataSource(startDate, endDate, serviceType, setupGrid);
-
-            saveHistory.close();
-            saveHistory.resetHistory();
         };
 
         startDatePicker.kendoDatePicker({
@@ -231,9 +245,6 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
         $("#serviceDetails").kendoServiceDetails({
             source: vm.get("selectedService")
         });
-
-        //watch for input changes
-        saveHistory.saveInputChanges("#serviceDetails");
 
         $(window).resize(function () {
             resizeGrid(false);

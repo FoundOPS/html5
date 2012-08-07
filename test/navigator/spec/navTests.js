@@ -1,6 +1,6 @@
 "use strict";
 
-define(["containers/navigator", "lib/kendo.all","lib/userVoice"], function (Navigator) {
+define(["widgets/navigator", "lib/kendo.all","lib/userVoice"], function (Navigator) {
     var config = {
         "name": "Jonathan Perl",
         "settingsUrl": "#view/personalSettings.html",
@@ -155,11 +155,13 @@ define(["containers/navigator", "lib/kendo.all","lib/userVoice"], function (Navi
                 expect(sideBarElementCount).toEqual(internalSideBarElementCount);
                 //console.log(navigator.sideBarElementCount);
 
-
                 $("#navClient").trigger("click");
                 $("#changeBusiness").trigger("click");
-                var lastPopupContent = $("#popupContent").children("a").eq(1);
-                navigator.changeBusiness(lastPopupContent, config);
+                var popupContentChild = $("#popupContent").children("a").eq(1);
+                navigator.changeBusiness(popupContentChild, config);
+                sideBarElementCount = $(".sideBarElement").length;
+                internalSideBarElementCount = navigator.sideBarElementCount;
+                expect(sideBarElementCount).toEqual(internalSideBarElementCount);
 
                 //console.log(navigator.sideBarElementCount);
             });
@@ -196,7 +198,6 @@ define(["containers/navigator", "lib/kendo.all","lib/userVoice"], function (Navi
                         expect(hasClassExpand).toBeFalsy();
                     });
                     it("cover, sidebar has cover class on large view only.", function(){
-                        //TODO: Check if coverButton is enabled and compare it to existing/visible.
                         var isCoverWindowButtonVisible = $("#coverWindowButton").is(":visible");
                         var isCoverWindowButtonEnabled = navigator.isCoverWindowButtonEnabled;
                         expect(isCoverWindowButtonVisible).toBe(isCoverWindowButtonEnabled);
@@ -213,7 +214,7 @@ define(["containers/navigator", "lib/kendo.all","lib/userVoice"], function (Navi
                     });
                 }
                 if($(window).width()<=800){
-                    it("shown, sidebar has shown class on small view only", function(){
+                    it("shown, sidebar has shown class on small view only (also tests hidden)", function(){
                         $("#showMenu").trigger("click");
                         var hasClassShown = $("#sideBar").hasClass("shown");
                         var hasClassHidden = $("#sideBar").hasClass("hidden");
@@ -232,8 +233,21 @@ define(["containers/navigator", "lib/kendo.all","lib/userVoice"], function (Navi
     });
 
     describe("Popup initialised:", function(){
-        it("has the popupWrapper div created", function(){});
-        it("has the content correctly initialised", function(){});
-        it("behaves correctly on menu item click", function(){});
+        it("has the popupWrapper div created", function(){
+            expect($("#popupWrapper").length).toBe(1);
+        });
+        it("has the content correctly initialised and behaves correctly on menu item click", function(){
+            $("#navClient").trigger("click");
+            $("#changeBusiness").trigger("click");
+            var role = null;
+            var name = null;
+            var popupContentChildName = null;
+            for(role in config.roles){
+                name = config.roles[role].name;
+                popupContentChildName = $("#popupContent").children("a").eq(role).text();
+                expect(name).toBe(popupContentChildName);
+            }
+            $('html').trigger("click");
+        });
     });
 });
