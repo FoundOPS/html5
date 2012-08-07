@@ -2,7 +2,7 @@
 
 'use strict';
 
-define(['tools'], function (tools) {
+define(function () {
     var models = {};
     /**
      * Enum for device platforms.

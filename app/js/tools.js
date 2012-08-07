@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(['underscore', 'developer'], function (_, developer) {
+define(function () {
     var tools = {};
 
     /**
@@ -196,15 +196,15 @@ define(['underscore', 'developer'], function (_, developer) {
     };
 
     /**
-    * watches all input elements on page for value change
-    * param {string} pageDiv the id of the view. ex: "#personal"
-    */
+     * watches all input elements on page for value change
+     * param {string} pageDiv the id of the view. ex: "#personal"
+     */
     tools.observeInput = function (pageDiv) {
-        $(pageDiv + ' input').each(function() {
+        $(pageDiv + ' input').each(function () {
             // Save current value of element
             $(this).data('oldVal', $(this).val());
             // Look for changes in the value
-            $(this).bind("propertychange keyup input paste change", function(){
+            $(this).bind("propertychange keyup input paste change", function () {
                 // If value has changed...
                 if ($(this).data('oldVal') != $(this).val()) {
                     // Updated stored value

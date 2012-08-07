@@ -13,8 +13,9 @@ require.config({
     }
 });
 
-require(["containers/navigator", "silverlight", "session", "lib/kendo.all", "ui/personalSettings", "ui/businessSettings", "ui/usersSettings",
-    "ui/dispatcherSettings", "ui/changePassword", "ui/createPassword", "underscore", "lib/userVoice"], function (Navigator, silverlight, session) {
+require(["widgets/navigator", "containers/silverlight", "db/session", "lib/kendo.all", "underscore", "lib/userVoice",
+    "sections/personalSettings", "sections/businessSettings", "sections/usersSettings",
+    "sections/dispatcherSettings", "sections/changePassword", "sections/createPassword"], function (Navigator, silverlight, session) {
     var application, navigator;
 
     session.load(function (data) {

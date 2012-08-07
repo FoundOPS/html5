@@ -31,7 +31,7 @@ require.config({
     }
 });
 
-require(["jquery", "lib/leaflet", "developer", "db/services", "tools", "ui/leaflet", "ui/ui"], function ($, l, developer, services, tools, leaflet, ui) {
+require(["jquery", "lib/leaflet", "db/developer", "db/services", "tools", "ui/leaflet", "ui/ui"], function ($, l, developer, services, tools, leaflet, ui) {
 
 //region Locals
     /**

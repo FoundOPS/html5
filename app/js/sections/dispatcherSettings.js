@@ -6,8 +6,8 @@
 
 "use strict";
 
-define(["developer", "tools", "db/services", "session", "ui/saveHistory", "widgets/settingsMenu", "ui/colorPicker",
-    "ui/kendoChanges"], function (developer, tools, dbServices, session, saveHistory) {
+define(["tools", "db/services", "db/session", "db/saveHistory", "widgets/settingsMenu", "ui/colorPicker",
+    "ui/kendoChanges"], function (tools, dbServices, session, saveHistory) {
     var dispatcherSettings = {};
 
     //region Locals

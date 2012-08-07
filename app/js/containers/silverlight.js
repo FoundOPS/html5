@@ -1,6 +1,6 @@
 'use strict';
 
-define(['db/services', 'session', 'underscore'], function (dbservices, session) {
+define(['db/services', 'db/session'], function (dbServices, session) {
     var silverlight = {}, currentSection;
 
     window.silverlight = silverlight;
@@ -48,7 +48,7 @@ define(['db/services', 'session', 'underscore'], function (dbservices, session) 
         if (!location || !location.hash) {
             return;
         }
-        if (location.hash.indexOf("silverlight") == -1) {
+        if (location.hash.indexOf("silverlight") === -1) {
             hide();
             //todo set current section based off hash
             currentSection = null;
@@ -74,7 +74,7 @@ define(['db/services', 'session', 'underscore'], function (dbservices, session) 
         var errorType = args.ErrorType;
         var iErrorCode = args.ErrorCode;
 
-        if (errorType == "ImageError" || errorType == "MediaError") {
+        if (errorType === "ImageError" || errorType === "MediaError") {
             return;
         }
 
@@ -89,8 +89,8 @@ define(['db/services', 'session', 'underscore'], function (dbservices, session) 
             errMsg += "Line: " + args.lineNumber + "     \n";
             errMsg += "Position: " + args.charPosition + "     \n";
         }
-        else if (errorType == "RuntimeError") {
-            if (args.lineNumber != 0) {
+        else if (errorType === "RuntimeError") {
+            if (args.lineNumber !== 0) {
                 errMsg += "Line: " + args.lineNumber + "     \n";
                 errMsg += "Position: " + args.charPosition + "     \n";
             }
@@ -103,7 +103,7 @@ define(['db/services', 'session', 'underscore'], function (dbservices, session) 
         //for IE
         throw new Error(errMsg);
 
-        dbservices.trackError(errMsg, currentSection, session.get("role.name"));
+        dbServices.trackError(errMsg, currentSection, session.get("role.name"));
     };
     window.onSourceDownloadProgressChanged = function (sender, eventArgs) {
         var myText = sender.findName("progressText");

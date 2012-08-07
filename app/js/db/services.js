@@ -6,7 +6,7 @@
 
 'use strict';
 
-define(["developer", "tools", "ui/saveHistory", "lib/xdr"], function (developer, tools, saveHistory) {
+define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, saveHistory) {
     var services = {};
 
     $.support.cors = true;
