@@ -295,7 +295,7 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
      * @param {!function(Array.<Object>)} settings The loaded settings.
      */
     services.updatePersonalSettings = function (settings) {
-        return notifications.linkNotification(
+        return saveHistory.linkNotification(
             $.ajax({
                 url: services.API_URL + "settings/UpdatePersonalSettings?roleId=" + services.RoleId,
                 type: "POST",
