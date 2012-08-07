@@ -179,6 +179,12 @@ define(["developer", "tools", "ui/notifications"], function (developer, tools, n
     //region Services
 
     /**
+     * Get the list of services
+     * @param roleId The role to get the services for
+     */
+    services.getServiceTypes = services._getHttp('service/GetServiceTypes', {}, false);
+
+    /**
      * Get the service and its fields.
      * Need to pass the serviceId or the occurDate and the recurringServiceId.
      * @param {?string} serviceId
@@ -204,6 +210,17 @@ define(["developer", "tools", "ui/notifications"], function (developer, tools, n
 
             callback(service);
         });
+    };
+
+    services.updateServiceDetails = function (service) {
+        return notifications.linkNotification(
+            $.ajax({
+                url: services.API_URL + "service/UpdateServiceDetails",
+                type: "POST",
+                dataType: "json",
+                contentType: 'application/json',
+                data: JSON.stringify(service)
+            }));
     };
 
     //endregion

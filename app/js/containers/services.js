@@ -19,7 +19,7 @@ require(["jquery", "underscore", "lib/kendo.all", "developer", "db/services", "t
      * @param {!function(kendo.data.DataSource, Array.<Object>, Array.<Object>} callback When the data is loaded it will call
      * this function and pass 3 parameters: the datasource, the fields, and the formatted data
      */
-    var getDataSource = function (startDate, endDate, callback) {
+    var getDataSource = function (startDate, endDate, serviceType, callback) {
         var formatResponse = function (data) {
             //The types will be returned in the first row
             var types = _.first(data);
@@ -100,7 +100,19 @@ require(["jquery", "underscore", "lib/kendo.all", "developer", "db/services", "t
             callback(fields, formattedData);
         };
 
-        dbServices._getHttp("service/GetServicesHoldersWithFields", {startDate: tools.formatDate(startDate), endDate: tools.formatDate(endDate)}, false)(formatResponse);
+        dbServices._getHttp("service/GetServicesHoldersWithFields", {startDate: tools.formatDate(startDate), endDate: tools.formatDate(endDate), serviceType: serviceType}, false)(formatResponse);
+    };
+
+    var setupServiceTypeDropdown = function () {
+        $("#serviceTypes").kendoDropDownList({
+            dataTextField: "Name",
+            dataValueField: "Id",
+            dataSource: services.serviceTypes,
+            change: function(e) {
+                //load the filtered services
+                services.updateServices();
+            }
+        });
     };
 
     services.initialize = function () {
@@ -151,7 +163,7 @@ require(["jquery", "underscore", "lib/kendo.all", "developer", "db/services", "t
                 columns.push(column);
             });
 
-            $("#grid").kendoGrid({
+            services.grid = $("#grid").kendoGrid({
                 autoBind: true,
                 change: function (e) {
                     var selectedItem = this.dataItem(this.select());
@@ -174,27 +186,37 @@ require(["jquery", "underscore", "lib/kendo.all", "developer", "db/services", "t
             });
         };
 
+        dbServices.getServiceTypes(function (serviceTypes) {
+            services.serviceTypes = serviceTypes;
+
+            setupServiceTypeDropdown();
+
+            //load the filtered services
+            services.updateServices();
+        });
+
         var startDatePicker = $("#startDatePicker");
         var endDatePicker = $("#endDatePicker");
 
-        var updateDateRange = function () {
+        services.updateServices = function () {
             var startDate = startDatePicker.data("kendoDatePicker").value();
             var endDate = endDatePicker.data("kendoDatePicker").value();
+            var serviceType = $("#serviceTypes").data("kendoDropDownList").value();
 
-            getDataSource(startDate, endDate, setupGrid);
+            getDataSource(startDate, endDate, serviceType, setupGrid);
         };
 
         startDatePicker.kendoDatePicker({
             value: moment().subtract('weeks', 2).toDate(),
             min: new Date(1950, 0, 1),
             max: new Date(2049, 11, 31),
-            change: updateDateRange
+            change: services.updateServices
         });
         endDatePicker.kendoDatePicker({
             value: moment().add('weeks', 2).toDate(),
             min: new Date(1950, 0, 1),
             max: new Date(2049, 11, 31),
-            change: updateDateRange
+            change: services.updateServices
         });
 
         services.viewModel.bind("change", function (e) {
@@ -202,9 +224,6 @@ require(["jquery", "underscore", "lib/kendo.all", "developer", "db/services", "t
             if (e.field === "selectedService") {
             }
         });
-
-        //Start loading the initial services
-        updateDateRange();
 
         $("#serviceDetails").kendoServiceDetails({
             source: services.viewModel.get("selectedService")
