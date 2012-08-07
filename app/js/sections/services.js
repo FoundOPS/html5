@@ -3,7 +3,7 @@
 'use strict';
 
 require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widgets/serviceDetails", "lib/jquery.form"], function ($, dbServices, tools, saveHistory) {
-    var services = {}, serviceHoldersDataSource, vm = kendo.observable();
+    var services = {}, serviceHoldersDataSource, vm = kendo.observable(), grid;
 
     services.vm = vm;
 
@@ -13,7 +13,15 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
     };
 
     services.save = function () {
-        dbServices.updateService(vm.get("selectedService"));
+        dbServices.updateService(vm.get("selectedService")).success(function (e) {
+            //Change the current row's ServiceId to match this Id in case this was a newly inserted service
+            if (grid) {
+                var selectedItem = grid.dataItem(grid.select());
+                selectedItem.set("ServiceId", vm.get("selectedService.Id"));
+
+                //TODO update all the columns
+            }
+        });
     };
 
     /**
@@ -114,7 +122,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
             dataTextField: "Name",
             dataValueField: "Id",
             dataSource: services.serviceTypes,
-            change: function(e) {
+            change: function (e) {
                 //reload the services
                 services.updateServices();
             }
@@ -124,9 +132,9 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
     services.initialize = function () {
         var resizeGrid = function (initialLoad) {
             var extraMargin;
-            if(initialLoad){
+            if (initialLoad) {
                 extraMargin = 50;
-            }else{
+            } else {
                 extraMargin = 85;
             }
             var windowHeight = $(window).height();
@@ -169,7 +177,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
                 columns.push(column);
             });
 
-            services.grid = $("#grid").kendoGrid({
+            grid = $("#grid").kendoGrid({
                 autoBind: true,
                 change: function (e) {
                     var selectedItem = this.dataItem(this.select());
@@ -198,7 +206,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
                 },
                 selectable: true,
                 scrollable: true
-            });
+            }).data("kendoGrid");
         };
 
         dbServices.getServiceTypes(function (serviceTypes) {
