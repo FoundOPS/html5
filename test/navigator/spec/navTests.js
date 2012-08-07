@@ -1,6 +1,6 @@
 "use strict";
 
-define(["containers/navigator", "lib/kendo.all","lib/userVoice"], function (Navigator) {
+define(["widgets/navigator", "lib/kendo.all","lib/userVoice"], function (Navigator) {
     var config = {
         "name": "Jonathan Perl",
         "settingsUrl": "#view/personalSettings.html",
@@ -129,6 +129,7 @@ define(["containers/navigator", "lib/kendo.all","lib/userVoice"], function (Navi
 
     var navigator = new Navigator(config);
     navigator.hideSearch();
+    //navigator.changeAvatar("test.jpg");
     describe("Navigator initialization: ", function () {
         describe("The top navigation initialised and", function() {
             it("has the nav div initialised", function(){
@@ -150,13 +151,22 @@ define(["containers/navigator", "lib/kendo.all","lib/userVoice"], function (Navi
                 var visibleSideBarElementCount = $(".sideBarElement:visible").length;
                 expect(sideBarElementCount).toEqual(visibleSideBarElementCount);
 
-                //TODO: Compare with sideBarElement count in sideBar class.
-                //var internalSideBarElementCount = navigator.getSideBarElementCount();
-                //expect(sideBarElementCount).toEqual(internalSideBarElementCount);
+                var internalSideBarElementCount = navigator.sideBarElementCount;
+                expect(sideBarElementCount).toEqual(internalSideBarElementCount);
+                //console.log(navigator.sideBarElementCount);
+
+
+                $("#navClient").trigger("click");
+                $("#changeBusiness").trigger("click");
+                var lastPopupContent = $("#popupContent").children("a").eq(1);
+                navigator.changeBusiness(lastPopupContent, config);
+
+                //console.log(navigator.sideBarElementCount);
             });
             it("has the expandMenuButton visible on large view / hidden on small view", function(){
-                var isExpandMenuButtonVisible = $("#expandMenuButton").is(":visible");
-                console.log(isExpandMenuButtonVisible);
+                //TODO: Push the slideMenu visibility onto expandMenuButton.
+                var isExpandMenuButtonVisible = $("#slideMenu").is(":visible");
+                //console.log(isExpandMenuButtonVisible);
                 //TODO: Check child divs?
                 var isLargeView = false;
                 if($(window).width()>800){
@@ -185,11 +195,13 @@ define(["containers/navigator", "lib/kendo.all","lib/userVoice"], function (Navi
                         hasClassExpand = $("#sideBar").hasClass("expand");
                         expect(hasClassExpand).toBeFalsy();
                     });
-                    xit("cover, sidebar has cover class on large view only.", function(){
+                    it("cover, sidebar has cover class on large view only.", function(){
                         //TODO: Check if coverButton is enabled and compare it to existing/visible.
-                        var isCoverWindowButtonVisible = $("#coverWindowButton:visible").length;
-                        //var isCoverWindowButtonEnabled = navigator.isCoverWindowButtonEnabled();
-                        //expect(isCoverWindowButtonVisible).toEqual(isCoverWindowButtonEnabled);
+                        var isCoverWindowButtonVisible = $("#coverWindowButton").is(":visible");
+                        var isCoverWindowButtonEnabled = navigator.isCoverWindowButtonEnabled;
+                        expect(isCoverWindowButtonVisible).toBe(isCoverWindowButtonEnabled);
+
+                        if(!isCoverWindowButtonEnabled)return;
 
                         $("#coverWindowButton").trigger("click");
                         var hasClassCover = $("#sideBar").hasClass("cover");
@@ -201,7 +213,7 @@ define(["containers/navigator", "lib/kendo.all","lib/userVoice"], function (Navi
                     });
                 }
                 if($(window).width()<=800){
-                    it("shown, sidebar has shown class on small view only", function(){
+                    it("shown, sidebar has shown class on small view only (also tests hidden)", function(){
                         $("#showMenu").trigger("click");
                         var hasClassShown = $("#sideBar").hasClass("shown");
                         var hasClassHidden = $("#sideBar").hasClass("hidden");

@@ -13,7 +13,8 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
     $.ajaxSetup({
         xhrFields: {
             withCredentials: true
-        }});
+        }
+    });
 
     /**
      * Enum for loading statuses.
@@ -27,9 +28,9 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
     var apiUrl;
     //setup the api url depending on the mode
     var mode = developer.CURRENT_DATA_SOURCE;
-    if (mode === developer.DataSource.LOCALAPI) {
+    if (mode === developer.DataSource.BROWSER_LOCALAPI) {
         apiUrl = 'http://localhost:9711/api/';
-    } else if (mode === developer.DataSource.ANDROIDLA) {
+    } else if (mode === developer.DataSource.ANDROID_LOCALAPI) {
         apiUrl = 'http://10.0.2.2:9711/api/';
     } else if (mode === developer.DataSource.LIVE) {
         apiUrl = 'http://api.foundops.com/api/';
@@ -75,7 +76,7 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
         /**
          * A function to perform the get operation on the api (defined by the parameters above)
          * and invoke the callback with the loaded data.
-         * @param {!function(Object)} callback A callback to pass the loaded data to.
+         * @param {?function(Object)} callback A callback to pass the loaded data to.
          */
         var getThenInvokeCallback = function (callback) {
             var params = opt_params || {};
@@ -98,7 +99,9 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
                         }
 
                         //perform the callback function by passing the response data
-                        callback(convertedData);
+                        if (callback !== null) {
+                            callback(convertedData);
+                        }
                     });
             };
 
@@ -108,7 +111,7 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
                 if (!services.RoleId) {
                     roleIdFunctionQueue.push(function () {
                         params.roleId = services.RoleId.toString();
-                        invokeAjax(params)
+                        invokeAjax(params);
                     });
                     return;
                 }
@@ -220,12 +223,13 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
                 dataType: "json",
                 contentType: 'application/json',
                 data: JSON.stringify(service)
-            }));
+            })
+        );
     };
 
     //endregion
 
-    //region Settings    
+    //region Settings
 
     /**
      * Creates personal password(for initial login).
@@ -237,7 +241,8 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
             $.ajax({
                 url: services.API_URL + "settings/CreatePassword?newPass=" + newPass + "&confirmPass=" + confirmPass,
                 type: "POST"
-            }));
+            })
+        );
     };
 
     // Get Employees.
@@ -266,7 +271,8 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
             $.ajax({
                 url: services.API_URL + "settings/UpdatePassword?oldPass=" + oldPass + "&newPass=" + newPass + "&confirmPass=" + confirmPass,
                 type: "POST"
-            }));
+            })
+        );
     };
 
     /**
@@ -304,9 +310,9 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
                 data: JSON.stringify(settings)
             }));
     };
-    
-     services.getTimeZones = services._getHttp('settings/GetTimeZones', {}, false);
-    
+
+    services.getTimeZones = services._getHttp('settings/GetTimeZones', {}, false);
+
     //endregion
 
     //region User
@@ -352,7 +358,7 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
      */
     services.hookupDefaultComplete = function (dataSource) {
         var onComplete = function (jqXHR, textStatus) {
-            if (textStatus == "success") {
+            if (textStatus === "success") {
                 saveHistory.success();
             } else {
                 dataSource.cancelChanges();

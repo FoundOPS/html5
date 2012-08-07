@@ -1,22 +1,14 @@
 <div id="routeDestinationDetails" data-role="view" data-layout="mobile-view" data-model="mobile.viewModel"
-     data-title="Destination Info" data-transition="slide">
+     data-title="Destination Info">
     <div id="locationInfo" data-bind="source: this" data-template="locationTemplate"></div>
-    <p style="top:10px; margin-bottom: -5px;">Contacts</p>
+
+    <div id="contacts" data-role="contacts" data-bind="contacts: contacts"></div>
+
+    <p style="top:10px; margin-bottom: -5px;">Tasks</p>
     <hr style="width:90%;"/>
-    <ul id="destinationContactInfoListView" data-bind="source: clientPhoneContactInfoSource"
-        data-role="listview" data-style="inset" data-template="contactInfoPhoneTemplate"></ul>
-    <ul id="destinationContactInfoListView" data-bind="source: clientEmailContactInfoSource"
-        data-role="listview" data-style="inset" data-template="contactInfoEmailTemplate"></ul>
-    <ul id="destinationContactInfoListView" data-bind="source: clientWebsiteContactInfoSource"
-        data-role="listview" data-style="inset" data-template="contactInfoWebsiteTemplate"></ul>
-    <ul id="destinationContactInfoListView" data-bind="source: locationPhoneContactInfoSource"
-        data-role="listview" data-style="inset" data-template="contactInfoPhoneTemplate"></ul>
-    <ul id="destinationContactInfoListView" data-bind="source: locationEmailContactInfoSource"
-        data-role="listview" data-style="inset" data-template="contactInfoEmailTemplate"></ul>
-    <ul id="destinationContactInfoListView" data-bind="source: locationWebsiteContactInfoSource"
-        data-role="listview" data-style="inset" data-template="contactInfoWebsiteTemplate"></ul>
-    <!--p style="top:10px; margin-bottom: -5px;">Tasks</p!-->
-    <hr style="width:90%;"/>
+    <ul id="routeTasksListView" data-bind="source: routeTasksSource, click: selectTask"
+        data-role="listview" data-style="inset" data-template="routeTasksTemplate">
+    </ul>
 </div>
 <script type="text/x-kendo-template" id="locationTemplate">
     <h1>${selectedDestination.Client.Name}</h1>
@@ -25,18 +17,13 @@
     <p>${selectedDestination.Location.AddressLineTwo}</p>
     <p>${selectedDestination.Location.City}, ${selectedDestination.Location.State}<br/>
         ${selectedDestination.Location.ZipCode}</p>
-    <p style="margin-top:10px;"><a href="http://maps.google.com/maps?q=${selectedDestination.Location.Latitude},${selectedDestination.Location.Longitude}"
+    <p style="margin-top:10px;"><a data-rel="external" data-role="button" href="http://maps.google.com/maps?q=${selectedDestination.Location.Latitude},${selectedDestination.Location.Longitude}"
        class="km-button">Directions</a></p>
 </script>
-<script type="text/x-kendo-template" id="contactInfoPhoneTemplate">
-    <a data-rel="external" href="tel:${Data}">Call ${Label}</a>
-    <br/><p id="contactData">${Data}</p>
+<script type="text/x-kendo-template" id="contactInfoTemplate">
+    <p style="top:10px; margin-bottom: -5px;">Contacts</p>
+    <hr style="width:90%;"/>
 </script>
-<script type="text/x-kendo-template" id="contactInfoEmailTemplate">
-    <a data-rel="external" href="mailto:${Data}">E-mail ${Label}</a>
-    <br/><p id="contactData">${Data}</p>
-</script>
-<script type="text/x-kendo-template" id="contactInfoWebsiteTemplate">
-    <a data-rel="external" href="${Data}">Go to Website</a>
-    <br/><p id="contactData">${Data}</p>
+<script type="text/x-kendo-template" id="routeTasksTemplate">
+    <a>${Name}</a>
 </script>
