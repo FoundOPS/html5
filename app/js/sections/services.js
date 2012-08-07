@@ -2,7 +2,7 @@
 
 'use strict';
 
-require(["jquery", "underscore", "lib/kendo.all", "developer", "db/services", "tools", "lib/moment", "widgets/serviceDetails", "lib/jquery.form"], function ($, _, k, developer, dbServices, tools) {
+require(["jquery", "db/services", "tools", "lib/moment", "widgets/serviceDetails", "lib/jquery.form"], function ($, dbServices, tools) {
     var services = {}, serviceHoldersDataSource;
 
     //set services to a global function, so the functions are accessible from the HTML element
