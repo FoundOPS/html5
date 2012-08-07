@@ -114,6 +114,10 @@ define(["db/services", "db/session", "db/saveHistory", "tools", "widgets/setting
         if (!roleId) {
             return;
         }
+        if (role.type !== "Administrator") {
+            return;
+        }
+
         usersDataSource.transport.options.read.url = dbServices.API_URL + "settings/GetAllUserSettings?roleId=" + roleId;
         usersDataSource.transport.options.update.url = dbServices.API_URL + "settings/UpdateUserSettings?roleId=" + roleId;
         usersDataSource.transport.options.destroy.url = dbServices.API_URL + "settings/DeleteUserSettings?roleId=" + roleId;

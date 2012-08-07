@@ -11,14 +11,14 @@ define(function () {
     /**
      * Enum for the data source.
      * LOCAL: load data from JSON files in the application's directory. Works for both Android & Browser Debugging. TODO: Implement this mode.
-     * LOCALAPI: load data from the local api server.
-     * ANDROIDLA: debug in Android Emulator using the local api server.
-     * LIVE: load from the main server. TODO: Implement this mode.
+     * BROWSER_LOCALAPI: load data from the local api server.
+     * ANDROID_LOCALAPI: debug in Android Emulator using the local api server.
+     * LIVE: load from the main server.
      * @enum {number}
      */
     developer.DataSource = {
-        LOCALAPI: 0,
-        ANDROIDLA: 1,
+        BROWSER_LOCALAPI: 0,
+        ANDROID_LOCALAPI: 1,
         LIVE: 2,
         TESTAPI: 3
     };
@@ -35,10 +35,10 @@ define(function () {
     };
 
     /**
-     * The current web service source.
+     * The current web service source. Used when running local server for debugging.
      * @type {developer.DataSource}
      */
-    developer.CURRENT_DATA_SOURCE = developer.DataSource.LOCALAPI;
+    developer.CURRENT_DATA_SOURCE = developer.DataSource.BROWSER_LOCALAPI;
 
     /**
      * This is for sections that are in the Silverlight application and is used for debugging.

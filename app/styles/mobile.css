@@ -1,23 +1,84 @@
 body {
     font-family: Roboto,HelveticaNeue,sans-serif;
 }
-#address-label {
+#addressLabel {
     font-size: x-small;
-    margin-bottom: -15px;
-    margin-top: -20px;
+    margin: -50px 0px -15px 0px;
  }
 #contactData {
     font-size: x-small;
-    margin: -20px 0px -15px -1px;
+    margin: -15px 0px -15px 1px;
 }
 #locationInfo p {
     margin-top: -10px;
     font-size: 1.3em;
     font-weight: normal;
 }
-.km-listview-wrapper li {
-    margin-top: -5px;
+#routeDestinations-listview li {
+    line-height: 1em;
 }
-.km-listview-wrapper li a {
-    text-decoration: none;
+#routeDestinations-listview li a {
+    margin-bottom: -10px;
+}
+#textbox, #textarea, #dropdown, #number, #earliest-textbox, #default-textbox, #latest-textbox {
+    position: static;
+    padding-bottom: 0px;
+}
+#earliest-textbox, #default-textbox, #latest-textbox {
+    text-align: center;
+}
+#taskStatuses-listview > li {
+    border-bottom: 0px;
+    border-top: 0px;
+}
+#clientPhoneContactInfoListView .km-listview-link::after,
+#locationPhoneContactInfoListView .km-listview-link::after,
+#clientEmailContactInfoListView .km-listview-link::after,
+#locationEmailContactInfoListView .km-listview-link::after,
+#clientWebsiteContactInfoListView .km-listview-link::after,
+#locationWebsiteContactInfoListView .km-listview-link::after,
+#taskStatuses-listview .km-listview-link::after {
+    border: 0;
+}
+.k-animation-container {
+    width: 100% !important;
+    height: 100% !important;
+}
+.km-vertical-scrollbar,
+.km-horizontal-scrollbar {
+    height: 100%;
+    width: 100%;
+}
+.km-list input[type="password"], .km-list input[type="search"], .km-list input[type="number"],
+.km-list input[type="tel"], .km-list input[type="url"], .km-list input[type="email"],
+.km-list input[type="text"]:not(.k-input), .km-list input[type="month"], .km-list input[type="color"],
+.km-list input[type="week"], .km-list input[type="date"], .km-list input[type="time"],
+.km-list input[type="datetime"], .km-list select:not([multiple]), .km-list .k-dropdown {
+    width: auto;
+}
+.km-android #taskFieldName {
+    margin-left:-10px;
+}
+.km-android .km-listview .km-list {
+    border-bottom:1px solid #333;
+}
+.km-android #earl-text-label, .km-android #def-text-label, .km-android #late-text-label {
+    position: relative;
+    top: -10px;
+}
+.km-ios #contactData{
+    font-size: x-small;
+    margin: -10px 0px -10px 2px;
+}
+.km-ios #textbox, .km-ios #textarea, .km-ios #dropdown, .km-ios #number, .km-ios #earliest-textbox,
+.km-ios #default-textbox, .km-ios #latest-textbox  {
+    border: inherit;
+    border-bottom:1px solid rgba(0, 0, 0, 0.1)
+}
+.km-ios #earl-text-label, .km-ios #def-text-label, .km-ios #late-text-label {
+    position: relative;
+    top: -5px;
+}
+.km-ios .km-list select:not([multiple]), .km-ios .km-list .k-dropdown-wrap {
+    background: 100% 82% no-repeat url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAACWCAQAAABj2vCcAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAf0lEQVR4XuzLsQkAAAwCsP7/tD1CcAqZcykMsizLsizLsizLsizLsizLsizLsizL8ncuxzYAgEAAhJz893BazVfXE2quGc9z32asZahlqGWoZahlqGWoZahlqGWoZahlqGWoZahlqGWoZahlqGWoZahlqOUq5CrkKuStlKuS3QdJPtFaleZ1DgAAAABJRU5ErkJggg==") transparent;
 }

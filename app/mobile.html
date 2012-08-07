@@ -4,14 +4,16 @@
     <meta charset="utf-8">
     <title>FoundOPS</title>
     <!--3rd Party CSS/Javascript!-->
-    <link href="lib/kendo.mobile.all.min.css" rel="stylesheet"/>
-    <link href="styles/mobile.css" rel="stylesheet"/>
+    <link href="lib/kendo.mobile.all.min.css" rel="stylesheet" type="text/css"/>
+    <link href="lib/kendo.common.min.css" rel="stylesheet" type="text/css"/>
+    <link href="lib/kendo.default.min.css" rel="stylesheet" type="text/css"/>
+    <link href="styles/mobile.css" rel="stylesheet" type="text/css"/>
     <!--Application CSS/Javascript!-->
-    <script data-main="js/containers/mobile" src="lib/require-jquery.js"></script>
-    <script src="lib/cordova.js"></script>
+    <script data-main="js/containers/mobile" src="lib/require-jquery.js" type="application/javascript"></script>
+    <script src="lib/cordova.js" type="application/javascript"></script>
 </head>
 <body>
-<div data-role="view" data-title="Login" data-show="mobile.checkLogin" data-transition="slide">
+<div data-role="view" data-title="Login" data-show="mobile.checkLogin">
     <header data-role="header">
         <!--replaced navbar to not have a back button-->
         <div data-role="navbar" style="height: 44px;">
@@ -21,13 +23,17 @@
     <div id="logo" style="text-align: center">
         <img style="width:70%;" alt="FoundOPS" src="img/SplashPNG.png"/>
     </div>
-    <div style="text-align: center">
+    <div style="text-align: center; height: auto; width: auto">
         <form id="login" class="validate" method="post">
-            <input class="k-textbox" placeholder="E-mail Address" required type="email" id="email"/>
-            <input class="k-textbox" placeholder="Password" required type="password" id="pass"/>
+            <input class="k-textbox" placeholder="E-mail Address" required="required" type="email" id="email"/>
+            <input class="k-textbox" placeholder="Password" required="required" type="password" id="pass"/>
             <p><input data-click="mobile.login" data-role="button" type="submit" value="Login"/></p>
         </form>
-        <!--Listview for styling purposes-->
+        <p style="font-size: 10px; margin-top: -10px">
+            Remember me?
+            <input id="rememberMe" style="position: relative; top: 2px;" type="checkbox" />
+        </p>
+        <!--Listview for styling purposes in iOS-->
         <ul data-role="listview" data-style="inset"></ul>
     </div>
     <footer>
@@ -39,7 +45,7 @@
 <div data-role="layout" data-id="mobile-view">
     <header data-role="header">
         <div data-role="navbar">
-            <a class="nav-button" data-align="left" data-role="backbutton">Back</a>
+            <a id="backButton " class="nav-button km-button km-back" data-align="left" data-click="mobile.onBack" data-role="button">Back</a>
             <span data-role="view-title"></span>
         </div>
     </header>

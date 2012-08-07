@@ -41,7 +41,7 @@ define(function () {
      * @param {Number} speed Speed at which the phone is moving.
      * @constructor
      */
-    models.TrackPoint = function TrackPoint (accuracy, date, heading, latitude, longitude, routeId, source, speed) {
+    models.TrackPoint = function TrackPoint(accuracy, date, heading, latitude, longitude, routeId, source, speed) {
         this.Accuracy = accuracy;
         this.CollectedTimeStamp = date.toJSON();
         this.Heading = heading;

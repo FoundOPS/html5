@@ -1,32 +1,31 @@
 // Copyright 2012 FoundOPS LLC. All Rights Reserved.
 
 /**
- * @fileoverview Class to hold mobile models/logic.
+ * @fileoverview The main class for the mobile application.
  */
 
 'use strict';
 
 require.config({
-    waitSeconds: 10,
-    baseUrl: 'js',
+    baseUrl: "js",
     paths: {
         // JavaScript folders
         lib: "../lib",
-        ui: "ui",
-        db: "db",
 
         // Libraries
         cordova: "../lib/cordova",
+        jquery: '../lib/jquery',
         underscore: "../lib/underscore"
     },
     shim: {
+        cordova: {},
         underscore: {
             exports: "_"
         }
     }
 });
 
-require(["jquery", "lib/kendo.mobile.min", "db/services", "db/models"], function ($, k, services, models) {
+require(["jquery", "developer", "tools", "db/services", "db/models", "widgets/contacts", "lib/moment", "lib/kendo.all", "underscore"], function ($, developer, tools, dbServices, models) {
     /**
      * mobile = wrapper for all mobile objects
      * app = the kendoUI mobile app
@@ -36,7 +35,7 @@ require(["jquery", "lib/kendo.mobile.min", "db/services", "db/models"], function
      * e = the email used to login
      * p = the password used to login
      */
-    var mobile = {}, app, serviceDate, intervalId = null, trackPointsToSend = [], e, p;
+    var mobile = {}, app, serviceDate, intervalId = null, trackPointsToSend = [];
 
     //set mobile to a global function, so the functions are accessible from the HTML element
     window.mobile = mobile;
@@ -63,47 +62,57 @@ require(["jquery", "lib/kendo.mobile.min", "db/services", "db/models"], function
     };
 
     //Overrides phone's back button navigation - Phonegap
-    function onBack() {
-        if (window.location.hash === "#views/routeList.html") {
+    mobile.onBack = function () {
+        if (window.location.hash === "#view/routeList.html") {
             mobile.logout();
-        } else if (window.location.hash === "#views/routeDetails.html") {
-            app.navigate("views/routeList.html");
-        } else if (window.location.hash === "#views/routeDestinationDetails.html") {
-            app.navigate("views/routeDetails.html");
+        } else if (window.location.hash === "#view/routeDestinations.html") {
+            app.navigate("view/routeList.html");
+        } else if (window.location.hash === "#view/routeDestinationDetails.html") {
+            app.navigate("view/routeDestinations.html");
+        } else if (window.location.hash === "#view/taskDetails.html") {
+            app.navigate("view/routeDestinationDetails.html");
         }
-    }
+    };
 
     //Fires when cordova is ready
     function onDeviceReady() {
         //set the OS of the device running the app
         mobile.CONFIG.DEVICE_PLATFORM = device.platform;
 
-        //Used to disallow user from navigating back to login screen if already logged in.
-        document.addEventListener("backbutton", onBack, false);
+        //Listens for back button being pressed on Android.
+        document.addEventListener("backbutton", mobile.onBack, false);
     }
 
     //Listens for Cordova to load
     document.addEventListener("deviceready", onDeviceReady, false);
 
     //region Login/Logout - Eventually will be moved to new navigator
+    var email;
     mobile.login = function () {
-        if (localStorage.getItem("loggedIn") === "true") {
-            e = localStorage.getItem("email");
-            p = localStorage.getItem("pass");
+        email = $("#email").val();
+        var password = $("#pass").val();
+
+        if ($("#rememberMe").prop("checked") === true) {
+            localStorage.setItem("rememberMe", true);
+            localStorage.setItem("email", email);
         } else {
-            e = $("#email").val();
-            p = $("#pass").val();
+            localStorage.setItem("rememberMe", false);
+            localStorage.removeItem("email");
         }
-        services.authenticate(e, p, function (data) {
+
+        dbServices.authenticate(email, password, function (data) {
             //if this was authenticated refresh routes and navigate to routeslist
+            //TODO: Fix case where user fails authentication.
             if (data) {
                 //Save the application's login state.
                 localStorage.setItem("loggedIn", true);
-                localStorage.setItem("email", e);
-                localStorage.setItem("pass", p);
-                app.navigate("views/routeList.html");
+                app.navigate("view/routeList.html");
             } else {
-                navigator.notification.alert("Login information is incorrect.");
+                if (developer.CURRENT_DATA_SOURCE === developer.DataSource.BROWSER_LOCALAPI) {
+                    alert("Login information is incorrect.");
+                } else {
+                    navigator.notification.alert("Login information is incorrect.");
+                }
             }
         });
     };
@@ -111,24 +120,26 @@ require(["jquery", "lib/kendo.mobile.min", "db/services", "db/models"], function
     mobile.logout = function () {
         navigator.notification.confirm("Are you sure you want to logout?", function (buttonIndex) {
             if (buttonIndex === 1) {
-                services.logout(function (data) {
-                    if (data) {
-                        //Clear application's login state.
-                        localStorage.setItem("loggedIn", false);
-                        mobile.viewModel.routesSource.data();
-                        app.navigate("views/clearhist.html");
-                    } else {
-                        navigator.notification.alert("Logout cannot be completed at this time.");
-                    }
-                });
+                //Clear application's login state
+                localStorage.setItem("loggedIn", false);
+                mobile.viewModel.routesSource.data();
+                app.navigate("view/clearhist.html");
+
+                dbServices.logout();
             }
         }, "Logout", "Yes,No");
     };
 
     mobile.checkLogin = function () {
-        if (localStorage.getItem("loggedIn") === "true") {
-            mobile.login();
-        }
+        //Wait until the application is initialized
+        setTimeout(function () {
+            if (localStorage.getItem("loggedIn") === "true") {
+                app.navigate("view/routeList.html");
+            } else if (localStorage.getItem("rememberMe") === "true") {
+                $("#email").val(localStorage.getItem("email"));
+                $("#rememberMe").prop("checked", true);
+            }
+        }, 0);
     };
     //endregion
 
@@ -140,7 +151,8 @@ require(["jquery", "lib/kendo.mobile.min", "db/services", "db/models"], function
      */
     var addPushTrackPoints = function (routeId) {
         var onSuccess = function (position) {
-            var collectedTime = new Date(position.timestamp);
+            //Add a trackpoint for now in UTC
+            var collectedTime = moment.utc().toDate();
 
             var newTrackPoint = new models.TrackPoint(
                 position.coords.accuracy,
@@ -154,8 +166,8 @@ require(["jquery", "lib/kendo.mobile.min", "db/services", "db/models"], function
             );
             trackPointsToSend.push(newTrackPoint);
 
-            services.postTrackPoints(trackPointsToSend, function (e) {
-                if (e) {
+            dbServices.postTrackPoints(trackPointsToSend, function (data) {
+                if (data) {
                     //flush trackpoints if successful
                     trackPointsToSend = [];
                 }
@@ -165,65 +177,116 @@ require(["jquery", "lib/kendo.mobile.min", "db/services", "db/models"], function
 
         var onError = function (error) {
             navigator.notification.alert("Can not collect track points at this time. Please check your GPS settings.", mobile.viewModel.endRoute(), "Alert", "Confirm");
-            //console.log("Error Code: " + error.code + '\n' + error.message);
         };
 
         //Phonegap geolocation function
         navigator.geolocation.getCurrentPosition(onSuccess, onError, {enableHighAccuracy: true});
     };
 
-    //region viewModel - Contains all the information and resources relating to the route view templates.
+    mobile.pushServiceData = function (e) {
+        var field,
+            fields = _.first(mobile.viewModel.taskDetailsSource.Fields, mobile.viewModel.taskDetailsSource.Fields.length);
+        for (field in fields) {
+            if (e.getAttribute("data-fieldid") === fields[field].Id) {
+                if (e.id === "checkbox" || e.id === "checklist") {
+                    var option;
+                    for (option in mobile.viewModel.taskDetailsSource.Fields[field].Options) {
+                        if (mobile.viewModel.taskDetailsSource.Fields[field].Options[option].Id === e.getAttribute("data-optionid")) {
+                            if (e.checked === false) {
+                                mobile.viewModel.taskDetailsSource.Fields[field].Options[option].IsChecked = true;
+                            } else if (e.checked === true) {
+                                mobile.viewModel.taskDetailsSource.Fields[field].Options[option].IsChecked = false;
+                            }
+                        }
+                    }
+                } else {
+                    mobile.viewModel.taskDetailsSource.Fields[field].Value = e.value;
+                }
+            }
+        }
+
+        dbServices.postServiceDetails(mobile.viewModel.taskDetailsSource.toJSON(), function (data) {
+            // On error -> log response.
+            console.log(data);
+        });
+    };
+
+    //region viewModel - Contains all the information and resources relating to the route views.
     mobile.viewModel = kendo.observable({
-        routesSource: services.routesDataSource,
+        /**
+         * A kendo data source for Routes for the current user's routes.
+         * @type {kendo.data.DataSource}
+         */
+        routesSource: new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: dbServices.API_URL + "routes/GetRoutes",
+                    type: "GET",
+                    dataType: "jsonp",
+                    contentType: "application/json; charset=utf-8"
+                }
+            },
+            change: function (e) {
+
+            },
+            serverPaging: true
+        }),
+        refreshRoutes: function () {
+            this.routesSource.read();
+        },
         /**
          * Select a route
-         * @param e The event args from a list view click event
+         * @param e The event args from a list view click event (the selected Route)
          */
         selectRoute: function (e) {
             this.set("selectedRoute", e.dataItem);
             this.set("routeDestinationsSource",
                 new kendo.data.DataSource({
-                    data: this.get("selectedRoute").RouteDestinations
+                    data: this.get("selectedRoute.RouteDestinations")
                 }));
-            app.navigate("views/routeDetails.html");
+            dbServices.getTaskStatuses(this.get("selectedRoute").BusinessAccountId, function (response) {
+                mobile.viewModel.set("taskStatusesSource",
+                    new kendo.data.DataSource({
+                        data: response
+                    }));
+            });
+            app.navigate("view/routeDestinations.html");
         },
         /**
          * Select a route destination
-         * @param e The event args from a list view click event
+         * @param e The event args from a list view click event (the selected Destination)
          */
         selectRouteDestination: function (e) {
             this.set("selectedDestination", e.dataItem);
-            this.set("clientPhoneContactInfoSource",
+
+            this.set("routeTasksSource",
                 new kendo.data.DataSource({
-                    data: this.get("selectedDestination").Client.ContactInfoSet,
-                    filter: {field: "Type", operator: "equal", value: "Phone Number"}
+                    data: this.get("selectedDestination.RouteTasks")
                 }));
-            this.set("clientEmailContactInfoSource",
-                new kendo.data.DataSource({
-                    data: this.get("selectedDestination").Client.ContactInfoSet,
-                    filter: {field: "Type", operator: "equal", value: "Email Address"}
-                }));
-            this.set("clientWebsiteContactInfoSource",
-                new kendo.data.DataSource({
-                    data: this.get("selectedDestination").Client.ContactInfoSet,
-                    filter: {field: "Type", operator: "equal", value: "Website"}
-                }));
-            this.set("locationPhoneContactInfoSource",
-                new kendo.data.DataSource({
-                    data: this.get("selectedDestination").Location.ContactInfoSet,
-                    filter: {field: "Type", operator: "equal", value: "Phone Number"}
-                }));
-            this.set("locationEmailContactInfoSource",
-                new kendo.data.DataSource({
-                    data: this.get("selectedDestination").Location.ContactInfoSet,
-                    filter: {field: "Type", operator: "equal", value: "Email Address"}
-                }));
-            this.set("locationWebsiteContactInfoSource",
-                new kendo.data.DataSource({
-                    data: this.get("selectedDestination").Location.ContactInfoSet,
-                    filter: {field: "Type", operator: "equal", value: "Website"}
-                }));
-            app.navigate("views/routeDestinationDetails.html");
+
+            app.navigate("view/routeDestinationDetails.html");
+        },
+
+        contacts: function () {
+            return _.union(this.get("selectedDestination.Client.ContactInfoSet").slice(0), this.get("selectedDestination.Location.ContactInfoSet").slice(0));
+        },
+        /**
+         * Select a task and create a dataSource for the task input fields.
+         * @param e The event args from a list view click event (the selected Task)
+         */
+        selectTask: function (e) {
+            this.set("selectedTask", e.dataItem);
+            dbServices.getTaskDetails(this.get("selectedTask").Id, function (data) {
+                mobile.viewModel.set("taskDetailsSource", data[0]);
+                mobile.viewModel.set("taskFieldsSource", mobile.viewModel.get("taskDetailsSource").Fields);
+                app.navigate("view/taskDetails.html");
+            });
+        },
+        /**
+         * Select a status for a certain route and send it to the server.
+         */
+        selectStatus: function (e) {
+            console.log(e.dataItem);
         },
         //Dictate the visibility of the startRoute and endRoute buttons.
         startVisible: true,
@@ -232,16 +295,13 @@ require(["jquery", "lib/kendo.mobile.min", "db/services", "db/models"], function
          * Starts collecting and sending trackpoints for the selected route.
          */
         startRoute: function () {
-            //the viewmodel
-            var that = this;
-
-            that.set("startVisible", false);
-            that.set("endVisible", true);
+            this.set("startVisible", false);
+            this.set("endVisible", true);
             serviceDate = new Date();
 
             //store the intervalId
             intervalId = window.setInterval(function () {
-                addPushTrackPoints(that.get("selectedRoute").Id);
+                addPushTrackPoints(mobile.viewModel.get("selectedRoute").Id);
             }, mobile.CONFIG.TRACKPOINT_COLLECTION_FREQUENCY_SECONDS * 1000);
         },
         /**
@@ -254,11 +314,18 @@ require(["jquery", "lib/kendo.mobile.min", "db/services", "db/models"], function
             //stop calling addPushTrackPoints
             clearInterval(intervalId);
             trackPointsToSend = [];
+        },
+        openStatuses: function () {
+            $("#taskStatuses-actionsheet").kendoMobileActionSheet("open");
+        },
+        closeStatuses: function () {
+            $("#taskStatuses-actionsheet").kendoMobileActionSheet("close");
         }
     });
     //endregion
 
     //Start the mobile application - must be at the bottom of the code.
-    app = new kendo.mobile.Application($(document.body), {platform: "android"});
-
+    app = new kendo.mobile.Application($(document.body), {
+        transition: "slide"
+    });
 });

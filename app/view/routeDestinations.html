@@ -1,8 +1,8 @@
 <div id="routeDestinations" data-role="view" data-layout="mobile-view" data-model="mobile.viewModel"
-     data-title="Destinations" data-transition="slide">
+              data-title="Destinations">
     <header data-role="header">
         <div data-role="navbar">
-            <a class="nav-button" data-align="left" data-role="backbutton">Back</a>
+            <a id="backButton " class="nav-button km-button km-back" data-align="left" data-click="mobile.onBack" data-role="button">Back</a>
             <a id="startButton" class="nav-button" data-align="right"
                data-bind="click: startRoute, visible: startVisible" data-role="button">Start Route</a>
             <a id="endButton" class="nav-button" data-align="right"
@@ -10,10 +10,10 @@
             <span data-role="view-title"></span>
         </div>
     </header>
-    <ul id="routeDestinations-listview" data-bind="source:routeDestinationsSource, click: selectRouteDestination" data-role="listview"
-        data-style="inset" data-template="routeDestinationsViewTemplate"></ul>
+    <ul id="routeDestinations-listview" data-bind="source:routeDestinationsSource, click: selectRouteDestination"
+        data-role="listview" data-style="inset" data-template="routeDestinationsViewTemplate">
+    </ul>
 </div>
 <script type="text/x-kendo-template" id="routeDestinationsViewTemplate">
-    <a>${Client.Name}</a>
-    <br/><p id="address-label">${Location.AddressLineOne}</p>
+    <a class="km-listview-link"><span>${Client.Name}<br/><label id="addressLabel">${Location.AddressLineOne}</label></a>
 </script>

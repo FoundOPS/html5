@@ -1,3 +1,9 @@
+// Copyright 2012 FoundOPS LLC. All Rights Reserved.
+
+/**
+ * @fileoverview The main class for the application.
+ */
+
 'use strict';
 
 require.config({

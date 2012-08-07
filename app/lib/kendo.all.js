@@ -1,15 +1,11 @@
 /*
-* Kendo UI Complete v2012.2.710 (http://kendoui.com)
+* Kendo UI Complete v2012.2.803 (http://kendoui.com)
 * Copyright 2012 Telerik AD. All rights reserved.
 *
 * Kendo UI Complete commercial licenses may be obtained at http://kendoui.com/complete-license
 * If you do not own a commercial license, this file shall be governed by the trial license terms.
 */
 ;(function($, undefined) {
-    /**
-     * @name kendo
-     * @namespace This object contains all code introduced by the Kendo project, plus helper functions that are used across all widgets.
-     */
     var kendo = window.kendo = window.kendo || {},
         extend = $.extend,
         each = $.each,
@@ -65,12 +61,7 @@
         return subclass;
     };
 
-    var Observable = Class.extend(/** @lends kendo.Observable.prototype */{
-        /**
-         * Creates an observable instance.
-         * @constructs
-         * @class Represents a class that can trigger events, along with methods that subscribe handlers to these events.
-         */
+    var Observable = Class.extend({
         init: function() {
             this._events = {};
         },
@@ -170,7 +161,9 @@
                 idx,
                 length;
 
-            if (events) {
+            if (eventName === undefined) {
+                that._events = {};
+            } else if (events) {
                 if (handler) {
                     for (idx = 0, length = events.length; idx < length; idx++) {
                         if (events[idx] === handler) {
@@ -186,55 +179,6 @@
         }
     });
 
-    /**
-     * @name kendo.Template.Description
-     *
-     * @section
-     * <p>
-     *  Templates offer way of creating HTML chunks. Options such as HTML encoding and compilation for optimal
-     *  performance are available.
-     * </p>
-     *
-     * @exampleTitle Basic template
-     * @example
-     * var inlineTemplate = kendo.template("Hello, #= firstName # #= lastName #");
-     * var inlineData = { firstName: "John", lastName: "Doe" };
-     * $("#inline").html(inlineTemplate(inlineData));
-     *
-     * @exampleTitle Output:
-     * @example
-     * Hello, John Doe!
-     *
-     * @exampleTitle Encode HTML
-     * @example
-     * var encodingTemplate = kendo.template("HTML tags are encoded as follows: #:html#");
-     * var encodingData = { html: "<strong>lorem ipsum</strong>" };
-     * $("#encoding").html(encodingTemplate(encodingData));
-     *
-     * @exampleTitle Output:
-     * @example
-     * HTML tags are encoded as follows: <strong>lorem ipsum</strong>
-     *
-     * @exampleTitle Use javascript in templates
-     * @example
-     * var encodingTemplate = kendo.template("#if (foo) {# bar #}#");
-     * var data = { foo: true};
-     * $("#encoding").html(encodingTemplate(data)); // outputs bar
-     *
-     * @exampleTitle Escape sharp symbols in JavaScript strings
-     * @example
-     * var encodingTemplate = kendo.template("<a href='\\#'>Link</a>");
-     *
-     * @exampleTitle Escape sharp symbols in script templates
-     * @example
-     * <script type="text/x-kendo-template" id="template">
-     *  <a href="\#">Link</a>
-     * </script>
-     *
-     * <script>
-     * var encodingTemplate = kendo.template($("#template").html());
-     * </script>
-     */
 
      function compilePart(part, stringPart) {
          if (stringPart) {
@@ -265,23 +209,9 @@
         escapedSharpRegExp = /\\#/g,
         sharpRegExp = /__SHARP__/g;
 
-    /**
-     * @name kendo.Template
-     * @namespace
-     */
-    Template = /** @lends kendo.Template */ {
+    Template = {
         paramName: "data", // name of the parameter of the generated template
         useWithBlock: true, // whether to wrap the template in a with() block
-        /**
-         * Renders a template for each item of the data.
-         * @ignore
-         * @name kendo.Template.render
-         * @static
-         * @function
-         * @param {String} [template] The template that will be rendered
-         * @param {Array} [data] Data items
-         * @returns {String} The rendered template
-         */
         render: function(template, data) {
             var idx,
                 length,
@@ -293,16 +223,6 @@
 
             return html;
         },
-        /**
-         * Compiles a template to a function that builds HTML. Useful when a template will be used several times.
-         * @ignore
-         * @name kendo.Template.compile
-         * @static
-         * @function
-         * @param {String} [template] The template that will be compiled
-         * @param {Object} [options] Compilation options
-         * @returns {Function} The compiled template
-         */
         compile: function(template, options) {
             var settings = extend({}, this, options),
                 paramName = settings.paramName,
@@ -374,7 +294,7 @@ function pad(number) {
 
     if (typeof Date.prototype.toJSON !== FUNCTION) {
 
-        /** @ignore */
+
         Date.prototype.toJSON = function (key) {
             var that = this;
 
@@ -387,7 +307,7 @@ function pad(number) {
                 pad(that.getUTCSeconds())   + "Z" : null;
         };
 
-        String.prototype.toJSON = Number.prototype.toJSON = /** @ignore */ Boolean.prototype.toJSON = function (key) {
+        String.prototype.toJSON = Number.prototype.toJSON = Boolean.prototype.toJSON = function (key) {
             return this.valueOf();
         };
     }
@@ -573,355 +493,6 @@ function pad(number) {
         }
     }};
 
-    /**
-     * @name kendo.Globalization
-     * @namespace
-     */
-     /**
-     * @name kendo.Globalization.Description
-     *
-     * @section Globalization is the process of designing and developing an
-     * application that works in multiple cultures. The culture defines specific information
-     * for the number formats, week and month names, date and time formats and etc.
-     *
-     * @section Kendo exposes <strong><em>culture(cultureName)</em></strong> method which allows to select the culture
-     * script corresponding to the "culture name". kendo.culture() method uses the passed culture name
-     * to select a culture from the culture scripts that you have included and then sets the current culture. If there is no
-     * corresponding culture then the method will try to find culture which is equal to the country part of the culture name.
-     * If no culture is found the default one is used.
-     *
-     * <h3>Define current culture settings</h3>
-     *
-     * @exampleTitle Include culture scripts and select culture
-     * @example
-     *
-     * <script src="jquery.js" ></script>
-     * <script src="kendo.all.min.js"></script>
-     * <script src="kendo.culture.en-GB.js"></script>
-     * <script type="text/javascript">
-     *    //set current culture to the "en-GB" culture script.
-     *    kendo.culture("en-GB");
-     * </script>
-     *
-     * @exampleTitle Select closest culture
-     * @example
-     *
-     * <script src="jquery.js" ></script>
-     * <script src="kendo.all.min.js"></script>
-     * <script src="kendo.culture.fr.js"></script>
-     * <script type="text/javascript">
-     *    //set current culture to the "fr" culture script.
-     *    kendo.culture("fr-FR");
-     * </script>
-     *
-     * @exampleTitle Get current culture
-     * @example
-     * var cultureInfo = kendo.culture();
-     *
-     * <h3>Find culture object</h3>
-     *
-     * @section Kendo also exposes <strong><em>findCulture(cultureName)</em></strong> method which returns a culture object which corresponds to
-     * the passed culture name. If there is no such culture in the registered culture scripts, the method will try to find a culture object
-     * which corresponds to the country part of the culture name. If no culture is found, the result will be <strong>null</strong>.
-     *
-     * @exampleTitle Find a culture object
-     * @example
-     *
-     * <script src="jquery.js" ></script>
-     * <script src="kendo.all.min.js"></script>
-     * <script src="kendo.culture.fr.js"></script>
-     * <script type="text/javascript">
-     *    //finds the "fr-FR" culture object.
-     *    var culture = kendo.findCulture("fr-FR");
-     * </script>
-     *
-     * @section
-     * <h3>Format number or date object</h3>
-     *
-     * Kendo exposes methods which can format number or date object using specific format string and the current specified culture:
-     * @section
-     * <h4><code>kendo.toString(object, format)</code> - returns a string representation of the current object using specific format.</h4>
-     * @exampleTitle Formats number and date objects
-     * @example
-     * //format number using standard number format
-     * kendo.toString(10.12, "n"); //10.12
-     * kendo.toString(10.12, "n0"); //10
-     * kendo.toString(10.12, "n5"); //10.12000
-     * kendo.toString(10.12, "c"); //$10.12
-     * kendo.toString(0.12, "p"); //12.00 %
-     * //format number using custom number format
-     * kendo.toString(19.12, "00##"); //0019
-     * //format date
-     * kendo.toString(new Date(2010, 9, 5), "yyyy/MM/dd" ); // "2010/10/05"
-     * kendo.toString(new Date(2010, 9, 5), "dddd MMMM d, yyyy" ); // "Tuesday October 5, 2010"
-     * kendo.toString(new Date(2010, 10, 10, 22, 12), "hh:mm tt" ); // "10:12 PM"
-     *
-     * @section
-     * <h4>kendo.format - replaces each format item in a specified string with the text equivalent of a corresponding object's value.</h4>
-     *  @exampleTitle String format
-     *  @example
-     *  kendo.format("{0} - {1}", 12, 24); //12 - 24
-     *  kendo.format("{0:c} - {1:c}", 12, 24); //$12.00 - $24.00
-     *
-     * @section
-     * <h3>Parsing a string</h3>
-     *
-     * Kendo exposes methods which converts the specified string to date or number object:
-     * <ol>
-     *    <li>
-     *       <code>kendo.parseInt(string, [culture])</code> - converts a string to a whole number using the specified culture (current culture by default).
-     *        @exampleTitle Parse string to integer
-     *        @example
-     *
-     *        //assumes that current culture defines decimal separator as "."
-     *        kendo.parseInt("12.22"); //12
-     *
-     *        //assumes that current culture defines decimal separator as ",", group separator as "." and currency symbol as "€"
-     *        kendo.parseInt("1.212,22 €"); //1212
-     *    </li>
-     *    <li>
-     *       <code>kendo.parseFloat(string, [culture])</code> - converts a string to a number with floating point using the specified culture (current culture by default).
-     *        @exampleTitle Parse string to float
-     *        @example
-     *
-     *        //assumes that current culture defines decimal separator as "."
-     *        kendo.parseFloat("12.22"); //12.22
-     *
-     *        //assumes that current culture defines decimal separator as ",", group separator as "." and currency symbol as "€"
-     *        kendo.parseFloat("1.212,22 €"); //1212.22
-     *    </li>
-     *    <li>
-     *       <code>kendo.parseDate(string, [formats], [culture])</code> - converts a string to a JavaScript Date object, taking into account the given format/formats (or the given culture's set of default formats).
-     *       Current culture is used if one is not specified.
-     *        @exampleTitle Parse string to float
-     *        @example
-     *
-     *        //current culture is "en-US"
-     *        kendo.parseDate("12/22/2000"); //Fri Dec 22 2000
-     *        kendo.parseDate("2000/12/22", "yyyy/MM/dd"); //Fri Dec 22 2000
-     *    </li>
-     * </ol>
-     *
-     * @section
-     * <h3>Number formatting</h3>
-     * The purpose of number formatting is to convert Number object to a human readable string using culture's specific settings. <code>kendo.format</code> and <code>kendo.toString</code>
-     * methods support standard and custom numeric formats:
-     * <h4>Standard numeric formats</h4>
-     *<strong>n</strong> for number
-     *       @exampleTitle Formatting using "n" format
-     *       @example
-     *       kendo.culture("en-US");
-     *       kendo.toString(1234.567, "n"); //1,234.57
-     *
-     *       kendo.culture("de-DE");
-     *       kendo.toString(1234.567, "n3"); //1.234,567
-     *@section
-     *<strong>c</strong> for currency
-     *       @exampleTitle Formatting using "c" format
-     *       @example
-     *       kendo.culture("en-US");
-     *       kendo.toString(1234.567, "c"); //$1,234.57
-     *
-     *       kendo.culture("de-DE");
-     *       kendo.toString(1234.567, "c3"); //1.234,567 €
-     *@section
-     *<strong>p</strong> for percentage (number is multiplied by 100)
-     *       @exampleTitle Formatting using "p" format
-     *       @example
-     *       kendo.culture("en-US");
-     *       kendo.toString(0.222, "p"); //22.20 %
-     *
-     *       kendo.culture("de-DE");
-     *       kendo.toString(0.22, "p3"); //22.000 %
-     *@section
-     *<strong>e</strong> for exponential
-     *       @exampleTitle Formatting using "e" format
-     *       @example
-     *       kendo.toString(0.122, "e"); //1.22e-1
-     *       kendo.toString(0.122, "e4"); //1.2200e-1
-     *
-     * @section
-     * <h4>Custom numeric formats</h4>
-     * You can create custom numeric format string using one or more custom numeric specifiers. Custom numeric format string is any tha is not a standard numeric format.
-     * <div class="details-list">
-     *   <h4 class="details-title">Format specifiers</h4>
-     *   <dl>
-     *     <dt>
-     *       "0" - zero placeholder
-     *     </dt>
-     *     <dd>Replaces the zero with the corresponding digit if one is present; otherwise, zero appears in the result string - <code>kendo.toString(1234.5678, "00000") -> 01235</code></dd>
-     *     <dt>
-     *       "#" - digit placeholder
-     *     </dt>
-     *     <dd>Replaces the pound sign with the corresponding digit if one is present; otherwise, no digit appears in the result string - <code>kendo.toString(1234.5678, "#####") -> 1235</code></dd>
-     *     <dt>
-     *       "." - Decimal placeholder
-     *     </dt>
-     *     <dd>Determines the location of the decimal separator in the result string - <code>kendo.tostring(0.45678, "0.00") -> 0.46 </code>(en-us)</dd>
-     *     <dt>
-     *       "," - group separator placeholder
-     *     </dt>
-     *     <dd>Insert localized group separator between each group - <code>kendo.tostring(12345678, "##,#") -> 12,345,678</code>(en-us)</dd>
-     *     <dt>
-     *       "%" - percentage placeholder
-     *     </dt>
-     *     <dd>Multiplies a number by 100 and inserts a localized percentage symbol in the result string</dd>
-     *     <dt>
-     *       "e" - exponential notation
-     *     </dt>
-     *     <dd><code>kendo.toString(0.45678, "e0") -> 5e-1</code></dd>
-     *     <dt>
-     *       ";" - section separator
-     *     </dt>
-     *     <dd>Defines sections wih separate format strings for positive, negative, and zero numbers</dd>
-     *     <dt>
-     *       "string"/'string' - Literal string delimiter
-     *     </dt>
-     *     <dd>Indicates that the enclosed characters should be copied to the result string</dd>
-     *   </dl>
-     * </div>
-     *
-     * @section
-     * <h3>Date formatting</h3>
-     * The purpose of date formatting is to convert Date object to a human readable string using culture's specific settings. <code>kendo.format</code> and <code>kendo.toString</code>
-     * methods support standard and custom date formats:
-     * <h4>Standard date formats</h4>
-     * <div class="details-list">
-     *   <h4 class="details-title">Format specifiers</h4>
-     *   <dl>
-     *     <dt>
-     *       "d" - short date pattern
-     *     </dt>
-     *     <dd><code>kendo.toString(new Date(2000, 10, 6), "d") -> 11/6/2000</code></dd>
-     *     <dt>
-     *       "D" - long date pattern
-     *     </dt>
-     *     <dd><code>kendo.toString(new Date(2000, 10, 6), "D") -> Monday, November 06, 2000</code></dd>
-     *     <dt>
-     *       "F" - Full date/time pattern
-     *     </dt>
-     *     <dd><code>kendo.toString(new Date(2000, 10, 6), "D") -> Monday, November 06, 2000 12:00:00 AM</code></dd>
-     *     <dt>
-     *       "g" - General date/time pattern (short time)
-     *     </dt>
-     *     <dd><code>kendo.toString(new Date(2000, 10, 6), "g") -> 11/6/2000 12:00 AM</code></dd>
-     *     <dt>
-     *       "G" - General date/time pattern (long time)
-     *     </dt>
-     *     <dd><code>kendo.toString(new Date(2000, 10, 6), "G") -> 11/6/2000 12:00:00 AM</code></dd>
-     *     <dt>
-     *       "M/m" - Month/day pattern
-     *     </dt>
-     *     <dd><code>kendo.toString(new Date(2000, 10, 6), "m") -> November 06</code></dd>
-     *     <dt>
-     *       "u" - Universal sortable date/time pattern
-     *     </dt>
-     *     <dd><code>kendo.toString(new Date(2000, 10, 6), "u") -> 2000-11-06 00:00:00Z</code></dd>
-     *     <dt>
-     *       "Y/y" - Year/month pattern
-     *     </dt>
-     *     <dd><code>kendo.toString(new Date(2000, 10, 6), "y") -> November, 2000</code></dd>
-     *   </dl>
-     * </div>
-     *
-     *@section
-     * <h4>Custom date formats</h4>
-     * <div class="details-list">
-     *   <h4 class="details-title">Format specifiers</h4>
-     *   <dl>
-     *     <dt>
-     *       "d"
-     *     </dt>
-     *     <dd>The day of the month, from 1 through 31</dd>
-     *     <dt>
-     *       "dd"
-     *     </dt>
-     *     <dd>The day of the month, from 01 through 31.</dd>
-     *     <dt>
-     *       "ddd"
-     *     </dt>
-     *     <dd>iThe abbreviated name of the day of the week</dd>
-     *     <dt>
-     *       "dddd"
-     *     </dt>
-     *     <dd>The full name of the day of the week</dd>
-     *     <dt>
-     *       "f"
-     *     </dt>
-     *     <dd>The tenths of a second in a date and time value</dd>
-     *     <dt>
-     *       "ff"
-     *     </dt>
-     *     <dd>The hundredths of a second in a date and time value</dd>
-     *     <dt>
-     *       "fff"
-     *     </dt>
-     *     <dd>The milliseconds in a date and time value</dd>
-     *     <dt>
-     *       "M"
-     *     </dt>
-     *     <dd>The month, from 1 through 12</dd>
-     *     <dt>
-     *       "MM"
-     *     </dt>
-     *     <dd>The month, from 01 through 12</dd>
-     *     <dt>
-     *       "MMM"
-     *     </dt>
-     *     <dd>The abbreviated name of the month</dd>
-     *     <dt>
-     *       "MMMM"
-     *     </dt>
-     *     <dd>The full name of the month</dd>
-     *     <dt>
-     *       "h"
-     *     </dt>
-     *     <dd>The hour, using a 12-hour clock from 1 to 12</dd>
-     *     <dt>
-     *       "hh"
-     *     </dt>
-     *     <dd>The hour, using a 12-hour clock from 01 to 12</dd>
-     *     <dt>
-     *       "H"
-     *     </dt>
-     *     <dd>The hour, using a 24-hour clock from 1 to 23</dd>
-     *     <dt>
-     *       "HH"
-     *     </dt>
-     *     <dd>The hour, using a 24-hour clock from 01 to 23</dd>
-     *     <dt>
-     *       "m"
-     *     </dt>
-     *     <dd>The minute, from 0 through 59</dd>
-     *     <dt>
-     *       "mm"
-     *     </dt>
-     *     <dd>The minute, from 00 through 59</dd>
-     *     <dt>
-     *       "s"
-     *     </dt>
-     *     <dd>The second, from 0 through 59</dd>
-     *     <dt>
-     *       "ss"
-     *     </dt>
-     *     <dd>The second, from 00 through 59</dd>
-     *     <dt>
-     *       "tt"
-     *     </dt>
-     *     <dd>The AM/PM designator</dd>
-     *   </dl>
-     * </div>
-     *
-     * @section
-     * <p><h3>Widgets that depend on current culture are:</h3>
-     *    <ul>
-     *        <li> Calendar </li>
-     *        <li> DatePicker </li>
-     *        <li> TimePicker </li>
-     *        <li> NumericTextBox </li>
-     *    </ul>
-     * </p>
-     */
 
      function findCulture(culture) {
         if (culture) {
@@ -1078,7 +649,7 @@ function pad(number) {
 
         formatAndPrecision = standardFormatRegExp.exec(format);
 
-        /* standard formatting */
+        // standard formatting
         if (formatAndPrecision) {
             format = formatAndPrecision[1].toLowerCase();
 
@@ -1399,6 +970,7 @@ function pad(number) {
         exponentRegExp = /[eE][\-+]?[0-9]+/,
         shortTimeZoneRegExp = /[+|\-]\d{1,2}/,
         longTimeZoneRegExp = /[+|\-]\d{1,2}:\d{2}/,
+        dateRegExp = /^\/Date\((.*?)\)\/$/,
         formatsSequence = ["G", "g", "d", "F", "D", "y", "m", "T", "t"];
 
     function outOfRange(value, start, end) {
@@ -1656,6 +1228,13 @@ function pad(number) {
             date = null,
             length, patterns;
 
+        if (value && value.indexOf("/D") === 0) {
+            date = dateRegExp.exec(value);
+            if (date) {
+                return new Date(parseInt(date[1], 10));
+            }
+        }
+
         culture = kendo.getCulture(culture);
 
         if (!formats) {
@@ -1878,17 +1457,7 @@ function pad(number) {
         return destination;
     }
 
-    /**
-     * Contains results from feature detection.
-     * @name kendo.support
-     * @namespace Contains results from feature detection.
-     */
     (function() {
-        /**
-         * Indicates the width of the browser scrollbar. A value of zero means that the browser does not show a visual representation of a scrollbar (i.e. mobile browsers).
-         * @name kendo.support.scrollbar
-         * @property {Boolean}
-         */
         support.scrollbar = function() {
             var div = document.createElement("div"),
                 result;
@@ -1909,37 +1478,18 @@ function pad(number) {
         try {
             table.innerHTML = "<tr><td></td></tr>";
 
-            /**
-             * Indicates whether the browser supports setting of the <tbody> innerHtml.
-             * @name kendo.support.tbodyInnerHtml
-             * @property {Boolean}
-             */
             support.tbodyInnerHtml = true;
         } catch (e) {
             support.tbodyInnerHtml = false;
         }
 
-        /**
-         * Indicates whether the browser supports touch events.
-         * @name kendo.support.touch
-         * @property {Boolean}
-         */
         support.touch = "ontouchstart" in window;
         support.pointers = navigator.msPointerEnabled;
 
-        /**
-         * Indicates whether the browser supports CSS transitions.
-         * @name kendo.support.transitions
-         * @property {Boolean}
-         */
-        var transitions = support.transitions = false;
-        var transforms = support.transforms = false;
+        var transitions = support.transitions = false,
+            transforms = support.transforms = false,
+            elementProto = "HTMLElement" in window ? HTMLElement.prototype : [];
 
-        /**
-         * Indicates whether the browser supports hardware 3d transitions.
-         * @name kendo.support.hasHW3D
-         * @property {Boolean}
-         */
         support.hasHW3D = ("WebKitCSSMatrix" in window && "m11" in new window.WebKitCSSMatrix()) || "MozPerspective" in document.documentElement.style || "msPerspective" in document.documentElement.style;
         support.hasNativeScrolling = typeof document.documentElement.style.webkitOverflowScrolling == "string";
 
@@ -1953,7 +1503,7 @@ function pad(number) {
                 transforms = {
                     css: "-" + lowPrefix + "-",
                     prefix: prefix,
-                    event: (lowPrefix === "o" || lowPrefix === "webkit") ? lowPrefix : ""
+                    event: (lowPrefix === "o" || lowPrefix === "webkit") ? lowPrefix : lowPrefix === "ms" ? "MS" : ""
                 };
 
                 if (hasTransitions) {
@@ -1968,11 +1518,6 @@ function pad(number) {
         support.transforms = transforms;
         support.transitions = transitions;
 
-        /**
-         * Indicates the browser device pixel ratio.
-         * @name kendo.support.devicePixelRatio
-         * @property {Float}
-         */
         support.devicePixelRatio = window.devicePixelRatio === undefined ? 1 : window.devicePixelRatio;
 
         support.detectOS = function (ua) {
@@ -2003,6 +1548,7 @@ function pad(number) {
                     omobile: /Opera\sMobi/i,
                     firefox: /Firefox|Fennec/i,
                     mobilesafari: /version\/.*safari/i,
+                    chrome: /chrome/i,
                     webkit: /webkit/i,
                     ie: /MSIE|Windows\sPhone/i
                 },
@@ -2044,28 +1590,14 @@ function pad(number) {
             return os;
         };
 
-        /**
-         * Parses the mobile OS type and version from the browser user agent.
-         * @name kendo.support.mobileOS
-         */
         support.mobileOS = support.detectOS(navigator.userAgent);
 
         support.zoomLevel = function() {
             return support.touch ? (document.documentElement.clientWidth / window.innerWidth) : 1;
         };
 
-        /**
-         * Indicates the browser support for event capturing
-         * @name kendo.support.eventCapture
-         * @property {Boolean}
-         */
         support.eventCapture = document.documentElement.addEventListener;
 
-        /**
-         * Indicates whether the browser supports input placeholder.
-         * @name kendo.support.placeholder
-         * @property {Boolean}
-         */
         support.placeholder = "placeholder" in document.createElement("input");
         support.stableSort = (function() {
             var sorted = [0,1,2,3,4,5,6,7,8,9,10,11,12].sort(function() { return 0; } );
@@ -2074,14 +1606,22 @@ function pad(number) {
                 sorted[9] === 9 && sorted[10] === 10 && sorted[11] === 11 && sorted[12] === 12;
         })();
 
+        support.matchesSelector = elementProto.webkitMatchesSelector || elementProto.mozMatchesSelector ||
+                                  elementProto.msMatchesSelector || elementProto.oMatchesSelector || elementProto.matchesSelector ||
+          function( selector ) {
+              var nodeList = document.querySelectorAll ? ( this.parentNode || document ).querySelectorAll( selector ) || [] : $(selector),
+                  i = nodeList.length;
+
+              while (i--) {
+                  if (nodeList[i] == this) {
+                      return true;
+                  }
+              }
+
+              return false;
+          };
     })();
 
-    /**
-     * Exposed by jQuery.
-     * @ignore
-     * @name jQuery.fn
-     * @namespace Handy jQuery plug-ins that are used by all Kendo widgets.
-     */
 
     function size(obj) {
         var result = 0, key;
@@ -2235,20 +1775,6 @@ function pad(number) {
         return fx.transitionPromise(element, destination, prepareAnimationOptions(options, duration, reverse, complete));
     }
 
-    extend($.fn, /** @lends jQuery.fn */{
-        kendoStop: function(clearQueue, gotoEnd) {
-            return this.stop(clearQueue, gotoEnd);
-        },
-
-        kendoAnimate: function(options, duration, reverse, complete) {
-            return animate(this, options, duration, reverse, complete);
-        },
-
-        kendoAnimateTo: function(destination, options, duration, reverse, complete) {
-            return animateTo(this, destination, options, duration, reverse, complete);
-        }
-    });
-
     function toggleClass(element, classes, options, add) {
         if (classes) {
             classes = classes.split(" ");
@@ -2261,28 +1787,35 @@ function pad(number) {
         return element;
     }
 
-    extend($.fn, /** @lends jQuery.fn */{
-        kendoAddClass: function(classes, options){
-            return toggleClass(this, classes, options, true);
-        },
-        kendoRemoveClass: function(classes, options){
-            return toggleClass(this, classes, options, false);
-        },
-        kendoToggleClass: function(classes, options, toggle){
-            return toggleClass(this, classes, options, toggle);
-        }
-    });
+    if (!("kendoAnimate" in $.fn)) {
+        extend($.fn, {
+            kendoStop: function(clearQueue, gotoEnd) {
+                return this.stop(clearQueue, gotoEnd);
+            },
+
+            kendoAnimate: function(options, duration, reverse, complete) {
+                return animate(this, options, duration, reverse, complete);
+            },
+
+            kendoAnimateTo: function(destination, options, duration, reverse, complete) {
+                return animateTo(this, destination, options, duration, reverse, complete);
+            },
+
+            kendoAddClass: function(classes, options){
+                return toggleClass(this, classes, options, true);
+            },
+            kendoRemoveClass: function(classes, options){
+                return toggleClass(this, classes, options, false);
+            },
+            kendoToggleClass: function(classes, options, toggle){
+                return toggleClass(this, classes, options, toggle);
+            }
+        });
+    }
 
     var ampRegExp = /&/g,
         ltRegExp = /</g,
         gtRegExp = />/g;
-    /**
-     * Encodes HTML characters to entities.
-     * @name kendo.htmlEncode
-     * @function
-     * @param {String} value The string that needs to be HTML encoded.
-     * @returns {String} The encoded string.
-     */
     function htmlEncode(value) {
         return ("" + value).replace(ampRegExp, "&amp;").replace(ltRegExp, "&lt;").replace(gtRegExp, "&gt;");
     }
@@ -2301,7 +1834,9 @@ function pad(number) {
     };
 
     if (support.touch) {
-        /** @ignore */
+
+        var mobileChrome = (support.mobileOS.browser == "chrome" && !support.mobileOS.ios);
+
         touchLocation = function(e, id) {
             var changedTouches = e.changedTouches || e.originalEvent.changedTouches;
 
@@ -2329,7 +1864,11 @@ function pad(number) {
         eventTarget = function(e) {
             var touches = "originalEvent" in e ? e.originalEvent.changedTouches : "changedTouches" in e ? e.changedTouches : null;
 
-            return touches ? document.elementFromPoint(touches[0].clientX, touches[0].clientY) : null;
+            if (mobileChrome) {
+                return touches ? document.elementFromPoint(touches[0].screenX, touches[0].screenY) : null;
+            } else {
+                return touches ? document.elementFromPoint(touches[0].clientX, touches[0].clientY) : null;
+            }
         };
 
         each(["swipe", "swipeLeft", "swipeRight", "swipeUp", "swipeDown", "doubleTap", "tap"], function(m, value) {
@@ -2390,16 +1929,12 @@ function pad(number) {
     },
     localUrlRe = /^([a-z]+:)?\/\//i;
 
-    extend(kendo, /** @lends kendo */ {
-        /**
-         * @name kendo.ui
-         * @namespace Contains all classes for the Kendo UI widgets.
-         */
+    extend(kendo, {
         ui: kendo.ui || {},
         fx: kendo.fx || fx,
-        data: kendo.data || {},
         mobile: kendo.mobile || {},
-        dataviz: kendo.dataviz || {ui: {}},
+        data: kendo.data || {},
+        dataviz: kendo.dataviz || {ui: { roles: {}}},
         keys: {
             INSERT: 45,
             DELETE: 46,
@@ -2420,8 +1955,8 @@ function pad(number) {
             F10: 121,
             F12: 123
         },
-        support: support,
-        animate: animate,
+        support: kendo.support || support,
+        animate: kendo.animate || animate,
         ns: "",
         attr: function(value) {
             return "data-" + kendo.ns + value;
@@ -2430,24 +1965,14 @@ function pad(number) {
         deepExtend: deepExtend,
         size: size,
         isNodeEmpty: isNodeEmpty,
-        getOffset: getOffset,
-        parseEffects: parseEffects,
-        toggleClass: toggleClass,
-        directions: directions,
+        getOffset: kendo.getOffset || getOffset,
+        parseEffects: kendo.parseEffects || parseEffects,
+        toggleClass: kendo.toggleClass || toggleClass,
+        directions: kendo.directions || directions,
         Observable: Observable,
         Class: Class,
         Template: Template,
-        /**
-         * Shorthand for {@link kendo.Template.compile}.
-         * @name kendo.template
-         * @function
-         */
         template: proxy(Template.compile, Template),
-        /**
-         * Shorthand for {@link kendo.Template.render}.
-         * @name kendo.render
-         * @function
-         */
         render: proxy(Template.render, Template),
         stringify: proxy(JSON.stringify, JSON),
         touchLocation: touchLocation,
@@ -2456,7 +1981,7 @@ function pad(number) {
         isLocalUrl: function(url) {
             return url && !localUrlRe.test(url);
         },
-        /** @ignore */
+
         expr: function(expression, safe) {
             expression = expression || "";
 
@@ -2472,22 +1997,22 @@ function pad(number) {
 
             return expression;
         },
-        /** @ignore */
+
         getter: function(expression, safe) {
             return getterCache[expression] = getterCache[expression] || new Function("d", "return " + kendo.expr(expression, safe));
         },
-        /** @ignore */
+
         setter: function(expression) {
             return setterCache[expression] = setterCache[expression] || new Function("d,value", "d." + expression + "=value");
         },
-        /** @ignore */
+
         accessor: function(expression) {
             return {
                 get: kendo.getter(expression),
                 set: kendo.setter(expression)
             };
         },
-        /** @ignore */
+
         guid: function() {
             var id = "", i, random;
 
@@ -2507,7 +2032,7 @@ function pad(number) {
             return role.replace(/(\S+)/g, "[" + kendo.attr("role") + "=$1],").slice(0, -1);
         },
 
-        /** @ignore */
+
         logToConsole: function(message) {
             var console = window.console;
 
@@ -2517,13 +2042,7 @@ function pad(number) {
         }
     });
 
-    var Widget = Observable.extend( /** @lends kendo.ui.Widget.prototype */ {
-        /**
-         * Initializes widget. Sets `element` and `options` properties.
-         * @constructs
-         * @class Represents a UI widget. Base class for all Kendo widgets
-         * @extends kendo.Observable
-         */
+    var Widget = Observable.extend( {
         init: function(element, options) {
             var that = this;
 
@@ -2531,15 +2050,15 @@ function pad(number) {
 
             Observable.fn.init.call(that);
 
-            that.options = extend(true, {}, that.options, options);
+            options = that.options = extend(true, {}, that.options, options);
 
             if (!that.element.attr(kendo.attr("role"))) {
-                that.element.attr(kendo.attr("role"), (that.options.name || "").toLowerCase());
+                that.element.attr(kendo.attr("role"), (options.name || "").toLowerCase());
             }
 
-            that.element.data("kendo" + that.options.prefix + that.options.name, that);
+            that.element.data("kendo" + options.prefix + options.name, that);
 
-            that.bind(that.events, that.options);
+            that.bind(that.events, options);
         },
 
         events: [],
@@ -2552,6 +2071,14 @@ function pad(number) {
             $.extend(this.options, options);
 
             this.bind(this.events, options);
+        },
+
+        destroy: function() {
+            var that = this;
+
+            that.element.removeData("kendo" + that.options.prefix + that.options.name);
+
+            that.unbind();
         }
     });
 
@@ -2636,7 +2163,11 @@ function pad(number) {
             return;
         }
 
-        widget = roles[role];
+        if (role.indexOf(".") === -1) {
+            widget = roles[role];
+        } else { // full namespace path - like kendo.ui.Widget
+            widget = kendo.getter(role)(window);
+        }
 
         if (!widget) {
             return;
@@ -2664,7 +2195,7 @@ function pad(number) {
             }
         }
 
-        result = $(element).data("kendo" + widget.fn.options.name);
+        result = $(element).data("kendo" + widget.fn.options.prefix + widget.fn.options.name);
 
         if (!result) {
             result = new widget(element, options);
@@ -2675,9 +2206,8 @@ function pad(number) {
         return result;
     };
 
-    kendo.init = function(element) {
-        var namespaces = slice.call(arguments, 1),
-            roles;
+    kendo.rolesFromNamespaces = function(namespaces) {
+        var roles;
 
         if (!namespaces[0]) {
             namespaces = [kendo.ui, kendo.dataviz.ui];
@@ -2685,25 +2215,35 @@ function pad(number) {
 
         roles = $.map(namespaces, function(namespace) { return namespace.roles; }).reverse();
 
-        roles = extend.apply(null, [{}].concat(roles));
+        return extend.apply(null, [{}].concat(roles));
+    };
+
+    kendo.init = function(element) {
+        var roles = kendo.rolesFromNamespaces(slice.call(arguments, 1));
 
         $(element).find("[data-" + kendo.ns + "role]").andSelf().each(function(){
             kendo.initWidget(this, {}, roles);
         });
     };
 
+    kendo.destroy = function(element) {
+        $(element).find("[data-" + kendo.ns + "role]").andSelf().each(function(){
+            var element = $(this),
+                widget = kendo.widgetInstance(element, kendo.ui) ||
+                         kendo.widgetInstance(element, kendo.mobile.ui) ||
+                         kendo.widgetInstance(element, kendo.dataviz.ui);
+
+            if (widget) {
+                widget.destroy();
+            }
+        });
+    };
+
     kendo.parseOptions = parseOptions;
 
-    extend(kendo.ui, /** @lends kendo.ui */{
+    extend(kendo.ui, {
         Widget: Widget,
         roles: {},
-        /**
-         * Shows an overlay with a loading message, indicating that an action is in progress.
-         * @name kendo.ui.progress
-         * @function
-         * @param {jQuery} container The container that will hold the overlay
-         * @param {Boolean} toggle Whether the overlay should be shown or hidden
-         */
         progress: function(container, toggle) {
             var mask = container.find(".k-loading-mask");
 
@@ -2718,23 +2258,6 @@ function pad(number) {
                 mask.remove();
             }
         },
-        /**
-         * Helper method for writing new widgets.
-         * Exposes a jQuery plug-in that will handle the widget creation and attach its client-side object in the appropriate data-* attribute.
-         * @name kendo.ui.plugin
-         * @function
-         * @param {kendo.ui.Widget} widget The widget function.
-         * @param {Object} register <kendo.ui> The object where the reference to the widget is recorded.
-         * @param {Object} prefix <""> The plugin function prefix, e.g. "Mobile" will register "kendoMobileFoo".
-         * @example
-         * function TextBox(element, options);
-         * kendo.ui.plugin(TextBox);
-         *
-         * // initialize a new TextBox for each input, with the given options object.
-         * $("input").kendoTextBox({ });
-         * // get the TextBox object and call the value API method
-         * $("input").data("kendoTextBox").value();
-         */
         plugin: function(widget, register, prefix) {
             var name = widget.fn.options.name,
                 getter;
@@ -2793,13 +2316,7 @@ function pad(number) {
         }
     });
 
-    var MobileWidget = Widget.extend(/** @lends kendo.mobile.ui.Widget.prototype */{
-        /**
-         * Initializes mobile widget. Sets `element` and `options` properties.
-         * @constructs
-         * @class Represents a mobile UI widget. Base class for all Kendo mobile widgets.
-         * @extends kendo.ui.Widget
-         */
+    var MobileWidget = Widget.extend({
         init: function(element, options) {
             Widget.fn.init.call(this, element, options);
             this.wrapper = this.element;
@@ -2819,19 +2336,11 @@ function pad(number) {
         }
     });
 
-    /**
-     * @name kendo.mobile
-     * @namespace This object contains all code introduced by the Kendo mobile suite, plus helper functions that are used across all mobile widgets.
-     */
     extend(kendo.mobile, {
         init: function(element) {
             kendo.init(element, kendo.mobile.ui, kendo.ui, kendo.dataviz.ui);
         },
 
-        /**
-         * @name kendo.mobile.ui
-         * @namespace Contains all classes for the Kendo Mobile UI widgets.
-         */
         ui: {
             Widget: MobileWidget,
             roles: {},
@@ -2841,12 +2350,6 @@ function pad(number) {
         }
     });
 
-    /**
-     * Enables kinetic scrolling on touch devices
-     * @name kendo.touchScroller
-     * @function
-     * @param {Selector} element The container element to enable scrolling for.
-     */
     kendo.touchScroller = function(element, options) {
         if (support.touch && kendo.mobile.ui.Scroller && !element.data("kendoMobileScroller")) {
             element.kendoMobileScroller(options);
@@ -2856,18 +2359,10 @@ function pad(number) {
         }
     };
 
-    /**
-     * Prevents the default event action. Should be supplied as an event callback
-     * @name kendo.preventDefault
-     * @function
-     */
     kendo.preventDefault = function(e) {
         e.preventDefault();
     };
 
-    /**
-     * Retrieves the widget for a given element (if any)
-     */
     kendo.widgetInstance = function(element, suite) {
         var widget = suite.roles[element.data(kendo.ns + "role")];
 
@@ -2876,12 +2371,6 @@ function pad(number) {
         }
     };
 
-    /**
-     * Binds to orientation change or resize (depending on the platform)
-     * Abstracts problem with android triggering event before the dimensions have changed.
-     * @function
-     * @param {Function} callback The callback to be executed
-     */
     kendo.onResize = function(callback) {
         var handler = callback;
         if (support.mobileOS.android) {
@@ -2891,7 +2380,7 @@ function pad(number) {
         $(window).on(support.resize, handler);
     };
 
-    kendo.data = function(element, key) {
+    kendo.attrValue = function(element, key) {
         return element.data(kendo.ns + key);
     };
 })(jQuery);
@@ -3647,8 +3136,8 @@ function pad(number) {
             keep: [ "opacity" ],
             css: {
                 opacity: function(element, options) {
-                    var opacity = element[0].style.opacity;
-                    return options.effects.fade.direction == "in" && (!opacity || opacity == 1) ? 0 : 1;
+                    var opacity = element.data("opacity"), direction = options.effects.fade.direction;
+                    return direction == "out" && isNaN(opacity) || direction == "in" ? 0 : opacity;
                 }
             },
             restore: [ "opacity" ],
@@ -3776,8 +3265,11 @@ function pad(number) {
                     property = (direction ? direction == "vertical" : true) ? HEIGHT : WIDTH,
                     setLength = element[0].style[property],
                     oldLength = element.data(property),
-                    length = parseFloat(oldLength || setLength) || round(element.css(property, AUTO )[property]()),
+                    length = parseFloat(oldLength || setLength),
+                    realLength = round(element.css(property, AUTO)[property]()),
                     completion = {};
+
+                length = options.reset ? realLength || length : length || realLength;
 
                 completion[property] = (reverse ? 0 : length) + PX;
                 element.css(property, reverse ? length : 0).css(property);
@@ -4381,9 +3873,11 @@ function pad(number) {
         UPDATE = "update",
         DESTROY = "destroy",
         CHANGE = "change",
+        SYNC = "sync",
         GET = "get",
         ERROR = "error",
         REQUESTSTART = "requestStart",
+        REQUESTEND = "requestEnd",
         crud = [CREATE, READ, UPDATE, DESTROY],
         identity = function(o) { return o; },
         getter = kendo.getter,
@@ -4469,7 +3963,7 @@ function pad(number) {
                         node: e.node,
                         index: e.index,
                         items: e.items || [this],
-                        action: e.action || "itemchange"
+                        action: e.node  ? (e.action || "itemchange") : "itemchange"
                     });
                 });
             }
@@ -4687,7 +4181,7 @@ function pad(number) {
                 type = toString.call(object),
                 isObservableArray = object instanceof ObservableArray;
 
-            if (object !== null && type === "[object Object]" && !(object instanceof DataSource) && !isObservableArray) {
+            if (object !== null && object !== undefined && type === "[object Object]" && !(object instanceof DataSource) && !isObservableArray) {
                 if (!(object instanceof ObservableObject)) {
                     object = new ObservableObject(object);
                 }
@@ -4759,12 +4253,6 @@ function pad(number) {
         },
 
         "date": function(value) {
-            if (typeof value === STRING) {
-                var date = dateRegExp.exec(value);
-                if (date) {
-                    return new Date(parseInt(date[1], 10));
-                }
-            }
             return kendo.parseDate(value);
         },
 
@@ -4776,7 +4264,7 @@ function pad(number) {
         },
 
         "string": function(value) {
-            return value + "";
+            return value != null ? (value + "") : value;
         },
 
         "default": function(value) {
@@ -4851,13 +4339,18 @@ function pad(number) {
         },
 
         accept: function(data) {
-            var that = this;
+            var that = this,
+                parent = function() { return that; },
+                field;
 
-            extend(that, data);
+            for (field in data) {
+                that._set(field, that.wrap(data[field], field, parent));
+            }
 
             if (that.idField) {
                 that.id = that.get(that.idField);
             }
+
             that.dirty = false;
         },
 
@@ -4873,7 +4366,7 @@ function pad(number) {
         }
 
         var model,
-            proto = extend({}, { defaults: {} }, options),
+            proto = extend({ defaults: {} }, options),
             name,
             field,
             type,
@@ -5786,10 +5279,14 @@ function pad(number) {
 
             if (isPlainObject(that.model)) {
                 that.model = model = base.define(that.model);
+            }
 
+            if (that.model) {
                 var dataFunction = proxy(that.data, that),
                     groupsFunction = proxy(that.groups, that),
                     getters = {};
+
+                model = that.model;
 
                 if (model.fields) {
                     each(model.fields, function(field, value) {
@@ -5986,7 +5483,7 @@ function pad(number) {
 
             that._data = that._observe(that._data);
 
-            that.bind([ERROR, CHANGE, REQUESTSTART], options);
+            that.bind([ERROR, CHANGE, REQUESTSTART, SYNC, REQUESTEND], options);
         },
 
         options: {
@@ -6066,6 +5563,8 @@ function pad(number) {
                     }
 
                     that._change();
+
+                    that.trigger(SYNC);
                 });
         },
 
@@ -6078,6 +5577,8 @@ function pad(number) {
                 pristine = that.reader.data(that._pristine),
                 type = result.type,
                 length;
+
+            that.trigger(REQUESTEND, { response: response, type: type });
 
             if (response) {
                 response = that.reader.parse(response);
@@ -6247,7 +5748,7 @@ function pad(number) {
                     pristineIndex = that._pristineIndex(model);
                     if (index != -1) {
                         if (pristineIndex != -1 && !model.isNew()) {
-                            extend(true, that._data[index], pristine[pristineIndex]);
+                           that._data[index].accept(pristine[pristineIndex]);
                         } else {
                             that._data.splice(index, 1);
                         }
@@ -6325,6 +5826,18 @@ function pad(number) {
                 delete options.page;
                 delete options.pageSize;
             }
+            if (!that.options.serverGrouping) {
+                delete options.group;
+            }
+            if (!that.options.serverFiltering) {
+                delete options.filter;
+            }
+            if (!that.options.serverSorting) {
+                delete options.sort;
+            }
+            if (!that.options.serverAggregates) {
+                delete options.aggregate;
+            }
             return options;
         },
 
@@ -6357,11 +5870,15 @@ function pad(number) {
         },
 
         _removeGroupItem: function(data, model) {
-            var result;
+            var result,
+                that = this;
 
             eachGroupItems(data, function(items, group) {
                 result = removeModel(items, model);
                 if (result) {
+                    if (!result.isNew || !result.isNew()) {
+                        that._destroyed.push(result);
+                    }
                     return true;
                 }
             });
@@ -6370,6 +5887,7 @@ function pad(number) {
 
         error: function(xhr, status, errorThrown) {
             this._dequeueRequest();
+            this.trigger(REQUESTEND, { });
             this.trigger(ERROR, { xhr: xhr, status: status, errorThrown: errorThrown });
         },
 
@@ -6391,13 +5909,16 @@ function pad(number) {
                 options = that.options,
                 hasGroups = options.serverGrouping === true && that._group && that._group.length > 0;
 
+            that.trigger(REQUESTEND, { response: data, type: "read" });
+
             data = that.reader.parse(data);
 
             if (that._handleCustomErrors(data)) {
+                that._dequeueRequest();
                 return;
             }
 
-            that._pristine = isPlainObject(data) ? $.extend(true, {}, data) : data.slice(0);
+            that._pristine = isPlainObject(data) ? $.extend(true, {}, data) : data.slice ? data.slice(0) : data;
 
             that._total = that.reader.total(data);
 
@@ -6634,33 +6155,32 @@ function pad(number) {
                 page = that.page(),
                 total = that.total();
 
-            if (!page) {
+            if (!page || (total && page + 1 > that.totalPages())) {
                 return;
             }
 
-            if (total) {
-                that.page(page + 1);
-            } else {
-                that._skip = page * that.take();
-                that._query({ page: page + 1 });
-            }
+            that._skip = page * that.take();
+
+            page += 1;
+            that._query({ page: page });
+
+            return page;
         },
 
         prev: function() {
             var that = this,
-                page = that.page(),
-                total = that.total();
+                page = that.page();
 
             if (!page || page === 1) {
                 return;
             }
 
-            if (total) {
-                that.page(page - 1);
-            } else {
-                that._skip = that._skip - that.take();
-                that._query({ page: page - 1});
-            }
+            that._skip = that._skip - that.take();
+
+            page -= 1;
+            that._query({ page: page });
+
+            return page;
         },
 
         page: function(val) {
@@ -6831,7 +6351,7 @@ function pad(number) {
                     for (takeIdx = skipIdx; takeIdx < length; takeIdx++) {
                         range = ranges[takeIdx];
 
-                        if (range.data.length && start + count >= range.start /*&& count + count <= range.end*/) {
+                        if (range.data.length && start + count >= range.start) {
                             rangeData = range.data;
                             rangeEnd = range.end;
 
@@ -7073,7 +6593,9 @@ function pad(number) {
                         hasChildren: hasChildren
                     }
                 }
-            }, that.children, { data: value });
+            }, that.children);
+
+            children.data = value;
 
             if (!hasChildren) {
                 hasChildren = children.schema.data;
@@ -7087,17 +6609,34 @@ function pad(number) {
                 that.hasChildren = !!hasChildren.call(that, that);
             }
 
-            that.children = new HierarchicalDataSource(children);
-            that.children._parent = function(){
-                return that;
-            };
+            that._childrenOptions = children;
 
-            that.children.bind(CHANGE, function(e){
-                e.node = e.node || that;
-                that.trigger(CHANGE, e);
-            });
+            if (that.hasChildren) {
+                that._initChildren();
+            }
 
             that._loaded = !!(value && value[data]);
+        },
+
+        _initChildren: function() {
+            var that = this;
+
+            if (!(that.children instanceof HierarchicalDataSource)) {
+                that.children = new HierarchicalDataSource(that._childrenOptions);
+                that.children._parent = function(){
+                    return that;
+                };
+
+                that.children.bind(CHANGE, function(e){
+                    e.node = e.node || that;
+                    that.trigger(CHANGE, e);
+                });
+            }
+        },
+
+        append: function(model) {
+            this._initChildren();
+            this.children.add(model);
         },
 
         hasChildren: false,
@@ -7115,17 +6654,23 @@ function pad(number) {
         },
 
         load: function() {
-            var that = this, options = {};
+            var that = this,
+                options = {};
 
-            options[that.idField || "id"] = that.id;
+            that._initChildren();
 
-            if (!that._loaded) {
-                that.children._data = undefined;
+            if (!that._loaded || that.hasChildren) {
+                options[that.idField || "id"] = that.id;
+
+                if (!that._loaded) {
+                    that.children._data = undefined;
+                }
+
+                that.children.one(CHANGE, function() {
+                            that._loaded = true;
+                        })
+                        .query(options);
             }
-
-            that.children.one(CHANGE, function() {
-                that._loaded = true;
-            }).query(options);
         },
 
         parentNode: function() {
@@ -7179,15 +6724,16 @@ function pad(number) {
 
             if (parentNode) {
                 parentNode.hasChildren = true;
+                parentNode._initChildren();
             }
 
             return DataSource.fn.insert.call(this, index, model);
         },
 
-        getByUid: function(uid) {
-            var idx, length, node, data;
+        _find: function(method, value) {
+            var idx, length, node, data, children;
 
-            node = DataSource.fn.getByUid.call(this, uid);
+            node = DataSource.fn[method].call(this, value);
 
             if (node) {
                 return node;
@@ -7196,11 +6742,26 @@ function pad(number) {
             data = this._flatData(this.data());
 
             for (idx = 0, length = data.length; idx < length; idx++) {
-                node = data[idx].children.getByUid(uid);
+                children = data[idx].children;
+
+                if (!(children instanceof HierarchicalDataSource)) {
+                    continue;
+                }
+
+                node = children[method](value);
+
                 if (node) {
                     return node;
                 }
             }
+        },
+
+        get: function(id) {
+            return this._find("get", id);
+        },
+
+        getByUid: function(uid) {
+            return this._find("getByUid", uid);
         }
     });
 
@@ -7285,7 +6846,7 @@ function pad(number) {
         return dataSource instanceof HierarchicalDataSource ? dataSource : new HierarchicalDataSource(dataSource);
     };
 
-    extend(true, kendo.data, /** @lends kendo.data */ {
+    extend(true, kendo.data, {
         readers: {
             json: DataReader
         },
@@ -7313,6 +6874,7 @@ function pad(number) {
         innerText,
         proxy = $.proxy,
         VALUE = "value",
+        SOURCE = "source",
         CHECKED = "checked",
         CHANGE = "change";
 
@@ -7726,7 +7288,7 @@ function pad(number) {
                 for (idx = 0, length = items.length; idx < length; idx++) {
                     child = clone.children[0];
                     element.insertBefore(child, reference || null);
-                    bindElement(child, items[idx]);
+                    bindElement(child, items[idx], kendo.ui.roles);
                 }
             }
         },
@@ -7765,7 +7327,7 @@ function pad(number) {
 
                 if (element.children.length) {
                     for (idx = 0, length = source.length; idx < length; idx++) {
-                        bindElement(element.children[idx], source[idx]);
+                        bindElement(element.children[idx], source[idx], kendo.ui.roles);
                     }
                 }
             }
@@ -7794,7 +7356,9 @@ function pad(number) {
                     var index;
 
                     if (source instanceof ObservableArray) {
-                        if (value !== false && value !== true) {
+                        value = this.element.value;
+
+                        if (value !== "on" && value !== "off") {
                             index = source.indexOf(value);
                             if (index > -1) {
                                 source.splice(index, 1);
@@ -7809,12 +7373,14 @@ function pad(number) {
             },
 
             refresh: function() {
-                var value = this.bindings[CHECKED].get();
-                var element = this.element;
+                var value = this.bindings[CHECKED].get(),
+                    source = value,
+                    element = this.element;
 
                 if (element.type == "checkbox") {
-                    if (value instanceof ObservableArray) {
-                        if (value.indexOf(this.value(element)) >= 0) {
+                    if (source instanceof ObservableArray) {
+                        value = this.element.value;
+                        if (source.indexOf(value) >= 0) {
                             value = true;
                         }
                     }
@@ -7832,9 +7398,7 @@ function pad(number) {
                     value = element.value;
 
                 if (element.type == "checkbox") {
-                    if (value == "on" || value == "off" || value === "true") {
-                        value = element.checked;
-                    }
+                    value = element.checked;
                 }
 
                 return value;
@@ -8069,7 +7633,7 @@ function pad(number) {
             },
 
             itemChange: function(e) {
-                bindElement(e.item[0], e.data, e.ns || kendo.ui);
+                bindElement(e.item[0], e.data, (e.ns || kendo.ui).roles);
             },
 
             dataBinding: function() {
@@ -8099,7 +7663,7 @@ function pad(number) {
                     }
 
                     for (idx = 0, length = view.length; idx < length; idx++) {
-                        bindElement(items[idx], view[idx], ns);
+                        bindElement(items[idx], view[idx], ns.roles);
                     }
                 }
             },
@@ -8214,10 +7778,26 @@ function pad(number) {
         bind: function(bindings) {
             var nodeName = this.target.nodeName.toLowerCase(),
                 key,
+                hasValue,
+                hasSource,
                 specificBinders = binders[nodeName] || {};
 
             for (key in bindings) {
-                this.applyBinding(key, bindings, specificBinders);
+                if (key == VALUE) {
+                    hasValue = true;
+                } else if (key == SOURCE) {
+                    hasSource = true;
+                } else {
+                    this.applyBinding(key, bindings, specificBinders);
+                }
+            }
+
+            if (hasSource) {
+                this.applyBinding(SOURCE, bindings, specificBinders);
+            }
+
+            if (hasValue) {
+                this.applyBinding(VALUE, bindings, specificBinders);
             }
         },
 
@@ -8267,7 +7847,7 @@ function pad(number) {
             for (binding in bindings) {
                 if (binding == VALUE) {
                     hasValue = true;
-                } else if (binding == "source") {
+                } else if (binding == SOURCE) {
                     hasSource = true;
                 } else {
                     that.applyBinding(binding, bindings);
@@ -8275,7 +7855,7 @@ function pad(number) {
             }
 
             if (hasSource) {
-                that.applyBinding("source", bindings);
+                that.applyBinding(SOURCE, bindings);
             }
 
             if (hasValue) {
@@ -8323,9 +7903,8 @@ function pad(number) {
         return result;
     }
 
-    function bindingTargetForRole(role, element, namespace) {
-        var roles = namespace.roles,
-            type = roles[role];
+    function bindingTargetForRole(role, element, roles) {
+        var type = roles[role];
 
         if (type) {
             return new WidgetBindingTarget(kendo.initWidget(element, type.options, roles));
@@ -8375,7 +7954,7 @@ function pad(number) {
         return result;
     }
 
-    function bindElement(element, source, namespace) {
+    function bindElement(element, source, roles) {
         var role = element.getAttribute("data-" + kendo.ns + "role"),
             idx,
             bind = element.getAttribute("data-" + kendo.ns + "bind"),
@@ -8385,16 +7964,12 @@ function pad(number) {
             options = {},
             target;
 
-        if (!namespace) {
-            namespace = kendo.ui;
-        }
-
         if (role || bind) {
             unbindElement(element);
         }
 
         if (role) {
-            target = bindingTargetForRole(role, element, namespace);
+            target = bindingTargetForRole(role, element, roles);
         }
 
         if (bind) {
@@ -8444,19 +8019,21 @@ function pad(number) {
 
         if (deep && children) {
             for (idx = 0; idx < children.length; idx++) {
-                bindElement(children[idx], source, namespace);
+                bindElement(children[idx], source, roles);
             }
         }
     }
 
-    function bind(dom, object, namespace) {
-        var idx, length;
+    function bind(dom, object) {
+        var idx,
+            length,
+            roles = kendo.rolesFromNamespaces([].slice.call(arguments, 2));
 
         object = kendo.observable(object);
         dom = $(dom);
 
         for (idx = 0, length = dom.length; idx < length; idx++ ) {
-            bindElement(dom[idx], object, namespace);
+            bindElement(dom[idx], object, roles);
         }
     }
 
@@ -8527,6 +8104,7 @@ function pad(number) {
 ;(function($, undefined) {
     var kendo = window.kendo,
         Widget = kendo.ui.Widget,
+        NS = ".kendoValidator",
         INVALIDMSG = "k-invalid-msg",
         INVALIDINPUT = "k-invalid",
         emailRegExp = /^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))$/i,
@@ -8583,161 +8161,7 @@ function pad(number) {
             .replace(/&gt;/g, '>');
     }
 
-    /**
-     *  @name kendo.Validator.Description
-     *
-     *  @section
-     *  <p>
-     *     Validator offers an easy way to do client-side form validation.
-     *     Built around the HTML5 form validation attributes it supports variety of built-in validation rules, but also provides a convenient way for setting custom rules handling.
-     *  </p>
-     *  @exampleTitle <b>Validator</b> initialization to validate input elements inside a container
-     *  @example
-     *  <div id="myform">
-     *   <input type="text" name="firstName" required />
-     *   <input type="text" name="lastName" required />
-     *   <button id="save" type="button">Save</button>
-     *  </div>
-     *
-     *  <script>
-     *   $(document).ready(function(){
-     *       var validatable = $("#myform").kendoValidator().data("kendoValidator");
-     *       $("#save").click(function() {
-     *          if (validatable.validate()) {
-     *              save();
-     *          }
-     *       });
-     *   });
-     *   </script>
-     *  @section <h4>Validation Rules</h4>
-     *
-     *  @exampleTitle <strong>required</strong>- element should have a value
-     *  @example
-     *  <input type="text" name="firstName" required />
-     *
-     *  @exampleTitle <strong>pattern</strong>- constrains the value to match a specific regular expression
-     *  @example
-     *  <input type="text" name="twitter" pattern="https?://(?:www\.)?twitter\.com/.+i" />
-     *
-     *  @exampleTitle <strong>max/min</strong>- constrain the minimum and/or maximum numeric values that can be entered
-     *  @example
-     *  <input type="number" name="age" min="1" max="42" />
-     *
-     *  @exampleTitle <strong>step</strong>- when used in combination with the min and max attributes, constrains the granularity of values that can be entered
-     *  @example
-     *  <input type="number" name="age" min="1" max="100" step="2" />
-     *
-     *  @exampleTitle <strong>url</strong>- constrain the value to being a valid URL
-     *  @example
-     *  <input type="url" name="url" />
-     *
-     *  @exampleTitle <strong>email</strong>- constrain the value to being a valid email
-     *  @example
-     *  <input type="email" name="email" />
-     *
-     *  @section
-     *  <p>Beside the built-in validation rules, KendoUI Validator also provides a convenient way for setting custom rules through its rules configuration option. </p>
-     *
-     *  @exampleTitle
-     *  @example
-     *  $("#myform").kendoValidator({
-     *      rules: {
-     *        custom: function(input) {
-     *          // Only Tom will be a valid value for FirstName input
-     *          return input.is("[name=firstname]") && input.val() === "Tom";
-     *        }
-     *      }
-     * });
-     *
-     *  @section <h4>Validation Messages</h4>
-     *  <p>There are several ways to control the messages which appears if validation fails:</p>
-     *
-     *  @exampleTitle Set the validation messages for all input elements, through configuration options
-     *  @example
-     *   $("#myform").kendoValidator({
-     *      rules: {
-     *          custom: function(input) {
-     *                  //...
-     *          }
-     *      },
-     *      messages: {
-     *        // defines message for the 'custom' validation rule
-     *        custom: "Please enter valid value for my custom rule",
-     *        // overrides the built-in message for required rule
-     *        required: "My custom required message",
-     *        // overrides the built-in email rule message with a custom function which return the actual message
-     *        email: function(input) {
-     *          return getMessage(input);
-     *        }
-     *     }
-     *  });
-     *  @exampleTitle Use the title and validationMessage attributes to set per input element messages
-     *  @example
-     *     <input type="tel" pattern="\d{10}" validationMessage="Plase enter a ten digit phone number" />
-     *
-     *  @section <h4>Triggering validation</h4>
-     *  <p>In order to trigger the element(s) validation, <strong>validate</strong> method should be used. It will return either <em>true</em> if validation succeeded or <em>false</em> in case of a failure. </p>
-     *  <p>
-     *  Note that if a HTML form element is set as validation container, the form submits will be automatically prevented if validation fails.
-     *  </p>
-     *  @section <h4>Initialize Kendo Validator with specific tooltip position</h4>
-     *
-     *  <p>
-     *      Ideally Kendo Validator places its tooltips besides the validated input. However, if the input is later enhanced to a ComboBox, AutoComplete or other Kendo Widget, placing the
-     *      tooltip beside the input may cover important information or break the widget rendering. In this case, you can specify where exactly do you want the tooltip to be placed by
-     *      adding a span with data-for attribute set to the validated input name and a class .k-invalid-msg. Check the example below:
-     *  </p>
-     *
-     *  @exampleTitle <b>Validator</b> initialization with specific tooltip placement (the tooltip will remain outside of the AutoComplete widget after enhancement)
-     *  @example
-     *  <div id="myform">
-     *      <input type="text" id="name" name="name" required />
-     *      <span class="k-invalid-msg" data-for="name"></span>
-     *  </div>
-     *
-     *  <script>
-     *      $("#name").kendoAutoComplete({
-     *                     dataSource: data,
-     *                     separator: ", "
-     *                 });
-     *
-     *      $("#myform").kendoValidator();
-     *  </script>
-     */
-    var Validator = Widget.extend(/** @lends kendo.Validator.prototype */{ /**
-         * @constructs
-         * @extends kendo.Widget
-         * @param {Element} element DOM element
-         * @param {Object} options Configuration options.
-         * @option {Object} [rules] Set of validation rules. Those rules will extend the built-in ones.
-         * _example
-         * $("#myform").kendoValidator({
-         *      rules: {
-         *          custom: function(input) {
-         *              return input.is("[name=firstname]") && input.val() === "Tom"; // Only Tom will be a valid value for FirstName input
-         *          }
-         *      }
-         * });
-         * @option {Object} [messages] Set of messages (either strings or functions) which will be shown when given validation rule fails.
-         *  By setting already existing key the appropriate built-in message will be overridden.
-         * _example
-         * $("#myform").kendoValidator({
-         *      rules: {
-         *          custom: function(input) {
-         *             //...
-         *          }
-         *      },
-         *      messages: {
-         *          custom: "Please enter valid value for my custom rule",// defines message for the 'custom' validation rule
-         *          required: "My custom required message", // overrides the built-in message for required rule
-         *          email: function(input) { // overrides the built-in email rule message with a custom function which return the actual message
-         *              return getMessage(input);
-         *          }
-         *      }
-         * });
-         * @option {Boolean} [validateOnBlur] Determines if validation will be triggered when element loses focus. Default value is true.
-         */
-        init: function(element, options) {
+    var Validator = Widget.extend({        init: function(element, options) {
             var that = this,
                 resolved = resolveRules(element);
 
@@ -8829,6 +8253,12 @@ function pad(number) {
             validateOnBlur: true
         },
 
+        destroy: function() {
+            Widget.fn.destroy.call(this);
+
+            this.element.off(NS);
+        },
+
         _submit: function(e) {
             if (!this.validate()) {
                 e.stopPropagation();
@@ -8843,35 +8273,22 @@ function pad(number) {
             var that = this;
 
             if (that.element.is(FORM)) {
-                that.element.submit(proxy(that._submit, that));
+                that.element.on("submit" + NS, proxy(that._submit, that));
             }
 
             if (that.options.validateOnBlur) {
                 if (!that.element.is(INPUTSELECTOR)) {
-                    that.element.delegate(INPUTSELECTOR, BLUR, function() {
+                    that.element.on(BLUR + NS, INPUTSELECTOR, function() {
                         that.validateInput($(this));
                     });
                 } else {
-                    that.element.bind(BLUR, function() {
+                    that.element.on(BLUR + NS, function() {
                         that.validateInput(that.element);
                     });
                 }
             }
         },
 
-        /**
-         * Validates the input element(s) against the declared validation rules.
-         * @returns {Boolean} If all rules are passed successfully.
-         * @example
-         * // get a reference to the validatable form
-         * var validatable = $("#myform").kendoValidator().data("kendoValidator");
-         * // check validation on save button click
-         * $("#save").click(function() {
-         *     if (validatable.validate()) {
-         *         save();
-         *     }
-         * });
-         */
         validate: function() {
             var that = this,
                 inputs,
@@ -8894,11 +8311,6 @@ function pad(number) {
             return that.validateInput(that.element);
         },
 
-        /**
-         * Validates the input element against the declared validation rules.
-         * @param {Element} input Input element to be validated.
-         * @returns {Boolean} If all rules are passed successfully.
-         */
         validateInput: function(input) {
             input = $(input);
 
@@ -8975,22 +8387,6 @@ function pad(number) {
             return { valid: true };
         },
 
-        /**
-         * Get the error messages if any.
-         * @returns {Array} Messages for the failed validation rules.
-         * @example
-         * // get a reference to the validatable form
-         * var validatable = $("#myform").kendoValidator().data("kendoValidator");
-         * $("#save").click(function() {
-         *     if (validatable.validate() === false) {
-         *         // get the errors and write them out to the "errors" html container
-         *         var errors = validatable.errors();
-         *         $(errors).each(function() {
-         *             $("#errors").html(this);
-         *         });
-         *     }
-         * });
-         */
         errors: function() {
             var results = [],
                 errors = this._errors,
@@ -9020,8 +8416,11 @@ function pad(number) {
         getOffset = kendo.getOffset,
         draggables = {},
         dropTargets = {},
+        dropAreas = {},
         lastDropTarget,
-        invalidZeroEvents = support.mobileOS && support.mobileOS.android,
+        OS = support.mobileOS,
+        invalidZeroEvents = OS && OS.android,
+        mobileChrome = (invalidZeroEvents && OS.browser == "chrome"),
         START_EVENTS = "mousedown",
         MOVE_EVENTS = "mousemove",
         END_EVENTS = "mouseup mouseleave",
@@ -9067,7 +8466,11 @@ function pad(number) {
     }
 
     function elementUnderCursor(e) {
-        return document.elementFromPoint(e.x.client, e.y.client);
+        if (mobileChrome) {
+            return document.elementFromPoint(e.x.screen, e.y.screen);
+        } else {
+            return document.elementFromPoint(e.x.client, e.y.client);
+        }
     }
 
     function numericCssPropery(element, property) {
@@ -9108,35 +8511,33 @@ function pad(number) {
         parent.trigger(e.type);
     }
 
-    /**
-     * @name kendo.DragAxis.Description
-     *
-     * @section <h4>DragAxis</h4>
-     * The DragAxis is used internally by the kendo.Drag component to store and calculate event data.
-     * The Drag component contains two DragAxis instances: <code>x</code> for the horizontal coordinates, and <code>y</code> for the vertical.
-     * The two DragAxis instances are available in each Drag event parameter.
-     * @exampleTitle Access DragAxis information in Drag start event
-     * @example
-     * new kendo.Drag($("#foo"), {
-     *  start: function(e) {
-     *      console.log(x); // Horizontal axis
-     *      console.log(y); // Vertical axis
-     *  }
-     * });
-     *
-     * @section Each axis instance contains the following fields:
-     * <ul>
-     *   <li><b>location</b> - the offset of the mouse/touch relative to the entire document (pageX/Y);</li>
-     *   <li><b>startLocation</b> - the offset of the mouse/touch relative to the document when the drag started;</li>
-     *   <li><b>client</b> - the offset of the mouse/touch relative to the viewport (clientX/Y);</li>
-     *   <li><b>delta</b> - the change from the previous event location</li>
-     *   <li><b>velocity</b> - the pixels per millisecond speed of the current move.</li>
-     * </ul>
-     */
-    var DragAxis = Class.extend(/** @lends kendo.DragAxis.prototype */{
-        /**
-         * @constructs
-         */
+    function checkTarget(target, targets, areas) {
+        var theTarget, theFilter, i = 0,
+            targetLen = targets && targets.length,
+            areaLen = areas && areas.length;
+
+        while (target && target.parentNode) {
+            for (i = 0; i < targetLen; i ++) {
+                theTarget = targets[i];
+                if (theTarget.element[0] === target) {
+                    return { target: theTarget, targetElement: target };
+                }
+            }
+
+            for (i = 0; i < areaLen; i ++) {
+                theFilter = areas[i];
+                if (support.matchesSelector.call(target, theFilter.options.filter)) {
+                    return { target: theFilter, targetElement: target };
+                }
+            }
+
+            target = target.parentNode;
+        }
+
+        return undefined;
+    }
+
+    var DragAxis = Class.extend({
         init: function(axis) {
             this.axis = axis;
         },
@@ -9147,6 +8548,7 @@ function pad(number) {
 
             that.startLocation = that.location = offset;
             that.client = location["client" + that.axis];
+            that.screen = location["screen" + that.axis];
             that.velocity = that.delta = 0;
             that.timeStamp = timeStamp;
         },
@@ -9162,34 +8564,14 @@ function pad(number) {
             that.delta = offset - that.location;
             that.location = offset;
             that.client = location["client" + that.axis];
+            that.screen = location["screen" + that.axis];
             that.initialDelta = offset - that.startLocation;
             that.velocity = that.delta / (timeStamp - that.timeStamp);
             that.timeStamp = timeStamp;
         }
     });
 
-    /**
-     * @name kendo.Drag.Description
-     * @section <h4>Drag</h4> The kendo Drag component provides a cross-browser, touch-friendly way to handle mouse and touch drag events.
-     * @exampleTitle <b>Drag</b> initialization
-     * @example
-     * var drag = new kendo.Drag($("#draggable"));
-     */
-    var Drag = Observable.extend(/** @lends kendo.Drag.prototype */{
-        /**
-         * @constructs
-         * @extends kendo.Observable
-         * @param {Element} element the DOM element from which the drag event starts.
-         * @param {Object} options Configuration options.
-         * @option {Number} [threshold] <0> The minimum distance the mouse/touch should move before the event is triggered.
-         * @option {Boolean} [global] <false> If set to true, the drag event will be tracked beyond the element boundaries.
-         * @option {Element} [surface]  If set, the drag event will be tracked for the surface boundaries. By default, leaving the element boundaries will end the drag.
-         * @option {Boolean} [allowSelection] <false> If set to true, the mousedown and selectstart events will not be prevented.
-         * @option {Boolean} [stopPropagation] <false> If set to true, the mousedown event propagation will be stopped, disabling
-         * drag capturing at parent elements.
-         * If set to false, dragging outside of the element boundaries will trigger the <code>end</code> event.
-         * @option {Selector} [filter] If passed, the filter limits the child elements that will trigger the event sequence.
-         */
+    var Drag = Observable.extend({
         init: function(element, options) {
             var that = this,
                 eventMap = {},
@@ -9247,87 +8629,17 @@ function pad(number) {
             }
 
             that.bind([
-            /**
-             * Fires when the user presses and releases the element without any movement or with a movement below the <code>threshold</code> specified.
-             * @name kendo.Drag#tap
-             * @event
-             * @param {Event} e
-             * @param {DragAxis} e.x Reference to the horizontal drag axis instance.
-             * @param {DragAxis} e.y Reference to the vertical drag axis instance.
-             * @param {jQueryEvent} e.event Reference to the jQuery event object.
-             * @param {Element} e.target Reference to the DOM element from which the Drag started.
-             * It is different from the element only if <code>filter</code> option is specified.
-             */
             TAP,
-            /**
-             * Fires when the user starts dragging the element.
-             * @name kendo.Drag#start
-             * @event
-             * @param {Event} e
-             * @param {DragAxis} e.x Reference to the horizontal drag axis instance.
-             * @param {DragAxis} e.y Reference to the vertical drag axis instance.
-             * @param {jQueryEvent} e.event Reference to the jQuery event object.
-             * @param {Element} e.target Reference to the DOM element from which the Drag started.
-             * It is different from the element only if <code>filter</code> option is specified.
-             */
             START,
-            /**
-             * Fires while dragging.
-             * @name kendo.Drag#move
-             * @event
-             * @param {Event} e
-             * @param {DragAxis} e.x Reference to the horizontal drag axis instance.
-             * @param {DragAxis} e.y Reference to the vertical drag axis instance.
-             * @param {jQueryEvent} e.event Reference to the jQuery event object.
-             * @param {Element} e.target Reference to the DOM element from which the Drag started.
-             * It is different from the element only if <code>filter</code> option is specified.
-             */
             MOVE,
-            /**
-             * Fires when the drag ends.
-             * @name kendo.Drag#end
-             * @event
-             * @param {Event} e
-             * @param {DragAxis} e.x Reference to the horizontal drag axis instance.
-             * @param {DragAxis} e.y Reference to the vertical drag axis instance.
-             * @param {jQueryEvent} e.event Reference to the jQuery event object.
-             * @param {Element} e.target Reference to the DOM element from which the Drag started.
-             * It is different from the element only if <code>filter</code> option is specified.
-             */
             END,
-            /**
-             * Fires when the drag is canceled. This  when the <code>cancel</code> method is called.
-             * @name kendo.Drag#cancel
-             * @event
-             * @param {Event} e
-             * @param {DragAxis} e.x Reference to the horizontal drag axis instance.
-             * @param {DragAxis} e.y Reference to the vertical drag axis instance.
-             * @param {jQueryEvent} e.event Reference to the jQuery event object.
-             * @param {Element} e.target Reference to the DOM element from which the Drag started.
-             * It is different from the element only if <code>filter</code> option is specified.
-             */
             CANCEL], options);
         },
 
-        /**
-         * Capture the current drag, so that Drag listeners bound to parent elements will not trigger.
-         * This method will not have any effect if the current drag instance is instantiated with the <code>global</code> option set to true.
-         */
         capture: function() {
             Drag.captured = true;
         },
 
-        /**
-         * Discard the current drag. Calling the <code>cancel</code> method will trigger the <code>cancel</code> event.
-         * The correct moment to call this method would be in the <code>start</code> event handler.
-         * @exampleTitle Cancel the drag event sequence
-         * @example
-         * new kendo.Drag($("#foo"), {
-         *  start: function(e) {
-         *      e.cancel();
-         *  }
-         * });
-         */
         cancel: function() {
             this._cancel();
             this.trigger(CANCEL);
@@ -9740,14 +9052,7 @@ function pad(number) {
         }
     });
 
-    var DropTarget = Widget.extend(/** @lends kendo.ui.DropTarget.prototype */ {
-        /**
-         * @constructs
-         * @extends kendo.ui.Widget
-         * @param {Element} element DOM element
-         * @param {Object} options Configuration options.
-         * @option {String} [group] <"default"> Used to group sets of draggable and drop targets. A draggable with the same group value as a drop target will be accepted by the drop target.
-         */
+    var DropTarget = Widget.extend({
         init: function(element, options) {
             var that = this;
 
@@ -9763,30 +9068,8 @@ function pad(number) {
         },
 
         events: [
-            /**
-             * Fires when draggable moves over the drop target.
-             * @name kendo.ui.DropTarget#dragenter
-             * @event
-             * @param {Event} e
-             * @param {jQuery} e.draggable Reference to the draggable that enters the drop target.
-             */
             DRAGENTER,
-            /**
-             * Fires when draggable moves out of the drop target.
-             * @name kendo.ui.DropTarget#dragleave
-             * @event
-             * @param {Event} e
-             * @param {jQuery} e.draggable Reference to the draggable that leaves the drop target.
-             */
             DRAGLEAVE,
-            /**
-             * Fires when draggable is dropped over the drop target.
-             * @name kendo.ui.DropTarget#drop
-             * @event
-             * @param {Event} e
-             * @param {jQuery} e.draggable Reference to the draggable that is dropped over the drop target.
-             * @param {jQuery} e.draggable.currentTarget The element that the drag and drop operation started from.
-             */
             DROP
         ],
 
@@ -9801,7 +9084,8 @@ function pad(number) {
 
             if (draggable) {
                 return that.trigger(eventName, extend({}, e.event, {
-                           draggable: draggable
+                           draggable: draggable,
+                           dropTarget: e.dropTarget
                        }));
             }
         },
@@ -9824,57 +9108,29 @@ function pad(number) {
         }
     });
 
-    /**
-     * @name kendo.ui.Draggable.Description
-     *
-     * @section <h4>Draggable</h4>
-     * Enable draggable functionality on any DOM element.
-     *
-     * @exampleTitle <b>Draggable</b> initialization
-     * @example
-     * var draggable = $("#draggable").kendoDraggable();
-     *
-     * @name kendo.ui.DropTarget.Description
-     *
-     * @section <h4>DropTarget</h4>
-     * Enable any DOM element to be a target for draggable elements.
-     *
-     * @exampleTitle <b>DropTarget</b> initialization
-     * @example
-     * var dropTarget = $("#dropTarget").kendoDropTarget();
-     */
-    var Draggable = Widget.extend(/** @lends kendo.ui.Draggable.prototype */{
-        /**
-         * @constructs
-         * @extends kendo.ui.Widget
-         * @param {Element} element DOM element
-         * @param {Object} options Configuration options.
-         * @option {Number} [distance] <5> The required distance that the mouse should travel in order to initiate a drag.
-         * @option {Selector} [filter] Selects child elements that are draggable if a widget is attached to a container.
-         * @option {String} [group] <"default"> Used to group sets of draggable and drop targets. A draggable with the same group value as a drop target will be accepted by the drop target.
-         * @option {String} [axis] <null> Constrains the hint movement to either the horizontal (x) or vertical (y) axis. Can be set to either "x" or "y".
-         * @option {jQuery} [container] If set, the hint movement is constrained to the container boundaries.
-         * @option {Object} [cursorOffset] <null> If set, specifies the offset of the hint relative to the mouse cursor/finger.
-         * By default, the hint is initially positioned on top of the draggable source offset. The option accepts an object with two keys: <code>top</code> and <code>left</code>.
-         * _exampleTitle Initialize Draggable with cursorOffset
-         * _example
-         * $("#draggable").kendoDraggable({cursorOffset: {top: 10, left: 10}});
-         * @option {Function | jQuery} [hint] Provides a way for customization of the drag indicator. If a function is supplied, it receives one argument - the draggable element's jQuery object.
-         * _example
-         *  //hint as a function
-         *  $("#draggable").kendoDraggable({
-         *      hint: function(element) {
-         *          return $("#draggable").clone();
-         *          // same as
-         *          //  return element.clone();
-         *      }
-         *  });
-         *
-         * //hint as jQuery object
-         *  $("#draggable").kendoDraggable({
-         *      hint: $("#draggableHint");
-         *  });
-         */
+    var DropTargetArea = DropTarget.extend({
+        init: function(element, options) {
+            var that = this;
+
+            Widget.fn.init.call(that, element, options);
+
+            var group = that.options.group;
+
+            if (!(group in dropAreas)) {
+                dropAreas[group] = [ that ];
+            } else {
+                dropAreas[group].push( that );
+            }
+        },
+
+        options: {
+            name: "DropTargetArea",
+            group: "default",
+            filter: null
+        }
+    });
+
+    var Draggable = Widget.extend({
         init: function (element, options) {
             var that = this;
 
@@ -9901,33 +9157,9 @@ function pad(number) {
         },
 
         events: [
-            /**
-             * Fires when item drag starts.
-             * @name kendo.ui.Draggable#dragstart
-             * @event
-             * @param {Event} e
-             */
             DRAGSTART,
-             /**
-             * Fires while dragging.
-             * @name kendo.ui.Draggable#drag
-             * @event
-             * @param {Event} e
-             */
             DRAG,
-             /**
-             * Fires when item drag ends.
-             * @name kendo.ui.Draggable#dragend
-             * @event
-             * @param {Event} e
-             */
             DRAGEND,
-             /**
-             * Fires when item drag is canceled by pressing the Escape key.
-             * @name kendo.ui.Draggable#dragcancel
-             * @event
-             * @param {Event} e
-             */
             DRAGCANCEL
         ],
 
@@ -10016,25 +9248,25 @@ function pad(number) {
 
             e.preventDefault();
 
-            that._withDropTarget(e, function(target) {
+            that._withDropTarget(e, function(target, targetElement) {
                 if (!target) {
                     if (lastDropTarget) {
-                        lastDropTarget._trigger(DRAGLEAVE, e);
+                        lastDropTarget._trigger(DRAGLEAVE, extend(e, { dropTarget: $(lastDropTarget.targetElement) }));
                         lastDropTarget = null;
                     }
                     return;
                 }
 
                 if (lastDropTarget) {
-                    if (target.element[0] === lastDropTarget.element[0]) {
+                    if (targetElement === lastDropTarget.targetElement) {
                         return;
                     }
 
-                    lastDropTarget._trigger(DRAGLEAVE, e);
+                    lastDropTarget._trigger(DRAGLEAVE, extend(e, { dropTarget: $(lastDropTarget.targetElement) }));
                 }
 
-                target._trigger(DRAGENTER, e);
-                lastDropTarget = target;
+                target._trigger(DRAGENTER, extend(e, { dropTarget: $(targetElement) }));
+                lastDropTarget = extend(target, { targetElement: targetElement });
             });
 
             that._trigger(DRAG, e);
@@ -10047,9 +9279,9 @@ function pad(number) {
         _end: function(e) {
             var that = this;
 
-            that._withDropTarget(e, function(target) {
+            that._withDropTarget(e, function(target, targetElement) {
                 if (target) {
-                    target._drop(e);
+                    target._drop(extend({}, e, { dropTarget: $(targetElement) }));
                     lastDropTarget = null;
                 }
             });
@@ -10072,27 +9304,26 @@ function pad(number) {
             var that = this;
 
             return that.trigger(
-            eventName, extend(
-            {},
-            e.event,
-            {
-                x: e.x,
-                y: e.y,
-                currentTarget: that.currentTarget
-            }));
+                eventName, extend(
+                {},
+                e.event,
+                {
+                    x: e.x,
+                    y: e.y,
+                    currentTarget: that.currentTarget,
+                    dropTarget: e.dropTarget
+                }
+            ));
         },
 
         _withDropTarget: function(e, callback) {
             var that = this,
-                target,
-                theTarget,
-                result,
+                target, result,
                 options = that.options,
                 targets = dropTargets[options.group],
-                i = 0,
-                length = targets && targets.length;
+                areas = dropAreas[options.group];
 
-            if (length) {
+            if (targets && targets.length || areas && areas.length) {
 
                 target = elementUnderCursor(e);
 
@@ -10102,20 +9333,13 @@ function pad(number) {
                     that.hint.show();
                 }
 
-                outer:
-                while (target) {
-                    for (i = 0; i < length; i ++) {
-                        theTarget = targets[i];
-                        if (theTarget.element[0] === target) {
-                            result = theTarget;
-                            break outer;
-                        }
-                    }
+                result = checkTarget(target, targets, areas);
 
-                    target = target.parentNode;
+                if (result) {
+                    callback(result.target, result.targetElement);
+                } else {
+                    callback();
                 }
-
-                callback(result);
             }
         },
 
@@ -10134,6 +9358,7 @@ function pad(number) {
     });
 
     kendo.ui.plugin(DropTarget);
+    kendo.ui.plugin(DropTargetArea);
     kendo.ui.plugin(Draggable);
     kendo.Drag = Drag;
     kendo.Tap = Tap;
@@ -10317,69 +9542,7 @@ function pad(number) {
         }
     });
 
-    /**
-     * @name kendo.mobile.ui.Scroller.Description
-     * @section
-     * <p>The Kendo Mobile Scroller widget enables touch friendly kinetic scrolling for the contents of a given DOM element.  </p>
-     *
-     * <h3>Getting Started</h3>
-     * <p>Each mobile View initializes a scroller for its content element. In addition to that, a scroller will be initialized for every element with a
-     * <code>role</code> data attribute set to <code>scroller</code>.
-     * Alternatively, it can be initialized using jQuery plugin syntax in the containing mobile View <strong>init event handler</strong>.
-     * </p>
-     * <p>For the scroller to work, its element should have fixed dimensions (width and/or height) set.</p>
-     *
-     * @exampleTitle Initialize mobile Scroller using a role data attribute.
-     * @example
-     * <div data-role="scroller">
-     *   Foo
-     * </div>
-     *
-     * @exampleTitle Initialize mobile Scroller using jQuery plugin syntax
-     * @example
-     * <div id="scroller"></div>
-     * <script>
-     * var scroller = $("#scroller").kendoMobileScroller();
-     * </script>
-     *
-     * @exampleTitle Obtain the current mobile view scroller
-     * @example
-     * <div data-role="view" data-init="getScroller">
-     *   Foo
-     * </div>
-     * <script>
-     *  function getScroller(e) {
-     *     var scroller = e.view.scroller;
-     *  }
-     * </script>
-     *
-     * @section
-     * <p>The mobile Scroller widget exposes the following fields:</p>
-     * <ul>
-     * <li><strong>scrollTop</strong> - the number of pixels that are hidden from view above the scrollable area.</li>
-     * <li><strong>scrollLeft</strong> - the number of pixels that are hidden from view to the left of the scrollable area.</li>
-     * </ul>
-     *
-     */
-    var Scroller = Widget.extend(/** @lends kendo.mobile.ui.Scroller.prototype */{
-        /**
-         * @constructs
-         * @extends kendo.mobile.ui.Widget
-         * @param {Element} element DOM element
-         * @param {Object} options
-         * @option {Boolean} [elastic] <true> Weather or not to allow out of bounds dragging and easing.
-         * @option {Number} [pullOffset] <140> The threshold below which a releasing the scroller will trigger the pull event.
-         * Has effect only when the pullToRefresh option is set to true.
-         * @option {String} [pullTemplate] <Pull to refresh> The message template displayed when the user pulls the scroller.
-         * Has effect only when the pullToRefresh option is set to true.
-         * @option {Boolean} [pullToRefresh] <false> If set to true, the scroller will display a hint when the user pulls the container beyond its top limit.
-         * If a pull beyond the specified pullOffset occurs, a pull event will be triggered.
-         * @option {String} [releaseTemplate] <Release to refresh> The message template displayed when the user pulls the scroller below the
-         * pullOffset, indicating that pullToRefresh will occur.
-         * Has effect only when the pullToRefresh option is set to true.
-         * @option {String} [refreshTemplate] <Refreshing> The message template displayed during the refresh.
-         * Has effect only when the pullToRefresh option is set to true.
-         */
+    var Scroller = Widget.extend({
         init: function(element, options) {
             var that = this;
             Widget.fn.init.call(that, element, options);
@@ -10459,16 +9622,10 @@ function pad(number) {
             kendo.onResize($.proxy(that.reset, that));
         },
 
-        /**
-         * Returns the height in pixels of the scroller content.
-         */
         scrollHeight: function() {
             return this.scrollElement[0].scrollHeight;
         },
 
-        /**
-         * Returns the width in pixels of the scroller content.
-         */
         scrollWidth: function() {
             return this.scrollElement[0].scrollWidth;
         },
@@ -10483,40 +9640,8 @@ function pad(number) {
         },
 
         events: [
-            /**
-             * Fires when the pull option is set to true, and the user pulls the scrolling container beyond the specified pullThreshold.
-             * @name kendo.mobile.ui.Scroller#pull
-             * @event
-             * @param {Event} e
-             */
             PULL,
-            /**
-             * Fires when the user scrolls through the content.
-             * @name kendo.mobile.ui.Scroller#scroll
-             * @event
-             * @param {Event} e
-             * @param {Number} e.scrollTop The number of pixels that are hidden from view above the scrollable area.
-             * @param {Number} e.scrollLeft The number of pixels that are hidden from view to the left of the scrollable area.
-             * @exampleTitle Bind to scroller scroll event in view init
-             * @example
-             * <div data-role="view" data-init="attachToScroller"> ... </div>
-             *  <script>
-             *     function attachToScroller(e) {
-             *       var scroller = e.view.scroller;
-             *       scroller.bind("scroll", function(e) {
-             *          console.log(e.scrollTop);
-             *          console.log(e.scrollLeft);
-             *       });
-             *     }
-             *  </script>
-             */
             SCROLL,
-            /**
-             * Fires when the scroller dimensions change (e.g. orientation change or resize)
-             * @name kendo.mobile.ui.Scroller#resize
-             * @event
-             * @param {Event} e
-             */
             RESIZE
         ],
 
@@ -10528,55 +9653,25 @@ function pad(number) {
             }
         },
 
-        /**
-         * Scrolls the container to the top.
-         */
         reset: function() {
             this.movable.moveTo({x: 0, y: 0});
         },
 
-        /**
-         * Scrolls the container to the specified location
-         * @param {Number} x The horizontal offset in pixels to scroll to.
-         * @param {Number} y The vertical offset in pixels to scroll to.
-         */
         scrollTo: function(x, y) {
             this.movable.moveTo({x: x, y: y});
         },
 
-        /**
-         * Indicate that the pull event is handled (i.e. data from the server has been retrieved).
-         * @exampleTitle Custom pull to refresh view scroll handling
-         * @example
-         *  <div data-role="view" data-init="initPullToRefreshScroller">
-         *      <h2 id="pull-to-refresh-clock"></h2>
-         *  </div>
-         * <script>
-         *
-         *  function updateClock() {
-         *      pullTime = kendo.toString(new Date(), "hh:mm:ss tt" );
-         *      $("#pull-to-refresh-clock").html("Last update at " + pullTime + ". <br /> Pull to refresh.");
-         *  }
-         *
-         *  function initPullToRefreshScroller(e) {
-         *      var scroller = e.view.scroller;
-         *
-         *      scroller.setOptions({
-         *          pullToRefresh: true,
-         *          pull: function() {
-         *              updateClock();
-         *              setTimeout(function() { scroller.pullHandled(); }, 400);
-         *          }
-         *      })
-         *  }
-         * </script>
-         */
         pullHandled: function() {
             var that = this;
             that.refreshHint.removeClass(REFRESHCLASS);
             that.hintContainer.html(that.pullTemplate({}));
             that.yinertia.onEnd();
             that.xinertia.onEnd();
+        },
+
+        destroy: function() {
+            Widget.fn.destroy.call(this);
+            this.drag.destroy();
         },
 
         _initPullToRefresh: function() {
@@ -10661,6 +9756,7 @@ function pad(number) {
     var kendo = window.kendo,
         Widget = kendo.ui.Widget,
         proxy = $.proxy,
+        NS = ".kendoGroupable",
         indicatorTmpl = kendo.template('<div class="k-group-indicator" data-#=data.ns#field="${data.field}" data-#=data.ns#title="${data.title || ""}" data-#=data.ns#dir="${data.dir || "asc"}">' +
                 '<a href="\\#" class="k-link">' +
                     '<span class="k-icon k-si-arrow-${(data.dir || "asc") == "asc" ? "n" : "s"}">(sorted ${(data.dir || "asc") == "asc" ? "ascending": "descending"})</span>' +
@@ -10768,11 +9864,11 @@ function pad(number) {
                     },
                     drag: proxy(that._drag, that)
                 })
-                .delegate(".k-button", "click", function(e) {
+                .on("click" + NS, ".k-button", function(e) {
                     e.preventDefault();
                     that._removeIndicator($(this).parent());
                 })
-                .delegate(".k-link", "click", function(e) {
+                .on("click" + NS,".k-link", function(e) {
                     var current = $(this).parent(),
                         newIndicator = that.buildIndicator(current.attr(kendo.attr("field")), current.attr(kendo.attr("title")), current.attr(kendo.attr("dir")) == "asc" ? "desc" : "asc");
 
@@ -10831,6 +9927,13 @@ function pad(number) {
 
         destroy: function() {
             var that = this;
+
+            Widget.fn.destroy.call(that);
+
+            that.groupContainer
+                .off(NS)
+                .kendoDraggable("destroy");
+
             if (that.dataSource && that._refreshHandler) {
                 that.dataSource.unbind("change", that._refreshHandler);
             }
@@ -10944,7 +10047,12 @@ function pad(number) {
             }
         },
         _canDrag: function(element) {
-            return element.attr(kendo.attr("groupable")) != "false" && (element.hasClass("k-group-indicator") || !this.indicator(element.attr(kendo.attr("field"))));
+            var field = element.attr(kendo.attr("field"));
+
+            return element.attr(kendo.attr("groupable")) != "false" &&
+                field &&
+                (element.hasClass("k-group-indicator") ||
+                    !this.indicator(field));
         },
         _canDrop: function(source, target, position) {
             var next = source.next();
@@ -11016,7 +10124,7 @@ function pad(number) {
 
             element = that.element.addClass(KREORDERABLE);
             options = that.options;
-            draggable = options.draggable || new kendo.ui.Draggable(element, {
+            that.draggable = draggable = options.draggable || new kendo.ui.Draggable(element, {
                 group: group,
                 filter: options.filter,
                 hint: options.hint
@@ -11092,8 +10200,19 @@ function pad(number) {
 
         events: [
             CHANGE
-        ]
+        ],
 
+       destroy: function() {
+           var that = this;
+
+           Widget.fn.destroy.call(that);
+
+           if (that.draggable) {
+               that.draggable.destroy();
+           }
+
+           kendo.destroy(that.element);
+       }
     });
 
     kendo.ui.plugin(Reorderable);
@@ -11123,7 +10242,7 @@ function pad(number) {
             that._position = that.orientation == HORIZONTAL ? "left" : "top";
             that._sizingDom = that.orientation == HORIZONTAL ? "outerWidth" : "outerHeight";
 
-            new ui.Draggable(element, {
+            that.draggable = new ui.Draggable(element, {
                 distance: 0,
                 filter: options.handle,
                 drag: proxy(that._resize, that),
@@ -11207,6 +10326,15 @@ function pad(number) {
 
             that.trigger(RESIZEEND, extend(e, { position: that.position }));
             $(document.body).css("cursor", "");
+        },
+        destroy: function() {
+            var that = this;
+
+            Widget.fn.destroy.call(that);
+
+            if (that.draggable) {
+                that.draggable.destroy();
+            }
         }
     });
 
@@ -11221,6 +10349,7 @@ function pad(number) {
         SINGLE = "single",
         FIELD = "data-field",
         DESC = "desc",
+        NS = ".kendoSortable",
         TLINK = ".k-link",
         Widget = kendo.ui.Widget;
 
@@ -11230,7 +10359,10 @@ function pad(number) {
 
             Widget.fn.init.call(that, element, options);
 
-            that.dataSource = that.options.dataSource.bind("change", proxy(that.refresh, that));
+            that._refreshHandler = proxy(that.refresh, that);
+
+            that.dataSource = that.options.dataSource.bind("change", that._refreshHandler);
+
             link = that.element.find(TLINK);
 
             if (!link[0]) {
@@ -11238,13 +10370,24 @@ function pad(number) {
             }
 
             that.link = link;
-            that.element.click(proxy(that._click, that));
+
+            that.element.on("click" + NS, proxy(that._click, that));
         },
 
         options: {
             name: "Sortable",
             mode: SINGLE,
             allowUnsort: true
+        },
+
+        destroy: function() {
+            var that = this;
+
+            Widget.fn.destroy.call(that);
+
+            that.element.off(NS);
+
+            that.dataSource.unbind("change", that._refreshHandler);
         },
 
         refresh: function() {
@@ -11330,6 +10473,7 @@ function pad(number) {
         SELECTSTART = "selectstart",
         DOCUMENT = $(document),
         CHANGE = "change",
+        NS = ".kendoSelectable",
         UNSELECTING = "k-state-unselecting";
 
     var Selectable = Widget.extend({
@@ -11345,7 +10489,7 @@ function pad(number) {
             that._upDelegate = proxy(that._up, that);
 
             that.element.addClass(SELECTABLE);
-            that.element.delegate("." + SELECTABLE + " " + that.options.filter, MOUSEDOWN, proxy(that._down, that));
+            that.element.on(MOUSEDOWN + NS, "." + SELECTABLE + " " + that.options.filter, proxy(that._down, that));
         },
 
         events: [CHANGE],
@@ -11614,6 +10758,13 @@ function pad(number) {
                 }
             });
             that.trigger(CHANGE, {});
+        },
+        destroy: function() {
+            var that = this;
+
+            Widget.fn.destroy.call(that);
+
+            that.element.off(NS);
         }
     });
 
@@ -11630,6 +10781,7 @@ function pad(number) {
         PREV = ".k-i-arrow-w",
         NEXT = ".k-i-arrow-e",
         CHANGE = "change",
+        NS = ".kendoPager",
         CLICK = "click",
         KEYDOWN = "keydown",
         DISABLED = "disabled",
@@ -11723,8 +10875,7 @@ function pad(number) {
                        '</span>');
                 }
 
-                that._keydownHandler = proxy(that._keydown, that);
-                that.element.on(KEYDOWN, ".k-pager-input input", that._keydownHandler);
+                that.element.on(KEYDOWN + NS, ".k-pager-input input", proxy(that._keydown, that));
             }
 
             if (options.previousNext) {
@@ -11759,9 +10910,7 @@ function pad(number) {
                    that.element.find(".k-pager-sizes select").kendoDropDownList();
                 }
 
-                that._changeHandler = proxy(that._change, that);
-
-                that.element.on(CHANGE, ".k-pager-sizes select", that._changeHandler);
+                that.element.on(CHANGE + NS, ".k-pager-sizes select", proxy(that._change, that));
             }
 
             if (options.refresh) {
@@ -11770,9 +10919,7 @@ function pad(number) {
                         '"><span class="k-icon k-i-refresh">' + options.messages.refresh + "</span></a>");
                 }
 
-                that._reloadHandler = proxy(that._refreshClick, that);
-
-                that.element.on(CLICK, ".k-pager-refresh", that._reloadHandler);
+                that.element.on(CLICK + NS, ".k-pager-refresh", proxy(that._refreshClick, that));
             }
 
             if (options.info) {
@@ -11781,9 +10928,7 @@ function pad(number) {
                 }
             }
 
-            that._clickHandler = proxy(that._click, that);
-
-            that.element.on(CLICK, "a", that._clickHandler);
+            that.element.on(CLICK + NS , "a", proxy(that._click, that));
 
             if (options.autoBind) {
                 that.refresh();
@@ -11793,14 +10938,8 @@ function pad(number) {
         destroy: function() {
             var that = this;
 
-            that.element.off(CLICK, "a", that._clickHandler);
-
-            that.element.off(KEYDOWN, ".k-pager-input input", that._keydownHandler);
-
-            that.element.off(CHANGE, ".k-pager-sizes select", that._changeHandler);
-
-            that.element.off(CLICK, ".k-pager-refresh", that._reloadHandler);
-
+            Widget.fn.destroy.call(that);
+            that.element.off(NS);
             that.dataSource.unbind(CHANGE, that._refreshHandler);
         },
 
@@ -12017,6 +11156,7 @@ function pad(number) {
         cssPrefix = support.transitions.css,
         TRANSFORM = cssPrefix + "transform",
         extend = $.extend,
+        NS = ".kendoPopup",
         styles = ["font-family",
                    "font-size",
                    "font-stretch",
@@ -12050,8 +11190,11 @@ function pad(number) {
                 .addClass("k-popup k-group k-reset")
                 .css({ position : ABSOLUTE })
                 .appendTo(options.appendTo)
-                .bind("mouseenter mouseleave", function(e) {
-                    that._hovered = e.type === "mouseenter";
+                .on("mouseenter" + NS, function() {
+                    that._hovered = true;
+                })
+                .on("mouseleave" + NS, function() {
+                    that._hovered = false;
                 });
 
             that.wrapper = $();
@@ -12108,7 +11251,7 @@ function pad(number) {
             };
 
             if (options.toggleTarget) {
-                $(options.toggleTarget).bind(options.toggleEvent, $.proxy(that.toggle, that));
+                $(options.toggleTarget).on(options.toggleEvent + NS, $.proxy(that.toggle, that));
             }
         },
 
@@ -12140,6 +11283,34 @@ function pad(number) {
                     hide: true
                 }
             }
+        },
+
+        destroy: function() {
+            var that = this,
+                options = that.options,
+                element = that.element.off(NS),
+                parent;
+
+            Widget.fn.destroy.call(that);
+
+            if (options.toggleTarget) {
+                $(options.toggleTarget).off(NS);
+            }
+
+            DOCUMENT_ELEMENT.unbind(MOUSEDOWN, that._mousedownProxy);
+            WINDOW.unbind(RESIZE_SCROLL, that._resizeProxy);
+
+            if (options.appendTo[0] === document.body) {
+                parent = element.parent(".k-animation-container");
+
+                if (parent[0]) {
+                    parent.remove();
+                } else {
+                    element.remove();
+                }
+            }
+
+            kendo.destroy(that.element);
         },
 
         open: function(x, y) {
@@ -12478,11 +11649,6 @@ function pad(number) {
     ui.plugin(Popup);
 })(jQuery);
 (function($, undefined) {
-    /**
-    * @name kendo.ui.List.Description
-    *
-    * @section Common class for ComboBox, DropDownList and AutoComplete widgets.
-    */
     var kendo = window.kendo,
         ui = kendo.ui,
         Widget = ui.Widget,
@@ -12500,19 +11666,17 @@ function pad(number) {
         CLOSE = "close",
         SELECT = "select",
         SELECTED = "selected",
+        REQUESTSTART = "requestStart",
         extend = $.extend,
         proxy = $.proxy,
         isIE8 = $.browser.msie && parseInt($.browser.version, 10) < 9,
         quotRegExp = /"/g;
 
-    var List = Widget.extend(/** @lends kendo.ui.List */{
-        /**
-         * Creates a List instance.
-         * @constructs
-         * @extends kendo.ui.Widget
-         */
+    var List = Widget.extend({
         init: function(element, options) {
-            var that = this, id, list;
+            var that = this,
+                ns = that.ns,
+                list, id;
 
             Widget.fn.init.call(that, element, options);
 
@@ -12520,13 +11684,13 @@ function pad(number) {
 
             that.ul = $('<ul unselectable="on" class="k-list k-reset"/>')
                         .css({ overflow: kendo.support.touch ? "": "auto" })
-                        .delegate(LI, "mouseenter", function() { $(this).addClass(HOVER); })
-                        .delegate(LI, "mouseleave", function() { $(this).removeClass(HOVER); })
-                        .delegate(LI, CLICK, proxy(that._click, that));
+                        .on("mouseenter" + ns, LI, function() { $(this).addClass(HOVER); })
+                        .on("mouseleave" + ns, LI, function() { $(this).removeClass(HOVER); })
+                        .on(CLICK + ns, LI, proxy(that._click, that));
 
             that.list = list = $("<div class='k-list-container'/>")
                         .append(that.ul)
-                        .mousedown(function(e) {
+                        .on("mousedown" + ns, function(e) {
                             e.preventDefault();
                         });
 
@@ -12534,8 +11698,6 @@ function pad(number) {
             if (id) {
                 list.attr(ID, id + "-list");
             }
-
-            $(document.documentElement).bind("mousedown", proxy(that._mousedown, that));
         },
 
         items: function() {
@@ -12558,6 +11720,24 @@ function pad(number) {
                 that._current = candidate;
             } else {
                 return that._current;
+            }
+        },
+
+        destroy: function() {
+            var that = this,
+                ns = that.ns;
+
+            Widget.fn.destroy.call(that);
+
+            that._unbindDataSource();
+
+            that.ul.off(ns);
+            that.list.off(ns);
+
+            that.popup.destroy();
+
+            if (that._form) {
+                that._form.off("reset", that._resetHandler);
             }
         },
 
@@ -12680,16 +11860,14 @@ function pad(number) {
                 wrapper = this.wrapper,
                 computedStyle, computedWidth;
 
-            if (!width) {
-                computedStyle = window.getComputedStyle ? window.getComputedStyle(wrapper[0], null) : 0;
-                computedWidth = computedStyle ? parseFloat(computedStyle.width) : wrapper.outerWidth();
+            computedStyle = window.getComputedStyle ? window.getComputedStyle(wrapper[0], null) : 0;
+            computedWidth = computedStyle ? parseFloat(computedStyle.width) : wrapper.outerWidth();
 
-                if (computedStyle && ($.browser.mozilla || $.browser.msie)) { // getComputedStyle returns different box in FF and IE.
-                    computedWidth += parseFloat(computedStyle.paddingLeft) + parseFloat(computedStyle.paddingRight) + parseFloat(computedStyle.borderLeftWidth) + parseFloat(computedStyle.borderRightWidth);
-                }
-
-                width = computedWidth - (list.outerWidth() - list.width());
+            if (computedStyle && ($.browser.mozilla || $.browser.msie)) { // getComputedStyle returns different box in FF and IE.
+                computedWidth += parseFloat(computedStyle.paddingLeft) + parseFloat(computedStyle.paddingRight) + parseFloat(computedStyle.borderLeftWidth) + parseFloat(computedStyle.borderRightWidth);
             }
+
+            width = computedWidth - (list.outerWidth() - list.width());
 
             list.css({
                 fontFamily: wrapper.css("font-family"),
@@ -12703,15 +11881,12 @@ function pad(number) {
             var that = this,
                 list = that.list,
                 options = that.options,
-                wrapper = that.wrapper,
-                opened = false;
+                wrapper = that.wrapper;
 
             that.popup = new ui.Popup(list, extend({}, options.popup, {
                 anchor: wrapper,
                 open: function(e) {
-                    if (!opened) {
-                        opened = that._adjustListWidth();
-                    }
+                    that._adjustListWidth();
 
                     if (that.trigger(OPEN)) {
                         e.preventDefault();
@@ -12844,16 +12019,7 @@ function pad(number) {
 
     kendo.ui.List = List;
 
-    /**
-    * @name kendo.ui.Select.Description
-    *
-    * @section Common class for ComboBox and DropDownList widgets.
-    */
-    ui.Select = List.extend(/** @lends kendo.ui.Select */{
-        /**
-         * @extends kendo.ui.List
-         * @constructs
-         */
+    ui.Select = List.extend({
         init: function(element, options) {
             List.fn.init.call(this, element, options);
         },
@@ -12864,18 +12030,10 @@ function pad(number) {
             this._dataSource();
 
             if (this.options.autoBind) {
-                this._selectItem();
+                this.dataSource.fetch();
             }
         },
 
-        /**
-        * Closes the drop-down list.
-        * @example
-        * dropdownlist.close();
-        *
-        * @example
-        * combobox.close();
-        */
         close: function() {
             this.popup.close();
         },
@@ -12951,8 +12109,7 @@ function pad(number) {
             }
 
             if (that.dataSource && that._refreshHandler) {
-                that.dataSource.unbind(CHANGE, that._refreshHandler)
-                               .unbind("requestStart", that._requestStartHandler);
+                that._unbindDataSource();
             } else {
                 that._refreshHandler = proxy(that.refresh, that);
                 that._requestStartHandler = proxy(that._showBusy, that);
@@ -12960,7 +12117,14 @@ function pad(number) {
 
             that.dataSource = kendo.data.DataSource.create(dataSource)
                                    .bind(CHANGE, that._refreshHandler)
-                                   .bind("requestStart", that._requestStartHandler);
+                                   .bind(REQUESTSTART, that._requestStartHandler);
+        },
+
+        _unbindDataSource: function() {
+            var that = this;
+
+            that.dataSource.unbind(CHANGE, that._refreshHandler)
+                           .unbind(REQUESTSTART, that._requestStartHandler);
         },
 
         _index: function(value) {
@@ -13049,6 +12213,21 @@ function pad(number) {
             return pressed;
         },
 
+        _selectItem: function(value) {
+            var that = this,
+                options = that.options;
+
+            value = value || options.value || that.value();
+
+            if (value) {
+                that.value(value);
+            } else {
+                that.select(options.index);
+            }
+
+            that.trigger("selected");
+        },
+
         _valueOnFetch: function(value) {
             var that = this;
 
@@ -13113,14 +12292,18 @@ function pad(number) {
 
         _reset: function() {
             var that = this,
-                element = that.element;
+                element = that.element,
+                form = element.closest("form");
 
-            element.closest("form")
-                   .bind("reset", function() {
-                       setTimeout(function() {
-                            that.value(element[0].value);
-                       });
-                   });
+            if (form[0]) {
+                that._resetHandler = function() {
+                    setTimeout(function() {
+                        that.value(element[0].value);
+                    });
+                };
+
+                that._form = form.on("reset", that._resetHandler);
+            }
         },
 
         _cascade: function() {
@@ -13190,7 +12373,12 @@ function pad(number) {
                           select();
                       });
 
-                select();
+
+                if (parent._valueCalled !== undefined) {
+                    select();
+                } else if (!parent.value()) {
+                    that.enable(false);
+                }
             }
         }
     });
@@ -13212,131 +12400,6 @@ function pad(number) {
 
 })(jQuery);
 (function($, undefined) {
-    /**
-     * @name kendo.ui.Calendar.Description
-     *
-     * @section
-     * <p>
-     *  The <b>Calendar</b> renders a graphical calendar that supports
-     *  navigation and selection. It supports custom templates for its
-     *  "month" view, configurable options for a minimum and maximum date,
-     *  start view and the depth of the navigation.
-     * </p>
-     * <h3>Getting Started</h3>
-     *
-     * @exampleTitle Create a div element
-     * @example
-     * <div id="calendar"></div>
-     *
-     * @exampleTitle Initialize the Calendar via a jQuery ID selector
-     * @example
-     * $(document).ready(function(){
-     *  $("#calendar").kendoCalendar();
-     * });
-     *
-     * @section
-     * <p>
-     *  When a <b>Calendar</b> is initialized, it will automatically be
-     *  displayed near the location of the used HTML element.
-     * </p>
-     * <h3>Configuring Calendar Behaviors</h3>
-     * <p>
-     *  The <b>Calendar</b> provides many configuration options that can be
-     *  easily set during initialization. Among the properties that can be
-     *  controlled:
-     * </p>
-     * <ul>
-     *  <li>Selected date</li>
-     *  <li>Minimum and/or maximum date</li>
-     *  <li>Start view</li>
-     *  <li>
-     *   Define the navigation depth (last view to which end user can
-     *   navigate)
-     *  </li>
-     *  <li>Day template</li>
-     *  <li>Footer template</li>
-     * </ul>
-     *
-     * @exampleTitle Create Calendar with selected date and a defined minimum
-     * and maximum date
-     * @example
-     * $("#calendar").kendoCalendar({
-     *  value: new Date(),
-     *  min: new Date(1950, 0, 1),
-     *  max: new Date(2049, 11, 31)
-     * });
-     *
-     * @section
-     * <p>
-     *  The <b>Calendar</b> will not navigate before than the minimum
-     *  date specified. It will also not navigate ahead the maximum date
-     *  specified.
-     * </p>
-     * @section
-     * <h3>Define start view and navigation depth</h3>
-     * <p>
-     *  The first rendered view can be defined with "start" option.
-     *  Navigation depth can be controlled with "depth" option. Predefined
-     *  views are:
-     *  <ul>
-     *   <li>"month" - shows the days from the month</li>
-     *   <li>"year" - shows the months of the year</li>
-     *   <li>"decade" - shows the years from the decade</li>
-     *   <li>"century" - shows the decades from the century</li>
-     *  </ul>
-     * </p>
-     *
-     * @exampleTitle Create a Calendar, which allows a user to select a month
-     * @example
-     * $("#calendar").kendoCalendar({
-     *  start: "year",
-     *  depth: "year"
-     * });
-     *
-     * @section
-     * <h3>Customize day template</h3>
-     * <p>
-     *  The <b>Calendar</b> allows to customize content of the rendered day
-     *  in the "month" view.
-     * </p>
-     *
-     * @exampleTitle Create a Calendar with custom template
-     * @example
-     * $("#calendar").kendoCalendar({
-     *  month: {
-     *   content: '<div class="custom"><#=data.value#></div>'
-     *  }
-     * });
-     *
-     * @section
-     * <p>
-     *  This templates wraps the "value" in a div HTML element. Here is an
-     *  example of the object passed to the template function:
-     * </p>
-     *
-     * @exampleTitle Structure of the data object passed to the template
-     * @example
-     * data = {
-     *  date: date, // Date object corresponding to the current cell
-     *  title: kendo.toString(date, "D"),
-     *  value: date.getDate(),
-     *  dateString: "2011/0/1" // formatted date using yyyy/MM/dd format and month is zero-based
-     * };
-     *
-     * @section
-     * <h3>Accessing an Existing Calendar</h3>
-     * <p>
-     *  You can reference an existing <b>Calendar</b> instance via
-     *  <a href="http://api.jquery.com/jQuery.data/">jQuery.data()</a>.
-     *  Once a reference has been established, you can use the API to control
-     *  its behavior.
-     * </p>
-     *
-     * @exampleTitle Accessing an existing Calendar instance
-     * @example
-     * var calendar = $("#calendar").data("kendoCalendar");
-     *
-     */
     var kendo = window.kendo,
         ui = kendo.ui,
         Widget = ui.Widget,
@@ -13349,8 +12412,9 @@ function pad(number) {
         transitionOrigin = transitions ? transitions.css + "transform-origin" : "",
         cellTemplate = template('<td#=data.cssClass#><a class="k-link" href="\\#" data-#=data.ns#value="#=data.dateString#">#=data.value#</a></td>', { useWithBlock: false }),
         emptyCellTemplate = template("<td>&nbsp;</td>", { useWithBlock: false }),
-        isIE8 = $.browser.msie && parseInt($.browser.version, 10) < 9,
-        CLICK = touch ? "touchend" : "click",
+        isIE8 = $.browser.msie && (parseInt($.browser.version, 10) < 9 || (document.documentMode && document.documentMode < 9)),
+        ns = ".kendoCalendar",
+        CLICK = (touch ? "touchend" : "click") + ns,
         MIN = "min",
         LEFT = "left",
         SLIDE = "slide",
@@ -13366,7 +12430,8 @@ function pad(number) {
         TODAY = "k-nav-today",
         CELLSELECTOR = "td:has(.k-link)",
         MOUSEENTER = touch ? "touchstart" : "mouseenter",
-        MOUSELEAVE = touch ? "touchend" : "mouseleave",
+        MOUSEENTER_WITH_NS = MOUSEENTER + ns,
+        MOUSELEAVE = (touch ? "touchend" : "mouseleave") + ns,
         MS_PER_MINUTE = 60000,
         MS_PER_DAY = 86400000,
         PREVARROW = "_prevArrow",
@@ -13381,114 +12446,7 @@ function pad(number) {
             century: 3
         };
 
-    var Calendar = Widget.extend(/** @lends kendo.ui.Calendar.prototype */{
-        /**
-          * @constructs
-          * @extends kendo.ui.Widget
-          * @param {Element} element DOM element
-          * @param {Object} options Configuration options.
-          * @option {Date} [value] <null> Specifies the selected date.
-          * _example
-          * // set the selected date to Jan 1st. 2012
-          * $("#calendar").kendoCalendar({
-          *     value: new Date(2012, 0, 1)
-          * });
-          * _exampleTitle To set after initialization
-          * _example
-          * // get a reference to the Kendo UI calendar widget
-          * var calendar = $("#calendar").data("kendoCalendar");
-          * // set the selected date on the calendar to Jan 1st, 2012
-          * calendar.value(new Date(2012, 0, 1));
-          * @option {Date} [min] <Date(1900, 0, 1)> Specifies the minimum date, which the calendar can show.
-          * _example
-          * // set the min date to Jan 1st, 2011
-          * $("#calendar").kendoCalendar({
-          *     min = new Date(2011, 0, 1)
-          * });
-          * _exampleTitle To set after initialization
-          * _example
-          * // get a reference to the Kendo UI calendar widget
-          * var calendar = $("#calendar").data("kendoCalendar");
-          * // set the min date to Jan 1st, 2011
-          * calendar.min(new Date(2011, 0, 1));
-          * @option {Date} [max] <Date(2099, 11, 31)> Specifies the maximum date, which the calendar can show.
-          * _example
-          * $("#calendar").kendoCalendar({
-          *     max = new Date(2013, 0, 1);
-          * });
-          * _exampleTitle To set after initialization
-          * _example
-          * // get a reference to the Kendo UI calendar widget
-          * var calendar = $("#calendar").data("kendoCalendar");
-          * // set the max date to Jan 1st, 2013
-          * calendar.max(new Date(2013, 0, 1));
-          * @option {String} [footer] <> Specifies the content of the footer. If false, the footer will not be rendered.
-          * _example
-          * // change the footer text from the default current date
-          * $("#calendar").kendoCalendar({
-          *     footer = "My Custom Footer"
-          * });
-          * _exampleTitle Hide the footer
-          * _example
-          * $("#calendar").kendoCalendar({
-          *     footer = false;
-          * });
-          * @option {String} [format] <MM/dd/yyyy> Specifies the format, which is used to parse value set with value() method.
-          * _example
-          * $("#calendar").kendoCalendar({
-          *     format: "yyyy/MM/dd"
-          * });
-          * @option {String} [start] <month> Specifies the start view.
-          * _example
-          * $("#calendar").kendoCalendar({
-          *     start: "year"
-          * });
-          * @option {String} [depth] Specifies the navigation depth.
-          * _example
-          * $("#calendar").kendoCalendar({
-          *     depth: "year"
-          * });
-          * @option {Array} [dates] <> Specifies a list of dates, which will be passed to the month template.
-          *  _example
-          * $("#calendar").kendoCalendar({
-          *     dates: [new Date(2000, 10, 10, 10, 0, 0), new Date(2000, 10, 10, 30, 0)] //can manipulate month template depending on this array.
-          * });
-          * @option {String} [footer] <> Template to be used for rendering the footer. If false, the footer will not be rendered.
-          * _example
-          *
-          *  //calendar intialization
-          *  <script>
-          *      $("#calendar").kendoCalendar({
-          *          footer: kendo.template("Today - #=kendo.toString(data, 'd') #")
-          *      });
-          *  </script>
-          * @option {Object} [month] <> Templates for the cells rendered in the "month" view.
-          * @option {String} [month.content] <> Template to be used for rendering the cells in the "month" view, which are in range.
-          * _example
-          *  //template
-          * <script id="cellTemplate" type="text/x-kendo-tmpl">
-          *      <div class="${ data.value < 10 ? exhibition : party }">
-          *      </div>
-          *      ${ data.value }
-          *  </script>
-          *
-          *  //calendar intialization
-          *  <script>
-          *      $("#calendar").kendoCalendar({
-          *          month: {
-          *             content:  $("#cellTemplate").html(),
-          *          }
-          *      });
-          *  </script>
-          * @option {String} [month.empty] <> Template to be used for rendering the cells in the "month" view, which are not in the min/max range.
-          * @option {String} [culture] <en-US> Specifies the culture info used by the widget.
-          * _example
-          *
-          * // specify on widget initialization
-          * $("#calendar").kendoCalendar({
-          *     culture: "de-DE"
-          * });
-          */
+    var Calendar = Widget.extend({
         init: function(element, options) {
             var that = this, value;
 
@@ -13508,8 +12466,8 @@ function pad(number) {
             that._footer(that.footer);
 
             element
-                .delegate(CELLSELECTOR, MOUSEENTER + " " + MOUSELEAVE, mousetoggle)
-                .delegate(CELLSELECTOR, CLICK, proxy(that._click, that));
+                .on(MOUSEENTER_WITH_NS + " " + MOUSELEAVE, CELLSELECTOR, mousetoggle)
+                .on(CLICK, CELLSELECTOR, proxy(that._click, that));
 
             value = options.value;
             normalize(options);
@@ -13549,46 +12507,6 @@ function pad(number) {
         },
 
         events: [
-            /**
-            * Fires when the selected date is changed
-            * @name kendo.ui.Calendar#change
-            * @event
-            * @param {Event} e
-            * @example
-            * $("#calendar").kendoCalendar({
-            *     change: function(e) {
-            *         // handle event
-            *     });
-            * });
-            * @exampleTitle To set after initialization
-            * @example
-            * // get a reference to the Kendo UI calendar widget
-            * var calendar = $("#calendar").data("kendoCalendar");
-            * // bind to the change event
-            * calendar.bind("change", function(e) {
-            *      // handle event
-            * });
-            */
-            /**
-            * Fires when navigate
-            * @name kendo.ui.Calendar#navigate
-            * @event
-            * @param {Event} e
-            * @example
-            * $("#calendar").kendoCalendar({
-            *     navigate: function(e) {
-            *          // handle event
-            *     }
-            * });
-            * @exampleTitle To set after initialization
-            * @example
-            * // get a reference to the Kendo UI calendar widget
-            * var calendar = $("#calendar").data("kendoCalendar");
-            * // bind to the change event
-            * calendar.bind("navigate", function(e) {
-            *      // handle event
-            * });
-            */
             CHANGE,
             NAVIGATE
         ],
@@ -13599,74 +12517,37 @@ function pad(number) {
             Widget.fn.setOptions.call(this, options);
         },
 
-        /**
-        * Gets/Sets the min value of the calendar.
-        * @param {Date|String} value The min date to set.
-        * @returns {Date} The min value of the calendar.
-        * @example
-        * // get a reference to the calendar widget
-        * var calendar = $("#calendar").data("kendoCalendar");
-        *
-        * // get the min value of the calendar.
-        * var min = calendar.min();
-        *
-        * // set the min value of the calendar.
-        * calendar.min(new Date(1900, 0, 1));
-        */
+        destroy: function() {
+            var that = this,
+                today = that._today.off(ns);
+
+            that.element.off(ns);
+            that._title.off(ns);
+            that[PREVARROW].off(ns);
+            that[NEXTARROW].off(ns);
+
+            kendo.destroy(today);
+            kendo.destroy(that._view);
+
+            Widget.fn.destroy.call(that);
+        },
+
         min: function(value) {
             return this._option(MIN, value);
         },
 
-        /**
-        * Gets/Sets the max value of the calendar.
-        * @param {Date | String} value The max date to set.
-        * @returns {Date} The max value of the calendar.
-        * @example
-        * // get a reference to the calendar widget
-        * var calendar = $("#calendar").data("kendoCalendar");
-        *
-        * // get the max value of the calendar.
-        * var max = calendar.max();
-        *
-        * // set the max value of the calendar.
-        * calendar.max(new Date(2100, 0, 1));
-        */
         max: function(value) {
             return this._option("max", value);
         },
 
-        /**
-        * Navigates to the past
-        * @example
-        * // get a reference to the calendar widget
-        * var calendar = $("#calendar").data("kendoCalendar");
-        * // navigate to past
-        * calendar.navigateToPast();
-        */
         navigateToPast: function() {
             this._navigate(PREVARROW, -1);
         },
 
-        /**
-        * Navigates to the future
-        * @example
-        * // get a reference to the calendar widget
-        * var calendar = $("#calendar").data("kendoCalendar");
-        * // navigate to future
-        * calendar.navigateToFuture();
-        */
         navigateToFuture: function() {
             this._navigate(NEXTARROW, 1);
         },
 
-        /**
-        * Navigates to the upper view
-        * @example
-        * // get a reference to the calendar widget
-        * var calendar = $("#calendar").data("kendoCalendar");
-        * // navigate up
-        * calendar.navigateUp();
-        */
         navigateUp: function() {
             var that = this,
                 index = that._index;
@@ -13678,15 +12559,6 @@ function pad(number) {
             that.navigate(that._current, ++index);
         },
 
-        /**
-        * Navigates to the lower view
-        * @param {Date} value Desired date
-        * @example
-        * // get a reference to the calendar widget
-        * var calendar = $("#calendar").data("kendoCalendar");
-        * // navigate down
-        * calendar.navigateDown(value);
-        */
         navigateDown: function(value) {
             var that = this,
             index = that._index,
@@ -13707,16 +12579,6 @@ function pad(number) {
             that.navigate(value, --index);
         },
 
-        /**
-        * Navigates to view
-        * @param {Date} value Desired date
-        * @param {String} view Desired view
-        * @example
-        * // get a reference to the calendar widget
-        * var calendar = $("#calendar").data("kendoCalendar");
-        * // navigate to the desired date
-        * calendar.navigate(value, view);
-        */
         navigate: function(value, view) {
             view = isNaN(view) ? views[view] : view;
 
@@ -13784,20 +12646,6 @@ function pad(number) {
             that._changeView = true;
         },
 
-        /**
-        * Gets/Sets the value of the calendar.
-        * @param {Date|String} value The date to set.
-        * @returns {Date} The value of the calendar.
-        * @example
-        * // get a reference to the calendar widget
-        * var calendar = $("#calendar").data("kendoCalendar");
-        *
-        * // get the value of the calendar.
-        * var value = calendar.value();
-        *
-        * // set the value of the calendar.
-        * calendar.value(new Date());
-        */
         value: function(value) {
             var that = this,
             view = that._view,
@@ -14005,12 +12853,12 @@ function pad(number) {
             }
 
             links = element.find(".k-link")
-                           .bind(MOUSEENTER + " " + MOUSELEAVE, mousetoggle)
+                           .on(MOUSEENTER_WITH_NS + " " + MOUSELEAVE, mousetoggle)
                            .click(false);
 
-            that._title = links.eq(1).bind(CLICK, proxy(that.navigateUp, that));
-            that[PREVARROW] = links.eq(0).bind(CLICK, proxy(that.navigateToPast, that));
-            that[NEXTARROW] = links.eq(2).bind(CLICK, proxy(that.navigateToFuture, that));
+            that._title = links.eq(1).on(CLICK, proxy(that.navigateUp, that));
+            that[PREVARROW] = links.eq(0).on(CLICK, proxy(that.navigateToPast, that));
+            that[NEXTARROW] = links.eq(2).on(CLICK, proxy(that.navigateToFuture, that));
         },
 
         _navigate: function(arrow, modifier) {
@@ -14078,16 +12926,16 @@ function pad(number) {
             }
 
             if (link) {
-                link.unbind(CLICK);
+                link.off(CLICK);
 
                 if (toggle) {
                     link.addClass(TODAY)
                         .removeClass(DISABLED)
-                        .bind(CLICK, proxy(that._todayClick, that));
+                        .on(CLICK, proxy(that._todayClick, that));
                 } else {
                     link.removeClass(TODAY)
                         .addClass(DISABLED)
-                        .bind(CLICK, prevent);
+                        .on(CLICK, prevent);
                 }
             }
         },
@@ -14310,12 +13158,17 @@ function pad(number) {
                 return compare(date1, date2);
             },
             setDate: function(date, value) {
+                var month;
                 if (value instanceof DATE) {
-                    date.setFullYear(value.getFullYear(),
-                    value.getMonth(),
-                    date.getDate());
+                    month = value.getMonth();
+
+                    date.setFullYear(value.getFullYear(), month, date.getDate());
+
+                    if (month !== date.getMonth()) {
+                        date.setDate(0);
+                    }
                 } else {
-                    var month = date.getMonth() + value;
+                    month = date.getMonth() + value;
 
                     date.setMonth(month);
 
@@ -14517,8 +13370,11 @@ function pad(number) {
     }
 
     function mousetoggle(e) {
-        e.stopImmediatePropagation();
-        $(this).toggleClass(HOVER, e.type == "mouseenter");
+        if (!touch) {
+            e.stopImmediatePropagation();
+        }
+
+        $(this).toggleClass(HOVER, e.type == MOUSEENTER);
     }
 
     function prevent (e) {
@@ -14581,97 +13437,6 @@ function pad(number) {
     kendo.calendar = calendar;
 })(jQuery);
 (function($, undefined) {
-    /**
-     * @name kendo.ui.DatePicker.Description
-     *
-     * @section
-     * <p>
-     *  The <b>DatePicker</b> allows the end user to select a date from a
-     *  calendar or by direct input. It supports custom templates for "month"
-     *  view, configurable options for min and max date, start view and the
-     *  depth of the navigation.
-     * </p>
-     * <h3>Getting Started</h3>
-     *
-     * @exampleTitle Creating a DatePicker from existing input element
-     * @example
-     * <input id="datePicker" />
-     *
-     * @exampleTitle DatePicker initialization
-     * @example
-     * $(document).ready(function(){
-     *  $("#datePicker").kendoDatePicker();
-     * });
-     *
-     * @section
-     * <p>
-     *  When a <b>DatePicker</b> is initialized, it will be displayed at the
-     *  location of the target HTML element.
-     * </p>
-     * <h3>Configuring DatePicker Behaviors</h3>
-     * <p>
-     *  The <b>DatePicker</b> provides configuration options that can be set
-     *  during initialization. Among the properties that can be controlled:
-     * </p>
-     * <ul>
-     *  <li>Selected date</li>
-     *  <li>Minimum and/or maximum date</li>
-     *  <li>Define format</li>
-     *  <li>Start view</li>
-     *  <li>Navigation depth (last view to which end user can navigate)</li>
-     * </ul>
-     *
-     * @exampleTitle Create DatePicker with a selected date and a defined
-     * minimum and maximum date
-     * @example
-     * $(document).ready(function(){
-     *  $("#datePicker").kendoDatePicker({
-     *   value: new Date(),
-     *   min: new Date(1950, 0, 1),
-     *   max: new Date(2049, 11, 31)
-     *  })
-     * });
-     *
-     * @section
-     * <p>
-     *  DatePicker will set the value only if the entered date is valid and
-     *  within the defined range.
-     * </p>
-     * @section
-     * <h3>Defining a Start View and Navigation Depth</h3>
-     * <p>
-     *  The first rendered view can be defined with "start" option.
-     *  Navigation depth can be controlled with "depth" option. Predefined
-     *  views are:
-     * </p>
-     * <ul>
-     *  <li>"month" - shows the days from the month</li>
-     *  <li>"year" - shows the months of the year</li>
-     *  <li>"decade" - shows the years from the decade</li>
-     *  <li>"century" - shows the decades from the century</li>
-     * </ul>
-     *
-     * @exampleTitle Create a DatePicker for selecting a month
-     * @example
-     * $("#datePicker").kendoDatePicker({
-     *  start: "year",
-     *  depth: "year"
-     * });
-     *
-     * @section
-     * <h3>Accessing an Existing DatePicker</h3>
-     * <p>
-     *  You can reference an existing <b>DatePicker</b> instance via
-     *  <a href="http://api.jquery.com/jQuery.data/">jQuery.data()</a>.
-     *  Once a reference has been established, you can use the API to control
-     *  its behavior.
-     * </p>
-     *
-     * @exampleTitle Accessing an existing DatePicker instance
-     * @example
-     * var datePicker = $("#datePicker").data("kendoDatePicker");
-     *
-     */
     var kendo = window.kendo,
     ui = kendo.ui,
     touch = kendo.support.touch,
@@ -14681,8 +13446,8 @@ function pad(number) {
     template = kendo.template,
     DIV = "<div />",
     SPAN = "<span />",
-    CLICK = (touch ? "touchend" : "click"),
-    CLICK_DATEPICKER = CLICK + ".datepicker",
+    ns = ".kendoDatePicker",
+    CLICK = (touch ? "touchend" : "click") + ns,
     OPEN = "open",
     CLOSE = "close",
     CHANGE = "change",
@@ -14694,8 +13459,8 @@ function pad(number) {
     SELECTED = "k-state-selected",
     STATEDISABLED = "k-state-disabled",
     HOVER = "k-state-hover",
-    HOVEREVENTS = "mouseenter mouseleave",
-    MOUSEDOWN = (touch ? "touchstart" : "mousedown"),
+    HOVEREVENTS = "mouseenter" + ns + " mouseleave" + ns,
+    MOUSEDOWN = (touch ? "touchstart" : "mousedown") + ns,
     MIN = "min",
     MAX = "max",
     MONTH = "month",
@@ -14754,10 +13519,9 @@ function pad(number) {
 
                 element.appendTo(popup.element)
                        .data(DATEVIEW, that)
-                       .undelegate(CLICK_DATEPICKER)
-                       .delegate("td:has(.k-link)", CLICK_DATEPICKER, proxy(that._click, that))
-                       .unbind(MOUSEDOWN)
-                       .bind(MOUSEDOWN, preventDefault)
+                       .off(CLICK + " " + MOUSEDOWN)
+                       .on(CLICK, "td:has(.k-link)", proxy(that._click, that))
+                       .on(MOUSEDOWN, preventDefault)
                        .show();
 
                 calendar.unbind(CHANGE)
@@ -14780,6 +13544,27 @@ function pad(number) {
                 calendar.navigate(that._value, options.start);
                 that.value(that._value);
             }
+        },
+
+        destroy: function() {
+            var that = this,
+                calendar = that.calendar,
+                element = calendar.element,
+                popups;
+
+            if (element.data(DATEVIEW) === that) {
+                popups = $(".k-calendar-container");
+
+                if (popups.length > 1) {
+                    element.appendTo(document.body);
+                } else {
+                    element.off(ns);
+                    calendar.destroy();
+                    DatePicker.sharedCalendar = null;
+                }
+            }
+
+            that.popup.destroy();
         },
 
         open: function() {
@@ -14976,201 +13761,7 @@ function pad(number) {
 
     kendo.DateView = DateView;
 
-    var DatePicker = Widget.extend(/** @lends kendo.ui.DatePicker.prototype */{
-        /**
-         * @constructs
-         * @extends kendo.ui.Widget
-         * @param {Element} element DOM element
-         * @param {Object} options Configuration options.
-         * @option {Date} [value] <null> Specifies the selected date.
-         * _example
-         * // set the selected value to January 1st, 2011
-         * $("#datePicker").kendoDatePicker({
-         *  value: new Date(2011, 0, 1)
-         * });
-         * _exampleTitle To set after initialization
-         * _example
-         * // get a reference to the datePicker widget
-         * var datePicker = $("#datePicker").data("kendoDatePicker");
-         * // set the selected date on the datePicker to January 1st, 2011
-         * datePicker.value(new Date(2011, 0, 1));
-         * @option {Date} [min] <Date(1900, 0, 1)> Specifies the minimum date that the calendar can show.
-         * _example
-         * // set the min date to Jan 1st, 2011
-         * $("#datePicker").kendoDatePicker({
-         *  min: new Date(2011, 0, 1)
-         * });
-         * _exampleTitle To set after initialization
-         * _example
-         * // get a reference to the datePicker widget
-         * var datePicker = $("#datePicker").data("kendoDatePicker");
-         * // set the min date to Jan 1st, 2011
-         * datePicker.min(new Date(2011, 0, 1));
-         * @option {Date} [max] <Date(2099, 11, 31)> Specifies the maximum date, which the calendar can show.
-         * _example
-         * $("#datePicker").kendoDatePicker({
-         *  max: new Date(2013, 0, 1) // sets max date to Jan 1st, 2013
-         * });
-         * _exampleTitle To set after initialization
-         * _example
-         * var datePicker = $("#datePicker").data("kendoDatePicker");
-         * // set the max date to Jan 1st, 2013
-         * datePicker.max(new Date(2013,0, 1));
-         * @option {String} [format] <MM/dd/yyyy> Specifies the format, which is used to format the value of the DatePicker displayed in the input.
-         * _example
-         * $("#datePicker").kendoDatePicker({
-         *     format: "yyyy/MM/dd"
-         * });
-         * @option {Array} [parseFormats] <> Specifies the formats, which are used to parse the value set with value() method or by direct input. If not set the value of the format will be used.
-         * _example
-         * $("#datePicker").kendoDatePicker({
-         *     format: "yyyy/MM/dd",
-         *     parseFormats: ["MMMM yyyy"] //format also will be added to parseFormats
-         * });
-         * @option {String} [start] <month> Specifies the start view.
-         * The following settings are available for the <b>start</b> value:
-         * <div class="details-list">
-         *    <dl>
-         *         <dt>
-         *              <code>"month"</code>
-         *         </dt>
-         *         <dd>
-         *             shows the days of the month
-         *         </dd>
-         *         <dt>
-         *              <code>"year"</code>
-         *         </dt>
-         *         <dd>
-         *              shows the months of the year
-         *         </dd>
-         *         <dt>
-         *              <code>"decade"</code>
-         *         </dt>
-         *         <dd>
-         *              shows the years of the decade
-         *         </dd>
-         *         <dt>
-         *              <code>"century"</code>
-         *         </dt>
-         *         <dd>
-         *              shows the decades from the centery
-         *         </dd>
-         *    </dl>
-         * </div>
-         * _example
-         * $("#datePicker").kendoDatePicker({
-         *     start: "decade" // the datePicker will start with a decade display
-         * });
-         * @option {String} [depth] Specifies the navigation depth. The following
-         * settings are available for the <b>depth</b> value:
-         * <div class="details-list">
-         *    <dl>
-         *         <dt>
-         *              <code>"month"</code>
-         *         </dt>
-         *         <dd>
-         *             shows the days of the month
-         *         </dd>
-         *         <dt>
-         *              <code>"year"</code>
-         *         </dt>
-         *         <dd>
-         *              shows the months of the year
-         *         </dd>
-         *         <dt>
-         *              <code>"decade"</code>
-         *         </dt>
-         *         <dd>
-         *              shows the years of the decade
-         *         </dd>
-         *         <dt>
-         *              <code>"century"</code>
-         *         </dt>
-         *         <dd>
-         *              shows the decades from the centery
-         *         </dd>
-         *    </dl>
-         * </div>
-         * _example
-         * $("#datePicker").kendoDatePicker({
-         *     start: "decade",
-         *     depth: "year" // the datePicker will only go to the year level
-         * });
-         * @option {String} [footer] <> Template to be used for rendering the footer of the calendar.
-         * _example
-         *  // DatePicker initialization
-         *  <script>
-         *      $("#datePicker").kendoDatePicker({
-         *          footer: kendo.template("Today - #=kendo.toString(data, 'd') #")
-         *      });
-         *  </script>
-         * @option {Object} [month] <> Templates for the cells rendered in the calendar "month" view.
-         * @option {String} [month.content] <> Template to be used for rendering the cells in the calendar "month" view, which are in range.
-         * _example
-         *  //template
-         *
-         * <script id="cellTemplate" type="text/x-kendo-tmpl">
-         *      <div class="${ data.value < 10 ? exhibition : party }">
-         *      </div>
-         *      ${ data.value }
-         *  </script>
-         *
-         *  //datePicker initialization
-         *  <script>
-         *      $("#datePicker").kendoDatePicker({
-         *          month: {
-         *             content:  kendo.template($("#cellTemplate").html()),
-         *          }
-         *      });
-         *  </script>
-         *
-         * @option {String} [month.empty]
-         * The template used for rendering the cells in the calendar "month" view, which are not in the range between
-         * the minimum and maximum values.
-         *
-         * @option {Object} [animation]
-         * The animation(s) used for opening and/or closing the pop-up. Setting this value to <strong>false</strong>
-         * will disable the animation(s).
-         *
-         * @option {Object} [animation.open]
-         * The animation(s) used for displaying of the pop-up.
-         *
-         * _exampleTitle Fade-in the pop-up over 300 milliseconds
-         * _example
-         * $("#datePicker").kendoDatePicker({
-         *     animation: {
-         *         open: {
-         *             effects: "fadeIn",
-         *             duration: 300,
-         *             show: true
-         *         }
-         *     }
-         * });
-         *
-         * @option {Object} [animation.close]
-         * The animation(s) used for hiding of the pop-up.
-         *
-         * _exampleTitle Fade-out the pop-up over 300 milliseconds
-         * _example
-         * $("#datePicker").kendoDatePicker({
-         *     animation: {
-         *         close: {
-         *             effects: "fadeOut",
-         *             duration: 300,
-         *             show: false,
-         *             hide: true
-         *         }
-         *     }
-         * });
-         *
-         * @option {String} [culture] <en-US> Specifies the culture info used by the widget.
-         * _example
-         *
-         * // specify on widget initialization
-         * $("#datepicker").kendoDatePicker({
-         *     culture: "de-DE"
-         * });
-         */
+    var DatePicker = Widget.extend({
         init: function(element, options) {
             var that = this;
 
@@ -15209,17 +13800,13 @@ function pad(number) {
 
             element
                 .addClass("k-input")
-                .bind({
-                    keydown: proxy(that._keydown, that),
-                    focus: function(e) {
-                        that._inputWrapper.addClass(FOCUSED);
-                    },
-                    blur: proxy(that._blur, that)
-                })
-                .closest("form")
-                .bind("reset", function() {
-                    that.value(element[0].defaultValue);
+                .on("keydown" + ns, proxy(that._keydown, that))
+                .on("blur" + ns, proxy(that._blur, that))
+                .on("focus" + ns, function(e) {
+                    that._inputWrapper.addClass(FOCUSED);
                 });
+
+            that._reset();
 
             that.enable(!element.is('[disabled]'));
             that.value(options.value || that.element.val());
@@ -15227,66 +13814,6 @@ function pad(number) {
             kendo.notify(that);
         },
         events: [
-        /**
-        * Fires when the selected date is changed
-        * @name kendo.ui.DatePicker#change
-        * @event
-        * @param {Event} e
-        * @example
-        * $("#datePicker").kendoDatePicker({
-        *     change: function(e) {
-        *         // handle event
-        *     }
-        * });
-        * @exampleTitle To set after initialization
-        * @example
-        * // get a reference to the datePicker widget
-        * var datePicker = $("#datePicker").data("kendoDatePicker");
-        * // bind to the change event
-        * datePicker.bind("change", function(e) {
-        *     // handle event
-        * });
-        */
-        /**
-        * Fires when the calendar is opened
-        * @name kendo.ui.DatePicker#open
-        * @event
-        * @param {Event} e
-        * @example
-        * $("#datePicker").kendoDatePicker({
-        *     open: function(e) {
-        *         // handle event
-        *     }
-        * });
-        * @exampleTitle To set after initialization
-        * @example
-        * // get a reference to the datePicker widget
-        * var datePicker = $("#datePicker").data("kendoDatePicker");
-        * // bind to the open event
-        * datePicker.bind("open", function(e) {
-        *     // handle event
-        * });
-        */
-        /**
-        * Fires when the calendar is closed
-        * @name kendo.ui.DatePicker#close
-        * @event
-        * @param {Event} e
-        * @example
-        * $("#datePicker").kendoDatePicker({
-        *     close: function(e) {
-        *         // handle event
-        *     }
-        * });
-        * @exampleTitle To set after initialization
-        * @example
-        * // get a reference to the datePicker widget
-        * var datePicker = $("#datePicker").data("kendoDatePicker");
-        * // bind to the close event
-        * datePicker.bind("close", function(e) {
-        *     // handle event
-        * });
-        */
         OPEN,
         CLOSE,
         CHANGE],
@@ -15315,23 +13842,10 @@ function pad(number) {
             extend(that.dateView.options, that.options);
         },
 
-        /**
-        * Enable/Disable the datePicker widget.
-        * @param {Boolean} enable The argument, which defines whether to enable/disable the datePicker.
-        * @example
-        * // get a reference to the datepicker widget
-        * var datePicker = $("#datePicker").data("kendoDatePicker");
-        *
-        * // disables the datePicker
-        * datePicker.enable(false);
-        *
-        * // enables the datePicker
-        * datePicker.enable(true);
-        */
         enable: function(enable) {
             var that = this,
-                icon = that._dateIcon.unbind(CLICK + " " + MOUSEDOWN),
-                wrapper = that._inputWrapper.unbind(HOVEREVENTS),
+                icon = that._dateIcon.off(ns),
+                wrapper = that._inputWrapper.off(ns),
                 element = that.element;
 
             if (enable === false) {
@@ -15344,94 +13858,48 @@ function pad(number) {
                 wrapper
                     .addClass(DEFAULT)
                     .removeClass(STATEDISABLED)
-                    .bind(HOVEREVENTS, that._toggleHover);
+                    .on(HOVEREVENTS, that._toggleHover);
 
                 element
                     .removeAttr(DISABLED);
 
-                icon.bind(CLICK, proxy(that._click, that))
-                    .bind(MOUSEDOWN, preventDefault);
+                icon.on(CLICK, proxy(that._click, that))
+                    .on(MOUSEDOWN, preventDefault);
             }
         },
 
-        /**
-        * Opens the calendar.
-        * @name kendo.ui.DatePicker#open
-        * @function
-        * @example
-        * // get a reference to the datepicker widget
-        * var datePicker = $("#datePicker").data("kendoDatePicker");
-        * // open the datepicker
-        * datePicker.open();
-        */
+        destroy: function() {
+            var that = this;
+
+            Widget.fn.destroy.call(that);
+
+            that.dateView.destroy();
+
+            that.element.off(ns);
+            that._dateIcon.off(ns);
+            that._inputWrapper.off(ns);
+
+            if (that._form) {
+                that._form.off("reset", that._resetHandler);
+            }
+        },
+
         open: function() {
             this.dateView.open();
         },
 
-        /**
-        * Closes the calendar.
-        * @name kendo.ui.DatePicker#close
-        * @function
-        * @example
-        * // get a reference to the datepicker widget
-        * var datePicker = $("#datePicker").data("kendoDatePicker");
-        * // close the datepicker
-        * datePicker.close();
-        */
         close: function() {
             this.dateView.close();
         },
 
-        /**
-        * Gets/Sets the min value of the datePicker.
-        * @param {Date | String} value The min date to set.
-        * @returns {Date} The min value of the datePicker.
-        * @example
-        * // get a reference to the datepicker widget
-        * var datePicker = $("#datePicker").data("kendoDatePicker");
-        *
-        * // get the min value of the datePicker.
-        * var min = datePicker.min();
-        *
-        * // set the min value of the datePicker.
-        * datePicker.min(new Date(1900, 0, 1));
-        */
         min: function(value) {
             return this._option(MIN, value);
         },
 
-        /**
-        * Gets/Sets the max value of the datePicker.
-        * @param {Date | String} value The max date to set.
-        * @returns {Date} The max value of the datePicker.
-        * @example
-        * // get a reference to the datepicker widget
-        * var datePicker = $("#datePicker").data("kendoDatePicker");
-        *
-        * // get the max value of the datePicker.
-        * var max = datePicker.max();
-        *
-        * // set the max value of the datePicker.
-        * datePicker.max(new Date(1900, 0, 1));
-        */
         max: function(value) {
             return this._option(MAX, value);
         },
 
-        /**
-        * Gets/Sets the value of the datePicker.
-        * @param {Date | String} value The value to set.
-        * @returns {Date} The value of the datePicker.
-        * @example
-        * // get a reference to the datepicker widget
-        * var datePicker = $("#datePicker").data("kendoDatePicker");
-        *
-        * // get the value of the datePicker.
-        * var value = datePicker.value();
-        *
-        * // set the value of the datePicker.
-        * datePicker.value("10/10/2000"); //parse "10/10/2000" date and selects it in the calendar.
-        */
         value: function(value) {
             var that = this;
 
@@ -15566,8 +14034,25 @@ function pad(number) {
                 height: element[0].style.height
             });
 
-            that.wrapper = wrapper.addClass("k-widget k-datepicker k-header");
+            that.wrapper = wrapper.addClass("k-widget k-datepicker k-header")
+                                  .addClass(element[0].className)
+                                  .show();
+
             that._inputWrapper = $(wrapper[0].firstChild);
+        },
+
+        _reset: function() {
+            var that = this,
+                element = that.element,
+                form = element.closest("form");
+
+            if (form[0]) {
+                that._resetHandler = function() {
+                    that.value(element[0].defaultValue);
+                };
+
+                that._form = form.on("reset", that._resetHandler);
+            }
         }
     });
 
@@ -15575,138 +14060,6 @@ function pad(number) {
 
 })(jQuery);
 (function ($, undefined) {
-    /**
-     * @name kendo.ui.AutoComplete.Description
-     *
-     * @section
-     * <p>
-     *  The <b>AutoComplete</b> provides suggestions depending on the typed
-     *  text. It also allows multiple value entries. The suggestions shown by
-     *  the <b>AutoComplete</b> can come from a local Array or from a remote
-     *  data service.
-     * </p>
-     * <h3>Getting Started</h3>
-     *
-     * @exampleTitle Create a HTML input element
-     * @example
-     * <input id="autoComplete" />
-     *
-     * @exampleTitle Initialize the AutoComplete using a jQuery selector
-     * @example
-     * $(document).ready(function() {
-     *  $("#autoComplete").kendoAutoComplete(["Item1", "Item2"]);
-     * });
-     *
-     * @section <h3>AutoComplete Suggestions</h3>
-     * <p>
-     *  There are two primary ways to provide the <b>AutoComplete</b>
-     *  suggestions:
-     * </p>
-     * <ol>
-     *  <li>From a local array</li>
-     *  <li>From a remote data service</li>
-     * </ol>
-     * <p>
-     *  Locally defined values are best for small, fixed sets of suggestions.
-     *  Remote suggestions should be used for larger data sets. When used
-     *  with the <strong>DataSource</strong> component,
-     *  filtering large remote data services can be pushed to the server as
-     *  well, maximizing client-side performance.
-     * </p>
-     * <h3>Local Suggestions</h3>
-     * <p>
-     *  To configure and provide <b>AutoComplete</b> suggestions locally, you
-     *  can either pass an array directly to its constructor or you can set
-     *  the dataSource property to an local array.
-     * </p>
-     *
-     * @exampleTitle Directly initialize suggestions in constructor
-     * @example
-     * $("#autoComplete").kendoAutoComplete(["Item1", "Item2", "Item3"]);
-     *
-     * @exampleTitle Using dataSource property to bind to local Array
-     * @example
-     * var data = ["Item1", "Item2", "Item3"];
-     * $("#autoComplete").kendoAutoComplete({
-     *    dataSource: data
-     * });
-     *
-     * @section
-     * <h3>Remote Suggestions</h3>
-     * <p>
-     *  The easiest way to bind an <b>AutoComplete</b> to remote
-     *  suggestions is to use the
-     *  <strong>DataSource</strong> component; an
-     *  abstraction for local and remote data. The <b>DataSource</b>
-     *  component can be used to serve data from a variety of data services,
-     *  such as
-     *  <a href="http://en.wikipedia.org/wiki/XML">XML</a>,
-     *  <a href="http://en.wikipedia.org/wiki/JSON">JSON</a>, and
-     *  <a href="http://en.wikipedia.org/wiki/JSONP">JSONP</a>.
-     * </p>
-     *
-     * @exampleTitle Using the Kendo UI Web DataSource component to bind to
-     * remote suggestions with OData
-     * @example
-     * $(document).ready(function(){
-     *  $("#autoComplete").kendoAutoComplete({
-     *   minLength: 3,
-     *   dataTextField: "Name", // JSON property name to use
-     *   dataSource: new kendo.data.DataSource({
-     *    type: "odata", // specifies data protocol
-     *    pageSize: 10, // limits result set
-     *    transport: {
-     *     read: "http://odata.netflix.com/Catalog/Titles"
-     *    }
-     *   })
-     *  })
-     * });
-     *
-     * @exampleTitle Using the Kendo UI Web DataSource to bind to JSONP
-     * suggestions
-     * @example
-     * $(document).ready(function(){
-     *  $("#autoComplete").kendoAutoComplete({
-     *   minLength:6,
-     *   dataTextField:"title",
-     *   filter: "contains",
-     *   dataSource: new kendo.data.DataSource({
-     *    transport: {
-     *     read: {
-     *      url: "http://api.geonames.org/wikipediaSearchJSON",
-     *      data: {
-     *       q: function(){
-     *        return $("#autoComplete").data("kendoAutoComplete").value();
-     *       },
-     *       maxRows: 10,
-     *       username: "demo"
-     *      }
-     *     }
-     *    },
-     *    schema: {
-     *     data:"geonames"
-     *    }
-     *   }),
-     *   change: function(){
-     *    this.dataSource.read();
-     *   }
-     *  })
-     * });
-     *
-     * @section
-     * <h3>Accessing an Existing AutoComplete</h3>
-     * <p>
-     *  You can reference an existing <b>AutoComplete</b> instance via
-     *  <a href="http://api.jquery.com/jQuery.data/">jQuery.data()</a>.
-     *  Once a reference has been established, you can use the API to control
-     *  its behavior.
-     * </p>
-     *
-     * @exampleTitle Accessing an existing AutoComplete instance
-     * @example
-     * var autoComplete = $("#autoComplete").data("kendoAutoComplete");
-     *
-     */
     var kendo = window.kendo,
         support = kendo.support,
         placeholderSupported = support.placeholder,
@@ -15721,7 +14074,8 @@ function pad(number) {
         SELECTED = "k-state-selected",
         STATEDISABLED = "k-state-disabled",
         HOVER = "k-state-hover",
-        HOVEREVENTS = "mouseenter mouseleave",
+        ns = ".kendoAutoComplete",
+        HOVEREVENTS = "mouseenter" + ns + " mouseleave" + ns,
         caretPosition = List.caret,
         selectText = List.selectText,
         proxy = $.proxy;
@@ -15752,162 +14106,11 @@ function pad(number) {
         selectText(element, length, length);
     }
 
-    var AutoComplete = List.extend/** @lends kendo.ui.AutoComplete.prototype */({
-        /**
-        * @constructs
-        * @extends kendo.ui.List
-        * @param {Element} element DOM element
-        * @param {Object} options Configuration options.
-        * @option {Object | kendo.data.DataSource } [dataSource] The set of data that the AutoComplete will be bound to.
-        *  Either a local JavaScript object, or an instance of the Kendo UI DataSource.
-        * _exampleTitle Bind to local array
-        * _example
-        * var items = [ { Name: "Item 1" }, { Name: "Item 2"} ];
-        * $("#autoComplete").kendoAutoComplete({ dataSource: items });
-        * _exampleTitle Bind to a remote URL
-        * _example
-        * $("#autocomplete").kendoAutoComplete({
-        *     dataSource: new kendo.data.DataSource({
-        *         transport: {
-        *             read: "Items/GetData" // url to server method which returns data
-        *         }
-        *     });
-        * });
-        * @option {Boolean} [enable] <true> Controls whether the AutoComplete should be initially enabled.
-        * _example
-        * // disable the autocomplete when it is created (enabled by default)
-        * $("#autoComplete").kendoAutoComplete({
-        *     enable: false
-        * });
-        * @option {Boolean} [highlightFirst] <true> Controls whether the first item will be automatically highlighted.
-        * _example
-        * $("#autocomplete").kendoAutoComplete({
-        *     highlightFirst: false //no of the suggested items will be highlighted
-        * });
-        * @option {Boolean} [suggest] <false> Controls whether the AutoComplete should automatically auto-type the rest of text.
-        * _example
-        * // turn on auto-typing (off by default)
-        * $("#autoComplete").kendoAutoComplete({
-        *     suggest: true
-        * });
-        * @option {Number} [delay] <200> Specifies the delay in ms after which the AutoComplete will start filtering the dataSource.
-        * _example
-        * // set the delay to 500 milliseconds
-        * $("#autoComplete").kendoAutoComplete({
-        *     delay: 500
-        * });
-        * @option {Number} [minLength] <1> Specifies the minimum number of characters that should be typed before the AutoComplete queries
-        * the dataSource.
-        * _example
-        * // wait until the user types 3 characters before querying the server
-        * $("#autoComplete").kendoAutoComplete({
-        *     minLength: 3
-        * });
-        * @option {String} [dataTextField] <null> Sets the field of the data item that provides the text content of the list items.
-        * _example
-        * var items = [ { ID: 1, Name: "Item 1" }, { ID: 2, Name: "Item 2"} ];
-        * $("#autoComplete").kendoAutoComplete({
-        *     dataSource: items,
-        *     dataTextField: "Name"
-        * });
-        * @option {String} [filter] <"startswith"> Defines the type of filtration. This value is handled by the remote data source.
-        * _example
-        * // send a filter value of 'contains' to the server
-        * $("#autoComplete").kendoAutoComplete({
-        *     filter: 'contains'
-        * });
-        * @option {String} [ignoreCase] <true> Defines whether the filtration should be case sensitive.
-        * _example
-        * $("#autoComplete").kendoAutoComplete({
-        *     filter: 'contains',
-        *     ignoreCase: false //now filtration will be case sensitive
-        * });
-        * @option {Number} [height] <200> Sets the height of the drop-down list in pixels.
-        * _example
-        * // set the height of the drop-down list that appears when the autocomplete is activated to 500px
-        * $("#autoComplete").kendoAutoComplete({
-        *     height: 500
-        * });
-        * @option {String} [separator] <""> Sets the separator for completion. Empty by default, allowing for only one completion.
-        * _example
-        * // set completion separator to ,
-        * $("#autoComplete").kendoAutoComplete({
-        *     separator: ", "
-        * });
-        * @option {String} [template] Template to be used for rendering the items in the list.
-        * _example
-        *  //template
-        *
-        * <script id="template" type="text/x-kendo-tmpl">
-        *       # if (data.BoxArt.SmallUrl) { #
-        *           <img src="${ data.BoxArt.SmallUrl }" alt="${ data.Name }" />Title:${ data.Name }, Year: ${ data.Name }
-        *       # } else { #
-        *           <img alt="${ data.Name }" />Title:${ data.Name }, Year: ${ data.Name }
-        *       # } #
-        *  </script>
-        *
-        *  //autocomplete initialization
-        *  <script>
-        *      $("#autocomplete").kendoAutoComplete({
-        *          dataSource: dataSource,
-        *          dataTextField: "Name",
-        *          template: kendo.template($("#template").html())
-        *      });
-        *  </script>
-        * @option {Object} [animation] <> Animations to be used for opening/closing the popup. Setting to false will turn of the animation.
-        * @option {Object} [animation.open] <> Animation to be used for opening of the popup.
-        * _example
-        *  //autocomplete initialization
-        *  <script>
-        *      $("#autocomplete").kendoAutoComplete({
-        *          dataSource: dataSource,
-        *          animation: {
-        *             open: {
-        *                 effects: "fadeIn",
-        *                 duration: 300,
-        *                 show: true
-        *             }
-        *          }
-        *      });
-        *  </script>
-        * @option {Object} [animation.close] <> Animation to be used for closing of the popup.
-        * _example
-        *  //autocomplete initialization
-        *  <script>
-        *      $("#autocomplete").kendoAutoComplete({
-        *          dataSource: dataSource,
-        *          animation: {
-        *             close: {
-        *                 effects: "fadeOut",
-        *                 duration: 300,
-        *                 hide: true
-        *                 show: false
-        *             }
-        *          }
-        *      });
-        *  </script>
-        *  @option {String} [placeholder] <""> A string that appears in the textbox when it has no value.
-        *  _example
-        *  //autocomplete initialization
-        *  <script>
-        *      $("#autocomplete").kendoAutoComplete({
-        *          dataSource: dataSource,
-        *          placeholder: "Enter value..."
-        *      });
-        *  </script>
-        *  _example
-        *  <input id="autocomplete" placeholder="Enter value..." />
-        *
-        *  //combobox initialization
-        *  <script>
-        *      $("#autocomplete").kendoAutoComplete({
-        *          dataSource: dataSource
-        *      });
-        *  </script>
-        */
+    var AutoComplete = List.extend({
         init: function (element, options) {
             var that = this, wrapper;
 
+            that.ns = ns;
             options = $.isArray(options) ? { dataSource: options} : options;
 
             List.fn.init.call(that, element, options);
@@ -15932,20 +14135,17 @@ function pad(number) {
             element
                 .attr("autocomplete", "off")
                 .addClass("k-input")
-                .bind({
-                    keydown: proxy(that._keydown, that),
-                    paste: proxy(that._search, that),
-                    focus: function () {
-                        that._prev = that.value();
-                        that._placeholder(false);
-                        wrapper.addClass(FOCUSED);
-                        clearTimeout(that._bluring);
-                    },
-                    blur: function () {
-                        that._change();
-                        that._placeholder();
-                        wrapper.removeClass(FOCUSED);
-                    }
+                .on("keydown" + ns, proxy(that._keydown, that))
+                .on("paste" + ns, proxy(that._search, that))
+                .on("focus" + ns, function () {
+                    that._prev = that.value();
+                    that._placeholder(false);
+                    wrapper.addClass(FOCUSED);
+                })
+                .on("blur" + ns, function () {
+                    that._change();
+                    that._placeholder();
+                    wrapper.removeClass(FOCUSED);
                 });
 
             that._enable();
@@ -15995,106 +14195,14 @@ function pad(number) {
         },
 
         events: [
-        /**
-        * Fires when the drop-down list is opened
-        * @name kendo.ui.AutoComplete#open
-        * @event
-        * @param {Event} e
-        * @example
-        * $("#autoComplete").kendoAutoComplete({
-        *     open: function(e) {
-        *         // handle event
-        *     }
-        * });
-        * @example
-        * var autoComplete = $("#autoComplete").data("kendoAutoComplete");
-        * autoComplete.bind("open", function(e) {
-        *     // handle event
-        * });
-        */
-        "open",
-        /**
-        * Fires when the drop-down list is closed
-        * @name kendo.ui.AutoComplete#close
-        * @event
-        * @param {Event} e
-        * @example
-        * $("#autoComplete").kendoAutoComplete({
-        *     close: function(e) {
-        *         // handle event
-        *     }
-        * });
-        * @exampleTitle To set after initialization
-        * @example
-        * var autoComplete = $("#autoComplete").data("kendoAutoComplete");
-        * autoComplete.bind("close", function(e) {
-        *     // handle event
-        * });
-            */
-        "close",
-            /**
-            * Fires when the value has been changed.
-            * @name kendo.ui.AutoComplete#change
-            * @event
-            * @param {Event} e
-            * $("#autoComplete").kendoAutoComplete({
-            *     change: function(e) {
-            *         // handle event
-            *     }
-            * });
-            * @exampleTitle To set after initialization
-            * @example
-            * var autoComplete = $("#autoComplete").data("kendoAutoComplete");
-            * $("#autoComplete").data("kendoAutoComplete").bind("change", function(e) {
-            *     // handle event
-            * });
-                */
-               CHANGE,
-               /**
-               *
-               * Triggered when a Li element is selected.
-               *
-               * @name kendo.ui.AutoComplete#select
-               * @event
-               *
-               * @param {Event} e
-               *
-               * @param {jQuery} e.item
-               * The selected item chosen by a user.
-               *
-               * @exampleTitle Attach select event handler during initialization; detach via unbind()
-               * @example
-               * // event handler for select
-               * var onSelect = function(e) {
-               *     // access the selected item via e.item (jQuery object)
-               * };
-               *
-               * // attach select event handler during initialization
-               * var autocomplete = $("#autocomplete").kendoAutoComplete({
-               *     select: onSelect
-               * });
-               *
-               * // detach select event handler via unbind()
-               * autocomplete.data("kendoAutoComplete").unbind("select", onSelect);
-               *
-               * @exampleTitle Attach select event handler via bind(); detach via unbind()
-               * @example
-               * // event handler for select
-               * var onSelect = function(e) {
-               *     // access the selected item via e.item (jQuery object)
-               * };
-               *
-               * // attach select event handler via bind()
-               * $("#autocomplete").data("kendoAutoComplete").bind("select", onSelect);
-               *
-               * // detach select event handler via unbind()
-               * $("#autocomplete").data("kendoAutoComplete").unbind("select", onSelect);
-               *
-               */
-               "select",
-               "dataBinding",
-               "dataBound"
-            ],
+            "open",
+            "close",
+            CHANGE,
+            "select",
+            "dataBinding",
+            "dataBound"
+        ],
+
         setOptions: function(options) {
             List.fn.setOptions.call(this, options);
 
@@ -16102,86 +14210,52 @@ function pad(number) {
             this._accessors();
         },
 
-        /**
-        * Returns the raw data record at the specified index
-        * @name kendo.ui.AutoComplete#dataItem
-        * @function
-        * @param {Number} index The zero-based index of the data record
-        * @returns {Object} The raw data record. Returns <i>undefined</i> if no data.
-        * @example
-        * var autocomplete = $("#autocomplete").data("kendoAutoComplete");
-        *
-        * // get the dataItem corresponding to the passed index.
-        * var dataItem = autocomplete.dataItem(1);
-        */
 
-        /**
-        * Enable/Disable the autocomplete widget.
-        * @param {Boolean} enable The argument, which defines whether to enable/disable the autocomplete.
-        * @example
-        * // get a reference to the autocomplete widget
-        * var autocomplete = $("autocomplete").data("kendoAutoComplete");
-        *
-        * // disables the autocomplete
-        * autocomplete.enable(false);
-        *
-        * // enables the autocomplete
-        * autocomplete.enable(true);
-        */
         enable: function(enable) {
             var that = this,
                 element = that.element,
-                wrapper = that.wrapper;
+                wrapper = that.wrapper.off(HOVEREVENTS);
 
             if (enable === false) {
                 wrapper
                     .removeClass(DEFAULT)
-                    .addClass(STATEDISABLED)
-                    .unbind(HOVEREVENTS);
+                    .addClass(STATEDISABLED);
 
                 element.attr(DISABLED, DISABLED);
             } else {
                 wrapper
                     .removeClass(STATEDISABLED)
                     .addClass(DEFAULT)
-                    .bind(HOVEREVENTS, that._toggleHover);
+                    .on(HOVEREVENTS, that._toggleHover);
 
                 element
                     .removeAttr(DISABLED);
             }
         },
 
-        /**
-        * Closes the drop-down list.
-        * @example
-        * // get a reference to the autocomplete widget
-        * var autocomplete = $("autocomplete").data("kendoAutoComplete");
-        *
-        * autocomplete.close();
-        */
         close: function () {
             var that = this;
             that._current = null;
             that.popup.close();
         },
 
-        /**
-        * Re-render the items in drop-down list.
-        * @name kendo.ui.AutoComplete#refresh
-        * @function
-        * @example
-        * // get a referenence to the Kendo UI AutoComplete
-        * var autocomplete = $("autocomplete").data("kendoAutoComplete");
-        * // re-render the items in drop-down list.
-        * autocomplete.refresh();
-        */
+        destroy: function() {
+            var that = this;
+
+            that.element.off(ns);
+            that.wrapper.off(ns);
+
+            List.fn.destroy.call(that);
+        },
+
         refresh: function () {
             var that = this,
             ul = that.ul[0],
             popup = that.popup,
             options = that.options,
             data = that._data(),
-            length = data.length;
+            length = data.length,
+            action;
 
             that.trigger("dataBinding");
 
@@ -16201,7 +14275,14 @@ function pad(number) {
 
             if (that._open) {
                 that._open = false;
-                popup[length ? "open" : "close"]();
+                action = length ? "open" : "close";
+
+                if (that._typing && that.element[0] !== document.activeElement) {
+                    action = "close";
+                }
+
+                popup[action]();
+                that._typing = undefined;
             }
 
             if (that._touchScroller) {
@@ -16213,30 +14294,10 @@ function pad(number) {
             that.trigger("dataBound");
         },
 
-        /**
-        * Selects drop-down list item and sets the text of the autocomplete.
-        * @param {jQuery Object} li The LI element.
-        * @example
-        * // get a reference to the autocomplete widget
-        * var autocomplete = $("autocomplete").data("kendoAutoComplete");
-        *
-        * // selects by jQuery object
-        * autocomplete.select(autocomplete.ul.children().eq(0));
-        */
         select: function (li) {
             this._select(li);
         },
 
-        /**
-        * Filters dataSource using the provided parameter and rebinds drop-down list.
-        * @param {string} word The filter value.
-        * @example
-        * // get a reference to the autocomplete widget
-        * var autocomplete = $("autocomplete").data("kendoAutoComplete");
-        *
-        * // Searches for item which has "Inception" in the name.
-        * autocomplete.search("Inception");
-        */
         search: function (word) {
             var that = this,
             options = that.options,
@@ -16270,19 +14331,6 @@ function pad(number) {
             }
         },
 
-        /**
-        * Forces a suggestion onto the text of the AutoComplete.
-        * @param {string} value Characters to force a suggestion.
-        * @example
-        * // note that this suggest is not the same as the configuration method
-        * // suggest which enables/disables auto suggesting for the AutoComplete
-        * //
-        * // get a referenence to the Kendo UI AutoComplete
-        * var autoComplete = $("#autoComplete").data("kendoAutoComplete");
-        *
-        * // force a suggestion to the item with the name "Inception"
-        * autoComplete.suggest("Inception");
-        */
         suggest: function (word) {
             var that = this,
                 key = that._last,
@@ -16343,17 +14391,6 @@ function pad(number) {
             selectText(element, caret, selectionEnd);
         },
 
-        /**
-        * Gets/Sets the value of the autocomplete.
-        * @param {String} value The value to set.
-        * @returns {String} The value of the autocomplete.
-        * @example
-        * // get a reference to the autocomplete widget
-        * var autocomplete = $("autocomplete").data("kendoAutoComplete");
-        *
-        * // get the text of the autocomplete.
-        * var value = autocomplete.value();
-        */
         value: function (value) {
             var that = this,
                 element = that.element[0];
@@ -16404,7 +14441,7 @@ function pad(number) {
                 e.preventDefault();
             } else if (key === keys.ENTER || key === keys.TAB) {
 
-                if (that.popup.visible()) {
+                if (key === keys.ENTER && that.popup.visible()) {
                     e.preventDefault();
                 }
 
@@ -16533,156 +14570,13 @@ function pad(number) {
 
     ui.plugin(AutoComplete);
 })(jQuery);
-/**
- * @fileOverview Provides a DropDownList implementation which can be used to display a list of values and allows the
- * selection of a single value from the list.
- */
 
 (function($, undefined) {
-    /**
-     * @name kendo.ui.DropDownList.Description
-     *
-     * @section
-     * <p>
-     *  A <strong>DropDownList</strong> displays a list of values and allows the selection of a single value from the
-     *  list.Custom values may not be entered via keyboard input.If you wish permit keyboard input - that is, custom
-     *  values are allowed - use the <strong>ComboBox</strong>.
-     * </p>
-     * <h3>Getting Started</h3>
-     * <p>There are two ways to create a <strong>DropDownList</strong>:</p>
-     * <ol>
-     *  <li>From a &lt;select&gt; element with HTML to define the list items</li>
-     *  <li>From an &lt;input&gt; element with databinding to define the listitems</li>
-     * </ol>
-     * <p>
-     *  A <strong>DropDownList</strong> will look and operate consistently regardless of the way in which it was
-     *  created.
-     * </p>
-     *
-     * @exampleTitle Creating a DropDownList from existing &lt;input&gt; element
-     * @example
-     * <input id="dropDownList" />
-     *
-     * @section
-     * <p></p>
-     * <p>
-     *  Initialization of a <strong>DropDownList</strong> should occur after the DOM is fully loaded. It is recommended
-     *  that initialization the <strong>DropDownList</strong> occur within a handler is provided to
-     *  $(document).ready().
-     * </p>
-     *
-     * @exampleTitle Initialize a DropDownList using a selector within $(document).ready()
-     * @example
-     * $(document).ready(function() {
-     *     $("#dropDownList").kendoDropDownList({
-     *         dataTextField: "text",
-     *         dataValueField: "value",
-     *         dataSource: [
-     *             { text: "Item1", value: "1" },
-     *             { text: "Item2", value: "2" }
-     *         ]
-     *     });
-     * });
-     *
-     * @exampleTitle Create a DropDownList from existing &lt;select&gt; element with a pre-defined structure
-     * @example
-     * <select id="dropDownList">
-     *     <option>Item 1</option>
-     *     <option>Item 2</option>
-     *     <option>Item 3</option>
-     * </select>
-     *
-     * <script>
-     *     $(document).ready(function(){
-     *         $("#dropDownList").kendoDropDownList();
-     *     });
-     * </script>
-     *
-     * @section
-     * <h3>Binding to Local or Remote Data</h3>
-     * <p>
-     *  The <strong>DropDownList</strong> can be bound to both local arrays and remote data via the
-     *  <strong>DataSource</strong> component; an abstraction for local and
-     *  remote data. Local arrays are appropriate for limited value options, while remote data binding is better for
-     *  larger data sets. With remote data-binding, items will be loaded on-demand; when they are displayed.
-     * </p>
-     *
-     * @exampleTitle Binding to a remote OData service
-     * @example
-     * $(document).ready(function() {
-     *     $("#titles").kendoDropDownList({
-     *         index: 0,
-     *         dataTextField: "Name",
-     *         dataValueField: "Id",
-     *         dataSource: {
-     *             type: "odata",
-     *             transport: {
-     *                 read: "http://odata.netflix.com/Catalog/Titles"
-     *             }
-     *         }
-     *     });
-     * });
-     *
-     * @section
-     * @section
-     * <h3>Customizing Item Templates</h3>
-     * <p>
-     *  The <strong>DropDownList</strong> uses Kendo UI templates to enable you to control how items are rendered. For
-     *  a detailed description of the capabilities and syntax of the Kendo UI templates, please refer to the
-     *  <a href="http://www.kendoui.com/documentation/framework/templates/overview.aspx" title="Kendo UI Template">documentation</a>.
-     * </p>
-     *
-     * @exampleTitle Basic item template customization
-     * @example
-     * <!-- HTML -->
-     * <input id="titles" />
-     *
-     * <!-- Template -->
-     * <script id="scriptTemplate" type="text/x-kendo-template">
-     *     # if (data.BoxArt.SmallUrl) { #
-     *         <img src="${ data.BoxArt.SmallUrl }" alt="${ data.Name }" />
-     *         Title:${ data.Name }, Year: ${ data.Name }
-     *     # } else { #
-     *         <img alt="${ data.Name }" />
-     *         Title:${ data.Name }, Year: ${ data.Name }
-     *     # } #
-     * </script>
-     *
-     * <!-- DropDownList initialization -->
-     * <script type="text/javascript">
-     *     $(document).ready(function() {
-     *         $("#titles").kendoDropDownList({
-     *             autoBind: false,
-     *             dataTextField: "Name",
-     *             dataValueField: "Id",
-     *             template: $("#scriptTemplate").html(),
-     *             dataSource: {
-     *                 type: "odata",
-     *                 transport: {
-     *                     read: "http://odata.netflix.com/Catalog/Titles"
-     *                 }
-     *             }
-     *         });
-     *     });
-     * </script>
-     *
-     * @section
-     * <h3>Accessing an Existing DropDownList</h3>
-     * <p>
-     *  You can reference an existing <b>DropDownList</b> instance via
-     *  <a href="http://api.jquery.com/jQuery.data/">jQuery.data()</a>. Once a reference has been established, you can
-     *  use the API to control its behavior.
-     * </p>
-     *
-     * @exampleTitle Accessing an existing DropDownList instance
-     * @example
-     * var dropDownList = $("#dropDownList").data("kendoDropDownList");
-     *
-     */
     var kendo = window.kendo,
         ui = kendo.ui,
         Select = ui.Select,
         os = kendo.support.mobileOS,
+        ns = ".kendoDropDownList",
         ATTRIBUTE = "disabled",
         CHANGE = "change",
         SELECT = "select",
@@ -16691,180 +14585,26 @@ function pad(number) {
         DISABLED = "k-state-disabled",
         SELECTED = "k-state-selected",
         TABINDEX = "tabIndex",
-        HOVEREVENTS = "mouseenter mouseleave",
+        HOVEREVENTS = "mouseenter" + ns + " mouseleave" + ns,
         proxy = $.proxy;
 
-    var DropDownList = Select.extend( /** @lends kendo.ui.DropDownList.prototype */ {
-        /**
-         * @constructs
-         * @extends kendo.ui.Select
-         * @param {Element} element DOM element
-         * @param {Object} options Configuration options.
-         * @option {kendo.data.DataSource | Object} [dataSource] Instance of DataSource or the data that the DropDownList will be bound to.
-         * _exampleTitle Bind to a local array
-         * _example
-         * // bind to local data
-         * var items = [ { Id: 0, Title: "Manager" }, { Id: 1, Title: "Developer" }, { Id: 2, Title: "Vice President" } ];
-         * $("#dropdownlist").kendoDropDownList({
-         *     dataSource: items,
-         *     dataTextField: "Title",
-         *     dataValueField: "Id"
-         * });
-         * _exampleTitle Bind to a remote URL
-         * _example
-         * $("#dropdownlist").kendoDropDownList({
-         *     dataSource: {
-         *         transport: {
-         *             read: "titles.json"
-         *         }
-         *     },
-         *     dataTextField: "Title",
-         *     dataValueField: "Id"
-         * });
-         * @option {Boolean} [enable] <true> Controls whether the DropDownList should be initially enabled.
-         * _example
-         * $("#dropdownlist").kendoDropDownList({
-         *     enabled: false // dropdown list will not be enabled
-         * });
-         * _exampleTitle To set after initialization
-         * _example
-         * // get a reference to the dropdown list
-         * var dropdownlist = $("#dropdownlist").data("kendoDropDownList");
-         * // disable the dropdown
-         * dropdownlist.enable(false);
-         * @option {Number} [index] <0> Defines the initial selected item.
-         * _example
-         * $("#dropdownlist").kendoDropDownList({
-         *     index: 1 // selects the second item in the dropdown list
-         * });
-         * @option {Boolean} [autoBind] <true> Controls whether to bind the widget on initialization.
-         * _example
-         * $("#dropdownlist").kendoDropDownList({
-         *     autoBind: false
-         * });
-         * @option {Number} [delay] <500> Specifies the delay in ms before the search text typed by the end user is cleared.
-         * _example
-         * $("#dropdownlist").kendoDropDownList({
-         *     delay: 1000 // wait 1 second before clearing the user input
-         * });
-         * @option {String} [dataTextField] <""> Sets the field of the data item that provides the text content of the list items.
-         * _example
-         * var items = [ { Id: 0, Title: "Manager" }, { Id: 1, Title: "Developer" }, { Id: 2, Title: "Vice President" } ];
-         * $("#dropdownlist").kendoDropDownList({
-         *     dataSource: items,
-         *     dataTextField: "Title",
-         *     dataValueField: "Id"
-         * });
-         * @option {String} [dataValueField] <""> Sets the field of the data item that provides the value content of the list items.
-         * _example
-         * var items = [ { Id: 0, Title: "Manager" }, { Id: 1, Title: "Developer" }, { Id: 2, Title: "Vice President" } ];
-         * $("#dropdownlist").kendoDropDownList({
-         *     dataSource: items,
-         *     dataTextField: "Title",
-         *     dataValueField: "Id"
-         * });
-         * @option {Number} [height] <200> Define the height of the drop-down list in pixels.
-         * _example
-         * $("#dropdownlist").kendoDropDownList({
-         *     height: 400
-         * });
-         * @option {String | Object} [optionLabel] <""> Define the text of the default empty item. If the value is an object, then the widget will use it directly.
-         * _example
-         * $("#dropdownlist").kendoDropDownList({
-         *     optionLabel: "Select An Option"
-         * });
-         * _example
-         * $("#dropdownlist").kendoDropDownList({
-         *     dataTextField: "text",
-         *     dataValueField: "value",
-         *     optionLabel: {
-         *        text: "Select An Option",
-         *        value: ""
-         *     }
-         * });
-         * @option {String} [template] Template to be used for rendering the items in the list.
-         * _example
-         *  //template
-         * <script id="template" type="text/x-kendo-tmpl">
-         *       # if (data.BoxArt.SmallUrl) { #
-         *           <img src="${ data.BoxArt.SmallUrl }" alt="${ data.Name }" />Title:${ data.Name }, Year: ${ data.Name }
-         *       # } else { #
-         *           <img alt="${ data.Name }" />Title:${ data.Name }, Year: ${ data.Name }
-         *       # } #
-         *  </script>
-         *
-         *  //dropdownlist initialization
-         *  <script>
-         *      $("#dropdownlist").kendoDropDownList({
-         *          dataSource: dataSource,
-         *          dataTextField: "Name",
-         *          dataValueField: "Id",
-         *          template: kendo.template($("#template").html())
-         *      });
-         *  </script>
-         * @option {String} [text] <""> Define the text of the widget, when the autoBind is set to false.
-         * _example
-         * $("#dropdownlist").kendoDropDownList({
-         *      autoBind: false,
-         *      text: "Chai"
-         * });
-         * @option {String} [value] <""> Define the value of the widget
-         * _example
-         * $("#dropdownlist").kendoDropDownList({
-         *      dataSource: ["Item1", "Item2"],
-         *      value: "Item1"
-         * });
-         * @option {Object} [animation] <> Animations to be used for opening/closing the popup. Setting to false will turn of the animation.
-         * @option {Object} [animation.open] <> Animation to be used for opening of the popup.
-         * _example
-         *  //dropdownlist initialization
-         *  <script>
-         *      $("#dropdownlist").kendoDropDownList({
-         *          dataSource: dataSource,
-         *          animation: {
-         *             open: {
-         *                 effects: "fadeIn",
-         *                 duration: 300,
-         *                 show: true
-         *             }
-         *          }
-         *      });
-         *  </script>
-         * @option {Object} [animation.close] <> Animation to be used for closing of the popup.
-         * _example
-         *  //dropdownlist initialization
-         *  <script>
-         *      $("#dropdownlist").kendoDropDownList({
-         *          dataSource: dataSource,
-         *          animation: {
-         *             close: {
-         *                 effects: "fadeOut",
-         *                 duration: 300,
-         *                 hide: true
-         *                 show: false
-         *             }
-         *          }
-         *      });
-         *  </script>
-         * @option {String} [ignoreCase] <true> Controls whether the search should be case sensitive.
-         * _example
-         * $("#dropdownlist").kendoDropDownList({
-         *     ignoreCase: false //now search will be case sensitive
-         * });
-         */
+    var DropDownList = Select.extend( {
         init: function(element, options) {
             var that = this,
                 index = options && options.index,
                 optionLabel, useOptionLabel, text;
 
+            that.ns = ns;
             options = $.isArray(options) ? { dataSource: options } : options;
 
             Select.fn.init.call(that, element, options);
 
-            options = that.options;
-            element = that.element.focus(function() {
+            that._focusHandler = function() {
                 that.wrapper.focus();
-            });
+            };
+
+            options = that.options;
+            element = that.element.on("focus" + ns, that._focusHandler);
 
             that._reset();
 
@@ -16893,7 +14633,7 @@ function pad(number) {
             }
 
             if (options.autoBind) {
-                that._selectItem();
+                that.dataSource.fetch();
             } else {
                 text = options.text;
                 if (!text) {
@@ -16933,112 +14673,9 @@ function pad(number) {
             animation: {}
         },
         events: [
-            /**
-            * Fires when the drop-down list is opened
-            * @name kendo.ui.DropDownList#open
-            * @event
-            * @param {Event} e
-            * @example
-            * $("#dropdownlist").kendoDropDownList({
-            *     open: function(e) {
-            *         // handle event
-            *     }
-            * });
-            * @exampleTitle To set after initialization
-            * @example
-            * // get a reference to the dropdown list
-            * var dropdownlist = $("#dropdownlist").data("kendoDropDownList");
-            * // bind to the open event
-            * dropdownlist.bind("open", function(e) {
-            *     // handle event
-            * });
-            */
             "open",
-
-            /**
-            * Fires when the drop-down list is closed
-            * @name kendo.ui.DropDownList#close
-            * @event
-            * @param {Event} e
-            * @example
-            * $("#dropdownlist").kendoDropDownList({
-            *     close: function(e) {
-            *         // handle event
-            *     }
-            * });
-            * @exampleTitle To set after initialization
-            * @example
-            * // get a reference to the dropdown list
-            * var dropdownlist = $("#dropdownlist").data("kendoDropDownList");
-            * // bind to the close event
-            * dropdownlist.bind("close", function(e) {
-            *     // handle event
-            * });
-            */
             "close",
-
-            /**
-            * Fires when the value has been changed.
-            * @name kendo.ui.DropDownList#change
-            * @event
-            * @param {Event} e
-            * @example
-            * $("#dropdownlist").kendoDropDownList({
-            *     change: function(e) {
-            *         // handle event
-            *     }
-            * });
-            * @exampleTitle To set after initialization
-            * @example
-            * // get a reference to the dropdown list
-            * var dropdownlist = $("#dropdownlist").data("kendoDropDownList");
-            * // bind to the change event
-            * dropdownlist.bind("change", function(e) {
-            *     // handle event
-            * });
-            */
             CHANGE,
-            /**
-            *
-            * Triggered when a Li element is selected.
-            *
-            * @name kendo.ui.DropDownList#select
-            * @event
-            *
-            * @param {Event} e
-            *
-            * @param {jQuery} e.item
-            * The selected item chosen by a user.
-            *
-            * @exampleTitle Attach select event handler during initialization; detach via unbind()
-            * @example
-            * // event handler for select
-            * var onSelect = function(e) {
-            *     // access the selected item via e.item (jQuery object)
-            * };
-            *
-            * // attach select event handler during initialization
-            * var dropdownlist = $("#dropdownlist").kendoDropDownList({
-            *     select: onSelect
-            * });
-            *
-            * // detach select event handler via unbind()
-            * dropdownlist.data("kendoDropDownList").unbind("select", onSelect);
-            *
-            * @exampleTitle Attach select event handler via bind(); detach via unbind()
-            * @example
-            * // event handler for select
-            * var onSelect = function(e) {
-            *     // access the selected item via e.item (jQuery object)
-            * };
-            *
-            * // attach select event handler via bind()
-            * $("#dropdownlist").data("kendoDropDownList").bind("select", onSelect);
-            *
-            * // detach select event handler via unbind()
-            * $("#dropdownlist").data("kendoDropDownList").unbind("select", onSelect);
-            *
-            */
             "select",
             "dataBinding",
             "dataBound"
@@ -17051,47 +14688,21 @@ function pad(number) {
             this._accessors();
         },
 
-        /**
-        * Closes the drop-down list.
-        * @name kendo.ui.DropDownList#close
-        * @function
-        * @example
-        * // get a reference to the dropdown widget
-        * var dropdownList = $("#dropdownList").data("kendoDropDownList");
-        * // close the dropdown
-        * dropdownlist.close();
-        */
+        destroy: function() {
+            var that = this;
 
-        /**
-        * Returns the raw data record at the specified index. If the index is not specified, the selected index will be used.
-        * @name kendo.ui.DropDownList#dataItem
-        * @function
-        * @param {Number} index The zero-based index of the data record
-        * @returns {Object} The raw data record. Returns <i>undefined</i> if no data.
-        * @example
-        * var dropdownlist = $("#dropdownlist").data("kendoDropDownList");
-        *
-        * // get the dataItem corresponding to the selectedIndex.
-        * var dataItem = dropdownlist.dataItem();
-        *
-        * // get the dataItem corresponding to the passed index.
-        * var dataItem = dropdownlist.dataItem(1);
-        */
+            that.wrapper.off(ns);
+            that.element.off(ns);
+            that._inputWrapper.off(ns);
 
-        /**
-        * Enables/disables the dropdownlist widget
-        * @param {Boolean} enable Desired state
-        * @example
-        * // get a reference to the dropdown list
-        * var dropdownlist = $("#dropdownlist").data("kendoDropDownList");
-        * // disable the dropdown list
-        * dropdownlist.enable(false);
-        */
+            Select.fn.destroy.call(that);
+        },
+
         enable: function(enable) {
             var that = this,
                 element = that.element,
-                wrapper = that.wrapper.unbind(".dropdownlist"),
-                dropDownWrapper = that._inputWrapper.unbind(HOVEREVENTS);
+                wrapper = that.wrapper.off(ns),
+                dropDownWrapper = that._inputWrapper.off(HOVEREVENTS);
 
             if (enable === false) {
                 element.attr(ATTRIBUTE, ATTRIBUTE);
@@ -17099,77 +14710,46 @@ function pad(number) {
                 dropDownWrapper
                     .removeClass(DEFAULT)
                     .addClass(DISABLED);
+
             } else {
                 element.removeAttr(ATTRIBUTE, ATTRIBUTE);
 
                 dropDownWrapper
                     .addClass(DEFAULT)
                     .removeClass(DISABLED)
-                    .bind(HOVEREVENTS, that._toggleHover);
+                    .on(HOVEREVENTS, that._toggleHover);
 
                 wrapper
-                    .bind({
-                        "click.dropdownlist": function(e) {
+                    .on("click" + ns, function(e) {
                             e.preventDefault();
                             that.toggle();
-                        },
-                        "keydown.dropdownlist": proxy(that._keydown, that),
-                        "keypress.dropdownlist": proxy(that._keypress, that),
-                        "focusin.dropdownlist": function() {
-                            dropDownWrapper.addClass(FOCUSED);
-                        },
-                        "focusout.dropdownlist": function(e) {
-                            that._blur();
-                            dropDownWrapper.removeClass(FOCUSED);
-                        }
+                    })
+                    .on("keydown" + ns, proxy(that._keydown, that))
+                    .on("keypress" + ns, proxy(that._keypress, that))
+                    .on("focusin" + ns, function() { dropDownWrapper.addClass(FOCUSED); })
+                    .on("focusout" + ns, function() {
+                        that._blur();
+                        dropDownWrapper.removeClass(FOCUSED);
                     });
             }
         },
 
-        /**
-        * Opens the drop-down list.
-        * @example
-        * // get a reference to the dropdown list
-        * var dropdownlist = $("#dropdownlist").data("kendoDropDownList");
-        * // open the drop down
-        * dropdownlist.open();
-        */
         open: function() {
             var that = this;
 
             if (!that.ul[0].firstChild) {
                 that._open = true;
-                that._selectItem();
+                that.dataSource.fetch();
             } else {
                 that.popup.open();
                 that._scroll(that._current);
             }
         },
 
-        /**
-        * Toggles the drop-down list between opened and closed state.
-        * @param {Boolean} toggle Defines the whether to open/close the drop-down list.
-        * @example
-        * // get a reference to the dropdown list
-        * var dropdownlist = $("#dropdownlist").data("kendoDropDownList");
-        *
-        * // toggles the open state of the drop-down list.
-        * dropdownlist.toggle();
-        */
         toggle: function(toggle) {
             this._toggle(toggle);
         },
 
-        /**
-        * Re-render the items in drop-down list.
-        * @name kendo.ui.DropDownList#refresh
-        * @function
-        * @example
-        * // get a referenence to the Kendo UI DropDownList
-        * var dropdownlist = $("dropdownlist").data("kendoDropDownList");
-        * // re-render the items in drop-down list.
-        * dropdownlist.refresh();
-        */
         refresh: function() {
             var that = this,
                 data = that._data(),
@@ -17201,21 +14781,16 @@ function pad(number) {
             that._hideBusy();
             that._makeUnselectable();
 
+            if (!that._valueCalled) {
+                that._selectItem();
+                that._valueCalled = false;
+            }
+
             that.trigger("dataBound");
         },
 
 
 
-        /**
-        * Selects item, which starts with the provided parameter.
-        * @param {string} word The search value.
-        * @example
-        * // get a reference to the dropdown list
-        * var dropdownlist = $("#dropdownlist").data("kendoDropDownList");
-        *
-        * // Selects item which starts with "In".
-        * dropdownlist.search("In");
-        */
         search: function(word) {
             if (word) {
                 var that = this,
@@ -17240,25 +14815,6 @@ function pad(number) {
             }
         },
 
-        /**
-        * Selects drop-down list item and sets the value and the text of the dropdownlist.
-        * @param {jQuery | Number | Function} li LI element or index of the item or predicate function, which defines the item that should be selected.
-        * @returns {Number} The index of the selected LI element.
-        * @example
-        * // get a reference to the dropdown list
-        * var dropdownlist = $("#dropdownlist").data("kendoDropDownList");
-        *
-        * // selects by jQuery object
-        * dropdownlist.select(dropdownlist.ul.children().eq(0));
-        *
-        * // selects by index
-        * dropdownlist.select(1);
-        *
-        * // selects item if its text is equal to "test" using predicate function
-        * dropdownlist.select(function(dataItem) {
-        *     return dataItem.text === "test";
-        * });
-        */
         select: function(li) {
             var that = this;
 
@@ -17271,17 +14827,6 @@ function pad(number) {
             }
         },
 
-        /**
-        * Gets/Sets the text of the dropdownlist.
-        * @param {String} text The text to set.
-        * @returns {String} The text of the dropdownlist.
-        * @example
-        * // get a reference to the dropdown list
-        * var dropdownlist = $("#dropdownlist").data("kendoDropDownList");
-        *
-        * // get the text of the dropdownlist.
-        * var text = dropdownlist.text();
-        */
         text: function (text) {
             var span = this.span;
 
@@ -17292,20 +14837,6 @@ function pad(number) {
             }
         },
 
-        /**
-        * Gets/Sets the value of the dropdownlist. The value will not be set if there is no item with such value. If value is undefined, text of the data item is used.
-        * @param {String} value The value to set.
-        * @returns {String} The value of the dropdownlist.
-        * @example
-        * // get a reference to the dropdown list
-        * var dropdownlist = $("#dropdownlist").data("kendoDropDownList");
-        *
-        * // get the value of the dropdownlist.
-        * var value = dropdownlist.value();
-        *
-        * // set the value of the dropdownlist.
-        * dropdownlist.value("1"); //looks for item which has value "1"
-        */
         value: function(value) {
             var that = this,
                 idx;
@@ -17314,6 +14845,8 @@ function pad(number) {
                 if (value !== null) {
                     value = value.toString();
                 }
+
+                that._valueCalled = true;
 
                 if (value && that._valueOnFetch(value)) {
                     return;
@@ -17325,21 +14858,6 @@ function pad(number) {
             } else {
                 return that._accessor();
             }
-        },
-
-        _selectItem: function() {
-            var that = this;
-
-            that.dataSource.one(CHANGE, function() {
-                var value = that.options.value || that.value();
-                if (value) {
-                    that.value(value);
-                } else {
-                    that.select(that.options.index);
-                }
-
-                that.trigger("selected");
-            }).fetch();
         },
 
         _accept: function(li) {
@@ -17542,154 +15060,6 @@ function pad(number) {
     ui.plugin(DropDownList);
 })(jQuery);
 (function($, undefined) {
-    /**
-     * @name kendo.ui.ComboBox.Description
-     *
-     * @section
-     * <p>
-     * The <strong>ComboBox</strong> displays a list of values and allows the selection of a single value from this
-     * list. Custom values may also be entered via keyboard input. If you do not wish permit keyboard input - that is,
-     * custom values are not permitted - use the
-     * <strong>DropDownList</strong>.
-     * </p>
-     * <p>
-     * The <strong>ComboBox</strong> represents a richer version of a &lt;select&gt; element, providing support for
-     * local and remote data binding, item templates, and configurable options for controlling the list behavior.
-     * </p>
-     * <h3>Getting Started</h3>
-     * <p>There are two ways to create a <strong>ComboBox</strong>:</p>
-     * <ol>
-     *  <li>From a &lt;select&gt; element with HTML to define the list items</li>
-     *  <li>From an &lt;input&gt; element with databinding to define the listitems</li>
-     * </ol>
-     * <p>
-     *  A <strong>ComboBox</strong> will look and operate consistently regardless of the way in which it was created.
-     * </p>
-     *
-     * @exampleTitle Creating a ComboBox from an existing &lt;input&gt; element
-     * @example
-     * <input id="comboBox" />
-     *
-     * @section
-     * <p></p>
-     * <p>
-     *  Initialization of a <strong>ComboBox</strong> should occur after the DOM is fully loaded. It is recommended
-     *  that initialization the <strong>ComboBox</strong> occur within a handler is provided to
-     *  $(document).ready().
-     * </p>
-     *
-     * @exampleTitle Initialize a ComboBox using a selector within $(document).ready()
-     * @example
-     * $(document).ready(function(){
-     *     $("#comboBox").kendoComboBox({
-     *         dataTextField: "text",
-     *         dataValueField: "value",
-     *         dataSource: [
-     *             { text: "Item1", value: "1" },
-     *             { text: "Item2", value: "2" }
-     *         ]
-     *     });
-     * });
-     *
-     * @exampleTitle Creating a ComboBox from existing &lt;select&gt; element with a pre-defined structure
-     * @example
-     * <select id="comboBox">
-     *     <option>Item 1</option>
-     *     <option>Item 2</option>
-     *     <option>Item 3</option>
-     * </select>
-     *
-     * <script>
-     *     $(document).ready(function(){
-     *         $("#comboBox").kendoComboBox();
-     *     });
-     * </script>
-     *
-     * @section
-     * <h3>Binding to Local or Remote Data</h3>
-     * <p>
-     *  The <strong>ComboBox</strong> can be bound to both local arrays and remote data via the
-     *  <strong>DataSource</strong> component; an abstraction for local and
-     *  remote data. Local arrays are appropriate for limited value options, while remote data binding is better for
-     *  larger data sets. With remote data-binding, items will be loaded on-demand; when they are displayed.
-     * </p>
-     *
-     * @exampleTitle Binding to a remote OData service
-     * @example
-     * $(document).ready(function() {
-     *     $("#comboBox").kendoComboBox({
-     *         index: 0,
-     *         dataTextField: "Name",
-     *         dataValueField: "Id",
-     *         filter: "contains",
-     *         dataSource: {
-     *             type: "odata",
-     *             serverFiltering: true,
-     *             serverPaging: true,
-     *             pageSize: 20,
-     *             transport: {
-     *                 read: "http://odata.netflix.com/Catalog/Titles"
-     *             }
-     *         }
-     *     });
-     * });
-     *
-     * @section
-     * <h3>Customizing Item Templates</h3>
-     * <p>
-     *  The <strong>ComboBox</strong> uses Kendo UI templates to enable you to control how items are rendered. For a
-     *  detailed description of the capabilities and syntax of the Kendo UI templates, please refer to the
-     *  <a href="http://www.kendoui.com/documentation/framework/templates/overview.aspx" title="Kendo UI Template">documentation</a>.
-     * </p>
-     *
-     * @exampleTitle Basic item template customization
-     * @example
-     * <input id="comboBox" />
-     * <!-- Template -->
-     * <script id="scriptTemplate" type="text/x-kendo-template">
-     *     # if (data.BoxArt.SmallUrl) { #
-     *         <img src="${ data.BoxArt.SmallUrl }" alt="${ data.Name }" />
-     *         Title:${ data.Name }, Year: ${ data.Name }
-     *     # } else { #
-     *         <img alt="${ data.Name }" />
-     *         Title:${ data.Name }, Year: ${ data.Name }
-     *     # } #
-     * </script>
-     *
-     * <!-- ComboBox initialization -->
-     * <script>
-     *     $(document).ready(function() {
-     *         $("#comboBox").kendoComboBox({
-     *             autoBind: false,
-     *             dataTextField: "Name",
-     *             dataValueField: "Id",
-     *             template: $("#scriptTemplate").html(),
-     *             dataSource: {
-     *                 type: "odata",
-     *                 serverFiltering: true,
-     *                 serverPaging: true,
-     *                 pageSize: 20,
-     *                 transport: {
-     *                     read: "http://odata.netflix.com/Catalog/Titles"
-     *                 }
-     *             }
-     *         });
-     *     });
-     * </script>
-     *
-     * @section
-     * <h3>Accessing an Existing ComboBox</h3>
-     * <p>
-     *  You can reference an existing <b>ComboBox</b> instance via
-     *  <a href="http://api.jquery.com/jQuery.data/">jQuery.data()</a>. Objectnce a reference has been established, you
-     *  can use the API to control its behavior.
-     * </p>
-     *
-     * @exampleTitle Accessing an existing ComboBox instance
-     * @example
-     * var comboBox = $("#comboBox").data("kendoComboBox");
-     *
-     */
     var kendo = window.kendo,
         ui = kendo.ui,
         List = ui.List,
@@ -17698,218 +15068,39 @@ function pad(number) {
         placeholderSupported = support.placeholder,
         removeFiltersForField = Select.removeFiltersForField,
         keys = kendo.keys,
-        CLICK = support.touch ? "touchend" : "click",
+        ns = ".kendoComboBox",
+        CLICK = (support.touch ? "touchend" : "click") + ns,
         ATTRIBUTE = "disabled",
         CHANGE = "change",
         DEFAULT = "k-state-default",
         DISABLED = "k-state-disabled",
         FOCUSED = "k-state-focused",
-        MOUSEDOWN = "mousedown",
+        MOUSEDOWN = "mousedown" + ns,
         SELECT = "select",
         STATE_SELECTED = "k-state-selected",
         STATE_FILTER = "filter",
         STATE_ACCEPT = "accept",
         STATE_REBIND = "rebind",
-        HOVEREVENTS = "mouseenter mouseleave",
+        HOVEREVENTS = "mouseenter" + ns + " mouseleave" + ns,
         NULL = null,
         proxy = $.proxy;
 
-    var ComboBox = Select.extend(/** @lends kendo.ui.ComboBox.prototype */{
-        /**
-        * @constructs
-        * @extends kendo.ui.Select
-        * @param {Element} element DOM element
-        * @param {Object} options Configuration options.
-        * @option {Object | kendo.data.DataSource} [dataSource] A local JavaScript object or instance of DataSource or the data that the ComboBox will be bound to.
-        * _example
-        * var items = [{ text: "Item 1", value: "1" }, { text: "Item 2", value: "2" }];
-        * $("#comboBox").kendoComboBox({
-        *     dataTextField: "text",
-        *     dataValueField: "value",
-        *     dataSource: items
-        * });
-        * _exampleTitle To set after initialization
-        * _example
-        * $("#comboBox").kendoComboBox({
-        *     dataSource: new kendo.data.DataSource({
-        *         transport: {
-        *             read: {
-        *                 url: "Get/Items" // url to remote data source (simple list of strings)
-        *             }
-        *         }
-        *     });
-        * });
-        * @option {Boolean} [enable] <true> Controls whether the ComboBox should be initially enabled.
-        * _example
-        * $("#comboBox").kendoComboBox({
-        *     enable: false
-        * });
-        * _exampleTitle To set after initialization
-        * _example
-        * // get a reference to the ComboBox widget
-        * var comboBox = $("#comboBox").data("kendoComboBox");
-        * comboBox.enable(false);
-        * @option {Number} [index] <-1> Defines the initial selected item.
-        * _example
-        * var items = [{ text: "Item 1", value: "1" }, { text: "Item 2", value: "2" }];
-        * $("#comboBox").kendoComboBox({
-        *     dataSource: items,
-        *     index: 1 // 0 based from the start of the collection of objects. this selects "Item 2".
-        * });
-        * @option {Boolean} [autoBind] <true> Controls whether to bind the widget to the DataSource on initialization.
-        * _example
-        * $("#comboBox").kendoComboBox({
-        *     autoBind: false
-        * });
-        * @option {Boolean} [highlightFirst] <true> Controls whether the first item will be automatically highlighted.
-        * _example
-        * $("#comboBox").kendoComboBox({
-        *     highLightFirst: true
-        * });
-        * @option {Boolean} [suggest] <false> Controls whether the ComboBox should automatically auto-type the rest of text.
-        * _example
-        * $("#comboBox").kendoComboBox({
-        *     suggest: false
-        * });
-        * @option {Number} [delay] <200> Specifies the delay in ms after which the ComboBox will start filtering dataSource.
-        * _example
-        * $("#comboBox").kendoComboBox({
-        *     delay: 500
-        * });
-        * @option {Number} [minLength] <1> Specifies the minimum characters that should be typed before the ComboBox activates
-        * _example
-        * $("#comboBox").kendoComboBox({
-        *     minLength: 3
-        * });
-        * @option {String} [dataTextField] <""> Sets the field of the data item that provides the text content of the list items.
-        * _example
-        * $("#comboBox").kendoComboBox({
-        *     dataTextField: "Name",
-        *     dataValueField: "ID"
-        * });
-        * @option {String} [dataValueField] <""> Sets the field of the data item that provides the value content of the list items.
-        * _example
-        * $("#comboBox").kendoComboBox({
-        *     dataTextField: "Name",
-        *     dataValueField: "ID"
-        * });
-        * @option {String} [filter] <"none"> Defines the type of filtration. If "none" the ComboBox will not filter the items.
-        * _example
-        * $("#comboBox").kendoComboBox({
-        *     filter: "startswith"
-        * });
-        * @option {String} [ignoreCase] <true> Defines whether the filtration should be case sensitive.
-        * _example
-        * $("#combobox").kendoComboBox({
-        *     filter: 'contains',
-        *     ignoreCase: false //now filtration will be case sensitive
-        * });
-        * @option {Number} [height] <200> Define the height of the drop-down list in pixels.
-        * _example
-        * $("#comboBox").kendoComboBox({
-        *     height: 500
-        * });
-        * @option {string} [template] Template to be used for rendering the items in the list.
-        * _example
-        *  //template
-        * <script id="template" type="text/x-kendo-tmpl">
-        *       # if (data.BoxArt.SmallUrl) { #
-        *           <img src="${ data.BoxArt.SmallUrl }" alt="${ data.Name }" />Title:${ data.Name }, Year: ${ data.Name }
-        *       # } else { #
-        *           <img alt="${ data.Name }" />Title:${ data.Name }, Year: ${ data.Name }
-        *       # } #
-        *  </script>
-        *
-        *  //combobox initialization
-        *  <script>
-        *      $("#combobox").kendoComboBox({
-        *          dataSource: dataSource,
-        *          dataTextField: "Name",
-        *          dataValueField: "Id",
-        *          template: kendo.template($("#template").html())
-        *      });
-        *  </script>
-        * @option {String} [text] <""> Define the text of the widget, when the autoBind is set to false.
-        * _example
-        * $("#combobox").kendoComboBox({
-        *      autoBind: false,
-        *      text: "Chai"
-        * });
-        * @option {String} [value] <""> Define the value of the widget
-        * _example
-        * $("#combobox").kendoComboBox({
-        *      dataSource: ["Item1", "Item2"],
-        *      value: "Item1"
-        * });
-        * @option {Object} [animation] <> Animations to be used for opening/closing the popup. Setting to false will turn off the animation.
-        * _exampleTitle Turn of animation
-        * _example
-        * $("#comboBox").kendoComboBox({
-        *     animation: false
-        * });
-        * @option {Object} [animation.open] <> Animation to be used for opening of the popup.
-        * _example
-        *  //combobox initialization
-        *
-        * <script>
-        *      $("#combobox").kendoComboBox({
-        *          dataSource: dataSource,
-        *          animation: {
-        *             open: {
-        *                 effects: "fadeIn",
-        *                 duration: 300,
-        *                 show: true
-        *             }
-        *          }
-        *      });
-        *  </script>
-        *
-        * @option {Object} [animation.close] <> Animation to be used for closing of the popup.
-        * _example
-        *  //combobox initialization
-        *  <script>
-        *      $("#combobox").kendoComboBox({
-        *          dataSource: dataSource,
-        *          animation: {
-        *             close: {
-        *                 effects: "fadeOut",
-        *                 duration: 300,
-        *                 hide: true
-        *                 show: false
-        *             }
-        *          }
-        *      });
-        *  </script>
-        *  @option {String} [placeholder] <""> A string that appears in the textbox when the combobox has no value.
-        *  _example
-        *  //combobox initialization
-        *  <script>
-        *      $("#combobox").kendoComboBox({
-        *          dataSource: dataSource,
-        *          placeholder: "Select..."
-        *      });
-        *  </script>
-        *  _example
-        *  <input id="combobox" placeholder="Select..." />
-        *
-        *  //combobox initialization
-        *  <script>
-        *      $("#combobox").kendoComboBox({
-        *          dataSource: dataSource
-        *      });
-        *  </script>
-        */
+    var ComboBox = Select.extend({
         init: function(element, options) {
             var that = this, wrapper, text;
+
+            that.ns = ns;
 
             options = $.isArray(options) ? { dataSource: options } : options;
 
             Select.fn.init.call(that, element, options);
 
+            that._focusHandler = function() {
+                that.input.focus();
+            };
+
             options = that.options;
-            element = that.element.focus(function() {
-                        that.input.focus();
-                      });
+            element = that.element.on("focus" + ns, that._focusHandler);
 
             options.placeholder = options.placeholder || element.attr("placeholder");
 
@@ -17931,26 +15122,29 @@ function pad(number) {
 
             wrapper = that._inputWrapper;
 
-            that.input.bind({
-                keydown: proxy(that._keydown, that),
-                focus: function() {
+            that.input
+                .on("keydown" + ns, proxy(that._keydown, that))
+                .on("focus" + ns, function() {
                     wrapper.addClass(FOCUSED);
                     that._placeholder(false);
-                },
-                blur: function() {
+                })
+                .on("blur" + ns, function() {
                     wrapper.removeClass(FOCUSED);
                     clearTimeout(that._typing);
-                    that.text(that.text());
+
+                    if (that.options.text !== that.input.val()) {
+                        that.text(that.text());
+                    }
+
                     that._placeholder();
                     that._blur();
-                }
-            });
+                });
 
             that._oldIndex = that.selectedIndex = -1;
             that._old = that.value();
 
             if (options.autoBind) {
-                that._selectItem();
+                that._filterSource();
             } else {
                 text = options.text;
 
@@ -17990,116 +15184,16 @@ function pad(number) {
         },
 
         events:[
-            /**
-            * Fires when the drop-down list is opened
-            * @name kendo.ui.ComboBox#open
-            * @event
-            * @param {Event} e
-            * @example
-            * $("#comboBox").kendoComboBox({
-            *     open: function(e) {
-            *             // handle event
-            *         }
-            * });
-            * @exampleTitle To set after initialization
-            * @example
-            * // get a reference to instance of the Kendo UI ComboBox
-            * var combobox = $("#comboBox").data("kendoComboBox");
-            * // bind to the open event
-            * combobox.bind("open", function(e) {
-            *     // handle event
-            * });
-            */
             "open",
 
-            /**
-            * Fires when the drop-down list is closed
-            * @name kendo.ui.ComboBox#close
-            * @event
-            * @param {Event} e
-            * @example
-            * $("#comboBox").kendoComboBox({
-            *     close: function(e) {
-            *         // handle event
-            *     }
-            * });
-            * @exampleTitle To set after initialization
-            * @example
-            * // get a reference to instance of the Kendo UI ComboBox
-            * var combobox = $("#comboBox").data("kendoComboBox");
-            * // bind to the close event
-            * combobox.bind("close", function(e) {
-            *     // handle event
-            * });
-            */
             "close",
 
-            /**
-            * Fires when the value has been changed.
-            * @name kendo.ui.ComboBox#change
-            * @event
-            * @param {Event} e
-            * @example
-            * $("#comboBox").kendoComboBox({
-            *     change: function(e) {
-            *         // handle event
-            *     }
-            * });
-            * @exampleTitle To set after initialization
-            * @example
-            * // get a reference to instance of the Kendo UI ComboBox
-            * var combobox = $("#comboBox").data("kendoComboBox");
-            * // bind to the change event
-            * combobox.bind("change", function(e) {
-            *     // handle event
-            * });
-            */
             CHANGE,
-            /**
-            *
-            * Triggered when a Li element is selected.
-            *
-            * @name kendo.ui.ComboBox#select
-            * @event
-            *
-            * @param {Event} e
-            *
-            * @param {jQuery} e.item
-            * The selected item chosen by a user.
-            *
-            * @exampleTitle Attach select event handler during initialization; detach via unbind()
-            * @example
-            * // event handler for select
-            * var onSelect = function(e) {
-            *     // access the selected item via e.item (jQuery object)
-            * };
-            *
-            * // attach select event handler during initialization
-            * var combobox = $("#combobox").kendoComboBox({
-            *     select: onSelect
-            * });
-            *
-            * // detach select event handler via unbind()
-            * combobox.data("kendoComboBox").unbind("select", onSelect);
-            *
-            * @exampleTitle Attach select event handler via bind(); detach via unbind()
-            * @example
-            * // event handler for select
-            * var onSelect = function(e) {
-            *     // access the selected item via e.item (jQuery object)
-            * };
-            *
-            * // attach select event handler via bind()
-            * $("#combobox").data("kendoComboBox").bind("select", onSelect);
-            *
-            * // detach select event handler via unbind()
-            * $("#combobox").data("kendoComboBox").unbind("select", onSelect);
-            *
-            */
             "select",
             "dataBinding",
             "dataBound"
         ],
+
         setOptions: function(options) {
             Select.fn.setOptions.call(this, options);
 
@@ -18122,45 +15216,21 @@ function pad(number) {
             Select.fn.current.call(that, li);
         },
 
-        /**
-        * Returns the raw data record at the specified index. If the index is not specified, the selected index will be used.
-        * @name kendo.ui.ComboBox#dataItem
-        * @function
-        * @param {Number} index The zero-based index of the data record
-        * @returns {Object} The raw data record. Returns <i>undefined</i> if no data.
-        * @example
-        * var combobox = $("#combobox").data("kendoComboBox");
-        *
-        * // get the dataItem corresponding to the selectedIndex.
-        * var dataItem = combobox.dataItem();
-        *
-        * // get the dataItem corresponding to the passed index.
-        * var dataItem = combobox.dataItem(1);
-        */
+        destroy: function() {
+            var that = this;
 
-        /**
-        * Closes the drop-down list.
-        * @name kendo.ui.ComboBox#close
-        * @function
-        * @example
-        * // get a reference to instance of the Kendo UI ComboBox
-        * var combobox = $("#comboBox").data("kendoComboBox");
-        * combobox.close();
-        */
-        /**
-        * Enables/disables the combobox widget
-        * @param {Boolean} enable Desired state
-        * @example
-        * // get a reference to instance of the Kendo UI ComboBox
-        * var combobox = $("#comboBox").data("kendoComboBox");
-        * // disables the combobox
-        * combobox.enable(false);
-        */
+            that.input.off(ns);
+            that.element.off(ns);
+            that._inputWrapper.off(ns);
+
+            Select.fn.destroy.call(that);
+        },
+
         enable: function(enable) {
             var that = this,
                 input = that.input.add(that.element),
-                wrapper = that._inputWrapper.unbind(HOVEREVENTS),
-                arrow = that._arrow.parent().unbind(CLICK + " " + MOUSEDOWN);
+                wrapper = that._inputWrapper.off(HOVEREVENTS),
+                arrow = that._arrow.parent().off(CLICK + " " + MOUSEDOWN);
 
             if (enable === false) {
                 wrapper
@@ -18172,21 +15242,14 @@ function pad(number) {
                 wrapper
                     .removeClass(DISABLED)
                     .addClass(DEFAULT)
-                    .bind(HOVEREVENTS, that._toggleHover);
+                    .on(HOVEREVENTS, that._toggleHover);
 
                 input.removeAttr(ATTRIBUTE);
-                arrow.bind(CLICK, function() { that.toggle(); })
-                     .bind(MOUSEDOWN, function(e) { e.preventDefault(); });
+                arrow.on(CLICK, function() { that.toggle(); })
+                     .on(MOUSEDOWN, function(e) { e.preventDefault(); });
             }
         },
 
-        /**
-        * Opens the drop-down list.
-        * @example
-        * // get a reference to instance of the Kendo UI ComboBox
-        * var combobox = $("#comboBox").data("kendoComboBox");
-        * combobox.open();
-        */
         open: function() {
             var that = this,
                 serverFiltering = that.dataSource.options.serverFiltering;
@@ -18198,30 +15261,21 @@ function pad(number) {
             if (!that.ul[0].firstChild || (that._state === STATE_ACCEPT && !serverFiltering)) {
                 that._open = true;
                 that._state = STATE_REBIND;
-                that._selectItem();
+                that._filterSource();
             } else {
                 that.popup.open();
                 that._scroll(that._current);
             }
         },
 
-        /**
-        * Re-render the items of the drop-down list.
-        * @name kendo.ui.ComboBox#refresh
-        * @function
-        * @example
-        * // get a referenence to the Kendo UI ComboBox
-        * var combobox = $("#combobox").data("kendoComboBox");
-        * // re-render the items of the drop-down list.
-        * combobox.refresh();
-        */
         refresh: function() {
             var that = this,
                 ul = that.ul[0],
                 options = that.options,
-                value = that.value(),
+                state = that._state,
                 data = that._data(),
-                length = data.length;
+                length = data.length,
+                value, open;
 
             that.trigger("dataBinding");
 
@@ -18229,12 +15283,12 @@ function pad(number) {
             that._height(length);
 
             if (that.element.is(SELECT)) {
-                that._options(data);
-
-                if (value && that._state === STATE_REBIND) {
+                if (state === STATE_REBIND) {
+                    value = that.value();
                     that._state = "";
-                    that.value(value);
                 }
+
+                that._options(data);
             }
 
             if (length) {
@@ -18242,14 +15296,21 @@ function pad(number) {
                     that.current($(ul.firstChild));
                 }
 
-                if (options.suggest && that.input.val()) {
+                if (options.suggest && that.input.val() && that._valueCalled !== undefined) {
                     that.suggest($(ul.firstChild));
                 }
             }
 
             if (that._open) {
                 that._open = false;
-                that.toggle(!!length);
+                open = !!length;
+
+                if (that._typing && that.element[0] !== document.activeElement) {
+                    open = false;
+                }
+
+                that.toggle(open);
+                that._typing = undefined;
             }
 
             if (that._touchScroller) {
@@ -18258,28 +15319,15 @@ function pad(number) {
 
             that._makeUnselectable();
 
+            if (!that._valueCalled && state !== STATE_FILTER) {
+                that._selectItem(value);
+                that._valueCalled = false;
+            }
+
             that._hideBusy();
             that.trigger("dataBound");
         },
 
-        /**
-        * Selects drop-down list item and sets the value and the text of the combobox.
-        * @param {jQuery | Number | Function} li LI element or index of the item or predicate function, which defines the item that should be selected.
-        * @returns {Number} The index of the selected LI element.
-        * @example
-        * var combobox = $("#combobox").data("kendoComboBox");
-        *
-        * // selects by jQuery object
-        * combobox.select(combobox.ul.children().eq(0));
-        *
-        * // selects by index
-        * combobox.select(1);
-        *
-        * // selects item if its text is equal to "test" using predicate function
-        * combobox.select(function(dataItem) {
-        *     return dataItem.text === "test";
-        * });
-        */
         select: function(li) {
             var that = this;
 
@@ -18292,15 +15340,6 @@ function pad(number) {
             }
         },
 
-        /**
-        * Filters dataSource using the provided parameter and rebinds drop-down list.
-        * @param {string} word The filter value.
-        * @example
-        * var combobox = $("#combobox").data("kendoComboBox");
-        *
-        * // Searches for item which has "In" in the name.
-        * combobox.search("In");
-        */
         search: function(word) {
             word = typeof word === "string" ? word : this.text();
             var that = this,
@@ -18308,8 +15347,7 @@ function pad(number) {
                 options = that.options,
                 ignoreCase = options.ignoreCase,
                 filter = options.filter,
-                field = options.dataTextField,
-                filters, expression;
+                field = options.dataTextField;
 
             clearTimeout(that._typing);
 
@@ -18320,34 +15358,16 @@ function pad(number) {
                     that._open = true;
                     that._state = STATE_FILTER;
 
-                    expression = that.dataSource.filter() || {};
-                    removeFiltersForField(expression, field);
-
-                    filters = expression.filters || [];
-                    filters.push({
+                    that._filterSource({
                         value: ignoreCase ? word.toLowerCase() : word,
                         field: field,
                         operator: filter,
                         ignoreCase: ignoreCase
                     });
-
-                    that.dataSource.filter(filters);
                 }
             }
         },
 
-        /**
-        * Forces a suggestion onto the text of the ComboBox.
-        * @param {string} value Characters to force a suggestion.
-        * @example
-        * // note that this suggest is not the same as the configuration method
-        * // suggest which enables/disables auto suggesting for the ComboBox
-        * //
-        * // get a referenence to the Kendo UI ComboBox
-        * var combobox = $("#combobox").data("kendoComboBox");
-        * // force a suggestion to the item with the name "Inception"
-        * combobox.suggest("Inception");
-        */
         suggest: function(word) {
             var that = this,
                 element = that.input[0],
@@ -18392,16 +15412,6 @@ function pad(number) {
             }
         },
 
-        /**
-        * Gets/Sets the text of the ComboBox.
-        * @param {String} text The text to set.
-        * @returns {String} The text of the combobox.
-        * @example
-        * var combobox = $("#combobox").data("kendoComboBox");
-        *
-        * // get the text of the combobox.
-        * var text = combobox.text();
-        */
         text: function (text) {
             text = text === null ? "" : text;
 
@@ -18443,34 +15453,12 @@ function pad(number) {
             }
         },
 
-        /**
-        * Toggles the drop-down list between opened and closed state.
-        * @param {Boolean} toggle Defines the whether to open/close the drop-down list.
-        * @example
-        * var combobox = $("#combobox").data("kendoComboBox");
-        *
-        * // toggles the open state of the drop-down list.
-        * combobox.toggle();
-        */
         toggle: function(toggle) {
             var that = this;
 
             that._toggle(toggle);
         },
 
-        /**
-        * Gets/Sets the value of the combobox. If the value is undefined, text of the data item will be used.
-        * @param {String} value The value to set.
-        * @returns {String} The value of the combobox.
-        * @example
-        * var combobox = $("#combobox").data("kendoComboBox");
-        *
-        * // get the value of the combobox.
-        * var value = combobox.value();
-        *
-        * // set the value of the combobox.
-        * combobox.value("1"); //looks for item which has value "1"
-        */
         value: function(value) {
             var that = this,
                 idx;
@@ -18479,6 +15467,8 @@ function pad(number) {
                 if (value !== null) {
                     value = value.toString();
                 }
+
+                that._valueCalled = true;
 
                 if (value && that._valueOnFetch(value)) {
                     return;
@@ -18651,20 +15641,13 @@ function pad(number) {
 
         _keydown: function(e) {
             var that = this,
-                key = e.keyCode,
-                input = that.input;
+                key = e.keyCode;
 
             that._last = key;
 
             clearTimeout(that._typing);
 
-            if (key == keys.TAB) {
-                that.text(input.val());
-
-                if (that._state === STATE_FILTER && that.selectedIndex > -1) {
-                    that._state = STATE_ACCEPT;
-                }
-            } else if (!that._move(e)) {
+            if (key != keys.TAB && !that._move(e)) {
                that._search();
             }
         },
@@ -18734,23 +15717,20 @@ function pad(number) {
             }
         },
 
-        _selectItem: function() {
+        _filterSource: function(filter) {
             var that = this,
                 options = that.options,
                 dataSource = that.dataSource,
                 expression = dataSource.filter() || {};
 
-            removeFiltersForField(expression, that.options.dataTextField);
+            removeFiltersForField(expression, options.dataTextField);
 
-            that.dataSource.one(CHANGE, function() {
-                var value = options.value || that.value();
-                if (value) {
-                    that.value(value);
-                } else {
-                    that.select(options.index);
-                }
-                that.trigger("selected");
-            }).filter(expression);
+            if (filter) {
+                expression = expression.filters || [];
+                expression.push(filter);
+            }
+
+            dataSource.filter(expression);
         },
 
         _wrapper: function() {
@@ -18784,21 +15764,16 @@ function pad(number) {
         ACTIVE = "k-state-selected",
         ASC = "asc",
         DESC = "desc",
-        CLICK = "click",
         CHANGE = "change",
         POPUP = "kendoPopup",
         FILTERMENU = "kendoFilterMenu",
         MENU = "kendoMenu",
+        NS = ".kendoColumnMenu",
+        nameSpecialCharRegExp = /(\[|\]|\$|\.|\:|\+)/g,
         Widget = ui.Widget;
 
     function trim(text) {
-        if (!String.prototype.trim) {
-            text = text.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
-        } else {
-            text = text.trim();
-        }
-
-        return text.replace(/&nbsp;/gi, "");
+        return $.trim(text).replace(/&nbsp;/gi, "");
     }
 
     var ColumnMenu = Widget.extend({
@@ -18811,17 +15786,20 @@ function pad(number) {
             element = that.element;
             options = that.options;
             that.owner = options.owner;
+            that.dataSource = options.dataSource;
 
             that.field = element.attr(kendo.attr("field"));
+
             link = element.find(".k-header-column-menu");
+
             if (!link[0]) {
                 link = element.prepend('<a class="k-header-column-menu" href="#"><span class="k-icon k-i-arrowhead-s"/></a>').find(".k-header-column-menu");
             }
-            that._clickHandler = proxy(that._click, that);
-            link.click(that._clickHandler);
-            that.link = link;
+
+            that.link = link.on("click" + NS, proxy(that._click, that));
 
             that.wrapper = $('<div class="k-column-menu"/>');
+
             that.wrapper.html(kendo.template(template)({
                 ns: kendo.ns,
                 messages: options.messages,
@@ -18861,16 +15839,27 @@ function pad(number) {
         destroy: function() {
             var that = this;
 
+            Widget.fn.destroy.call(that);
+
             if (that.filterMenu) {
                 that.filterMenu.destroy();
-                that.filterMenu = null;
             }
 
-            that.wrapper.children().removeData(MENU);
-            that.wrapper.removeData(POPUP).remove();
-            that.link.unbind(CLICK, that._clickHandler);
-            that.element.removeData("kendoColumnMenu");
-            that.columns = null;
+            that.dataSource.unbind("refresh", that._refreshHandler);
+
+            if (that.options.columns) {
+                that.owner.unbind("columnShow", that._updateColumnsMenuHandler);
+                that.owner.unbind("columnHide", that._updateColumnsMenuHandler);
+            }
+
+            that.menu.element.off(NS);
+            that.menu.destroy();
+
+            that.wrapper.off(NS);
+
+            that.popup.destroy();
+
+            that.link.off(NS);
         },
 
         close: function() {
@@ -18905,7 +15894,7 @@ function pad(number) {
 
             return map(menuColumns, function(col) {
                 return {
-                    field: col.field,
+                    field: col.field || col.title,
                     title: col.title || col.field,
                     hidden: col.hidden,
                     index: inArray(col, columns)
@@ -18924,12 +15913,13 @@ function pad(number) {
             var that = this;
 
             if (that.options.sortable) {
-
                 that.refresh();
 
-                that.options.dataSource.bind(CHANGE, proxy(that.refresh, that));
+                that._refreshHandler = proxy(that.refresh, that);
 
-                that.menu.element.delegate(".k-sort-asc, .k-sort-desc", CLICK, function() {
+                that.dataSource.bind(CHANGE, that._refreshHandler);
+
+                that.menu.element.on("click" + NS, ".k-sort-asc, .k-sort-desc", function() {
                     var item = $(this),
                         dir = item.hasClass("k-sort-asc") ? ASC : DESC;
 
@@ -18945,7 +15935,7 @@ function pad(number) {
         _sortDataSource: function(item, dir) {
             var that = this,
                 sortable = that.options.sortable,
-                dataSource = that.options.dataSource,
+                dataSource = that.dataSource,
                 idx,
                 length,
                 sort = dataSource.sort() || [];
@@ -18979,13 +15969,21 @@ function pad(number) {
 
                 that._updateColumnsMenu();
 
-                that.owner.bind(["columnHide", "columnShow"], function() {
-                    that._updateColumnsMenu();
-                });
+                that._updateColumnsMenuHandler = proxy(that._updateColumnsMenu, that);
 
-                that.wrapper.delegate("[type=checkbox]", CHANGE , function(e) {
+                that.owner.bind(["columnHide", "columnShow"], that._updateColumnsMenuHandler);
+
+                that.wrapper.on(CHANGE + NS, "[type=checkbox]", function(e) {
                     var input = $(this),
-                        index = parseInt(input.attr(kendo.attr("index")), 10);
+                        index,
+                        column,
+                        columns = that.owner.columns,
+                        field = input.attr(kendo.attr("field"));
+
+                     column = grep(columns, function(column) {
+                        return column.field == field || column.title == field;
+                    })[0];
+                    index = inArray(column, columns);
 
                     if (input.is(":checked")) {
                         that.owner.showColumn(index);
@@ -18997,15 +15995,16 @@ function pad(number) {
         },
 
         _updateColumnsMenu: function() {
-            var columns = this._ownerColumns(),
-                allselector = map(columns, function(field) {
-                    return "[" + kendo.attr("index") + "=" + field.index+ "]";
+            var attr = "[" + kendo.attr("field") + "=",
+                columns = this._ownerColumns(),
+                allselector = map(columns, function(col) {
+                    return attr + col.field.replace(nameSpecialCharRegExp, "\\$1") + "]";
                 }).join(","),
                 visible = grep(columns, function(field) {
                     return !field.hidden;
                 }),
-                selector = map(visible, function(field) {
-                    return "[" + kendo.attr("index") + "=" + field.index+ "]";
+                selector = map(visible, function(col) {
+                    return attr + col.field.replace(nameSpecialCharRegExp, "\\$1") + "]";
                 }).join(",");
 
             this.wrapper.find(allselector).attr("checked", false);
@@ -19101,6 +16100,7 @@ function pad(number) {
         SELECTION_CELL_SELECTOR = "tbody>tr:not(.k-grouping-row,.k-detail-row,.k-group-footer) > td:not(.k-group-cell,.k-hierarchy-cell)",
         CELL_SELECTOR =  ROW_SELECTOR + ">td" + DATA_CELL,
         FIRST_CELL_SELECTOR = CELL_SELECTOR + ":first",
+        NS = ".kendoGrid",
         EDIT = "edit",
         SAVE = "save",
         REMOVE = "remove",
@@ -19152,6 +16152,19 @@ function pad(number) {
             itemHeight: $.noop
         },
 
+        destroy: function() {
+            var that = this;
+
+            Widget.fn.destroy.call(that);
+
+            that.dataSource.unbind(CHANGE, that._refreshHandler);
+            that.wrapper.add(that.verticalScrollbar).off(NS);
+
+            if (that.drag) {
+                that.drag.destroy();
+            }
+        },
+
         wrap: function() {
             var that = this,
                 // workaround for IE issue where scroll is not raised if container is same width as the scrollbar
@@ -19166,8 +16179,7 @@ function pad(number) {
             that.content = element.children().first();
             that.wrapper = that.content.wrap('<div class="k-virtual-scrollable-wrap"/>')
                                 .parent()
-                                .bind("DOMMouseScroll", proxy(that._wheelScroll, that))
-                                .bind("mousewheel", proxy(that._wheelScroll, that));
+                                .bind("DOMMouseScroll" + NS + " mousewheel" + NS, proxy(that._wheelScroll, that));
 
             if (kendo.support.touch) {
                 that.drag = new kendo.Drag(that.wrapper, {
@@ -19183,7 +16195,7 @@ function pad(number) {
                                         .css({
                                             width: scrollbar
                                         }).appendTo(element)
-                                        .bind("scroll", proxy(that._scroll, that));
+                                        .bind("scroll" + NS, proxy(that._scroll, that));
         },
 
         _wheelScroll: function(e) {
@@ -19362,13 +16374,13 @@ function pad(number) {
             iconClass: "k-icon"
         },
         destroy: {
-            text: "",
+            text: "Delete",
             imageClass: "k-delete",
             className: "k-grid-delete",
             iconClass: "k-icon"
         },
         edit: {
-            text: "",
+            text: "Edit",
             imageClass: "k-edit",
             className: "k-grid-edit",
             iconClass: "k-icon"
@@ -19441,7 +16453,7 @@ function pad(number) {
 
             if (isPlainObject(command) && command.click) {
                 commandName = command.name || command.text;
-                container.on(CLICK, "a.k-grid-" + commandName, { commandName: commandName }, proxy(command.click, context));
+                container.on(CLICK, "a.k-grid-" + (commandName || "").replace(/\s/g, ""), { commandName: commandName }, proxy(command.click, context));
             }
         }
     }
@@ -19544,6 +16556,8 @@ function pad(number) {
 
             if (that.options.autoBind) {
                 that.dataSource.fetch();
+            } else {
+                that._footer();
             }
 
             kendo.notify(that);
@@ -19609,7 +16623,62 @@ function pad(number) {
             height: null,
             resizable: false,
             reorderable: false,
-            columnMenu: false
+            columnMenu: false,
+            detailTemplate: null
+        },
+
+        destroy: function() {
+            var that = this;
+
+            Widget.fn.destroy.call(that);
+
+            if (that.pager) {
+                that.pager.destroy();
+            }
+
+            if (that.groupable) {
+                that.groupable.destroy();
+            }
+
+            if (that.virtualScrollable) {
+                that.virtualScrollable.destroy();
+            }
+
+            that.thead.find("th").each(function(){
+                var th = $(this),
+                    filterMenu = th.data("kendoFilterMenu"),
+                    sortable = th.data("kendoSortable"),
+                    columnMenu = th.data("kendoColumnMenu");
+
+                if (filterMenu) {
+                    filterMenu.destroy();
+                }
+
+                if (sortable) {
+                    sortable.destroy();
+                }
+
+                if (columnMenu) {
+                    columnMenu.destroy();
+                }
+            });
+
+            that._destroyEditable();
+
+            that.dataSource.unbind(CHANGE, that._refreshHandler)
+                           .unbind(REQUESTSTART, that._requestStartHandler)
+                           .unbind(ERROR, that._errorHandler);
+
+            that.element
+                .add(that.wrapper)
+                .add(that.table)
+                .add(that.thead)
+                .add(that.content)
+                .add(that.content.find(">.k-virtual-scrollable-wrap"))
+                .add(that.wrapper.find(">.k-grid-toolbar"))
+                .off(NS);
+
+            kendo.destroy(that.wrapper);
         },
 
         setOptions: function(options) {
@@ -19667,7 +16736,7 @@ function pad(number) {
                 resizeHandle = that.resizeHandle,
                 left;
 
-            that.thead.on("mousemove", "th:not(.k-group-cell,.k-hierarchy-cell)", function(e) {
+            that.thead.on("mousemove" + NS, "th:not(.k-group-cell,.k-hierarchy-cell)", function(e) {
                  var th = $(this),
                     position = th.offset().left + this.offsetWidth;
 
@@ -19790,7 +16859,7 @@ function pad(number) {
             if (that.options.reorderable) {
                 that._draggableInstance = that.thead.kendoDraggable({
                     group: kendo.guid(),
-                    filter: ".k-header:not(.k-group-cell,.k-hierarchy-cell):visible[" + kendo.attr("field") + "]",
+                    filter: ".k-header:not(.k-group-cell,.k-hierarchy-cell):visible",
                     hint: function(target) {
                         return $('<div class="k-header k-drag-clue" />')
                             .css({
@@ -19801,7 +16870,7 @@ function pad(number) {
                                 paddingTop: target.css("paddingTop"),
                                 paddingBottom: target.css("paddingBottom")
                             })
-                            .html(target.attr(kendo.attr("title")) || target.attr(kendo.attr("field")))
+                            .html(target.attr(kendo.attr("title")) || target.attr(kendo.attr("field")) || target.text())
                             .prepend('<span class="k-icon k-drag-status k-denied" />');
                     }
                 }).data("kendoDraggable");
@@ -19814,13 +16883,16 @@ function pad(number) {
                 that.thead.kendoReorderable({
                     draggable: that._draggableInstance,
                     change: function(e) {
-                        var column = visibleColumns(that.columns)[e.oldIndex];
+                        var reorderableColumns = visibleColumns(that.columns),
+                        newIndex = inArray(reorderableColumns[e.newIndex], that.columns),
+                        column = reorderableColumns[e.oldIndex];
+
                         that.trigger(COLUMNREORDER, {
-                            newIndex: e.newIndex,
-                            oldIndex: e.oldIndex,
+                            newIndex: newIndex,
+                            oldIndex: inArray(column, that.columns),
                             column: column
                         });
-                        that.reorderColumn(e.newIndex, column);
+                        that.reorderColumn(newIndex, column);
                     }
                 });
             }
@@ -19828,8 +16900,8 @@ function pad(number) {
 
         reorderColumn: function(destIndex, column) {
             var that = this,
-                sourceIndex = $.inArray(column, that.columns),
-                colSourceIndex = $.inArray(column, visibleColumns(that.columns)),
+                sourceIndex = inArray(column, that.columns),
+                colSourceIndex = inArray(column, visibleColumns(that.columns)),
                 rows,
                 idx,
                 length,
@@ -19896,7 +16968,7 @@ function pad(number) {
 
                 if (mode === "incell") {
                     if (editable.update !== false) {
-                        that.wrapper.delegate("tr:not(.k-grouping-row) > td:not(.k-hierarchy-cell,.k-detail-cell,.k-group-cell,.k-edit-cell,:has(a.k-grid-delete))", CLICK, function(e) {
+                        that.wrapper.on(CLICK + NS, "tr:not(.k-grouping-row) > td:not(.k-hierarchy-cell,.k-detail-cell,.k-group-cell,.k-edit-cell,:has(a.k-grid-delete),:has(button.k-grid-delete))", function(e) {
                             var td = $(this);
 
                             if (td.closest("tbody")[0] !== that.tbody[0] || $(e.target).is(":input")) {
@@ -19912,19 +16984,18 @@ function pad(number) {
                                 that.editCell(td);
                             }
 
-                        });
-
-                        that.wrapper.bind("focusin", function(e) {
+                        })
+                        .on("focusin" + NS, function(e) {
                             clearTimeout(that.timer);
                             that.timer = null;
-                        });
-                        that.wrapper.bind("focusout", function(e) {
+                        })
+                        .on("focusout" + NS, function(e) {
                             that.timer = setTimeout(handler, 1);
                         });
                     }
                 } else {
                     if (editable.update !== false) {
-                        that.wrapper.delegate("tbody>tr:not(.k-detail-row,.k-grouping-row):visible a.k-grid-edit", CLICK, function(e) {
+                        that.wrapper.on(CLICK + NS, "tbody>tr:not(.k-detail-row,.k-grouping-row):visible a.k-grid-edit", function(e) {
                             e.preventDefault();
                             that.editRow($(this).closest("tr"));
                         });
@@ -19932,11 +17003,18 @@ function pad(number) {
                 }
 
                 if (editable.destroy !== false) {
-                    that.wrapper.delegate("tbody>tr:not(.k-detail-row,.k-grouping-row):visible a.k-grid-delete", CLICK, function(e) {
+                    that.wrapper.on(CLICK + NS, "tbody>tr:not(.k-detail-row,.k-grouping-row):visible .k-grid-delete", function(e) {
                         e.preventDefault();
                         that.removeRow($(this).closest("tr"));
                     });
-               }
+                } else {
+                    //Required for the MVC server wrapper delete button
+                    that.wrapper.on(CLICK + NS, "tbody>tr:not(.k-detail-row,.k-grouping-row):visible button.k-grid-delete", function(e) {
+                        if (!that._confirmation()) {
+                            e.preventDefault();
+                        }
+                    });
+                }
             }
         },
 
@@ -19972,17 +17050,21 @@ function pad(number) {
         _destroyEditable: function() {
             var that = this;
 
-            if (that.editable) {
-                that._detachModelChange();
-
-                that.editable.destroy();
-                delete that.editable;
-
-                if (that._editMode() === "popup") {
-                    that._editContainer.data("kendoWindow").close();
+            var destroy = function() {
+                if (that.editable) {
+                    that._detachModelChange();
+                    that.editable.destroy();
+                    that.editable = null;
+                    that._editContainer = null;
                 }
+            };
 
-                that._editContainer = null;
+            if (that.editable) {
+                if (that._editMode() === "popup") {
+                    that._editContainer.data("kendoWindow").bind("deactivate", destroy).close();
+                } else {
+                    destroy();
+                }
             }
         },
 
@@ -20022,8 +17104,6 @@ function pad(number) {
             if (cell.hasClass("k-dirty-cell")) {
                 $('<span class="k-dirty"/>').prependTo(cell);
             }
-			//foundops change
-			ops.closeCell();
         },
 
         _displayCell: function(cell, column, dataItem) {
@@ -20109,12 +17189,12 @@ function pad(number) {
 
                 container = that._editContainer;
 
-                container.delegate("a.k-grid-cancel", CLICK, function(e) {
+                container.on(CLICK + NS, "a.k-grid-cancel", function(e) {
                     e.preventDefault();
                     that.cancelRow();
                 });
 
-                container.delegate("a.k-grid-update", CLICK, function(e) {
+                container.on(CLICK + NS, "a.k-grid-update", function(e) {
                     e.preventDefault();
                     that.saveRow();
                 });
@@ -20134,11 +17214,15 @@ function pad(number) {
                 cancelText,
                 attr,
                 editable = that.options.editable,
+                template = editable.template,
                 options = isPlainObject(editable) ? editable.window : {},
                 settings = extend({}, kendo.Template, that.options.templateSettings);
 
-            if (editable.template) {
-                html += (kendo.template(window.unescape(editable.template), settings))(model);
+            if (template) {
+                if (typeof template === STRING) {
+                    template = window.unescape(template);
+                }
+                html += (kendo.template(template, settings))(model);
 
                 for (idx = 0, length = that.columns.length; idx < length; idx++) {
                     column = that.columns[idx];
@@ -20201,9 +17285,9 @@ function pad(number) {
 
             var wnd = container.data("kendoWindow");
 
-            wnd.wrapper.delegate(".k-i-close", "click", function() {
-                    that.cancelRow();
-                });
+            wnd.wrapper.on(CLICK + NS, ".k-i-close", function() {
+                that.cancelRow();
+            });
 
             that.editable = that._editContainer
                 .kendoEditable({
@@ -20405,9 +17489,9 @@ function pad(number) {
                 }
 
                 if (editable && editable.create !== false) {
-                    container.delegate(".k-grid-add", CLICK, function(e) { e.preventDefault(); that.addRow(); })
-                        .delegate(".k-grid-cancel-changes", CLICK, function(e) { e.preventDefault(); that.cancelChanges(); })
-                        .delegate(".k-grid-save-changes", CLICK, function(e) { e.preventDefault(); that.saveChanges(); });
+                    container.on(CLICK + NS, ".k-grid-add", function(e) { e.preventDefault(); that.addRow(); })
+                        .on(CLICK + NS, ".k-grid-cancel-changes", function(e) { e.preventDefault(); that.cancelChanges(); })
+                        .on(CLICK + NS, ".k-grid-save-changes", function(e) { e.preventDefault(); that.saveChanges(); });
                 }
             }
         },
@@ -20429,7 +17513,7 @@ function pad(number) {
         _createButton: function(command) {
             var template = command.template || COMMANDBUTTONTMPL,
                 commandName = typeof command === STRING ? command : command.name || command.text,
-                options = { className: "k-grid-" + commandName, text: commandName, imageClass: "", attr: "", iconClass: "" };
+                options = { className: "k-grid-" + (commandName || "").replace(/\s/g, ""), text: commandName, imageClass: "", attr: "", iconClass: "" };
 
             if (!commandName && !(isPlainObject(command) && command.template))  {
                 throw new Error("Custom commands should have name specified");
@@ -20463,7 +17547,7 @@ function pad(number) {
                 groupable = that.options.groupable;
 
             if (!that.groupable) {
-                that.table.delegate(".k-grouping-row .k-i-collapse, .k-grouping-row .k-i-expand", CLICK, function(e) {
+                that.table.on(CLICK + NS, ".k-grouping-row .k-i-collapse, .k-grouping-row .k-i-expand", function(e) {
                     var element = $(this),
                     group = element.closest("tr");
 
@@ -20628,99 +17712,96 @@ function pad(number) {
                 };
 
             if (that.options.navigatable) {
-                wrapper.bind({
-                    focus: function() {
-                        var current = that._current;
-                        if(current && current.is(":visible")) {
-                            current.addClass(FOCUSED);
-                        } else {
-                            currentProxy(that.table.find(FIRST_CELL_SELECTOR));
-                        }
-                    },
-                    focusout: function(e) {
-                        if (that._current) {
-                            that._current.removeClass(FOCUSED);
-                        }
-                        e.stopPropagation();
-                    },
-                    keydown: function(e) {
-                        var key = e.keyCode,
-                            current = that.current(),
-                            shiftKey = e.shiftKey,
-                            dataSource = that.dataSource,
-                            pageable = that.options.pageable,
-                            canHandle = !$(e.target).is(":button,a,:input,a>.t-icon"),
-                            isInCell = that._editMode() == "incell",
-                            currentIndex,
-                            cell,
-                            handled = false;
+                wrapper.on("focus" + NS, function() {
+                    var current = that._current;
+                    if(current && current.is(":visible")) {
+                        current.addClass(FOCUSED);
+                    } else {
+                        currentProxy(that.table.find(FIRST_CELL_SELECTOR));
+                    }
+                })
+                .on("focusout" + NS, function(e) {
+                    if (that._current) {
+                        that._current.removeClass(FOCUSED);
+                    }
+                    e.stopPropagation();
+                })
+                .on("keydown" + NS, function(e) {
+                    var key = e.keyCode,
+                        current = that.current(),
+                        shiftKey = e.shiftKey,
+                        dataSource = that.dataSource,
+                        pageable = that.options.pageable,
+                        canHandle = !$(e.target).is(":button,a,:input,a>.t-icon"),
+                        isInCell = that._editMode() == "incell",
+                        currentIndex,
+                        cell,
+                        handled = false;
 
-                        if (canHandle && keys.UP === key) {
-                            currentProxy(current ? current.parent().prevAll(ROW_SELECTOR).last().children(":eq(" + current.index() + "),:eq(0)").last() : table.find(FIRST_CELL_SELECTOR));
+                    if (canHandle && keys.UP === key) {
+                        currentProxy(current ? current.parent().prevAll(ROW_SELECTOR).last().children(":eq(" + current.index() + "),:eq(0)").last() : table.find(FIRST_CELL_SELECTOR));
+                        handled = true;
+                    } else if (canHandle && keys.DOWN === key) {
+                        currentProxy(current ? current.parent().nextAll(ROW_SELECTOR).first().children(":eq(" + current.index() + "),:eq(0)").last() : table.find(FIRST_CELL_SELECTOR));
+                        handled = true;
+                    } else if (canHandle && keys.LEFT === key) {
+                        currentProxy(current ? current.prevAll(DATA_CELL + ":first") : table.find(FIRST_CELL_SELECTOR));
+                        handled = true;
+                    } else if (canHandle && keys.RIGHT === key) {
+                        currentProxy(current ? current.nextAll(":visible:first") : table.find(FIRST_CELL_SELECTOR));
+                        handled = true;
+                    } else if (canHandle && pageable && keys.PAGEDOWN == key) {
+                        that._current = null;
+                        dataSource.page(dataSource.page() + 1);
+                        handled = true;
+                    } else if (canHandle && pageable && keys.PAGEUP == key) {
+                        that._current = null;
+                        dataSource.page(dataSource.page() - 1);
+                        handled = true;
+                    } else if (that.options.editable) {
+                        current = current ? current : table.find(FIRST_CELL_SELECTOR);
+                        if (keys.ENTER == key || keys.F2 == key) {
+                            that._handleEditing(current);
                             handled = true;
-                        } else if (canHandle && keys.DOWN === key) {
-                            currentProxy(current ? current.parent().nextAll(ROW_SELECTOR).first().children(":eq(" + current.index() + "),:eq(0)").last() : table.find(FIRST_CELL_SELECTOR));
-                            handled = true;
-                        } else if (canHandle && keys.LEFT === key) {
-                            currentProxy(current ? current.prevAll(DATA_CELL + ":first") : table.find(FIRST_CELL_SELECTOR));
-                            handled = true;
-                        } else if (canHandle && keys.RIGHT === key) {
-                            currentProxy(current ? current.nextAll(":visible:first") : table.find(FIRST_CELL_SELECTOR));
-                            handled = true;
-                        } else if (canHandle && pageable && keys.PAGEDOWN == key) {
-                            that._current = null;
-                            dataSource.page(dataSource.page() + 1);
-                            handled = true;
-                        } else if (canHandle && pageable && keys.PAGEUP == key) {
-                            that._current = null;
-                            dataSource.page(dataSource.page() - 1);
-                            handled = true;
-                        } else if (that.options.editable) {
-                            current = current ? current : table.find(FIRST_CELL_SELECTOR);
-                            if (keys.ENTER == key || keys.F2 == key) {
-                                that._handleEditing(current);
+                        } else if (keys.TAB == key && isInCell) {
+                            cell = shiftKey ? current.prevAll(DATA_CELL + ":first") : current.nextAll(":visible:first");
+                            if (!cell.length) {
+                                cell = current.parent()[shiftKey ? "prevAll" : "nextAll"]("tr:not(.k-grouping-row,.k-detail-row):visible")
+                                    .children(DATA_CELL + (shiftKey ? ":last" : ":first"));
+                            }
+
+                            if (cell.length) {
+                                that._handleEditing(current, cell);
                                 handled = true;
-                            } else if (keys.TAB == key && isInCell) {
-                                cell = shiftKey ? current.prevAll(DATA_CELL + ":first") : current.nextAll(":visible:first");
-                                if (!cell.length) {
-                                    cell = current.parent()[shiftKey ? "prevAll" : "nextAll"]("tr:not(.k-grouping-row,.k-detail-row):visible")
-                                        .children(DATA_CELL + (shiftKey ? ":last" : ":first"));
+                            }
+                        } else if (keys.ESC == key && that._editContainer) {
+                            if (that._editContainer.has(current[0]) || current[0] === that._editContainer[0]) {
+                                if (isInCell) {
+                                    that.closeCell();
+                                } else {
+                                    currentIndex = that.items().index(current.parent());
+                                    document.activeElement.blur();
+                                    that.cancelRow();
+                                    if (currentIndex >= 0) {
+                                        that.current(that.items().eq(currentIndex).children().filter(DATA_CELL).first());
+                                    }
                                 }
 
-                                if (cell.length) {
-                                    that._handleEditing(current, cell);
-                                    handled = true;
+                                if (browser.msie && parseInt(browser.version, 10) < 9) {
+                                    document.body.focus();
                                 }
-                            } else if (keys.ESC == key && that._editContainer) {
-                                if (that._editContainer.has(current[0]) || current[0] === that._editContainer[0]) {
-                                    if (isInCell) {
-                                        that.closeCell();
-                                    } else {
-                                        currentIndex = that.items().index(current.parent());
-                                        document.activeElement.blur();
-                                        that.cancelRow();
-                                        if (currentIndex >= 0) {
-                                            that.current(that.items().eq(currentIndex).children().filter(DATA_CELL).first());
-                                        }
-                                    }
-
-                                    if (browser.msie && parseInt(browser.version, 10) < 9) {
-                                        document.body.focus();
-                                    }
-                                    wrapper.focus();
-                                    handled = true;
-                                }
+                                wrapper.focus();
+                                handled = true;
                             }
                         }
-
-                        if(handled) {
-                            e.preventDefault();
-                            e.stopPropagation();
-                        }
                     }
-                });
 
-                wrapper.delegate(selector, "mousedown", clickCallback); }
+                    if(handled) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
+                })
+                .on("mousedown" + NS, selector, clickCallback); }
         },
 
         _handleEditing: function(current, next) {
@@ -20851,14 +17932,20 @@ function pad(number) {
                     });
                 }
 
-                that.scrollables = header.children(".k-grid-header-wrap"); // the footer does not exists here yet!
+                that.scrollables = header.children(".k-grid-header-wrap");
+
+                // the footer may exists if rendered from the server
+                var footer = that.wrapper.find(".k-grid-footer");
+                if (footer.length) {
+                    that.scrollables = that.scrollables.add(footer.children(".k-grid-footer-wrap"));
+                }
 
                 if (scrollable.virtual) {
-                    that.content.find(">.k-virtual-scrollable-wrap").bind('scroll', function () {
+                    that.content.find(">.k-virtual-scrollable-wrap").bind("scroll" + NS, function () {
                         that.scrollables.scrollLeft(this.scrollLeft);
                     });
                 } else {
-                    that.content.bind('scroll', function () {
+                    that.content.bind("scroll" + NS, function () {
                         that.scrollables.scrollLeft(this.scrollLeft);
                     });
 
@@ -21110,6 +18197,8 @@ function pad(number) {
             if (that.options.scrollable) {
                 html = $('<div class="k-grid-footer"><div class="k-grid-footer-wrap"><table cellspacing="0"><tbody>' + footerRow + '</tbody></table></div></div>');
                 that._appendCols(html.find("table"));
+                html.css("padding-right", kendo.support.scrollbar()); // Update inner fix.
+
                 return html;
             }
 
@@ -21279,7 +18368,7 @@ function pad(number) {
                 }
 
                 if (length) { // data item is an object
-                    rowTemplate += ' ' + kendo.attr("uid") + '="#=uid#"';
+                    rowTemplate += ' ' + kendo.attr("uid") + '="#=' + settings.paramName + '.uid#"';
                 }
 
                 rowTemplate += ">";
@@ -21335,6 +18424,7 @@ function pad(number) {
                 settings = extend({}, kendo.Template, that.options.templateSettings),
                 template = column.template,
                 paramName = settings.paramName,
+                field = column.field,
                 html = "",
                 idx,
                 length,
@@ -21366,7 +18456,7 @@ function pad(number) {
                     html += paramName + ".";
                 }
 
-                html += column.field;
+                html += field;
                 html += ") { #";
                 html += "${v[idx].text}";
                 html += "#break;#";
@@ -21379,11 +18469,12 @@ function pad(number) {
                     html += 'kendo.format(\"' + format.replace(formatRegExp,"\\$1") + '\",';
                 }
 
-                if (!settings.useWithBlock) {
-                    html += paramName + ".";
+                if (field) {
+                    field = paramName + "." + field;
+                    html += field + "==null?'':" + field;
+                } else {
+                    html += "''";
                 }
-
-                html += column.field;
 
                 if (format) {
                     html += ")";
@@ -21521,13 +18612,13 @@ function pad(number) {
         _hasDetails: function() {
             var that = this;
 
-            return that.options.detailTemplate !== undefined  || (that._events[DETAILINIT] || []).length;
+            return that.options.detailTemplate !== null  || (that._events[DETAILINIT] || []).length;
         },
 
         _details: function() {
             var that = this;
 
-            that.table.delegate(".k-hierarchy-cell .k-plus, .k-hierarchy-cell .k-minus", CLICK, function(e) {
+            that.table.on(CLICK + NS, ".k-hierarchy-cell .k-plus, .k-hierarchy-cell .k-minus", function(e) {
                 var button = $(this),
                     expanding = button.hasClass("k-plus"),
                     masterRow = button.closest("tr.k-master-row"),
@@ -22125,6 +19216,7 @@ function pad(number) {
         REMOVE = "remove",
         SAVE = "save",
         CLICK = "click",
+        NS = ".kendoListView",
         proxy = $.proxy,
         progress = kendo.ui.progress,
         DataSource = kendo.data.DataSource;
@@ -22196,13 +19288,19 @@ function pad(number) {
             }
         },
 
+        _unbindDataSource: function() {
+            var that = this;
+
+            that.dataSource.unbind(CHANGE, that._refreshHandler)
+                            .unbind(REQUESTSTART, that._requestStartHandler)
+                            .unbind(ERROR, that._errorHandler);
+        },
+
         _dataSource: function() {
             var that = this;
 
             if (that.dataSource && that._refreshHandler) {
-                that.dataSource.unbind(CHANGE, that._refreshHandler)
-                                .unbind(REQUESTSTART, that._requestStartHandler)
-                                .unbind(ERROR, that._errorHandler);
+                that._unbindDataSource();
             } else {
                 that._refreshHandler = proxy(that.refresh, that);
                 that._requestStartHandler = proxy(that._requestStart, that);
@@ -22242,7 +19340,7 @@ function pad(number) {
             if (e && e.action === "itemchange") {
                 if (!that.editable) {
                     data = e.items[0];
-                    idx = view.indexOf(data);
+                    idx = $.inArray(data, view);
 
                     if (idx >= 0) {
                         item = $(template(data));
@@ -22293,7 +19391,7 @@ function pad(number) {
                     pagerId: null
                 });
 
-                $("#" + pagerId).kendoPager(settings);
+                that.pager = new kendo.ui.Pager($("#" + pagerId), settings);
             }
         },
 
@@ -22316,7 +19414,7 @@ function pad(number) {
                 });
 
                 if (navigatable) {
-                    that.element.keydown(function(e) {
+                    that.element.on("keydown" + NS, function(e) {
                         if (e.keyCode === keys.SPACEBAR) {
                             current = that.current();
                             e.preventDefault();
@@ -22371,21 +19469,20 @@ function pad(number) {
 
             if (navigatable) {
                 element.attr("tabIndex", Math.max(element.attr("tabIndex") || 0, 0));
-                element.bind({
-                    focus: function() {
+                element.on("focus" + NS, function() {
                         var current = that._current;
                         if(current && current.is(":visible")) {
                             current.addClass(FOCUSED);
                         } else {
                             currentProxy(element.find(FOCUSSELECTOR).first());
                         }
-                    },
-                    focusout: function() {
+                    })
+                    .on("focusout" + NS, function() {
                         if (that._current) {
                             that._current.removeClass(FOCUSED);
                         }
-                    },
-                    keydown: function(e) {
+                    })
+                    .on("keydown" + NS, function(e) {
                         var key = e.keyCode,
                             current = that.current();
 
@@ -22400,10 +19497,9 @@ function pad(number) {
                             that._current = null;
                             that.dataSource.page(that.dataSource.page() + 1);
                         }
-                    }
-                });
+                    });
 
-                element.addClass(FOCUSABLE).delegate("." + FOCUSABLE + FOCUSSELECTOR, "mousedown", clickCallback);
+                element.addClass(FOCUSABLE).on("mousedown" + NS, "." + FOCUSABLE + FOCUSSELECTOR, clickCallback);
             }
        },
 
@@ -22527,29 +19623,52 @@ function pad(number) {
        },
 
        _crudHandlers: function() {
-           var that = this;
+           var that = this,
+               clickNS = CLICK + NS;
 
-           that.element.on(CLICK, ".k-edit-button", function(e) {
+           that.element.on(clickNS, ".k-edit-button", function(e) {
                var item = $(this).closest("[" + kendo.attr("uid") + "]");
                that.edit(item);
                e.preventDefault();
            });
 
-           that.element.on(CLICK, ".k-delete-button", function(e) {
+           that.element.on(clickNS, ".k-delete-button", function(e) {
                var item = $(this).closest("[" + kendo.attr("uid") + "]");
                that.remove(item);
                e.preventDefault();
            });
 
-           that.element.on(CLICK, ".k-update-button", function(e) {
+           that.element.on(clickNS, ".k-update-button", function(e) {
                that.save();
                e.preventDefault();
            });
 
-           that.element.on(CLICK, ".k-cancel-button", function(e) {
+           that.element.on(clickNS, ".k-cancel-button", function(e) {
                that.cancel();
                e.preventDefault();
            });
+       },
+
+       destroy: function() {
+           var that = this;
+
+           Widget.fn.destroy.call(that);
+
+           that._unbindDataSource();
+
+           that._destroyEditable();
+
+           that.element.off(NS);
+
+           if (that.pager) {
+               that.pager.destroy();
+           }
+
+           if (that.selectable) {
+               that.selectable.destroy();
+           }
+
+           kendo.destroy(that.element);
        }
     });
 
@@ -22564,6 +19683,7 @@ function pad(number) {
         os = kendo.support.mobileOS,
         extend = $.extend,
         deepExtend = kendo.deepExtend,
+        NS = ".kendoEditor",
         keys = kendo.keys;
 
     // options can be: template (as string), cssClass, title, defaultValue
@@ -22723,7 +19843,7 @@ function pad(number) {
             selectBox.list.find(".k-item").each(function(idx, element){
                 var item = $(element),
                     text = item.text(),
-                
+
                     style = kendo.ui.editor.Dom.inlineStyle(textarea.data.data("kendoEditor").document, "span", {className : classes[idx].value});
                 item.html('<span unselectable="on" style="display:block;' + style +'">' + text + '</span>');
             });
@@ -22734,7 +19854,7 @@ function pad(number) {
                 rtlStyle = textarea.closest(".k-rtl").length ? "direction:rtl;" : "";
 
             textarea.hide();
-            iframe = $("<iframe />", { src: 'javascript:"<html></html>"', frameBorder: "0" })
+            iframe = $("<iframe />", { frameBorder: "0" })
                             .css("display", "")
                             .addClass("k-content")
                             .insertBefore(textarea)[0];
@@ -22781,74 +19901,73 @@ function pad(number) {
             editor.body = editor.document.body;
 
             $(editor.document)
-                .bind({
-                    keydown: function (e) {
-                        if (e.keyCode === keys.F10) {
-                            // Handling with timeout to avoid the default IE menu
-                            setTimeout(function() {
-                                var TABINDEX = "tabIndex",
-                                    element = editor.wrapper,
-                                    tabIndex = element.attr(TABINDEX);
+                .on("keydown" + NS, function (e) {
+                    if (e.keyCode === keys.F10) {
+                        // Handling with timeout to avoid the default IE menu
+                        setTimeout(function() {
+                            var TABINDEX = "tabIndex",
+                                element = editor.wrapper,
+                                tabIndex = element.attr(TABINDEX);
 
-                                // Chrome can't focus something which has already been focused
-                                element.attr(TABINDEX, tabIndex || 0).focus().find("li:has(" + focusable + ")").first().focus();
+                            // Chrome can't focus something which has already been focused
+                            element.attr(TABINDEX, tabIndex || 0).focus().find("li:has(" + focusable + ")").first().focus();
 
-                                if (!tabIndex && tabIndex !== 0) {
-                                   element.removeAttr(TABINDEX);
-                                }
-
-                            }, 100);
-
-                            e.preventDefault();
-                            return;
-                        }
-
-                        var toolName = editor.keyboard.toolFromShortcut(editor.options.tools, e);
-
-                        if (toolName) {
-                            e.preventDefault();
-                            if (!/undo|redo/.test(toolName)) {
-                                editor.keyboard.endTyping(true);
+                            if (!tabIndex && tabIndex !== 0) {
+                               element.removeAttr(TABINDEX);
                             }
-                            editor.exec(toolName);
-                            return false;
+
+                        }, 100);
+
+                        e.preventDefault();
+                        return;
+                    }
+
+                    var toolName = editor.keyboard.toolFromShortcut(editor.options.tools, e);
+
+                    if (toolName) {
+                        e.preventDefault();
+                        if (!/undo|redo/.test(toolName)) {
+                            editor.keyboard.endTyping(true);
                         }
+                        editor.exec(toolName);
+                        return false;
+                    }
 
-                        if (editor.keyboard.isTypingKey(e) && editor.pendingFormats.hasPending()) {
-                            if (isFirstKeyDown) {
-                                isFirstKeyDown = false;
-                            } else {
-                                var range = editor.getRange();
-                                editor.pendingFormats.apply(range);
-                                editor.selectRange(range);
-                            }
-                        }
-
-                        editor.keyboard.clearTimeout();
-
-                        editor.keyboard.keydown(e);
-                    },
-                    keyup: function (e) {
-                        var selectionCodes = [8, 9, 33, 34, 35, 36, 37, 38, 39, 40, 40, 45, 46];
-
-                        if ($.inArray(e.keyCode, selectionCodes) > -1 || (e.keyCode == 65 && e.ctrlKey && !e.altKey && !e.shiftKey)) {
-                            editor.pendingFormats.clear();
-                            select(editor);
-                        }
-
-                        if (editor.keyboard.isTypingKey(e)) {
-                            if (editor.pendingFormats.hasPending()) {
-                                var range = editor.getRange();
-                                editor.pendingFormats.apply(range);
-                                editor.selectRange(range);
-                            }
+                    if (editor.keyboard.isTypingKey(e) && editor.pendingFormats.hasPending()) {
+                        if (isFirstKeyDown) {
+                            isFirstKeyDown = false;
                         } else {
-                            isFirstKeyDown = true;
+                            var range = editor.getRange();
+                            editor.pendingFormats.apply(range);
+                            editor.selectRange(range);
                         }
+                    }
 
-                        editor.keyboard.keyup(e);
-                    },
-                    mousedown: function(e) {
+                    editor.keyboard.clearTimeout();
+
+                    editor.keyboard.keydown(e);
+                })
+                .on("keyup" + NS, function (e) {
+                    var selectionCodes = [8, 9, 33, 34, 35, 36, 37, 38, 39, 40, 40, 45, 46];
+
+                    if ($.inArray(e.keyCode, selectionCodes) > -1 || (e.keyCode == 65 && e.ctrlKey && !e.altKey && !e.shiftKey)) {
+                        editor.pendingFormats.clear();
+                        select(editor);
+                    }
+
+                    if (editor.keyboard.isTypingKey(e)) {
+                        if (editor.pendingFormats.hasPending()) {
+                            var range = editor.getRange();
+                            editor.pendingFormats.apply(range);
+                            editor.selectRange(range);
+                        }
+                    } else {
+                        isFirstKeyDown = true;
+                    }
+
+                    editor.keyboard.keyup(e);
+                })
+                .on("mousedown" + NS, function(e) {
                         editor.pendingFormats.clear();
 
                         var target = $(e.target);
@@ -22856,14 +19975,13 @@ function pad(number) {
                         if (!$.browser.gecko && e.which == 2 && target.is("a[href]")) {
                             window.open(target.attr("href"), "_new");
                         }
-                    },
-                    mouseup: function () {
-                        select(editor);
-                    }
+                })
+                .on("mouseup" + NS, function(){
+                    select(editor);
                 });
 
             $(editor.window)
-                .bind("blur", function () {
+                .on("blur" + NS, function () {
                     var old = editor.textarea.value,
                         value = editor.encodedValue();
 
@@ -22874,10 +19992,9 @@ function pad(number) {
                     }
                 });
 
-            $(editor.body)
-                .bind("cut paste", function (e) {
-                      editor.clipboard["on" + e.type](e);
-                  });
+            $(editor.body).on("cut" + NS + " paste" + NS, function (e) {
+                  editor.clipboard["on" + e.type](e);
+            });
         },
 
         formatByName: function(name, format) {
@@ -22965,7 +20082,7 @@ function pad(number) {
 
             element = $(element);
 
-            element.closest("form").bind("submit", function () {
+            element.closest("form").on("submit" + NS, function () {
                 that.update();
             });
 
@@ -23052,14 +20169,14 @@ function pad(number) {
             });
 
             wrapper
-                .delegate(enabledButtons, "mouseenter", function() { $(this).addClass("k-state-hover"); })
-                .delegate(enabledButtons, "mouseleave", function() { $(this).removeClass("k-state-hover"); })
-                .delegate(buttons, "mousedown", false)
-                .delegate(focusable, "keydown", function(e) {
+                .on("mouseenter" + NS, enabledButtons, function() { $(this).addClass("k-state-hover"); })
+                .on("mouseleave" + NS, enabledButtons, function() { $(this).removeClass("k-state-hover"); })
+                .on("mousedown" + NS, buttons, false)
+                .on("keydown" + NS, focusable, function(e) {
                     var closestLi = $(this).closest("li"),
-                    focusableTool = "li:has(" + focusable + ")",
-                    focusElement,
-                    keyCode = e.keyCode;
+                        focusableTool = "li:has(" + focusable + ")",
+                        focusElement,
+                        keyCode = e.keyCode;
 
                     if (keyCode == keys.RIGHT) {
                         focusElement = closestLi.nextAll(focusableTool).first().find(focusable);
@@ -23092,12 +20209,12 @@ function pad(number) {
                         focusElement.focus();
                     }
                 })
-                .delegate(enabledButtons, "click", function (e) {
+                .on("click" + NS, enabledButtons, function(e) {
                     e.preventDefault();
                     e.stopPropagation();
                     that.exec(toolFromClassName(this));
                 })
-                .delegate(disabledButtons, "click", function(e) { e.preventDefault(); })
+                .on("click" + NS, disabledButtons, function(e) { e.preventDefault(); })
                 .find(toolbarItems)
                     .each(function () {
                         var toolName = toolFromClassName(this),
@@ -23141,31 +20258,45 @@ function pad(number) {
                         });
                 });
 
-            $(document)
-                .bind("DOMNodeInserted", function(e) {
-                    var wrapper = that.wrapper;
+            that._DOMNodeInsertedHandler = function(e) {
+                that._DOMNodeInserted(e);
+            };
 
-                    if ($.contains(e.target, wrapper[0]) || wrapper[0] == e.target) {
-                        // preserve updated value before re-initializing
-                        // don't use update() to prevent the editor from encoding the content too early
-                        that.textarea.value = that.value();
-                        wrapper.find("iframe").remove();
-                        initializeContentElement(that);
-                    }
-                })
-                .bind("mousedown", function(e) {
-                    try {
-                        if (that.keyboard.isTypingInProgress()) {
-                            that.keyboard.endTyping(true);
-                        }
+            that._endTypingHandler = function() {
+                that._endTyping();
+            };
 
-                        if (!that.selectionRestorePoint) {
-                            that.selectionRestorePoint = new editorNS.RestorePoint(that.getRange());
-                        }
-                    } catch (e) { }
-                });
+            $(document).on("DOMNodeInserted", that._DOMNodeInsertedHandler)
+                       .on("mousedown", that._endTypingHandler);
 
             kendo.notify(that);
+        },
+
+        _endTyping: function() {
+            var that = this;
+
+            try {
+                if (that.keyboard.isTypingInProgress()) {
+                    that.keyboard.endTyping(true);
+                }
+
+                if (!that.selectionRestorePoint) {
+                    that.selectionRestorePoint = new kendo.ui.editor.RestorePoint(that.getRange());
+                }
+            } catch (e) { }
+        },
+
+        _DOMNodeInserted: function(e) {
+            var that = this,
+                wrapper = that.wrapper;
+
+            if ($.contains(e.target, wrapper[0]) || wrapper[0] == e.target) {
+                // preserve updated value before re-initializing
+                // don't use update() to prevent the editor from encoding the content too early
+                that.textarea.value = that.value();
+                wrapper.find("iframe").remove();
+                initializeContentElement(that);
+            }
         },
 
         events: [
@@ -23241,6 +20372,22 @@ function pad(number) {
                 "subscript", // declare explicitly
                 "superscript" // declare explicitly */
             ]
+        },
+
+        destroy: function() {
+            var that = this;
+            Widget.fn.destroy.call(that);
+
+            $(that.window)
+                .add(that.document)
+                .add(that.wrapper)
+                .add(that.element.closest("form"))
+                .off(NS);
+
+            $(document).off("DOMNodeInserted", that._DOMNodeInsertedHandler)
+                       .off("mousedown", that._endTypingHandler);
+
+            kendo.destroy(that.wrapper);
         },
 
         _nativeTools: [
@@ -23612,9 +20759,18 @@ var Dom = {
     },
 
     splitDataNode: function(node, offset) {
-        var newNode = node.cloneNode(false);
+        var newNode = node.cloneNode(false),
+            denormalizedText = "",
+            iterator = node;
+
+        while (iterator.nextSibling && iterator.nextSibling.nodeType == 3 && iterator.nextSibling.nodeValue) {
+            denormalizedText += iterator.nextSibling.nodeValue;
+            iterator = iterator.nextSibling;
+        }
+
         node.deleteData(offset, node.length);
         newNode.deleteData(0, offset);
+        newNode.nodeValue += denormalizedText;
         Dom.insertAfter(newNode, node);
     },
 
@@ -24117,7 +21273,7 @@ var Serializer = {
             if (nodeType == 1) {
                 tagName = dom.name(node);
 
-                if (!tagName || (node.attributes._moz_dirty && dom.is(node, 'br'))) {
+                if (!tagName || (node.attributes._moz_dirty && dom.is(node, 'br')) || node.className == "k-marker") {
                     return;
                 }
 
@@ -28374,91 +25530,6 @@ extend(Editor, {
 
 })(jQuery);
 (function($, undefined) {
-    /**
-     * @name kendo.ui.NumericTextBox.Description
-     *
-     * @section
-     * <p>
-     *    The NumericTextBox widget can convert an INPUT element into a numeric, percentage or currency textbox.
-     *    The type is defined depending on the specified format. The widget renders spin buttons and with their help you can
-     *    increment/decrement the value with a predefined step. The NumericTextBox widget accepts only numeric entries.
-     *    The widget uses <em>kendo.culture.current</em> culture in order to determine number precision and other culture
-     *    specific properties.
-     * </p>
-     *
-     * <h3>Getting Started</h3>
-     *
-     * @exampleTitle Creating a NumericTextBox from existing INPUT element
-     * @example
-     * <input id="textBox" />
-     *
-     * @exampleTitle NumericTextBox initialization
-     * @example
-     * $(document).ready(function(){
-     *  $("#textBox").kendoNumericTextBox();
-     * });
-     *
-     * @section
-     * <p>
-     *  When a <b>NumericTextBox</b> is initialized, it will automatically
-     *  wraps the input element with span element and will render spin
-     *  buttons.
-     * </p>
-     * <h3>Configuring NumericTextBox behaviors</h3>
-     * <p>
-     *  The <b>NumericTextBox</b> provides configuration options that can be
-     *  easily set during initialization. Among the properties that can be
-     *  controlled:
-     * </p>
-     * <ul>
-     *  <li>Value of the <b>NumericTextBox</b></li>
-     *  <li>Minimum and/or maximum values</li>
-     *  <li>Increment step</li>
-     *  <li>Precision of the number</li>
-     *  <li>Number format (any valid number format is allowed)</li>
-     * </ul>
-     * <p>
-     *  To see a full list of available properties and values, review the
-     *  Slider Configuration API documentation tab.
-     * </p>
-     * @exampleTitle Customizing NumericTextBox defaults
-     * @example
-     *  $("#textbox").kendoNumericTextBox({
-     *      value: 10,
-     *      min: -10,
-     *      max: 100,
-     *      step: 0.75,
-     *      format: "n",
-     *      decimals: 3
-     *  });
-     * @section
-     * @exampleTitle Create Currency NumericTextBox widget
-     * @example
-     *  $("#textbox").kendoNumericTextBox({
-     *      format: "c2" //Define currency type and 2 digits precision
-     *  });
-     * @section
-     * @exampleTitle Create Percentage NumericTextBox widget
-     * @example
-     *  $("#textbox").kendoNumericTextBox({
-     *      format: "p",
-     *      value: 0.15 // 15 %
-     *  });
-     *
-     * @section
-     * <h3>Accessing an Existing NumericTextBox</h3>
-     * <p>
-     *  You can reference an existing <b>NumericTextBox</b> instance via
-     *  <a href="http://api.jquery.com/jQuery.data/">jQuery.data()</a>.
-     *  Once a reference has been established, you can use the API to control
-     *  its behavior.
-     * </p>
-     *
-     * @exampleTitle Accessing an existing NumericTextBox instance
-     * @example
-     * var numericTextBox = $("#numericTextBox").data("kendoNumericTextBox");
-     *
-     */
     var kendo = window.kendo,
         keys = kendo.keys,
         ui = kendo.ui,
@@ -28471,13 +25542,15 @@ extend(Editor, {
         DISABLED = "disabled",
         INPUT = "k-input",
         SPIN = "spin",
+        ns = ".kendoNumericTextBox",
         TOUCHEND = "touchend",
-        MOUSEDOWN = touch ? "touchstart" : "mousedown",
-        MOUSEUP = touch ? "touchmove " + TOUCHEND : "mouseup mouseleave",
+        MOUSELEAVE = "mouseleave" + ns,
+        MOUSEDOWN = (touch ? "touchstart": "mousedown") + ns,
+        MOUSEUP = touch ? "touchmove" + ns + " " + TOUCHEND + ns : "mouseup" + ns + " " + MOUSELEAVE,
+        HOVEREVENTS = "mouseenter" + ns + " " + MOUSELEAVE,
         DEFAULT = "k-state-default",
         FOCUSED = "k-state-focused",
         HOVER = "k-state-hover",
-        HOVEREVENTS = "mouseenter mouseleave",
         POINT = ".",
         SELECTED = "k-state-selected",
         STATEDISABLED = "k-state-disabled",
@@ -28489,110 +25562,7 @@ extend(Editor, {
             188 : ","
         };
 
-    var NumericTextBox = Widget.extend(/** @lends kendo.ui.NumericTextBox.prototype */{
-        /**
-         * @constructs
-         * @extends kendo.ui.Widget
-         * @param {Element} element DOM element
-         * @param {Object} options Configuration options
-         * @option {Number} [value] <null> Specifies the value of the NumericTextBox widget.
-         * _example
-         *  // specify in the HTML
-         * <input id="numeric" value="10" type="number" min="-100" max="100" step="10"/>
-         *
-         * // specify on widget initialization
-         * $("#numeric").kendoNumericTextBox({
-         *     min: 0,
-         *     max: 100,
-         *     value: 50
-         * });
-         * @option {Number} [min] <null> Specifies the smallest value the user can enter.
-         * _example
-         *  // specify in the HTML
-         * <input id="numeric" value="10" type="number" min="-100" max="100" step="10"/>
-         * <br />
-         * // specify on widget initialization
-         * $("#numeric").kendoNumericTextBox({
-         *     min: 0,
-         *     max: 100,
-         *     value: 50
-         * });
-         * @option {Number} [max] <null> Specifies the largest value the user can enter.
-         * _example
-         *  // specify in the HTML
-         * <input id="numeric" value="10" type="number" min="-100" max="100" step="10"/>
-         * <br />
-         * // specify on widget initialization
-         * $("#numeric").kendoNumericTextBox({
-         *     min: 0,
-         *     max: 100,
-         *     value: 50
-         * });
-         * @option {Number} [decimals] <null> Specifies the number precision. If not set precision defined by current culture is used.
-         * _example
-         * // specify on widget initialization
-         * $("#numeric").kendoNumericTextBox({
-         *     min: 0,
-         *     max: 1,
-         *     step: 0.1,
-         *     decimals: 1
-         * });
-         * @option {Number} [step] <1> Specifies the increment/decrement step.
-         * _example
-         *  // specify in the HTML
-         * <input id="numeric" value="10" type="number" />
-         * <br />
-         * // specify on widget initialization
-         * $("#numeric").kendoNumericTextBox({
-         *     min: 0,
-         *     max: 1,
-         *     step: 0.1
-         * });
-         * @option {String} [format] <n> Specifies the format of the number. Any valid number format is allowed.
-         * _example
-         * $("#numeric").kendoNumericTextBox({
-         *    format: "p0", // format as percentage with % sign
-         *    min: 0,
-         *    max: 1,
-         *    step: 0.01
-         * });
-         * @option {String} [placeholder] <""> Specifies the text displayed when the input is empty.
-         * _example
-         * // specify on widget initialization
-         * $("#numeric").kendoNumericTextBox({
-         *     min: 0,
-         *     max: 100,
-         *     value: 50,
-         *     placeholder: "Select A Value"
-         * });
-         * @option {String} [upArrowText] <Increase value> Specifies the text of the tooltip on the up arrow.
-         * _example
-         * // specify on widget initialization
-         * $("#numeric").kendoNumericTextBox({
-         *     min: 0,
-         *     max: 100,
-         *     value: 50,
-         *     upArrowText: "More",
-         *     downArrowText: "Less"
-         * });
-         * @option {String} [downArrowText] <Decrease value> Specifies the text of the tooltip on the down arrow.
-         * _example
-         * // specify on widget initialization
-         * $("#numeric").kendoNumericTextBox({
-         *     min: 0,
-         *     max: 100,
-         *     value: 50,
-         *     upArrowText: "More",
-         *     downArrowText: "Less"
-         * });
-         * @option {String} [culture] <en-US> Specifies the culture info used by the NumericTextBox widget.
-         * _example
-         *
-         * // specify on widget initialization
-         * $("#numeric").kendoNumericTextBox({
-         *     culture: "de-DE"
-         * });
-         */
+    var NumericTextBox = Widget.extend({
          init: function(element, options) {
              var that = this,
              isStep = options && options.step !== undefined,
@@ -28602,26 +25572,18 @@ extend(Editor, {
 
              options = that.options;
              element = that.element.addClass(INPUT)
-                           .bind({
-                               keydown: proxy(that._keydown, that),
-                               paste: proxy(that._paste, that),
-                               blur: proxy(that._focusout, that)
-                           });
-
-             element.closest("form")
-                    .bind("reset", function() {
-                        setTimeout(function() {
-                            that.value(element[0].value);
-                        });
-                    });
+                           .on("keydown" + ns, proxy(that._keydown, that))
+                           .on("paste" + ns, proxy(that._paste, that))
+                           .on("blur" + ns, proxy(that._focusout, that));
 
              options.placeholder = options.placeholder || element.attr("placeholder");
 
+             that._reset();
              that._wrapper();
              that._arrows();
              that._input();
 
-             that._text.focus(proxy(that._click, that));
+             that._text.on("focus" + ns, proxy(that._click, that));
 
              min = that.min(element.attr("min"));
              max = that.max(element.attr("max"));
@@ -28667,68 +25629,15 @@ extend(Editor, {
             downArrowText: "Decrease value"
         },
         events: [
-             /**
-             * Fires when the value is changed
-             * @name kendo.ui.NumericTextBox#change
-             * @event
-             * @param {Event} e
-             * @example
-             * $("#numeric").kendoNumericTextBox({
-             *     change: function(e) {
-             *         // handle event
-             *     }
-             * });
-             * @exampleTitle To set after initialization
-             * @example
-             * // get a reference to the numeric textbox widget
-             * var numeric = $("#numeric").data("kendoNumericTextBox");
-             * // bind to the change event
-             * numeric.bind("change", function(e) {
-             *     // handle event
-             * });
-             */
             CHANGE,
-             /**
-             * Fires when the value is changed from the spin buttons
-             * @name kendo.ui.NumericTextBox#spin
-             * @event
-             * @param {Event} e
-             * @example
-             * $("#numeric").kendoNumericTextBox({
-             *     spin: function(e) {
-             *         // handle event
-             *     }
-             * });
-             * @exampleTitle To set after initialization
-             * @example
-             * // get a reference to the numeric textbox widget
-             * var numeric = $("#numeric").data("kendoNumericTextBox");
-             * // bind to the spin event
-             * numeric.bind("spin", function(e) {
-             *     // handle event
-             * });
-             */
             SPIN
         ],
-        /**
-        * Enable/Disable the numerictextbox widget.
-        * @param {Boolean} enable The argument, which defines whether to enable/disable tha numerictextbox.
-        * @example
-        * // get a reference to the numeric textbox
-        * var textbox = $("#textbox").data("kendoNumericTextBox");
-        *
-        * // disables the numerictextbox
-        * numerictextbox.enable(false);
-        *
-        * // enables the numerictextbox
-        * numerictextbox.enable(true);
-        */
         enable: function(enable) {
             var that = this,
                 text = that._text.add(that.element),
-                wrapper = that._inputWrapper.unbind(HOVEREVENTS),
-                upArrow = that._upArrow.unbind(MOUSEDOWN),
-                downArrow = that._downArrow.unbind(MOUSEDOWN);
+                wrapper = that._inputWrapper.off(HOVEREVENTS),
+                upArrow = that._upArrow.off(MOUSEDOWN),
+                downArrow = that._downArrow.off(MOUSEDOWN);
 
             that._toggleText(true);
 
@@ -28742,17 +25651,17 @@ extend(Editor, {
                 wrapper
                     .addClass(DEFAULT)
                     .removeClass(STATEDISABLED)
-                    .bind(HOVEREVENTS, that._toggleHover);
+                    .on(HOVEREVENTS, that._toggleHover);
 
                 text.removeAttr(DISABLED);
 
-                upArrow.bind(MOUSEDOWN, function(e) {
+                upArrow.on(MOUSEDOWN, function(e) {
                     e.preventDefault();
                     that._spin(1);
                     that._upArrow.addClass(SELECTED);
                 });
 
-                downArrow.bind(MOUSEDOWN, function(e) {
+                downArrow.on(MOUSEDOWN, function(e) {
                     e.preventDefault();
                     that._spin(-1);
                     that._downArrow.addClass(SELECTED);
@@ -28760,74 +25669,35 @@ extend(Editor, {
             }
         },
 
-        /**
-        * Gets/Sets the min value of the NumericTextBox.
-        * @param {Number | String} value The min value to set.
-        * @returns {Number} The min value of the NumericTextBox.
-        * @example
-        * // get a reference to the NumericTextBox widget
-        * var numerictextbox = $("#numerictextbox").data("kendoNumericTextBox");
-        *
-        * // get the min value of the numerictextbox.
-        * var min = numerictextbox.min();
-        *
-        * // set the min value of the numerictextbox.
-        * numerictextbox.min(-10);
-        */
+        destroy: function() {
+            var that = this;
+
+            that.element
+                .add(that._text)
+                .add(that._upArrow)
+                .add(that._downArrow)
+                .add(that._inputWrapper)
+                .off(ns);
+
+            if (that._form) {
+                that._form.off("reset", that._resetHandler);
+            }
+
+            Widget.fn.destroy.call(that);
+        },
+
         min: function(value) {
             return this._option("min", value);
         },
 
-        /**
-        * Gets/Sets the max value of the NumericTextBox.
-        * @param {Number | String} value The max value to set.
-        * @returns {Number} The max value of the NumericTextBox.
-        * @example
-        * // get a reference to the NumericTextBox widget
-        * var numerictextbox = $("#numerictextbox").data("kendoNumericTextBox");
-        *
-        * // get the max value of the numerictextbox.
-        * var max = numerictextbox.max();
-        *
-        * // set the max value of the numerictextbox.
-        * numerictextbox.max(10);
-        */
         max: function(value) {
             return this._option("max", value);
         },
 
-        /**
-        * Gets/Sets the step value of the NumericTextBox.
-        * @param {Number | String} value The step value to set.
-        * @returns {Number} The step value of the NumericTextBox.
-        * @example
-        * // get a reference to the NumericTextBox widget
-        * var numerictextbox = $("#numerictextbox").data("kendoNumericTextBox");
-        *
-        * // get the step value of the numerictextbox.
-        * var step = numerictextbox.step();
-        *
-        * // set the step value of the numerictextbox.
-        * numerictextbox.step(0.1);
-        */
         step: function(value) {
             return this._option("step", value);
         },
 
-        /**
-        * Gets/Sets the value of the numerictextbox.
-        * @param {Number | String} value The value to set.
-        * @returns {Number} The value of the numerictextbox.
-        * @example
-        * // get a referene to the numeric textbox
-        * var numerictextbox = $("#textbox").data("kendoNumericTextBox");
-        *
-        * // get the value of the numerictextbox.
-        * var value = numerictextbox.value();
-        *
-        * // set the value of the numerictextbox.
-        * numerictextbox.value("10.20");
-        */
         value: function(value) {
             var that = this, adjusted;
 
@@ -28844,6 +25714,10 @@ extend(Editor, {
 
             that._update(value);
             that._old = that._value;
+        },
+
+        focus: function() {
+            this._focusin();
         },
 
         _adjust: function(value) {
@@ -28881,7 +25755,7 @@ extend(Editor, {
                 arrows.wrapAll('<span class="k-select"/>');
             }
 
-            arrows.bind(MOUSEUP, function(e) {
+            arrows.on(MOUSEUP, function(e) {
                 if (!touch || kendo.eventTarget(e) != e.currentTarget || e.type === TOUCHEND) {
                     clearTimeout( that._spinning );
                 }
@@ -29188,6 +26062,22 @@ extend(Editor, {
             element[0].style.width = "";
             that.wrapper = wrapper.addClass("k-widget k-numerictextbox").show();
             that._inputWrapper = $(wrapper[0].firstChild);
+        },
+
+        _reset: function() {
+            var that = this,
+                element = that.element,
+                form = element.closest("form");
+
+            if (form[0]) {
+                that._resetHandler = function() {
+                    setTimeout(function() {
+                        that.value(element[0].value);
+                    });
+                };
+
+                that._form = form.on("reset", that._resetHandler);
+            }
         }
     });
 
@@ -29231,131 +26121,6 @@ extend(Editor, {
     ui.plugin(NumericTextBox);
 })(jQuery);
 (function ($, undefined) {
-    /**
-     * @name kendo.ui.Menu.Description
-     *
-     * @section
-     * <p>
-     *  The <b>Menu</b> displays hierarchical data as a multi-level menu. It provides rich styling for unordered lists
-     *  of items, and can be used for both navigation and executing JavaScript commands. Items can be defined and
-     *  initialized from HTML, or the API can be used to add and remove items.
-     * </p>
-     * <h3>Getting Started</h3>
-     *
-     * @exampleTitle Create a HTML hierarchical list of items
-     * @example
-     * <ul id="menu">
-     *     <li>Item 1
-     *         <ul>
-     *             <li>Item 1.1</li>
-     *             <li>Item 1.2</li>
-     *         </ul>
-     *     </li>
-     *     <li>Item 2</li>
-     * </ul>
-     *
-     * @section
-     * <p>
-     *  Initialization of a <strong>Menu</strong> should occur after the DOM is fully loaded. It is recommended that
-     *  initialization the <strong>Menu</strong> occur within a handler is provided to $(document).ready().
-     * </p>
-     *
-     * @exampleTitle Initialize a Menu using a selector within $(document).ready()
-     * @example
-     * $(document).ready(function() {
-     *     $("#menu").kendoMenu();
-     * });
-     *
-     * @exampleTitle Initialize the Menu using JSON data object
-     * @example
-     * $(document).ready(function() {
-     *  $("#menu").kendoMenu({
-     *   dataSource:
-     *     [{
-     *         text: "Item 1",
-     *         url: "http://www.kendoui.com"                // Link URL if navigation is needed, optional.
-     *     },
-     *     {
-     *         text: "<b>Item 2</b>",
-     *         encoded: false,                                 // Allows use of HTML for item text
-     *         content: "text"                                 // content within an item
-     *     },
-     *     {
-     *         text: "Item 3",
-     *         imageUrl: "http://www.kendoui.com/test.jpg", // Item image URL, optional.
-     *         items: [{                                    // Sub item collection
-     *              text: "Sub Item 1"
-     *         },
-     *         {
-     *              text: "Sub Item 2"
-     *         }]
-     *     },
-     *     {
-     *         text: "Item 4",
-     *         spriteCssClass: "imageClass3"                // Item image sprite CSS class, optional.
-     *     }]
-     *  })
-     * });
-     *
-     * @section
-     * <h3>Customizing Menu Animations</h3>
-     * <p>
-     *  By default, the <b>Menu</b> uses a slide animation to expand and
-     *  reveal sub-items as the mouse hovers. Animations can be easily
-     *  customized using configuration properties, changing the animation
-     *  style and delay. Menu items can also be configured to open on click
-     *  instead of on hover.
-     * </p>
-     *
-     * @exampleTitle Changing Menu animation and open behavior
-     * @example
-     * $("#menu").kendoMenu({
-     *  animation: {
-     *   open: { effects: "fadeIn" },
-     *   hoverDelay: 500
-     *  },
-     *  openOnClick: true
-     * });
-     *
-     * @section
-     * <h3>Dynamically configuring Menu items</h3>
-     * <p>
-     *  The <b>Menu</b> API provides several methods for dynamically adding
-     *  or removing Items. To add items, provide the new item as a JSON
-     *  object along with a reference item that will be used to determine the
-     *  placement in the hierarchy.
-     * </p>
-     * <p>
-     *  A reference item is simply a target Menu Item HTML element that
-     *  already exists in the Menu. Any valid jQuery selector can be used to
-     *  obtain a reference to the target item. For examples, see the
-     *  <a href="../menu/api.html" title="Menu API demos">Menu API demos</a>.
-     *  Removing an item only requires a reference to the target element that
-     *  should be removed.
-     * </p>
-     *
-     * @exampleTitle Dynamically add a new root Menu item
-     * @example
-     * var menu = $("#menu").kendoMenu().data("kendoMenu");
-     * menu.insertAfter(
-     *  { text: "New Menu Item" },
-     *  menu.element.children("li:last")
-     * );
-     *
-     * @section
-     * <h3>Accessing an Existing Menu</h3>
-     * <p>
-     *  You can reference an existing <b>Menu</b> instance via
-     *  <a href="http://api.jquery.com/jQuery.data/">jQuery.data()</a>.
-     *  Once a reference has been established, you can use the API to control
-     *  its behavior.
-     * </p>
-     *
-     * @exampleTitle Accessing an existing Menu instance
-     * @example
-     * var menu = $("#menu").data("kendoMenu");
-     *
-     */
     var kendo = window.kendo,
         ui = kendo.ui,
         touch = kendo.support.touch,
@@ -29365,6 +26130,7 @@ extend(Editor, {
         template = kendo.template,
         Widget = ui.Widget,
         excludedNodesRegExp = /^(ul|a|div)$/i,
+        NS = ".kendoMenu",
         IMG = "img",
         OPEN = "open",
         MENU = "k-menu",
@@ -29419,7 +26185,7 @@ extend(Editor, {
         },
 
         rendering = {
-            /** @ignore */
+
             wrapperCssClass: function (group, item) {
                 var result = "k-item",
                     index = item.index;
@@ -29440,15 +26206,15 @@ extend(Editor, {
 
                 return result;
             },
-            /** @ignore */
+
             textClass: function(item) {
                 return LINK;
             },
-            /** @ignore */
+
             textAttributes: function(item) {
                 return item.url ? " href='" + item.url + "'" : "";
             },
-            /** @ignore */
+
             arrowClass: function(item, group) {
                 var result = "k-icon";
 
@@ -29460,23 +26226,23 @@ extend(Editor, {
 
                 return result;
             },
-            /** @ignore */
+
             text: function(item) {
                 return item.encoded === false ? item.text : kendo.htmlEncode(item.text);
             },
-            /** @ignore */
+
             tag: function(item) {
                 return item.url ? "a" : "span";
             },
-            /** @ignore */
+
             groupAttributes: function(group) {
                 return group.expanded !== true ? " style='display:none'" : "";
             },
-            /** @ignore */
+
             groupCssClass: function(group) {
                 return "k-group";
             },
-            /** @ignore */
+
             content: function(item) {
                 return item.content ? item.content : "&nbsp;";
             }
@@ -29576,68 +26342,7 @@ extend(Editor, {
         item.filter(":last-child").addClass(LAST);
     }
 
-    var Menu = Widget.extend({/** @lends kendo.ui.Menu.prototype */
-        /**
-         * Creates a Menu instance.
-         * @constructs
-         * @extends kendo.ui.Widget
-         * @class Menu UI widget
-         * @param {Selector} element DOM element
-         * @param {Object} options Configuration options.
-         * @option {Object} [animation] A collection of <b>Animation</b> objects, used to change default animations. A value of false will disable all animations in the widget.
-         * <p>Available animations for the <b>Menu</b> are listed below.  Each animation has a reverse options which is used for the <b>close</b> effect by default, but can be over-ridden
-         * by setting the <b>close</b> animation.  Each animation also has a direction which can be set off the animation (i.e. <b>slideIn:Down</b>).</p>
-         * <div class="details-list">
-         * <dl>
-         *     <dt><b>slideIn</b></dt>
-         *     <dd>Menu content slides in from the top</dd>
-         *     <dt><b>fadeIn</b></dt>
-         *     <dd>Menu content fades in</dd>
-         *     <dt><b>expand</b></dt>
-         *     <dd>Menu content expands from the top down. Similar to slideIn.</dd>
-         * </dl>
-         * </div>
-         * _example
-         *  $("#menu").kendoMenu({
-         *      animation: { open: { effects: "fadeIn" } }
-         *  });
-         * @option {Animation} [animation.open] The animation that will be used when opening sub menus.
-         * @option {Animation} [animation.close] The animation that will be used when closing sub menus.
-         * @option {String} [orientation] <"horizontal"> Root menu orientation. Could be horizontal or vertical.
-         * _example
-         *  $("#menu").kendoMenu({
-         *      orientation: "vertical"
-         *  });
-         * @option {Boolean} [closeOnClick] <true> Specifies that sub menus should close after item selection (provided they won't navigate).
-         * _example
-         *  $("#menu").kendoMenu({
-         *      closeOnClick: false
-         *  });
-         * @option {Boolean} [openOnClick] <false> Specifies that the root sub menus will be opened on item click.
-         * _example
-         *  $("#menu").kendoMenu({
-         *      openOnClick: true
-         *  });
-         * @option {Number} [hoverDelay] <100> Specifies the delay in ms before the menu is opened/closed - used to avoid accidental closure on leaving.
-         * _example
-         *  $("#menu").kendoMenu({
-         *      hoverDelay: 200
-         *  });
-         * @option {String} [direction] <"default"> Specifies Menu opening direction. Can be "top", "bottom", "left", "right".
-         * You can also specify different direction for root and sub menu items, separating them with space. The example below will initialize the root menu to open upwards and
-         * its sub menus to the left.
-         * _example
-         * $("#menu").kendoMenu({
-         *     direction: "top left"
-         * });
-         * @option {String} [popupCollision] Specifies how Menu should adjust to screen boundaries. By default the strategy is <b>"fit"</b> for a sub menu with a horizontal parent,
-         * meaning it will move to fit in screen boundaries in all directions, and <b>"fit flip"</b> for a sub menu with vertical parent, meaning it will fit vertically and flip over
-         * its parent horizontally. You can also switch off the screen boundary detection completely if you set the <b>popupCollision</b> to false.
-         * _example
-         * $("#menu").kendoMenu({
-         *     popupCollision: false
-         * });
-         */
+    var Menu = Widget.extend({
         init: function(element, options) {
             var that = this;
 
@@ -29659,92 +26364,30 @@ extend(Editor, {
 
             that.nextItemZIndex = 100;
 
-            element.delegate(disabledSelector, CLICK, false)
-                   .delegate(itemSelector, CLICK, proxy(that._click , that));
+            element.on(CLICK + NS, disabledSelector, false)
+                   .on(CLICK + NS, itemSelector, proxy(that._click , that));
 
             if (!touch) {
-                element.delegate(itemSelector, MOUSEENTER, proxy(that._mouseenter, that))
-                       .delegate(itemSelector, MOUSELEAVE, proxy(that._mouseleave, that))
-                       .delegate(linkSelector, MOUSEENTER + " " + MOUSELEAVE, that._toggleHover);
+                element.on(MOUSEENTER + NS, itemSelector, proxy(that._mouseenter, that))
+                       .on(MOUSELEAVE + NS, itemSelector, proxy(that._mouseleave, that))
+                       .on(MOUSEENTER + NS + " " + MOUSELEAVE + NS, linkSelector, that._toggleHover);
             } else {
                 options.openOnClick = true;
-                element.delegate(linkSelector, "touchstart touchend", that._toggleHover);
+                element.on("touchstart" + NS + " touchend" + NS, linkSelector, that._toggleHover);
             }
 
             if (options.openOnClick) {
                 that.clicked = false;
-                $(document).click(proxy( that._documentClick, that ));
+                that._documentClickHandler = proxy(that._documentClick, that);
+                $(document).click(that._documentClickHandler);
             }
 
             kendo.notify(that);
         },
 
         events: [
-            /**
-            * Fires before a sub menu gets opened.
-            * @name kendo.ui.Menu#open
-            * @event
-            * @param {Event} e
-            * @param {Element} e.item The opened item
-            * @example
-            *  $("#menu").kendoMenu({
-            *      open: function(e) {
-            *          // handle event
-            *      }
-            *  });
-            * @exampleTitle To set after initialization
-            * @example
-            *  // get a reference to the menu widget
-            *  var menu = $("#menu").data("kendoMenu");
-            *  // bind to the open event
-            *  menu.bind("open", function(e) {
-            *      // handle event
-            *  });
-            */
             OPEN,
-            /**
-            * Fires after a sub menu gets closed.
-            * @name kendo.ui.Menu#close
-            * @event
-            * @param {Event} e
-            * @param {Element} e.item The closed item
-            * @example
-            *  $("#menu").kendoMenu({
-            *      close: function(e) {
-            *          // handle event
-            *      }
-            *  });
-            * @exampleTitle To set after initialization
-            * @example
-            *  // get a reference to the menu widget
-            *  var menu = $("#menu").data("kendoMenu");
-            *  // bind to the close event
-            *  menu.bind("close", function(e) {
-            *      // handle event
-            *  });
-            */
             CLOSE,
-            /**
-            * Fires when a menu item gets selected.
-            * @name kendo.ui.Menu#select
-            * @event
-            * @param {Event} e
-            * @param {Element} e.item The selected item
-            * @example
-            *  $("#menu").kendoMenu({
-            *      select: function(e) {
-            *          // handle event
-            *      }
-            *  });
-            * @exampleTitle To set after initialization
-            * @example
-            *  // get a reference to the menu widget
-            *  var menu = $("#menu").data("kendoMenu");
-            *  // bind to the select event
-            *  menu.bind("select", function(e) {
-            *      // handle event
-            *  });
-            */
             SELECT
         ],
 
@@ -29766,26 +26409,18 @@ extend(Editor, {
             hoverDelay: 100
         },
 
-        /**
-         *
-         * Enables or disables an item of a <strong>Menu</strong>. This can optionally be accomplished on
-         * initialization by setting the <b>disabled="disabled"</b> on the desired menu item html element.
-         *
-         * @param {Selector} element
-         * Target element
-         *
-         * @param {Boolean} enable
-         * Desired state
-         *
-         * @returns {Menu}
-         * Returns the Menu object to support chaining.
-         *
-         * @example
-         * // get a reference to the menu widget
-         * var menu = $("#menu").data("kendoMenu");
-         * // disable the li menu item with the id "secondItem"
-         * menu.enable("#secondItem", false);
-         */
+        destroy: function() {
+            var that = this;
+
+            Widget.fn.destroy.call(that);
+
+            that.element.off(NS);
+
+            if (that._documentClickHandler) {
+                $(document).unbind(that._documentClickHandler);
+            }
+        },
+
         enable: function (element, enable) {
             this._toggleDisabled(element, enable !== false);
 
@@ -29798,50 +26433,6 @@ extend(Editor, {
             return this;
         },
 
-        /**
-         *
-         * Appends an item to a <strong>Menu</strong> in the specified referenceItem's sub menu.
-         *
-         * @param {Selector} item
-         * Target item, specified as a JSON object. Can also handle an array of such objects.
-         *
-         * @param {Item} referenceItem
-         * A reference item to append the new item in.
-         *
-         * @returns {Menu}
-         * Returns the Menu object to support chaining.
-         *
-         * @example
-         * // get a reference to the menu widget
-         * var menu = $("#menu").data("kendoMenu");
-         * //
-         * menu.append(
-         *     [{
-         *         text: "Item 1",
-         *         url: "http://www.kendoui.com"                // Link URL if navigation is needed, optional.
-         *     },
-         *     {
-         *         text: "<b>Item 2</b>",
-         *         encoded: false,                                 // Allows use of HTML for item text
-         *         content: "text"                                 // content within an item
-         *     },
-         *     {
-         *         text: "Item 3",
-         *         imageUrl: "http://www.kendoui.com/test.jpg", // Item image URL, optional.
-         *         items: [{                                    // Sub item collection
-         *              text: "Sub Item 1"
-         *         },
-         *         {
-         *              text: "Sub Item 2"
-         *         }]
-         *     },
-         *     {
-         *         text: "Item 4",
-         *         spriteCssClass: "imageClass3"                // Item image sprite CSS class, optional.
-         *     }],
-         *     referenceItem
-         * );
-         */
         append: function (item, referenceItem) {
             referenceItem = this.element.find(referenceItem);
 
@@ -29864,50 +26455,6 @@ extend(Editor, {
             return this;
         },
 
-        /**
-         *
-         * Inserts an item into a <strong>Menu</strong> before the specified referenceItem.
-         *
-         * @param {Selector} item
-         * Target item, specified as a JSON object. Can also handle an array of such objects.
-         *
-         * @param {Selector} referenceItem
-         * A reference item to insert the new item before
-         *
-         * @returns {Menu}
-         * Returns the Menu object to support chaining.
-         *
-         * @example
-         * // get a reference to the menu widget
-         * var menu = $("#menu").data("kendoMenu");
-         * //
-         * menu.insertBefore(
-         *     [{
-         *         text: "Item 1",
-         *         url: "http://www.kendoui.com"                // Link URL if navigation is needed, optional.
-         *     },
-         *     {
-         *         text: "<b>Item 2</b>",
-         *         encoded: false,                                 // Allows use of HTML for item text
-         *         content: "text"                                 // content within an item
-         *     },
-         *     {
-         *         text: "Item 3",
-         *         imageUrl: "http://www.kendoui.com/test.jpg", // Item image URL, optional.
-         *         items: [{                                    // Sub item collection
-         *              text: "Sub Item 1"
-         *         },
-         *         {
-         *              text: "Sub Item 2"
-         *         }]
-         *     },
-         *     {
-         *         text: "Item 4",
-         *         spriteCssClass: "imageClass3"                // Item image sprite CSS class, optional.
-         *     }],
-         *     referenceItem
-         * );
-         */
         insertBefore: function (item, referenceItem) {
             referenceItem = this.element.find(referenceItem);
 
@@ -29930,51 +26477,6 @@ extend(Editor, {
             return this;
         },
 
-        /**
-         *
-         * Inserts an item into a <strong>Menu</strong> after the specified referenceItem.
-         *
-         * @param {Selector} item
-         * Target item, specified as a JSON object. Can also handle an array of such objects.
-         *
-         * @param {Selector} referenceItem
-         * A reference item to insert the new item after.
-         *
-         * @returns {Menu}
-         * Returns the Menu object to support chaining.
-         *
-         * @example
-         * // get a reference to the menu widget
-         * var menu = $("#menu").data("kendoMenu");
-         * //
-         * menu.insertAfter(
-         *     [{
-         *         text: "Item 1",
-         *         url: "http://www.kendoui.com"                // Link URL if navigation is needed, optional.
-         *     },
-         *     {
-         *         text: "<b>Item 2</b>",
-         *         encoded: false,                                 // Allows use of HTML for item text
-         *         content: "text"                                 // content within an item
-         *     },
-         *     {
-         *         text: "Item 3",
-         *         imageUrl: "http://www.kendoui.com/test.jpg", // Item image URL, optional.
-         *         items: [{                                    // Sub item collection
-         *              text: "Sub Item 1"
-         *         },
-         *         {
-         *              text: "Sub Item 2"
-         *         }]
-         *     },
-         *     {
-         *         text: "Item 4",
-         *         spriteCssClass: "imageClass3"                // Item image sprite CSS class, optional.
-         *     }],
-         *     referenceItem
-         * );
-         *
-         */
         insertAfter: function (item, referenceItem) {
             referenceItem = this.element.find(referenceItem);
 
@@ -30051,23 +26553,6 @@ extend(Editor, {
             return { items: items, group: parent, contents: contents };
         },
 
-        /**
-         *
-         * Removes a specified item(s) from a <strong>Menu</strong>.
-         *
-         * @param {Selector} element
-         * Target item selector.
-         *
-         * @returns {Menu}
-         * Returns the Menu object to support chaining.
-         *
-         * @example
-         * // get a reference to the menu widget
-         * var menu = $("#menu").data("kendoMenu");
-         * // remove the item with the id "Item1"
-         * menu.remove("#Item1");
-         *
-         */
         remove: function (element) {
             element = this.element.find(element);
 
@@ -30096,23 +26581,6 @@ extend(Editor, {
             return that;
         },
 
-        /**
-         *
-         * Opens a sub-menu of a specified item(s) in a <strong>Menu</strong>.
-         *
-         * @param {Selector} element
-         * Target item selector.
-         *
-         * @returns {Menu}
-         * Returns the Menu object to support chaining.
-         *
-         * @example
-         * // get a reference to the menu widget
-         * var menu = $("#menu").data("kendoMenu");
-         * // open the sub menu of "Item1"
-         * menu.open("#Item1");
-         *
-         */
         open: function (element) {
             var that = this,
                 options = that.options,
@@ -30191,22 +26659,6 @@ extend(Editor, {
             return that;
         },
 
-        /**
-         *
-         * Closes a sub-menu of a specified item(s) in a <strong>Menu</strong>.
-         *
-         * @param {Selector} element Target item selector.
-         *
-         * @returns {Menu}
-         * Returns the Menu object to support chaining.
-         *
-         * @example
-         * // get a reference to the menu widget
-         * var menu = $("#menu").data("kendoMenu");
-         * // close the sub menu of "Item1"
-         * menu.close("#Item1");
-         *
-         */
         close: function (element) {
             var that = this;
             element = that.element.find(element);
@@ -30333,6 +26785,7 @@ extend(Editor, {
 
             if (that.options.closeOnClick && !(href && href.length > 0) && !element.children(groupSelector + ",.k-animation-container").length) {
                 that.close(link.parentsUntil(that.element, allItemsSelector));
+                that.clicked = false;
             }
 
             if ((!element.parent().hasClass(MENU) || !that.options.openOnClick) && !touch) {
@@ -30413,6 +26866,7 @@ extend(Editor, {
         isFunction = $.isFunction,
         isPlainObject = $.isPlainObject,
         inArray = $.inArray,
+        nameSpecialCharRegExp = /(\[|\]|\$|\.|\:|\+)/g,
         ERRORTEMPLATE = '<div class="k-widget k-tooltip k-tooltip-validation" style="margin:0.5em"><span class="k-icon k-warning"> </span>' +
                     '${message}<div class="k-callout k-callout-n"></div></div>',
         CHANGE = "change";
@@ -30552,7 +27006,7 @@ extend(Editor, {
                 type = isValuesEditor ? "values" : fieldType(modelField),
                 isCustomEditor = isObject && field.editor,
                 editor = isCustomEditor ? field.editor : editors[type],
-                container = that.element.find("[data-container-for=" + fieldName + "]");
+                container = that.element.find("[data-container-for=" + fieldName.replace(nameSpecialCharRegExp, "\\$1")+ "]");
 
             editor = editor ? editor : editors["string"];
 
@@ -30594,11 +27048,16 @@ extend(Editor, {
         },
 
         destroy: function() {
-            this.options.model.unbind("set", this._validateProxy);
-            kendo.unbind(this.element);
+            var that = this;
 
-            this.element.removeData("kendoValidator")
-                .removeData("kendoEditable");
+            Widget.fn.destroy.call(that);
+
+            that.options.model.unbind("set", that._validateProxy);
+
+            kendo.unbind(that.element);
+            kendo.destroy(that.element);
+
+            that.element.removeData("kendoValidator");
         },
 
         refresh: function() {
@@ -30654,6 +27113,7 @@ extend(Editor, {
         DATEPICKER = "kendoDatePicker",
         proxy = $.proxy,
         POPUP = "kendoPopup",
+        NS = ".kendoFilterMenu",
         EQ = "Is equal to",
         NEQ = "Is not equal to",
         Widget = ui.Widget;
@@ -30762,13 +27222,16 @@ extend(Editor, {
                 if (!link[0]) {
                     link = element.prepend('<a class="k-grid-filter" href="#"><span class="k-icon k-filter"/></a>').find(".k-grid-filter");
                 }
-                that._clickHandler = proxy(that._click, that);
-                link.click(that._clickHandler);
+
+                link.on("click" + NS, proxy(that._click, that));
+
             } else {
                 that.link = $();
             }
 
-            that.dataSource = options.dataSource.bind("change", proxy(that.refresh, that));
+            that._refreshHandler = proxy(that.refresh, that);
+
+            that.dataSource = options.dataSource.bind("change", that._refreshHandler);
 
             that.field = options.field || element.attr(kendo.attr("field"));
 
@@ -30793,17 +27256,27 @@ extend(Editor, {
 
             operators = operators[type] || options.operators[type];
 
-            that.form = $('<form class="k-filter-menu"/>');
+            that.form = $('<form class="k-filter-menu"/>')
+                            .html(kendo.template(type === "boolean" ? booleanTemplate : defaultTemplate)({
+                                field: that.field,
+                                ns: kendo.ns,
+                                messages: options.messages,
+                                extra: options.extra,
+                                operators: operators,
+                                type: type,
+                                values: convertItems(options.values)
+                            }))
+                            .on("submit" + NS, proxy(that._submit, that))
+                            .on("reset" + NS, proxy(that._reset, that));
 
-            that.form.html(kendo.template(type === "boolean" ? booleanTemplate : defaultTemplate)({
-                field: that.field,
-                ns: kendo.ns,
-                messages: options.messages,
-                extra: options.extra,
-                operators: operators,
-                type: type,
-                values: convertItems(options.values)
-            }));
+           that.form
+                .find("[" + kendo.attr("type") + "=number]")
+                .removeClass("k-textbox")
+                [NUMERICTEXTBOX]()
+                .end()
+                .find("[" + kendo.attr("type") + "=date]")
+                .removeClass("k-textbox")
+                [DATEPICKER]();
 
             if (!options.appendToElement) {
                 that.popup = that.form[POPUP]({
@@ -30817,20 +27290,6 @@ extend(Editor, {
                 that.popup = that.element.closest(".k-popup").data(POPUP);
             }
 
-            that.form
-                .bind({
-                    submit: proxy(that._submit, that),
-                    reset: proxy(that._reset, that)
-                })
-                .find("[" + kendo.attr("type") + "=number]")
-                .removeClass("k-textbox")
-                [NUMERICTEXTBOX]()
-                .end()
-                .find("[" + kendo.attr("type") + "=date]")
-                .removeClass("k-textbox")
-                [DATEPICKER]();
-
-
             that.refresh();
         },
 
@@ -30843,7 +27302,8 @@ extend(Editor, {
                 filters: [{ field: that.field, operator: "eq", value: "" }, { field: that.field, operator: "eq", value: "" }]
             });
 
-            kendo.bind(that.form, that.filterModel);
+            //NOTE: binding the form element directly causes weird error in IE when grid is bound through MVVM and column is sorted
+            kendo.bind(that.form.children().first(), that.filterModel);
 
             if (that._bind(expression)) {
                 that.link.addClass("k-state-active");
@@ -30853,13 +27313,19 @@ extend(Editor, {
         },
 
         destroy: function() {
-            kendo.unbind(this.form);
+            var that = this;
 
-            this.form.remove();
+            Widget.fn.destroy.call(that);
 
-            this.form.removeData(POPUP);
-            this.link.unbind("click", this._clickHandler);
-            this.element.removeData("kendoFilterMenu");
+            kendo.unbind(that.form);
+            kendo.destroy(that.form);
+            that.form.unbind(NS);
+
+            that.popup.destroy();
+
+            that.link.unbind(NS);
+
+            that.dataSource.unbind("change", that._refreshHandler);
         },
 
         _bind: function(expression) {
@@ -30879,6 +27345,10 @@ extend(Editor, {
                     filterModel.set("logic", expression.logic);
 
                     currentFilter = filterModel.filters[current];
+                    if (!currentFilter) {
+                        filterModel.filters.push({ field: that.field });
+                        currentFilter = filterModel.filters[current];
+                    }
                     currentFilter.set("value", that._parse(filter.value));
                     currentFilter.set("operator", filter.operator);
 
@@ -31048,201 +27518,7 @@ extend(Editor, {
 
     ui.plugin(FilterMenu);
 })(jQuery);
-/**
- * @fileOverview Provides a PanelBar implementation which can be used to
- * display a hierarchical data as a multi-level, expandable panel bar.
- */
-
 (function($, undefined) {
-    /**
-     * @name kendo.ui.PanelBar.Description
-     *
-     * @section
-     * <p>
-     *  The <strong>PanelBar</strong> displays hierarchical data as a multi-level, expandable widget that is useful for
-     *  constrained areas of a page. Its structure may be defined in HTML or configured dynamically through its API. The
-     *  content for items can also be loaded via AJAX by specifying a content URL.
-     * </p>
-     * <h3>Getting Started</h3>
-     * <p>
-     *  A <strong>PanelBar</strong> can be created by targeting the root element of a HTML list. A
-     *  <strong>PanelBar</strong> will utilize this list to define its structure and content.
-     * </p>
-     *
-     * @exampleTitle Create a list of items
-     * @example
-     * <ul id="panelBar">
-     *     <li>
-     *         Item 1
-     *             <ul>
-     *                 <li>Sub Item 1</li>
-     *                 <li>Sub Item 2</li>
-     *             </ul>
-     *     <li>
-     *     <li>Item 2</li>
-     * </ul>
-     *
-     * @section
-     * <p></p>
-     * <p>
-     *  Initialization of a <strong>PanelBar</strong> should occur after the DOM is fully loaded. It is recommended
-     *  that initialization the <strong>PanelBar</strong> occur within a handler is provided to $(document).ready().
-     * </p>
-     *
-     * @exampleTitle Initialize the PanelBar via an ID selector
-     * @example
-     * $(document).ready(function() {
-     *     $("#panelBar").kendoPanelBar();
-     * });
-     *
-     * @section
-     * <p>
-     *  <strong>PanelBar</strong> items may contain nested content (including markup) within a <strong>div</strong>
-     *  element. Text content located outside nested content will be used as the title of the item.
-     * </p>
-     *
-     * @exampleTitle Create a list of items in HTML with nested content
-     * @example
-     * <ul id="panelBar">
-     *     <li>Item with no content</li>
-     *     <li>Item with content
-     *         <div>This is nested content of a PanelBar item.</div>
-     *     </li>
-     * </ul>
-     *
-     * @section
-     * <p>A <strong>PanelBar</strong> will preserve the content defined within an item.</p>
-     *
-     * @exampleTitle Initialize the PanelBar via an ID selector
-     * @example
-     * var panelBar = $("#panelbar").kendoPanelBar();
-     *
-     * @exampleTitle Initialize a PanelBar using JSON data object
-     * @example
-     * $("#panelbar").kendoPanelBar({
-     *     dataSource: [
-     *         {
-     *             text: "Item 1",
-     *             url: "http://www.kendoui.com/"                  // link URL if navigation is needed (optional)
-     *         },
-     *         {
-     *             text: "<b>Item 2</b>",
-     *             encoded: false,                                 // Allows use of HTML for item text
-     *             content: "text"                                 // content within an item
-     *         },
-     *         {
-     *             text: "Item 3",
-     *             contentUrl: "partialContent.html"               // content URL to load within an item
-     *         },
-     *         {
-     *             text: "Item 4",
-     *             imageUrl: "http://www.kendoui.com/test.jpg",    // item image URL, optional
-     *             expanded: true,                                 // item is rendered expanded
-     *             items: [{                                       // Sub item collection.
-     *                 text: "Sub Item 1"
-     *             },
-     *             {
-     *                 text: "Sub Item 2"
-     *             }]
-     *         },
-     *         {
-     *             text: "Item 5",
-     *             // item image sprite CSS class, optional
-     *             spriteCssClass: "imageClass3"
-     *         }
-     *     ]
-     * });
-     *
-     * @section
-     * <h3>Loading Content with AJAX</h3>
-     * <p>
-     *  While any valid technique for loading AJAX content can be used, the <strong>PanelBar</strong> provides built-in
-     *  support for asynchronously loading content from URLs. These URLs should return HTML fragments that can be
-     *  loaded in the <strong>PanelBar</strong> item content area. Content DIVs should be completely empty for AJAX
-     *  loading to work.
-     * </p>
-     *
-     * @exampleTitle Create a list of items with a target for dynamic content
-     * @example
-     * <ul id="panelBar">
-     *     <li>Item 1
-     *         <ul>
-     *             <li>Sub Item 1</li>
-     *         </ul>
-     *     </li>
-     *     <li>Item 2</li>
-     *     <li>
-     *         Item with Dynamic Content
-     *         <div></div>
-     *     </li>
-     * </ul>
-     *
-     * @exampleTitle Load a PanelBar item content asynchronously via AJAX
-     * @example
-     * $("#panelBar").kendoPanelBar({
-     *     contentUrls:[
-     *         null,
-     *         null,
-     *         "html-content-snippet.html"
-     *     ]
-     * });
-     *
-     * @section
-     * <p>
-     *  When the <strong>PanelBar</strong> loads remote content via AJAX, the server response is cached in-memory so
-     *  that subsequent expand/collapse actions do not trigger subsequent AJAX requests.
-     * </p>
-     * <h3>Customizing PanelBar Animations</h3>
-     * <p>
-     *  By default, a <strong>PanelBar</strong> uses animations to expand and reveal sub-items when an item header is
-     *  clicked. These animations can be modified in configuration via the open and close animation properties. A
-     *  <strong>PanelBar</strong> can also be configured to only allow one panel to remain open at a time.
-     * </p>
-     *
-     * @exampleTitle Changing PanelBar animation and expandMode behavior
-     * @example
-     * $("#panelBar").kendoPanelBar({
-     *     animation: {
-     *         open : { effects: "fadeIn" }
-     *     },
-     *     expandMode: "single"
-     * });
-     *
-     * @section
-     * <h3>Dynamically Configuring PanelBar Items</h3>
-     * <p>
-     *  The <strong>PanelBar</strong> API provides several methods for dynamically adding or removing Items. To add
-     *  items, provide the new item as a JSON object along with a reference item that will be used to determine its
-     *  placement in the items hierarchy. Note: The reference item is optional when appending.
-     * </p>
-     * <p>
-     *  A reference item is a target <strong>PanelBar</strong> item HTML element that already exists in the PanelBar.
-     *  Any valid selector can be used to obtain a reference to the target item.
-     * </p>
-     * <p>Removing an item only requires a reference to the target element that should be removed.</p>
-     *
-     * @exampleTitle Dynamically adding a new root PanelBar item
-     * @example
-     * var panelBar = $("#panelBar").kendoPanelBar().data("kendoPanelBar");
-     *
-     * panelBar.insertAfter(
-     *      { text: "New PanelBar Item" },
-     *      panelBar.element.children("li:last")
-     * );
-     *
-     * @section
-     * <h3>Accessing an Existing PanelBar</h3>
-     * <p>
-     *  You can reference an existing <strong>PanelBar</strong> instance via
-     *  <a href="http://api.jquery.com/jQuery.data/">jQuery.data()</a>. Once a reference has been established, you can
-     *  use the API to control its behavior.
-     * </p>
-     *
-     * @exampleTitle Accessing an existing PanelBar instance
-     * @example
-     * var panelBar = $("#panelBar").data("kendoPanelBar");
-     *
-     */
     var kendo = window.kendo,
         ui = kendo.ui,
         extend = $.extend,
@@ -31250,6 +27526,7 @@ extend(Editor, {
         template = kendo.template,
         Widget = ui.Widget,
         excludedNodesRegExp = /^(ul|a|div)$/i,
+        NS = ".kendoPanelBar",
         IMG = "img",
         HREF = "href",
         LAST = "k-last",
@@ -31455,132 +27732,7 @@ extend(Editor, {
         link.parentsUntil(element, ITEM).filter(":has(.k-header)").addClass(HIGHLIGHTEDCLASS.substr(1));
     }
 
-    var PanelBar = Widget.extend({/** @lends kendo.ui.PanelBar.prototype */
-        /**
-         *
-         * Creates a PanelBar instance.
-         *
-         * @constructs
-         * @extends kendo.ui.Widget
-         *
-         * @param {Selector} element DOM element
-         * @param {Object} options Configuration options.
-         *
-         * @option {Object} [animation]
-         * A collection of visual animations used when <strong>PanelBar</strong> items are opened or closed through
-         * user interactions. Setting this option to <strong>false</strong> will disable all animations.
-         *
-         * _exampleTitle Defining custom animations when opening and closing items
-         * _example
-         * $("#panelBar").kendoPanelBar({
-         *     animation: {
-         *         // fade-out closing items over 1000 milliseconds
-         *         close: {
-         *             duration: 1000,
-         *             effects: "fadeOut"
-         *         },
-         *        // fade-in and expand opening items over 500 milliseconds
-         *        open: {
-         *            duration: 500,
-         *            effects: "expandVertical fadeIn"
-         *        }
-         *    }
-         * });
-         *
-         * @option {Object} [animation.open]
-         * The visual animation(s) that will be used when opening items.
-         *
-         * _exampleTitle Defining a custom animation when opening items that executes over 200 milliseconds
-         * _example
-         * $("#panelBar").kendoPanelBar({
-         *     animation: {
-         *         open: {
-         *             duration: 200,
-         *             effects: "expandVertical"
-         *         }
-         *     }
-         * });
-         *
-         * @option {Number} [animation.open.duration] <200>
-         * The number of milliseconds used for the visual animation when an item is opened.
-         *
-         * _exampleTitle Defining a custom animation for opening items that executes over 1000 milliseconds
-         * _example
-         * $("#panelBar").kendoPanelBar({
-         *  animation: {
-         *       open: {
-         *           duration: 1000
-         *       }
-         *    }
-         * });
-         *
-         * @option {String} [animation.open.effects] <"expandVertical">
-         * A whitespace-delimited string of animation effects that are used when an item is expanded. Options include
-         * <strong>"expandVertical"</strong> and <strong>"fadeIn"</strong>.
-         *
-         * @option {Boolean} [animation.open.show] <true>
-         *
-         * @option {Object} [animation.close]
-         * The visual animation(s) that will be used when <strong>PanelBar</strong> items are closed.
-         *
-         * _exampleTitle Defining a custom animation for closing items that
-         * executes over 200 milliseconds
-         * _example
-         * $("#panelBar").kendoPanelBar({
-         *     animation: {
-         *         close: {
-         *             duration: 200,
-         *             effects: "fadeOut"
-         *         }
-         *     }
-         * });
-         *
-         * @option {Number} [animation.close.duration] <200>
-         * The number of milliseconds used for the visual animation when a <strong>PanelBar</strong> item is closed.
-         *
-         * _exampleTitle Animating all closing items for 1000 milliseconds
-         * _example
-         * $("#panelBar").kendoPanelBar({
-         *     animation: {
-         *         close: {
-                       duration: 1000
-                   }
-         *   }
-         * });
-         *
-         * @option {String} [animation.close.effects]
-         * A whitespace-delimited string of animation effects that are utilized when a <strong>PanelBar</strong> item
-         * is closed. Options include <strong>"fadeOut"</strong>.
-         *
-         * _exampleTitle Fading-out all closing items for 1000 milliseconds
-         * _example
-         * $("#panelBar").kendoPanelBar({
-         *     animation: {
-         *         close: {
-         *             duration: 1000,
-         *             effects: "fadeOut"
-         *         }
-         *     }
-         * });
-         *
-         * @option {String} [expandMode] <"multiple">
-         * Specifies how the <strong>PanelBar</strong> items are displayed when opened and closed. The following values
-         * are available:
-         * <div class="details-list">
-         *  <dl>
-         *   <dt>"single"</dt>
-         *   <dd>Display one item at a time when an item is opened; opening an item will close the previously opened item.</dd>
-         *   <dt>"multiple"</dt>
-         *   <dd>Display multiple values at one time; opening an item has no visual impact on any other items in the <strong>PanelBar</strong>.</dd>
-         *  </dl>
-         * </div>
-         *
-         * _example
-         * $("#panelBar").kendoPanelBar({
-         *     expandMode: "single"
-         * });
-         *
-         */
+    var PanelBar = Widget.extend({
         init: function(element, options) {
             var that = this,
                 content;
@@ -31602,9 +27754,9 @@ extend(Editor, {
             }
 
             element
-                .delegate(clickableItems, CLICK, $.proxy(that._click, that))
-                .delegate(clickableItems, MOUSEENTER + " " + MOUSELEAVE, that._toggleHover)
-                .delegate(disabledItems, CLICK, false);
+                .on(CLICK + NS, clickableItems, $.proxy(that._click, that))
+                .on(MOUSEENTER  + NS + " " + MOUSELEAVE + NS, clickableItems, that._toggleHover)
+                .on(CLICK + NS, disabledItems, false);
 
             if (options.contentUrls) {
                 element.find("> .k-item")
@@ -31623,226 +27775,13 @@ extend(Editor, {
         },
 
         events: [
-                /**
-                 *
-                 * Triggered when an item of a PanelBar is expanded.
-                 *
-                 * @name kendo.ui.PanelBar#expand
-                 * @event
-                 *
-                 * @param {Event} e
-                 *
-                 * @param {Element} e.item
-                 * The expanding item of the PanelBar.
-                 *
-                 * @exampleTitle Attach expand event handler during initialization; detach via unbind()
-                 * @example
-                 * // event handler for expand
-                 * var onExpand = function(e) {
-                 *     // access the expanded item via e.item (HTMLElement)
-                 * };
-                 *
-                 * // attach expand event handler during initialization
-                 * var panelBar = $("#panelBar").kendoPanelBar({
-                 *     expand: onExpand
-                 * });
-                 *
-                 * // detach expand event handler via unbind()
-                 * panelBar.data("kendoPanelBar").unbind("expand", onExpand);
-                 *
-                 * @exampleTitle Attach expand event handler via bind(); detach via unbind()
-                 * @example
-                 * // event handler for expand
-                 * var onExpand = function(e) {
-                 *     // access the expanded item via e.item (HTMLElement)
-                 * };
-                 *
-                 * // attach expand event handler via bind()
-                 * $("#panelBar").data("kendoPanelBar").bind("expand", onExpand);
-                 *
-                 * // detach expand event handler via unbind()
-                 * $("#panelBar").data("kendoPanelBar").unbind("expand", onExpand);
-                 *
-                 */
-                EXPAND,
-
-                /**
-                 *
-                 * Triggered when an item of a PanelBar is collapsed.
-                 *
-                 * @name kendo.ui.PanelBar#collapse
-                 * @event
-                 *
-                 * @param {Event} e
-                 *
-                 * @param {Element} e.item
-                 * The collapsing item of the PanelBar.
-                 *
-                 * @exampleTitle Attach collapse event handler during initialization; detach via unbind()
-                 * @example
-                 * // event handler for collapse
-                 * var onCollapse = function(e) {
-                 *     // access the collapsed item via e.item (HTMLElement)
-                 * };
-                 *
-                 * // attach collapse event handler during initialization
-                 * var panelBar = $("#panelBar").kendoPanelBar({
-                 *     collapse: onCollapse
-                 * });
-                 *
-                 * // detach collapse event handler via unbind()
-                 * panelBar.data("kendoPanelBar").unbind("collapse", onCollapse);
-                 *
-                 * @exampleTitle Attach collapse event handler via bind(); detach via unbind()
-                 * @example
-                 * // event handler for collapse
-                 * var onCollapse = function(e) {
-                 *     // access the collapsed item via e.item (HTMLElement)
-                 * };
-                 *
-                 * // attach collapse event handler via bind()
-                 * $("#panelBar").data("kendoPanelBar").bind("collapse", onCollapse);
-                 *
-                 * // detach collapse event handler via unbind()
-                 * $("#panelBar").data("kendoPanelBar").unbind("collapse", onCollapse);
-                 *
-                 */
-                COLLAPSE,
-
-                /**
-                 *
-                 * Triggered when an item of a PanelBar is selected.
-                 *
-                 * @name kendo.ui.PanelBar#select
-                 * @event
-                 *
-                 * @param {Event} e
-                 *
-                 * @param {Element} e.item
-                 * The selected item of the PanelBar.
-                 *
-                 * @exampleTitle Attach select event handler during initialization; detach via unbind()
-                 * @example
-                 * // event handler for select
-                 * var onSelect = function(e) {
-                 *     // access the selected item via e.item (HTMLElement)
-                 * };
-                 *
-                 * // attach select event handler during initialization
-                 * var panelBar = $("#panelBar").kendoPanelBar({
-                 *     select: onSelect
-                 * });
-                 *
-                 * // detach select event handler via unbind()
-                 * panelBar.data("kendoPanelBar").unbind("select", onSelect);
-                 *
-                 * @exampleTitle Attach select event handler via bind(); detach via unbind()
-                 * @example
-                 * // event handler for select
-                 * var onSelect = function(e) {
-                 *     // access the selected item via e.item (HTMLElement)
-                 * };
-                 *
-                 * // attach select event handler via bind()
-                 * $("#panelBar").data("kendoPanelBar").bind("select", onSelect);
-                 *
-                 * // detach select event handler via unbind()
-                 * $("#panelBar").data("kendoPanelBar").unbind("select", onSelect);
-                 *
-                 */
-                SELECT,
-
-                /**
-                 *
-                 * Triggered when an item of a PanelBar is activated.
-                 *
-                 * @name kendo.ui.PanelBar#activate
-                 * @event
-                 *
-                 * @param {Event} e
-                 *
-                 * @param {Element} e.item
-                 * The activated item of the PanelBar.
-                 *
-                 * @exampleTitle Attach activate event handler during initialization; detach via unbind()
-                 * @example
-                 * // event handler for activate
-                 * var onActivate = function(e) {
-                 *     // access the activated item via e.item (HTMLElement)
-                 * };
-                 *
-                 * // attach activate event handler during initialization
-                 * var panelBar = $("#panelBar").kendoPanelBar({
-                 *     activate: onActivate
-                 * });
-                 *
-                 * // detach activate event handler via unbind()
-                 * panelBar.data("kendoPanelBar").unbind("activate", onActivate);
-                 *
-                 * @exampleTitle Attach activate event handler via bind(); detach via unbind()
-                 * @example
-                 * // event handler for activate
-                 * var onActivate = function(e) {
-                 *     // access the activated item via e.item (HTMLElement)
-                 * };
-                 *
-                 * // attach activate event handler via bind()
-                 * $("#panelBar").data("kendoPanelBar").bind("activate", onActivate);
-                 *
-                 * // detach activate event handler via unbind()
-                 * $("#panelBar").data("kendoPanelBar").unbind("activate", onActivate);
-                 *
-                 */
-                ACTIVATE,
-
-                /**
-                 * Fires when AJAX request results in an error.
-                 * @name kendo.ui.PanelBar#error
-                 * @event
-                 * @param {Event} e
-                 * @param {jqXHR} e.xhr The jqXHR object used to load the content
-                 * @param {String} e.status The returned status.
-                 * @example
-                 * $("#panelBar").kendoPanelBar({
-                 *     error: function(e) {
-                 *         // handle event
-                 *     }
-                 * });
-                 *
-                 * @exampleTitle To set after intialization
-                 * @example
-                 * // get a reference to the panel bar
-                 * var panelBar = $("#panelBar").data("kendoPanelBar");
-                 * // bind the error ajax event
-                 * panelBar.bind("error", function(e) {
-                 *     // handle event
-                 * });
-                 */
-                ERROR,
-                /**
-                 * Fires when content is fetched from an AJAX request.
-                 * @name kendo.ui.PanelBar#contentLoad
-                 * @event
-                 * @param {Event} e
-                 * @param {Element} e.item The selected item
-                 * @param {Element} e.contentElement The loaded content element
-                 * @example
-                 * $("#panelBar").kendoPanelBar({
-                 *     contentLoad: function(e) {
-                 *         // handle event
-                 *     }
-                 * });
-                 * @exampleTitle To set after intialization
-                 * @example
-                 * // get a reference to the panel bar
-                 * var panelBar = $("#panelBar").data("kendoPanelBar");
-                 * // bind the contentLoad event
-                 * panelBar.bind("contentLoad", function(e) {
-                 *     // handle event
-                 * });
-                 */
-                CONTENTLOAD
-            ],
+            EXPAND,
+            COLLAPSE,
+            SELECT,
+            ACTIVATE,
+            ERROR,
+            CONTENTLOAD
+        ],
         options: {
             name: "PanelBar",
             animation: {
@@ -31858,30 +27797,13 @@ extend(Editor, {
             expandMode: "multiple"
         },
 
-        /**
-         *
-         * Expands the specified item(s) of a <strong>PanelBar</strong>.
-         *
-         * @example
-         * // access an existing PanelBar instance
-         * var panelBar = $("#panelBar").data("kendoPanelBar");
-         * // expand the element with ID, "item1"
-         * panelBar.expand($("#item1"));
-         * // expand the element with ID, "item2" without visual animations
-         * panelBar.expand($("#item2"), false);
-         * // expand all list items that start with ID, "item"
-         * panelBar.expand($('[id^="item"]'));
-         *
-         * @param {Selector} element
-         * The <strong>PanelBar</strong> item(s) to be expanded, expressed as a selector.
-         *
-         * @param {Boolean} [useAnimation]
-         * Temporariliy enables (<b>true</b>) or disables (<b>false</b>) any visual animation(s) when expanding items.
-         *
-         * @returns {PanelBar}
-         * Returns the PanelBar object to support chaining.
-         *
-         */
+        destroy: function() {
+            Widget.fn.destroy.call(this);
+
+            this.element.off(NS);
+
+            kendo.destroy(this.element);
+        },
         expand: function (element, useAnimation) {
             var that = this,
                 animBackup = {};
@@ -31919,32 +27841,6 @@ extend(Editor, {
             return that;
         },
 
-        /**
-         *
-         * Collapses the specified item(s) of a <strong>PanelBar</strong>.
-         *
-         * @example
-         * // access an existing PanelBar instance
-         * var panelBar = $("#panelBar").data("kendoPanelBar");
-         * // collapse the element with ID, "item1"
-         * panelBar.collapse($("#item1"));
-         * // collapse the element with ID, "item2" without visual animations
-         * panelBar.collapse($("#item2"), false);
-         * // collapse all list items that start with ID, "item"
-         * panelBar.collapse($('[id^="item"]'));
-         *
-         * @param {Selector} element
-         * The <strong>PanelBar</strong> item(s) to be collapsed, expressed as a string containing a selector
-         * expression or represented by a <a href="http://api.jquery.com/category/selectors/">jQuery selector</a>.
-         *
-         * @param {Boolean} [useAnimation]
-         * Temporarily enables (<strong>true</strong>) or disables (<strong>false</strong>) any visual animation(s)
-         * when collapsing items.
-         *
-         * @returns {PanelBar}
-         * Returns the PanelBar object to support chaining.
-         *
-         */
         collapse: function (element, useAnimation) {
             var that = this,
                 animBackup = {};
@@ -31984,22 +27880,6 @@ extend(Editor, {
                 .toggleClass(DISABLEDCLASS.substr(1), !enable);
         },
 
-        /**
-         *
-         * Selects the specified item of the <strong>PanelBar</strong>. If this method is invoked without arguments, it
-         * returns the currently selected item.
-         *
-         * @param {String | Selector} element
-         * The <strong>PanelBar</strong> item to be selected, expressed as a string containing a selector expression or
-         * represented by a <a href="http://api.jquery.com/category/selectors/">jQuery selector</a>.
-         *
-         * @example
-         * // access an existing PanelBar instance
-         * var panelBar = $("#panelBar").data("kendoPanelBar");
-         * // select the item with ID, "item1"
-         * panelBar.select("#item1");
-         *
-         */
         select: function (element) {
             var that = this;
             element = that.element.find(element);
@@ -32022,32 +27902,6 @@ extend(Editor, {
             return that;
         },
 
-        /**
-         *
-         * Enables (<strong>true</strong>) or disables (<strong>false</strong>) the specified item(s) of the
-         * <strong>PanelBar</strong>.
-         *
-         * @example
-         * // access an existing PanelBar instance
-         * var panelBar = $("#panelBar").data("kendoPanelBar");
-         * // enable the item of the PanelBar with ID, "item1"
-         * panelBar.enable($("#item1"), true);
-         * // disable the currently selected item of the PanelBar
-         * var item = panelBar.select();
-         * panelBar.enable(item, false);
-         * // disable all list items that start with ID, "item"
-         * panelBar.enable($('[id^="item"]'), false);
-         *
-         * @param {String | Selector} element
-         * The <strong>PanelBar</strong> item(s) to be enabled (<b>true</b>) or disabled (<b>false</b>), expressed as a
-         * string containing a selector expression or represented by a
-         * <a href="http://api.jquery.com/category/selectors/">jQuery selector</a>.
-         *
-         * @param {Boolean} enable
-         * The desired state - enabled (<strong>true</strong>) or disabled (<strong>false</strong>) - of the target
-         * element(s).
-         *
-         */
         enable: function (element, state) {
             this._toggleDisabled(element, state !== false);
 
@@ -32060,58 +27914,6 @@ extend(Editor, {
             return this;
         },
 
-        /**
-         *
-         * Appends an item to the PanelBar.
-         *
-         * @param {Selector} item
-         * Target item, specified as the JSON representation of an object. You can pass item text, content or
-         * contentUrl here. Can handle an HTML string or array of such strings or JSON.
-         *
-         * @param {Item} referenceItem
-         * A reference item to append the new item in
-         *
-         * @returns {PanelBar}
-         * Returns the PanelBar object to support chaining.
-         *
-         * @example
-         * var panelBar = $("#panelBar").data("kendoPanelBar");
-         * panelBar.append(
-         *     [
-         *         {
-         *             text: "Item 1",
-         *             url: "http://www.kendoui.com/"                  // link URL if navigation is needed (optional)
-         *         },
-         *         {
-         *             text: "<b>Item 2</b>",
-         *             encoded: false,                                 // Allows use of HTML for item text
-         *             content: "text"                                 // content within an item
-         *         },
-         *         {
-         *             text: "Item 3",
-         *             contentUrl: "partialContent.html"               // content URL to load within an item
-         *         },
-         *         {
-         *             text: "Item 4",
-         *             imageUrl: "http://www.kendoui.com/test.jpg",    // item image URL, optional
-         *             expanded: true,                                 // item is rendered expanded
-         *             items: [{                                       // Sub item collection.
-         *                 text: "Sub Item 1"
-         *             },
-         *             {
-         *                 text: "Sub Item 2"
-         *             }]
-         *         },
-         *         {
-         *             text: "Item 5",
-         *             // item image sprite CSS class, optional
-         *             spriteCssClass: "imageClass3"
-         *         }
-         *     ],
-         *     referenceItem
-         * );
-         *
-         */
         append: function (item, referenceItem) {
             referenceItem = this.element.find(referenceItem);
 
@@ -32135,54 +27937,6 @@ extend(Editor, {
             return this;
         },
 
-        /**
-         *
-         * Inserts a PanelBar item before the specified referenceItem
-         *
-         * @param {Selector} item
-         * Target item, specified as a JSON object. You can pass item text, content or contentUrl here. Can handle an
-         * TML string or array of such strings or JSON.
-         *
-         * @param {Item} referenceItem
-         * A reference item to insert the new item before.
-         *
-         * @returns {PanelBar}
-         * Returns the PanelBar object to support chaining.
-         *
-         * @example
-         * panelBar.insertBefore(
-         *     [{
-         *         text: "Item 1",
-         *         url: "http://www.kendoui.com"                // Link URL if navigation is needed, optional.
-         *     },
-         *     {
-         *         text: "<b>Item 2</b>",
-         *         encoded: false,                              // Allows use of HTML for item text
-         *         content: "text"                              // Content for the content element
-         *     },
-         *     {
-         *         text: "Item 3",
-         *         contentUrl: "partialContent.html"            // From where to load the item content
-         *     },
-         *     {
-         *         text: "Item 4",
-         *         imageUrl: "http://www.kendoui.com/test.jpg", // Item image URL, optional.
-         *         expanded: true,                              // item is rendered expanded
-         *         items: [{                                    // Sub item collection.
-         *              text: "Sub Item 1"
-         *         },
-         *         {
-         *              text: "Sub Item 2"
-         *         }]
-         *     },
-         *     {
-         *         text: "Item 5",
-         *         spriteCssClass: "imageClass3"                // Item image sprite CSS class, optional.
-         *     }],
-         *     referenceItem
-         * );
-         *
-         */
         insertBefore: function (item, referenceItem) {
             referenceItem = this.element.find(referenceItem);
 
@@ -32205,43 +27959,6 @@ extend(Editor, {
             return this;
         },
 
-        /**
-         * Inserts a PanelBar item after the specified referenceItem
-         * @param {Selector} item Target item, specified as a JSON object. You can pass item text, content or contentUrl here. Can handle an HTML string or array of such strings or JSON.
-         * @param {Item} referenceItem A reference item to insert the new item after
-         * @example
-         * panelBar.insertAfter(
-         *     [{
-         *         text: "Item 1",
-         *         url: "http://www.kendoui.com"                // Link URL if navigation is needed, optional.
-         *     },
-         *     {
-         *         text: "<b>Item 2</b>",
-         *         encoded: false,                              // Allows use of HTML for item text
-         *         content: "text"                              // Content for the content element
-         *     },
-         *     {
-         *         text: "Item 3",
-         *         contentUrl: "partialContent.html"            // From where to load the item content
-         *     },
-         *     {
-         *         text: "Item 4",
-         *         imageUrl: "http://www.kendoui.com/test.jpg", // Item image URL, optional.
-         *         expanded: true,                              // item is rendered expanded
-         *         items: [{                                    // Sub item collection.
-         *              text: "Sub Item 1"
-         *         },
-         *         {
-         *              text: "Sub Item 2"
-         *         }]
-         *     },
-         *     {
-         *         text: "Item 5",
-         *         spriteCssClass: "imageClass3"                // Item image sprite CSS class, optional.
-         *     }],
-         *     referenceItem
-         * );
-         */
         insertAfter: function (item, referenceItem) {
             referenceItem = this.element.find(referenceItem);
 
@@ -32264,19 +27981,6 @@ extend(Editor, {
             return this;
         },
 
-        /**
-         *
-         * Removes the specified PanelBar item(s).
-         *
-         * @param {Selector} element Target item selector.
-         *
-         * @example
-         * // get a reference to the panel bar
-         * var panelBar = $("#panelBar").data("kendoPanelBar");
-         * // remove Item 1
-         * panelBar.remove("#Item1");
-         *
-         */
         remove: function (element) {
             element = this.element.find(element);
 
@@ -32300,15 +28004,6 @@ extend(Editor, {
             return that;
         },
 
-        /**
-         * Reloads the content of a <strong>PanelBar</strong> from an AJAX request.
-         * @param {Selector} element Target element
-         * @example
-         * // get a reference to the panel bar
-         * var panelBar = $("#panelBar").data("kendoPanelBar");
-         * // reload the panel basr
-         * panelBar.reload();
-         */
         reload: function (element) {
             var that = this;
             element = that.element.find(element);
@@ -32637,184 +28332,7 @@ extend(Editor, {
     kendo.ui.plugin(PanelBar);
 
 })(jQuery);
-/**
- * @fileOverview Provides a TabStrip implementation which can be used to display a collection of tabs with associated
- * content
- */
-
 (function ($, undefined) {
-    /**
-     *
-     * @name kendo.ui.TabStrip.Description
-     *
-     * @section
-     * <p>
-     *  A <strong>TabStrip</strong> displays a collection of tabs with associated content. It is composed of an
-     *  unordered list of items - representing tabs - and a collection of div elements, which contain the content for
-     *  each tab.
-     * </p>
-     * <h3>Getting Started</h3>
-     *
-     * @exampleTitle Create an unordered list for tabs with associated div elements for content
-     * @example
-     * <div id="tabStrip">
-     *     <ul>
-     *         <li>First tab</li>
-     *         <li>Second tab</li>
-     *     </ul>
-     *     <div>First tab content</div>
-     *     <div>Second tab content</div>
-     * </div>
-     *
-     * @section
-     * <p>
-     *  Initialization of a <strong>TabStrip</strong> should occur after the DOM is fully loaded. It is recommended
-     *  that initialization the <strong>TabStrip</strong> occur within a handler is provided to $(document).ready().
-     * </p>
-     *
-     * @exampleTitle Initialize a TabStrip using a selector within $(document).ready()
-     * @example
-     * $(document).ready(function() {
-     *     $("#tabStrip").kendoTabStrip();
-     * });
-     *
-     * @exampleTitle Initialize the TabStrip using JSON data object
-     * @example
-     * $(document).ready(function() {
-     *     $("#tabstrip").kendoTabStrip({
-     *         dataTextField: "text",
-     *         dataContentField: "content",
-     *         dataUrlField: "url",
-     *         dataImageUrlField: "imageUrl",
-     *         dataSpriteCssClass: "spriteCssClass",
-     *         dataContentUrlField: "contentUrl",
-     *         dataSource:
-     *         [{
-     *             text: "Item 1",
-     *             url: "http://www.kendoui.com"               // Link URL if navigation is needed, optional.
-     *         },
-     *         {
-     *             text: "Item 2",
-     *             content: "text"                             // Content for the content element
-     *         },
-     *         {
-     *             text: "Item 3",
-     *             contentUrl: "partialContent.html"           // From where to load the item content
-     *         },
-     *         {
-     *             text: "Item 4",
-     *             imageUrl: "http://www.kendoui.com/test.jpg" // Item image URL, optional.
-     *         },
-     *         {
-     *             text: "Item 5",
-     *             spriteCssClass: "imageClass3"               // Item image sprite CSS class, optional.
-     *         }]
-     *     });
-     * });
-     *
-     * @section
-     * <p>
-     *  The tabs of a <strong>TabStrip</strong> are not required to have content. Should a tab have no content, it is
-     *  safe to omit its associated div.
-     * </p>
-     * <h3>Loading TabStrip content with AJAX</h3>
-     * <p>
-     *  While any valid technique for loading AJAX content can be used, a <strong>TabStrip</strong> supports loading
-     *  content from URLs in an asynchronous manner. These URLs should return HTML fragments that can be loaded in a
-     *  TabStrip content area. Content DIVs are not required and if present should be completely empty for AJAX loading
-     *  to work.
-     * </p>
-     *
-     * @exampleTitle Loading Tab content asynchronously
-     * @example
-     * <div id="tabstrip">
-     *     <ul>
-     *         <li>First Tab</li>
-     *         <li>Second Tab</li>
-     *     </ul>
-     *     <div></div>
-     *     <div></div>
-     *  </div>
-     *
-     * @exampleTitle Initialize TabStrip and configure one tab with async content loading
-     * @example
-     * $(document).ready(function(){
-     *     $("#tabstrip").kendoTabStrip({
-     *         contentUrls: [null, "html-content-snippet.html"]
-     *     });
-     *  });
-     *
-     * @section
-     * <h3>Dynamically Configure TabStrip Tabs</h3>
-     * <p>
-     *  The <strong>TabStrip</strong> API provides several methods for dynamically adding or removing tabs. To add
-     *  tabs, provide the new item as a JSON object along with a reference item that will be used to determine the
-     *  placement in the <strong>TabStrip</strong>. Note: append() does not require a reference item.
-     * <p>
-     * <p>
-     *  A reference item is simply a target DOM element of a tab that already exists in the TabStrip. Any valid
-     *  selector may be used to obtain a reference to the target item.
-     * </p>
-     * <p>Removing an item requires a reference to the target element.</p>
-     *
-     * @exampleTitle Dynamically add a new tab
-     * @example
-     * var tabStrip = $("#tabStrip").data("kendoTabStrip");
-     * tabStrip.insertAfter(
-     *     { text: "New Tab" },
-     *     tabstrip.tabGroup.children("li:last")
-     * );
-     *
-     * @section
-     * <h3>Selecting a Tab on Initial Load</h3>
-     * <p>
-     *  It is possible to select a tab and display its associated content upon its initial load. There are two (2) ways
-     *  to accomplish this task:
-     * </p>
-     * <ol>
-     *  <li>Add a "k-state-active" class to the DOM element of the tab</li>
-     *  <li>Use select() to target and select a tab either by selector or index</li>
-     * </ol>
-     * <p>Both approaches produce the same result.</p>
-     *
-     * @exampleTitle Selecting a default tab manually using HTML
-     * @example
-     * <div id="tabstrip">
-     *     <ul>
-     *         <li class="k-state-active">First Tab</li>
-     *         <li>Second Tab</li>
-     *     </ul>
-     *     <div></div>
-     *     <div></div>
-     * </div>
-     *
-     * @exampleTitle Initialize a TabStrip and select first tab via select(element)
-     * @example
-     * $(document).ready(function(){
-     *     var tabstrip = $("#tabstrip").kendoTabStrip().data("kendoTabStrip");
-     *     tabstrip.select(tabstrip.tabGroup.children("li:first"));
-     * });
-     *
-     * @exampleTitle Initialize a TabStrip and select first tab via select(index)
-     * @example
-     * $(document).ready(function(){
-     *     var tabstrip = $("#tabstrip").kendoTabStrip().data("kendoTabStrip");
-     *     tabstrip.select(1);
-     * });
-     *
-     * @section
-     * <h3>Accessing an Existing TabStrip</h3>
-     * <p>
-     *  You can reference an existing <b>TabStrip</b> instance via
-     *  <a href="http://api.jquery.com/jQuery.data/">jQuery.data()</a>. Once a reference has been established, you can
-     *  use the API to control its behavior.
-     * </p>
-     *
-     * @exampleTitle Accessing an existing TabStrip instance
-     * @example
-     * var tabStrip = $("#tabStrip").data("kendoTabStrip");
-     *
-     */
     var kendo = window.kendo,
         ui = kendo.ui,
         map = $.map,
@@ -32824,6 +28342,7 @@ extend(Editor, {
         template = kendo.template,
         Widget = ui.Widget,
         excludedNodesRegExp = /^(a|div)$/i,
+        NS = ".kendoTabStrip",
         IMG = "img",
         HREF = "href",
         LINK = "k-link",
@@ -32953,177 +28472,7 @@ extend(Editor, {
         tabs.filter(":last-child").addClass(LAST);
     }
 
-    var TabStrip = Widget.extend({/** @lends kendo.ui.TabStrip.prototype */
-        /**
-         *
-         * Creates a TabStrip instance.
-         *
-         * @constructs
-         * @extends kendo.ui.Widget
-         * @class TabStrip UI widget
-         *
-         * @param {Selector} element DOM element
-         * @param {Object} options Configuration options.
-         *
-         * @option {Object} [animation]
-         * A collection of visual animations used when <strong>TabStrip</strong> tab are selected through
-         * user interactions. Setting this option to <strong>false</strong> will disable all animations.
-         *
-         * _exampleTitle Defining custom animations when selecting tabs
-         * _example
-         * $("#tabstrip").kendoTabStrip({
-         *     animation: {
-         *         // fade-out current tab over 1000 milliseconds
-         *         close: {
-         *             duration: 1000,
-         *             effects: "fadeOut"
-         *         },
-         *        // fade-in new tab over 500 milliseconds
-         *        open: {
-         *            duration: 500,
-         *            effects: "fadeIn"
-         *        }
-         *    }
-         * });
-         *
-         * @option {Object} [animation.open]
-         * The visual animation(s) that will be used when the new tab is shown.
-         *
-         * _exampleTitle Defining a custom animation when new tab is shown that executes over 200 milliseconds
-         * _example
-         * $("#tabstrip").kendoTabStrip({
-         *     animation: {
-         *         open: {
-         *             duration: 200,
-         *             effects: "expand:vertical"
-         *         }
-         *     }
-         * });
-         *
-         * @option {Number} [animation.open.duration] <200>
-         * The number of milliseconds used for the visual animation when a new tab is shown.
-         *
-         * _exampleTitle Defining animation when a new tab is shown that executes over 1000 milliseconds
-         * _example
-         * $("#tabstrip").kendoTabStrip({
-         *  animation: {
-         *       open: {
-         *           duration: 1000
-         *       }
-         *    }
-         * });
-         *
-         * @option {String} [animation.open.effects] <"expand:vertical fadeIn">
-         * A whitespace-separated string of animation effects that are used when a new tab is shown. Options include
-         * <strong>"expand:vertical"</strong> and <strong>"fadeIn"</strong>.
-         *
-         * @option {Boolean} [animation.open.show] <true>
-         *
-         * @option {Object} [animation.close]
-         * The visual animation(s) that will be used when the current tab is closed.
-         *
-         * _exampleTitle Defining a custom animation for the current tab that
-         * executes over 200 milliseconds
-         * _example
-         * $("#tabstrip").kendoTabStrip({
-         *     animation: {
-         *         close: {
-         *             duration: 200,
-         *             effects: "fadeOut"
-         *         }
-         *     }
-         * });
-         *
-         * @option {Number} [animation.close.duration] <200>
-         * The number of milliseconds used for the visual animation when the current tab is closed.
-         *
-         * _exampleTitle Animating the current tab for 1000 milliseconds
-         * _example
-         * $("#tabstrip").kendoTabStrip({
-         *     animation: {
-         *         close: {
-                       duration: 1000
-                   }
-         *   }
-         * });
-         *
-         * @option {String} [animation.close.effects]
-         * A whitespace-delimited string of animation effects that are utilized when the current tab
-         * is closed. By default not specified - uses the opening animation with reverse.
-         *
-         * _exampleTitle Fading-out the current tab for 1000 milliseconds
-         * _example
-         * $("#tabstrip").kendoTabStrip({
-         *     animation: {
-         *         close: {
-         *             duration: 1000,
-         *             effects: "fadeOut"
-         *         }
-         *     }
-         * });
-         *
-         * @option {String} [dataTextField] <""> Sets the field of the data item that provides the text name of the tab.
-         * _example
-         * $("#tabstrip").kendoTabStrip({
-         *     dataTextField: "Name",
-         *     dataSource: data
-         * });
-         *
-         * @option {String} [dataContentField] <""> Sets the field of the data item that provides the text content of
-         * the tab content element.
-         * _example
-         * $("#tabstrip").kendoTabStrip({
-         *     dataTextField: "Name",
-         *     dataContentField: "Content",
-         *     dataSource: data
-         * });
-         *
-         * @option {String} [dataImageUrlField] <""> Sets the field of the data item that provides the image URL of
-         * the tab.
-         * _example
-         * $("#tabstrip").kendoTabStrip({
-         *     dataTextField: "Name",
-         *     dataImageUrlField: "ImageUrl",
-         *     dataSource: data
-         * });
-         *
-         * @option {String} [dataUrlField] <""> Sets the field of the data item that provides the link URL for the
-         * tab.
-         * _example
-         * $("#tabstrip").kendoTabStrip({
-         *     dataTextField: "Name",
-         *     dataUrlField: "Url",
-         *     dataSource: data
-         * });
-         *
-         * @option {String} [dataSpriteCssClass] <""> Sets the field of the data item that provides the CSS class of
-         * the tab.
-         * _example
-         * $("#tabstrip").kendoTabStrip({
-         *     dataTextField: "Name",
-         *     dataSpriteCssClass: "CssClass",
-         *     dataSource: data
-         * });
-         *
-         * @option {String} [dataContentUrlField] <""> Sets the field of the data item that provides the URL for
-         * the ajax loaded tab content.
-         * _example
-         * $("#tabstrip").kendoTabStrip({
-         *     dataTextField: "Name",
-         *     dataContentUrlField: "ContentUrl",
-         *     dataSource: data
-         * });
-         *
-         * @option {Boolean} [collapsible] <false>
-         * Specifies whether the TabStrip should be able to collapse completely when clicking an expanded tab.
-         *
-         * _exampleTitle Turning on tab collapsing
-         * _example
-         * $("#tabstrip").kendoTabStrip({
-         *     collapsible: true
-         * });
-         *
-         */
+    var TabStrip = Widget.extend({
         init: function(element, options) {
             var that = this;
 
@@ -33140,9 +28489,9 @@ extend(Editor, {
             options = that.options;
 
             that.wrapper
-                .delegate(CLICKABLEITEMS, CLICK, $.proxy(that._click, that))
-                .delegate(HOVERABLEITEMS, MOUSEENTER + " " + MOUSELEAVE, that._toggleHover)
-                .delegate(DISABLEDLINKS, CLICK, false);
+                .on(CLICK + NS, CLICKABLEITEMS, $.proxy(that._click, that))
+                .on(MOUSEENTER + NS +" " + MOUSELEAVE + NS, HOVERABLEITEMS, that._toggleHover)
+                .on(CLICK + NS, DISABLEDLINKS, false);
 
             that._updateClasses();
 
@@ -33263,6 +28612,7 @@ extend(Editor, {
                 }
             } else {
                 that.trigger("dataBinding");
+                that.remove("li");
                 that.append(tabs);
                 that.trigger("dataBound");
             }
@@ -33299,128 +28649,9 @@ extend(Editor, {
         },
 
         events: [
-            /**
-             *
-             * Triggered before a tab is selected.
-             *
-             * @name kendo.ui.TabStrip#select
-             * @event
-             *
-             * @param {Event} e
-             *
-             * @param {HTMLElement} e.item
-             * The selected item chosen by a user.
-             *
-             * @param {Element} e.contentElement
-             * The content element of the tab going to be selected.
-             *
-             * @exampleTitle Attach select event handler during initialization; detach via unbind()
-             * @example
-             * // event handler for select
-             * var onSelect = function(e) {
-             *     // access the selected item via e.item (HTMLElement)
-             * };
-             *
-             * // attach select event handler during initialization
-             * var tabStrip = $("#tabStrip").kendoTabStrip({
-             *     select: onSelect
-             * });
-             *
-             * // detach select event handler via unbind()
-             * tabStrip.data("kendoTabStrip").unbind("select", onSelect);
-             *
-             * @exampleTitle Attach select event handler via bind(); detach via unbind()
-             * @example
-             * // event handler for select
-             * var onSelect = function(e) {
-             *     // access the selected item via e.item (HTMLElement)
-             * };
-             *
-             * // attach select event handler via bind()
-             * $("#tabStrip").data("kendoTabStrip").bind("select", onSelect);
-             *
-             * // detach select event handler via unbind()
-             * $("#tabStrip").data("kendoTabStrip").unbind("select", onSelect);
-             *
-             */
             SELECT,
-            /**
-             * Triggered just after a tab is being made visible, but before the end of the animation
-             *
-             * @name kendo.ui.TabStrip#activate
-             * @event
-             *
-             * @param {Event} e
-             *
-             * @param {HTMLElement} e.item
-             * The activated tab.
-             *
-             * @param {Element} e.contentElement
-             * The content element of the activated tab.
-             *
-             * @exampleTitle Attach activate event handler during initialization; detach via unbind()
-             * @example
-             * // event handler for activate
-             * var onActivate = function(e) {
-             *     // access the activated item via e.item (HTMLElement)
-             * };
-             *
-             * // attach activate event handler during initialization
-             * var tabStrip = $("#tabStrip").kendoTabStrip({
-             *     activate: onActivate
-             * });
-             *
-             * // detach activate event handler via unbind()
-             * tabStrip.data("kendoTabStrip").unbind("activate", onActivate);
-             *
-             * @exampleTitle Attach activate event handler via bind(); detach via unbind()
-             * @example
-             * // event handler for activate
-             * var onActivate = function(e) {
-             *     // access the activated item via e.item (HTMLElement)
-             * };
-             *
-             * // attach activate event handler via bind()
-             * $("#tabStrip").data("kendoTabStrip").bind("activate", onActivate);
-             *
-             * // detach activate event handler via unbind()
-             * $("#tabStrip").data("kendoTabStrip").unbind("activate", onActivate);
-             *
-             */
             ACTIVATE,
-            /**
-             *
-             * Triggered when an AJAX request results in an error.
-             *
-             * @name kendo.ui.TabStrip#error
-             * @event
-             *
-             * @param {Event} e
-             *
-             * @param {jqXHR} e.xhr
-             * The jqXHR object used to load the content
-             *
-             * @param {String} e.status
-             * The returned status.
-             *
-             */
             ERROR,
-            /**
-             *
-             * Triggered when content is fetched from an AJAX request.
-             *
-             * @name kendo.ui.TabStrip#contentLoad
-             * @event
-             *
-             * @param {Event} e
-             *
-             * @param {Element} e.item
-             * The selected item
-             *
-             * @param {Element} e.contentElement
-             * The loaded content element that is retrieved via AJAX.
-             *
-             */
             CONTENTLOAD,
             "change",
             "dataBinding",
@@ -33448,24 +28679,19 @@ extend(Editor, {
             collapsible: false
         },
 
-        /**
-         *
-         * Selects the specified tab(s) within a <strong>TabStrip</strong>. If called without arguments, it returns the
-         * currently selected tab.
-         *
-         * @param {Selector/Index} element or index
-         * The target tab(s), specified as a selector or index in the tab group.
-         *
-         * @example
-         * tabStrip.select("#tab1");
-         *
-         * @example
-         * tabStrip.select(1);
-         *
-         * @returns {TabStrip}
-         * Returns the TabStrip object to support chaining.
-         *
-         */
+        destroy: function() {
+            var that = this;
+
+            Widget.fn.destroy.call(that);
+
+            if (that._refreshHandler) {
+                that.dataSource.unbind("change", that._refreshHandler);
+            }
+
+            that.wrapper.off(NS);
+            kendo.destroy(that.wrapper);
+        },
+
         select: function (element) {
             var that = this;
 
@@ -33488,56 +28714,18 @@ extend(Editor, {
             return that;
         },
 
-        /**
-         *
-         * Disables (<strong>false</strong>) or enables (<strong>true</strong>) a tab(s) of a <strong>TabStrip</strong>.
-         *
-         * @param {Selector} element
-         * The target tab(s), specified as a selector, to be enabled (<strong>true</strong>) or disabled
-         * (<strong>false</strong>).
-         *
-         * @param {Boolean} enable
-         * Desired state of the tab(s) specified by the selector; enabled (<strong>true</strong>) or disabled
-         * (<strong>false</strong>).
-         *
-         * @returns {TabStrip}
-         * Returns the TabStrip object to support chaining.
-         *
-         */
         enable: function (element, state) {
             this._toggleDisabled(element, state !== false);
 
             return this;
         },
 
-        /**
-         *
-         * Disables a tab(s) of a <strong>TabStrip</strong>.
-         *
-         * @param {Selector} element
-         * The target tab(s), specified as a selector, to be disabled.
-         *
-         * @returns {TabStrip}
-         * Returns the TabStrip object to support chaining.
-         *
-         */
         disable: function (element) {
             this._toggleDisabled(element, false);
 
             return this;
         },
 
-        /**
-         *
-         * Reloads TabStrip tab(s) via AJAX.
-         *
-         * @param {Selector} element
-         * The target tab(s), specified as a selector, to be reloaded via AJAX.
-         *
-         * @returns {TabStrip}
-         * Returns the TabStrip object to support chaining.
-         *
-         */
         reload: function (element) {
             element = this.tabGroup.find(element);
             var that = this;
@@ -33554,43 +28742,6 @@ extend(Editor, {
             return that;
         },
 
-        /**
-         *
-         * Appends a tab to the collection of tabs in a <strong>TabStrip</strong>.
-         *
-         * @param {Selector} tab
-         * Target tab, specified as a JSON object. You can pass tab text, content or contentUrl here. Can handle an
-         * HTML string or array of such strings or JSON.
-         *
-         * @returns {TabStrip}
-         * Returns the TabStrip object to support chaining.
-         *
-         * @example
-         * tabStrip.append(
-         *     [{
-         *         text: "Item 1",
-         *         url: "http://www.kendoui.com"               // Link URL if navigation is needed, optional.
-         *     },
-         *     {
-         *         text: "<b>Item 2</b>",
-         *         encoded: false,                             // Allows use of HTML for item text
-         *         content: "text"                             // Content for the content element
-         *     },
-         *     {
-         *         text: "Item 3",
-         *         contentUrl: "partialContent.html"           // From where to load the item content
-         *     },
-         *     {
-         *         text: "Item 4",
-         *         imageUrl: "http://www.kendoui.com/test.jpg" // Item image URL, optional.
-         *     },
-         *     {
-         *         text: "Item 5",
-         *         spriteCssClass: "imageClass3"               // Item image sprite CSS class, optional.
-         *     }]
-         * );
-         *
-         */
         append: function (tab) {
             var that = this,
                 inserted = that._create(tab);
@@ -33606,46 +28757,6 @@ extend(Editor, {
             return that;
         },
 
-        /**
-         *
-         * Inserts a newly-created tab before a specified tab.
-         *
-         * @param {Selector} item
-         * Target tab, specified as a JSON object. You can pass tab text, content or contentUrl here. Can handle an
-         * HTML string or array of such strings or JSON.
-         *
-         * @param {Item} referenceTab
-         * A reference tab to insert the new item before
-         *
-         * @returns {TabStrip}
-         * Returns the TabStrip object to support chaining.
-         *
-         * @example
-         * tabStrip.insertBefore(
-         *     [{
-         *         text: "Item 1",
-         *         url: "http://www.kendoui.com"               // Link URL if navigation is needed, optional.
-         *     },
-         *     {
-         *         text: "<b>Item 2</b>",
-         *         encoded: false,                             // Allows use of HTML for item text
-         *         content: "text"                             // Content for the content element
-         *     },
-         *     {
-         *         text: "Item 3",
-         *         contentUrl: "partialContent.html"           // From where to load the item content
-         *     },
-         *     {
-         *         text: "Item 4",
-         *         imageUrl: "http://www.kendoui.com/test.jpg" // Item image URL, optional.
-         *     },
-         *     {
-         *         text: "Item 5",
-         *         spriteCssClass: "imageClass3"               // Item image sprite CSS class, optional.
-         *     }],
-         *     referenceItem
-         * );
-         */
         insertBefore: function (tab, referenceTab) {
             var that = this,
                 inserted = that._create(tab),
@@ -33662,47 +28773,6 @@ extend(Editor, {
             return that;
         },
 
-        /**
-         *
-         * Inserts a newly-created tab after a specified tab.
-         *
-         * @param {Selector} item
-         * Target tab, specified as a JSON object. You can pass tab text, content or contentUrl here. Can handle an
-         * HTML string or array of such strings or JSON.
-         *
-         * @param {Item} referenceTab
-         * A reference tab to insert the new item after.
-         *
-         * @returns {TabStrip}
-         * Returns the TabStrip object to support chaining.
-         *
-         * @example
-         * tabStrip.insertAfter(
-         *     [{
-         *         text: "Item 1",
-         *         url: "http://www.kendoui.com"               // Link URL if navigation is needed, optional.
-         *     },
-         *     {
-         *         text: "<b>Item 2</b>",
-         *         encoded: false,                             // Allows use of HTML for item text
-         *         content: "text"                             // Content for the content element
-         *     },
-         *     {
-         *         text: "Item 3",
-         *         contentUrl: "partialContent.html"           // From where to load the item content
-         *     },
-         *     {
-         *         text: "Item 4",
-         *         imageUrl: "http://www.kendoui.com/test.jpg" // Item image URL, optional.
-         *     },
-         *     {
-         *         text: "Item 5",
-         *         spriteCssClass: "imageClass3"               // Item image sprite CSS class, optional.
-         *     }],
-         *     referenceItem
-         * );
-         *
-         */
         insertAfter: function (tab, referenceTab) {
             var that = this,
                 inserted = that._create(tab),
@@ -33719,36 +28789,22 @@ extend(Editor, {
             return that;
         },
 
-        /**
-         *
-         * Removes a specified tab from a TabStrip.
-         *
-         * @param {Selector} element
-         * The target tab(s), specified as a selector, to be removed.
-         *
-         * @returns {TabStrip}
-         * Returns the TabStrip object to support chaining.
-         *
-         * @exampleTitle Remove a tab with ID, tab1 from a TabStrip
-         * @example
-         * tabStrip.remove("#tab1");
-         *
-         */
-        remove: function (element) {
+        remove: function (elements) {
             var that = this,
-                type = typeof element,
-                content;
+                type = typeof elements,
+                contents = $();
 
             if (type === "string") {
-                element = that.tabGroup.find(element);
+                elements = that.tabGroup.find(elements);
             } else if (type === "number") {
-                element = that.tabGroup.children().eq(element);
+                elements = that.tabGroup.children().eq(elements);
             }
 
-            content = $(that.contentElement(element.index()));
-
-            content.remove();
-            element.remove();
+            elements.each(function () {
+                contents.push(that.contentElement($(this).index()));
+            });
+            elements.remove();
+            contents.remove();
 
             that._updateContentElements();
 
@@ -33911,18 +28967,6 @@ extend(Editor, {
             }
         },
 
-        /**
-         *
-         * Deactivates a tab specified as a selector. Note: Invoking this method will not trigger any events.
-         *
-         * @param {Selector} item
-         * The target tab, specified as a selector, to be deactivated.
-         *
-         * @example
-         * var tabToDeactivate = $("#tab1");
-         * $("#tabStrip").data("kendoTabStrip").deactivateTab(tabToActivate);
-         *
-         */
         deactivateTab: function (item) {
             var that = this,
                 animationSettings = that.options.animation,
@@ -33948,22 +28992,6 @@ extend(Editor, {
                     .removeClass(ACTIVESTATE);
         },
 
-        /**
-         *
-         * Activates a tab specified as a selector. Note: Invoking this method will not trigger any events.
-         *
-         * @param {Selector} item
-         * The target tab, specified as a selector, to be activated.
-         *
-         * @returns {Boolean}
-         * Returns <strong>true</strong> if successful; otherwise, <strong>false</strong>.
-         *
-         * @exampleTitle Activate a tab with ID, tab1 in a TabStrip
-         * @example
-         * var tabToActivate = $("#tab1");
-         * $("#tabStrip").data("kendoTabStrip").activateTab(tabToActivate);
-         *
-         */
         activateTab: function (item) {
             item = this.tabGroup.find(item);
 
@@ -34068,27 +29096,12 @@ extend(Editor, {
             return true;
         },
 
-        /**
-         *
-         * Obtains the DOM element representing a tab by its index in the <strong>TabStrip</strong>.
-         *
-         * @param {int} itemIndex
-         * The index of the tab in the TabStrip.
-         *
-         * @returns {HTMLElement}
-         * The DOM element representing a tab by its index in the <strong>TabStrip</strong>.
-         *
-         * @exampleTitle Obtain the DOM element representing the first tab in a TabStrip
-         * @example
-         * var tabContent = $("#tabStrip").data("kendoTabStrip").contentElement(0);
-         *
-         */
         contentElement: function (itemIndex) {
             if (isNaN(itemIndex - 0)) {
                 return;
             }
 
-            var contentElements = this.contentElements,
+            var contentElements = this.contentAnimators || this.contentElements,
                 idTest = new RegExp("-" + (itemIndex + 1) + "$");
 
             for (var i = 0, len = contentElements.length; i < len; i++) {
@@ -34173,89 +29186,8 @@ extend(Editor, {
     kendo.ui.plugin(TabStrip);
 
 })(jQuery);
-/**
- * @fileOverview Provides a TimePicker implementation which allows the end user to select a time value from a list of
- * predefined values or to type a new value.
- */
 
 (function($, undefined) {
-    /**
-     * @name kendo.ui.TimePicker.Description
-     *
-     * @section
-     * <p>
-     *  The <strong>TimePicker</strong> allows the end user to select a time value from a list of predefined values or
-     *  to type a new value. It supports configurable options for the format, minimum and maximum time, and the
-     *  interval between predefined values in the list.
-     * </p>
-     * <h3>Getting Started</h3>
-     *
-     * @exampleTitle Creating a TimePicker from existing input element
-     * @example
-     * <input id="timePicker" />
-     *
-     * @exampleTitle Initialize the PanelBar via an ID selector
-     * @example
-     * $(document).ready(function(){
-     *     $("#timePicker").kendoTimePicker();
-     * });
-     *
-     * @section
-     * <p>
-     *  When a <strong>TimePicker</strong> is initialized, it will automatically be displayed near the location of the
-     *  used HTML element.
-     * </p>
-     * <h3>Configuring TimePicker Behaviors</h3>
-     * <p>
-     *  A <strong>TimePicker</strong> provides configuration options that can be easily set during initialization.
-     *  Among the properties that can be controlled:
-     * </p>
-     * <ul>
-     *  <li>Selected time</li>
-     *  <li>Minimum/Maximum time</li>
-     *  <li>Define format</li>
-     *  <li>Define interval between predefined values in the list</li>
-     * </ul>
-     *
-     * @exampleTitle Create TimePicker with selected time and defined min and max time
-     * @example
-     * $("#timePicker").kendoTimePicker({
-     *     value: new Date(2000, 10, 10, 10, 0, 0),
-     *     min: new Date(1950, 0, 1, 8, 0, 0),
-     *     max: new Date(2049, 11, 31, 18, 0, 0)
-     * });
-     *
-     * @section
-     * <p>
-     *  A <strong>TimePicker</strong> will set the value only if the entered time is valid and if it is in the defined
-     *  range.
-     * </p>
-     *
-     * @exampleTitle Define time format
-     * @example
-     * $("#timePicker").kendoTimePicker({
-     *     format: "hh:mm:ss tt"
-     * });
-     *
-     * @exampleTitle Define the interval (in minutes) between values in the list
-     * @example
-     * $("#timePicker").kendoTimePicker({
-     *     interval: 15
-     * });
-     *
-     * @section
-     * <h3>Accessing an Existing TimePicker</h3>
-     * <p>
-     *  You can reference an existing <strong>TimePicker</strong> instance via
-     *  <a href="http://api.jquery.com/jQuery.data/">jQuery.data()</a>. Once a reference has been established, you can
-     *  use the API to control its behavior.
-     * </p>
-     *
-     * @exampleTitle Accessing an existing TimePicker instance
-     * @example
-     * var timePicker = $("#timePicker").data("kendoTimePicker");
-     *
-     */
     var kendo = window.kendo,
         touch = kendo.support.touch,
         keys = kendo.keys,
@@ -34265,15 +29197,16 @@ extend(Editor, {
         OPEN = "open",
         CLOSE = "close",
         CHANGE = "change",
-        CLICK = (touch ? "touchend" : "click"),
+        ns = ".kendoTimePicker",
+        CLICK = (touch ? "touchend" : "click") + ns,
         DEFAULT = "k-state-default",
         DISABLED = "disabled",
         LI = "li",
         SPAN = "<span/>",
         FOCUSED = "k-state-focused",
         HOVER = "k-state-hover",
-        HOVEREVENTS = "mouseenter mouseleave",
-        MOUSEDOWN = "mousedown",
+        HOVEREVENTS = "mouseenter" + ns + " mouseleave" + ns,
+        MOUSEDOWN = "mousedown" + ns,
         MS_PER_MINUTE = 60000,
         MS_PER_DAY = 86400000,
         SELECTED = "k-state-selected",
@@ -34293,13 +29226,13 @@ extend(Editor, {
 
         that.ul = $('<ul unselectable="on" class="k-list k-reset"/>')
                     .css({ overflow: kendo.support.touch ? "": "auto" })
-                    .delegate(LI, CLICK, proxy(that._click, that))
-                    .delegate(LI, "mouseenter", function() { $(this).addClass(HOVER); })
-                    .delegate(LI, "mouseleave", function() { $(this).removeClass(HOVER); });
+                    .on(CLICK, LI, proxy(that._click, that))
+                    .on("mouseenter" + ns, LI, function() { $(this).addClass(HOVER); })
+                    .on("mouseleave" + ns, LI, function() { $(this).removeClass(HOVER); });
 
         that.list = $("<div class='k-list-container'/>")
                     .append(that.ul)
-                    .mousedown(preventDefault);
+                    .on(MOUSEDOWN, preventDefault);
 
         that._popup();
 
@@ -34329,6 +29262,15 @@ extend(Editor, {
 
         close: function() {
             this.popup.close();
+        },
+
+        destroy: function() {
+            var that = this;
+
+            that.ul.off(ns);
+            that.list.off(ns);
+
+            that.popup.destroy();
         },
 
         open: function() {
@@ -34650,86 +29592,7 @@ extend(Editor, {
 
     kendo.TimeView = TimeView;
 
-    var TimePicker = Widget.extend(/** @lends kendo.ui.TimePicker.prototype */{
-        /**
-         *
-         * Creates a TimePicker instance.
-         *
-         * @constructs
-         * @extends kendo.ui.Widget
-         *
-         * @param {Element} element DOM element
-         * @param {Object} options Configuration options.
-         *
-         * @option {Date} [value] <null>
-         * Specifies the selected time.
-         *
-         * @option {Date} [min] <00:00>
-         * Specifies the start value in the popup list.
-         *
-         * @option {Date} [max] <00:00>
-         * Specifies the end value in the popup list.
-         *
-         * @option {String} [format] <h:mm tt> Specifies the format, which is used to format the value of the TimePicker displayed in the input.
-         *
-         * @option {Array} [parseFormats] <> Specifies the formats, which are used to parse the value set with the value method or by direct input. If not set the value of the options.format will be used.
-         * _example
-         * $("#timePicker").kendoTimePicker({
-         *     format: "h:mm tt",
-         *     parseFormats: ["HH:mm"] //format also will be added to parseFormats
-         * });
-         *
-         * @option {Array} [dates] <> Specifies a list of dates, which are shown in the time drop-down list. If not set, the DateTimePicker will auto-generate the available times.
-         *  _example
-         * $("#timePicker").kendoTimePicker({
-         *     dates: [new Date(2000, 10, 10, 10, 0, 0), new Date(2000, 10, 10, 30, 0)] //the drop-down list will consist only two entries - "10:00 AM" and "10:30 AM"
-         * });
-         *
-         * @option {Number} [interval] <30>
-         * Specifies the interval, between values in the popup list, in minutes.
-         *
-         * @option {Object} [animation] <>
-         * Animations to be used for opening/closing the popup. Setting to false will turn of the animation.
-         *
-         * @option {Object} [animation.open] <>
-         * Animation to be used for opening of the popup.
-         *
-         * _exampleTitle Intialize a TimePicker that fades-in the time drop-down list over 300 milliseconds
-         * _example
-         * $("#timePicker").kendoTimePicker({
-         *     animation: {
-         *         open: {
-         *             effects: "fadeIn",
-         *             duration: 300,
-         *             show: true
-         *         }
-         *     }
-         * });
-         *
-         * @option {Object} [animation.close] <>
-         * Animation to be used for closing of the popup.
-         *
-         * _exampleTitle Initialize a TimePicker that fades-out the time drop-down list over 300 milliseconds
-         * _example
-         * $("#timepicker").kendoTimePicker({
-         *     animation: {
-         *         close: {
-         *             effects: "fadeOut",
-         *             duration: 300,
-         *             hide: true
-         *             show: false
-         *         }
-         *     }
-         * });
-         *
-         * @option {String} [culture] <en-US> Specifies the culture info used by the widget.
-         * _example
-         *
-         * // specify on widget initialization
-         * $("#timepicker").kendoTimePicker({
-         *     culture: "de-DE"
-         * });
-         */
+    var TimePicker = Widget.extend({
         init: function(element, options) {
             var that = this;
 
@@ -34765,22 +29628,17 @@ extend(Editor, {
             }));
 
             that._icon();
+            that._reset();
 
             if (!touch) {
                 element[0].type = "text";
             }
 
             element.addClass("k-input")
-                .bind({
-                    keydown: proxy(that._keydown, that),
-                    focus: function(e) {
-                        that._inputWrapper.addClass(FOCUSED);
-                    },
-                    blur: proxy(that._blur, that)
-                })
-                .closest("form")
-                .bind("reset", function() {
-                    that.value(element[0].defaultValue);
+                .on("keydown" + ns, proxy(that._keydown, that))
+                .on("blur" + ns, proxy(that._blur, that))
+                .on("focus" + ns, function() {
+                    that._inputWrapper.addClass(FOCUSED);
                 });
 
             that.enable(!element.is('[disabled]'));
@@ -34803,84 +29661,6 @@ extend(Editor, {
         },
 
         events: [
-        /**
-         *
-         * Triggered when the underlying value of a TimePicker is changed.
-         *
-         * @name kendo.ui.TimePicker#change
-         * @event
-         *
-         * @param {Event} e
-         *
-         * @exampleTitle Attach change event handler during initialization; detach via unbind()
-         * @example
-         * // event change for expand
-         * var onChange = function(e) {
-         *     // ...
-         * };
-         *
-         * // attach change event handler during initialization
-         * var timePicker = $("#timePicker").kendoTimePicker({
-         *     change: onChange
-         * });
-         *
-         * // detach change event handler via unbind()
-         * timePicker.data("kendoTimePicker").unbind("change", onChange);
-         *
-         * @exampleTitle Attach change event handler via bind(); detach via unbind()
-         * @example
-         * // event change for expand
-         * var onChange = function(e) {
-         *     // ...
-         * };
-         *
-         * // attach change event handler via bind()
-         * $("#timePicker").data("kendoTimePicker").bind("change", onChange);
-         *
-         * // detach change event handler via unbind()
-         * $("#timePicker").data("kendoTimePicker").unbind("change", onChange);
-         *
-         */
-         /**
-        * Fires when the time drop-down list is opened
-        * @name kendo.ui.TimePicker#open
-        * @event
-        * @param {Event} e
-        * @example
-        * $("#timePicker").kendoTimePicker({
-        *     open: function(e) {
-        *         // handle event
-        *     }
-        * });
-        * @exampleTitle To set after initialization
-        * @example
-        * // get a reference to the timePicker widget
-        * var timePicker = $("#timePicker").data("kendoTimePicker");
-        * // bind to the open event
-        * timePicker.bind("open", function(e) {
-        *     // handle event
-        * });
-        */
-        /**
-        * Fires when the time drop-down list is closed
-        * @name kendo.ui.TimePicker#close
-        * @event
-        * @param {Event} e
-        * @example
-        * $("#timePicker").kendoTimePicker({
-        *     close: function(e) {
-        *         // handle event
-        *     }
-        * });
-        * @exampleTitle To set after initialization
-        * @example
-        * // get a reference to the timePicker widget
-        * var timePicker = $("#timePicker").data("kendoTimePicker");
-        * // bind to the close event
-        * timePicker.bind("close", function(e) {
-        *     // handle event
-        * });
-        */
          OPEN,
          CLOSE,
          CHANGE
@@ -34904,31 +29684,11 @@ extend(Editor, {
             }
         },
 
-        /**
-         *
-         * Enables or disables a TimePicker.
-         *
-         * @param {Boolean} enable
-         * Enables (<strong>true</strong> or undefined) or disables (<strong>false</strong>) a TimePicker.
-         *
-         * @exampleTitle Enable a TimePicker
-         * @example
-         * $("timepicker").data("kendoTimePicker").enable();
-         *
-         * @exampleTitle Enable a TimePicker
-         * @example
-         * $("timepicker").data("kendoTimePicker").enable(true);
-         *
-         * @exampleTitle Disable a TimePicker
-         * @example
-         * $("timepicker").data("kendoTimePicker").enable(false);
-         *
-         */
         enable: function(enable) {
             var that = this,
                 element = that.element,
-                arrow = that._arrow.unbind(CLICK + " " + MOUSEDOWN),
-                wrapper = that._inputWrapper.unbind(HOVEREVENTS);
+                arrow = that._arrow.off(ns),
+                wrapper = that._inputWrapper.off(HOVEREVENTS);
 
             if (enable === false) {
                 wrapper
@@ -34940,113 +29700,48 @@ extend(Editor, {
                 wrapper
                     .removeClass(STATEDISABLED)
                     .addClass(DEFAULT)
-                    .bind(HOVEREVENTS, that._toggleHover);
+                    .on(HOVEREVENTS, that._toggleHover);
 
                 element
                     .removeAttr(DISABLED);
 
-                arrow.bind(CLICK, proxy(that._click, that))
-                     .bind(MOUSEDOWN, preventDefault);
+                arrow.on(CLICK, proxy(that._click, that))
+                     .on(MOUSEDOWN, preventDefault);
             }
         },
 
-        /**
-         *
-         * Closes the drop-down list of a TimePicker.
-         *
-         * @exampleTitle Close the time drop-down list of a TimePicker.
-         * @example
-         * $("timepicker").data("kendoTimePicker").close();
-         *
-         */
+        destroy: function() {
+            var that = this;
+
+            Widget.fn.destroy.call(that);
+
+            that.timeView.destroy();
+
+            that.element.off(ns);
+            that._arrow.off(ns);
+            that._inputWrapper.off(ns);
+
+            if (that._form) {
+                that._form.off("reset", that._resetHandler);
+            }
+        },
+
         close: function() {
             this.timeView.close();
         },
 
-        /**
-         *
-         * Opens the drop-down list of a TimePicker.
-         *
-         * @exampleTitle Open the time drop-down list of a TimePicker.
-         * @example
-         * $("timepicker").data("kendoTimePicker").open();
-         *
-         */
         open: function() {
             this.timeView.open();
         },
 
-        /**
-         *
-         * Gets or sets the minimum value of the TimePicker.
-         *
-         * @param {Date|String} value
-         * The minimum time value to set for a TimePicker, expressed as a Date object or as a string.
-         *
-         * @returns {Date}
-         * The minimum time value of a TimePicker.
-         *
-         * @exampleTitle Get the minimum value of a TimePicker
-         * @example
-         * var timePicker = $("#timePicker").data("kendoTimePicker");
-         * var minimum = timePicker.min();
-         *
-         * @exampleTitle Set the minimum value of a TimePicker
-         * @example
-         * var timePicker = $("#timePicker").data("kendoTimePicker");
-         * timePicker.min(new Date(1900, 0, 1, 10, 0, 0));
-         *
-         */
         min: function (value) {
             return this._option("min", value);
         },
 
-        /**
-         *
-         * Gets or sets the maximum value of the TimePicker.
-         *
-         * @param {Date|String} value
-         * The maximum time value to set for a TimePicker, expressed as a Date object or as a string.
-         *
-         * @returns {Date}
-         * The maximum time value of a TimePicker.
-         *
-         * @exampleTitle Get the maximum value of a TimePicker
-         * @example
-         * var timePicker = $("#timePicker").data("kendoTimePicker");
-         * var maximum = timePicker.max();
-         *
-         * @exampleTitle Set the maximum value of a TimePicker
-         * @example
-         * var timePicker = $("#timePicker").data("kendoTimePicker");
-         * timePicker.max(new Date(1900, 0, 1, 10, 0, 0));
-         *
-         */
         max: function (value) {
             return this._option("max", value);
         },
 
-        /**
-         *
-         * Gets or sets the value of the TimePicker.
-         *
-         * @param {Date|String} value
-         * The time value to set for a TimePicker, expressed as a Date object or as a string.
-         *
-         * @returns {Date}
-         * The time value of a TimePicker.
-         *
-         * @exampleTitle Get the value of a TimePicker
-         * @example
-         * var timePicker = $("#timePicker").data("kendoTimePicker");
-         * var timePickerValue = timePicker.value();
-         *
-         * @exampleTitle Set the value of a TimePicker
-         * @example
-         * var timePicker = $("#timePicker").data("kendoTimePicker");
-         * timePicker.value("10:00 AM");
-         *
-         */
         value: function(value) {
             var that = this;
 
@@ -35177,8 +29872,25 @@ extend(Editor, {
                 height: element[0].style.height
             });
 
-            that.wrapper = wrapper.addClass("k-widget k-timepicker k-header");
+            that.wrapper = wrapper.addClass("k-widget k-timepicker k-header")
+                                  .addClass(element[0].className)
+                                  .show();
+
             that._inputWrapper = $(wrapper[0].firstChild);
+        },
+
+        _reset: function() {
+            var that = this,
+                element = that.element,
+                form = element.closest("form");
+
+            if (form[0]) {
+                that._resetHandler = function() {
+                    that.value(element[0].defaultValue);
+                };
+
+                that._form = form.on("reset", that._resetHandler);
+            }
         }
     });
 
@@ -35200,118 +29912,6 @@ extend(Editor, {
 
 })(jQuery);
 (function($, undefined) {
-    /**
-     * @name kendo.ui.DateTimePicker.Description
-     *
-     * @section
-     * <p>
-     *  The <b>DateTimePicker</b> allows the end user to select a value from a
-     *  calendar or a time drop-down list. Direct input is also allowed.
-     *  It supports configurable options for minimum and maximum value, the format,
-     *  the interval between predefined hours in the time view, custom templates for "month" view
-     *  of the calendar, start view and the depth of the navigation.
-     * </p>
-     * <h3>Getting Started</h3>
-     *
-     * @exampleTitle Creating a DateTimePicker from existing input element
-     * @example
-     * <input id="dateTimePicker" />
-     *
-     * @exampleTitle DateTimePicker initialization
-     * @example
-     * $(document).ready(function(){
-     *  $("#dateTimePicker").kendoDateTimePicker();
-     * });
-     *
-     * @section
-     * <p>
-     *  When a <b>DateTimePicker</b> is initialized, it will be displayed at the
-     *  location of the target HTML element.
-     * </p>
-     * <h3>Configuring DateTimePicker Behaviors</h3>
-     * <p>
-     *  The <b>DateTimePicker</b> provides configuration options that can be set
-     *  during initialization. Among the properties that can be controlled:
-     * </p>
-     * <ul>
-     *  <li>Selected datetime</li>
-     *  <li>Minimum/Maximum datetime</li>
-     *  <li>Define format</li>
-     *  <li>Start view</li>
-     *  <li>Navigation depth (last view to which end user can navigate)</li>
-     *  <li>Define interval between predefined values in the time drop-down list</li>
-     * </ul>
-     *
-     * @exampleTitle Create DateTimePicker with a selected value and a defined
-     * minimum and maximum datetime
-     * @example
-     * $(document).ready(function(){
-     *  $("#dateTimePicker").kendoDateTimePicker({
-     *     value: new Date(2000, 10, 10, 10, 0, 0),
-     *     min: new Date(1950, 0, 1, 8, 0, 0),
-     *     max: new Date(2049, 11, 31, 18, 0, 0)
-     *  })
-     * });
-     *
-     * @section
-     * <p>
-     *  DateTimePicker will set the value only if the entered datetime is valid and
-     *  within the defined range.
-     * </p>
-     *
-     * @exampleTitle Define the format
-     * @example
-     * $("#dateTimePicker").kendoDateTimePicker({
-     *     format: "MM/dd/yyyy hh:mm tt" //format is used to format the value of the widget and to parse the input.
-     * });
-     *
-     * @exampleTitle Define the time format
-     * @example
-     * $("#dateTimePicker").kendoDateTimePicker({
-     *     timeFormat: "hh:mm:ss tt" //this format will be used to format the predefined values in the time list.
-     * });
-     *
-     * @section
-     * <h3>Defining a Start View and Navigation Depth</h3>
-     * <p>
-     *  The first rendered view can be defined with "start" option.
-     *  Navigation depth can be controlled with "depth" option. Predefined
-     *  views are:
-     * </p>
-     * <ul>
-     *  <li>"month" - shows the days from the month</li>
-     *  <li>"year" - shows the months of the year</li>
-     *  <li>"decade" - shows the years from the decade</li>
-     *  <li>"century" - shows the decades from the century</li>
-     * </ul>
-     *
-     * @exampleTitle Create a DateTimePicker for selecting a month
-     * @example
-     * $("#dateTimePicker").kendoDateTimePicker({
-     *  start: "year",
-     *  depth: "year"
-     * });
-     *
-     * @exampleTitle Define the interval (in minutes) between values in the time drop-down list
-     * @example
-     * $("#dateTimePicker").kendoDateTimePicker({
-     *     interval: 15
-     * })
-     *
-     * @section
-     * <h3>Accessing an Existing DateTimePicker</h3>
-     * <p>
-     *  You can reference an existing <b>DateTimePicker</b> instance via
-     *  <a href="http://api.jquery.com/jQuery.data/">jQuery.data()</a>.
-     *  Once a reference has been established, you can use the API to control
-     *  its behavior.
-     * </p>
-     *
-     * @exampleTitle Accessing an existing DateTimePicker instance
-     * @example
-     * var dateTimePicker = $("#dateTimePicker").data("kendoDateTimePicker");
-     *
-     */
 
     var kendo = window.kendo,
         TimeView = kendo.TimeView,
@@ -35328,15 +29928,15 @@ extend(Editor, {
         OPEN = "open",
         CLOSE = "close",
         CHANGE = "change",
-        CLICK = (touch ? "touchend" : "click"),
+        ns = ".kendoDateTimePicker",
+        CLICK = (touch ? "touchend" : "click") + ns,
         DISABLED = "disabled",
         DEFAULT = "k-state-default",
         FOCUSED = "k-state-focused",
         HOVER = "k-state-hover",
         STATEDISABLED = "k-state-disabled",
-        HOVEREVENTS = "mouseenter mouseleave",
-        MOUSEDOWN = (touch ? "touchstart" : "mousedown"),
-        ICONEVENTS = CLICK + " " + MOUSEDOWN,
+        HOVEREVENTS = "mouseenter" + ns + " mouseleave" + ns,
+        MOUSEDOWN = (touch ? "touchstart" : "mousedown") + ns,
         MONTH = "month",
         SPAN = "<span/>",
         DATE = Date,
@@ -35346,215 +29946,7 @@ extend(Editor, {
         timeViewParams = { view: "time" },
         extend = $.extend;
 
-    var DateTimePicker = Widget.extend(/** @lends kendo.ui.DateTimePicker.prototype */{
-        /**
-         * @constructs
-         * @extends kendo.ui.Widget
-         * @param {Element} element DOM element
-         * @param {Object} options Configuration options.
-         * @option {Date} [value] <null> Specifies the selected value.
-         * _example
-         * // set the selected value to January 1st, 2011 12:00 AM
-         * $("#dateTimePicker").kendoDateTimePicker({
-         *  value: new Date(2011, 0, 1)
-         * });
-         * _exampleTitle To set after initialization
-         * _example
-         * // get a reference to the dateTimePicker widget
-         * var dateTimePicker = $("#dateTimePicker").data("kendoDateTimePicker");
-         * // set the selected value on the dateTimePicker to January 1st, 2011
-         * dateTimePicker.value(new Date(2011, 0, 1));
-         * @option {Date} [min] <Date(1900, 0, 1)> Specifies the minimum date that the calendar can show.
-         * _example
-         * // set the min date to Jan 1st, 2011
-         * $("#dateTimePicker").kendoDateTimePicker({
-         *  min: new Date(2011, 0, 1)
-         * });
-         * _exampleTitle To set after initialization
-         * _example
-         * // get a reference to the dateTimePicker widget
-         * var dateTimePicker = $("#dateTimePicker").data("kendoDateTimePicker");
-         * // set the min date to Jan 1st, 2011 12:00 AM
-         * dateTimePicker.min(new Date(2011, 0, 1));
-         * @option {Date} [max] <Date(2099, 11, 31)> Specifies the maximum date, which the calendar can show.
-         * _example
-         * $("#dateTimePicker").kendoDateTimePicker({
-         *  max: new Date(2013, 0, 1) // sets max date to Jan 1st, 2013 12:00 AM
-         * });
-         * _exampleTitle To set after initialization
-         * _example
-         * var dateTimePicker = $("#dateTimePicker").data("kendoDateTimePicker");
-         * // set the max date to Jan 1st, 2013 12:00 AM
-         * dateTimePicker.max(new Date(2013,0, 1));
-         * @option {String} [format] <MM/dd/yyyy h:mm tt> Specifies the format, which is used to format the value of the DateTimePicker displayed in the input.
-         * _example
-         * $("#dateTimePicker").kendoDateTimePicker({
-         *     format: "yyyy/MM/dd hh:mm tt"
-         * });
-         * @option {String} [timeFormat] <h:mm tt> Specifies the format, which is used to format the values in the time drop-down list.
-         * _example
-         * $("#dateTimePicker").kendoDateTimePicker({
-         *     timeFormat: "HH:mm" //24 hours format
-         * });
-         * @option {Array} [parseFormats] <> Specifies the formats, which are used to parse the value set with value() method or by direct input. If not set the value of the options.format and options.timeFormat will be used.
-         * _example
-         * $("#datePicker").kendoDatePicker({
-         *     format: "yyyy/MM/dd hh:mm tt",
-         *     parseFormats: ["MMMM yyyy", "HH:mm"] //format also will be added to parseFormats
-         * });
-         * @option {Array} [dates] <> Specifies a list of dates, which are shown in the time drop-down list. If not set, the DateTimePicker will auto-generate the available times.
-         *  _example
-         * $("#dateTimePicker").kendoDateTimePicker({
-         *     dates: [new Date(2000, 10, 10, 10, 0, 0), new Date(2000, 10, 10, 30, 0)] //the drop-down list will consist only two entries - "10:00 AM" and "10:30 AM"
-         * });
-         * @option {Number} [interval] <30> Specifies the interval, between values in the popup list, in minutes.
-         * _example
-         * $("#dateTimePicker").kendoDateTimePicker({
-         *     interval: 15
-         * });
-         * @option {String} [start] <month> Specifies the start view of the calendar.
-         * The following settings are available for the <b>start</b> value:
-         * <div class="details-list">
-         *    <dl>
-         *         <dt>
-         *              <code>"month"</code>
-         *         </dt>
-         *         <dd>
-         *             shows the days of the month
-         *         </dd>
-         *         <dt>
-         *              <code>"year"</code>
-         *         </dt>
-         *         <dd>
-         *              shows the months of the year
-         *         </dd>
-         *         <dt>
-         *              <code>"decade"</code>
-         *         </dt>
-         *         <dd>
-         *              shows the years of the decade
-         *         </dd>
-         *         <dt>
-         *              <code>"century"</code>
-         *         </dt>
-         *         <dd>
-         *              shows the decades from the centery
-         *         </dd>
-         *    </dl>
-         * </div>
-         * _example
-         * $("#dateTimePicker").kendoDateTimePicker({
-         *     start: "decade" // the dateTimePicker will start with a decade display
-         * });
-         * @option {String} [depth] Specifies the navigation depth of the calendar. The following
-         * settings are available for the <b>depth</b> value:
-         * <div class="details-list">
-         *    <dl>
-         *         <dt>
-         *              <code>"month"</code>
-         *         </dt>
-         *         <dd>
-         *             shows the days of the month
-         *         </dd>
-         *         <dt>
-         *              <code>"year"</code>
-         *         </dt>
-         *         <dd>
-         *              shows the months of the year
-         *         </dd>
-         *         <dt>
-         *              <code>"decade"</code>
-         *         </dt>
-         *         <dd>
-         *              shows the years of the decade
-         *         </dd>
-         *         <dt>
-         *              <code>"century"</code>
-         *         </dt>
-         *         <dd>
-         *              shows the decades from the centery
-         *         </dd>
-         *    </dl>
-         * </div>
-         * _example
-         * $("#dateTimePicker").kendoDateTimePicker({
-         *     start: "decade",
-         *     depth: "year" // the dateTimePicker will only go to the year level
-         * });
-         * @option {String} [footer] <> Template to be used for rendering the footer of the calendar.
-         * _example
-         *  // DateTimePicker initialization
-         *  <script>
-         *      $("#dateTimePicker").kendoDateTimePicker({
-         *          footer: kendo.template("Today - #=kendo.toString(data, 'd') #")
-         *      });
-         *  </script>
-         * @option {Object} [month] <> Templates for the cells rendered in the calendar "month" view.
-         * @option {String} [month.content] <> Template to be used for rendering the cells in the calendar "month" view, which are in range.
-         * _example
-         *  //template
-         * <script id="cellTemplate" type="text/x-kendo-tmpl">
-         *      <div class="${ data.value < 10 ? exhibition : party }">
-         *      </div>
-         *      ${ data.value }
-         *  </script>
-         *
-         *  //dateTimePicker initialization
-         *  <script>
-         *      $("#dateTimePicker").kendoDateTimePicker({
-         *          month: {
-         *             content:  kendo.template($("#cellTemplate").html()),
-         *          }
-         *      });
-         *  </script>
-         *
-         * @option {String} [month.empty]
-         * The template used for rendering the cells in the calendar "month" view, which are not in the range between
-         * the minimum and maximum values.
-         *
-         * @option {Object} [animation]
-         * The animation(s) used for opening and/or closing the pop-ups. Setting this value to <strong>false</strong>
-         * will disable the animation(s).
-         *
-         * @option {Object} [animation.open]
-         * The animation(s) used for displaying of the pop-up.
-         *
-         * _exampleTitle Fade-in the pop-up over 300 milliseconds
-         * _example
-         * $("#dateTimePicker").kendoDateTimePicker({
-         *     animation: {
-         *         open: {
-         *             effects: "fadeIn",
-         *             duration: 300,
-         *             show: true
-         *         }
-         *     }
-         * });
-         *
-         * @option {Object} [animation.close]
-         * The animation(s) used for hiding of the pop-up.
-         *
-         * _exampleTitle Fade-out the pop-up over 300 milliseconds
-         * _example
-         * $("#dateTimePicker").kendoDateTimePicker({
-         *     animation: {
-         *         close: {
-         *             effects: "fadeOut",
-         *             duration: 300,
-         *             show: false,
-         *             hide: true
-         *         }
-         *     }
-         * });
-         *
-         * @option {String} [culture] <en-US> Specifies the culture info used by the widget.
-         * _example
-         *
-         * // specify on widget initialization
-         * $("#datetimepicker").kendoDateTimePicker({
-         *     culture: "de-DE"
-         * });
-         */
+    var DateTimePicker = Widget.extend({
         init: function(element, options) {
             var that = this;
 
@@ -35571,27 +29963,23 @@ extend(Editor, {
 
             that._views();
 
+            that._reset();
+
             if (!touch) {
                 element[0].type = "text";
             }
 
             element.addClass("k-input")
-                    .bind({
-                        keydown: $.proxy(that._keydown, that),
-                        focus: function() {
+                   .on("keydown" + ns, $.proxy(that._keydown, that))
+                   .on("focus" + ns, function() {
                             that._inputWrapper.addClass(FOCUSED);
-                        },
-                        blur: function() {
-                            that._inputWrapper.removeClass(FOCUSED);
-                            that._change(element.val());
-                            that.close("date");
-                            that.close("time");
-                        }
-                    })
-                   .closest("form")
-                   .bind("reset", function() {
-                       that.value(element[0].defaultValue);
-                   });
+                   })
+                   .on("blur" + ns, function() {
+                        that._inputWrapper.removeClass(FOCUSED);
+                        that._change(element.val());
+                        that.close("date");
+                        that.close("time");
+                    });
 
             that._midnight = getMilliseconds(options.min) + getMilliseconds(options.max) === 0;
 
@@ -35621,136 +30009,41 @@ extend(Editor, {
     },
 
     events: [
-        /**
-        *
-        * Triggered when the underlying value of a DateTimePicker is changed.
-        *
-        * @name kendo.ui.DateTimePicker#change
-        * @event
-        *
-        * @param {Event} e
-        *
-        * @exampleTitle Attach change event handler during initialization; detach via unbind()
-        * @example
-        * // event change for expand
-        * var onChange = function(e) {
-        *     // ...
-        * };
-        *
-        * // attach change event handler during initialization
-        * var dateTimePicker = $("#dateTimePicker").kendoDateTimePicker({
-        *     change: onChange
-        * });
-        *
-        * // detach change event handler via unbind()
-        * dateTimePicker.data("kendoDateTimePicker").unbind("change", onChange);
-        *
-        * @exampleTitle Attach change event handler via bind(); detach via unbind()
-        * @example
-        * // event change for expand
-        * var onChange = function(e) {
-        *     // ...
-        * };
-        *
-        * // attach change event handler via bind()
-        * $("#dateTimePicker").data("kendoDateTimePicker").bind("change", onChange);
-        *
-        * // detach change event handler via unbind()
-        * $("#dateTimePicker").data("kendoDateTimePicker").unbind("change", onChange);
-        *
-        */
-        /**
-        * Fires when the calendar or the time drop-down list is opened
-        * @name kendo.ui.DateTimePicker#open
-        * @event
-        * @param {Event} e
-        *
-        * @param {String} e.view
-        * The view which is opened. Possible values are "date" and "time".
-        *
-        * @example
-        * $("#dateTimePicker").kendoDateTimePicker({
-        *     open: function(e) {
-        *         // handle event
-        *     }
-        * });
-        * @exampleTitle To set after initialization
-        * @example
-        * // get a reference to the dateTimePicker widget
-        * var dateTimePicker = $("#dateTimePicker").data("kendoDateTimePicker");
-        * // bind to the open event
-        * dateTimePicker.bind("open", function(e) {
-        *     // handle event
-        * });
-        */
-        /**
-        * Fires when the calendar or the time drop-down list is closed
-        * @name kendo.ui.DateTimePicker#close
-        * @event
-        * @param {Event} e
-        *
-        * @param {String} e.view
-        * The view which is closed. Possible values are "date" and "time".
-        *
-        * @example
-        * $("#dateTimePicker").kendoDateTimePicker({
-        *     close: function(e) {
-        *         // handle event
-        *     }
-        * });
-        * @exampleTitle To set after initialization
-        * @example
-        * // get a reference to the dateTimePicker widget
-        * var dateTimePicker = $("#dateTimePicker").data("kendoDateTimePicker");
-        * // bind to the close event
-        * dateTimePicker.bind("close", function(e) {
-        *     // handle event
-        * });
-        */
         OPEN,
         CLOSE,
         CHANGE
     ],
-
         setOptions: function(options) {
-            var that = this;
+            var that = this,
+            dateViewOptions = that.dateView.options,
+            timeViewOptions = that.timeView.options;
 
             Widget.fn.setOptions.call(that, options);
-
             normalize(that.options);
 
-            extend(that.dateView.options, that.options);
-            extend(that.timeView.options, that.options);
+            options = that.options;
+            extend(dateViewOptions, options, {
+                change: dateViewOptions.change,
+                close: dateViewOptions.close,
+                open: dateViewOptions.open
+            });
+
+            extend(timeViewOptions, options, {
+                format: options.timeFormat,
+                change: timeViewOptions.change,
+                close: timeViewOptions.close,
+                open: timeViewOptions.open
+            });
 
             that.timeView.ul[0].innerHTML = "";
         },
 
-        /**
-         *
-         * Enables or disables a DateTimePicker.
-         *
-         * @param {Boolean} enable
-         * Enables (<strong>true</strong> or undefined) or disables (<strong>false</strong>) a DateTimePicker.
-         *
-         * @exampleTitle Enable a DateTimePicker
-         * @example
-         * $("dateTimePicker").data("kendoDateTimePicker").enable();
-         *
-         * @exampleTitle Enable a dateTimePicker
-         * @example
-         * $("dateTimePicker").data("kendoDateTimePicker").enable(true);
-         *
-         * @exampleTitle Disable a dateTimePicker
-         * @example
-         * $("dateTimePicker").data("kendoDateTimePicker").enable(false);
-         *
-         */
         enable: function(enable) {
             var that = this,
-                dateIcon = that._dateIcon.unbind(ICONEVENTS),
-                timeIcon = that._timeIcon.unbind(ICONEVENTS),
-                wrapper = that._inputWrapper.unbind(HOVEREVENTS),
-                element = that.element;
+                element = that.element,
+                dateIcon = that._dateIcon.off(ns),
+                timeIcon = that._timeIcon.off(ns),
+                wrapper = that._inputWrapper.off(HOVEREVENTS);
 
             if (enable === false) {
                 wrapper
@@ -35762,56 +30055,50 @@ extend(Editor, {
                 wrapper
                     .addClass(DEFAULT)
                     .removeClass(STATEDISABLED)
-                    .bind(HOVEREVENTS, that._toggleHover);
+                    .on(HOVEREVENTS, that._toggleHover);
 
                 element
                     .removeAttr(DISABLED);
 
-                dateIcon.bind({
-                    click: function() {
-                        that.toggle("date");
+                dateIcon.on(MOUSEDOWN, preventDefault)
+                        .on(CLICK, function() {
+                            that.toggle("date");
 
-                        if (!touch && element[0] !== document.activeElement) {
-                            element.focus();
-                        }
-                    },
-                    mousedown: preventDefault
-                });
+                            if (!touch && element[0] !== document.activeElement) {
+                                element.focus();
+                            }
+                        });
 
-                timeIcon.bind({
-                    click: function() {
-                        that.toggle("time");
 
-                        if (!touch && element[0] !== document.activeElement) {
-                            element.focus();
-                        }
-                    },
-                    mousedown: preventDefault
-                });
+                timeIcon.on(MOUSEDOWN, preventDefault)
+                        .on(CLICK, function() {
+                            that.toggle("time");
+
+                            if (!touch && element[0] !== document.activeElement) {
+                                element.focus();
+                            }
+                        });
             }
         },
 
-        /**
-         *
-         * Closes the calendar or the time drop-down list.
-         *
-         * @param {String} view
-         * The view of the DateTimePicker, expressed as a string.
-         * Available views are "time" and "date".
-         *
-         * @exampleTitle Close the calendar of the DateTimePicker
-         * @example
-         * $("dateTimePicker").data("kendoDateTimePicker").close();
-         *
-         * @exampleTitle Close the calendar of the DateTimePicker
-         * @example
-         * $("dateTimePicker").data("kendoDateTimePicker").close("date");
-         *
-         * @exampleTitle Close the time drop-down list of a DateTimePicker.
-         * @example
-         * $("dateTimePicker").data("kendoDateTimePicker").close("time");
-         *
-         */
+        destroy: function() {
+            var that = this;
+
+            Widget.fn.destroy.call(that);
+
+            that.dateView.destroy();
+            that.timeView.destroy();
+
+            that.element.off(ns);
+            that._dateIcon.off(ns);
+            that._timeIcon.off(ns);
+            that._inputWrapper.off(ns);
+
+            if (that._form) {
+                that._form.off("reset", that._resetHandler);
+            }
+        },
+
         close: function(view) {
             if (view !== "time") {
                 view = "date";
@@ -35820,27 +30107,6 @@ extend(Editor, {
             this[view + "View"].close();
         },
 
-        /**
-         *
-         * Opens the calendar or the time drop-down list.
-         *
-         * @param {String} view
-         * The view of the DateTimePicker, expressed as a string.
-         * Available views are "time" and "date".
-         *
-         * @exampleTitle Open the calendar of the DateTimePicker
-         * @example
-         * $("dateTimePicker").data("kendoDateTimePicker").open();
-         *
-         * @exampleTitle Open the calendar of the DateTimePicker
-         * @example
-         * $("dateTimePicker").data("kendoDateTimePicker").open("date");
-         *
-         * @exampleTitle Open the time drop-down list of a DateTimePicker.
-         * @example
-         * $("dateTimePicker").data("kendoDateTimePicker").open("time");
-         *
-         */
         open: function(view) {
             if (view !== "time") {
                 view = "date";
@@ -35849,77 +30115,14 @@ extend(Editor, {
             this[view + "View"].open();
         },
 
-        /**
-         *
-         * Gets or sets the minimum value of the DateTimePicker.
-         *
-         * @param {Date|String} value
-         * The minimum time value to set for a DateTimePicker, expressed as a Date object or as a string.
-         *
-         * @returns {Date}
-         * The minimum time value of a DateTimePicker.
-         *
-         * @exampleTitle Get the minimum value of a DateTimePicker
-         * @example
-         * var dateTimePicker = $("#dateTimePicker").data("kendoDateTimePicker");
-         * var minimum = dateTimePicker.min();
-         *
-         * @exampleTitle Set the minimum value of a DateTimePicker
-         * @example
-         * var dateTimePicker = $("#dateTimePicker").data("kendoDateTimePicker");
-         * dateTimePicker.min(new Date(1900, 0, 1, 10, 0, 0));
-         *
-         */
         min: function(value) {
             return this._option("min", value);
         },
 
-        /**
-         *
-         * Gets or sets the maximum value of the DateTimePicker.
-         *
-         * @param {Date|String} value
-         * The maximum time value to set for a DateTimePicker, expressed as a Date object or as a string.
-         *
-         * @returns {Date}
-         * The maximum time value of a DateTimePicker.
-         *
-         * @exampleTitle Get the maximum value of a DateTimePicker
-         * @example
-         * var dateTimePicker = $("#dateTimePicker").data("kendoDateTimePicker");
-         * var maximum = dateTimePicker.max();
-         *
-         * @exampleTitle Set the maximum value of a DateTimePicker
-         * @example
-         * var dateTimePicker = $("#dateTimePicker").data("kendoDateTimePicker");
-         * dateTimePicker.max(new Date(1900, 0, 1, 10, 0, 0));
-         *
-         */
         max: function(value) {
             return this._option("max", value);
         },
 
-        /**
-         *
-         * Toggles the calendar or the time drop-down list.
-         *
-         * @param {String} view
-         * The view of the DateTimePicker, expressed as a string.
-         * Available views are "time" and "date".
-         *
-         * @exampleTitle Toggle the calendar of the DateTimePicker
-         * @example
-         * $("dateTimePicker").data("kendoDateTimePicker").toggle();
-         *
-         * @exampleTitle Toggle the calendar of the DateTimePicker
-         * @example
-         * $("dateTimePicker").data("kendoDateTimePicker").toggle("date");
-         *
-         * @exampleTitle Toggle the time drop-down list of a DateTimePicker.
-         * @example
-         * $("dateTimePicker").data("kendoDateTimePicker").toggle("time");
-         *
-         */
         toggle: function(view) {
             var secondView = "timeView";
 
@@ -35933,27 +30136,6 @@ extend(Editor, {
             this[secondView].close();
         },
 
-        /**
-         *
-         * Gets or sets the value of the DateTimePicker.
-         *
-         * @param {Date|String} value
-         * The time value to set for a DateTimePicker, expressed as a Date object or as a string.
-         *
-         * @returns {Date}
-         * The time value of a DateTimePicker.
-         *
-         * @exampleTitle Get the value of a DateTimePicker
-         * @example
-         * var dateTimePicker = $("#dateTimePicker").data("kendoDateTimePicker");
-         * var timePickerValue = dateTimePicker.value();
-         *
-         * @exampleTitle Set the value of a DateTimePicker
-         * @example
-         * var dateTimePicker = $("#dateTimePicker").data("kendoDateTimePicker");
-         * dateTimePicker.value("2/23/2000 10:00 AM");
-         *
-         */
         value: function(value) {
             var that = this;
 
@@ -36107,8 +30289,7 @@ extend(Editor, {
             that.dateView = new kendo.DateView(extend({}, options, {
                 anchor: that.wrapper,
                 change: function() {
-                    // calendar is the current scope
-                    var value = this.value(),
+                    var value = that.dateView.calendar.value(),
                         msValue = +value,
                         msMin = +options.min,
                         msMax = +options.max,
@@ -36217,8 +30398,25 @@ extend(Editor, {
                 height: element[0].style.height
             });
 
-            that.wrapper = wrapper.addClass("k-widget k-datetimepicker k-header");
+            that.wrapper = wrapper.addClass("k-widget k-datetimepicker k-header")
+                                  .addClass(element[0].className)
+                                  .show();
+
             that._inputWrapper = $(wrapper[0].firstChild);
+        },
+
+        _reset: function() {
+            var that = this,
+                element = that.element,
+                form = element.closest("form");
+
+            if (form[0]) {
+                that._resetHandler = function() {
+                    that.value(element[0].defaultValue);
+                };
+
+                that._form = form.on("reset", that._resetHandler);
+            }
         }
     });
 
@@ -36238,128 +30436,7 @@ extend(Editor, {
     ui.plugin(DateTimePicker);
 
 })(jQuery);
-/**
- * @fileOverview Provides a TreeView implementation which can be used to display hierarchical data in a traditional
- * tree structure.
- */
-
 (function($, undefined){
-    /**
-     * @name kendo.ui.TreeView.Description
-     *
-     * @section
-     * <p>
-     *  The <strong>TreeView</strong> displays hierarchical data in a traditional tree structure. It supports user
-     *  interaction through the mouse or touch to perform re-ordering operations via drag-and-drop.
-     * </p>
-     * <p>
-     *  A <strong>TreeView</strong> can be created by leveraging HTML lists. However, it does not support binding to a
-     *  remote data source at this point in time.
-     * </p>
-     * <h3>Getting Started</h3>
-     * <p>A <strong>TreeView</strong> can be created in two ways:</p>
-     * <ol>
-     *  <li>Define a hierarchical list with static HTML</li>
-     *  <li>Use dynamic data binding</li>
-     * </ol>
-     * <p>
-     *  Static HTML definition is appropriate for small hierarchies and for data that does not change frequently.
-     *  Databinding should be used for larger data sets and for data that changes frequently.
-     * </p>
-     * <h3>Creating a TreeView from HTML</h3>
-     *
-     * @exampleTitle Create a hierarchical list in HTML
-     * @example
-     * <ul id="treeView">
-     *     <li>Item 1
-     *         <ul>
-     *             <li>Item 1.1</li>
-     *             <li>Item 1.2</li>
-     *         </ul>
-     *     </li>
-     *     <li>Item 2</li>
-     * </ul>
-     *
-     * @section
-     * <p>
-     *  Initialization of a <strong>TreeView</strong> should occur after the DOM is fully loaded. It is recommended
-     *  that initialization the <strong>TreeView</strong> occur within a handler is provided to $(document).ready().
-     * </p>
-     *
-     * @exampleTitle Initialize a TreeView using a selector within $(document).ready()
-     * @example
-     * $(document).ready(function() {
-     *     $("#treeView").kendoTreeView();
-     * });
-     *
-     * @section
-     * <h3>Creating a TreeView with Data Binding to a Local Data Source</h3>
-     *
-     * @exampleTitle Create a hierarchical HTML list
-     * @example
-     * <div id="treeView"></div>
-     *
-     * @exampleTitle Initialize and bind the TreeView
-     * @example
-     * $(document).ready(function() {
-     *     $("#treeView").kendoTreeView({
-     *         dataSource: [
-     *             {
-     *                 text: "Item 1",
-     *                 items: [
-     *                     { text: "Item 1.1" },
-     *                     { text: "Item 1.2" }
-     *                 ]
-     *             },
-     *             { text: "Item 2" }
-     *         ]
-     *     })
-     * });
-     *
-     * @section
-     * <p>Currently, the <strong>TreeView</strong> does not support binding to a remote data source.</p>
-     * @exampleTitle TreeView item JSON structure
-     * @example
-     * var item = {
-     *     text: "Item text",
-     *
-     *     // renders a <img class="k-image" src="/images/icon.png" />
-     *     imageUrl: "/images/icon.png",
-     *
-     *     // renders a <span class="k-sprite icon save" />
-     *     spriteCssClass: "icon save",
-     *
-     *     // specifies whether the node text should be encoded or not
-     *     // useful when rendering node-specific HTML
-     *     encoded: false,
-     *
-     *  A number of <strong>TreeView</strong> behaviors can be easily controlled by simple configuration properties,
-     *  such as animation behaviors and drag-and-drop behaviors.
-     * </p>
-     *
-     * @exampleTitle Enabling drag-and-drop for TreeView nodes
-     * @example
-     * $("#treeView").kendoTreeView({
-     *     dragAndDrop: true
-     * });
-     *
-     * @section
-     * <p>
-     *  When drag-and-drop is enabled, the nodes of a <strong>TreeView</strong> can be dragged and dropped between all
-     *  levels, with useful tooltips helping indicate where the node will be dropped.
-     * </p>
-     * <h3>Accessing an Existing TreeView</h3>
-     * <p>
-     *  You can reference an existing <strong>TreeView</strong> instance via
-     *  <a href="http://api.jquery.com/jQuery.data/">jQuery.data()</a>. Once a reference has been established, you can
-     *  use the API to control its behavior.
-     * </p>
-     *
-     * @exampleTitle Accessing an existing TreeView instance
-     * @example
-     * var treeView = $("#treeView").data("kendoTreeView");
-     *
-     */
     var kendo = window.kendo,
         ui = kendo.ui,
         data = kendo.data,
@@ -36369,6 +30446,7 @@ extend(Editor, {
         Widget = ui.Widget,
         HierarchicalDataSource = data.HierarchicalDataSource,
         proxy = $.proxy,
+        NS = ".kendoTreeView",
         SELECT = "select",
         EXPAND = "expand",
         CHANGE = "change",
@@ -36377,8 +30455,10 @@ extend(Editor, {
         DRAG = "drag",
         DROP = "drop",
         DRAGEND = "dragend",
+        DATABOUND = "dataBound",
         CLICK = "click",
         VISIBILITY = "visibility",
+        UNDEFINED = "undefined",
         KSTATEHOVER = "k-state-hover",
         KTREEVIEW = "k-treeview",
         VISIBLE = ":visible",
@@ -36408,10 +30488,6 @@ extend(Editor, {
 
             return result.children(filter);
         };
-    }
-
-    function treeviewFromNode(node) {
-        return $(node).closest("[data-role=treeview]").data("kendoTreeView");
     }
 
     subGroup = contentChild(".k-group");
@@ -36459,47 +30535,6 @@ extend(Editor, {
         }
     }
 
-    function updateNodeClasses(node, groupData, nodeData) {
-        var wrapper = node.children("div"),
-            group = node.children("ul");
-
-        if (node.hasClass("k-treeview")) {
-            return;
-        }
-
-        nodeData = extend({
-            expanded: group.css("display") != "none",
-            index: node.index(),
-            enabled: !wrapper.children(".k-in").hasClass("k-state-disabled")
-        }, nodeData);
-
-        groupData = extend({
-            firstLevel: node.parent().parent().hasClass(KTREEVIEW),
-            length: node.parent().children().length
-        }, groupData);
-
-        // li
-        node.removeClass("k-first k-last")
-            .addClass(rendering.wrapperCssClass(groupData, nodeData));
-
-        // div
-        wrapper.removeClass("k-top k-mid k-bot")
-               .addClass(rendering.cssClass(groupData, nodeData));
-
-        // span
-        wrapper.children(".k-in").removeClass("k-in k-state-default k-state-disabled")
-            .addClass(rendering.textClass(nodeData));
-
-        // toggle button
-        if (group.length) {
-            wrapper.children(".k-icon").removeClass("k-plus k-minus k-plus-disabled k-minus-disabled")
-                .addClass(rendering.toggleButtonClass(nodeData));
-
-            group.addClass("k-group");
-        }
-    }
-
-
     templates = {
         dragClue: template("<div class='k-header k-drag-clue'><span class='k-icon k-drag-status'></span>#= text #</div>"),
         group: template(
@@ -36509,180 +30544,9 @@ extend(Editor, {
         )
     };
 
-    TreeView = Widget.extend(/** @lends kendo.ui.TreeView.prototype */ {
-        /**
-         *
-         * Creates a TreeView instance.
-         *
-         * @constructs
-         * @extends kendo.ui.Widget
-         *
-         * @param {Element} element DOM element
-         * @param {Object} options Configuration options.
-         *
-         * @option {Array} [dataSource]
-         * The data that the <strong>TreeView</strong> will be bound to.
-         *
-         * @option {Object} [animation]
-         * A collection of visual animations used when items are expanded or collapsed through user interaction.
-         * Setting this option to <strong>false</strong> will disable all animations.
-         *
-         * _example
-         * $("#treeView").kendoTreeView({
-         *     animation: {
-         *         expand: {
-         *             duration: 200,
-         *             hide: true,
-         *             show: false
-         *         },
-         *         collapse: {
-         *             duration: 200,
-         *             effects: "expandVertical",
-         *             show: true
-         *         }
-         *     }
-         * });
-         *
-         * @option {Animation} [animation.expand]
-         * The animation that will be used when expanding items.
-         *
-         * @option {Number} [animation.expand.duration] <200> The number of milliseconds used for the animation when a
-         * node is expanded.
-         *
-         * _example
-         * $("#treeView").kendoTreeView({
-         *     animation: {
-         *         expand: {
-         *             duration: 1000
-         *         }
-         *     }
-         * });
-         *
-         * @option {String} [animation.expand.effects] <"expandVertical">
-         * A whitespace-delimited string of animation effects that are utilized when a <strong>TreeView</strong> node
-         * is expanded. Options include <strong>"expandVertical"</strong> and <strong>"fadeIn"</strong>.
-         *
-         * _exampleTitle Initialize a TreeView to expand and fade-in nodes over 5000 milliseconds
-         * _example
-         * $("#treeView").kendoTreeView({
-         *     animation: {
-         *         expand: {
-         *             duration: 5000,
-         *             effects: "expandVertical fadeIn"
-         *         }
-         *     }
-         * });
-         *
-         * @option {Boolean} [animation.expand.show] <true>
-         *
-         * @option {Boolean} [dragAndDrop] <false>
-         * Disables (<strong>false</strong>) or enables (<b>true</b>) drag-and-drop on the nodes of a
-         * <strong>TreeView</strong>.
-         *
-         * @option {Animation} [animation.collapse]
-         * The animation that will be used when collapsing items.
-         *
-         * @option {Number} [animation.collapse.duration] <200>
-         * The number of milliseconds used for the animation when a node is expanded.
-         *
-         * _exampleTitle Initialize a TreeView to collapse nodes over 1000 milliseconds
-         * _example
-         * $("#treeView").kendoTreeView({
-         *     animation: {
-         *         collapse: {
-         *             duration: 1000
-         *         }
-         *     }
-         * });
-         *
-         * @option {String} [animation.collapse.effects]
-         * A whitespace-delimited string of animation effects that are utilized when a <strong>TreeView</strong> node
-         * is collapsed. Options include <strong>"fadeOut"</strong>.
-         *
-         * _exampleTitle Initialize a TreeView to collapse and fade-out nodes over 5000 milliseconds
-         * _example
-         * $("#treeView").kendoTreeView({
-         *     animation: {
-         *         collapse: {
-         *             duration: 5000,
-         *             effects: "fadeOut"
-         *         }
-         *     }
-         * });
-         *
-         * @option {String|Function} [template] Template for rendering of the nodes of the treeview.
-         * _example
-         * $("#treeview").kendoTreeView({
-         *     template: "#= item.text # <a href='\\#'>Delete</a>"
-         * });
-         *
-         * @option {String|Function} [checkboxTemplate] Template for rendering of the treeview checkboxes.
-         * _example
-         * $("#treeview").kendoTreeView({
-         *     template: kendo.template(
-         *         "<input type='checkbox' name='checkedFiles[" +
-         *             item.id +
-         *         "]' value='true' />"
-         *     )
-         * });
-         *
-         * @option {Boolean} [loadOnDemand] <true> Indicates whether the child datasources should be fetched
-         * lazily, when parent groups get expanded. Setting this to false causes all child dataSources to
-         * be loaded at initialization time. Note: when initializing a TreeView from array (rather than from a
-         * HierarchicalDataSource instance), the default value of this option is false.
-         *
-         * @option {String} [dataTextField] <null> Sets the field of the data item that provides
-         * the text content of the treeview nodes.
-         * _example
-         * var items = [ { id: 1, ProductName: "Tea" }, { id: 2, ProductName: "Coffee"} ];
-         * $("#treeview").kendoTreeView({
-         *     dataSource: items,
-         *     dataTextField: "ProductName"
-         * });
-         *
-         * @option {String} [dataUrlField] <null> Sets the field of the data item that provides
-         * the link URL of the treeview nodes.
-         * _example
-         * var items = [
-         *     { id: 1, text: "Tea", LinksTo: "http://tea.example.com" },
-         *     { id: 2, text: "Coffee", LinksTo: "http://coffee.example.com" }
-         * ];
-         *
-         * $("#treeview").kendoTreeView({
-         *     dataSource: items,
-         *     dataUrlField: "LinksTo"
-         * });
-         *
-         * @option {String} [dataSpriteCssClassField] <null> Sets the field of the data item that provides
-         * the sprite CSS class of the treeview nodes.
-         * _example
-         * var items = [
-         *     { id: 1, text: "Tea", sprite: "icon-tea" },
-         *     { id: 2, text: "Coffee", sprite: "icon-coffee" }
-         * ];
-         *
-         * $("#treeview").kendoTreeView({
-         *     dataSource: items,
-         *     dataSpriteCssClassField: "sprite"
-         * });
-         *
-         * @option {String} [dataImageUrlField] <null> Sets the field of the data item that provides
-         * the image URL of the treeview nodes.
-         * _example
-         * var items = [
-         *     { id: 1, text: "Tea", image: "tea.png" },
-         *     { id: 2, text: "Coffee", image: "coffee.png" }
-         * ];
-         *
-         * $("#treeview").kendoTreeView({
-         *     dataSource: items,
-         *     dataImageUrlField: "image"
-         * });
-         */
+    TreeView = Widget.extend({
         init: function (element, options) {
             var that = this,
-                clickableItems = ".k-in:not(.k-state-selected,.k-state-disabled)",
-                MOUSEENTER = "mouseenter",
                 dataInit,
                 inferred = false;
 
@@ -36691,7 +30555,7 @@ extend(Editor, {
                 options = { dataSource: options };
             }
 
-            if (options && typeof options.loadOnDemand == "undefined" && isArray(options.dataSource)) {
+            if (options && typeof options.loadOnDemand == UNDEFINED && isArray(options.dataSource)) {
                 options.loadOnDemand = false;
             }
 
@@ -36741,13 +30605,7 @@ extend(Editor, {
 
             that._dataSource(inferred);
 
-            that.wrapper
-                .on(MOUSEENTER, ".k-in.k-state-selected", function(e) { e.preventDefault(); })
-                .on(MOUSEENTER, clickableItems, function () { $(this).addClass(KSTATEHOVER); })
-                .on("mouseleave", clickableItems, function () { $(this).removeClass(KSTATEHOVER); })
-                .on(CLICK, clickableItems, proxy(that._nodeClick, that))
-                .on("dblclick", "div:not(.k-state-disabled) .k-in", proxy(that._toggleButtonClick, that))
-                .on(CLICK, ".k-plus,.k-minus", proxy(that._toggleButtonClick, that));
+            that._attachEvents();
 
             if (options.dragAndDrop) {
                 that.dragging = new TreeViewDragAndDrop(that);
@@ -36761,6 +30619,21 @@ extend(Editor, {
             } else {
                 that._attachUids();
             }
+        },
+
+        _attachEvents: function() {
+            var that = this,
+                clickableItems = ".k-in:not(.k-state-selected,.k-state-disabled)",
+                MOUSEENTER = "mouseenter";
+
+            that.wrapper
+                .on(MOUSEENTER + NS, ".k-in.k-state-selected", function(e) { e.preventDefault(); })
+                .on(MOUSEENTER + NS, clickableItems, function () { $(this).addClass(KSTATEHOVER); })
+                .on("mouseleave" + NS, clickableItems, function () { $(this).removeClass(KSTATEHOVER); })
+                .on(CLICK + NS, clickableItems, proxy(that._nodeClick, that))
+                .on("dblclick" + NS, "div:not(.k-state-disabled) .k-in", proxy(that._toggleButtonClick, that))
+                .on(CLICK + NS, ".k-plus,.k-minus", proxy(that._toggleButtonClick, that));
+
         },
 
         _attachUids: function(root, dataSource) {
@@ -36780,14 +30653,21 @@ extend(Editor, {
         },
 
         _animation: function() {
-            var options = this.options;
+            var options = this.options,
+                animationOptions = options.animation;
 
-            if (options.animation === false) {
-                options.animation = {
+            if (animationOptions === false) {
+                animationOptions = {
                     expand: { show: true, effects: {} },
                     collapse: { hide: true, effects: {} }
                 };
+            } else if (!animationOptions.collapse || !("effects" in animationOptions.collapse)) {
+                animationOptions.collapse = extend({ reverse: true }, animationOptions.expand);
             }
+
+            extend(animationOptions.collapse, { show: false, hide: true });
+
+            options.animation = animationOptions;
         },
 
         _dataSource: function(silentRead) {
@@ -36797,6 +30677,8 @@ extend(Editor, {
 
             function recursiveRead(data) {
                 for (var i = 0; i < data.length; i++) {
+                    data[i]._initChildren();
+
                     data[i].children.read();
 
                     recursiveRead(data[i].children.view());
@@ -36832,180 +30714,15 @@ extend(Editor, {
         },
 
         events: [
-            /**
-            *
-            * Triggered before the dragging of a node starts.
-            *
-            * @name kendo.ui.TreeView#dragstart
-            * @event
-            *
-            * @param {Event} e
-            *
-            * @param {Node} e.sourceNode
-            * The node that will be dragged.
-            *
-            * @exampleTitle Disable dragging of root nodes
-            * @example
-            * treeview.data("kendoTreeView").bind("dragstart", function(e) {
-            *     if ($(e.sourceNode).parentsUntil(".k-treeview", ".k-item").length == 0) {
-            *         e.preventDefault();
-            *     }
-            * });
-            *
-            */
             DRAGSTART,
-
-            /**
-            *
-            * Triggered while a node is being dragged.
-            *
-            * @name kendo.ui.TreeView#drag
-            * @event
-            *
-            * @param {Event} e
-            *
-            * @param {Node} e.sourceNode
-            * The node that is being dragged.
-            *
-            * @param {Element} e.dropTarget
-            * The element that the node is placed over.
-            *
-            * @param {Number} e.pageX
-            * The x coordinate of the mouse.
-            *
-            * @param {Number} e.pageY
-            * The y coordinate of the mouse.
-            *
-            * @param {String} e.statusClass
-            * The status that the drag clue shows.
-            *
-            * @param {Function} e.setStatusClass
-            * Allows a custom drag clue status to be set.
-            * <p>Pre-defined status classes are:</p>
-            * <ul>
-            *     <li><strong>k-insert-top</strong>
-            *         - Indicates that the item will be inserted on top.
-            *     </li>
-            *     <li><strong>k-insert-middle</strong>
-            *         - Indicates that the item will be inserted in the middle.
-            *     </li>
-            *     <li><strong>k-insert-bottom</strong>
-            *         - Indicates that the item will be inserted at the bottom.
-            *     </li>
-            *     <li><strong>k-add</strong>
-            *         - Indicates that the item will be added/appended.
-            *     </li>
-            *     <li><strong>k-denied</strong>
-            *         - Indicates an invalid operation. Using this class will automatically
-            *           make the drop operation invalid, so there will be no need to call
-            *           <code>setValid(false)</code> in the <code>drop</code> event.
-            *     </li>
-            * </ul>
-            *
-            * @exampleTitle Show the user that is not permitted to drop nodes outside of the #drop-area element
-            * @example
-            * treeview.data("kendoTreeView").bind("drag", function(e) {
-            *     if ($(e.dropTarget).parents("#drop-area").length ) {
-            *         e.setStatusClass("k-denied");
-            *     }
-            * });
-            *
-            */
             DRAG,
-
-            /**
-            *
-            * Triggered when a node is being dropped.
-            *
-            * @name kendo.ui.TreeView#drop
-            * @event
-            *
-            * @param {Event} e
-            *
-            * @param {Node} e.sourceNode
-            * The node that is being dropped.
-            *
-            * @param {Node} e.destinationNode
-            * The node that the sourceNode is being dropped upon.
-            *
-            * @param {Boolean} e.valid
-            * Whether this drop operation is permitted.
-            *
-            * @param {Function} e.setValid
-            * Allows the drop to be prevented.
-            *
-            * @param {Element} e.dropTarget
-            * The element that the node is placed over.
-            *
-            * @param {String} e.dropPosition
-            * Shows where the source will be dropped. One of the values <strong>over</strong>, <strong>before</strong>, or <strong>after</strong>.
-            *
-            */
             DROP,
-
-            /**
-            *
-            * Triggered after a node has been dropped.
-            *
-            * @name kendo.ui.TreeView#dragend
-            * @event
-            *
-            * @param {Event} e
-            *
-            * @param {Node} e.sourceNode
-            * The node that is being dropped.
-            *
-            * @param {Node} e.destinationNode
-            * The node that the sourceNode is being dropped upon.
-            *
-            * @param {String} e.dropPosition
-            * Shows where the source has been dropped. One of the values <strong>over</strong>, <strong>before</strong>, or <strong>after</strong>.
-            *
-            */
             DRAGEND,
-            /**
-            *
-            * Triggered before a subgroup gets expanded.
-            *
-            * @name kendo.ui.TreeView#expand
-            * @event
-            *
-            * @param {Event} e
-            *
-            * @param {Node} e.node
-            * The expanded node
-            *
-            */
+
+            DATABOUND,
+
             EXPAND,
-
-            /**
-            *
-            * Triggered before a subgroup gets collapsed.
-            *
-            * @name kendo.ui.TreeView#collapse
-            * @event
-            *
-            * @param {Event} e
-            *
-            * @param {Node} e.node
-            * The collapsed node
-            *
-            */
             COLLAPSE,
-
-            /**
-            *
-            * Triggered when a node gets selected.
-            *
-            * @name kendo.ui.TreeView#select
-            * @event
-            *
-            * @param {Event} e
-            *
-            * @param {Node} e.node
-            * The selected node
-            *
-            */
             SELECT
         ],
 
@@ -37052,28 +30769,33 @@ extend(Editor, {
             }
         },
 
-        _fieldFor: function(fieldName) {
+        _fieldAccessor: function(fieldName) {
             var fieldBindings = this.options[bindings[fieldName]],
-                count = fieldBindings.length;
+                count = fieldBindings.length,
+                result = "(function(item) {";
 
             if (count === 0) {
-                return "'" + fieldName + "'";
-            } else if (count == 1) {
-                return "'" + fieldBindings[0] + "'";
+                result += "return item['" + fieldName + "'];";
             } else {
-                // generates ['foo', 'bar'][item.level() < 3 ? item.level() : 2]
-                return "['" + fieldBindings.join("','") + "']" +
-                       "[item.level() < " + count + " ? item.level() : " + (count-1) + "]";
+                result += "var level = item.level();" +
+                          "var levels = [" +
+                            $.map(fieldBindings, function(x) {
+                                return "function(d){ return " + kendo.expr(x) + "}";
+                            }).join(",") + "];";
+
+                // generates levels[level < 3 ? level : 2](item);
+                result += "return levels[level < " + count + " ? level : " + (count-1) + "](item)";
             }
+
+            result += "})";
+
+            return result;
         },
 
         _textTemplate: function() {
             var that = this,
-                field = function(fieldName) {
-                    return "item[" + that._fieldFor(fieldName) + "]";
-                },
                 templateText =
-                    "# var text = " + field("text") + "; #" +
+                    "# var text = " + that._fieldAccessor("text") + "(item); #" +
                     "# if (typeof item.encoded != 'undefined' && item.encoded === false) {#" +
                         "#= text #" +
                     "# } else { #" +
@@ -37089,10 +30811,10 @@ extend(Editor, {
 
         _itemTemplate: function() {
             var that = this,
-                field = function(fieldName) {
-                    return "item[" + that._fieldFor(fieldName) + "]";
-                },
                 templateText =
+                    "# var url = " + that._fieldAccessor("url") + "(item); #" +
+                    "# var imageUrl = " + that._fieldAccessor("imageUrl") + "(item); #" +
+                    "# var spriteCssClass = " + that._fieldAccessor("spriteCssClass") + "(item); #" +
                     "<li class='#= r.wrapperCssClass(group, item) #'" +
                         " " + kendo.attr("uid") + "='#= item.uid #'" +
                     ">" +
@@ -37107,18 +30829,15 @@ extend(Editor, {
                                 "</span>" +
                             "# } #" +
 
-                            "# var url = " + field("url") + "; #" +
                             "# var tag = url ? 'a' : 'span'; #" +
                             "# var textAttr = url ? ' href=\\'' + url + '\\'' : ''; #" +
 
                             "<#=tag# class='#= r.textClass(item) #'#= textAttr #>" +
 
-                                "# var imageUrl = " + field("imageUrl") + "; #" +
                                 "# if (imageUrl) { #" +
                                     "<img class='k-image' alt='' src='#= imageUrl #'>" +
                                 "# } #" +
 
-                                "# var spriteCssClass = " + field("spriteCssClass") + "; #" +
                                 "# if (spriteCssClass) { #" +
                                     "<span class='k-sprite #= spriteCssClass #'></span>" +
                                 "# } #" +
@@ -37223,12 +30942,51 @@ extend(Editor, {
 
                 updateNodeHtml(node);
 
-                updateNodeClasses(node, groupData, nodeData);
+                that._updateNodeClasses(node, groupData, nodeData);
 
                 // iterate over child nodes
                 that._group(node);
             });
         },
+
+        _updateNodeClasses: function (node, groupData, nodeData) {
+            var wrapper = node.children("div"),
+                group = node.children("ul");
+
+            if (node.hasClass("k-treeview")) {
+                return;
+            }
+
+            nodeData = nodeData || {};
+            nodeData.expanded = typeof nodeData.expanded != UNDEFINED ? nodeData.expanded : this._expanded(node);
+            nodeData.index = typeof nodeData.index != UNDEFINED ? nodeData.index : node.index();
+            nodeData.enabled = typeof nodeData.enabled != UNDEFINED ? nodeData.enabled : !wrapper.children(".k-in").hasClass("k-state-disabled");
+
+            groupData = groupData || {};
+            groupData.firstLevel = typeof groupData.firstLevel != UNDEFINED ? groupData.firstLevel : node.parent().parent().hasClass(KTREEVIEW);
+            groupData.length = typeof groupData.length != UNDEFINED ? groupData.length : node.parent().children().length;
+
+            // li
+            node.removeClass("k-first k-last")
+                .addClass(rendering.wrapperCssClass(groupData, nodeData));
+
+            // div
+            wrapper.removeClass("k-top k-mid k-bot")
+                   .addClass(rendering.cssClass(groupData, nodeData));
+
+            // span
+            wrapper.children(".k-in").removeClass("k-in k-state-default k-state-disabled")
+                .addClass(rendering.textClass(nodeData));
+
+            // toggle button
+            if (group.length || node.attr("data-hasChildren") == "true") {
+                wrapper.children(".k-icon").removeClass("k-plus k-minus k-plus-disabled k-minus-disabled")
+                    .addClass(rendering.toggleButtonClass(nodeData));
+
+                group.addClass("k-group");
+            }
+        },
+
 
         _processNodes: function(nodes, callback) {
             var that = this;
@@ -37237,11 +30995,6 @@ extend(Editor, {
             });
         },
 
-        /**
-         *
-         * Returns the dataItem that corresponds to a TreeView node
-         *
-         */
         dataItem: function(node) {
             var uid = $(node).closest(NODE).attr(kendo.attr("uid")),
                 dataSource = this.dataSource;
@@ -37290,25 +31043,37 @@ extend(Editor, {
 
             if (parentNode.hasClass("k-item")) {
                 updateNodeHtml(parentNode);
-                updateNodeClasses(parentNode);
+                that._updateNodeClasses(parentNode);
             }
 
-            updateNodeClasses(node.prev());
-            updateNodeClasses(node.next());
-
+            that._updateNodeClasses(node.prev().first());
+            that._updateNodeClasses(node.next().last());
 
             // render sub-nodes
             for (i = 0; i < nodeData.length; i++) {
                 item = nodeData[i];
 
-                childrenData = item.children.data();
+                if (item.hasChildren) {
+                    childrenData = item.children.data();
 
-                if (childrenData.length) {
-                    that._insertNode(childrenData, item.index, node.eq(i), append, !that._expanded(node.eq(i)));
+                    if (childrenData.length) {
+                        that._insertNode(childrenData, item.index, node.eq(i), append, !that._expanded(node.eq(i)));
+                    }
                 }
             }
 
             return node;
+        },
+
+        _updateNode: function(field, items) {
+            var that = this, i, node;
+
+            if ($.inArray(field, that.options.dataTextField) >= 0) {
+                for (i = 0; i < items.length; i++) {
+                    node = that.findByUid(items[i].uid);
+                    that.text(node, items[i][field]);
+                }
+            }
         },
 
         refresh: function(e) {
@@ -37325,7 +31090,7 @@ extend(Editor, {
                 var group = subGroup(parentNode),
                     children = group.children();
 
-                if (typeof index == "undefined") {
+                if (typeof index == UNDEFINED) {
                     index = children.length;
                 }
 
@@ -37337,10 +31102,15 @@ extend(Editor, {
                         item.insertBefore(children.eq(index));
                     }
                 }, collapsed);
+
+                if (that._expanded(parentNode)) {
+                    that._updateNodeClasses(parentNode);
+                    subGroup(parentNode).css("display", "block");
+                }
             }
 
             if (e.field) {
-                return;
+                return that._updateNode(e.field, items);
             }
 
             if (node) {
@@ -37357,11 +31127,6 @@ extend(Editor, {
                     subGroup(parentNode).empty();
 
                     append(items, parentNode, true);
-
-                    if (that._expanded(parentNode)) {
-                        updateNodeClasses(parentNode, {}, { expanded: true });
-                        subGroup(parentNode).css("display", "block");
-                    }
                 } else {
                     that.root = that.wrapper.html(that._renderGroup({
                         items: items,
@@ -37373,87 +31138,29 @@ extend(Editor, {
                 }
             }
 
-            if (!loadOnDemand) {
-                for (i = 0; i < items.length; i++) {
+            for (i = 0; i < items.length; i++) {
+                if (!loadOnDemand || items[i].expanded) {
                     items[i].load();
                 }
             }
+
+            that.trigger(DATABOUND, {
+                node: node ? parentNode : undefined
+            });
         },
 
-        /**
-         *
-         * Expands nodes.
-         *
-         * @param {Selector} nodes
-         * The nodes that are to be expanded.
-         *
-         * @example
-         * var treeview = $("#treeview").data("kendoTreeView");
-         *
-         * // expands the node with id="firstItem"
-         * treeview.expand(document.getElementById("firstItem"));
-         *
-         * // expands all nodes
-         * treeview.expand(".k-item");
-         *
-         */
         expand: function (nodes) {
             this._processNodes(nodes, function (index, item) {
-                var contents = nodeContents(item);
-
-                if (contents.length > 0 && !contents.is(VISIBLE)) {
-                    this.toggle(item);
-                }
+                this.toggle(item, true);
             });
         },
 
-        /**
-         *
-         * Collapses nodes.
-         *
-         * @param {Selector} nodes
-         * The nodes that are to be collapsed.
-         *
-         * @example
-         * var treeview = $("#treeview").data("kendoTreeView");
-         *
-         * // collapse the node with id="firstItem"
-         * treeview.collapse(document.getElementById("firstItem"));
-         *
-         * // collapse all nodes
-         * treeview.collapse(".k-item");
-         *
-         */
         collapse: function (nodes) {
             this._processNodes(nodes, function (index, item) {
-                var contents = nodeContents(item);
-
-                if (contents.length > 0 && contents.is(VISIBLE)) {
-                    this.toggle(item);
-                }
+                this.toggle(item, false);
             });
         },
 
-        /**
-         *
-         * Enables or disables nodes.
-         *
-         * @param {Selector} nodes
-         * The nodes that are to be enabled/disabled.
-         *
-         * @param {Boolean} [enable=true]
-         * Whether the nodes should be enabled or disabled.
-         *
-         * @example
-         * var treeview = $("#treeview").data("kendoTreeView");
-         *
-         * // disable the node with id="firstItem"
-         * treeview.enable(document.getElementById("firstItem"), false);
-         *
-         * // enable all nodes
-         * treeview.enable(".k-item");
-         *
-         */
         enable: function (nodes, enable) {
             enable = arguments.length == 2 ? !!enable : true;
 
@@ -37465,31 +31172,10 @@ extend(Editor, {
                     isCollapsed = true;
                 }
 
-                updateNodeClasses(item, {}, { enabled: enable, expanded: !isCollapsed });
+                this._updateNodeClasses(item, {}, { enabled: enable, expanded: !isCollapsed });
             });
         },
 
-        /**
-         *
-         * Gets or sets the selected node of a TreeView.
-         *
-         * @param {Selector} [node]
-         * If provided, the node of a TreeView that should be selected.
-         *
-         * @returns {Node}
-         * The selected node of a TreeView.
-         *
-         * @exampleTitle Select the node with ID, firstItem
-         * @example
-         * var treeView = $("#treeView").data("kendoTreeView");
-         * treeView.select($("#firstItem"));
-         *
-         * @exampleTitle Get the currently selected node
-         * @example
-         * var treeView = $("#treeView").data("kendoTreeView");
-         * var selectedNode = treeView.select();
-         *
-         */
         select: function (node) {
             var element = this.element;
 
@@ -37506,20 +31192,7 @@ extend(Editor, {
             }
         },
 
-        /**
-         *
-         * Toggles the node of a TreeView between its expanded and collapsed states.
-         *
-         * @param {Selector} node
-         * The node that should be toggled.
-         *
-         * @exampleTitle Toggle the state of a node with ID, firstItem
-         * @example
-         * var treeView = $("#treeView").data("kendoTreeView");
-         * treeView.toggle($("#firstItem"));
-         *
-         */
-        toggle: function (node) {
+        toggle: function (node, expand) {
             node = $(node);
 
             if (!node.find(">div>.k-icon").is(".k-minus,.k-plus,.k-minus-disabled,.k-plus-disabled")) {
@@ -37527,35 +31200,35 @@ extend(Editor, {
             }
 
             var that = this,
-                contents = nodeContents(node),
-                isExpanding = !contents.is(VISIBLE),
                 options = that.options,
-                animationSettings = options.animation || {},
-                animation = animationSettings.expand,
-                collapse = extend({}, animationSettings.collapse),
-                hasCollapseAnimation = collapse && "effects" in collapse,
-                dataItem = that.dataItem(node);
+                contents = nodeContents(node),
+                isExpanding = arguments.length == 1 ? !contents.is(VISIBLE) : expand,
+                direction = isExpanding ? "expand" : "collapse",
+                animation = options.animation[direction],
+                dataItem = that.dataItem(node),
+                loaded;
 
             if (contents.data("animating")) {
                 return;
             }
 
-            if (!isExpanding) {
-                animation = extend( hasCollapseAnimation ? collapse
-                                    : extend({ reverse: true }, animation), { show: false, hide: true });
+            if (isExpanding == that._expanded(node)) {
+                return;
             }
 
-            if (!that._trigger(isExpanding ? "expand" : "collapse", node)) {
+            if (!that._trigger(direction, node)) {
                 that._expanded(node, isExpanding);
 
-                if (contents.children().length > 0) {
-                    updateNodeClasses(node, {}, { expanded: isExpanding });
+                loaded = dataItem && dataItem.loaded();
+
+                if (loaded && contents.children().length > 0) {
+                    that._updateNodeClasses(node, {}, { expanded: isExpanding });
 
                     if (!isExpanding) {
                         contents.css("height", contents.height()).css("height");
                     }
 
-                    contents.kendoStop(true, true).kendoAnimate(extend(animation, {
+                    contents.kendoStop(true, true).kendoAnimate(extend({ reset: true }, animation, {
                         complete: function() {
                             if (isExpanding) {
                                 contents.css("height", "");
@@ -37570,6 +31243,20 @@ extend(Editor, {
                     dataItem.load();
                 }
             }
+        },
+
+        destroy: function() {
+            var that = this;
+
+            Widget.fn.destroy.call(that);
+
+            that.element.off(NS);
+
+            if (that.dragging) {
+                that.dragging.destroy();
+            }
+
+            kendo.destroy(that.element);
         },
 
         _expanded: function(node, value) {
@@ -37607,33 +31294,21 @@ extend(Editor, {
             }
         },
 
-        /**
-         *
-         * Gets the text of a node in a TreeView.
-         *
-         * @param {Selector} node
-         * The node of which the text is being retrieved.
-         *
-         * @returns {String}
-         * The text of a node.
-         *
-         * @exampleTitle Get the text of the node with ID, firstItem
-         * @example
-         * var treeView = $("#treeView").data("kendoTreeView");
-         * var nodeText = treeView.text($("#firstItem"));
-         *
-         */
-        text: function (node) {
-            return $(node).closest(NODE).find(">div>.k-in").text();
+        text: function (node, text) {
+            return $(node).closest(NODE).find(">div>.k-in").text(text);
+        },
+
+        _objectOrSelf: function (node) {
+            return $(node).closest("[data-role=treeview]").data("kendoTreeView") || this;
         },
 
         _dataSourceMove: function(nodeData, group, parentNode, callback) {
             var that = this,
-                srcTreeView = treeviewFromNode(nodeData),
+                srcTreeView = that._objectOrSelf(nodeData),
                 srcDataSource,
                 dataItem,
                 referenceDataItem, i,
-                destTreeview = treeviewFromNode(parentNode || group),
+                destTreeview = that._objectOrSelf(parentNode || group),
                 destDataSource = destTreeview.dataSource;
 
             if (parentNode) {
@@ -37671,28 +31346,6 @@ extend(Editor, {
             return that.findByUid(dataItem.uid);
         },
 
-        /**
-         *
-         * Inserts a node after a specified node in a TreeView. This method may also be used to reorder the nodes of a
-         * TreeView.
-         *
-         * @param {String|Selector} nodeData
-         * A JSON-formatted string or selector that specifies the node to be inserted.
-         *
-         * @param {Node} referenceNode
-         * The node that will be preceed the newly-appended node.
-         *
-         * @exampleTitle Insert a node with the text, "JavaScript" after the node with ID, firstItem
-         * @example
-         * var treeView = $("#treeView").data("kendoTreeView");
-         * treeView.insertAfter({ text: "JavaScript" }, $("#firstItem"));
-         *
-         * @exampleTitle Moves a node with ID, secondNode after a node with ID, firstItem
-         * @example
-         * var treeView = $("#treeView").data("kendoTreeView");
-         * treeView.insertAfter($("#secondNode"), $("#firstItem"));
-         *
-         */
         insertAfter: function (nodeData, referenceNode) {
             var group = referenceNode.parent(),
                 parentNode;
@@ -37706,28 +31359,6 @@ extend(Editor, {
             });
         },
 
-        /**
-         *
-         * Inserts a node before another node. This method may also be used to reorder the nodes of a
-         * TreeView.
-         *
-         * @param {String|Selector} nodeData
-         * A JSON-formatted string or selector that specifies the node to be inserted.
-         *
-         * @param {Node} referenceNode
-         * The node that follows the inserted node.
-         *
-         * @exampleTitle Inserts a new node with the text, "CSS3" before the node with ID, firstItem
-         * @example
-         * var treeView = $("#treeView").data("kendoTreeView");
-         * treeView.insertBefore({ text: "CSS3" }, $("#firstItem"));
-         *
-         * @exampleTitle Moves the node with ID, secondNode before the node with ID, firstItem
-         * @example
-         * var treeView = $("#treeView").data("kendoTreeView");
-         * treeView.insertBefore($("#secondNode"), $("#firstItem"));
-         *
-         */
         insertBefore: function (nodeData, referenceNode) {
             var group = referenceNode.parent(),
                 parentNode;
@@ -37741,29 +31372,6 @@ extend(Editor, {
             });
         },
 
-        /**
-         *
-         * Appends a node to a group of a TreeView. This method may also be used to reorder the nodes of a
-         * TreeView.
-         *
-         * @param {String|Selector} nodeData
-         * A JSON-formatted string or selector that specifies the node to be appended.
-         *
-         * @param {Node} [parentNode]
-         * The node that will contain the newly appended node. If not specified, the new node will be appended to the
-         * root group of the TreeView.
-         *
-         * @exampleTitle Append a new node with the text, "HTML5" to the node with ID, firstItem
-         * @example
-         * var treeView = $("#treeView").data("kendoTreeView");
-         * treeView.append({ text: "HTML5" }, $("#firstItem"));
-         *
-         * @exampleTitle Moves the node with ID, secondNode as a last child of the node with ID, firstItem
-         * @example
-         * var treeView = $("#treeView").data("kendoTreeView");
-         * treeView.append($("#secondNode"), $("#firstItem"));
-         *
-         */
         append: function (nodeData, parentNode) {
             var that = this,
                 group = that.root;
@@ -37782,10 +31390,11 @@ extend(Editor, {
         },
 
         _remove: function (node, keepData) {
-            var parentNode,
+            var that = this,
+                parentNode,
                 prevSibling, nextSibling;
 
-            node = $(node, this.element);
+            node = $(node, that.element);
 
             parentNode = node.parent().parent();
             prevSibling = node.prev();
@@ -37795,28 +31404,15 @@ extend(Editor, {
 
             if (parentNode.hasClass("k-item")) {
                 updateNodeHtml(parentNode);
-                updateNodeClasses(parentNode);
+                that._updateNodeClasses(parentNode);
             }
 
-            updateNodeClasses(prevSibling);
-            updateNodeClasses(nextSibling);
+            that._updateNodeClasses(prevSibling);
+            that._updateNodeClasses(nextSibling);
 
             return node;
         },
 
-        /**
-         *
-         * Removes a node from a TreeView.
-         *
-         * @param {Selector} node
-         * The node that is to be removed.
-         *
-         * @exampleTitle Remove the node with ID, firstItem
-         * @example
-         * var treeView = $("#treeView").data("kendoTreeView");
-         * treeView.remove($("#firstItem"));
-         *
-         */
         remove: function (node) {
             var dataItem = this.dataItem(node);
             if (dataItem) {
@@ -37824,68 +31420,16 @@ extend(Editor, {
             }
         },
 
-        /**
-         *
-         * Removes a node from a TreeView, but keeps its jQuery.data() objects.
-         *
-         * @param {Selector} node
-         * The node that is to be detached.
-         *
-         * @returns {jQuery}
-         * The node that has been detached.
-         *
-         * @exampleTitle Remove the node with ID, firstItem
-         * @example
-         * var treeView = $("#treeView").data("kendoTreeView");
-         * var firstItem = $("#firstItem");
-         * firstItem.data("id", 1);
-         * treeview.detach(firstItem);
-         * firstItem.data("id") == 1;
-         *
-         */
         detach: function (node) {
             return this._remove(node, true);
         },
 
-        /**
-         *
-         * Searches a TreeView for a node that has specific text.
-         *
-         * @param {String} text
-         * The text that is being searched for.
-         *
-         * @returns {jQuery}
-         * All nodes that have the text.
-         *
-         * @exampleTitle Search a TreeView for the item that has the text, "CSS3 is da bomb!"
-         * @example
-         * var treeView = $("#treeView").data("kendoTreeView");
-         * var foundNode = treeView.findByText("CSS3 is da bomb!");
-         *
-         */
         findByText: function(text) {
             return $(this.element).find(".k-in").filter(function(i, element) {
                 return $(element).text() == text;
             }).closest(NODE);
         },
 
-        /**
-         *
-         * Searches a TreeView for a node with the given unique identifier.
-         * Applicable when the widget is bound to a HierarchicalDataSource.
-         *
-         * @param {String} text
-         * The text that is being searched for.
-         *
-         * @returns {jQueryObject}
-         * All nodes that have the text.
-         *
-         * @exampleTitle Search a TreeView for the item that has the text, "CSS3 is da bomb!"
-         * @example
-         * var treeView = $("#treeView").data("kendoTreeView");
-         * var foundNode = treeView.findByText("CSS3 is da bomb!");
-         *
-         */
         findByUid: function(uid) {
             return this.element.find(".k-item[" + kendo.attr("uid") + "=" + uid + "]");
         },
@@ -37934,6 +31478,7 @@ extend(Editor, {
         var that = this;
 
         that.treeview = treeview;
+        that.hovered = treeview.element;
 
         that._draggable = new ui.Draggable(treeview.element, {
            filter: "div:not(.k-state-disabled) .k-in",
@@ -37951,7 +31496,16 @@ extend(Editor, {
         });
     }
 
-    TreeViewDragAndDrop.prototype = /** @ignore */{
+    TreeViewDragAndDrop.prototype = {
+        _removeTouchHover: function() {
+            var that = this;
+
+            if (kendo.support.touch && that.hovered) {
+                that.hovered.find("." + KSTATEHOVER).removeClass(KSTATEHOVER);
+                that.hovered = false;
+            }
+        },
+
         _hintStatus: function(newStatus) {
             var statusElement = this._draggable.hint.find(".k-drag-status")[0];
 
@@ -37981,13 +31535,14 @@ extend(Editor, {
                 treeview = that.treeview,
                 sourceNode = that.sourceNode,
                 dropTarget = that.dropTarget = $(kendo.eventTarget(e)),
-                statusClass,
+                statusClass, closestTree = dropTarget.closest(".k-treeview"),
                 hoveredItem, hoveredItemPos, itemHeight, itemTop, itemContent, delta,
                 insertOnTop, insertOnBottom, addChild;
 
-            if (!dropTarget.closest(".k-treeview").length) {
+            if (!closestTree.length) {
                 // dragging node outside of treeview
                 statusClass = "k-denied";
+                that._removeTouchHover();
             } else if ($.contains(sourceNode[0], dropTarget[0])) {
                 // dragging node within itself
                 statusClass = "k-denied";
@@ -37995,22 +31550,22 @@ extend(Editor, {
                 // moving or reordering node
                 statusClass = "k-insert-middle";
 
-                that.dropHint.css(VISIBILITY, "visible");
-
                 hoveredItem = dropTarget.closest(".k-top,.k-mid,.k-bot");
 
-                if (hoveredItem.length > 0) {
+                if (hoveredItem.length) {
                     itemHeight = hoveredItem.outerHeight();
                     itemTop = hoveredItem.offset().top;
                     itemContent = dropTarget.closest(".k-in");
                     delta = itemHeight / (itemContent.length > 0 ? 4 : 2);
 
-                    insertOnTop = e.pageY < (itemTop + delta);
-                    insertOnBottom = (itemTop + itemHeight - delta) < e.pageY;
-                    addChild = itemContent.length > 0 && !insertOnTop && !insertOnBottom;
+                    insertOnTop = e.y.location < (itemTop + delta);
+                    insertOnBottom = (itemTop + itemHeight - delta) < e.y.location;
+                    that._removeTouchHover();
+                    addChild = itemContent.length && !insertOnTop && !insertOnBottom;
+                    that.hovered = addChild ? closestTree : false;
 
-                    itemContent.toggleClass(KSTATEHOVER, addChild);
                     that.dropHint.css(VISIBILITY, addChild ? "hidden" : "visible");
+                    itemContent.toggleClass(KSTATEHOVER, addChild);
 
                     if (addChild) {
                         statusClass = "k-add";
@@ -38038,8 +31593,8 @@ extend(Editor, {
             treeview.trigger(DRAG, {
                 sourceNode: sourceNode[0],
                 dropTarget: dropTarget[0],
-                pageY: e.pageY,
-                pageX: e.pageX,
+                pageY: e.y.location,
+                pageX: e.x.location,
                 statusClass: statusClass.substring(2),
                 setStatusClass: function (value) {
                     statusClass = value;
@@ -38086,6 +31641,7 @@ extend(Editor, {
             });
 
             dropHint.remove();
+            that._removeTouchHover();
 
             if (!valid || dropPrevented) {
                 that._draggable.dropped = valid;
@@ -38096,12 +31652,12 @@ extend(Editor, {
 
             // perform reorder / move
             if (dropPosition == "over") {
-                treeview.append(sourceNode, destinationNode);
+                sourceNode = treeview.append(sourceNode, destinationNode);
                 treeview.expand(destinationNode);
             } else if (dropPosition == "before") {
-                treeview.insertBefore(sourceNode, destinationNode);
+                sourceNode = treeview.insertBefore(sourceNode, destinationNode);
             } else if (dropPosition == "after") {
-                treeview.insertAfter(sourceNode, destinationNode);
+                sourceNode = treeview.insertAfter(sourceNode, destinationNode);
             }
 
             treeview.trigger(DRAGEND, {
@@ -38109,12 +31665,16 @@ extend(Editor, {
                 destinationNode: destinationNode[0],
                 dropPosition: dropPosition
             });
+        },
+
+        destroy: function() {
+            this._draggable.destroy();
         }
     };
 
     // client-side rendering
 
-    rendering = /** @ignore */{
+    rendering = {
         wrapperCssClass: function (group, item) {
             var result = "k-item",
                 index = item.index;
@@ -38192,108 +31752,8 @@ extend(Editor, {
 
     ui.plugin(TreeView);
 })(jQuery);
-/**
- * @fileOverview Provides a Slider and RangeSlider implementation which can be used to display a rich input for
- * selecting values or ranges of values.
- */
 
 (function($, undefined) {
-    /**
-     *
-     * @name kendo.ui.Slider.Description
-     *
-     * @section
-     * <p>
-     *  The <strong>Slider</strong> provides a rich input for selecting values or ranges of values. Unlike the HTML5
-     *  range input, the <strong>Slider</strong> presents a consistent experience across browsers and features a rich
-     *  API and event model.
-     * </p>
-     * <h3>Getting Started</h3>
-     * <p>There are two types of <strong>Slider</strong>:</p>
-     * <ol>
-     *  <li><strong>Slider</strong>, which presents one thumb and two opposing buttons for selecting a single value</li>
-     *  <li><strong>RangeSlider</strong>, which present two thumbs for defining a range of values</li>
-     * </ol>
-     * <h4>Slider</h4>
-     *
-     * @exampleTitle Create an input element
-     * @example
-     * <input id="slider" />
-     *
-     * @section
-     * <p>
-     *  Initialization of a <strong>Slider</strong> should occur after the DOM is fully loaded. It is recommended that
-     *  initialization the <strong>Slider</strong> occur within a handler is provided to $(document).ready().
-     * </p>
-     *
-     * @exampleTitle Initialize a Slider using a selector within $(document).ready()
-     * @example
-     * $(document).ready(function() {
-     *     $("#slider").kendoSlider();
-     * });
-     *
-     * @section
-     * <h4>RangeSlider</h4>
-     * @exampleTitle Create two HTML input elements in a div
-     * @example
-     * <div id="rangeSlider">
-     *     <input />
-     *     <input />
-     * </div>
-     *
-     * @section
-     * <p>
-     *  Initialization of a <strong>RangeSlider</strong> should occur after the DOM is fully loaded. It is recommended
-     *  that initialization the <strong>RangeSlider</strong> occur within a handler is provided to $(document).ready().
-     * </p>
-     *
-     * @exampleTitle Initialize a RangeSlider using a selector within $(document).ready()
-     * @example
-     * $(document).ready(function() {
-     *     $("#rangeSlider").kendoRangeSlider();
-     * });
-     *
-     * @section
-     * <p>
-     *  The <strong>RangeSlider</strong> requires two inputs to capture both ends of the value range. This benefits
-     *  scenarios where JavaScript is disabled, in which case users will be presented with two inputs, still allowing
-     *  them to input a valid range.
-     * </p>
-     * <h3>Customizing Slider Behaviors</h3>
-     * <p>
-     *  Many facets of the <strong>Slider</strong> and <strong>RangeSlider</strong> behavior can be configured through
-     *  properties, including:
-     * </p>
-     * <ul>
-     *  <li>Minimum and/or maximum values</li>
-     *  <li>Orientation (horizontal or vertical)</li>
-     *  <li>Small or large step</li>
-     *  <li>Tooltip format/placement</li>
-     * </ul>
-     *
-     * @exampleTitle Initialize a Slider and its properties
-     * @example
-     * $("#slider").kendoSlider({
-     *     min: 10,
-     *     max: 50,
-     *     orientation: "vertical",
-     *     smallStep: 1,
-     *     largeStep: 10
-     * });
-     *
-     * @section
-     * <h3>Accessing an Existing Slider</h3>
-     * <p>
-     *  You can reference an existing <strong>Slider</strong> instance via
-     *  <a href="http://api.jquery.com/jQuery.data/">jQuery.data()</a>. Once a reference has been established, you can
-     *  use the API to control its behavior.
-     * </p>
-     *
-     * @exampleTitle Accessing an existing Slider instance
-     * @example
-     * var slider = $("#slider").data("kendoSlider");
-     *
-     */
     var kendo = window.kendo,
         Widget = kendo.ui.Widget,
         Draggable = kendo.ui.Draggable,
@@ -38323,7 +31783,8 @@ extend(Editor, {
         STATE_DISABLED = "k-state-disabled",
         PRECISION = 3,
         DISABLED = "disabled",
-        UNDEFINED = "undefined";
+        UNDEFINED = "undefined",
+        NS = ".slider";
 
     var SliderBase = Widget.extend({
         init: function(element, options) {
@@ -38378,38 +31839,7 @@ extend(Editor, {
         },
 
         events: [
-            /**
-            * Fires when the slider value changes as a result of selecting a new value with the drag handle, buttons or keyboard.
-            * @name kendo.ui.Slider#change
-            * @event
-            * @param {Event} e
-            * @param {Number} e.value Represents the updated value of the slider.
-            **/
-
-            /**
-            * Fires when the rangeSlider value changes as a result of selecting a new value with one of the drag handles or the keyboard.
-            * @name kendo.ui.RangeSlider#change
-            * @event
-            * @param {Event} e
-            * @param {Number} e.value Represents the updated array of values of the first and second drag handle.
-            **/
             CHANGE,
-
-            /**
-            * Fires when the user drags the drag handle to a new position.
-            * @name kendo.ui.Slider#slide
-            * @event
-            * @param {Event} e
-            * @param {Number} e.value Represents the value from the current position of the drag handle.
-            **/
-
-            /**
-            * Fires when the user drags the drag handle to a new position.
-            * @name kendo.ui.RangeSlider#slide
-            * @event
-            * @param {Event} e
-            * @param {Number} e.value Represents an array of values of the current positions of the first and second drag handle.
-            **/
             SLIDE
         ],
 
@@ -38757,7 +32187,6 @@ extend(Editor, {
     };
 
     if (support.pointers) {
-        /** @ignore */
         touchLocation = function(e) {
             return {
                 idx: 0,
@@ -38768,7 +32197,6 @@ extend(Editor, {
     }
 
     if (support.touch) {
-        /** @ignore */
         touchLocation = function(e, id) {
             var changedTouches = e.changedTouches || e.originalEvent.changedTouches;
 
@@ -38798,93 +32226,7 @@ extend(Editor, {
         return typeof value !== UNDEFINED;
     }
 
-    var Slider = SliderBase.extend(/** @lends kendo.ui.Slider.prototype */{
-        /**
-         *
-         * Creates a Slider instance.
-         *
-         * @constructs
-         * @extends kendo.ui.Widget
-         *
-         * @param {Element} element DOM element
-         * @param {Object} options Configuration options.
-         *
-         * @option {Number} [min] <0>
-         * The minimum value of the <strong>Slider</strong>.
-         *
-         * @option {Number} [max] <10>
-         * The maximum value of the <strong>Slider</strong>.
-         *
-         * @option {Boolean} [showButtons] <true>
-         * Can be used to show (<b>true</b>) or hide (<b>false</b>) the
-         * increase and decrease buttons of a <strong>Slider</strong>.
-         *
-         * @option {Object} [tooltip]
-         * Configuration of the <strong>Slider</strong> tooltip.
-         *
-         * @option {Boolean} [tooltip.enabled] <true>
-         * Disables (<b>false</b>) or enables (<b>true</b>) the tooltip of
-         * the <strong>Slider</strong>.
-         *
-         * @option {String} [tooltip.format] <"{0}">
-         * Format string for the text of the tooltip. Note: The applied
-         * format will also influence the appearance of the <strong>Slider</strong>
-         * tick labels.
-         *
-         * @option {Number} [value] <0>
-         * The underlying value of the <strong>Slider</strong>.
-         *
-         * @option {String} [orientation] <"horizontal">
-         * The orientation of a <strong>Slider</strong>; <strong>"horizontal"</strong> or <strong>"vertical"</strong>.
-         *
-         * @option {String} [tickPlacement] <"both">
-         * Denotes the location of the tick marks in the <strong>Slider</strong>. The available options are:
-         * <div class="details-list">
-         *    <dl>
-         *         <dt>
-         *              <code>"topLeft"</code>
-         *         </dt>
-         *         <dd>
-         *              Tick marks are located on the top of the horizontal widget or on the left of
-         *   the vertical widget.
-         *         </dd>
-         *         <dt>
-         *              <code>"bottomRight"</code>
-         *         </dt>
-         *         <dd>
-         *             Tick marks are located on the bottom of the horizontal widget or on the
-         *   right side of the vertical widget.
-         *         </dd>
-         *         <dt>
-         *              <code>"both"</code>
-         *         </dt>
-         *         <dd>
-         *             Tick marks are located on both sides of the widget.
-         *         </dd>
-         *         <dt>
-         *              <code>"none"</code>
-         *         </dt>
-         *         <dd>
-         *             Tick marks are not visible.
-         *         </dd>
-         *    </dl>
-         * </div>
-         * @option {Number} [smallStep] <1>
-         * The small step value of the <strong>Slider</strong>. The underlying value will be changed when the end user
-         * (1) clicks on the increase or decrease buttons of the <strong>Slider</strong>, (2) presses the arrow keys
-         * (the drag handle must be focused), or (3) drags the drag handle.
-         *
-         * @option {Number} [largeStep] <5>
-         * The delta with which the value will change when the user presses the Page Up or Page Down key (the drag
-         * handle must be focused). Note: The allied largeStep will also set large tick for every large step.
-         *
-         * @option {String} [increaseButtonTitle] <"Increase">
-         * The title of the increase button of the <strong>Slider</strong>.
-         *
-         * @option {String} [decreaseButtonTitle] <"Decrease">
-         * The title of the decrease button of the <strong>Slider</strong>.
-         *
-         */
+    var Slider = SliderBase.extend({
         init: function(element, options) {
             var that = this,
                 dragHandle;
@@ -38924,20 +32266,6 @@ extend(Editor, {
             tooltip: { format: "{0}" }
         },
 
-        /**
-         * Enable/Disable the <strong>Slider</strong> widget.
-         * @param {Boolean} enable
-         * The argument, which defines whether to enable/disable the <strong>Slider</strong>.
-         * @example
-         * // get a reference to the slider widget
-         * var slider = $("#slider").data("kendoSlider");
-         *
-         * // disables the slider
-         * slider.enable(false);
-         *
-         * // enables the slider
-         * slider.enable(true);
-         */
         enable: function (enable) {
             var that = this,
                 options = that.options,
@@ -38973,17 +32301,18 @@ extend(Editor, {
 
             that.wrapper
                 .find(TICK_SELECTOR + ", " + TRACK_SELECTOR)
-                    .bind(TRACK_MOUSE_DOWN, clickHandler)
-                    .end().bind(TRACK_MOUSE_DOWN, function() {
+                    .on(TRACK_MOUSE_DOWN + NS, clickHandler)
+                    .end()
+                    .on(TRACK_MOUSE_DOWN + NS, function() {
                         $(document.documentElement).one("selectstart", kendo.preventDefault);
                     });
 
             that.wrapper
                 .find(DRAG_HANDLE)
-                .bind(MOUSE_UP, function (e) {
+                .on(MOUSE_UP + NS, function (e) {
                     $(e.target).removeClass(STATE_SELECTED);
                 })
-                .bind(CLICK, function (e) {
+                .on(CLICK + NS, function (e) {
                     e.preventDefault();
                 });
 
@@ -39005,31 +32334,31 @@ extend(Editor, {
                 }, that);
 
                 that.wrapper.find(".k-button")
-                    .bind(MOUSE_UP, proxy(function (e) {
+                    .on(MOUSE_UP + NS, proxy(function (e) {
                         this._clearTimer();
                     }, that))
-                    .bind(MOUSE_OVER, function (e) {
+                    .on(MOUSE_OVER + NS, function (e) {
                         $(e.currentTarget).addClass("k-state-hover");
                     })
-                    .bind("mouseout", proxy(function (e) {
+                    .on("mouseout" + NS, proxy(function (e) {
                         $(e.currentTarget).removeClass("k-state-hover");
                         this._clearTimer();
                     }, that))
                     .eq(0)
-                    .bind(MOUSE_DOWN, proxy(function (e) {
+                    .on(MOUSE_DOWN + NS, proxy(function (e) {
                         mouseDownHandler(e, 1);
                     }, that))
                     .click(false)
                     .end()
                     .eq(1)
-                    .bind(MOUSE_DOWN, proxy(function (e) {
+                    .on(MOUSE_DOWN + NS, proxy(function (e) {
                         mouseDownHandler(e, -1);
                     }, that))
                     .click(false);
             }
 
             that.wrapper
-                .find(DRAG_HANDLE).bind(KEY_DOWN, proxy(this._keydown, that));
+                .find(DRAG_HANDLE).on(KEY_DOWN + NS, proxy(this._keydown, that));
 
             options.enabled = true;
         },
@@ -39045,24 +32374,24 @@ extend(Editor, {
 
             that.wrapper
                 .find(".k-button")
-                .unbind(MOUSE_DOWN)
-                .bind(MOUSE_DOWN, kendo.preventDefault)
-                .unbind(MOUSE_UP)
-                .bind(MOUSE_UP, kendo.preventDefault)
-                .unbind("mouseleave")
-                .bind("mouseleave", kendo.preventDefault)
-                .unbind(MOUSE_OVER)
-                .bind(MOUSE_OVER, kendo.preventDefault);
+                .off(MOUSE_DOWN + NS)
+                .on(MOUSE_DOWN + NS, kendo.preventDefault)
+                .off(MOUSE_UP + NS)
+                .on(MOUSE_UP + NS, kendo.preventDefault)
+                .off("mouseleave" + NS)
+                .on("mouseleave" + NS, kendo.preventDefault)
+                .off(MOUSE_OVER + NS)
+                .on(MOUSE_OVER + NS, kendo.preventDefault);
 
             that.wrapper
-                .find(TICK_SELECTOR + ", " + TRACK_SELECTOR).unbind(TRACK_MOUSE_DOWN);
+                .find(TICK_SELECTOR + ", " + TRACK_SELECTOR).off(TRACK_MOUSE_DOWN + NS);
 
             that.wrapper
                 .find(DRAG_HANDLE)
-                .unbind(MOUSE_UP)
-                .unbind(KEY_DOWN)
-                .unbind(CLICK)
-                .bind(KEY_DOWN, false);
+                .off(MOUSE_UP + NS)
+                .off(KEY_DOWN + NS)
+                .off(CLICK + NS)
+                .on(KEY_DOWN + NS, false);
 
             that.options.enabled = false;
         },
@@ -39078,19 +32407,6 @@ extend(Editor, {
             }
         },
 
-        /**
-         *
-         * Gets or sets the value of a <strong>Slider</strong>. It accepts a string or number as parameters and returns
-         * a number representing the underlying value.
-         *
-         * @param {String} [value]
-         * The value to be set for a Slider.
-         *
-         * @example
-         * var slider = $("#slider").data("kendoSlider");
-         * var sliderValue = slider.value();
-         *
-         */
         value: function (value) {
             var that = this,
                 options = that.options;
@@ -39144,6 +32460,22 @@ extend(Editor, {
         _nextValueByIndex: function (index) {
             var count = this._values.length;
             return this._values[math.max(0, math.min(index, count - 1))];
+        },
+
+        destroy: function() {
+            var that = this;
+
+            Widget.fn.destroy.call(that);
+
+            that.wrapper.off(NS)
+                .find(".k-button").off(NS)
+                .end()
+                .find(DRAG_HANDLE).off(NS)
+                .end()
+                .find(TICK_SELECTOR + ", " + TRACK_SELECTOR).off(NS)
+                .end();
+
+            that._drag.draggable.destroy();
         }
     });
 
@@ -39206,7 +32538,7 @@ extend(Editor, {
                 return;
             }
 
-            owner.element.unbind(MOUSE_OVER);
+            owner.element.off(MOUSE_OVER + NS);
             that.dragHandle.addClass(STATE_SELECTED);
 
             that.dragableArea = owner._getDragableArea();
@@ -39363,7 +32695,7 @@ extend(Editor, {
             }
 
             that.dragHandle.removeClass(STATE_SELECTED);
-            owner.element.bind(MOUSE_OVER);
+            owner.element.on(MOUSE_OVER + NS);
 
             return false;
         },
@@ -39427,86 +32759,7 @@ extend(Editor, {
 
     kendo.ui.plugin(Slider);
 
-    var RangeSlider = SliderBase.extend(/** @lends kendo.ui.RangeSlider.prototype */{
-        /**
-         *
-         * Creates a RangeSlider instance.
-         *
-         * @constructs
-         * @extends kendo.ui.Widget
-         *
-         * @param {Element} element DOM element
-         * @param {Object} options Configuration options.
-         *
-         * @option {Number} [min] <0>
-         * The minimum value of the <strong>RangeSlider</strong>.
-         *
-         * @option {Number} [max] <10>
-         * The maximum value of the <strong>RangeSlider</strong>.
-         *
-         * @option {Object} [tooltip]
-         * Configuration of the <strong>RangeSlider</strong> tooltip.
-         *
-         * @option {String} [tooltip.format] <"{0}">
-         * Format string for the text of the tooltip. Note: The applied format will also influence the appearance of
-         * the <strong>RangeSlider</strong> tick labels.
-         *
-         * @option {Boolean} [tooltip.enabled] <true>
-         * Disables (<b>false</b>) or enables (<b>true</b>) the tooltip of the <strong>RangeSlider</strong>.
-         *
-         * @option {String} [orientation] <"horizontal">
-         * The orientation of a <strong>RangeSlider</strong>; <strong>"horizontal"</strong> or
-         * <strong>"vertical"</strong>.
-         *
-         * @option {String} [tickPlacement] <"both">
-         * Denotes the location of the tick marks in the <strong>RangeSlider</strong>. The available options are:
-         * <div class="details-list">
-         *    <dl>
-         *         <dt>
-         *              <code>"topLeft"</code>
-         *         </dt>
-         *         <dd>
-         *              Tick marks are located on the top of the horizontal widget or on the left of
-         *   the vertical widget.
-         *         </dd>
-         *         <dt>
-         *              <code>"bottomRight"</code>
-         *         </dt>
-         *         <dd>
-         *             Tick marks are located on the bottom of the horizontal widget or on the
-         *   right side of the vertical widget.
-         *         </dd>
-         *         <dt>
-         *              <code>"both"</code>
-         *         </dt>
-         *         <dd>
-         *             Tick marks are located on both sides of the widget.
-         *         </dd>
-         *         <dt>
-         *              <code>"none"</code>
-         *         </dt>
-         *         <dd>
-         *             Tick marks are not visible.
-         *         </dd>
-         *    </dl>
-         * </div>
-         *
-         * @option {Number} [smallStep] <1>
-         * The small step value of the <strong>RangeSlider</strong>. The underlying value will be changed when the end
-         * user (1) clicks on the increase or decrease buttons of the <strong>RangeSlider</strong>, (2) presses the
-         * arrow keys (the drag handle must be focused), or (3) drags the drag handle.
-         *
-         * @option {Number} [largeStep] <5>
-         * The delta with which the value will change when the user presses the Page Up or Page Down key (the drag
-         * handle must be focused). Note: The allied largeStep will also set large tick for every large step.
-         *
-         * @option {Number} [selectionStart] <0>
-         * The selection start value of the <strong>RangeSlider</strong>.
-         *
-         * @option {Number} [selectionEnd] <10>
-         * The selection end value of the <strong>RangeSlider</strong>.
-         *
-         */
+    var RangeSlider = SliderBase.extend({
         init: function(element, options) {
             var that = this,
                 inputs = $(element).find("input"),
@@ -39556,20 +32809,6 @@ extend(Editor, {
             tooltip: { format: "{0}" }
         },
 
-        /**
-         * Enable/Disable the <strong>RangeSlider</strong> widget.
-         * @param {Boolean} enable
-         * The argument, which defines whether to enable/disable the <strong>RangeSlider</strong>.
-         * @example
-         * // get a reference to the range slider widget
-         * var rangeSlider = $("#rangeSlider").data("kendoRangeSlider");
-         *
-         * // disables the range slider
-         * rangeSlider.enable(false);
-         *
-         * // enables the range slider
-         * rangeSlider.enable(true);
-         */
         enable: function (enable) {
             var that = this,
                 options = that.options,
@@ -39615,31 +32854,31 @@ extend(Editor, {
                 }
             };
 
-
             that.wrapper
                 .find(TICK_SELECTOR + ", " + TRACK_SELECTOR)
-                    .bind(TRACK_MOUSE_DOWN, clickHandler)
-                    .end().bind(TRACK_MOUSE_DOWN, function() {
+                    .on(TRACK_MOUSE_DOWN + NS, clickHandler)
+                    .end()
+                    .on(TRACK_MOUSE_DOWN + NS, function() {
                         $(document.documentElement).one("selectstart", kendo.preventDefault);
                     });
 
             that.wrapper
                 .find(DRAG_HANDLE)
-                .bind(MOUSE_UP, function (e) {
+                .on(MOUSE_UP + NS, function (e) {
                     $(e.target).removeClass(STATE_SELECTED);
                 })
-                .bind(CLICK, function (e) {
+                .on(CLICK + NS, function (e) {
                     e.preventDefault();
                 });
 
             that.wrapper.find(DRAG_HANDLE)
-                .eq(0).bind(KEY_DOWN,
+                .eq(0).on(KEY_DOWN + NS,
                     proxy(function(e) {
                         this._keydown(e, "firstHandle");
                     }, that)
                 )
                 .end()
-                .eq(1).bind(KEY_DOWN,
+                .eq(1).on(KEY_DOWN + NS,
                     proxy(function(e) {
                         this._keydown(e, "lastHandle");
                     }, that)
@@ -39658,14 +32897,14 @@ extend(Editor, {
             that.wrapper.find("input").attr(DISABLED, DISABLED);
 
             that.wrapper
-                .find(TICK_SELECTOR + ", " + TRACK_SELECTOR).unbind(TRACK_MOUSE_DOWN);
+                .find(TICK_SELECTOR + ", " + TRACK_SELECTOR).off(TRACK_MOUSE_DOWN + NS);
 
             that.wrapper
                 .find(DRAG_HANDLE)
-                .unbind(MOUSE_UP)
-                .unbind(KEY_DOWN)
-                .unbind(CLICK)
-                .bind(KEY_DOWN, kendo.preventDefault);
+                .off(MOUSE_UP + NS)
+                .off(KEY_DOWN + NS)
+                .off(CLICK + NS)
+                .on(KEY_DOWN + NS, kendo.preventDefault);
 
             that.options.enabled = false;
         },
@@ -39711,17 +32950,6 @@ extend(Editor, {
             }
         },
 
-        /**
-         *
-         * The value method gets or sets the start and end values of the <strong>RangeSlider</strong>. It
-         * accepts an array as parameter, and returns an object array with the start and end
-         * selection values.
-         *
-         * @example
-         * var rangeSider = $("#rangeSlider").data("kendoRangeSlider");
-         * rangeSlider.value();
-         *
-         */
         value: function(value) {
             if (value && value.length) {
                 return this._value(value[0], value[1]);
@@ -39798,6 +33026,20 @@ extend(Editor, {
             this.wrapper.find(DRAG_HANDLE).each(function (index) {
                 $(this).css("z-index", type == "firstHandle" ? 1 - index : index);
             });
+        },
+
+        destroy: function() {
+            var that = this;
+
+            Widget.fn.destroy.call(that);
+
+            that.wrapper.off(NS)
+                .find(TICK_SELECTOR + ", " + TRACK_SELECTOR).off(NS)
+                .end()
+                .find(DRAG_HANDLE).off(NS);
+
+            that._firstHandleDrag.draggable.destroy();
+            that._lastHandleDrag.draggable.destroy();
         }
     });
 
@@ -39841,139 +33083,7 @@ extend(Editor, {
     kendo.ui.plugin(RangeSlider);
 
 })(jQuery);
-/**
- * @fileOverview Provides a Splitter implementation which can be used to display a dynamic layout of resizable and
- * collapsible panes.
- */
-
 (function ($, undefined) {
-    /**
-     * @name kendo.ui.Splitter.Description
-     *
-     * @section
-     * <p>
-     *  The <strong>Splitter</strong> provides a dynamic layout of resizable and collapsible panes. It converts the
-     *  children of an HTML element in to the interactive layout, adding resize and collapse handles based on
-     *  configuration. A <strong>Splitter</strong> can be mixed in a vertical or horizontal orientation to build
-     *  complex layouts.
-     * </p>
-     * <h3>Getting Started</h3>
-     * <p>
-     *  The layout and structure of a <strong>Splitter</strong> is defined within the DOM as a div with child elements.
-     * </p>
-     *
-     * @exampleTitle Create a div with children that will become panes
-     * @example
-     * <div id="splitter">
-     *     <div>Area 1</div>
-     *     <div>Area 2</div>
-     * </div>
-     *
-     * @section
-     * <p>
-     *  Initialization of a <strong>Splitter</strong> should occur after the DOM is fully loaded. It is recommended
-     *  that initialization the <strong>Splitter</strong> occur within a handler is provided to $(document).ready().
-     * </p>
-     *
-     * @exampleTitle Initialize the Splitter using a selector within $(document).ready()
-     * @example
-     * $(document).ready(function() {
-     *     $("#splitter").kendoSplitter();
-     * });
-     *
-     * @section
-     * <p>
-     *  When the <strong>Splitter</strong> is initialized, a vertical split bar will be placed between the two div
-     *  elements. This bar can be moved by a user left and right to adjust the size on the panes.
-     * </p>
-     * <h3>Configuring Splitter Behaviors</h3>
-     * <p>
-     *  The <strong>Splitter</strong> has a default configuration specified during initialization. However, these
-     *  options may be overriden to control the following properties:
-     * </p>
-     * <ul>
-     *  <li>Maximum and/or minimum pane sizes</li>
-     *  <li>Resizable and collapsible/expandable pane behaviors</li>
-     *  <li>Orientation (horizontal or vertical)</li>
-     * </ul>
-     * <p>
-     *  The properties of a pane must be set during initialization and set for each individual pane in a
-     *  <strong>Splitter</strong>.
-     * </p>
-     *
-     * @exampleTitle Initialize a Splitter and the properties of its panes
-     * @example
-     * $("#splitter").kendoSplitter({
-     *     panes: [
-     *         { collapsible: true, min: "100px", max: "300px" },
-     *         { collapsible: true }
-     *     ],
-     *     orientation: "vertical"
-     * });
-     *
-     * @section
-     * <h3>Nested Splitter Layouts</h3>
-     * <p>To achieve complex layouts, the <strong>Splitter</strong> supports nested layouts.</p>
-     *
-     * @exampleTitle Creating nested Splitter layout
-     * @example
-     * <div id="horizontalSplitter">
-     *     <div><p>Left Side Pane Content</p></div>
-     *     <div>
-     *         <div id="verticalSplitter">
-     *             <div><p>Right Side, Top Pane Content</p></div>
-     *             <div><p>Right Side, Bottom Pane Content</p></div>
-     *         </div>
-     *     </div>
-     * </div>
-     *
-     * @exampleTitle Initialize two Splitters with differing orientations
-     * @example
-     * $("horizontalSplitter").kendoSplitter();
-     * $("verticalSplitter").kendoSplitter({ orientation: "vertical" });
-     *
-     * @section
-     * <h3>Loading Content with AJAX</h3>
-     * <p>
-     *  While any valid technique for loading content via AJAX may be used, <strong>Splitter</strong> provides built-in
-     *  support for asynchronously loading content from URLs. These URLs should return HTML fragments that can be
-     *  loaded in the pane of a <strong>Splitter</strong>. If you want to load a whole page in an IFRAME, you may do so
-     *  by specifying the complete URL (i.e. http://kendoui.com/).
-     * </p>
-     *
-     * @exampleTitle Loading Splitter content asynchronously
-     * @example
-     * <div id="splitter">
-     *     <div>Area 1 with Static Content</div>
-     *     <div></div>
-     *     <div></div>
-     * </div>
-     *
-     * @exampleTitle Initialize Splitter; configure async loading for one pane; and an iframe for a third pane
-     * @example
-     * $(document).ready(function() {
-     *     $("#splitter").kendoSplitter({
-     *         panes: [
-     *             {},
-     *             { contentUrl: "html-content-snippet.html" },
-     *             { contentUrl: "http://kendoui.com/" }
-     *         ]
-     *     });
-     * });
-     *
-     * @section
-     * <h3>Accessing an Existing Splitter</h3>
-     * <p>
-     *  You can reference an existing <strong>Splitter</strong> instance via
-     *  <a href="http://api.jquery.com/jQuery.data/">jQuery.data()</a>. Once a reference has been established, you can
-     *  use the API to control its behavior.
-     * </p>
-     *
-     * @exampleTitle Accessing an existing Splitter instance
-     * @example
-     * var splitter = $("#splitter").data("kendoSplitter");
-     *
-     */
     var kendo = window.kendo,
         ui = kendo.ui,
         extend = $.extend,
@@ -39981,6 +33091,7 @@ extend(Editor, {
         Widget = ui.Widget,
         pxUnitsRegex = /^\d+(\.\d+)?px$/i,
         percentageUnitsRegex = /^\d+(\.\d+)?%$/i,
+        NS = ".kendoSplitter",
         EXPAND = "expand",
         COLLAPSE = "collapse",
         CONTENTLOAD = "contentLoad",
@@ -40024,72 +33135,9 @@ extend(Editor, {
         };
     }
 
-    var Splitter = Widget.extend(/** @lends kendo.ui.Splitter.prototype */ {
-        /**
-         * Creates a Splitter instance.
-         *
-         * @constructs
-         * @extends kendo.ui.Widget
-         *
-         * @param {Element} element DOM element
-         * @param {Object} options Configuration options.
-         *
-         * @option {String} [orientation] <horizontal>
-         * Specifies the orientation of the <strong>Splitter</strong>.
-         * <div class="details-list">
-         *  <dl>
-         *   <dt>"horizontal"</dt>
-         *   <dd>Define horizontal orientation of the splitter.</dd>
-         *   <dt>"vertical"</dt>
-         *   <dd>Define vertical orientation of the splitter.</dd>
-         *  </dl>
-         * </div>
-         *
-         * @option {Array} [panes]
-         * An array of pane definitions.
-         *
-         * _example
-         * $("#splitter").kendoSplitter({
-         *     panes: [
-         *         { size: "200px", min: "100px", max: "300px" },
-         *         { size: "20%", resizable: false },
-         *         { collapsed: true, collapsible: true }
-         *     ]
-         * });
-         *
-         * @option {String} [panes.size]
-         * Specifies the size of a pane defined as pixels (i.e. "200px") or as a percentage (i.e. "50%"). Note: This
-         * value must not exceed <strong>panes.max</strong> or be less then <strong>panes.min</strong>.
-         *
-         * @option {String} [panes.min]
-         * Specifies the minimum size of a pane defined as pixels (i.e. "200px") or as a percentage (i.e. "50%"). The
-         * size of a resized pane cannot be less than the defined minimum size.
-         *
-         * @option {String} [panes.max]
-         * Specifies the maximum size of a pane defined as pixels (i.e. "200px") or as a percentage (i.e. "50%"). The
-         * size of a resized pane cannot exceed the defined maximum size.
-         *
-         * @option {Boolean} [panes.collapsed] <false>
-         * Specifies whether a pane is initially collapsed (<strong>true</strong>) or expanded (<strong>true</strong>).
-         *
-         * @option {Boolean} [panes.collapsible] <false>
-         * Specifies whether a pane is collapsible (<strong>true</strong>) or not collapsible (<strong>false</strong>).
-         *
-         * @option {Boolean} [panes.scrollable] <true>
-         * Specifies whether a pane is scrollable (<strong>true</strong>) or not scrollable (<strong>false</strong>).
-         *
-         * @option {Boolean} [panes.resizable] <true>
-         * Specifies whether a pane is resizable (<strong>true</strong>) or not resizable (<strong>false</strong>).
-         *
-         * @option {Boolean} [panes.contentUrl] <true>
-         * Specifies the URL from which to load the content of a pane.
-         *
-         */
+    var Splitter = Widget.extend({
         init: function(element, options) {
-            var that = this,
-                triggerResize = function() {
-                    that.trigger(RESIZE);
-                };
+            var that = this;
 
             Widget.fn.init.call(that, element, options);
 
@@ -40101,209 +33149,27 @@ extend(Editor, {
 
             that._initPanes();
 
+            that._resizeHandler = function() {
+                that.trigger(RESIZE);
+            };
+
             that._attachEvents();
 
-            $(window).resize(triggerResize);
+            $(window).on("resize", that._resizeHandler);
 
             that.resizing = new PaneResizing(that);
 
             that.element.triggerHandler("init.kendoSplitter");
         },
         events: [
-            /**
-            * Triggered when a pane of a Splitter is expanded.
-            *
-            * @name kendo.ui.Splitter#expand
-            * @event
-            *
-            * @param {Event} e
-            *
-            * @param {Element} e.pane
-            * The expanding pane of the Splitter.
-            *
-            * @exampleTitle Attach expand event handler during initialization; detach via unbind()
-            * @example
-            * // event handler for expand
-            * var onExpand = function(e) {
-            *     // access the expanded item via e.pane (HTMLElement)
-            * };
-            *
-            * // attach expand event handler during initialization
-            * var splitter = $("#splitter").kendoSplitter({
-            *     expand: onExpand
-            * });
-            *
-            * // detach expand event handler via unbind()
-            * splitter.data("kendoSplitter").unbind("expand", onExpand);
-            *
-            * @exampleTitle Attach expand event handler via bind(); detach via unbind()
-            * @example
-            * // event handler for expand
-            * var onExpand = function(e) {
-            *     // access the expanded item via e.pane (HTMLElement)
-            * };
-            *
-            * // attach expand event handler via bind()
-            * $("#splitter").data("kendoSplitter").bind("expand", onExpand);
-            *
-            * // detach expand event handler via unbind()
-            * $("#splitter").data("kendoSplitter").unbind("expand", onExpand);
-            *
-            */
             EXPAND,
 
-            /**
-            * Triggered when a pane of a Splitter is collapsed.
-            *
-            * @name kendo.ui.Splitter#collapse
-            * @event
-            *
-            * @param {Event} e
-            * @param {Element} e.pane
-            * The collapsing pane of the Splitter.
-            *
-            * @exampleTitle Attach expand event handler during initialization; detach via unbind()
-            * @example
-            * // event handler for expand
-            * var onCollapse = function(e) {
-            *     // access the collapsed item via e.pane (HTMLElement)
-            * };
-            *
-            * // attach collapse event handler during initialization
-            * var splitter = $("#splitter").kendoSplitter({
-            *     collapse: onCollapse
-            * });
-            *
-            * // detach collapse event handler via unbind()
-            * splitter.data("kendoSplitter").unbind("collapse", onCollapse);
-            *
-            * @exampleTitle Attach collapse event handler via bind(); detach via unbind()
-            * @example
-            * // event handler for collapse
-            * var onExpand = function(e) {
-            *     // access the collapsed item via e.pane (HTMLElement)
-            * };
-            *
-            * // attach collapse event handler via bind()
-            * $("#splitter").data("kendoSplitter").bind("collapse", onCollapse);
-            *
-            * // detach collapse event handler via unbind()
-            * $("#splitter").data("kendoSplitter").unbind("collapse", onCollapse);
-            *
-            */
             COLLAPSE,
 
-            /**
-            * Triggered when the content for a pane has finished loading.
-            *
-            * @name kendo.ui.Splitter#contentLoad
-            * @event
-            *
-            * @param {Event} e
-            *
-            * @param {HTMLElement} e.pane
-            * The pane whose content has been loaded.
-            *
-            * @exampleTitle Attach contentLoad event handler during initialization; detach via unbind()
-            * @example
-            * // event handler for contentLoad
-            * var onContentLoad = function(e) {
-            *     // access the loaded pane via e.pane (HTMLElement)
-            * };
-            *
-            * // attach contentLoad event handler during initialization
-            * var splitter = $("#splitter").kendoSplitter({
-            *     contentLoad: onContentLoad
-            * });
-            *
-            * // detach contentLoad event handler via unbind()
-            * splitter.data("kendoSplitter").unbind("contentLoad", onContentLoad);
-            *
-            * @exampleTitle Attach contentLoad event handler via bind(); detach via unbind()
-            * @example
-            * // event handler for contentLoad
-            * var onContentLoad = function(e) {
-            *     // access the loaded pane via e.pane (HTMLElement)
-            * };
-            *
-            * // attach contentLoad event handler via bind()
-            * $("#splitter").data("kendoSplitter").bind("contentLoad", onContentLoad);
-            *
-            * // detach contentLoad event handler via unbind()
-            * $("#splitter").data("kendoSplitter").unbind("contentLoad", onContentLoad);
-            *
-            */
             CONTENTLOAD,
 
-            /**
-            * Triggered when a pane is resized.
-            *
-            * @name kendo.ui.Splitter#resize
-            * @event
-            * @param {Event} e
-            *
-            * @exampleTitle Attach resize event handler during initialization; detach via unbind()
-            * @example
-            * // event handler for resize
-            * var onResize = function(e) {
-            *     // ...
-            * };
-            *
-            * // attach resize event handler during initialization
-            * var splitter = $("#splitter").kendoSplitter({
-            *     resize: onResize
-            * });
-            *
-            * // detach resize event handler via unbind()
-            * splitter.data("kendoSplitter").unbind("resize", onResize);
-
-            * @exampleTitle Attach resize event handler via bind(); detach via unbind()
-            * @example
-            * // event handler for resize
-            * var onResize = function(e) {
-            *     // ...
-            * };
-            *
-            * // attach resize event handler via bind()
-            * $("#splitter").data("kendoSplitter").bind("resize", onResize);
-            *
-            * // detach resize event handler via unbind()
-            * $("#splitter").data("kendoSplitter").unbind("resize", onResize);
-            *
-            */
             RESIZE,
 
-            /**
-            * Fires when the splitter layout has changed
-            *
-            * @name kendo.ui.Splitter#layoutChange
-            * @event
-            *
-            * @exampleTitle Attach layoutChange event handler during initialization; detach via unbind()
-            * @example
-            * // event handler for resize
-            * var onLayoutChange = function(e) {
-            *     // ...
-            * };
-            *
-            * $("#splitter").kendoSplitter({
-            *     layoutChange: onLayoutChange
-            * });
-            *
-            * @exampleTitle Attach layoutChange event handler via bind(); detach via unbind()
-            * @example
-            * // event handler for layoutChange
-            * var onLayoutChange = function(e) {
-            *     // ...
-            * };
-            *
-            * // attach layoutChange event handler via bind()
-            * $("#splitter").bind("layoutChange", onLayoutChange);
-            *
-            * // detach layoutChange event handler via unbind()
-            * $("#splitter").unbind("layoutChange", onLayoutChange);
-            *
-            */
             LAYOUTCHANGE
         ],
 
@@ -40311,31 +33177,28 @@ extend(Editor, {
             var that = this,
                 orientation = that.options.orientation,
                 splitbarSelector = ".k-splitbar-draggable-" + orientation,
-                expandCollapseSelector = ".k-splitbar .k-icon:not(.k-resize-handle)",
-                triggerResize = function() {
-                    that.trigger(RESIZE);
-                };
+                expandCollapseSelector = ".k-splitbar .k-icon:not(.k-resize-handle)";
 
             that.element
-                .delegate(splitbarSelector, MOUSEENTER, function() { $(this).addClass("k-splitbar-" + that.orientation + "-hover"); })
-                .delegate(splitbarSelector, MOUSELEAVE, function() { $(this).removeClass("k-splitbar-" + that.orientation + "-hover"); })
-                .delegate(splitbarSelector, "mousedown", function() { that._contentFrames(this).after("<div class='k-overlay' />"); })
-                .delegate(splitbarSelector, "mouseup", function() { that._contentFrames(this).next(".k-overlay").remove(); })
-                .delegate(expandCollapseSelector, MOUSEENTER, function() { $(this).addClass("k-state-hover"); })
-                .delegate(expandCollapseSelector, MOUSELEAVE, function() { $(this).removeClass('k-state-hover'); })
-                .delegate(".k-splitbar .k-collapse-next, .k-splitbar .k-collapse-prev", CLICK, that._arrowClick(COLLAPSE))
-                .delegate(".k-splitbar .k-expand-next, .k-splitbar .k-expand-prev", CLICK, that._arrowClick(EXPAND))
-                .delegate(".k-splitbar", "dblclick", proxy(that._dbclick, that))
+                .on(MOUSEENTER + NS, splitbarSelector, function() { $(this).addClass("k-splitbar-" + that.orientation + "-hover"); })
+                .on(MOUSELEAVE + NS, splitbarSelector, function() { $(this).removeClass("k-splitbar-" + that.orientation + "-hover"); })
+                .on("mousedown" + NS, splitbarSelector, function() { that._panes().append("<div class='k-splitter-overlay k-overlay' />"); })
+                .on("mouseup" + NS, splitbarSelector, function() { that._panes().children(".k-splitter-overlay").remove(); })
+                .on(MOUSEENTER + NS, expandCollapseSelector, function() { $(this).addClass("k-state-hover"); })
+                .on(MOUSELEAVE + NS, expandCollapseSelector, function() { $(this).removeClass('k-state-hover'); })
+                .on(CLICK + NS, ".k-splitbar .k-collapse-next, .k-splitbar .k-collapse-prev", that._arrowClick(COLLAPSE))
+                .on(CLICK + NS, ".k-splitbar .k-expand-next, .k-splitbar .k-expand-prev", that._arrowClick(EXPAND))
+                .on("dblclick" + NS, ".k-splitbar", proxy(that._dbclick, that))
                 .parent().closest(".k-splitter").each(function() {
                     var parentSplitter = $(this),
                         splitter = parentSplitter.data("kendoSplitter");
 
                     if (splitter) {
-                        splitter.bind(RESIZE, triggerResize);
+                        splitter.bind(RESIZE, that._resizeHandler);
                     } else {
-                        parentSplitter.one("init.kendoSplitter", function() {
-                            $(this).data("kendoSplitter").bind(RESIZE, triggerResize);
-                            triggerResize();
+                        parentSplitter.one("init" + NS, function() {
+                            $(this).data("kendoSplitter").bind(RESIZE, that._resizeHandler);
+                            that._resizeHandler();
                         });
                     }
                 });
@@ -40344,6 +33207,19 @@ extend(Editor, {
         options: {
             name: "Splitter",
             orientation: HORIZONTAL
+        },
+
+        destroy: function() {
+            var that = this;
+
+            Widget.fn.destroy.call(that);
+
+            that.element.off(NS);
+            that.resizing.destroy();
+
+            $(window).off("resize", that._resizeHandler);
+
+            kendo.destroy(that.element);
         },
 
         _initPanes: function() {
@@ -40364,28 +33240,10 @@ extend(Editor, {
                         that.ajaxRequest(pane);
                     })
                 .end();
+
             that.trigger(RESIZE);
         },
 
-        /**
-         * Loads the content of a pane from a local or remote URL.
-         *
-         * @param {Selector | DOM Element} pane
-         * The targetted pane whose content is to be loaded via a URL.
-         *
-         * @param {String} url
-         * A local or remote URL from which the content of the pane is to be loaded.
-         *
-         * @param {Object | String} data
-         * Any data that is necessary to be sent to the server.
-         *
-         * @example
-         * // get a reference to the splitter
-         * var splitter = $("#splitter").data("kendoSplitter");
-         * // load content into the pane with ID, pane1
-         * splitter.ajaxRequest("#pane1", "/customer/profile", { id: 42 });
-         *
-         */
         ajaxRequest: function(pane, url, data) {
             pane = $(pane);
 
@@ -40506,8 +33364,8 @@ extend(Editor, {
                 that._updateSplitBar(splitbar, previousPane, nextPane);
             });
         },
-        _contentFrames: function(splitbar) {
-            return $(splitbar).siblings(PANECLASS).find("> .k-content-frame");
+        _panes: function() {
+            return this.element.children(PANECLASS);
         },
         _resize: function() {
             var that = this,
@@ -40597,30 +33455,6 @@ extend(Editor, {
             that.trigger(LAYOUTCHANGE);
         },
 
-        /**
-         * Toggles the state of a specified pane (i.e. collapsed or expanded). Invoking this method will force the
-         * <strong>Splitter</strong> to redraw and it will trigger layoutChange and resize events. Note: Invoking the
-         * method will not trigger collapse or expand events.
-         *
-         * @param {Selector | DOM Element} pane
-         * The pane to be collapsed.
-         *
-         * @param {Boolean} expand (Optional)
-         * Represents the desired state of the specified pane; to be expanded (<strong>true</strong>) or collapsed
-         * (<strong>false</strong>). If undefined, toggle() will collapse the pane if it is expanded or will expand the
-         * pane if it is collapsed.
-         *
-         * @example
-         * // get a reference to the splitter
-         * var splitter = $("#splitter").data("kendoSplitter");
-         * // toggle the state of the pane with ID, pane1
-         * splitter.toggle("#pane1");
-         * // toggle the state of the pane with ID, pane1 to be expanded
-         * splitter.toggle("#pane1", true);
-         * // toggle the state of the pane with ID, pane1 to be collapsed
-         * splitter.toggle("#pane1", false);
-         *
-         */
         toggle: function(pane, expand) {
             var paneConfig;
 
@@ -40642,107 +33476,18 @@ extend(Editor, {
             this.trigger(RESIZE);
         },
 
-        /**
-         * Collapses a specified pane. Invoking this method will force the <strong>Splitter</strong> to redraw and it
-         * will trigger layoutChange and resize events. Note: Invoking the method will not trigger a collapse event.
-         *
-         * @param {Selector | DOM Element} pane
-         * The pane to be collapsed.
-         *
-         * @example
-         * // get a reference to the splitter
-         * var splitter = $("#splitter").data("kendoSplitter");
-         * // collapse the pane with ID, pane1
-         * splitter.collapse("#pane1");
-         *
-         */
         collapse: function(pane) {
             this.toggle(pane, false);
         },
 
-        /**
-         * Expands a specified pane. Invoking this method will force the <strong>Splitter</strong> to redraw and it
-         * will trigger layoutChange and resize events. Note: Invoking the method will not trigger an expand event.
-         *
-         * @param {Selector | DOM Element} pane
-         * The pane to be expanded.
-         *
-         * @example
-         * // get a reference to the splitter
-         * var splitter = $("#splitter").data("kendoSplitter");
-         * // expand the pane with ID, pane1
-         * splitter.expand("#pane1");
-         *
-         */
         expand: function(pane) {
             this.toggle(pane, true);
         },
 
-        /**
-         * Set the size of the pane. Setting this value will cause the <strong>Splitter</strong> to redraw and it will
-         * trigger layoutChange and resize events.
-         *
-         * @name kendo.ui.Splitter#size
-         * @function
-         *
-         * @param {Selector | DOM Element} pane
-         * The pane to be resized.
-         *
-         * @param {String} value
-         * The new size of the pane defined as pixels (i.e. "200px") or as a percentage (i.e. "50%"). Note: This value
-         * must not exceed <strong>panes.max</strong> or be less then <strong>panes.min</strong>.
-         *
-         * @example
-         * // get a reference to the splitter
-         * var splitter = $("#splitter").data("kendoSplitter");
-         * // set the size of the pane with ID, pane1
-         * splitter.size("#pane1", "200px");
-         *
-         */
         size: panePropertyAccessor("size", true),
 
-        /**
-         * Sets the minimum size of a pane. Setting this value will not cause the <strong>Splitter</strong> to
-         * redraw, nor will it trigger any events.
-         *
-         * @name kendo.ui.Splitter#min
-         * @function
-         *
-         * @param {Selector | DOM Element} pane
-         * The pane being targetted for a new minimum size configuration value.
-         *
-         * @param {String} value
-         * The minimum size value of the pane defined as pixels (i.e. "200px") or as a percentage (i.e. "50%").
-         *
-         * @example
-         * // get a reference to the splitter
-         * var splitter = $("#splitter").data("kendoSplitter");
-         * // set the minimum size of the pane with ID, pane1
-         * splitter.min("#pane1", "100px");
-         *
-         */
         min: panePropertyAccessor("min"),
 
-        /**
-         * Sets the maximum size of a pane. Setting this value will not cause the <strong>Splitter</strong> to
-         * redraw, nor will it trigger any events.
-         *
-         * @name kendo.ui.Splitter#max
-         * @function
-         *
-         * @param {Selector | DOM Element} pane
-         * The pane being targetted for a new minimum size configuration value.
-         *
-         * @param {String} value
-         * The maximum size value of the pane defined as pixels (i.e. "200px") or as a percentage (i.e. "50%").
-         *
-         * @example
-         * // get a reference to the splitter
-         * var splitter = $("#splitter").data("kendoSplitter");
-         * // set the maximum size of the pane with ID, pane1
-         * splitter.max("#pane1", "300px");
-         *
-         */
         max: panePropertyAccessor("max")
     });
 
@@ -40787,6 +33532,9 @@ extend(Editor, {
     }
 
     PaneResizing.prototype = {
+        destroy: function() {
+            this._resizable.destroy();
+        },
         _createHint: function(handle) {
             var that = this;
             return $("<div class='k-ghost-splitbar k-ghost-splitbar-" + that.orientation + " k-state-default' />")
@@ -40827,7 +33575,7 @@ extend(Editor, {
                 splitbar = $(e.currentTarget),
                 owner = that.owner;
 
-            owner._contentFrames(splitbar).next(".k-overlay").remove();
+            owner._panes().children(".k-splitter-overlay").remove();
 
             if (e.keyCode !== kendo.keys.ESC) {
                 var ghostPosition = e.position,
@@ -40864,6 +33612,7 @@ extend(Editor, {
         Widget = kendo.ui.Widget,
         logToConsole = kendo.logToConsole,
         rFileExtension = /\.([^\.]+)$/,
+        NS = ".kendoUpload",
         SELECT = "select",
         UPLOAD = "upload",
         SUCCESS = "success",
@@ -40893,10 +33642,10 @@ extend(Editor, {
             that._activeInput(activeInput);
             that.toggle(that.options.enabled);
 
-            activeInput.closest("form").bind({
-                "submit": $.proxy(that._onParentFormSubmit, that),
-                "reset": $.proxy(that._onParentFormReset, that)
-            });
+            var ns = that._ns = NS + "-" + kendo.guid();
+            activeInput.closest("form")
+                .on("submit" + ns, $.proxy(that._onParentFormSubmit, that))
+                .on("reset" + ns, $.proxy(that._onParentFormReset, that));
 
             if (that.options.async.saveUrl != undefined) {
                 that._module = that._supportsFormData() ?
@@ -40976,6 +33725,17 @@ extend(Editor, {
         toggle: function(enable) {
             enable = typeof (enable) === "undefined" ? enable : !enable;
             this.wrapper.toggleClass("k-state-disabled", enable);
+        },
+
+        destroy: function() {
+            var that = this;
+
+            $(document)
+                .add($(".k-dropzone", that.wrapper))
+                .add(that.wrapper.closest("form"))
+                .off(that._ns);
+
+            Widget.fn.destroy.call(that);
         },
 
         _addInput: function(input) {
@@ -41289,22 +34049,23 @@ extend(Editor, {
         },
 
         _setupDropZone: function() {
+            var that = this;
+
             $(".k-upload-button", this.wrapper)
                 .wrap("<div class='k-dropzone'></div>");
 
-            var dropZone = $(".k-dropzone", this.wrapper)
-                .append($("<em>" + this.localization["dropFilesHere"] + "</em>"))
-                .bind({
-                    "dragenter": stopEvent,
-                    "dragover": function(e) { e.preventDefault(); },
-                    "drop" : $.proxy(this._onDrop, this)
-                });
+            var ns = that._ns;
+            var dropZone = $(".k-dropzone", that.wrapper)
+                .append($("<em>" + that.localization.dropFilesHere + "</em>"))
+                .on("dragenter" + ns, stopEvent)
+                .on("dragover" + ns, function(e) { e.preventDefault(); })
+                .on("drop" + ns, $.proxy(this._onDrop, this));
 
-            bindDragEventWrappers(dropZone,
+            bindDragEventWrappers(dropZone, ns,
                 function() { dropZone.addClass("k-dropzone-hovered"); },
                 function() { dropZone.removeClass("k-dropzone-hovered"); });
 
-            bindDragEventWrappers($(document),
+            bindDragEventWrappers($(document), ns,
                 function() { dropZone.addClass("k-dropzone-active"); },
                 function() { dropZone.removeClass("k-dropzone-active"); });
         },
@@ -41359,7 +34120,7 @@ extend(Editor, {
                 .attr("encoding", "multipart/form-data");
     };
 
-    syncUploadModule.prototype = /** @ignore */  {
+    syncUploadModule.prototype = {
         onSelect: function(e) {
             var upload = this.upload;
             var sourceInput = $(e.target);
@@ -41396,7 +34157,7 @@ extend(Editor, {
 
     Upload._frameId = 0;
 
-    iframeUploadModule.prototype = /** @ignore */ {
+    iframeUploadModule.prototype = {
         onSelect: function(e) {
             var upload = this.upload,
                 sourceInput = $(e.target);
@@ -41626,7 +34387,7 @@ extend(Editor, {
             .bind("t:abort", $.proxy(this.onAbort, this));
     };
 
-    formDataUploadModule.prototype = /** @ignore */ {
+    formDataUploadModule.prototype = {
         onSelect: function(e, rawFiles) {
             var upload = this.upload,
                 module = this,
@@ -41926,11 +34687,11 @@ extend(Editor, {
         e.stopPropagation(); e.preventDefault();
     }
 
-    function bindDragEventWrappers(element, onDragEnter, onDragLeave) {
+    function bindDragEventWrappers(element, namespace, onDragEnter, onDragLeave) {
         var hideInterval, lastDrag;
 
         element
-            .bind("dragenter", function(e) {
+            .on("dragenter" + namespace, function(e) {
                 onDragEnter();
                 lastDrag = new Date();
 
@@ -41946,7 +34707,7 @@ extend(Editor, {
                     }, 100);
                 }
             })
-            .bind("dragover", function(e) {
+            .on("dragover" + namespace, function(e) {
                 lastDrag = new Date();
             });
     }
@@ -41976,154 +34737,7 @@ extend(Editor, {
     }
     kendo.ui.plugin(Upload);
 })(jQuery);
-/**
- * @fileOverview Provides a Window implementation which can be used to display content in a modal or non-modal HTML
- * window.
- */
-
 (function($, undefined) {
-    /**
-     * @name kendo.ui.Window.Description
-     *
-     * @section
-     * <p>
-     *  A <strong>Window</strong> displays content in a modal or non-modal HTML window. By default, a
-     *  <strong>Window</strong> can be moved, resized, and closed. Its content can also be defined with either as
-     *  static HTML or loaded dynamically via AJAX.
-     * </p>
-     * <p>
-     *  A <strong>Window</strong> can be initialized from virtually any DOM element. During initialization, the
-     *  targeted content will automatically be wrapped in the div element of the <strong>Window</strong>.
-     * </p>
-     * <h3>Getting Started</h3>
-     *
-     * @exampleTitle Create a simple HTML element with the Window content
-     * @example
-     * <div id="window">
-     *     Content of the Window
-     * </div>
-     *
-     * @exampleTitle Initialize the Window using a selector
-     * @example
-     * $(document).ready(function() {
-     *     $("#window").kendoWindow();
-     * });
-     *
-     * @section
-     * <p>
-     *  When a <strong>Window</strong> is initialized, it will automatically be displayed open near the location of the
-     *  DOM element that was used to initialize the content.
-     * </p>
-     * <h3>Configuring Window Behaviors</h3>
-     * <p>
-     *  A <strong>Window</strong> provides many configuration options that can be easily set during initialization.
-     *  Among the properties that can be controlled:
-     * </p>
-     * <ul>
-     *  <li>Minimum height/width</li>
-     *  <li>Available user actions (close/refresh/maximize/minimize) and ability to define custom ones</li>
-     *  <li>Title</li>
-     *  <li>Draggable and resizable behaviors</li>
-     * </ul>
-     *
-     * @exampleTitle Create a modal Window with all user actions enabled
-     * @example
-     * $("#window").kendoWindow({
-     *     actions: ["Custom", "Refresh", "Maximize", "Minimize", "Close"],
-     *     draggable: false,
-     *     height: "300px",
-     *     modal: true,
-     *     resizable: false,
-     *     title: "Modal Window",
-     *     width: "500px"
-     * });
-     *
-     * @section
-     * <p>
-     *  The order of the values in the actions array determines the order in which the action buttons will be rendered
-     *  in the title of a <strong>Window</strong>. The maximize action serves both as a button for expanding a
-     *  <strong>Window</strong> to fill the screen and as a button to restore a <strong>Window</strong> to its previous
-     *  size. The minimize action collapses a <strong>Window</strong> to its title.
-     * </p>
-     * <p>If a non-recognized action name is supplied, it is treated as a custom action - <strong>k-icon</strong> and <strong>k-actionname</strong>
-     * CSS classes are rendered for it and no click event handler is attached automatically. The Kendo stylesheets have a supplied icon for
-     * actions with the name "Custom", but any name can be used. Click events can be captured and handled in a standard way:</p>
-     *
-     * @exampleTitle Custom actions
-     * @example
-     *   $("#window").kendoWindow({
-     *       actions: ["Custom", "Minimize", "Maximize", "Close"],
-     *       title: "Window Title"
-     *   }).data("kendoWindow").wrapper.find(".k-i-custom").click(function(e) {
-     *       alert("Custom action button clicked");
-     *       e.preventDefault();
-     *   });
-     *
-     * <h3>Positioning and Opening a Window</h3>
-     * <p>
-     *  In some scenarios, it is preferable to center a <strong>Window</strong> rather than open it near the HTML
-     *  element used to define the content. It is also common to open a <strong>Window</strong> as the result of the
-     *  action of a user rather than on the load event of a page. The <strong>Window</strong> API provides methods for
-     *  handling these scenarios.
-     * </p>
-     *
-     * @exampleTitle Centering a Window and opening on button click
-     * @example
-     * <div id="window">
-     *     Content of the Window
-     * </div>
-     * <button id="openButton">Open Window</button>
-     *
-     * @exampleTitle Initialize Window, center, and configure button click action
-     * @example
-     * $(document).ready(function(){
-     *     var win = $("#window").kendoWindow({
-     *         height: "200px",
-     *         title: "Centered Window",
-     *         visible: false,
-     *         width: "200px"
-     *     }).data("kendoWindow");
-     * });
-     *
-     * $("#openButton").click(function(){
-     *     var win = $("#window").data("kendoWindow");
-     *     win.center();
-     *     win.open();
-     * });
-     *
-     * @section
-     * <h3>Loading Window content via AJAX</h3>
-     * <p>
-     *  A <strong>Window</strong> provides built-in support for asynchronously loading content from a URL. This URL
-     *  should return a HTML fragment that can be loaded in a Window content area.
-     * </p>
-     *
-     * @exampleTitle Load Window content asynchronously
-     * @example
-     * <div id="window"></div>
-     *
-     * @exampleTitle Initialize window and configure content loading
-     * @example
-     * $(document).ready(function(){
-     *     $("#window").kendoWindow({
-     *         content: "html-content-snippet.html",
-     *         title: "Async Window Content"
-     *     });
-     * });
-     *
-     * @section
-     * <h3>Accessing an Existing Window</h3>
-     * <p>
-     *  You can reference an existing <b>Window</b> instance via
-     *  <a href="http://api.jquery.com/jQuery.data/">jQuery.data()</a>. Once a reference has been established, you can
-     *  use the API to control its behavior.
-     * </p>
-     *
-     * @exampleTitle Accessing an existing Window instance
-     * @example
-     * var win = $("#window").data("kendoWindow");
-     *
-     */
     var kendo = window.kendo,
         Widget = kendo.ui.Widget,
         Draggable = kendo.ui.Draggable,
@@ -42134,6 +34748,7 @@ extend(Editor, {
         template = kendo.template,
         BODY = "body",
         templates,
+        NS = ".kendoWindow",
         // classNames
         KWINDOW = ".k-window",
         KWINDOWTITLEBAR = ".k-window-titlebar",
@@ -42162,18 +34777,24 @@ extend(Editor, {
         MINIMIZE_MAXIMIZE = ".k-window-actions .k-i-minimize,.k-window-actions .k-i-maximize",
         isLocalUrl = kendo.isLocalUrl;
 
+    function defined(x) {
+        return (typeof x != "undefined");
+    }
+
     function constrain(value, low, high) {
         return Math.max(Math.min(value, high), low);
     }
 
-    function windowObject(element) {
-        return element.children(KWINDOWCONTENT).data("kendoWindow");
+    function windowObject(element, name) {
+        var contentElement = element.children(KWINDOWCONTENT);
+
+        return contentElement.data("kendoWindow") || contentElement.data("kendo" + name);
     }
 
-    function openedModalWindows() {
+    function openedModalWindows(name) {
         return $(KWINDOW).filter(function() {
             var wnd = $(this);
-            return wnd.is(VISIBLE) && windowObject(wnd).options.modal;
+            return wnd.is(VISIBLE) && windowObject(wnd, name).options.modal;
         }).sort(function(a, b){
             return +$(a).css("zIndex") - +$(b).css("zIndex");
         });
@@ -42206,75 +34827,7 @@ extend(Editor, {
         };
     }
 
-    var Window = Widget.extend(/** @lends kendo.ui.Window.prototype */ {
-        /**
-         *
-         * @constructs
-         * @extends kendo.ui.Widget
-         *
-         * @param {Element} element
-         * DOM element
-         *
-         * @param {Object} options
-         * Configuration options.
-         *
-         * @option {Boolean} [modal] <false>
-         * Specifies whether the window should show a modal overlay over the page.
-         *
-         * @option {Boolean} [visible] <true>
-         * Specifies whether the window will be initially visible.
-         *
-         * @option {Boolean} [draggable] <true>
-         * Enables (<strong>true</strong>) or disables (<strong>false</strong>) the ability for users to move/drag a
-         * <strong>Window</strong>.
-         *
-         * @option {Boolean} [resizable] <true>
-         * Enables (<strong>true</strong>) or disables (<strong>false</strong>) the ability for users to resize a
-         * <strong>Window</strong>.
-         *
-         * @option {Number} [minWidth] <50>
-         * The minimum width (in pixels) that may be achieved by resizing the window.
-         *
-         * @option {Number} [minHeight] <50>
-         * The minimum height (in pixels) that may be achieved by resizing the window.
-         *
-         * @option {Number} [maxWidth] <Infinity>
-         * The maximum width (in pixels) that may be achieved by resizing the window.
-         *
-         * @option {Number} [maxHeight] <Infinity>
-         * The maximum height (in pixels) that may be achieved by resizing the window.
-         *
-         * @option {Object|String} [content]
-         * Specifies a URL or request options that the window should load its content from. For remote URLs, a
-         * container iframe element is automatically created.
-         *
-         * @option {String} [content.template]
-         * Template for the content of a <strong>Window</strong>.
-         *
-         * @option {Boolean} [iframe]
-         * Explicitly states whether content iframe should be created.
-         *
-         * @option {Array} [actions] <["Close"]>
-         * The buttons for interacting with the window. Predefined array values are "Close", "Refresh", "Minimize",
-         * and "Maximize".
-         *
-         * @option {String} [title]
-         * The text in the window title bar.
-         *
-         * @option {Object} [appendTo] <document.body>
-         * The element that the Window will be appended to.
-         *
-         * @option {Object} [animation]
-         * A collection of {Animation} objects, used to change default animations. A value of <strong>false</strong>
-         * will disable all animations in the widget.
-         *
-         * @option {Animation} [animation.open]
-         * The animation that will be used when a Window opens.
-         *
-         * @option {Animation} [animation.close]
-         * The animation that will be used when a Window closes.
-         *
-         */
+    var Window = Widget.extend({
         init: function(element, options) {
             var that = this,
                 wrapper,
@@ -42309,7 +34862,7 @@ extend(Editor, {
                 }
             }
 
-            if (typeof options.visible == "undefined") {
+            if (!defined(options.visible)) {
                 options.visible = element.is(VISIBLE);
             }
 
@@ -42340,14 +34893,13 @@ extend(Editor, {
                 that._overlay(wrapper.is(VISIBLE)).css({ opacity: 0.5 });
             }
 
-            wrapper.on({
-                mouseenter: function () { $(this).addClass(KHOVERSTATE); },
-                mouseleave: function () { $(this).removeClass(KHOVERSTATE); },
-                click: proxy(that._windowActionHandler, that)
-            }, ".k-window-titlebar .k-window-action");
+            wrapper
+                .on("mouseenter" + NS,  ".k-window-titlebar .k-window-action", function () { $(this).addClass(KHOVERSTATE); })
+                .on("mouseleave" + NS,  ".k-window-titlebar .k-window-action", function () { $(this).removeClass(KHOVERSTATE); })
+                .on("click" + NS, ".k-window-titlebar .k-window-action", proxy(that._windowActionHandler, that));
 
             if (options.resizable) {
-                wrapper.on("dblclick", KWINDOWTITLEBAR, proxy(that.toggleMaximization, that));
+                wrapper.on("dblclick" + NS, KWINDOWTITLEBAR, proxy(that.toggleMaximization, that));
 
                 each("n e s w se sw ne nw".split(" "), function(index, handler) {
                     wrapper.append(templates.resizeHandle(handler));
@@ -42361,11 +34913,15 @@ extend(Editor, {
             }
 
             wrapper.add(wrapper.find(".k-resize-handle,.k-window-titlebar"))
-                .on("mousedown", proxy(that.toFront, that));
+                .on("mousedown" + NS, proxy(that.toFront, that));
 
             that.touchScroller = kendo.touchScroller(element);
 
-            $(window).resize(proxy(that._onDocumentResize, that));
+            that._resizeHandler = function(e) {
+                return that._onDocumentResize(e);
+            };
+
+            $(window).on("resize", that._resizeHandler);
 
             if (options.visible) {
                 that.trigger(OPEN);
@@ -42418,329 +34974,14 @@ extend(Editor, {
         },
 
         events:[
-            /**
-             *
-             * Triggered when a Window is opened (i.e. the open() method is called).
-             *
-             * @name kendo.ui.Window#open
-             * @event
-             * @cancellable
-             *
-             * @param {Event} e
-             *
-             * @exampleTitle Attach open event handler during initialization; detach via unbind()
-             * @example
-             * // event handler for expand
-             * var onOpen = function(e) {
-             *     // ...
-             * };
-             *
-             * // attach open event handler during initialization
-             * var kendoWindow = $("#window").kendoWindow({
-             *     open: onOpen
-             * });
-             *
-             * // detach expand event handler via unbind()
-             * kendoWindow.data("kendoWindow").unbind("open", onOpen);
-             *
-             * @exampleTitle Attach open event handler via bind(); detach via unbind()
-             * @example
-             * // event handler for open
-             * var onOpen = function(e) {
-             *     // ...
-             * };
-             *
-             * // attach open event handler via bind()
-             * $("#window").data("kendoWindow").bind("open", onOpen);
-             *
-             * // detach open event handler via unbind()
-             * $("#window").data("kendoWindow").unbind("open", onOpen);
-             *
-             */
             OPEN,
-            /**
-             *
-             * Triggered when a Window has finished its opening animation.
-             *
-             * @name kendo.ui.Window#activate
-             * @event
-             *
-             * @param {Event} e
-             *
-             * @exampleTitle Attach activate event handler during initialization; detach via unbind()
-             * @example
-             * // event handler for activate
-             * var onActivate = function(e) {
-             *     // ...
-             * };
-             *
-             * // attach activate event handler during initialization
-             * var kendoWindow = $("#window").kendoWindow({
-             *     activate: onActivate
-             * });
-             *
-             * // detach activate event handler via unbind()
-             * kendoWindow.data("kendoWindow").unbind("activate", onActivate);
-             *
-             * @exampleTitle Attach activate event handler via bind(); detach via unbind()
-             * @example
-             * // event handler for activate
-             * var onActivate = function(e) {
-             *     // ...
-             * };
-             *
-             * // attach activate event handler via bind()
-             * $("#window").data("kendoWindow").bind("activate", onActivate);
-             *
-             * // detach activate event handler via unbind()
-             * $("#window").data("kendoWindow").unbind("activate", onActivate);
-             *
-             */
             ACTIVATE,
-            /**
-             *
-             * Triggered when a Window has finished its closing animation.
-             *
-             * @name kendo.ui.Window#deactivate
-             * @event
-             *
-             * @param {Event} e
-             *
-             * @exampleTitle Attach deactivate event handler during initialization; detach via unbind()
-             * @example
-             * // event handler for deactivate
-             * var onDeactivate = function(e) {
-             *     // ...
-             * };
-             *
-             * // attach deactivate event handler during initialization
-             * var kendoWindow = $("#window").kendoWindow({
-             *     deactivate: onDeactivate
-             * });
-             *
-             * // detach deactivate event handler via unbind()
-             * kendoWindow.data("kendoWindow").unbind("deactivate", onDeactivate);
-             *
-             * @exampleTitle Attach deactivate event handler via bind(); detach via unbind()
-             * @example
-             * // event handler for deactivate
-             * var onDeactivate = function(e) {
-             *     // ...
-             * };
-             *
-             * // attach deactivate event handler via bind()
-             * $("#window").data("kendoWindow").bind("deactivate", onDeactivate);
-             *
-             * // detach deactivate event handler via unbind()
-             * $("#window").data("kendoWindow").unbind("deactivate", onDeactivate);
-             *
-             */
             DEACTIVATE,
-            /**
-             *
-             * Triggered when a Window is closed (by a user or through the close() method).
-             *
-             * @name kendo.ui.Window#close
-             * @event
-             * @cancellable
-             *
-             * @param {Event} e
-             *
-             * @exampleTitle Attach close event handler during initialization; detach via unbind()
-             * @example
-             * // event handler for close
-             * var onClose = function(e) {
-             *     // ...
-             * };
-             *
-             * // attach close event handler during initialization
-             * var kendoWindow = $("#window").kendoWindow({
-             *     close: onClose
-             * });
-             *
-             * // detach close event handler via unbind()
-             * kendoWindow.data("kendoWindow").unbind("close", onClose);
-             *
-             * @exampleTitle Attach close event handler via bind(); detach via unbind()
-             * @example
-             * // event handler for close
-             * var onClose = function(e) {
-             *     // ...
-             * };
-             *
-             * // attach close event handler via bind()
-             * $("#window").data("kendoWindow").bind("close", onClose);
-             *
-             * // detach close event handler via unbind()
-             * $("#window").data("kendoWindow").unbind("close", onClose);
-             *
-             */
             CLOSE,
-            /**
-             *
-             * Triggered when the content of a Window have been refreshed via AJAX.
-             *
-             * @name kendo.ui.Window#refresh
-             * @event
-             *
-             * @param {Event} e
-             *
-             * @exampleTitle Attach refresh event handler during initialization; detach via unbind()
-             * @example
-             * // event handler for refresh
-             * var onRefresh = function(e) {
-             *     // ...
-             * };
-             *
-             * // attach refresh event handler during initialization
-             * var kendoWindow = $("#window").kendoWindow({
-             *     refresh: onRefresh
-             * });
-             *
-             * // detach refresh event handler via unbind()
-             * kendoWindow.data("kendoWindow").unbind("refresh", onRefresh);
-             *
-             * @exampleTitle Attach refresh event handler via bind(); detach via unbind()
-             * @example
-             * // event handler for refresh
-             * var onRefresh = function(e) {
-             *     // ...
-             * };
-             *
-             * // attach refresh event handler via bind()
-             * $("#window").data("kendoWindow").bind("refresh", onRefresh);
-             *
-             * // detach refresh event handler via unbind()
-             * $("#window").data("kendoWindow").unbind("refresh", onRefresh);
-             *
-             */
             REFRESH,
-            /**
-             *
-             * Triggered when a Window has been resized by a user.
-             *
-             * @name kendo.ui.Window#resize
-             * @event
-             *
-             * @param {Event} e
-             *
-             * @exampleTitle Attach resize event handler during initialization; detach via unbind()
-             * @example
-             * // event handler for resize
-             * var onResize = function(e) {
-             *     // ...
-             * };
-             *
-             * // attach resize event handler during initialization
-             * var kendoWindow = $("#window").kendoWindow({
-             *     resize: onResize
-             * });
-             *
-             * // detach resize event handler via unbind()
-             * kendoWindow.data("kendoWindow").unbind("resize", onResize);
-             *
-             * @exampleTitle Attach resize event handler via bind(); detach via unbind()
-             * @example
-             * // event handler for resize
-             * var onResize = function(e) {
-             *     // ...
-             * };
-             *
-             * // attach resize event handler via bind()
-             * $("#window").data("kendoWindow").bind("resize", onResize);
-             *
-             * // detach resize event handler via unbind()
-             * $("#window").data("kendoWindow").unbind("resize", onResize);
-             *
-             */
             RESIZE,
-
-            /**
-             * Triggered when the user starts to move the window.
-             * @name kendo.ui.Window#dragstart
-             * @event
-             * @param {Event} e
-             */
             DRAGSTART,
-
-            /**
-             *
-             * Triggered when a Window has been moved by a user.
-             *
-             * @name kendo.ui.Window#dragend
-             * @event
-             *
-             * @param {Event} e
-             *
-             * @exampleTitle Attach dragEnd event handler during initialization; detach via unbind()
-             * @example
-             * // event handler for dragEnd
-             * var onDragEnd = function(e) {
-             *     // ...
-             * };
-             *
-             * // attach dragEnd event handler during initialization
-             * var kendoWindow = $("#window").kendoWindow({
-             *     dragend: onDragEnd
-             * });
-             *
-             * // detach dragEnd event handler via unbind()
-             * kendoWindow.data("kendoWindow").unbind("dragend", onDragEnd);
-             *
-             * @exampleTitle Attach dragEnd event handler via bind(); detach via unbind()
-             * @example
-             * // event handler for dragEnd
-             * var onDragEnd = function(e) {
-             *     // ...
-             * };
-             *
-             * // attach dragEnd event handler via bind()
-             * $("#window").data("kendoWindow").bind("dragend", onDragEnd);
-             *
-             * // detach dragEnd event handler via unbind()
-             * $("#window").data("kendoWindow").unbind("dragend", onDragEnd);
-             *
-             */
             DRAGEND,
-
-            /**
-             *
-             * Triggered when an AJAX request for content fails.
-             *
-             * @name kendo.ui.Window#error
-             * @event
-             *
-             * @param {Event} e
-             *
-             * @exampleTitle Attach error event handler during initialization; detach via unbind()
-             * @example
-             * // event handler for error
-             * var onError = function(e) {
-             *     // ...
-             * };
-             *
-             * // attach dragEnd event handler during initialization
-             * var kendoWindow = $("#window").kendoWindow({
-             *     error: onError
-             * });
-             *
-             * // detach error event handler via unbind()
-             * kendoWindow.data("kendoWindow").unbind("error", onError);
-             *
-             * @exampleTitle Attach error event handler via bind(); detach via unbind()
-             * @example
-             * // event handler for error
-             * var onError = function(e) {
-             *     // ...
-             * };
-             *
-             * // attach error event handler via bind()
-             * $("#window").data("kendoWindow").bind("error", onError);
-             *
-             * // detach error event handler via unbind()
-             * $("#window").data("kendoWindow").unbind("error", onError);
-             *
-             */
             ERROR
         ],
 
@@ -42804,18 +35045,6 @@ extend(Editor, {
             });
         },
 
-        /**
-         *
-         * Centers a <strong>Window</strong> within the viewport.
-         *
-         * @returns {Window}
-         * Returns the (Kendo UI) Window object to support chaining.
-         *
-         * @example
-         * var kendoWindow = $("#window").data("kendoWindow");
-         * kendoWindow.center();
-         *
-         */
         center: function () {
             var wrapper = this.wrapper,
                 documentWindow = $(window);
@@ -42828,27 +35057,6 @@ extend(Editor, {
             return this;
         },
 
-        /**
-         *
-         * Gets or set the title of a <strong>Window</strong>.
-         *
-         * @param {String} [text]
-         * The title of the Window.
-         *
-         * @returns {Window}
-         * If a title is provided, this method will return the (Kendo UI) Window object to support chaining. Otherwise,
-         * it will return the current title of the (Kendo UI) Window.
-         *
-         * @exampleTitle Get the existing title of the Window
-         * @example
-         * var kendoWindow = $("#window").data("kendoWindow");
-         * var windowTitle = kendoWindow.title();
-         *
-         * @exampleTitle Set the title of a Window; utilize chaining (if necessary)
-         * @example
-         * var kendoWindow = $("#window").data("kendoWindow").title("Do a barrel roll!");
-         *
-         */
         title: function (text) {
             var that = this,
                 wrapper = that.wrapper,
@@ -42878,27 +35086,6 @@ extend(Editor, {
             return that;
         },
 
-        /**
-         *
-         * Gets or set the content of a <strong>Window</strong>.
-         *
-         * @param {String} [content]
-         * The content of the Window.
-         *
-         * @returns {Window}
-         * If content is provided, this method will return the (Kendo UI) Window object to support chaining. Otherwise,
-         * it will return the current content of the (Kendo UI) Window.
-         *
-         * @exampleTitle Get the existing content of the Window
-         * @example
-         * var kendoWindow = $("#window").data("kendoWindow");
-         * var windowContent = kendoWindow.content();
-         *
-         * @exampleTitle Set the title of a Window; utilize chaining (if necessary)
-         * @example
-         * var kendoWindow = $("#window").data("kendoWindow").content("Kendo UI for all the things!");
-         *
-         */
         content: function (html) {
             var content = this.wrapper.children(KWINDOWCONTENT);
 
@@ -42910,18 +35097,6 @@ extend(Editor, {
             return this;
         },
 
-        /**
-         *
-         * Opens a Window.
-         *
-         * @returns {Window}
-         * Returns the (Kendo UI) Window object to support chaining.
-         *
-         * @exampleTitle Open a Window; utilize chaining (if necessary)
-         * @example
-         * var kendoWindow = $("#window").data("kendoWindow").open();
-         *
-         */
         open: function () {
             var that = this,
                 wrapper = that.wrapper,
@@ -42941,7 +35116,7 @@ extend(Editor, {
 
                     if (showOptions.duration) {
                         overlay.kendoStop().kendoAnimate({
-                            effects: { fade: { direction: "out", properties: { opacity: 0.5 } } },
+                            effects: { fade: { direction: "in", properties: { opacity: 0.5 } } },
                             duration: showOptions.duration,
                             show: true
                         });
@@ -42971,18 +35146,6 @@ extend(Editor, {
             return that;
         },
 
-        /**
-         *
-         * Closes a Window.
-         *
-         * @returns {Window}
-         * Returns the (Kendo UI) Window object to support chaining.
-         *
-         * @exampleTitle Close a Window; utilize chaining (if necessary)
-         * @example
-         * var kendoWindow = $("#window").data("kendoWindow").close();
-         *
-         */
         close: function () {
             var that = this,
                 wrapper = that.wrapper,
@@ -42995,7 +35158,7 @@ extend(Editor, {
             if (wrapper.is(VISIBLE) && !that.trigger(CLOSE)) {
                 options.visible = false;
 
-                modalWindows = openedModalWindows();
+                modalWindows = openedModalWindows(options.name);
 
                 shouldHideOverlay = options.modal && modalWindows.length == 1;
 
@@ -43004,7 +35167,7 @@ extend(Editor, {
                 if (shouldHideOverlay) {
                     if (hideOptions.duration) {
                         overlay.kendoStop().kendoAnimate({
-                             effects: { fadeOut: { properties: { opacity: 0 } } },
+                             effects: "fade:out",
                              duration: hideOptions.duration,
                              hide: true
                          });
@@ -43012,7 +35175,7 @@ extend(Editor, {
                         overlay.hide();
                     }
                 } else if (modalWindows.length) {
-                    windowObject(modalWindows.eq(modalWindows.length - 2))._overlay(true);
+                    windowObject(modalWindows.eq(modalWindows.length - 2), options.name)._overlay(true);
                 }
 
                 wrapper.kendoStop().kendoAnimate({
@@ -43036,18 +35199,6 @@ extend(Editor, {
             return that;
         },
 
-        /**
-         *
-         * Brings forward a Window to the top of the z-index.
-         *
-         * @returns {Window}
-         * Returns the (Kendo UI) Window object to support chaining.
-         *
-         * @exampleTitle Bring forward a Window; utilize chaining (if necessary)
-         * @example
-         * var kendoWindow = $("#window").data("kendoWindow").toFront();
-         *
-         */
         toFront: function () {
             var that = this,
                 wrapper = that.wrapper,
@@ -43079,34 +35230,10 @@ extend(Editor, {
             return that;
         },
 
-        /**
-         *
-         * Toggles a Window between a maximized and restored state. Triggers the resize event.
-         *
-         * @returns {Window}
-         * Returns the (Kendo UI) Window object to support chaining.
-         *
-         * @exampleTitle Toggle the state of a Window; utilize chaining (if necessary)
-         * @example
-         * var kendoWindow = $("#window").data("kendoWindow").toggleMaximization();
-         *
-         */
         toggleMaximization: function () {
             return this[this.options.isMaximized ? "restore" : "maximize"]();
         },
 
-        /**
-         *
-         * Restores a maximized or minimized Window to its previous state. Triggers the resize event.
-         *
-         * @returns {Window}
-         * Returns the (Kendo UI) Window object to support chaining.
-         *
-         * @exampleTitle Restore the state of a Window; utilize chaining (if necessary)
-         * @example
-         * var kendoWindow = $("#window").data("kendoWindow").restore();
-         *
-         */
         restore: function () {
             var that = this,
                 options = that.options,
@@ -43140,19 +35267,6 @@ extend(Editor, {
             return that;
         },
 
-        /**
-         *
-         * Maximizes a Window to the entire viewing area of the user agent. Triggers the resize event.
-         *
-         * @function
-         * @returns {Window}
-         * Returns the (Kendo UI) Window object to support chaining.
-         *
-         * @exampleTitle Maximize a Window
-         * @example
-         * $("#window").data("kendoWindow").maximize();
-         *
-         */
         maximize: sizingAction("maximize", function() {
             var that = this,
                 wrapper = that.wrapper,
@@ -43177,19 +35291,6 @@ extend(Editor, {
             that._onDocumentResize();
         }),
 
-        /**
-         *
-         * Maximizes a Window to its title bar.
-         *
-         * @function
-         * @returns {Window}
-         * Returns the (Kendo UI) Window object to support chaining.
-         *
-         * @exampleTitle Minimize a Window
-         * @example
-         * $("#window").data("kendoWindow").minimize();
-         *
-         */
         minimize: sizingAction("minimize", function() {
             var that = this;
 
@@ -43216,53 +35317,12 @@ extend(Editor, {
             that.trigger(RESIZE);
         },
 
-        /**
-         *
-         * Refreshes the content of a Window from a remote URL.
-         *
-         * @param {Object|String} options
-         * Options for requesting data from the server.
-         * If omitted, the window uses the <code>content</code> property
-         * that was supplied when the window was created.
-         * Any options specified here are passed to jQuery.ajax().
-         *
-         * @param {String} options.url
-         * The server URL that will be requested.
-         *
-         * @param {Object} options.data
-         * A JSON object containing the data that will be passed to the server.
-         *
-         * @param {String} options.type
-         * The HTTP request method ("GET", "POST").
-         *
-         * @param {String} options.template
-         * A template to be used for displaying the requested data.
-         *
-         * @returns {Window}
-         * Returns the (Kendo UI) Window object to support chaining.
-         *
-         * @example
-         * var windowObject = $("#window").data("kendoWindow");
-         * windowObject.refresh("/feedbackForm");
-         *
-         * windowObject.refresh({
-         *     url: "/feedbackForm",
-         *     data: { userId: 42 }
-         * });
-         *
-         * windowObject.refresh({
-         *     url: "/userInfo",
-         *     data: { userId: 42 },
-         *     template: "Hello, #= firstName # #= lastName #"
-         * });
-         *
-         */
         refresh: function (options) {
             var that = this,
                 initOptions = that.options,
                 element = $(that.element),
                 iframe,
-                showIframe = initOptions.iframe,
+                showIframe,
                 url;
 
             if (!isPlainObject(options)) {
@@ -43271,10 +35331,12 @@ extend(Editor, {
 
             options = extend({}, initOptions.content, options);
 
+            showIframe = defined(initOptions.iframe) ? initOptions.iframe : options.iframe;
+
             url = options.url;
 
             if (url) {
-                if (typeof showIframe == "undefined") {
+                if (!defined(showIframe)) {
                     showIframe = !isLocalUrl(url);
                 }
 
@@ -43291,10 +35353,20 @@ extend(Editor, {
                         // render new iframe
                         element.html(templates.contentFrame(extend({}, initOptions, { content: options })));
                     }
+
+                    element.find("." + KCONTENTFRAME)
+                        .unbind("load" + NS)
+                        .on("load" + NS, function(){
+                            that.trigger(REFRESH);
+                        });
                 }
-            } else if (options.template) {
-                // refresh template
-                that.content(template(options.template)({}));
+            } else {
+                if (options.template) {
+                    // refresh template
+                    that.content(template(options.template)({}));
+                }
+
+                that.trigger(REFRESH);
             }
 
             return that;
@@ -43331,15 +35403,18 @@ extend(Editor, {
             }, options));
         },
 
-        /**
-         * Destroys the window and its modal overlay, if necessary. Removes the Window HTML elements from the DOM.
-         */
         destroy: function () {
             var that = this,
                 modalWindows,
                 shouldHideOverlay;
 
-            that.wrapper.remove();
+            Widget.fn.destroy.call(that);
+
+            that.wrapper.remove().add(that.wrapper.find(".k-resize-handle,.k-window-titlebar")).off(NS);
+
+            $(window).off("resize", that._resizeHandler);
+
+            kendo.destroy(that.wrapper);
 
             modalWindows = openedModalWindows();
 
@@ -43348,7 +35423,7 @@ extend(Editor, {
             if (shouldHideOverlay) {
                 that._overlay(false).remove();
             } else if (modalWindows.length > 0) {
-                windowObject(modalWindows.eq(modalWindows.length - 2))._overlay(true);
+                windowObject(modalWindows.eq(modalWindows.length - 2), that.options.name)._overlay(true);
             }
         },
 
@@ -43437,7 +35512,7 @@ extend(Editor, {
         });
     }
 
-    WindowResizing.prototype = /** @ignore */ {
+    WindowResizing.prototype = {
         dragstart: function (e) {
             var that = this,
                 wnd = that.owner,
@@ -43542,7 +35617,7 @@ extend(Editor, {
         });
     }
 
-    WindowDragging.prototype = /** @ignore */{
+    WindowDragging.prototype = {
         dragstart: function (e) {
             var wnd = this.owner,
                 element = wnd.element,
@@ -44668,8 +36743,9 @@ extend(Editor, {
                     lineOptions));
 
                 append(childElements, axis.renderTicks(view));
-                append(childElements, axis.renderPlotBands(view));
             }
+
+            append(childElements, axis.renderPlotBands(view));
 
             return childElements;
         },
@@ -44853,6 +36929,22 @@ extend(Editor, {
 
                 title.reflow(axis.box);
             }
+        },
+
+        alignTo: function(secondAxis) {
+            var axis = this,
+                lineBox = secondAxis.lineBox(),
+                vertical = axis.options.vertical,
+                pos = vertical ? Y : X;
+
+            axis.box.snapTo(lineBox, pos);
+            if (vertical) {
+                axis.box.shrink(0, axis.lineBox().height() - lineBox.height());
+            } else {
+                axis.box.shrink(axis.lineBox().width() - lineBox.width(), 0);
+            }
+            axis.box[pos + 1] -= axis.lineBox()[pos + 1] - lineBox[pos + 1];
+            axis.box[pos + 2] -= axis.lineBox()[pos + 2] - lineBox[pos + 2];
         }
     });
 
@@ -44921,7 +37013,7 @@ extend(Editor, {
                 }
             }
 
-            autoOptions.minorUnit = autoOptions.majorUnit / 5;
+            autoOptions.minorUnit = (options.majorUnit || autoOptions.majorUnit) / 5;
 
             return deepExtend(autoOptions, options);
         },
@@ -46795,6 +38887,7 @@ extend(Editor, {
         MONTHS = "months",
         MOUSEMOVE_TRACKING = "mousemove.tracking",
         MOUSEOVER = "mouseover",
+        NS = ".kendoChart",
         OUTSIDE_END = "outsideEnd",
         OUTLINE_SUFFIX = "_outline",
         PIE = "pie",
@@ -47081,8 +39174,8 @@ extend(Editor, {
             var chart = this,
                 element = chart.element;
 
-            element.bind(CLICK, proxy(chart._click, chart));
-            element.bind(MOUSEOVER, proxy(chart._mouseOver, chart));
+            element.on(CLICK + NS, proxy(chart._click, chart));
+            element.on(MOUSEOVER + NS, proxy(chart._mouseOver, chart));
         },
 
         _getChartElement: function(e) {
@@ -47151,7 +39244,7 @@ extend(Editor, {
 
                 highlight.show(point);
 
-                $(doc.body).bind(MOUSEMOVE_TRACKING, proxy(chart._mouseMove, chart));
+                $(doc.body).on(MOUSEMOVE_TRACKING, proxy(chart._mouseMove, chart));
             }
         },
 
@@ -47181,7 +39274,7 @@ extend(Editor, {
                     }
                 }
             } else {
-                $(doc.body).unbind(MOUSEMOVE_TRACKING);
+                $(doc.body).off(MOUSEMOVE_TRACKING);
 
                 delete chart._activePoint;
                 tooltip.hide();
@@ -47277,6 +39370,16 @@ extend(Editor, {
                     }
                 }
             }
+        },
+
+        destroy: function() {
+            var chart = this,
+                dataSource = chart.dataSource;
+
+            chart.wrapper.off(NS);
+            dataSource.unbind(CHANGE, chart._dataChangeHandler);
+
+            Widget.fn.destroy.call(chart);
         }
     });
 
@@ -47804,7 +39907,7 @@ extend(Editor, {
                         unit = YEARS;
                     } else if (cat.getMonth() - lastCat.getMonth() > 0) {
                         unit = MONTHS;
-                    } else if (cat.getDay() - lastCat.getDay() > 0) {
+                    } else if (cat.getDate() - lastCat.getDate() > 0) {
                         unit = DAYS;
                     } else if (cat.getHours() - lastCat.getHours() > 0) {
                         unit = HOURS;
@@ -48772,10 +40875,10 @@ extend(Editor, {
                     new Point2D(box.x2, box.y2)
                 ], true, elementOptions);
             } else if (type === CIRCLE) {
-                element = view.createCircle([
+                element = view.createCircle(new Point2D(
                     round(box.x1 + halfWidth, COORD_PRECISION),
                     round(box.y1 + box.height() / 2, COORD_PRECISION)
-                ], halfWidth, elementOptions);
+                ), halfWidth, elementOptions);
             } else {
                 element = view.createRect(box, elementOptions);
             }
@@ -48999,7 +41102,7 @@ extend(Editor, {
                     .brightness(BAR_BORDER_BRIGHTNESS)
                     .toHex();
 
-            return view.createCircle([center.x, center.y], radius, {
+            return view.createCircle(center, radius, {
                 data: { modelId: element.options.modelId },
                 stroke: borderColor,
                 strokeWidth: borderWidth
@@ -49887,7 +41990,8 @@ extend(Editor, {
                         delay: segment.animationDelay
                     }),
                     data: { modelId: options.modelId },
-                    zIndex: options.zIndex
+                    zIndex: options.zIndex,
+                    singleSegment: (segment.options.data || []).length === 1
                 }, border)));
             }
 
@@ -49899,7 +42003,11 @@ extend(Editor, {
         },
 
         createSegment: function(view, sector, options) {
-            return view.createSector(sector, options);
+            if (options.singleSegment) {
+                return view.createCircle(sector.c, sector.r, options);
+            } else {
+                return view.createSector(sector, options);
+            }
         },
 
         highlightOverlay: function(view, options) {
@@ -50732,6 +42840,10 @@ extend(Editor, {
 
                     rightAnchor = axis;
                 }
+
+                if (i !== 0) {
+                    axis.alignTo(yAnchor);
+                }
             }
 
             for (i = 0; i < xAxes.length; i++) {
@@ -50764,6 +42876,10 @@ extend(Editor, {
                     }
 
                     bottomAnchor = axis;
+                }
+
+                if (i !== 0) {
+                    axis.alignTo(xAnchor);
                 }
             }
         },
@@ -51535,17 +43651,29 @@ extend(Editor, {
         },
 
         setup: function() {
-            var sector = this.element.config,
+            var element = this.element,
+                sector = element.config,
                 startRadius;
+
+            if (element.options.singleSegment) {
+                sector = element;
+            }
+
             this.endRadius = sector.r;
             startRadius = this.startRadius = sector.ir || 0;
             sector.r = startRadius;
         },
 
         step: function(pos) {
-            var endRadius = this.endRadius,
-                sector = this.element.config,
-                startRadius = this.startRadius;
+            var animation = this,
+                element = animation.element,
+                endRadius = animation.endRadius,
+                sector = element.config,
+                startRadius = animation.startRadius;
+
+            if (element.options.singleSegment) {
+                sector = element;
+            }
 
             sector.r = interpolateValue(startRadius, endRadius, pos);
         }
@@ -52595,11 +44723,17 @@ extend(Editor, {
                 count = labels.length,
                 labelsOptions = options.labels,
                 padding = labelsOptions.padding,
-                rangeDistance = scale.options.rangeDistance = ring.r * 0.05,
+                rangeDistance = ring.r * 0.05,
                 rangeSize = options.rangeSize = options.rangeSize || ring.r * 0.1,
                 ranges = options.ranges || [],
                 halfWidth, halfHeight, labelAngle,
                 angle, label, lp, i, cx, cy, isInside;
+
+            if (typeof scale.options.rangeDistance != "undefined") {
+                rangeDistance = scale.options.rangeDistance;
+            } else {
+                scale.options.rangeDistance = rangeDistance;
+            }
 
             if (labelsOptions.position === INSIDE && ranges.length) {
                 ring.r -= rangeSize + rangeDistance;
@@ -54175,20 +46309,20 @@ extend(Editor, {
     });
 
     var SVGCircle = ViewElement.extend({
-        init: function(center, radius, options) {
+        init: function(c, r, options) {
             var circle = this;
             ViewElement.fn.init.call(circle, options);
 
-            circle.center = center;
-            circle.radius = radius;
+            circle.c = c;
+            circle.r = r;
 
             circle.template = SVGCircle.template;
             if (!circle.template) {
                 circle.template = SVGCircle.template = renderTemplate(
                     "<circle #= d.renderAttr(\"id\", d.options.id) # " +
                     "#= d.renderDataAttributes() #" +
-                    "cx='#= d.center[0] #' cy='#= d.center[1] #' " +
-                    "r='#= d.radius #' " +
+                    "cx='#= d.c.x #' cy='#= d.c.y #' " +
+                    "r='#= d.r #' " +
                     "#= d.renderAttr(\"stroke\", d.options.stroke) # " +
                     "#= d.renderAttr(\"stroke-width\", d.options.strokeWidth) #" +
                     "fill-opacity='#= d.options.fillOpacity #' " +
@@ -54206,9 +46340,18 @@ extend(Editor, {
 
         refresh: function(domElement) {
             $(domElement).attr({
-                "r": math.max(0, this.radius),
+                "r": math.max(0, this.r),
                 "fill-opacity": this.options.fillOpacity
             });
+        },
+
+        clone: function() {
+            var circle = this;
+            return new SVGCircle(
+                deepExtend({}, circle.c),
+                circle.r,
+                deepExtend({}, circle.options)
+            );
         }
     });
 
@@ -55096,7 +47239,7 @@ extend(Editor, {
                 return new Point2D(round(point.x), round(point.y));
             }
 
-            endAngle = (endAngle - startAngle) > 359.9 ? endAngle - 0.22 : endAngle;
+            endAngle = (endAngle - startAngle) > 359.9 ? endAngle - 0.5 : endAngle;
             outerStartPoint = roundPointCoordinates(config.point(startAngle)),
             innerStartPoint = roundPointCoordinates(config.point(startAngle, true)),
             outerEndPoint = roundPointCoordinates(config.point(endAngle));
@@ -55150,12 +47293,12 @@ extend(Editor, {
     });
 
     var VMLCircle = ViewElement.extend({
-        init: function(center, radius, options) {
+        init: function(c, r, options) {
             var circle = this;
             ViewElement.fn.init.call(circle, options);
 
-            circle.center = center;
-            circle.radius = radius;
+            circle.c = c;
+            circle.r = r;
 
             circle.template = VMLCircle.template;
             if (!circle.template) {
@@ -55163,9 +47306,9 @@ extend(Editor, {
                     "<kvml:oval #= d.renderAttr(\"id\", d.options.id) # " +
                             "#= d.renderDataAttributes() #" +
                             "style='position:absolute; " +
-                            "width:#= d.radius * 2 #px; height:#= d.radius * 2 #px; " +
-                            "top:#= d.center[1] - d.radius #px; " +
-                            "left:#= d.center[0] - d.radius #px;'>" +
+                            "width:#= d.r * 2 #px; height:#= d.r * 2 #px; " +
+                            "top:#= d.c.y - d.r #px; " +
+                            "left:#= d.c.x - d.r #px;'>" +
                         "#= d.fill.render() + d.stroke.render() #" +
                     "</kvml:oval>"
                 );
@@ -55181,20 +47324,29 @@ extend(Editor, {
 
         refresh: function(domElement) {
             var circle = this,
-                center = circle.center,
-                radius = math.max(0, circle.radius),
-                size = radius * 2,
+                c = circle.c,
+                r = math.max(0, circle.r),
+                size = r * 2,
                 element = $(domElement);
 
             element.css({
                 "width": size,
                 "height": size,
-                "top": center[1] - radius,
-                "left": center[0] - radius
+                "top": c.y - r,
+                "left": c.x - r
             });
 
             circle.fill.options = circle.options;
             circle.fill.refresh(element.find("fill")[0]);
+        },
+
+        clone: function() {
+            var circle = this;
+            return new VMLCircle(
+                deepExtend({}, circle.c),
+                circle.r,
+                deepExtend({}, circle.options)
+            );
         }
     });
 
@@ -55662,74 +47814,8 @@ extend(Editor, {
     var kendo = window.kendo,
         abs = Math.abs;
 
-    /**
-     *
-     * @name kendo.mobile.ui.Swipe.Description
-     * @section
-     * <p>The mobile swipe component handles user horizontal swiping events.</p>
-     * <h3>Getting Started</h3>
-     *
-     * <p>To register a swipe event for a given jQuery selector, use the <code>kendoMobileSwipe</code> jQuery plugin method.</p>
-     *
-     * @exampleTitle swipe event handling
-     * @example
-     * <div>
-     * <p>Foo</p>
-     * </p>Bar</p>
-     * </div>
-     *
-     * <script>
-     *  $("p").kendoMobileSwipe(function(e) {
-     *      console.log("You swiped" + e.target.text() );
-     *  });
-     * </script>
-     *
-     * @section
-     * <p>The event handler accepts a parameter with the following fields:</p>
-     * <table>
-     *  <tr>
-     *  <th align="left" valign="top">target</th>
-     *  <td>The DOM element which was swiped</td>
-     *  </tr>
-     *  <tr>
-     *  <th align="left" valign="top">direction</th>
-     *  <td>The swipe direction. Can be either <code>left</code> or <code>right</code>.</td>
-     *  </tr>
-     *  <tr>
-     *  <th align="left" valign="top">drag</th>
-     *  <td>An instance of the kendo.Drag component, containing additional information about the drag event sequence, that generated the swipe.</td>
-     *  </tr>
-     * </table>
-     *
-     * <h3>Configuration</h3>
-     *
-     * <p>The swipe event criteria (minimum horizontal distance, maximum vertical deviation, timing, and swipe surface) can be configured by passing an additional parameter to the <code>kendoMobileSwipe</code> method. For more details, see the configuration section.</p>
-     *
-     * @exampleTitle Listen only for longer and faster swipe events
-     * @example
-     * <div>
-     * <p>Foo</p>
-     * </p>Bar</p>
-     * </div>
-     *
-     * <script>
-     *  $("p").kendoMobileSwipe(function(e) {
-     *      console.log("You swiped" + e.target.text() );
-     *  }, { minXDelta: 200, maxDuration: 100 });
-     * </script>
-     */
 
-    var Swipe = kendo.Class.extend(/** @lends kendo.mobile.ui.Swipe.prototype */{
-        /**
-         * @constructs
-         * @param {Element} element DOM element.
-         * @param {Function} callback The callback to execute when the user swipes the element
-         * @param {Object} options Configuration options.
-         * @option {Number} [minXDelta] <30> The minimum horizontal distance in pixels the user should swipe before the event is triggered.
-         * @option {Number} [maxYDelta] <10> The maximum vertical deviation in pixels of the swipe event. Swipe with higher deviation are discarded.
-         * @option {Number} [maxDuration] <1000> The maximum amount of time in milliseconds the swipe event can last. Slower swipes are discarded.
-         * @option {jQuery} [surface] By default, swipe events are tracked only within the element boundries. If a surface is specified, the swipe events are extended to the provided surface. This is useful if  the swipe targets are small (or narrow).
-         */
+    var Swipe = kendo.Class.extend({
         init: function(element, callback, options) {
             options = $.extend({
                 minXDelta: 30,
@@ -55739,6 +47825,7 @@ extend(Editor, {
 
             new kendo.Drag(element, {
                 surface: options.surface,
+                allowSelection: true,
 
                 start: function(e) {
                     if (abs(e.x.velocity) * 2 >= abs(e.y.velocity)) {
@@ -55898,6 +47985,11 @@ extend(Editor, {
             this.popup.close();
         },
 
+        destroy: function() {
+            Widget.fn.destroy.call(this);
+            this.popup.destroy();
+        },
+
         _activate: function() {
             var that = this,
                 direction = that.options.direction,
@@ -55917,52 +48009,7 @@ extend(Editor, {
         }
     });
 
-    /**
-     * @name kendo.mobile.ui.PopOver.Description
-     * @section
-     * <p>The mobile PopOver widget represents a transient view which is displayed when the user taps on a navigational widget
-     * or area on the screen. It can contain one or more mobile views which can be navigated to, if needed.
-     * The Mobile Application automatically instantiates a mobile PopOver for each div element with a <code>role</code>
-     * data attribute set to <b>popover</b>.
-     * Alternatively, it can be initialized using jQuery plugin syntax in the containing mobile View <strong>init event handler</strong>.
-     * </p>
-     *
-     * <p>The Mobile PopOver widget can be open when any mobile navigational widget (listview link item, button, tabstrip, etc.) is tapped.
-     * To do so, add <code>data-rel="popover"</code> attribute and a <code>href</code> attribute equal to the PopOver <code>id</code> to the navigational widget DOM element (prefixed with <code>#</code>, like an anchor).</p>
-     *
-     * @exampleTitle A Mobile PopOver displaying "Hello World"
-     * @example
-     * <div data-role="view">
-     *  <a data-role="button" href="#foo" data-rel="popover">Say Hello</a>
-     *
-     *  <div data-role="popover">
-     *      <div data-role="view">
-     *          Hello world!
-     *      </div>
-     *  </div>
-     * </div>
-     *
-     * @section
-     * <p>The Mobile PopOver widget implicitly instantiates a pane widget for its contents, which allows the containing views to navigate to each
-     * other. The pane widget behavior (including default transition, layout, etc.) may be configured from the <code>pane</code> configuration option.</p>
-     * <p>The popover dimensions and direction can be configured from the <code>popup</code> configuration option.</p>
-     */
-    var PopOver = Widget.extend(/** @lends kendo.mobile.ui.PopOver.prototype */{
-        /**
-         * @constructs
-         * @extends kendo.mobile.ui.Widget
-         * @param {Element} element DOM element
-         * @option {Object} [pane] The pane configuration options.
-         * @option {String} [pane.layout] <> The id of the default Pane Layout.
-         * @option {String} [pane.initial] <> The id of the initial mobile View to display.
-         * @option {String} [pane.loading] <Loading...> The text displayed in the loading popup. Setting this value to false will disable the loading popup.
-         * @option {String} [pane.transition] <> The default View transition.
-         * @option {Object} [popup] The popup configuration options.
-         * @option {Number | String} [popup.width] <240> The width of the popup in pixels.
-         * @option {Number | String} [popup.height] <320> The height of the popup in pixels.
-         * @option {Number | String} [popup.direction] <down> The direction to which the popup will expand, relative to the target that opened it.
-         * Supported directions are up, right, down, and left.
-         */
+    var PopOver = Widget.extend({
         init: function(element, options) {
             var that = this,
                 popupOptions;
@@ -55978,7 +48025,8 @@ extend(Editor, {
 
             that.popup = new Popup(that.element, popupOptions);
 
-            that.pane = new ui.Pane(that.element, this.options.pane).navigate("");
+            that.pane = new ui.Pane(that.element, this.options.pane);
+            that.pane.navigate("");
 
             kendo.notify(that, ui);
         },
@@ -55990,46 +48038,24 @@ extend(Editor, {
         },
 
         events: [
-            /**
-             * Fires when popover is opened.
-             * @name kendo.mobile.ui.PopOver#open
-             * @event
-             * @param {Event} e
-             */
             OPEN,
-            /**
-             * Fires when popover is closed.
-             * @name kendo.mobile.ui.PopOver#close
-             * @event
-             * @param {Event} e
-             */
             CLOSE
         ],
 
-        /**
-         * Open the ActionSheet.
-         * @param {jQuery} target The target of the Popover, to which the visual arrow will point to.
-         */
         openFor: function(target) {
             this.popup.show(target);
         },
 
-        /**
-         * Close the popover.
-         * @exampleTitle Close a popover when a button is clicked
-         * @example
-         * <div data-role="popover" id="foo">
-         *  <a data-role="button" data-click="closePopOver">Close</a>
-         * </div>
-         *
-         * <script>
-         *  function closePopOver() {
-         *      $("#foo").data("kendoMobilePopOver").close();
-         *  }
-         * </script>
-         */
         close: function() {
             this.popup.hide();
+        },
+
+        destroy: function() {
+            Widget.fn.destroy.call(this);
+            this.pane.destroy();
+            this.popup.destroy();
+
+            kendo.destroy(this.element);
         }
     });
 
@@ -56042,16 +48068,7 @@ extend(Editor, {
         Widget = ui.Widget,
         CAPTURE_EVENTS = ["touchstart", "touchend", "touchmove", "mousedown", "mousemove", "mouseup"];
 
-    /**
-     * @name kendo.mobile.ui.Loader.Description
-     *
-     */
-    var Loader = Widget.extend(/** @lends kendo.mobile.ui.Loader.prototype */{
-        /**
-        * @constructs
-        * @extends kendo.mobile.ui.Widget
-        * @param {Element} element DOM element
-        */
+    var Loader = Widget.extend({
         init: function(container, options) {
             var that = this,
                 element = $('<div class="km-loader"><span class="km-loading km-spin"></span></div>');
@@ -56071,10 +48088,6 @@ extend(Editor, {
             timeout: 100
         },
 
-        /**
-         * Show the loading animation.
-         * @example
-         */
         show: function() {
             var that = this;
 
@@ -56089,10 +48102,6 @@ extend(Editor, {
             }, that.options.timeout);
         },
 
-        /**
-         * Hide the loading animation.
-         * @example
-         */
         hide: function() {
             var that = this;
             clearTimeout(that._loading);
@@ -56131,33 +48140,28 @@ extend(Editor, {
         ui = kendo.mobile.ui,
         Popup = kendo.ui.Popup,
         SHIM = '<div class="km-shim"/>',
-        Widget = ui.Widget;
+        Widget = ui.Widget,
+        MOUSEUP = kendo.support.mouseup + ".kendoMobileShim";
 
-    var Shim = Widget.extend(/** @lends kendo.mobile.ui.Shim.prototype */{
-        /**
-        * @constructs
-        * @extends kendo.mobile.ui.Widget
-        * @param {Element} element DOM element
-        */
+    var Shim = Widget.extend({
         init: function(element, options) {
             var that = this,
                 ios = kendo.mobile.application.os === "ios",
                 align = options.align || (ios ?  "bottom center" : "center center"),
                 position = options.position || (ios ? "bottom center" : "center center"),
                 effect = options.effect || (ios ? "slideIn:up" : "fade:in"),
-                shim = $(SHIM).hide(), view;
+                shim = $(SHIM).hide();
 
             Widget.fn.init.call(that, element, options);
-            view = that.view();
 
             that.shim = shim;
             that.element = element;
 
             if (!that.options.modal) {
-                that.shim.on(kendo.support.mouseup, $.proxy(that.hide, that));
+                that.shim.on(MOUSEUP, $.proxy(that.hide, that));
             }
 
-            view.container.append(shim);
+            kendo.mobile.application.element.append(shim);
 
             that.popup = new Popup(that.element, {
                 anchor: shim,
@@ -56199,6 +48203,12 @@ extend(Editor, {
 
         hide: function() {
             this.popup.close();
+        },
+
+        destroy: function() {
+            Widget.fn.destroy.call(this);
+            this.shim.off(MOUSEUP);
+            this.popup.destroy();
         }
     });
 
@@ -56216,93 +48226,10 @@ extend(Editor, {
         BEFORE_SHOW = "beforeShow",
         HIDE = "hide",
         Z_INDEX = "z-index",
-        data = kendo.data,
+        attrValue = kendo.attrValue,
         roleSelector = kendo.roleSelector;
 
-    /**
-     * @name kendo.mobile.ui.View.Description
-     *
-     * @section
-     *
-     * <p>The Kendo mobile View widget represents a screen in the kendo mobile Application. The
-     * Application automatically instantiates a mobile View for each element with a <code>role</code> data attribute set
-     * to <b>view</b>.</p>
-     *
-     * @exampleTitle Hello World mobile View
-     * @example
-     * <div data-role="view">Hello world!</div>
-     *
-     * @section
-     * <h3>Headers and Footers</h3>
-     * <p>By default, the mobile View contents stretch to fit the application element.
-     * In addition to that, The mobile View may also have a header and a footer.
-     * In order to mark header and footer elements, add block elements (<code>div</code>, <code>header</code>, <code>footer</code>, etc.) with attribute <code>data-role="header"</code> and
-     * <code>data-role="footer"</code>. </p>
-     *
-     * @exampleTitle Mobile View with Header and Footer
-     * @example
-     * <div data-role="view">
-     *   <div data-role="header">Header</div>
-     *   Hello world!
-     *   <div data-role="footer">Footer</div>
-     * </div>
-     *
-     * @section
-     * <strong>Important:</strong>
-     * <p>Because of the OS UI design conventions, the header and the footer switch positions when an Android device is detected.
-     * Usually the footer hosts a mobile Tabstrip widget, which is located at the bottom of the screen on iOS,
-     * and at the top of the screen in Android applications.  </p>
-     *
-     * @section
-     *
-     * <h3>View Parameters</h3>
-     *
-     * <p>Navigational widgets can pass additional URL parameters when navigating to Views. The parameters will be accessible in the  view <code>show</code> event handlers.</p>
-     *
-     * @exampleTitle Button with additional URL parameters
-     * @example
-     * <a data-role="button" href="#foo?bar=baz">Link to FOO <strong>View</strong> with bar parameter set to baz</a>
-     * <div data-role="view" id="foo" data-show="fooShow">
-     * </div>
-     *
-     * <script>
-     * function fooShow(e) {
-     *      e.view.params // {bar: "baz"}
-     * }
-     * </script>
-     *
-     * @section
-     * <h3>View DOM elements</h3>
-     * <p>Each mobile View instance exposes the following fields:</p>
-     * <ul>
-     *  <li><b>header</b> - the view (or the applied mobile layout) header DOM element;</li>
-     *  <li><b>footer</b> - the view (or the applied mobile layout) footer DOM element;</li>
-     *  <li><b>content</b> - the view content DOM element;</li>
-     *  <li><b>scrollerContent</b> - the view mobile scroller container DOM element. Recommended if the mobile View
-     *  contents need to be manipulated or <b>replaced</b>.</li>
-     * </ul>
-     */
-    var View = Widget.extend(/** @lends kendo.mobile.ui.View.prototype */{
-        /**
-         * @constructs
-         * @extends kendo.mobile.ui.Widget
-         * @param {Element} element DOM element.
-         * @param {Object} options Configuration options.
-         * @option {String} [title] <> The text to display in the navbar title (if present) and the browser title.
-         * @option {Boolean} [stretch] <false> If set to true, the view will stretch its child contents to occupy the entire view, while disabling kinetic scrolling.
-         * Useful if the view contains an image or a map.
-         * @option {String | ObservableObject} [model] <null> The MVVM model to bind to. If a string is passed, The view
-         * will try to resolve a reference to the view model variable in the global scope.
-         * _exampleTitle Bind a Mobile View
-         * _example
-         * <script>
-         *  var foo = { bar: "baz" }
-         * </script>
-         *
-         * <div data-role="view" data-model="foo">
-         *    <span data-bind="text:bar"></span>
-         * </div>
-         */
+    var View = Widget.extend({
         init: function(element, options) {
             var that = this;
 
@@ -56321,37 +48248,9 @@ extend(Editor, {
         },
 
         events: [
-            /**
-             * Fires after the mobile View and its child widgets are initialized.
-             * @name kendo.mobile.ui.View#init
-             * @event
-             * @param {Event} e
-             * @param {jQuery} e.view The mobile view instance
-             */
             INIT,
-            /**
-             * Fires before the mobile View becomes visible. The event can be prevented by calling the <code>preventDefault</code> method of the event parameter, in case a redirection should happen.
-             * @name kendo.mobile.ui.View#beforeShow
-             * @event
-             * @param {Event} e
-             * @param {jQuery} e.view The mobile view instance
-             */
             BEFORE_SHOW,
-            /**
-             * Fires when the mobile View becomes visible.
-             * @name kendo.mobile.ui.View#show
-             * @event
-             * @param {Event} e
-             * @param {jQuery} e.view The mobile view instance
-             */
             SHOW,
-            /**
-             * Fires when the mobile View becomes hidden.
-             * @name kendo.mobile.ui.View#hide
-             * @event
-             * @param {Event} e
-             * @param {jQuery} e.view The mobile view instance
-             */
             HIDE
         ],
 
@@ -56361,6 +48260,16 @@ extend(Editor, {
             defaultTransition: "",
             stretch: false,
             model: null
+        },
+
+        destroy: function() {
+            Widget.fn.destroy.call(this);
+
+            if (this.scroller) {
+                this.scroller.destroy();
+            }
+
+            kendo.destroy(this.element);
         },
 
         showStart: function() {
@@ -56476,12 +48385,13 @@ extend(Editor, {
 
             that.model = model;
 
+            // PopOver widgets have to be initialized first, as they move their element out of the DOM.
             element.find(roleSelector("popover")).each(function(){
                 kendo.initWidget(this, {}, ui.roles);
             });
 
             if (model) {
-                kendo.bind(element.children(), model, ui);
+                kendo.bind(element.children(), model, ui, kendo.ui, kendo.dataviz.ui);
             } else {
                 mobile.init(element.children());
             }
@@ -56493,7 +48403,7 @@ extend(Editor, {
                 element = that.element;
 
             element.data("kendoView", that).addClass("km-view");
-            that.transition = data(element, "transition");
+            that.transition = attrValue(element, "transition");
 
             that.header = element.children(roleSelector("header")).addClass("km-header");
             that.footer = element.children(roleSelector("footer")).addClass("km-footer");
@@ -56507,7 +48417,7 @@ extend(Editor, {
 
             that.element.prepend(that.header).append(that.footer);
 
-            that.id = data(element, "url") || "#" + element.attr("id");
+            that.id = attrValue(element, "url") || "#" + element.attr("id");
 
             if (that.layout) {
                 that.layout.setup(that);
@@ -56529,6 +48439,12 @@ extend(Editor, {
         if (source[0] && destination[0] && source[0] != destination[0]) {
             source.kendoAnimateTo(destination, {effects: "fade"});
         }
+    }
+
+    function initWidgets(collection) {
+        collection.each(function() {
+            kendo.initWidget($(this), {}, ui.roles);
+        });
     }
 
     var ViewTransition = Class.extend({
@@ -56605,83 +48521,7 @@ extend(Editor, {
         }
     });
 
-    /**
-     * @name kendo.mobile.ui.Layout.Description
-     *
-     * @section
-     *
-     * <p>A mobile <strong>Layout</strong> is used to share headers and footers between multiple <strong>Views</strong>.
-     * The header and/or footer element of the <strong>Layout</strong> are applied to any <strong>View</strong> that uses it.</p>
-     *
-     * <p>To define a <strong>Layout</strong> set <code>data-role="layout"</code> to an element.
-     *
-     * <p>When a view with the given layout is displayed, the layout attaches its header and footer to it.</p>
-     *
-     * <p><strong>Note:</strong> When instantiated, the layout detaches its element from the document tree.</p>
-     *
-     * <p>A <strong>View</strong> is associated with a <strong>Layout</strong> by setting its <code>data-layout</code> attribute value
-     * to the value of the layout's <code>data-id</code> attribute:</p>
-     *
-     * @exampleTitle Views with Layout
-     * @example
-     * <div data-role="view" data-layout="foo">Foo</div>
-     * <div data-role="view" data-layout="foo">Bar</div>
-     *
-     * <div data-role="layout" data-id="foo">
-     *   <div data-role="header">Header</div>
-     *   <div data-role="footer">Footer</div>
-     * </div>
-     *
-     * @section
-     * <p>A default <strong>Application</strong> layout can be set by passing the layout id in the <code>options</code> parameter of the <strong>Application</strong>'s constructor.
-     * A mobile <strong>View</strong> can remove the default application <strong>Layout</strong> by setting <code>data-layout=""</code>.</p>
-     *
-     * @exampleTitle Default Application Layout
-     * @example
-     * <div data-role="view">Bar</div>
-     *
-     * <div data-role="layout" data-id="foo">
-     *   <div data-role="header">Header</div>
-     * </div>
-     *
-     * <script>
-     *    new kendo.mobile.Application($(document.body), { layout: "foo" });
-     * </script>
-     *
-     * @section
-     * <p>Layouts can be platform specific, allowing for different layout and behavior per platform.
-     * A layout platform can be specified using <code>data-platform=""</code></p>
-     *
-     * @exampleTitle iOS and Android Application Layout
-     * @example
-     * <div data-role="view">Bar</div>
-     *
-     * <div data-role="layout" data-id="foo" data-platform="ios">
-     *   <div data-role="header">Header</div>
-     * </div>
-     *
-     * <div data-role="layout" data-id="foo" data-platform="android">
-     *   <div data-role="header">Header</div>
-     * </div>
-     *
-     * @section
-     * <h3>Layout DOM elements</h3>
-     * <p>Each mobile Layout instance exposes the following fields:</p>
-     * <ul>
-     *  <li><b>header</b> - the header DOM element;</li>
-     *  <li><b>footer</b> - the footer DOM element;</li>
-     * </ul>
-     */
-    var Layout = Widget.extend(/** @lends kendo.mobile.ui.Layout.prototype */{
-        /**
-         * @constructs
-         * @extends kendo.mobile.ui.Widget
-         * @param {Element} element DOM element.
-         * @param {Object} options Configuration options.
-         * @option {String} [id] <null> The id of the layout. Required.
-         * @option {String} [platform] <> The specific platform this layout targets. By default, layouts are displayed
-         * on all platforms.
-         */
+    var Layout = Widget.extend({
         init: function(element, options) {
             var that = this;
             Widget.fn.init.call(that, element, options);
@@ -56701,31 +48541,8 @@ extend(Editor, {
         },
 
         events: [
-            /**
-             * Fires after a mobile Layout and its child widgets is initialized.
-             * @name kendo.mobile.ui.Layout#init
-             * @event
-             * @param {Event} e
-             * @param {jQuery} e.layout The mobile layout instance
-             */
             INIT,
-            /**
-             * Fires when a mobile View using the layout becomes visible.
-             * @name kendo.mobile.ui.Layout#show
-             * @event
-             * @param {Event} e
-             * @param {jQuery} e.layout The mobile layout instance
-             * @param {jQuery} e.view The mobile view instance
-             */
             SHOW,
-            /**
-             * Fires when a mobile View using the layout becomes hidden.
-             * @name kendo.mobile.ui.Layout#hide
-             * @event
-             * @param {Event} e
-             * @param {jQuery} e.layout The mobile layout instance
-             * @param {jQuery} e.view The mobile view instance
-             */
             HIDE
         ],
 
@@ -56789,20 +48606,27 @@ extend(Editor, {
     var ViewEngine = Observable.extend({
         init: function(options) {
             var that = this,
-                views;
+                views,
+                container;
 
             Observable.fn.init.call(that);
 
             $.extend(that, options);
             that.sandbox = $("<div />");
+            container = that.container;
 
-            views = that._hideViews(that.container);
+            views = that._hideViews(container);
             that.rootView = views.first();
+
+            if (!that.rootView[0]) {
+                throw new Error("No root view found. Make sure that the kendo mobile application element directly contains one or more elements with data-role='view' attribute set.");
+            }
             that._view = null;
 
             that.layouts = {};
 
-            that._setupLayouts(that.container);
+            that._setupLayouts(container);
+            initWidgets(container.children(roleSelector("modalview")));
 
             if (that.loader) {
                 that.bind(SHOW_START, function() { that.loader.transition(); });
@@ -56859,7 +48683,7 @@ extend(Editor, {
         _createView: function(element) {
             var that = this,
                 viewOptions,
-                layout = data(element, "layout");
+                layout = attrValue(element, "layout");
 
             if (typeof layout === "undefined") {
                 layout = that.layout;
@@ -56902,6 +48726,8 @@ extend(Editor, {
                 sandbox = that.sandbox,
                 container = that.container,
                 views,
+                modalViews,
+                elementsToTransfer = roleSelector("layout modalview") + ", script, style",
                 view;
 
             if (BODY_REGEX.test(html)) {
@@ -56916,9 +48742,12 @@ extend(Editor, {
             view.hide().attr(attr("url"), url);
 
             that._setupLayouts(sandbox);
+            modalViews = sandbox.children(roleSelector("modalview"));
 
-            container.append(sandbox.children(roleSelector("layout") + ", script, style"))
-                .append(views);
+            container.append(sandbox.children(elementsToTransfer).add(views));
+
+            // Initialize the modalviews after they have been appended to the final container
+            initWidgets(modalViews);
 
             return that._createView(view);
         },
@@ -56945,7 +48774,7 @@ extend(Editor, {
 
             element.children(roleSelector("layout")).each(function() {
                 var layout = $(this),
-                    platform = data(layout,  "platform");
+                    platform = attrValue(layout,  "platform");
 
                 if (platform === undefined || platform === mobile.application.os) {
                     that.layouts[layout.data("id")] = kendo.initWidget(layout, {}, ui.roles);
@@ -56967,99 +48796,23 @@ extend(Editor, {
         OPEN = "open",
         WRAP = '<div class="km-modalview-wrapper" />';
 
-    /**
-     * @name kendo.mobile.ui.ModalView.Description
-     * @section
-     * <p>The Kendo ModalView is used to present self-contained functionality in the context of the current task.  </p>
-     *
-     * <h3>Getting Started</h3>
-     * <p>The Kendo mobile Application will automatically initialize a mobile ModalView widget for every <code>div</code> element with <code>role</code> data attribute set to <code>modalview</code> present in the views/layouts markup.
-     * Alternatively, it can be initialized using jQuery plugin syntax. The ModalView element may contain optional header and/or footer. A mobile scroller is automatically initialized around the contents of the element.</p>
-     *
-     * @exampleTitle ModalView with header and footer
-     * @example
-     * <div data-role="view">
-     *  <a href="#foo" data-rel="modalview">Foo</a>
-     *  <div data-role="modalview" id="foo">
-     *    <div data-role="header">
-     *        <div data-role="navbar">
-     *            <a data-align="right" data-role="button">Close</a>
-     *        </div>
-     *    </div>
-     *
-     *    <ul data-role="listview">
-     *      <li>Foo</li>
-     *    </ul>
-     *
-     *    <div data-role="footer">
-     *       <div data-role="navbar">
-     *           <a data-align="right" data-role="button">Details</a>
-     *       </div>
-     *    </div>
-     *  </div>
-     * </div>
-     *
-     *
-     * @section
-     * <h3>Opening a ModalView</h3>
-     * <p>The widget can be open when any mobile navigational widget (listview, button, tabstrip, etc.) is tapped.
-     * To do so, the navigational widget should have <code>data-rel="modalview"</code> and <code>href</code> attribute pointing to the ModalView's element <code>id</code> set (prefixed with <code>#</code>, like an anchor).</p>
-     *
-     * @exampleTitle Button, which opens a ModalView
-     * @example
-     * <div data-role="view">
-     *  <a href="#foo" data-rel="modalview">Foo</a>
-     *  <div data-role="modalview" id="foo">
-     *   ...
-     *  </div>
-     * </div>
-     *
-     * @exampleTitle Button, which closes a ModalView
-     * @example
-     * <div data-role="view">
-     *  <a href="#foo" data-rel="modalview">Foo</a>
-     *  <div data-role="modalview" id="foo">
-     *    <div data-role="header">
-     *        <div data-role="navbar">
-     *            <a data-align="right" data-click="closeModalView" data-role="button">Close</a>
-     *        </div>
-     *    </div>
-     *
-     *   Foo
-     *  </div>
-     * </div>
-     *
-     * <script>
-     * function closeModalView(e) {
-     *  // find the closest modal view, relative to the button element.
-     *  var modalView = e.sender.element.closest("[data-role=modalview]").data("kendoMobileModalView");
-     *  modalView.close();
-     * }
-     * </script>
-     */
-    var ModalView = ui.View.extend(/** @lends kendo.mobile.ui.ModalView.prototype */{
-        /**
-         * @constructs
-         * @extends kendo.mobile.ui.Widget
-         * @param {Element} element DOM element.
-         * @param {Object} options Configuration options.
-         * @option {Number} [width] The width of the ModalView container in pixels. If not set, the element style is used.
-         * @option {Number} [height] The height of the ModalView container in pixels. If not set, the element style is used.
-         * @option {Boolean} [modal] <true> When set to false, the ModalView will close when the user taps outside of its element.
-         */
+    var ModalView = ui.View.extend({
         init: function(element, options) {
-            var that = this;
+            var that = this, width, height;
 
             Widget.fn.init.call(that, element, options);
 
             element = that.element;
             options = that.options;
 
+            width = parseFloat(element.css("width"));
+            height = parseFloat(element.css("height"));
+
             element.addClass("km-modalview").wrap(WRAP);
 
             that.wrapper = element.parent().css({
-                width: options.width || element[0].style.width || 300,
-                height: options.height || element[0].style.height || 300
+                width: options.width || width || 300,
+                height: options.height || height || 300
             });
             element.css({ width: "", height: "" });
 
@@ -57072,42 +48825,25 @@ extend(Editor, {
 
             that._layout();
             that._scroller();
+            that._model();
         },
 
         events: [
-            /**
-             * Fires when the ModalView is shown.
-             * @name kendo.mobile.ui.ModalView#open
-             * @event
-             * @param {Event} e
-             * @param {jQuery} e.target The invocation target of the ModalView.
-             * @example
-             * <div data-role="view">
-             *  <a href="#foo" data-rel="modalview">Foo</a>
-             *  <div data-role="modalview" id="foo" data-open="logTarget">
-             *   Foo
-             *  </div>
-             * </div>
-             *
-             * <script>
-             * function logTarget(e) {
-             *   console.log(e.target); // <a href="#foo" ...
-             * }
-             * </script>
-             *
-             */
             OPEN
         ],
 
         options: {
             name: "ModalView",
-            modal: true
+            modal: true,
+            width: null,
+            height: null
         },
 
-        /**
-         * Open the ModalView
-         * @param {jQuery} target (optional) The target of the ModalView
-         */
+        destroy: function() {
+            Widget.fn.destroy.call(this);
+            this.shim.destroy();
+        },
+
         open: function(target) {
             var that = this;
             that.trigger(OPEN);
@@ -57122,9 +48858,6 @@ extend(Editor, {
             that.shim.show();
         },
 
-        /**
-         * Close the ModalView
-         */
         close: function() {
             this.shim.hide();
         }
@@ -57138,108 +48871,7 @@ extend(Editor, {
         Widget = ui.Widget,
         View = ui.View;
 
-    /**
-     * @name kendo.mobile.ui.SplitView.Description
-     * @section
-     * <p>The mobile SplitView is a tablet-specific view that consists of two or more <strong>mobile Pane widgets</strong>. The
-     * Mobile Application automatically instantiates a mobile SplitView for each element with a <code>role</code> data attribute set
-     * to <b>splitview</b>. </p>
-     * <p> <strong>Important:</strong> unlike most widgets, the splitview element <strong>should not be nested</strong>
-     * in a view, but should be put as an immediate child of the mobile application element.</p>
-     *
-     * @exampleTitle Mobile SplitView with two panes
-     * @example
-     * <div data-role="splitview">
-     *
-     *   <div data-role="pane" id="side-pane">
-     *     <div data-role="view" data-title="Messages">
-     *        <ul data-role="listview">
-     *          <li><a href="#foo" data-target="main-pane">Foo</a></li><!-- link to main pane -->
-     *          <li><a href="#bar">Bar</a></li><!-- link to same pane -->
-     *        </ul>
-     *     </div>
-     *   </div>
-     *
-     *   <div data-role="pane" data-layout="main-default" id="main-pane">
-     *     <div data-role="view" data-title="Messages">
-     *         No message selected
-     *     </div>
-     *
-     *     ...
-     *
-     *     <div data-role="layout" data-id="main-default">
-     *         <div data-role="header">
-     *             <div data-role="navbar">
-     *                 <span data-role="view-title"></span>
-     *             </div>
-     *         </div>
-     *     </div>
-     *   </div>
-     *
-     * </div>
-     *
-     * @section
-     * <h3>Customizing appearance</h3>
-     * By default Kendo UI Mobile is configured to show a horizontal SplitView with smaller left and bigger right pane in 1:2 proportion.
-     * In order to resize one of the panes, use CSS to set its width or adjust the flexibility of the flex boxes (if the width is set, the other pane flexibility should be set to a high numer, like 1000).
-     *
-     * @exampleTitle Set pane width to 300px or change the proportions to 1:3
-     * @example
-     * <div data-role="splitview" id="main">
-     *   <div data-role="pane" id="side-pane">
-     *     <div data-role="view">
-     *        <a data-role="button" href="#bar" data-target="main-pane">Bar (main pane)</a>
-     *        <a data-role="button" href="#baz" data-target="_top">Baz (application)</a>
-     *     </div>
-     *   </div>
-     *   <div data-role="pane" id="main-pane">
-     *     <div data-role="view" id="foo">
-     *        Foo
-     *     </div>
-     *     <div data-role="view" id="bar">
-     *        Bar
-     *     </div>
-     *   </div>
-     * </div>
-     *
-     * <style>
-     *     #side-pane { width: 300px; }
-     *     #main-pane { -webkit-box-flex: 1000; }
-     * </style>
-     * or
-     * <style>
-     *     #main-pane { -webkit-box-flex: 3; }
-     * </style>
-     *
-     * @section
-     * Additionally you can split your view to more panes by adding them directly. You can also make them stack vertically
-     * by setting data-style="vertical" on your SplitView.
-     *
-     * @exampleTitle Make SplitView to stack vertically.
-     * @example
-     * <div data-role="splitview" id="main" data-style="vertical">
-     *   <div data-role="pane" id="side-pane">
-     *     <div data-role="view">
-     *        <a data-role="button" href="#bar" data-target="main-pane">Bar (main pane)</a>
-     *        <a data-role="button" href="#baz" data-target="_top">Baz (application)</a>
-     *     </div>
-     *   </div>
-     *   <div data-role="pane" id="main-pane">
-     *     <div data-role="view" id="foo">
-     *        Foo
-     *     </div>
-     *     <div data-role="view" id="bar">
-     *        Bar
-     *     </div>
-     *   </div>
-     * </div>
-     */
-    var SplitView = View.extend(/** @lends kendo.mobile.ui.SplitView.prototype */{
-        /**
-         * @constructs
-         * @extends kendo.mobile.ui.Widget
-         * @param {Element} element DOM element
-         */
+    var SplitView = View.extend({
         init: function(element, options) {
             var that = this;
 
@@ -57269,7 +48901,7 @@ extend(Editor, {
 
             element.data("kendoView", that).addClass("km-view km-splitview");
 
-            that.transition = kendo.data(element, "transition");
+            that.transition = kendo.attrValue(element, "transition");
             $.extend(that, { header: [], footer: [], content: element });
         },
 
@@ -57324,73 +48956,23 @@ extend(Editor, {
         WIDGET_RELS = /popover|actionsheet|modalview/,
         BACK = "#:back",
 
-        data = kendo.data,
+        attrValue = kendo.attrValue,
         // navigation element roles
         buttonRoles = "button backbutton detailbutton listview-link",
-        linkRoles = "tab";
+        linkRoles = "tab",
+        NS = ".kendoMobilePane",
+        MOUSEDOWN = support.mousedown + NS,
+        MOUSEUP = support.mouseup + NS,
+        CLICK = "click" + NS,
+        TOUCHSTART = "touchstart" + NS;
 
     function appLinkClick(e) {
-        if(data($(e.currentTarget), "rel") != EXTERNAL) {
+        if(attrValue($(e.currentTarget), "rel") != EXTERNAL) {
             e.preventDefault();
         }
     }
 
-    /**
-     * @name kendo.mobile.ui.Pane.Description
-     * @section
-     * <h3>Mobile Pane</h3>
-     * <p>The mobile Pane widget groups one or more <strong>mobile views</strong> within the main view application. The mobile
-     * SplitView widget allows a side by-side display of several panes. The mobile PopOver automatically instantiates a mobile Pane widget for its
-     * contents.</p>
-     *
-     * @section
-     * <p>The mobile Pane widget acts like an embedded mobile application, with most of the application
-     * features available: support for local/remote views, default layout and transition, lading, etc. with one
-     * exception being the browser history support. Navigating within the pane will not update the history state, so
-     * deep linking to a pane state is not supported.</p>
-     *
-     * @section
-     * <h3>Navigating across panes</h3>
-     *
-     * <p>By default, navigational widgets will change views in the containing pane. To target another pane, use
-     * <code>target</code> data attribute set to the <strong>id</strong> of the pane. To change views in the mobile
-     * application, use <code>data-target="_top"</code>.</p>
-     *
-     * @exampleTitle Navigating across panes
-     * @example
-     * <div data-role="splitview" id="main">
-     *    <div data-role="pane" id="side-pane">
-     *      <div data-role="view">
-     *         <a data-role="button" href="#bar" data-target="main-pane">Bar (main pane)</a>
-     *         <a data-role="button" href="#baz" data-target="_top">Baz (application)</a>
-     *      </div>
-     *    </div>
-     *
-     *    <div data-role="pane" id="main-pane">
-     *      <div data-role="view" id="foo">
-     *         Foo
-     *      </div>
-     *      <div data-role="view" id="bar">
-     *         Bar
-     *      </div>
-     *    </div>
-     *  </div>
-     *
-     *  <div data-role="view" id="baz">
-     *     <a data-role="button" href="#main">Go back to splitview</a>
-     *  </div>
-     */
-    var Pane = Widget.extend(/** @lends kendo.mobile.ui.Pane.prototype */{
-        /**
-         * @constructs
-         * @extends kendo.mobile.ui.Widget
-         * @param {Element} element DOM element
-         * @param {Object} options Configuration options.
-         * @option {String} [layout] <> The id of the default Pane Layout.
-         * @option {String} [initial] <> The id of the initial mobilie View to display.
-         * @option {String} [loading] <Loading...> The text displayed in the loading popup. Setting this value to false will disable the loading popup.
-         * @option {String} [transition] <> The default View transition.
-         */
+    var Pane = Widget.extend({
         init: function(element, options) {
             var that = this;
 
@@ -57427,56 +49009,21 @@ extend(Editor, {
         },
 
         events: [
-            /**
-             * Fires when pane navigates to a view.
-             * @name kendo.mobile.ui.Pane#navigate
-             * @event
-             * @param {Event} e
-             * @param {jQuery} e.url The url of the view
-             */
             NAVIGATE,
-            /**
-             * Fires after the pane displays a view.
-             * @name kendo.mobile.ui.Pane#viewShow
-             * @event
-             * @param {Event} e
-             * @param {View} e.view The displayed view
-             */
             VIEW_SHOW
         ],
 
-        /**
-         * Navigate the local or remote view.
-         * @param {String} url The id or url of the view.
-         * @param {String} transition The transition to apply when navigating. See View Transitions section for more
-         * information.
-         *
-         * @exampleTitle Navigate to a remote view
-         * @example
-         * <div data-role="pane" id="main-pane">
-         * </div>
-         *
-         * <script>
-         * var pane = $("#main-pane").data("kendoMobilePane");
-         * pane.navigate("settings.html");
-         * </script>
-         *
-         * @exampleTitle Navigate to a local view
-         * @example
-         * <div data-role="pane" id="main-pane">
-         *   <div data-role="view" id="foo"> ... </div>
-         * </div>
-         *
-         * <script>
-         * var pane = $("#main-pane").data("kendoMobilePane");
-         * pane.navigate("#foo");
-         * </script>
-         */
+        destroy: function() {
+            Widget.fn.destroy.call(this);
+
+            this.element.off(NS);
+
+            kendo.destroy(this.element);
+        },
+
         navigate: function(url, transition) {
             var that = this,
                 history = that.history;
-
-            that.trigger(NAVIGATE, {url: url});
 
             if (url === BACK) {
                 history.pop();
@@ -57485,27 +49032,18 @@ extend(Editor, {
                 that.history.push(url);
             }
 
+            that.trigger(NAVIGATE, {url: url});
             that.viewEngine.showView(url, transition);
         },
 
-        /**
-         * Hide the loading animation.
-         */
         hideLoading: function() {
             this.loader.hide();
         },
 
-        /**
-         * Show the loading animation.
-         */
         showLoading: function() {
             this.loader.show();
         },
 
-        /**
-         * Get a reference to the current view.
-         * @returns {View} the view instance.
-         */
         view: function() {
             return this.viewEngine.view();
         },
@@ -57514,10 +49052,12 @@ extend(Editor, {
             var that = this,
                 mouseup = $.proxy(that._mouseup, that);
 
-            this.element
-                .on(support.mousedown, roleSelector(linkRoles), mouseup)
-                .on(support.mouseup, roleSelector(buttonRoles), mouseup)
-                .on("click", roleSelector(linkRoles + " " + buttonRoles), appLinkClick);
+            that.element
+                .on(MOUSEDOWN, roleSelector(linkRoles), mouseup)
+                .on(MOUSEUP, roleSelector(buttonRoles), mouseup)
+                .on(CLICK, roleSelector(linkRoles + " " + buttonRoles), appLinkClick)
+                .on(TOUCHSTART, roleSelector(buttonRoles), false) // Bust the ghost click
+                .on(TOUCHSTART, ".km-popup .k-item", false); // Prevent ghost clicks in DropDownList
         },
 
         _mouseup: function(e) {
@@ -57526,9 +49066,9 @@ extend(Editor, {
             }
 
             var link = $(e.currentTarget),
-                transition = data(link, "transition"),
-                rel = data(link, "rel") || "",
-                target = data(link, "target"),
+                transition = attrValue(link, "transition"),
+                rel = attrValue(link, "rel") || "",
+                target = attrValue(link, "target"),
                 pane = this,
                 href = link.attr(HREF);
 
@@ -57581,9 +49121,9 @@ extend(Editor, {
         },
 
         viewportTemplate = kendo.template('<meta content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no, width=device-width#=data.height#" name="viewport" />', {usedWithBlock: false}),
-        meta = '<meta name="apple-mobile-web-app-capable" content="yes" /> ' +
-               '<meta name="apple-mobile-web-app-status-bar-style" content="black" /> ' +
-                viewportTemplate({ height: "" }),
+        systemMeta = '<meta name="apple-mobile-web-app-capable" content="yes" /> ' +
+                     '<meta name="apple-mobile-web-app-status-bar-style" content="black" /> ',
+        viewportMeta = viewportTemplate({ height: "" }),
 
         iconMeta = kendo.template('<link rel="apple-touch-icon' + (support.mobileOS.android ? '-precomposed' : '') + '" # if(data.size) { # sizes="#=data.size#" #}# href="#=data.icon#" />', {usedWithBlock: false}),
 
@@ -57603,263 +49143,17 @@ extend(Editor, {
     }
 
     function applyViewportHeight() {
-        $("meta[name=viewport]").replaceWith(viewportTemplate({ height: isOrientationHorizontal() ? ", height=device-width" : ", height=device-height" }));
+        $("meta[name=viewport]").remove();
+        HEAD.append(viewportTemplate({
+            height: isOrientationHorizontal() ?
+                        ", height=" + window.innerHeight + "px"  :
+                        (OS.flatVersion >= 600 && OS.flatVersion < 700) ?
+                            ", height=" + window.innerWidth + "px" :
+                            ", height=device-height"
+        }));
     }
 
-    /**
-    * @name kendo.mobile.Application.Description
-    * @section
-    *
-    * <p>The Kendo mobile <strong>Application</strong> provides the necessary tools for building native-looking web based mobile applications.</p>
-    *
-    * <h3>Getting Started</h3>
-    * <p>The simplest mobile <strong>Application</strong> consists of a single mobile <strong>View</strong>. </p>
-    *
-    * @exampleTitle Hello World mobile Application
-    * @example
-    * <body>
-    *    <div data-role="view">
-    *      <div data-role="header">Header</div>
-    *      Hello world!
-    *      <div data-role="footer">Footer</div>
-    *    </div>
-    *
-    *    <script>
-    *    var app = new kendo.mobile.Application(); //document.body is used by default
-    *    </script>
-    * </body>
-    *
-    * @section
-    * <h3>Mobile Views</h3>
-    *
-    * <p>The mobile <strong>Application</strong> consists of a single HTML page with one or more mobile Views, linked with navigational widgets (Buttons, TabStrip, etc.).
-    * Each child of the application element (<code>&lt;body&gt;</code> by default) with <code>data-role="view"</code> is considered a mobile view.
-    *
-    * @section
-    *
-    * <h3>Navigation</h3>
-    * <p>When initialized, the mobile <strong>Application</strong> modifies the kendo mobile widgets' (listview link items, buttons, tabs, etc.) behavior so that they navigate between the mobile views when the user taps them.
-    * When targeting local views, The navigation <strong>Widget</strong>'s <code>href</code> attribute specifies the <strong>View</strong> id to navigate to, prefixed with <code>#</code>, like an anchor.</p>
-    *
-    * @exampleTitle Views linked with mobile Buttons
-    * @example
-    * <div data-role="view" id="foo">Foo <a href="#bar" data-role="button">Go to Bar</a></div>
-    * <div data-role="view" id="bar">Bar <a href="#foo" data-role="button">Go to Foo</a></div>
-    *
-    * @section
-    * <h3>Linking to External Pages</h3>
-    * <p>By default, all navigational widgets try to navigate to loacal views when tapped. This behavior can be overridden by setting <code>data-rel="external"</code> attribute to the link element. </p>
-    *
-    * @exampleTitle External links
-    * @example
-    * <a href="http://kendoui.com/" data-rel="external">Visit KendoUI</a>
-    *
-    * @section
-    *
-    * <h3>View Transitions</h3>
-    * <p><strong>View</strong> transitions are defined by setting a <code>data-transition</code> attribute to the <strong>View</strong> DOM element or to the navigational widget <code>A</code> DOM element.
-    * If both are present, the navigational widget transition takes precedence.
-    * An application-wide default transition may be set using the <code>transition</code> parameter in the options parameter of the <strong>Application</strong> constructor.
-    * The following transitions are supported:</p>
-    *
-    * <h4>slide</h4>
-    * <p> This is the default iOS <strong>View</strong> transition. Old <strong>View</strong> content slides to the left and the new <strong>View</strong> content slides in its place.
-    * Headers and footers (if present) use the <strong>fade</strong> transition. </p>
-    * <p>The transition direction can be specified by using <code>slide:(direction)</code>.
-    * Supported directions are <code>left</code> and <code>right</code>. By default, the direction is <code>left</code>.</p>
-    *
-    * <h4>zoom</h4>
-    * <p>The new <strong>View</strong> (along with its header and footer) content zooms from the center of the previous <strong>View</strong>. The old <strong>View</strong> content fades out. Suitable for displaying dialogs.</p>
-    *
-    * <h4>fade</h4>
-    * <p>The new <strong>View</strong> (along with its header and footer) content fades in on top of the previous <strong>View</strong> content.</p>
-    *
-    * <h4>overlay</h4>
-    * <p>The new <strong>View</strong> content slides on top of the previous <strong>View</strong>. Unlike the <code>slide</code> transition,
-    * the previous View stays "under" the new one, and the headers / footers do not transition separately. </p>
-    * <p>The transition direction can be specified by using <code>overlay:(direction)</code> format.
-    * Supported directions are <code>down</code>, <code>left</code>, <code>up</code> and <code>right</code>. By default, the direction is <code>left</code>.</p>
-    *
-    * @exampleTitle Views with Transitions
-    * @example
-    * <div data-role="view" id="foo" data-transition="slide">Foo <a href="#bar" data-role="button">Go to Bar</a></div>
-    * <div data-role="view" id="bar" data-transition="overlay:up">Bar <a href="#foo" data-role="button">Go to Foo</a></div>
-    *
-    * @section
-    * <p>Each transition may be played in <strong>reverse</strong>. To do so, add <code>" reverse"</code> after the transition definition. For
-    * instance, to simulate returning to previous view using slide transition, use <code>"slide:left reverse"</code></p>
-    *
-    * @exampleTitle Reverse transition
-    * @example
-    * <div data-role="view" id="foo">Foo <a href="#bar" data-role="button">Go to Bar</a></div>
-    * <div data-role="view" id="bar">Bar <a href="#foo" data-role="button" data-transition="slide:left reverse">Go to Foo</a></div>
-    *
-    * @section
-    * <p>When a <strong>View</strong> transitions to the <strong>View</strong> displayed before it (foo → bar → foo), this is considered a <strong>back</strong> navigation.
-    * In this case, the animation of the current <strong>View</strong> is applied in reverse.
-    * For instance, navigating with slide transition from <code>foo</code> to <code>bar</code>, then back to <code>foo</code>
-    * would cause the <code>foo</code> <strong>View</strong> to slide from the right side of the screen. </p>
-    *
-    * @section
-    *
-    * <h3>Remote Views</h3>
-    *
-    * <p>The Kendo mobile <strong>Application</strong> can load <strong>Views</strong> remotely, using AJAX. If the navigational widget href attribute value does not start with a hash (#),
-    * the application considers the View to be remote, and issues an AJAX request to the provided URL.
-    *
-    * The View content (the first element with <code>data-role="view"</code>) is extracted from the AJAX response and appended into the Application DOM element.
-    * Once the remote <strong>View</strong> is fetched, no additional round trips to the server occur when the <strong>View</strong> is displayed again. </p>
-    *
-    * @exampleTitle Remote View
-    * @example
-    * <!-- foo.html -->
-    * <div data-role="view">Foo <a href="bar.html" data-role="button">Go to Bar</a></div>
-    *
-    * <!-- bar.html -->
-    * <div data-role="view">Bar</div>
-    *
-    * @section
-    * <p>The remote view request will also append (but not initialize) any <strong>additional views</strong> found in the AJAX
-    * response. <strong>Inline style</strong> elements, <strong>inline script</strong> elements, and <strong>mobile layout</strong> definitions will also be evaluated and appended to the
-    * application. The elements must be available in the root of the response, or nested inside the <strong>body</strong> element. </p>
-    * <p>Scripts and styles from the <strong>head</strong> element (if present) will <strong>not</strong> be evaluated.</p>
-    *
-    * <p>If the remote view needs an <b>additional scripting (widget initialization/binding)</b> logic, it may be defined in the view init event handler,  in the AJAX response.</p>
-    *
-    * @exampleTitle Remote view with init event handler
-    * @example
-    * <!-- foo.html -->
-    * <div data-role="view">
-    * <a data-role="button" href="bar.html">Go to bar</a>
-    * </div>
-    *
-    * <!-- bar.html -->
-    * <div data-role="view" data-init="initBar">
-    *   <a href="#" id="link">Link</a>
-    * </div>
-    *
-    * <script>
-    *   function initBar(e) {
-    *       e.view.element.find("#link").kendoMobileButton();
-    *   }
-    * </script>
-    *
-    * @section
-    * <h3> Initial View</h3>
-    *
-    * <p> The <strong>Application</strong> provides a way to specify the initial view to show. The initial view can be set by
-    * passing the view id in the options parameter of the Application's constructor:
-    * @exampleTitle Define initial view
-    * @example
-    * <script>
-    *      new kendo.mobile.Application($(document.body), {
-    *          initial: "ViewID"
-    *      });
-    * </script>
-
-    * @section
-    *
-    * <h3>Web Clip Icons</h3>
-    *
-    * <p>The mobile devices can create a bookmark with a custom icon, placed on the Home screen. Users can use the shortcut to open that web page later.</p>
-    *
-    * @exampleTitle Define web clip icon
-    * @example
-    * <script>
-    *      new kendo.mobile.Application($(document.body), {
-    *          icon: "URL to a web clip icon"
-    *      });
-    * </script>
-    *
-    * @section
-    * <p>Multiple icons for different sizes can be defined. Please refer to Apple <a href="https://developer.apple.com/library/ios/#documentation/userexperience/conceptual/mobilehig/IconsImages/IconsImages.html#//apple_ref/doc/uid/TP40006556-CH14-SW11">Web Clip Icons help topic</a>
-    * for more information.</p>
-    *
-    * @exampleTitle Define multiple web clip icons
-    * @example
-    * <script>
-    *      new kendo.mobile.Application($(document.body), {
-    *          icon: {
-    *            "72x72" : "URL to a 72 x 72 pixels web clip icon",
-    *            "114x114" : "URL to a 114 x 114 pixels web clip icon"
-    *          }
-    *      });
-    * </script>
-    *
-    * @section
-    * <h3>Force Platform Styles</h3>
-    *
-    * <p> The <strong>Application</strong> provides a way to force a specific platform look on your application upon init by
-    * passing the OS name in the options parameter of the Application's constructor:
-    *
-    * @exampleTitle Force iOS look
-    * @example
-    * <script>
-    *      new kendo.mobile.Application($(document.body), {
-    *          platform: "ios"
-    *      });
-    * </script>
-    *
-    * @section
-    * Additionally, the OS version can be specified by by passing kendo.support.mobileOS object that is expected by Kendo UI Mobile.
-    * This is more complex, but allows fine grained tuning of the application look and behavior. A sample object initialization is like this:
-    *
-    * @exampleTitle Force iOS 5 look
-    * @example
-    * <script>
-    *      new kendo.mobile.Application($(document.body), {
-    *          platform: {
-    *                         device: "ipad",       // Mobile device, can be "ipad", "iphone", "ipod", "android" "fire", "blackberry", "meego"
-    *                         name: "ios",          // Mobile OS, can be "ios", "android", "blackberry", "meego"
-    *                         ios: true,            // Mobile OS name as a flag
-    *                         majorVersion: 5,      // Major OS version
-    *                         minorVersion: "0.0",  // Minor OS versions
-    *                         flatVersion: "500",   // Flat OS version for easier comparison
-    *                         appMode: false        // Whether running in browser or in AppMode/PhoneGap/Titanium.
-    *                         tablet: "ipad"        // If a tablet - tablet name or false for a phone.
-    *                    }
-    *      });
-    * </script>
-    */
-    var Application = kendo.Observable.extend(/** @lends kendo.mobile.Application.prototype */{
-        /**
-         * @constructs
-         * @extends kendo.Observable
-         * @param {Element} element DOM element. By default, the body element is used.
-         * @param {Object} options Configuration options.
-         * @option {String} [layout] <> The id of the default Application Layout.
-         * _example
-         * <div data-role="view">Bar</div>
-         *
-         * <div data-role="layout" data-id="foo">
-         *   <div data-role="header">Header</div>
-         * </div>
-         *
-         * @option {String} [initial] <> The id of the initial mobilie View to display.
-         * _example
-         * <script>
-         *      new kendo.mobile.Application($(document.body), {
-         *          initial: "ViewID"
-         *      });
-         * </script>
-         * @option {String} [loading] <Loading...> The text displayed in the loading popup. Setting this value to false will disable the loading popup.
-         * @option {Boolean} [hideAddressBar] <true> Whether to hide the browser address bar.
-         * <script>
-         *      new kendo.mobile.Application($(document.body), { layout: "foo" });
-         * </script>
-         * @option {String} [transition] <> The default View transition.
-         * _example
-         * <script>
-         *      new kendo.mobile.Application($(document.body), { transition: "slide" });
-         * </script>
-         * @option {String} [platform] <> Which platform look to force on the application. Can be one of "ios", "android", "blackberry".
-         * _example
-         * <script>
-         *      new kendo.mobile.Application($(document.body), {
-         *          platform: "android"
-         *      });
-         * </script>
-         */
+    var Application = kendo.Observable.extend({
         init: function(element, options) {
             var that = this;
 
@@ -57884,66 +49178,22 @@ extend(Editor, {
             });
         },
 
-        /**
-         * Navigate to local or to remote view.
-         * @param {String} url The id or url of the view.
-         * @param {String} transition The transition to apply when navigating. See View Transitions section for more
-         * information.
-         *
-         * @exampleTitle Navigate to a remote view
-         * @example
-         * var app = new kendo.mobile.Application();
-         * app.navigate("settings.html");
-         *
-         * @exampleTitle Navigate to a local view
-         * @example
-         * <div data-role="view" id="foo"> ... </div>
-         *
-         * <script>
-         * var app = new kendo.mobile.Application();
-         * app.navigate("#foo");
-         * </script>
-         */
         navigate: function(url, transition) {
             this.pane.navigate(url, transition);
         },
 
-        /**
-         * Get a reference to the current view's scroller widget instance.
-         * @returns {Scroller} the scroller widget instance.
-         */
         scroller: function() {
             return this.view().scroller;
         },
 
-        /**
-         * Hide the loading animation.
-         * @example
-         * <script>
-         *   var app = new kendo.mobile.Application();
-         *   app.hideLoading();
-         * </script>
-         */
         hideLoading: function() {
             this.pane.hideLoading();
         },
 
-        /**
-         * Show the loading animation.
-         * @example
-         * <script>
-         *   var app = new kendo.mobile.Application();
-         *   app.showLoading();
-         * </script>
-         */
         showLoading: function() {
             this.pane.showLoading();
         },
 
-        /**
-         * Get a reference to the current view.
-         * @returns {View} the view instance.
-         */
         view: function() {
             return this.pane.view();
         },
@@ -58033,7 +49283,11 @@ extend(Editor, {
         _attachMeta: function() {
             var icon = this.options.icon, size;
 
-            HEAD.prepend(meta);
+            if (!BERRYPHONEGAP) {
+                HEAD.prepend(viewportMeta);
+            }
+
+            HEAD.prepend(systemMeta);
 
             if (icon) {
                 if (typeof icon === "string") {
@@ -58102,104 +49356,20 @@ extend(Editor, {
         Shim = ui.Shim,
         Popup = ui.Popup,
         Widget = ui.Widget,
+        ns = ".kendoMobileActionSheet",
         OPEN = "open",
         BUTTONS = "li>a",
         CONTEXT_DATA = "actionsheetContext",
         WRAP = '<div class="km-actionsheet-wrapper" />',
-        cancelTemplate = kendo.template('<li class="km-actionsheet-cancel"><a href="\\#">#:cancel#</a></li>');
+        cancelTemplate = kendo.template('<li class="km-actionsheet-cancel"><a href="\\#">#:cancel#</a></li>'),
+        MOUSEUP = kendo.support.mouseup + ns,
+        CLICK = "click" + ns;
 
-    /**
-     * @name kendo.mobile.ui.ActionSheet.Description
-     * @section
-     * <p>The mobile ActionSheet widget displays a set of choices related to a task the user initiates.</p>
-     * <h3>Getting Started</h3>
-     * <p>The mobile Application will automatically initialize a mobile ActionSheet widget for every <code>ul</code> element with <code>role</code>
-     * data attribute set to <code>actionsheet</code> present in the views/layouts' markup.
-     * Alternatively, it can be initialized using jQuery plugin syntax in the containing mobile View <strong>init event handler</strong>.
-     * The actionsheet element should contain one or more <code>li</code> elements, each with an <code>a</code> element inside. A 'Cancel' action is automatically added to the bottom of the actions.</p>
-     *
-     * @exampleTitle Define an ActionSheet with two buttons
-     * @example
-     * <ul data-role="actionsheet">
-     *   <li><a data-action="foo">Foo</a></li>
-     *   <li><a data-action="bar">Bar</a></li>
-     * </ul>
-     *
-     * @section
-     * <p>In iOS, the ActionSheet slides in from the bottom of the screen; It also acts like a modal dialog - tapping the background does not close it. </p>
-     * <p>In Android and Blackberry, the available actions are centered in the middle of the screen, and tapping the background closes it.</p>
-     *
-     * <h3>ActionSheet in Tablets </h3>
-     * <p>If a tablet is detected, the ActionSheet widget will be displayed in a PopOver. The sizing and the direction of the popover may be customized
-     * through the <code>popup</code> configuration option.</p>
-     *
-     * <h3>Opening an ActionSheet</h3>
-     * <p>The widget can be open when any mobile navigational widget (listview link item, button, tabstrip, etc.) is tapped.
-     * To do so, set <code>data-rel="actionsheet"</code> attribute and a <code>href</code> attribute equal to the ActionSheet's element <code>id</code> (prefixed with <code>#</code>, like an anchor).</p>
-     *
-     * @exampleTitle Mobile Button opening ActionSheet
-     * @example
-     * <a data-role="button" data-rel="actionsheet" href="#replyActionSheet">Reply</a>
-     * <ul data-role="actionsheet" id="replyActionSheet">
-     *   <li><a data-action="foo">Reply</a></li>
-     *   <li><a data-action="foo">Reply to All</a></li>
-     *   <li><a data-action="bar">Forward</a></li>
-     * </ul>
-     *
-     * @section
-     * <h3>Executing Actions</h3>
-     * <p>Each link in the ActionSheet should have a <code>data-action</code> attribute set, specifying the callback method to be executed when the user taps it.
-     * The callback can be either a function, or a method of a JavaScript object in the global scope.</p>
-     *
-     * <p>The callback receives a object with two fields: <code>target</code> and (optional) <code>context</code> as a
-     * parameter. The <code>target</code> holds a reference to the DOM element which has opened the ActionSheet. The <code>context</code> contains
-     * to the optional <code>actionsheet-context</code> data attribute of the opening DOM element.</p>
-     *
-     * <p>After the callback has been executed, the ActionSheet closes automatically.</p>
-     *
-     * @exampleTitle Mobile ActionSheet actions and context
-     * @example
-     * <a id="myButton"
-     *  data-role="button"
-     *  data-actionsheet-context="1"
-     *  data-rel="actionsheet" href="#myActionSheet">Foo...</a>
-     *
-     * <ul data-role="actionsheet" id="myActionSheet">
-     *   <li><a data-action="foo">Foo</a></li>
-     *   <li><a data-action="bar.baz">Bar</a></li>
-     * </ul>
-     * <script>
-     *      function foo(e) {
-     *          e.context; // 1
-     *          e.target; // $("#myButton")
-     *      }
-     *
-     *      var bar = {
-     *          baz: function(e) {
-     *              e.context; // 1
-     *              e.target; // $("#myButton")
-     *          }
-     *      }
-     * </script>
-     *
-     */
-    var ActionSheet = Widget.extend(/** @lends kendo.mobile.ui.ActionSheet.prototype */{
-        /**
-         * @constructs
-         * @extends kendo.mobile.ui.Widget
-         * @param {Element} element DOM element.
-         * @param {Object} options Configuration options.
-         * @option {String} [cancel] <Cancel> The text of the cancel button.
-         * @option {Object} [popup] The popup configuration options (tablet only).
-         * @option {Number | String} [popup.width] <240> The width of the popup in pixels.
-         * @option {Number | String} [popup.height] <auto> The height of the popup in pixels.
-         * @option {Number | String} [popup.direction] <down> The direction to which the popup will expand, relative to the target that opened it.
-         */
+    var ActionSheet = Widget.extend({
         init: function(element, options) {
             var that = this,
                 os = kendo.support.mobileOS,
-                ShimClass = os.tablet ? Popup : Shim,
-                wrapper;
+                ShimClass = os.tablet ? Popup : Shim;
 
             Widget.fn.init.call(that, element, options);
 
@@ -58209,26 +49379,16 @@ extend(Editor, {
                 .addClass("km-actionsheet")
                 .append(cancelTemplate({cancel: that.options.cancel}))
                 .wrap(WRAP)
-                .on(kendo.support.mouseup, BUTTONS, $.proxy(that._click, that))
-                .on("click", BUTTONS, kendo.preventDefault);
+                .on(MOUSEUP, BUTTONS, $.proxy(that._click, that))
+                .on(CLICK, BUTTONS, kendo.preventDefault);
 
-            wrapper = element.parent();
-
-            that.wrapper = wrapper;
+            that.wrapper = element.parent();
             that.shim = new ShimClass(that.wrapper, $.extend({modal: !(os.android || os.meego)}, that.options.popup) );
 
             kendo.notify(that, ui);
         },
 
         events: [
-            /**
-             * Fires when the ActionSheet is opened.
-             * @name kendo.mobile.ui.ActionSheet#open
-             * @event
-             * @param {Event} e
-             * @param {jQuery} e.target The invocation target of the ActionSheet.
-             * @param {jQuery} e.context The defined ActionSheet context.
-             */
             OPEN
         ],
 
@@ -58238,11 +49398,6 @@ extend(Editor, {
             popup: { height: "auto" }
         },
 
-        /**
-         * Open the ActionSheet.
-         * @param {jQuery} target (optional) The target of the ActionSheet, available in the callback methods.
-         * @param {Object} context (optional) The context of the ActionSheet, available in the callback methods.
-         */
         open: function(target, context) {
             var that = this;
             that.target = $(target);
@@ -58251,21 +49406,23 @@ extend(Editor, {
         },
 
 
-        /**
-         * Close the ActionSheet.
-         */
         close: function() {
             this.context = this.target = null;
             this.shim.hide();
         },
 
-        /** @ignore */
         openFor: function(target) {
             var that = this;
             that.target = target;
             that.context = target.data(CONTEXT_DATA);
             that.trigger(OPEN, { target: that.target, context: that.context });
             that.shim.show(target);
+        },
+
+        destroy: function() {
+            Widget.fn.destroy.call(this);
+            this.element.off(ns);
+            this.shim.destroy();
         },
 
         _click: function(e) {
@@ -58297,132 +49454,22 @@ extend(Editor, {
         support = kendo.support,
         os = support.mobileOS,
         ANDROID3UP = os.android && os.flatVersion >= 300,
-        MOUSECANCEL = support.mousecancel,
+        ns = ".kendoMobileButton",
+        MOUSECANCEL = support.mousecancel + ns,
+        MOUSEMOVE = support.mousemove + ns,
+        MOUSEUP = support.mouseup + ns,
         MOUSEDOWN = support.mousedown,
-        MOUSEMOVE = support.mousemove,
-        MOUSEUP = support.mouseup,
+        MOUSEDOWN_NS = MOUSEDOWN + ns,
         CLICK = "click",
         removeActiveID = 0,
         proxy = $.proxy;
 
-    /**
-     * @name kendo.mobile.ui.Button.Description
-     * @section
-     * <p>The mobile Button widget navigates to mobile View or executes a custom callback when tapped.</p>
-     *
-     * <h3>Getting Started</h3>
-     * <p>The Kendo mobile Application will automatically initialize a mobile Button widget for every element with <code>role</code> data attribute set to <code>button</code> present in the views/layouts' markup.
-     * Alternatively, it can be initialized using jQuery plugin syntax in the containing mobile View <strong>init event handler</strong>.
-     * The button element may be either <code>A</code> or <code>BUTTON</code>. </p>
-     *
-     * @exampleTitle Initialize Kendo mobile Button based on role data attribute
-     * @example
-     * <a href="#foo" data-role="button">Foo</a>
-     *
-     * @exampleTitle Initialize Kendo mobile Button using jQuery
-     * @example
-     * var button = $("#button").kendoMobileButton();
-     *
-     * @section
-     *
-     * <h3>Customizing Mobile Button Appearance</h3>
-     * <p>The Kendo mobile Button color can be customized by setting its <code>background-color</code> CSS property inline or by using a CSS selector with specificity of 20+.
-     * You can target platforms separately using their respective root CSS classes.</p>
-     *
-     * @exampleTitle Green Button
-     * @example
-     * <a href="#foo" data-role="button" style="background-color: green">Foo</a>
-     *
-     * @section
-     *
-     * @exampleTitle Green Kendo mobile Button in iOS and a red one in Android
-     * @example
-     * <style>
-     *     .km-ios .checkout { background-color: green; }
-     *     .km-android .checkout { background-color: red; }
-     * </style>
-     *
-     * <a href="#foo" data-role="button" class="checkout">Foo</a>
-     *
-     * @section
-     * <h3>Button icons</h3>
-     * <p>A Button icon can be set in two ways - either by adding an <code>img</code> element inside the Button element,
-     * or by setting an <code>icon</code> data attribute to the Button element.</p>
-     * <p>KendoUI Mobile ships with several ready to use icons:</p>
-     *
-     * <ul id="icon-list">
-     *   <li title=".km-about"><span class="km-icon km-about"></span>about</li>
-     *   <li title=".km-action"><span class="km-icon km-action"></span>action</li>
-     *   <li title=".km-add"><span class="km-icon km-add"></span>add</li>
-     *   <li title=".km-bookmarks"><span class="km-icon km-bookmarks"></span>bookmarks</li>
-     *   <li title=".km-camera"><span class="km-icon km-camera"></span>camera</li>
-     *   <li title=".km-cart"><span class="km-icon km-cart"></span>cart</li>
-     *   <li title=".km-compose"><span class="km-icon km-compose"></span>compose</li>
-     *   <li title=".km-contacts"><span class="km-icon km-contacts"></span>contacts</li>
-     *   <li title=".km-details"><span class="km-icon km-details"></span>details</li>
-     *   <li title=".km-downloads"><span class="km-icon km-downloads"></span>downloads</li>
-     *   <li title=".km-fastforward"><span class="km-icon km-fastforward"></span>fastforward</li>
-     *   <li title=".km-favorites"><span class="km-icon km-favorites"></span>favorites</li>
-     *   <li title=".km-featured"><span class="km-icon km-featured"></span>featured</li>
-     *   <li title=".km-featured"><span class="km-icon km-toprated"></span>toprated</li>
-     *   <li title=".km-globe"><span class="km-icon km-globe"></span>globe</li>
-     *   <li title=".km-history"><span class="km-icon km-history"></span>history</li>
-     *   <li title=".km-home"><span class="km-icon km-home"></span>home</li>
-     *   <li title=".km-info"><span class="km-icon km-info"></span>info</li>
-     *   <li title=".km-more"><span class="km-icon km-more"></span>more</li>
-     *   <li title=".km-mostrecent"><span class="km-icon km-mostrecent"></span>mostrecent</li>
-     *   <li title=".km-mostviewed"><span class="km-icon km-mostviewed"></span>mostviewed</li>
-     *   <li title=".km-organize"><span class="km-icon km-organize"></span>organize</li>
-     *   <li title=".km-pause"><span class="km-icon km-pause"></span>pause</li>
-     *   <li title=".km-play"><span class="km-icon km-play"></span>play</li>
-     *   <li title=".km-recents"><span class="km-icon km-recents"></span>recents</li>
-     *   <li title=".km-refresh"><span class="km-icon km-refresh"></span>refresh</li>
-     *   <li title=".km-reply"><span class="km-icon km-reply"></span>reply</li>
-     *   <li title=".km-rewind"><span class="km-icon km-rewind"></span>rewind</li>
-     *   <li title=".km-search"><span class="km-icon km-search"></span>search</li>
-     *   <li title=".km-settings"><span class="km-icon km-settings"></span>settings</li>
-     *   <li title=".km-share"><span class="km-icon km-share"></span>share</li>
-     *   <li title=".km-stop"><span class="km-icon km-stop"></span>stop</li>
-     *   <li title=".km-trash"><span class="km-icon km-trash"></span>trash</li>
-     * </ul>
-     *
-     * <p>Additional icons may be added by defining the respective CSS class.
-     * If the <code>icon</code> data attribute is set to <code>custom</code>, the tab will receive <code>km-custom</code> CSS class.</p>
-     *
-     * <h3>Creating Custom Icons</h3>
-     *
-     * <p>In order to create colorizable icons like the default ones in Kendo UI Mobile, specify the icon image as a <b>box mask</b>
-     * (either as dataURI or as a separate image). The image should be <b>PNG8</b> or <b>PNG24</b> with alpha channel (<b>PNG8+Alpha</b> is supported by
-     * only few graphic editors, so <b>better stick with PNG24</b>). The image color is not important - it will be used as a mask only.</p>
-     *
-     * <p><strong>Note</strong>: <strong>BlackBerry 7.0</strong> has a bug that renders its masks as background-image, so it is recommended to use white in order to support it. The bug is fixed in <strong>7.1</strong>.</p>
-     *
-     * @exampleTitle Define custom button icon
-     * @example
-     * <style>
-     * .km-custom {
-     *   -webkit-mask-box-image: url("foo.png");
-     * }
-     * </style>
-     *
-     * <div data-role="button">
-     *   <a href="#index" data-icon="custom">Home</a>
-     * </div>
-     */
-    var Button = Widget.extend(/** @lends kendo.mobile.ui.Button.prototype */{
-        /**
-        * @constructs
-        * @extends kendo.mobile.ui.Widget
-        * @param {Element} element DOM element.
-        * @param {Object} options Configuration options.
-        * @option {String} [icon] <> The icon of the button. It can be either one of the built-in icons, or a custom one.
-        * _example
-        * var button = $("#button").kendoMobileButton({ icon: "stop" });
-        */
+    var Button = Widget.extend({
         init: function(element, options) {
             var that = this;
 
             Widget.fn.init.call(that, element, options);
+            element = that.element;
 
             that._wrap();
             that._style();
@@ -58430,34 +49477,31 @@ extend(Editor, {
             that._releaseProxy = proxy(that._release, that);
             that._removeProxy = proxy(that._removeActive, that);
 
-            that.element.bind(MOUSEUP, that._releaseProxy);
-            that.element.bind(MOUSEDOWN + " " + MOUSECANCEL + " " + MOUSEUP, that._removeProxy);
+            element.on(MOUSEUP, that._releaseProxy);
+            element.on(MOUSEDOWN_NS + " " + MOUSECANCEL + " " + MOUSEUP, that._removeProxy);
 
             if (ANDROID3UP) {
-                that.element.bind(MOUSEMOVE, function (e) {
+                element.on(MOUSEMOVE, function (e) {
                     if (!removeActiveID) {
-                        removeActiveID = setTimeout(that._removeProxy, 500 , e);
+                        removeActiveID = setTimeout(that._removeProxy, 500, e);
                     }
                 });
             }
         },
 
         events: [
-        /**
-         * Fires when the user taps the button.
-         * @name kendo.mobile.ui.Button#click
-         * @event
-         * @param {Event} e
-         * @param {jQuery} e.target The clicked DOM element
-         * @param {jQuery} e.button The button DOM element
-         */
-        CLICK
+            CLICK
         ],
 
         options: {
             name: "Button",
             icon: "",
             style: ""
+        },
+
+        destroy: function() {
+            Widget.fn.destroy.call(this);
+            this.element.off(ns);
         },
 
         _removeActive: function (e) {
@@ -58514,32 +49558,12 @@ extend(Editor, {
         }
     });
 
-    /**
-    * @name kendo.mobile.ui.BackButton.Description
-    * @section
-    * <h2>BackButton</h2>
-    * <p>The mobile BackButton widget navigates to the previously visited mobile View when pressed. A view can be explicitly set using the <code>href</code> attribute.</p>
-    *
-    * @exampleTitle Initialize Kendo mobile BackButton based on role data attribute
-    * @example
-    * <a data-role="backbutton">Foo</a>
-    *
-    * @exampleTitle Initialize Kendo mobile BackButton using jQuery plugin syntax
-    * @example
-    * var button = $("#button").kendoMobileBackButton();
-    */
-    var BackButton = Button.extend(/** @lends kendo.mobile.ui.BackButton.prototype */{
+    var BackButton = Button.extend({
         options: {
             name: "BackButton",
             style: "back"
         },
 
-        /**
-        * @constructs
-        * @extends kendo.mobile.ui.Button
-        * @param {Element} element DOM element.
-        * @param {Object} options Configuration options.
-        */
         init: function(element, options) {
             var that = this;
             Button.fn.init.call(that, element, options);
@@ -58550,33 +49574,12 @@ extend(Editor, {
         }
     });
 
-    /**
-    * @name kendo.mobile.ui.DetailButton.Description
-    * @section
-    * <h2>DetailButton</h2>
-    *
-    * <p>The DetailButton widget navigates to a mobile View when pressed.</p>
-    *
-    * @exampleTitle Initialize Kendo mobile DetailButton based on role data attribute
-    * @example
-    * <a data-role="detail-button">Foo</a>
-    *
-    * @exampleTitle Initialize Kendo mobile DetailButton using jQuery plugin syntax
-    * @example
-    * var button = $("#button").kendoMobileDetailButton();
-    */
-    var DetailButton = Button.extend(/** @lends kendo.mobile.ui.DetailButton.prototype */{
+    var DetailButton = Button.extend({
         options: {
             name: "DetailButton",
             style: ""
         },
 
-        /**
-        * @constructs
-        * @extends kendo.mobile.ui.Button
-        * @param {Element} element DOM element.
-        * @param {Object} options Configuration options.
-        */
         init: function(element, options) {
             Button.fn.init.call(this, element, options);
         },
@@ -58616,150 +49619,29 @@ extend(Editor, {
     ui.plugin(DetailButton);
 })(jQuery);
 (function($, undefined) {
-    /**
-     * @name kendo.mobile.ui.ButtonGroup.Description
-     * @section
-     * <p>The Kendo mobile ButtonGroup widget presents a linear set of grouped buttons.</p>
-     *
-     * <h3>Getting Started</h3>
-     * <p>The Kendo mobile Application will automatically initialize a mobile ButtonGroup for every element with <code>role</code> data attribute set to <code>buttongroup</code>
-     * present in the views/layouts markup. Alternatively, it can be initialized using jQuery plugin syntax in the containing mobile View <strong>init event handler</strong>. The ButtonGroup element should be <code>UL</code> element.</p>
-     *
-     * @exampleTitle Initialize Kendo mobile ButtonGroup based on role data attribute.
-     * @example
-     * <ul id="buttongroup" data-role="buttongroup">
-     *   <li>Option 1</li>
-     *   <li>Option 2</li>
-     * </ul>
-     *
-     * @exampleTitle Initialize Kendo mobile ButtonGroup using jQuery plugin syntax
-     * @example
-     * var buttongroup = $("#buttongroup").kendoMobileButtonGroup();
-     *
-     * @section
-     *
-     * <h3>Customizing Mobile ButtonGroup Appearance</h3>
-     *
-     * Every Kendo Mobile ButtonGroup color can be customized by setting the respective <code>background-color</code> CSS property inline or with a CSS selector.
-     * @exampleTitle Green Kendo mobile ButtonGroup
-     * @example
-     * <ul id="buttongroup" data-role="buttongroup">
-     *   <li style="background-color: green">Option1</li>
-     *   <li style="beckground-color: red">Option2</li>
-     * </ul>
-     *
-     * @section
-     * <h3>Button Icons</h3>
-     * <p>A Button icon can be set in two ways - either by adding an <code>img</code> element inside the Button <code>a</code> element,
-     * or by setting an <code>icon</code> data attribute to the Button <code>a</code> element.</p>
-     * <p>KendoUI Mobile ships with several ready to use icons:</p>
-     *
-     * <ul id="icon-list">
-     *   <li title=".km-about"><span class="km-icon km-about"></span>about</li>
-     *   <li title=".km-action"><span class="km-icon km-action"></span>action</li>
-     *   <li title=".km-add"><span class="km-icon km-add"></span>add</li>
-     *   <li title=".km-bookmarks"><span class="km-icon km-bookmarks"></span>bookmarks</li>
-     *   <li title=".km-camera"><span class="km-icon km-camera"></span>camera</li>
-     *   <li title=".km-cart"><span class="km-icon km-cart"></span>cart</li>
-     *   <li title=".km-compose"><span class="km-icon km-compose"></span>compose</li>
-     *   <li title=".km-contacts"><span class="km-icon km-contacts"></span>contacts</li>
-     *   <li title=".km-details"><span class="km-icon km-details"></span>details</li>
-     *   <li title=".km-downloads"><span class="km-icon km-downloads"></span>downloads</li>
-     *   <li title=".km-fastforward"><span class="km-icon km-fastforward"></span>fastforward</li>
-     *   <li title=".km-favorites"><span class="km-icon km-favorites"></span>favorites</li>
-     *   <li title=".km-featured"><span class="km-icon km-featured"></span>featured</li>
-     *   <li title=".km-featured"><span class="km-icon km-toprated"></span>toprated</li>
-     *   <li title=".km-globe"><span class="km-icon km-globe"></span>globe</li>
-     *   <li title=".km-history"><span class="km-icon km-history"></span>history</li>
-     *   <li title=".km-home"><span class="km-icon km-home"></span>home</li>
-     *   <li title=".km-info"><span class="km-icon km-info"></span>info</li>
-     *   <li title=".km-more"><span class="km-icon km-more"></span>more</li>
-     *   <li title=".km-mostrecent"><span class="km-icon km-mostrecent"></span>mostrecent</li>
-     *   <li title=".km-mostviewed"><span class="km-icon km-mostviewed"></span>mostviewed</li>
-     *   <li title=".km-organize"><span class="km-icon km-organize"></span>organize</li>
-     *   <li title=".km-pause"><span class="km-icon km-pause"></span>pause</li>
-     *   <li title=".km-play"><span class="km-icon km-play"></span>play</li>
-     *   <li title=".km-recents"><span class="km-icon km-recents"></span>recents</li>
-     *   <li title=".km-refresh"><span class="km-icon km-refresh"></span>refresh</li>
-     *   <li title=".km-reply"><span class="km-icon km-reply"></span>reply</li>
-     *   <li title=".km-rewind"><span class="km-icon km-rewind"></span>rewind</li>
-     *   <li title=".km-search"><span class="km-icon km-search"></span>search</li>
-     *   <li title=".km-settings"><span class="km-icon km-settings"></span>settings</li>
-     *   <li title=".km-share"><span class="km-icon km-share"></span>share</li>
-     *   <li title=".km-stop"><span class="km-icon km-stop"></span>stop</li>
-     *   <li title=".km-trash"><span class="km-icon km-trash"></span>trash</li>
-     * </ul>
-     *
-     * <h3>Creating Custom Icons</h3>
-     *
-     * <p>In order to create colorizable icons like the default ones in Kendo UI Mobile, specify the icon image as a <b>box mask</b>
-     * (either as dataURI or as a separate image). The image should be <b>PNG8</b> or <b>PNG24</b> with alpha channel (<b>PNG8+Alpha</b> is supported by
-     * only few graphic editors, so <b>better stick with PNG24</b>). The image color is not important - it will be used as a mask only.</p>
-     *
-     * <p><strong>Note</strong>: <strong>BlackBerry 7.0</strong> has a bug that renders its masks as background-image, so it is recommended to use white in order to support it. The bug is fixed in <strong>7.1</strong>.</p>
-     *
-     * @exampleTitle Define custom button icon
-     * @example
-     * <style>
-     * .km-custom {
-     *   -webkit-mask-box-image: url("foo.png");
-     * }
-     * </style>
-     *
-     * <ul id="buttongroup" data-role="buttongroup">
-     *   <li data-icon="custom">Option 1</li>
-     *   <li>Option 2</li>
-     * </ul>
-     */
     var kendo = window.kendo,
         ui = kendo.mobile.ui,
         Widget = ui.Widget,
         ACTIVE = "km-state-active",
         SELECT = "select",
         SELECTOR = "li:not(." + ACTIVE +")",
-        data = kendo.data,
-        MOUSEDOWN = kendo.support.touch ? "touchstart" : "mousedown";
+        ns = ".kendoMobileButtonGroup",
+        MOUSEDOWN = kendo.support.mousedown + ns;
 
-    var ButtonGroup = Widget.extend(/** @lends kendo.mobile.ui.ButtonGroup.prototype */{
-        /**
-         * @constructs
-         * @extends kendo.mobile.ui.Widget
-         * @param {Element} element DOM element.
-         * @param {Object} options Configuration options.
-         * @option {Number} [index] Defines the initially selected Button.
-         */
+    var ButtonGroup = Widget.extend({
         init: function(element, options) {
             var that = this;
 
             Widget.fn.init.call(that, element, options);
 
             that.element.addClass("km-buttongroup")
-                .delegate(SELECTOR, MOUSEDOWN, $.proxy(that._mousedown, that))
+                .on(MOUSEDOWN, SELECTOR, $.proxy(that._mousedown, that))
                 .find("li").each(that._button);
 
             that.select(that.options.index);
         },
 
         events: [
-            /**
-             * Fires when a Button is selected.
-             * @name kendo.mobile.ui.ButtonGroup#select
-             * @event
-             * @param {Event} e
-             *
-             * @exampleTitle Handle select event
-             * @example
-             * <ul id="buttongroup" data-role="buttongroup">
-             *   <li>Option 1</li>
-             *   <li>Option 2</li>
-             * </ul>
-             *
-             * <script>
-             *  $("#buttongroup").data("kendoMobileButtonGroup").bind("select", function(e) {
-             *      //handle select event
-             *  }
-             * </script>
-             */
             SELECT
         ],
 
@@ -58768,26 +49650,15 @@ extend(Editor, {
             index: -1
         },
 
-        /**
-         * Get the currently selected Button.
-         * @returns {jQuery} the currently selected Button.
-         */
         current: function() {
             return this.element.find("." + ACTIVE);
         },
 
-        /**
-         * Select a Button.
-         * @param {jQuery | Number} li LI element or index of the Button.
-         * @example
-         * var buttongroup = $("#buttongroup").data("kendoMobileButtonGroup");
-         *
-         * // selects by jQuery object
-         * buttongroup.select(buttongroup.element.children().eq(0));
-         *
-         * // selects by index
-         * buttongroup.select(1);
-         */
+        destroy: function() {
+            Widget.fn.destroy.call(this);
+            this.element.off(ns);
+        },
+
         select: function (li) {
             var that = this,
                 index = -1;
@@ -58812,7 +49683,7 @@ extend(Editor, {
 
         _button: function() {
             var button = $(this).addClass("km-button"),
-                icon = data(button, "icon"),
+                icon = kendo.attrValue(button, "icon"),
                 span = button.children("span"),
                 image = button.find("img").addClass("km-image");
 
@@ -58852,19 +49723,25 @@ extend(Editor, {
         HIGHLIGHT_SELECTOR = ".km-list > li > .km-listview-link, .km-list > li > .km-listview-label",
         HANDLED_INPUTS_SELECTOR = ".km-list > li > .km-listview-label > input",
         proxy = $.proxy,
-        data = kendo.data,
+        attrValue = kendo.attrValue,
         GROUP_CLASS = "km-group-title",
         ACTIVE_CLASS = "km-state-active",
         GROUP_WRAPPER = '<div class="' + GROUP_CLASS + '"><div class="km-text"></div></div>',
         GROUP_TEMPLATE = kendo.template('<li><div class="' + GROUP_CLASS + '"><div class="km-text">#= this.headerTemplate(data) #</div></div><ul>#= kendo.render(this.template, data.items)#</ul></li>'),
         WRAPPER = '<div class="km-listview-wrapper" />',
 
-        MOUSEDOWN = support.mousedown,
-        MOUSEMOVE = support.mousemove,
-        MOUSECANCEL = support.mousecancel,
+        NS = ".kendoMobileListView",
         MOUSEUP = support.mouseup,
-
+        MOUSEUP_NS = MOUSEUP + NS,
+        MOUSEDOWN = support.mousedown,
+        MOUSEDOWN_NS = MOUSEDOWN + NS,
+        MOUSEMOVE = support.mousemove + NS,
+        MOUSECANCEL = support.mousecancel + NS,
+        LAST_PAGE_REACHED = "lastPageReached",
         CLICK = "click",
+        CLICK_NS = CLICK + NS,
+
+        CHANGE = "change",
         REQUEST_START = "requestStart",
         FUNCTION = "function",
 
@@ -58878,7 +49755,7 @@ extend(Editor, {
 
         var clicked = $(e.currentTarget),
             item = clicked.parent(),
-            role = data(clicked, "role") || "",
+            role = attrValue(clicked, "role") || "",
             plainItem = (!role.match(buttonRegExp)),
             prevented = e.isDefaultPrevented();
 
@@ -58910,7 +49787,7 @@ extend(Editor, {
     }
 
     function enhanceItem(item) {
-        addIcon(item, data(item, "icon"));
+        addIcon(item, attrValue(item, "icon"));
     }
 
     function enhanceLinkItem(item) {
@@ -58925,7 +49802,7 @@ extend(Editor, {
         item.addClass("km-listview-link")
             .attr(kendo.attr("role"), "listview-link");
 
-        addIcon(item, data(parent, "icon"));
+        addIcon(item, attrValue(parent, "icon"));
     }
 
     function enhanceCheckBoxItem(label) {
@@ -58942,250 +49819,7 @@ extend(Editor, {
         label.addClass("km-listview-label");
     }
 
-    /**
-     * @name kendo.mobile.ui.ListView.Description
-     * @section
-     * <p>The Kendo Mobile ListView widget is used to display flat or grouped list of items.
-     * It can be either used in unbound mode by enhancing an HTML <code>ul</code> element, or bound to a DataSource instance.</p>
-     *
-     * <h3>Getting Started</h3>
-     * <p>The Kendo mobile Application automatically initializes the mobile ListView for every <code>ul</code> element with <code>role</code> data attribute set to
-     * <code>listview</code> present in the views' markup.
-     * Alternatively, it can be initialized using jQuery plugin syntax in the containing mobile View <strong>init event handler</strong>.
-     * The mobile ListView element may contain one or more <code>li</code> elements.</p>
-     *
-     * @exampleTitle Initialize mobile ListView using a role data attribute
-     * @example
-     * <ul data-role="listview">
-     *   <li>Foo</li>
-     *   <li>Bar</li>
-     * </ul>
-     *
-     * @exampleTitle Initialize mobile ListView using jQuery plugin syntax
-     * @example
-     * <div data-role="view" data-init="initListView">
-     *  <ul id="listView"></ul>
-     * </div>
-     *
-     * <script>
-     * function initListView(e) {
-     *  e.view.element.find("#listView").kendoMobileListView();
-     * }
-     * </script>
-     *
-     * @section
-     * <h3>Inset Mobile ListView</h3>
-     * <p>In iOS, the mobile ListView appearance can be changed to <strong>inset</strong>, to achieve an effect similar to iOS grouped table views,
-     * where the list items are padded from the container, and have rounded corners.
-     * To do so, set the <code>style</code> data attribute to <code>inset</code>.
-     * <strong>Note:</strong> This setting won't affect the appearance of the mobile ListView on Android/Blackberry devices.</p>
-     *
-     * @exampleTitle Create inset mobile ListView
-     * @example
-     * <ul data-role="listview" data-style="inset">
-     *   <li>Foo</li>
-     *   <li>Bar</li>
-     * </ul>
-     *
-     * @section
-     * <h3>Grouped mobile ListView</h3>
-     * <p>The mobile ListView can display items in groups, with optional headers. This can be achieved by nesting unordered lists in items,
-     * and setting the widget's element <code>type</code> data attribute to <code>group</code>.</p>
-     * @exampleTitle Create grouped mobile ListView
-     * @example
-     * <ul data-role="listview" data-type="group">
-     *     <li>
-     *         Foo
-     *         <ul>
-     *             <li>Bar</li>
-     *             <li>Baz</li>
-     *         </ul>
-     *     </li>
-     *     <li>
-     *         Bar
-     *         <ul>
-     *             <li>Bar</li>
-     *             <li>Qux</li>
-     *         </ul>
-     *     </li>
-     * </ul>
-     *
-     * @section
-     * <h3>Binding to Data</h3>
-     *
-     * <p>
-     * The mobile ListView can be bound to both local JavaScript arrays and remote data via the
-     * <strong>Kendo DataSource component</strong>. Local JavaScript arrays are appropriate for limited value
-     * options, while remote data binding is better for larger data sets.
-     * </p>
-     *
-     * @exampleTitle Bind mobile ListView to a local data source.
-     * @example
-     * function initListView(e) {
-     *     e.view.element.find("#listview").kendoMobileListView({
-     *         dataSource: kendo.data.DataSource.create(["foo", "bar", "baz"])
-     *      });
-     * });
-     *
-     * @section
-     * <h3>Customizing Item Templates</h3>
-     *
-     * <p>The mobile ListView leverages Kendo UI high-performance Templates to provide complete control
-     * over item rendering. For a complete overview of Kendo UI Template capabilities and syntax,
-     * please review the <a href="http://www.kendoui.com/documentation/framework/templates/" title="Kendo UI Template">Kendo UI Templates</a> documentation.
-     * </p>
-     *
-     * @exampleTitle Basic item template customization
-     * @example
-     * <ul id="listview"></ul>
-     *
-     * <script type="text/javascript">
-     *     function initListView(e) {
-     *         e.view.element.find("#listview").kendoMobileListView({
-     *             template : "<strong>#:data.foo#</strong>",
-     *             dataSource: kendo.data.DataSource.create([{foo: "bar"}, {foo: "baz"}])
-     *         });
-     *     });
-     * </script>
-     *
-     * @section
-     * <h3>Link Items</h3>
-     * <p>The mobile ListView will automatically style items with a single link element inside, adding a details indicator. </p>
-     *
-     * @exampleTitle ListView with link items
-     * @example
-     * <ul data-role="listview">
-     *   <li><a href="#foo">Foo</a></li>
-     *   <li><a href="#bar">Bar</a></li>
-     * </ul>
-     *
-     * @section
-     * <h3>Detail Buttons</h3>
-     * <p>Mobile ListView integrates with nested DetailButton widgets. These buttons are best suited when the user should be able to execute more than one action on a given row.
-     * Detail buttons support 4 default data-styles: <b>contactadd</b>, <b>detaildisclose</b>, <b>rowinsert</b> and <b>rowdelete</b>, along custom icons
-     * through the data-icon attribute. One row can contain both regular links and detail buttons.</p>
-     *
-     * @exampleTitle ListView with Detail Buttons
-     * @example
-     * <ul data-role="listview" data-style="inset" data-type="group">
-     *     <li>
-     *         Default button styles
-     *         <ul>
-     *             <li>Contact Add<a data-role="detailbutton" data-style="contactadd"></a></li>
-     *             <li>Detail Disclose<a data-role="detailbutton" data-style="detaildisclose"></a></li>
-     *             <li>Row Insert<a data-role="detailbutton" data-style="rowinsert"></a></li>
-     *             <li>Row Delete<a data-role="detailbutton" data-style="rowdelete"></a></li>
-     *         </ul>
-     *     </li>
-     *     <li>
-     *         Custom icons
-     *         <ul>
-     *             <li>Battery level<a data-role="detailbutton" data-icon="battery"></a></li>
-     *         </ul>
-     *     </li>
-     *     <li>
-     *         Link Items & Detail Buttons
-     *         <ul>
-     *             <li><a>Row Insert</a><a data-role="detailbutton" data-style="rowinsert"></a></li>
-     *             <li><a>Battery Level</a><a data-role="detailbutton" data-icon="battery"></a></li>
-     *         </ul>
-     *     </li>
-     * </ul>
-     *
-     * @section
-     * <h3>Item Icons</h3>
-     *
-     * <p>An icon can be set in two ways - either by adding an <code>img</code> element inside the <code>li</code> element, or by setting an <code>icon</code> data attribute to the <code>li</code> element.
-     * if data attribute is used then an <code>a</code> element should be put in the <code>li</code> element. The icon class will be applied to the <code>a</code> element.
-     * Kendo mobile ships with several ready to use icons:</p>
-     *
-     * <ul id="icon-list">
-     *   <li title=".km-about"><span class="km-icon km-about"></span>about</li>
-     *   <li title=".km-action"><span class="km-icon km-action"></span>action</li>
-     *   <li title=".km-add"><span class="km-icon km-add"></span>add</li>
-     *   <li title=".km-bookmarks"><span class="km-icon km-bookmarks"></span>bookmarks</li>
-     *   <li title=".km-camera"><span class="km-icon km-camera"></span>camera</li>
-     *   <li title=".km-cart"><span class="km-icon km-cart"></span>cart</li>
-     *   <li title=".km-compose"><span class="km-icon km-compose"></span>compose</li>
-     *   <li title=".km-contacts"><span class="km-icon km-contacts"></span>contacts</li>
-     *   <li title=".km-details"><span class="km-icon km-details"></span>details</li>
-     *   <li title=".km-downloads"><span class="km-icon km-downloads"></span>downloads</li>
-     *   <li title=".km-fastforward"><span class="km-icon km-fastforward"></span>fastforward</li>
-     *   <li title=".km-favorites"><span class="km-icon km-favorites"></span>favorites</li>
-     *   <li title=".km-featured"><span class="km-icon km-featured"></span>featured</li>
-     *   <li title=".km-featured"><span class="km-icon km-toprated"></span>toprated</li>
-     *   <li title=".km-globe"><span class="km-icon km-globe"></span>globe</li>
-     *   <li title=".km-history"><span class="km-icon km-history"></span>history</li>
-     *   <li title=".km-home"><span class="km-icon km-home"></span>home</li>
-     *   <li title=".km-info"><span class="km-icon km-info"></span>info</li>
-     *   <li title=".km-more"><span class="km-icon km-more"></span>more</li>
-     *   <li title=".km-mostrecent"><span class="km-icon km-mostrecent"></span>mostrecent</li>
-     *   <li title=".km-mostviewed"><span class="km-icon km-mostviewed"></span>mostviewed</li>
-     *   <li title=".km-organize"><span class="km-icon km-organize"></span>organize</li>
-     *   <li title=".km-pause"><span class="km-icon km-pause"></span>pause</li>
-     *   <li title=".km-play"><span class="km-icon km-play"></span>play</li>
-     *   <li title=".km-recents"><span class="km-icon km-recents"></span>recents</li>
-     *   <li title=".km-refresh"><span class="km-icon km-refresh"></span>refresh</li>
-     *   <li title=".km-reply"><span class="km-icon km-reply"></span>reply</li>
-     *   <li title=".km-rewind"><span class="km-icon km-rewind"></span>rewind</li>
-     *   <li title=".km-search"><span class="km-icon km-search"></span>search</li>
-     *   <li title=".km-settings"><span class="km-icon km-settings"></span>settings</li>
-     *   <li title=".km-share"><span class="km-icon km-share"></span>share</li>
-     *   <li title=".km-stop"><span class="km-icon km-stop"></span>stop</li>
-     *   <li title=".km-trash"><span class="km-icon km-trash"></span>trash</li>
-     * </ul>
-     *
-     * <p>Additional icons may be added by defining the respective CSS class.
-     * If the <code>icon</code> data attribute is set to <code>custom</code>, the tab will receive <code>km-custom</code> CSS class.
-     *
-     * <h3>Creating Custom Icons</h3>
-     *
-     * <p>In order to create colorizable icons like the default ones in Kendo UI Mobile, specify the icon image as a <b>box mask</b>
-     * (either as dataURI or as a separate image). The image should be <b>PNG8</b> or <b>PNG24</b> with alpha channel (<b>PNG8+Alpha</b> is supported by
-     * only few graphic editors, so <b>better stick with PNG24</b>). The image color is not important - it will be used as a mask only.</p>
-     *
-     * <p><strong>Note</strong>: <strong>BlackBerry 7.0</strong> has a bug that renders its masks as background-image, so it is recommended to use white in order to support it. The bug is fixed in <strong>7.1</strong>.</p>
-     *
-     * @exampleTitle Define custom list item icon
-     * @example
-     * <style>
-     * .km-custom {
-     *   -webkit-mask-box-image: url("foo.png");
-     * }
-     * </style>
-     *
-     * <ul data-role="listview" data-style="inset">
-     *   <li data-icon="custom">
-     *      <a>Home</a>
-     *   </li>
-     *   <li>
-     *      Bar
-     *   </li>
-     * </ul>
-     */
-    var ListView = Widget.extend(/** @lends kendo.mobile.ui.ListView.prototype */{
-        /**
-         * @constructs
-         * @extends kendo.mobile.ui.Widget
-         * @param {Element} element DOM element.
-         * @param {Object} options Configuration options.
-         * @option {kendo.data.DataSource | Object} [dataSource] Instance of DataSource or the data that the mobile ListView will be bound to.
-         * @option {Boolean} [autoBind] <true> Indicates whether the listview will call read on the DataSource initially.
-         * @option {String}  [type] The type of the control. Can be either <code>flat</code> (default) or group. Determined automatically in databound mode.
-         * @option {String}  [style] The style of the control. Can be either empty string(""), or inset.
-         * @option {String}  [template] <#:data#> The item template.
-         * @option {String}  [headerTemplate] <#:value#> The header item template (applicable when the type is set to group).
-         * @option {Boolean}  [fixedHeaders] <false> If set to true, the group headers will persist their position when the user scrolls through the listview. Applicable only when the type is set to group, or when binding to grouped datasource.
-         * @option {Boolean} [pullToRefresh] <false> If set to true, the listview will reload its data when the user pulls the view over the top limit.
-         * @option {Boolean} [appendOnRefresh] <false> Used in combination with pullToRefresh. If set to true, newly loaded data will be appended on top when refershing.
-         * @option {String}  [pullTemplate] <"Pull to refresh"> The message template displayed when the user pulls the listView. Applicable only when pullToRefresh is set to true.
-         * @option {String}  [releaseTemplate] <"Release to refresh"> The message template indicating that pullToRefresh will occur. Applicable only when pullToRefresh is set to true.
-         * @option {String}  [refreshTemplate] <"Refreshing"> The message template displayed during the refresh. Applicable only when pullToRefresh is set to true.
-         * @option {Boolean} [loadMore] <false> If set to true, a button is rendered at the bottom of the listview, which fetch the next page of data when tapped.
-         * @option {String}  [loadMoreText] <"Press to load more"> The text of the rendered load-more button (applies only if loadMore is set to true).
-         * @option {Boolean} [endlessScroll] <false> If set to true, the listview gets the next page of data when the user scrolls near the bottom of the view.
-         * @option {String}  [scrollTreshold] <30> The distance to the bottom in pixels, after which the listview will start fetching the next page. Applicable only when endlessScroll is set to true.
-         */
+    var ListView = Widget.extend({
         init: function(element, options) {
             var that = this;
 
@@ -59194,9 +49828,9 @@ extend(Editor, {
             options = that.options;
 
             that.element
-                .on([MOUSEDOWN, MOUSEUP, MOUSEMOVE, MOUSECANCEL].join(" "), HIGHLIGHT_SELECTOR, toggleItemActiveClass)
-                .on("click", HANDLED_INPUTS_SELECTOR, function (e) { e.preventDefault(); })
-                .on(MOUSEUP, ITEM_SELECTOR, proxy(that._click, that));
+                .on([MOUSEDOWN_NS, MOUSEUP_NS, MOUSEMOVE, MOUSECANCEL].join(" "), HIGHLIGHT_SELECTOR, toggleItemActiveClass)
+                .on(CLICK_NS, HANDLED_INPUTS_SELECTOR, function (e) { e.preventDefault(); })
+                .on(MOUSEUP_NS, ITEM_SELECTOR, proxy(that._click, that));
 
             that.element.wrap(WRAPPER);
             that.wrapper = that.element.parent();
@@ -59219,46 +49853,8 @@ extend(Editor, {
         },
 
         events: [
-            /**
-             * Fires when item is tapped.
-             * @name kendo.mobile.ui.ListView#click
-             * @event
-             * @param {Event} e
-             * @param {jQuery} e.item The selected list item.
-             * @param {jQuery} e.target The tapped DOM element.
-             * @param {Object} e.dataItem The corresponding dataItem associated with the item (available in databound mode only).
-             * Note: The dataItem must be from a non-primitive type (Object).
-             * @param {kendo.mobile.ui.Button} e.button The tapped Kendo mobile Button (if present).
-             *
-             * @exampleTitle Handling button clicks
-             * @example
-             * <ul data-role="listview" id="foo" data-click="listViewClick">
-             *     <li><a data-role="button" data-name="bar">Bar button</a> | <a data-role="button" data-name="baz">Baz button</a></li>
-             * </ul>
-             *
-             * <script>
-             *  function listViewClick(e) {
-             *      console.log(e.button); // Kendo mobile Button instance
-             *  }
-             * </script>
-             *
-             * @exampleTitle Accessing dataItem in event
-             * @example
-             * <ul id="foo"></ul>
-             *
-             * <script>
-             *  $("#foo").kendoMobileListView({
-             *     dataSource: new kendo.data.DataSource({
-             *          data:   [{title: "foo"}, {title: "bar"}]
-             *     }),
-             *
-             *     click: function(e) {
-             *          console.log(e.dataItem.title);
-             *     }
-             *  });
-             * </script>
-             */
-            CLICK
+            CLICK,
+            LAST_PAGE_REACHED
         ],
 
         options: {
@@ -59293,14 +49889,20 @@ extend(Editor, {
             }
         },
 
-        /**
-         * Repaints the listview (works only in databound mode).
-         * @example
-         * // get a reference to the mobile listview widget
-         * var listView = $("#listView").data("kendoMobileListView");
-         * // refreshes the listview
-         * listview.refresh();
-         */
+        destroy: function() {
+            var that = this;
+
+            Widget.fn.destroy.call(that);
+
+            that._unbindDataSource();
+            that.stopEndlessScrolling();
+            that.stopLoadMore();
+
+            that.element.off(NS);
+
+            kendo.destroy(that.element);
+        },
+
         refresh: function(e) {
             e = e || {};
 
@@ -59352,12 +49954,7 @@ extend(Editor, {
             if (loading) {
                 that.loading = false;
                 that._calcTreshold();
-
-                if (options.loadMore) {
-                    that._toggleButton(true);
-                } else {
-                    that._toggleIcon(false);
-                }
+                that._toggleLoader(false);
             }
 
             if (options.pullToRefresh) {
@@ -59374,10 +49971,6 @@ extend(Editor, {
             that.trigger("dataBound", { ns: ui });
         },
 
-        /**
-         * Get the listview DOM element items
-         * @returns {jQuery} The listview DOM element items
-         */
         items: function() {
             if (this.options.type === "group") {
                 return this.element.find(".km-list").children();
@@ -59386,23 +49979,57 @@ extend(Editor, {
             }
         },
 
+        stopEndlessScrolling: function() {
+            var that = this,
+                scroller = that._scroller();
+
+           if (scroller && that._loadIcon) {
+               that.loading = false;
+               that._loadIcon.parent().hide();
+
+               scroller.unbind("resize", that._scrollerResize)
+                       .unbind("scroll", that._scrollerScroll);
+
+               that.trigger(LAST_PAGE_REACHED);
+           }
+        },
+
+        stopLoadMore: function() {
+           var that = this;
+
+           if (that._loadButton) {
+               that.loading = false;
+               that._loadButton
+                   .off(CLICK_NS)
+                   .parent().hide();
+
+               that.trigger(LAST_PAGE_REACHED);
+           }
+        },
+
+        _unbindDataSource: function() {
+            var that = this;
+
+            that.dataSource.unbind(CHANGE, that._refreshHandler)
+                           .unbind(REQUEST_START, that._requestStartHandler);
+        },
+
         _dataSource: function() {
             var that = this,
-                options = that.options,
-                showLoading = $.proxy(that._showLoading, that);
+                options = that.options;
 
             if (that.dataSource && that._refreshHandler) {
-                that.dataSource.unbind("change", that._refreshHandler)
-                               .unbind(REQUEST_START, showLoading);
+                that._unbindDataSource();
             } else {
-                that._refreshHandler = proxy(that.refresh, that);
+                that._refreshHandler = $.proxy(that.refresh, that);
+                that._requestStartHandler = $.proxy(that._showLoading, that);
             }
 
             that.dataSource = DataSource.create(options.dataSource)
-                                        .bind("change", that._refreshHandler);
+                                        .bind(CHANGE, that._refreshHandler);
 
             if (!options.pullToRefresh && !options.loadMore && !options.endlessScroll) {
-                that.dataSource.bind(REQUEST_START, showLoading);
+                that.dataSource.bind(REQUEST_START, that._requestStartHandler);
             }
         },
 
@@ -59495,19 +50122,19 @@ extend(Editor, {
 
             if (options.endlessScroll) {
                 that._scrollHeight = scroller.element.height();
+                that._scrollerResize = function() {
+                    that._scrollHeight = scroller.element.height();
+                    that._calcTreshold();
+                },
+                that._scrollerScroll = function(e) {
+                    if (!that.loading && e.scrollTop + that._scrollHeight > that._treshold) {
+                        that._nextPage();
+                    }
+                };
 
                 scroller.setOptions({
-                    resize: function() {
-                        that._scrollHeight = scroller.element.height();
-                        that._calcTreshold();
-                    },
-                    scroll: function(e) {
-                        if (!that.loading && e.scrollTop + that._scrollHeight > that._treshold) {
-                            that.loading = true;
-                            that._toggleIcon(true);
-                            dataSource.next();
-                        }
-                    }
+                    resize: that._scrollerResize,
+                    scroll: that._scrollerScroll
                 });
             }
         },
@@ -59521,17 +50148,23 @@ extend(Editor, {
             }
         },
 
+        _nextPage: function() {
+            var that = this;
+            that.loading = true;
+            that._toggleLoader(true);
+
+            if (!that.dataSource.next()) {
+                that.stopEndlessScrolling();
+            }
+        },
+
         _templates: function() {
             var that = this,
                 template = that.options.template,
                 headerTemplate = that.options.headerTemplate,
-                dataIDAttribute = "",
+                dataIDAttribute =  ' data-uid="#=data.uid || ""#"',
                 templateProxy = {},
                 groupTemplateProxy = {};
-
-            if (that.dataSource.group()[0] || that.dataSource.view()[0] instanceof kendo.data.ObservableObject) {
-                dataIDAttribute = ' data-uid="#=uid#"';
-            }
 
             if (typeof template === FUNCTION) {
                 templateProxy.template = template;
@@ -59601,7 +50234,9 @@ extend(Editor, {
 
             that._enhanceItems();
 
-            element.closest(".km-content").toggleClass("km-insetcontent", inset); // iOS has white background when the list is not inset.
+            if (!element.parents(".km-listview")[0]) {
+                element.closest(".km-content").toggleClass("km-insetcontent", inset); // iOS has white background when the list is not inset.
+            }
 
             that._cacheHeaders();
         },
@@ -59641,11 +50276,7 @@ extend(Editor, {
 
                 if (loadMore) {
                     that._loadButton = $('<button class="km-load km-button">' + options.loadMoreText + '</button>')
-                                        .click(function() {
-                                           that.loading = true;
-                                           that._toggleButton(false);
-                                           that.dataSource.next();
-                                        });
+                                        .on(CLICK_NS, proxy(that._nextPage, that));
 
                     loadWrapper.append(that._loadButton);
                 }
@@ -59654,13 +50285,14 @@ extend(Editor, {
             }
         },
 
-        _toggleButton: function(toggle) {
-            this._loadButton.toggle(toggle);
-            this._toggleIcon(!toggle);
-        },
+        _toggleLoader: function(toggle) {
+            var that = this,
+                icon = that._loadIcon,
+                button = that._loadButton;
 
-        _toggleIcon: function(toggle) {
-            var icon = this._loadIcon;
+            if (button) {
+                button.toggle(!toggle);
+            }
 
             if (toggle) {
                 icon.css("display", "block");
@@ -59698,74 +50330,6 @@ extend(Editor, {
     ui.plugin(ListView);
 })(jQuery);
 (function($, undefined) {
-    /**
-     * @name kendo.mobile.ui.NavBar.Description
-     *
-     * @section
-     *
-     * <p>The Kendo mobile NavBar widget is used inside a mobile View or Layout Header element to display an application navigation bar.
-     * The mobile NavBar may display the current view title in the center, and optionally some additional left and right aligned widgets (a back button, settings button, etc.).</p>
-     *
-     * <h3>Getting Started</h3>
-     * The Kendo mobile Application will automatically initialize the mobile NavBar for every element with <code>role</code> data attribute set to <code>navbar</code> present in the views/layouts markup.
-     * Alternatively, it can be initialized using jQuery plugin syntax in the containing mobile View <strong>init event handler</strong>.
-     * @exampleTitle Initialize Kendo mobile NavBar based on role data attribute
-     * @example
-     * <div data-role="navbar">My View Title</div>
-     *
-     * @exampleTitle Initialize Kendo mobile NavBar using jQuery plugin syntax
-     * @example
-     * var navbar = $("#navbar").kendoMobileNavBar();
-     * @section <h3>Aligning Widgets Inside the NavBar</h3>
-     *
-     * <p>After initialization, the mobile NavBar positions its child elements based on the specified <code>align</code> data attribute (either <code>left</code> or <code>right</code>).
-     * By default, elements without any align are centered.</p>
-     *
-     * @exampleTitle Use the <code>align</code> data attribute to specify the elements position inside the NavBar
-     * @example
-     * <div data-role="navbar">
-     *   <a data-role="backbutton" data-align="left">Back</a>
-     *   My View Title
-     *   <a data-role="button" data-align="right">About</a>
-     * </div>
-     *
-     * @section <h3>Automatically Update NavBar Title Based on Current View's Title</h3>
-     *
-     * <p>If an element with <code>role</code> data attribute set to <code>view-title</code> is present inside the mobile NavBar,
-     * the Kendo mobile Application instance will update its text to the current View's title when changing views.
-     * The View title is specified by setting the <code>title</code> data attribute of the View element. </p>
-     *
-     * <p>This feature is particularly useful if the mobile NavBar is inside a layout.</p>
-     *
-     * @exampleTitle Use the <code>view-title</code> data attribute to auto-update the mobile NavBar title
-     * @example
-     * <div data-role="layout" data-id="foo">
-     *   <div data-role="header">
-     *       <div data-role="navbar">
-     *          <span data-role="view-title">My View Title</span>
-     *       </div>
-     *   </div>
-     * </div>
-     *
-     * <div data-role="view" data-layout="foo" data-title="bar"> ... </div>
-     * <div data-role="view" data-layout="foo" data-title="baz"> ... </div>
-     *
-     * @section <h3>Customizing Mobile NavBar Appearance</h3>
-     * <p>The mobile NavBar background color can be customized by setting its background-color CSS property either inline or using a CSS selector with specificity of 20+.
-     * Different platforms can be styled separately with their respective root classes. </p>
-     *
-     * @exampleTitle Green Kendo mobile NavBar
-     * @example
-     * <div data-role="navbar" style="background-color: green">My View Title</div>
-     *
-     * @exampleTitle Green Kendo mobile NavBar in iOS and a red one in Android
-     * @example
-     * <style>
-     *     .km-ios .checkout { background-color: green; }
-     *     .km-android .checkout { background-color: red; }
-     * </style>
-     * <div data-role="navbar" class="checkout">My View Title</div>
-     */
     var kendo = window.kendo,
         ui = kendo.mobile.ui,
         roleSelector = kendo.roleSelector,
@@ -59780,12 +50344,7 @@ extend(Editor, {
         }
     }
 
-    var NavBar = Widget.extend(/** @lends kendo.mobile.ui.NavBar.prototype */{
-        /**
-         * @constructs
-         * @extends kendo.mobile.ui.Widget
-         * @param {Element} element DOM element
-         */
+    var NavBar = Widget.extend({
         init: function(element, options) {
             var that = this;
 
@@ -59802,24 +50361,17 @@ extend(Editor, {
             name: "NavBar"
         },
 
-        /**
-         * Update the title element text. The title element is specified by setting the <code>role</code> data attribute to <code>view-title</code>.
-         * @param {String} value The text of title
-         * @example
-         * <div data-role="navbar" id="foo">
-         *     <span data-role="view-title"></span>
-         * </div>
-         *
-         * <script>
-         *   $("#foo").data("kendoMobileNavBar").title("Foo");
-         * </script>
-         */
         title: function(value) {
             this.element.find(roleSelector("view-title")).text(value);
         },
 
         viewShow: function(view) {
             this.title(view.options.title);
+        },
+
+        destroy: function() {
+            Widget.fn.destroy.call(this);
+            kendo.destroy(this.element);
         }
     });
 
@@ -59846,58 +50398,7 @@ extend(Editor, {
         CHANGE = "change",
         CURRENT_PAGE_CLASS = "km-current-page";
 
-    /**
-    * @name kendo.mobile.ui.ScrollView.Description
-    * @section
-    * <p>The Kendo Mobile ScrollView widget is used to scroll content wider than the device screen.</p>
-    *
-    * <h3>Getting Started</h3>
-    * <p>The Kendo Mobile Application automatically initializes the Mobile ScrollView for every element with <code>role</code> data attribute set to <code>scrollview</code> present in the views' markup.
-    * Alternatively, it can be initialized using jQuery plugin syntax in the containing mobile View <strong>init event handler</strong>.
-    *
-    * @exampleTitle Initialize mobile ScrollView using a role data attribute.
-    * @example
-    * <div data-role="scrollview">
-    *   Foo
-    * </div>
-    *
-    * @exampleTitle Initialize mobile ScrollView using jQuery plugin syntax.
-    * @example
-    * <div data-role="view" data-init="initScrollView">
-    *   <div id="scrollView">
-    *     <div data-role="page">Foo</div>
-    *     <div data-role="page">Bar</div>
-    *   </div>
-    * </div>
-    * <script>
-    * function initScrollView(e) {
-    *   e.view.element.find("#scrollView").kendoMobileScrollView();
-    * }
-    * </script>
-    *
-    * @section
-    * <h3>Pages</h3>
-    * Content pages may be defined in order to display exactly one item per page. Pages are automatically resized
-    * when the device is rotated. To define a page, wrap the content in a div with <code>data-role="page"</code> attribute set.
-    *
-    * @exampleTitle ScrollView with pages
-    * @example
-    * <div data-role="scrollView">
-    *    <div data-role="page">Foo</div>
-    *    <div data-role="page">Bar</div>
-    * </div>
-    */
-    var ScrollView = Widget.extend(/** @lends kendo.mobile.ui.ScrollView.prototype */{
-        /**
-        * @constructs
-        * @extends kendo.mobile.ui.Widget
-        * @param {Element} element DOM element
-        * @param {Object} options
-        * @option {Number} [page] <0> The initial page to display.
-        * @option {Number} [duration] <300> The milliseconds that take the ScrollView to snap to the current page after released.
-        * @option {Number} [velocityThreshold] <0.8> The velocity threshold after which a swipe will navigate to the next page (as opposed to snapping back to the current page).
-        * @option {Number} [bounceVelocityThreshold] <1.6> The velocity threshold after which a swipe will result in a bounce effect.
-        */
+    var ScrollView = Widget.extend({
         init: function(element, options) {
             var that = this;
 
@@ -59939,6 +50440,7 @@ extend(Editor, {
 
                     transition.cancel();
                 },
+                allowSelection: true,
                 end: proxy(that._dragEnd, that)
             });
 
@@ -59948,7 +50450,7 @@ extend(Editor, {
             });
 
             dimension = dimensions.x;
-            dimension.bind("change", proxy(that.refresh, that));
+            dimension.bind(CHANGE, proxy(that.refresh, that));
 
             pane = new Pane({
                 dimensions: dimensions,
@@ -59978,30 +50480,21 @@ extend(Editor, {
         },
 
         events: [
-            /**
-             * Fires when the widget page is changed.
-             * @name kendo.mobile.ui.ScrollView#change
-             * @event
-             * @param {Event} e
-             * @param {jQuery} e.page The current page (zero based index)
-             */
             CHANGE
         ],
+
+        destroy: function() {
+            Widget.fn.destroy.call(this);
+
+            this.drag.destroy();
+
+            kendo.destroy(this.element);
+        },
 
         viewShow: function(view) {
             this.dimensions.refresh();
         },
 
-        /**
-         * Redraw the mobile ScrollView pager. Called automatically on device orientation change event.
-         *
-         * @example
-         * <div data-role="scrollview" id="scrollview"></div>
-         *
-         * <script>
-         *    $("#scrollview").data("kendoMobileScrollView").refresh();
-         * </script>
-         */
         refresh: function() {
             var that = this,
                 pageHTML = "",
@@ -60028,33 +50521,11 @@ extend(Editor, {
             that._updatePager();
         },
 
-        /**
-         * Update the scrollview HTML content
-         * @param {String | jQuery} content the new scrollView content.
-         *
-         * @example
-         * <div data-role="scrollview" id="scrollview"></div>
-         *
-         * <script>
-         *    $("#scrollview").data("kendoMobileScrollView").content("<span>Foo</span>");
-         * </script>
-         */
         content: function(html) {
            this.element.children().first().html(html);
            this.dimensions.refresh();
         },
 
-        /**
-         * Scroll to the given page. Pages are zero-based indexed.
-         * @param {Number} page The page to scroll to.
-         * @example
-         * <div data-role="scrollview" id="scrollview"></div>
-         *
-         * <script>
-         *    // Scroll to the second page of the scrollView
-         *    $("#scrollview").data("kendoMobileScrollView").scrollTo(1);
-         * </script>
-         */
         scrollTo: function(page) {
             this.page = page;
             this._moveTo(- page * this.dimension.getSize(), Transition.easeOutExpo);
@@ -60108,57 +50579,6 @@ extend(Editor, {
     ui.plugin(ScrollView);
 })(jQuery);
 (function($, undefined) {
-    /**
-    * @name kendo.mobile.ui.Switch.Description
-    *
-    * @section
-    * <p>The mobile Switch widget is used to display two exclusive choices.</p>
-    * <p>When initialized, it shows the currently selected value. User slides the control to reveal the second value.
-    * The mobile Switch can be created from <code>input</code> element of type <code>checkbox</code>.</p>
-    *
-    * <h3>Getting Started</h3>
-    *
-    * <p> The Kendo Mobile Application will automatically initialize a mobile Switch for every element with <code>role</code> data attribute set to <code>swtich</code> present in the views/layouts markup.
-    * Alternatively, it can be initialized using jQuery plugin syntax in the containing mobile View <strong>init event handler</strong>.
-    *
-    * @exampleTitle Initialize mobile Switch based on role data attribute
-    * @example
-    * <input type="checkbox" data-role="switch" />
-    *
-    * @exampleTitle Initialize mobile Switch using jQuery plugin syntax
-    * @example
-    * <input type="checkbox" id="switch" />
-    * <script>
-    * var switchWidget = $("#switch").kendoMobileSwitch();
-    * </script>
-    * @section <h3>Checking/Unchecking the Mobile Switch</h3>
-    *
-    * <p>The checked state of the mobile Switch depends on the <code>checked</code> property of the widget's constructor options
-    * or the <code>checked</code> attribute of the widget's element.</p>
-    *
-    * @exampleTitle Initialize Kendo mobile Switch from checked <code>input</code>
-    * @example
-    * <input type="checkbox" id="switch" checked="checked" />
-    * <script>
-    * var switchWidget = $("#switch").kendoMobileSwitch();
-    * </script>
-    *
-    * @exampleTitle Initialize checked mobile Switch using jQuery plugin syntax
-    * @example
-    * <input type="checkbox" id="switch" />
-    * <script>
-    * var switchWidget = $("#switch").kendoMobileSwitch({ checked: true });
-    * </script>
-    *
-    * @section <h3>Specifying the Text of the Labels</h3>
-    *
-    * @exampleTitle Customize Kendo mobile Switch on/off labels
-    * @example
-    * <input type="checkbox" id="switch" />
-    * <script>
-    * var switchWidget = $("#switch").kendoMobileSwitch({ onLabel: "YES", offLabel: "NO" });
-    * </script>
-    */
     var kendo = window.kendo,
         ui = kendo.mobile.ui,
         Widget = ui.Widget,
@@ -60175,16 +50595,7 @@ extend(Editor, {
         return Math.max(minLimit, Math.min(maxLimit, value));
     }
 
-    var Switch = Widget.extend(/** @lends kendo.mobile.ui.Switch.prototype */{
-        /**
-        * @constructs
-        * @extends kendo.mobile.ui.Widget
-        * @param {Element} element DOM element.
-        * @param {Object} options Configuration options.
-        * @option {Boolean} [checked] <false> The checked state of the widget.
-        * @option {String} [onLabel] <ON> The ON label.
-        * @option {String} [offLabel] <OFF> The OFF label.
-        */
+    var Switch = Widget.extend({
         init: function(element, options) {
             var that = this, width, checked, handleWidth;
 
@@ -60195,8 +50606,8 @@ extend(Editor, {
             that._background();
             that._handle();
 
-            element = that.element.data(kendo.attr("role"), "switch");
-            element[0].type = "checkbox";
+            element = that.element[0];
+            element.type = "checkbox";
 
             width = that.wrapper.width();
             handleWidth = that.handle.outerWidth(true);
@@ -60207,7 +50618,7 @@ extend(Editor, {
 
             checked = that.options.checked;
             if (checked === null) {
-                checked = element[0].checked;
+                checked = element.checked;
             }
 
             that.check(checked);
@@ -60215,23 +50626,6 @@ extend(Editor, {
         },
 
         events: [
-            /**
-            * Fires when the state of the widget changes
-            * @name kendo.mobile.ui.Switch#change
-            * @event
-            * @param {Event} e
-            * @param {Object} e.checked The checked state of the widget.
-            *
-            * @exampleTitle Handle mobile Switch change event
-            * @example
-            * <input type="checkbox" id="switch" data-role="switch" />
-            *
-            * <script>
-            *  $("#switch").data("kendoMobileSwitch").bind("change", function(e) {
-            *      console.log(e.checked); // true or false
-            *  }
-            * </script>
-            */
             CHANGE
         ],
 
@@ -60242,24 +50636,6 @@ extend(Editor, {
             checked: null
         },
 
-        /**
-        * Get/Set the checked state of the widget.
-        * @param {Boolean} check Whether to turn the widget on or off.
-        * @returns {Boolean} The checked state of the widget.
-        * @example
-        * <input data-role="switch" id="foo" />;
-        *
-        * <script>
-        *   // get a reference to the switch widget
-        *   var switch = $("#foo").data("kendoMobileSwitch");
-        *
-        *   // get the checked state of the switch.
-        *   var checked = switch.check();
-        *
-        *   // set the checked state of the switch.
-        *   switch.check(true);
-        * </script>
-        */
         check: function(check) {
             var that = this,
                 element = that.element[0];
@@ -60275,19 +50651,11 @@ extend(Editor, {
                 .toggleClass(SWITCHOFF, !check);
         },
 
-        /**
-        * Toggle the checked state of the widget.
-        * @example
-        * <input data-role="switch" id="foo" />;
-        *
-        * <script>
-        *   // get a reference to the switch
-        *   var switch = $("#foo").data("kendoMobileSwitch");
-        *
-        *   // toggle the checked state of the switch.
-        *   switch.toggle();
-        * </script>
-        */
+        destroy: function() {
+            Widget.fn.destroy.call(this);
+            this.drag.destroy();
+        },
+
         toggle: function() {
             var that = this;
 
@@ -60412,106 +50780,17 @@ extend(Editor, {
     ui.plugin(Switch);
 })(jQuery);
 (function($, undefined) {
-    /**
-     * @name kendo.mobile.ui.TabStrip.Description
-     * @section
-     *
-     * <p>The mobile TabStrip widget is used inside a mobile view or layout footer element to display an application-wide group of navigation buttons.
-     * The look of the mobile TabStrip changes depending on the user mobile device and operating system.</p>
-     *
-     * <h3>Getting Started</h3>
-     * <p>The Kendo mobile Application will automatically initialize the mobile TabStrip for every element with <code>role</code> data attribute set to <code>tabstrip</code> present in the views/layouts markup.
-     * Alternatively, it can be initialized using jQuery plugin syntax in the mobile View/Layout init event handler. The tabstrip element should contain one or more <code>a</code> elements.</p>
-     *
-     * <h3>Kendo Mobile Application Integration</h3>
-     * <p>The tabs of the TabStrip navigate to the mobile application's views. When the mobile application navigates to another view, it updates the TabStrip's currently selected tab, based on the current view's URL.</p>
-     *
-     * @exampleTitle Initialize Kendo mobile TabStrip based on role data attribute.
-     * @example
-     * <div data-role="tabstrip">
-     *   <a href="#index">Home</a>
-     *   <a href="#featured">Featured</a>
-     * </div>
-     *
-     * @section
-     * <h3>Tab icons</h3>
-     * <p> A tab icon can be set in two ways - either by adding an <code>img</code> element inside the <code>a</code> element, or by setting an <code>icon</code> data attribute to the <code>a</code> element.
-     * Kendo mobile TabStrip ships with several ready to use icons:</p>
-     *
-     * <ul id="icon-list">
-     *   <li title=".km-about"><span class="km-icon km-about"></span>about</li>
-     *   <li title=".km-action"><span class="km-icon km-action"></span>action</li>
-     *   <li title=".km-add"><span class="km-icon km-add"></span>add</li>
-     *   <li title=".km-bookmarks"><span class="km-icon km-bookmarks"></span>bookmarks</li>
-     *   <li title=".km-camera"><span class="km-icon km-camera"></span>camera</li>
-     *   <li title=".km-cart"><span class="km-icon km-cart"></span>cart</li>
-     *   <li title=".km-compose"><span class="km-icon km-compose"></span>compose</li>
-     *   <li title=".km-contacts"><span class="km-icon km-contacts"></span>contacts</li>
-     *   <li title=".km-details"><span class="km-icon km-details"></span>details</li>
-     *   <li title=".km-downloads"><span class="km-icon km-downloads"></span>downloads</li>
-     *   <li title=".km-fastforward"><span class="km-icon km-fastforward"></span>fastforward</li>
-     *   <li title=".km-favorites"><span class="km-icon km-favorites"></span>favorites</li>
-     *   <li title=".km-featured"><span class="km-icon km-featured"></span>featured</li>
-     *   <li title=".km-featured"><span class="km-icon km-toprated"></span>toprated</li>
-     *   <li title=".km-globe"><span class="km-icon km-globe"></span>globe</li>
-     *   <li title=".km-history"><span class="km-icon km-history"></span>history</li>
-     *   <li title=".km-home"><span class="km-icon km-home"></span>home</li>
-     *   <li title=".km-info"><span class="km-icon km-info"></span>info</li>
-     *   <li title=".km-more"><span class="km-icon km-more"></span>more</li>
-     *   <li title=".km-mostrecent"><span class="km-icon km-mostrecent"></span>mostrecent</li>
-     *   <li title=".km-mostviewed"><span class="km-icon km-mostviewed"></span>mostviewed</li>
-     *   <li title=".km-organize"><span class="km-icon km-organize"></span>organize</li>
-     *   <li title=".km-pause"><span class="km-icon km-pause"></span>pause</li>
-     *   <li title=".km-play"><span class="km-icon km-play"></span>play</li>
-     *   <li title=".km-recents"><span class="km-icon km-recents"></span>recents</li>
-     *   <li title=".km-refresh"><span class="km-icon km-refresh"></span>refresh</li>
-     *   <li title=".km-reply"><span class="km-icon km-reply"></span>reply</li>
-     *   <li title=".km-rewind"><span class="km-icon km-rewind"></span>rewind</li>
-     *   <li title=".km-search"><span class="km-icon km-search"></span>search</li>
-     *   <li title=".km-settings"><span class="km-icon km-settings"></span>settings</li>
-     *   <li title=".km-share"><span class="km-icon km-share"></span>share</li>
-     *   <li title=".km-stop"><span class="km-icon km-stop"></span>stop</li>
-     *   <li title=".km-trash"><span class="km-icon km-trash"></span>trash</li>
-     * </ul>
-     *
-     * <p>Additional icons may be added by defining the respective CSS tab class.</p>
-     *
-     * <h3>Creating Custom Icons</h3>
-     *
-     * <p>In order to create colorizable icons like the default ones in Kendo UI Mobile, specify the icon image as a <b>box mask</b>
-     * (either as dataURI or as a separate image). The image should be <b>PNG8</b> or <b>PNG24</b> with alpha channel (<b>PNG8+Alpha</b> is supported by
-     * only few graphic editors, so <b>better stick with PNG24</b>). The image color is not important - it will be used as a mask only.</p>
-     *
-     * <p><strong>Note</strong>: <strong>BlackBerry 7.0</strong> has a bug that renders its masks as background-image, so it is recommended to use white in order to support it. The bug is fixed in <strong>7.1</strong>.</p>
-     *
-     * @exampleTitle Define custom tab icon
-     * @example
-     * <style>
-     * .km-custom {
-     *   -webkit-mask-box-image: url("foo.png");
-     * }
-     * </style>
-     *
-     * <div data-role="tabstrip">
-     *   <a href="#index" data-icon="custom">Home</a>
-     * </div>
-     */
     var kendo = window.kendo,
         ui = kendo.mobile.ui,
         Widget = ui.Widget,
         support = kendo.support,
         ACTIVE_STATE_CLASS = "km-state-active",
         SELECT = "select",
+        NS = ".kendoMobileTabStrip",
+        MOUSEDOWN = support.mousedown + NS,
         proxy = $.proxy;
 
-    var TabStrip = Widget.extend(/** @lends kendo.mobile.ui.TabStrip.prototype */{
-        /**
-         * @constructs
-         * @extends kendo.ui.Widget
-         * @param {Element} element DOM element.
-         * @param {Object} options Configuration options.
-         * @option {Number} [selectedIndex] <0> The index of the initially selected tab.
-         */
+    var TabStrip = Widget.extend({
         init: function(element, options) {
             var that = this;
 
@@ -60523,42 +50802,18 @@ extend(Editor, {
 
             that.element.find("a")
                             .each(that._buildButton)
-                            .bind(support.mousedown, that._releaseProxy)
+                            .on(MOUSEDOWN, that._releaseProxy)
                             .eq(that.options.selectedIndex).addClass(ACTIVE_STATE_CLASS);
         },
 
         events: [
-            /**
-             * Fires when tab is selected.
-             * @name kendo.mobile.ui.TabStrip#select
-             * @event
-             * @param {Event} e
-             * @param {jQuery} e.item The selected tab
-             */
             SELECT
         ],
 
-        /**
-         * Set the mobile TabStrip active tab to the tab with the specified url.
-         * @param {String} url The url of the tab.
-         *
-         * @example
-         * <div data-role="tabstrip" id="tabstrip"> <a href="#foo">Foo</a> </div>
-         *
-         * <script>
-         *     $(function() {
-         *         $("#tabstrip").data("kendoMobileTabStrip").switchTo("#foo");
-         *     });
-         * </script>
-         */
         switchTo: function(url) {
             this._setActiveItem(this.element.find('a[href$="' + url + '"]'));
         },
 
-        /**
-         * Get the currently selected tab DOM element.
-         * @returns {jQuery} the currently selected tab DOM element.
-         */
         currentItem: function() {
             return this.element.children("." + ACTIVE_STATE_CLASS);
         },
@@ -60592,7 +50847,7 @@ extend(Editor, {
 
         _buildButton: function() {
             var button = $(this),
-                icon = kendo.data(button, "icon"),
+                icon = kendo.attrValue(button, "icon"),
                 image = button.find("img"),
                 iconSpan = $('<span class="km-icon"/>');
 
@@ -60615,6 +50870,11 @@ extend(Editor, {
         viewShow: function(view) {
             var that = this;
             that.switchTo(view.id);
+        },
+
+        destroy: function() {
+            Widget.fn.destroy.call(this);
+            this.element.find("a").off(NS);
         },
 
         options: {

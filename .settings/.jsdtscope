@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="Android"/>
+	<classpathentry excluding="widgets/|ui/|db/|containers/" kind="src" path="app/js"/>
+	<classpathentry kind="src" path="app/js/containers"/>
+	<classpathentry kind="src" path="app/js/db"/>
+	<classpathentry kind="src" path="app/js/ui"/>
+	<classpathentry kind="src" path="app/js/widgets"/>
+	<classpathentry kind="src" path="app/lib"/>
+	<classpathentry excluding="main/" kind="src" path="build"/>
+	<classpathentry kind="src" path="build/main"/>
+	<classpathentry excluding="db/|ui/|containers/" kind="src" path="buildsmobile/js"/>
+	<classpathentry kind="src" path="buildsmobile/js/containers"/>
+	<classpathentry kind="src" path="buildsmobile/js/db"/>
+	<classpathentry kind="src" path="buildsmobile/js/ui"/>
+	<classpathentry kind="src" path="buildsmobile/lib"/>
+	<classpathentry kind="src" path="PhoneGap Build Package/js/containers"/>
+	<classpathentry kind="src" path="PhoneGap Build Package/lib"/>
+	<classpathentry excluding="jasmine/|navigator/spec/|navigator/scripts/" kind="src" path="test"/>
+	<classpathentry kind="src" path="test/jasmine"/>
+	<classpathentry kind="src" path="test/navigator/scripts"/>
+	<classpathentry kind="src" path="test/navigator/spec"/>
+	<classpathentry kind="con" path="org.eclipse.wst.jsdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="output" path=""/>
+</classpath>
