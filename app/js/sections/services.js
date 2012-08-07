@@ -13,7 +13,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
     };
 
     services.save = function () {
-        dbServices.updateServiceDetails(vm.get("selectedService"));
+        dbServices.updateService(vm.get("selectedService"));
     };
 
     /**
@@ -155,11 +155,11 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
                     column.template = "#= (" + key + "== null) ? ' ' : " + key + " #";
                 } else if (column.type === "date") {
                     if (value.detail === "datetime") {
-                        column.template = '#= moment(' + key + ').format("LLL") #';
+                        column.template = "#= (" + key + "== null) ? ' ' : moment(" + key + ").format('LLL') #";
                     } else if (value.detail === "time") {
-                        column.template = '#= moment(' + key + ').format("LT") #';
+                        column.template = "#= (" + key + "== null) ? ' ' : moment(" + key + ").format('LT') #";
                     } else if (value.detail === "date") {
-                        column.template = '#= moment(' + key + ').format("LL") #';
+                        column.template = "#= (" + key + "== null) ? ' ' : moment(" + key + ").format('LL') #";
                     }
                 }
 

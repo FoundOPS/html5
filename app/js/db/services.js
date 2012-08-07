@@ -215,10 +215,10 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
         });
     };
 
-    services.updateServiceDetails = function (service) {
+    services.updateService = function (service) {
         return saveHistory.linkNotification(
             $.ajax({
-                url: services.API_URL + "service/UpdateServiceDetails",
+                url: services.API_URL + "service/UpdateService",
                 type: "POST",
                 dataType: "json",
                 contentType: 'application/json',
