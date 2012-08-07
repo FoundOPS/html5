@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(['underscore', 'developer'], function (_, developer) {
+define(['lib/moment'], function () {
     var tools = {};
 
     /**
@@ -35,8 +35,9 @@ define(['underscore', 'developer'], function (_, developer) {
      * @return {Boolean}
      */
     tools.dateEqual = function (a, b, ignoreUtc) {
-        if (ignoreUtc)
+        if (ignoreUtc) {
             return a.getDate() === b.getDate() && a.getMonth() === b.getMonth() && a.getFullYear() === b.getFullYear();
+        }
 
         return a.getUTCDate() === b.getUTCDate() && a.getUTCMonth() === b.getUTCMonth() && a.getUTCFullYear() === b.getUTCFullYear();
     };
@@ -52,6 +53,15 @@ define(['underscore', 'developer'], function (_, developer) {
             day = date.getUTCDate(),
             year = date.getUTCFullYear();
         return month + "-" + day + "-" + year;
+    };
+
+    /**
+     * Strips the time zone from a date (to UTC) but keeps the same date.
+     * @param date
+     * @return {Date}
+     */
+    tools.stripTimeZone = function (date) {
+        return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
     };
 
     /**
@@ -116,6 +126,76 @@ define(['underscore', 'developer'], function (_, developer) {
         });
 
         return newGuidString;
+    };
+
+    /**
+     * Converts a datasource's view to CSV and saves it using data URI.
+     * Uses moment.js for date parsing (you can change this if you would like)
+     * @param {Array.<Object>} data The data to convert.
+     * @param {boolean} humanize If true, it will humanize the column header names.
+     * It will replace _ with a space and split CamelCase naming to have a space in between names -> Camel Case
+     * @param {Array.<String>} ignore Columns to ignore.
+     * @returns {string} The csv string.
+     */
+    tools.toCSV = function (data, fileName, humanize, ignore) {
+        var csv = '';
+        if (!ignore) {
+            ignore = [];
+        }
+
+        //ignore added datasource properties
+        ignore = _.union(ignore, ["_events", "idField", "_defaultId", "constructor", "init", "get",
+            "_set", "wrap", "bind", "one", "first", "trigger",
+            "unbind", "uid", "dirty", "id", "parent" ]);
+
+        //add the header row
+        if (data.length > 0) {
+            for (var col in data[0]) {
+                //do not include inherited properties
+                if (!data[0].hasOwnProperty(col) || _.include(ignore, col)) {
+                    continue;
+                }
+
+                if (humanize) {
+                    col = col.split('_').join(' ').replace(/([A-Z])/g, ' $1');
+                }
+
+                col = col.replace(/"/g, '""');
+                csv += '"' + col + '"';
+                if (col != data[0].length - 1) {
+                    csv += ",";
+                }
+            }
+            csv += "\n";
+        }
+
+        //add each row of data
+        for (var row in data) {
+            for (var col in data[row]) {
+                //do not include inherited properties
+                if (!data[row].hasOwnProperty(col) || _.include(ignore, col)) {
+                    continue;
+                }
+
+                var value = data[row][col];
+                if (value === null) {
+                    value = "";
+                } else if (value instanceof Date) {
+                    value = moment(value).format("MM/D/YYYY");
+                } else {
+                    value = value.toString();
+                }
+
+                value = value.replace(/"/g, '""');
+                csv += '"' + value + '"';
+                if (col !== data[row].length - 1) {
+                    csv += ",";
+                }
+            }
+            csv += "\n";
+        }
+
+        return csv;
     };
 
     /**
@@ -196,15 +276,15 @@ define(['underscore', 'developer'], function (_, developer) {
     };
 
     /**
-    * watches all input elements on page for value change
-    * param {string} pageDiv the id of the view. ex: "#personal"
-    */
+     * watches all input elements on page for value change
+     * param {string} pageDiv the id of the view. ex: "#personal"
+     */
     tools.observeInput = function (pageDiv) {
-        $(pageDiv + ' input').each(function() {
+        $(pageDiv + ' input').each(function () {
             // Save current value of element
             $(this).data('oldVal', $(this).val());
             // Look for changes in the value
-            $(this).bind("propertychange keyup input paste change", function(){
+            $(this).bind("propertychange keyup input paste change", function () {
                 // If value has changed...
                 if ($(this).data('oldVal') != $(this).val()) {
                     // Updated stored value

@@ -13,8 +13,10 @@ require.config({
     }
 });
 
-require(["containers/navigator", "silverlight", "session", "lib/kendo.all", "ui/personalSettings", "ui/businessSettings", "ui/usersSettings",
-    "ui/dispatcherSettings", "ui/changePassword", "ui/createPassword", "underscore", "lib/userVoice"], function (Navigator, silverlight, session) {
+require(["widgets/navigator", "containers/silverlight", "db/session", "lib/kendo.all", "underscore", "lib/userVoice",
+    "sections/personalSettings", "sections/businessSettings", "sections/usersSettings",
+    "sections/dispatcherSettings", "sections/changePassword", "sections/createPassword", 
+    "sections/services"], function (Navigator, silverlight, session) {
     var application, navigator;
 
     session.load(function (data) {
@@ -107,12 +109,4 @@ require(["containers/navigator", "silverlight", "session", "lib/kendo.all", "ui/
         application.navigate("view/changePassword.html");
     };
 
-    //BELOW NO LONGER NECESSARY
-    //set the height to make sure the horizontal scrollbar is on the bottom
-    /*var setHeight = function () {
-        var height = $(window).height() - 45;
-        $("#content").css("height", height + "px");
-    };
-    setHeight();
-    $(window).resize(setHeight);*/
 });

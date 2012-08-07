@@ -1,4 +1,4 @@
-define(["jquery", "session", "lib/kendo.all"], function ($, session) {
+define(["jquery", "db/session", "lib/kendo.all"], function ($, session) {
     // shorten references to variables. this is better for uglification
     var kendo = window.kendo,
         ui = kendo.ui,

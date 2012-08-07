@@ -26,7 +26,7 @@ require.config({
     }
 });
 
-require(["jquery", "lib/kendo.mobile.min", "developer", "db/services", "db/models"], function ($, k, developer, services, models) {
+require(["jquery", "lib/kendo.mobile.min", "db/services", "db/models"], function ($, k, services, models) {
     /**
      * mobile = wrapper for all mobile objects
      * app = the kendoUI mobile app

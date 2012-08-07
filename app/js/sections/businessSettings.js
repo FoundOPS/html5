@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(["db/services", "developer", "ui/saveHistory", "session", "widgets/imageUpload", "widgets/settingsMenu"], function (dbServices, developer, saveHistory, session) {
+define(["db/services", "db/saveHistory", "db/session", "widgets/imageUpload", "widgets/settingsMenu"], function (dbServices, saveHistory, session) {
     var businessSettings = {}, imageUpload, vm = kendo.observable();
 
     businessSettings.vm = vm;

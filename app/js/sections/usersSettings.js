@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(["developer", "db/services", "session", "ui/saveHistory", "tools", "widgets/settingsMenu"], function (developer, dbServices, session, saveHistory, tools) {
+define(["db/services", "db/session", "db/saveHistory", "tools", "widgets/settingsMenu"], function (dbServices, session, saveHistory, tools) {
     var usersSettings = {}, usersDataSource, linkedEmployees;
 
     //on add and edit, select a linked employee if the name matches the name in the form
