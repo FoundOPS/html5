@@ -21,8 +21,8 @@ require.config({
 
 require(["widgets/navigator", "containers/silverlight", "db/session", "lib/kendo.all", "underscore", "lib/userVoice",
     "sections/personalSettings", "sections/businessSettings", "sections/usersSettings",
-    "sections/dispatcherSettings", "sections/changePassword", "sections/createPassword", 
-    "sections/services"], function (Navigator, silverlight, session) {
+    "sections/dispatcherSettings", "sections/changePassword", "sections/createPassword",
+    "sections/services", "sections/routes"], function (Navigator, silverlight, session) {
     var application, navigator;
 
     session.load(function (data) {
@@ -86,7 +86,7 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "lib/kendo
     });
 
     //hookup remote loading into remoteContent, by using the kendo mobile application
-    window.application = application = new kendo.mobile.Application($("#remoteContent"), { initial: "view/updates.html"});
+    window.application = application = new kendo.mobile.Application($("#remoteContent"), { initial: "view/updates.html", platform: ""});
 
     //setup page tracking
     try {
@@ -114,5 +114,7 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "lib/kendo
     window.navigateToChangePassword = function () {
         application.navigate("view/changePassword.html");
     };
-
+    window.navigateToRoutes = function () {
+        application.navigate("view/routes.html");
+    };
 });

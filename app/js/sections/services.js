@@ -3,7 +3,7 @@
 'use strict';
 
 require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widgets/serviceDetails", "lib/jquery.form"], function ($, dbServices, tools, saveHistory) {
-    var services = {}, serviceHoldersDataSource, vm = kendo.observable();
+    var services = {}, serviceHoldersDataSource, vm = kendo.observable(), grid;
 
     services.vm = vm;
 
@@ -13,7 +13,15 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
     };
 
     services.save = function () {
-        dbServices.updateServiceDetails(vm.get("selectedService"));
+        dbServices.updateService(vm.get("selectedService")).success(function (e) {
+            //Change the current row's ServiceId to match this Id in case this was a newly inserted service
+            if (grid) {
+                var selectedItem = grid.dataItem(grid.select());
+                selectedItem.set("ServiceId", vm.get("selectedService.Id"));
+
+                //TODO update all the columns
+            }
+        });
     };
 
     /**
@@ -152,9 +160,9 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
     services.initialize = function () {
         var resizeGrid = function (initialLoad) {
             var extraMargin;
-            if(initialLoad){
+            if (initialLoad) {
                 extraMargin = 50;
-            }else{
+            } else {
                 extraMargin = 85;
             }
             var windowHeight = $(window).height();
@@ -183,11 +191,11 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
                     column.template = "#= (" + key + "== null) ? ' ' : " + key + " #";
                 } else if (column.type === "date") {
                     if (value.detail === "datetime") {
-                        column.template = '#= moment(' + key + ').format("LLL") #';
+                        column.template = "#= (" + key + "== null) ? ' ' : moment(" + key + ").format('LLL') #";
                     } else if (value.detail === "time") {
-                        column.template = '#= moment(' + key + ').format("LT") #';
+                        column.template = "#= (" + key + "== null) ? ' ' : moment(" + key + ").format('LT') #";
                     } else if (value.detail === "date") {
-                        column.template = '#= moment(' + key + ').format("LL") #';
+                        column.template = "#= (" + key + "== null) ? ' ' : moment(" + key + ").format('LL') #";
                     }
                 }
 
@@ -197,7 +205,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
                 columns.push(column);
             });
 
-            services.grid = $("#grid").kendoGrid({
+            grid = $("#grid").kendoGrid({
                 autoBind: true,
                 change: function () {
                     var selectedItem = this.dataItem(this.select());

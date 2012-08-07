@@ -1,0 +1,17 @@
+<div id="routes" data-init="routes.initialize" data-show="routes.show" data-role="view" data-title="Routes">
+    <footer data-role="footer">
+        <div data-role="navbar">
+            <a id="refreshButton" class="nav-button" data-align="center"
+               data-bind="click: refreshRoutes" data-role="button">Refresh</a>
+        </div>
+    </footer>
+    <!--Add following attributes when supported server info is pagable
+    data-pull-to-refresh="true" style="margin-bottom: 600px;"-->
+    <!--Half-fix for refreshing routes without reloading page data-auto-bind="false"!-->
+    <ul id="routes-listview" data-bind="source:routesSource, click:selectRoute"
+        data-role="listview" data-template="routeListViewTemplate">
+    </ul>
+</div>
+<script type="text/x-kendo-template" id="routeListViewTemplate">
+    <a>#= Name #</a>
+</script>
