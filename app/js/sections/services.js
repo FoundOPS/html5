@@ -2,13 +2,19 @@
 
 'use strict';
 
-require(["jquery", "db/services", "tools", "lib/moment", "widgets/serviceDetails", "lib/jquery.form"], function ($, dbServices, tools) {
-    var services = {}, serviceHoldersDataSource;
+require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widgets/serviceDetails", "lib/jquery.form"], function ($, dbServices, tools, saveHistory) {
+    var services = {}, serviceHoldersDataSource, vm = kendo.observable();
 
-    //set services to a global function, so the functions are accessible from the HTML element
-    window.services = services;
+    services.vm = vm;
 
-    services.viewModel = kendo.observable({selectedService: {}});
+    services.undo = function (state) {
+        vm.set("selectedService", state);
+        businessSettings.save();
+    };
+
+    services.save = function () {
+        dbServices.updateServiceDetails(vm.get("selectedService"));
+    };
 
     /**
      * A kendo data source for Services for the current business account.
@@ -109,7 +115,7 @@ require(["jquery", "db/services", "tools", "lib/moment", "widgets/serviceDetails
             dataValueField: "Id",
             dataSource: services.serviceTypes,
             change: function(e) {
-                //load the filtered services
+                //reload the services
                 services.updateServices();
             }
         });
@@ -169,7 +175,7 @@ require(["jquery", "db/services", "tools", "lib/moment", "widgets/serviceDetails
                     var selectedItem = this.dataItem(this.select());
                     //Load the service details, and update the view model
                     dbServices.getServiceDetails(selectedItem.ServiceId, selectedItem.OccurDate, selectedItem.RecurringServiceId, function (service) {
-                        services.viewModel.set("selectedService", service);
+                        services.vm.set("selectedService", service);
                     });
                 },
                 columns: columns,
@@ -191,7 +197,7 @@ require(["jquery", "db/services", "tools", "lib/moment", "widgets/serviceDetails
 
             setupServiceTypeDropdown();
 
-            //load the filtered services
+            //reload the services
             services.updateServices();
         });
 
@@ -204,6 +210,9 @@ require(["jquery", "db/services", "tools", "lib/moment", "widgets/serviceDetails
             var serviceType = $("#serviceTypes").data("kendoDropDownList").value();
 
             getDataSource(startDate, endDate, serviceType, setupGrid);
+
+            saveHistory.close();
+            saveHistory.resetHistory();
         };
 
         startDatePicker.kendoDatePicker({
@@ -219,21 +228,29 @@ require(["jquery", "db/services", "tools", "lib/moment", "widgets/serviceDetails
             change: services.updateServices
         });
 
-        services.viewModel.bind("change", function (e) {
-            //console.log(e.field);
-            if (e.field === "selectedService") {
-            }
+        $("#serviceDetails").kendoServiceDetails({
+            source: vm.get("selectedService")
         });
 
-        $("#serviceDetails").kendoServiceDetails({
-            source: services.viewModel.get("selectedService")
-        });
+        //watch for input changes
+        saveHistory.saveInputChanges("#serviceDetails");
 
         $(window).resize(function () {
             resizeGrid(false);
         });
 
         resizeGrid(true);
+    };
+
+    services.show = function () {
+        saveHistory.setCurrentSection({
+            page: "Services",
+            save: services.save,
+            undo: services.undo,
+            state: function () {
+                return vm.get("selectedService");
+            }
+        });
     };
 
     services.exportToCSV = function () {
@@ -244,4 +261,7 @@ require(["jquery", "db/services", "tools", "lib/moment", "widgets/serviceDetails
         form[0].action = dbServices.ROOT_API_URL + "Helper/Download";
         form.submit();
     };
+
+    //set services to a global function, so the functions are accessible from the HTML element
+    window.services = services;
 });
