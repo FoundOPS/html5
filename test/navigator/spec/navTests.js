@@ -1,6 +1,6 @@
 "use strict";
 
-define(["containers/navigator", "lib/kendo.all","lib/userVoice"], function (Navigator) {
+define(["widgets/navigator", "lib/kendo.all","lib/userVoice"], function (Navigator) {
     var config = {
         "name": "Jonathan Perl",
         "settingsUrl": "#view/personalSettings.html",
@@ -213,7 +213,7 @@ define(["containers/navigator", "lib/kendo.all","lib/userVoice"], function (Navi
                     });
                 }
                 if($(window).width()<=800){
-                    it("shown, sidebar has shown class on small view only", function(){
+                    it("shown, sidebar has shown class on small view only (also tests hidden)", function(){
                         $("#showMenu").trigger("click");
                         var hasClassShown = $("#sideBar").hasClass("shown");
                         var hasClassHidden = $("#sideBar").hasClass("hidden");
