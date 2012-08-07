@@ -211,6 +211,11 @@ body{
 hr{
     border: 1px solid #666;
 }
+
+button:hover{
+    background: url("../img/btnBgHover.png") repeat-x;
+}
+
 .wrap{
     margin: 0 20px 10px 180px;
     padding: 15px;
@@ -266,7 +271,6 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
     background-position: 0 -132px;
 }
 /*endregion*/
-
 /*region ImageUploadButton */
 .imageupload-button{
     margin-left: 185px;
@@ -279,7 +283,6 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
     margin-bottom: 10px;
 }
 /*endregion*/
-
 /*region Settings - Personal */
 #personal .wrap, #business .wrap, #changePassword .wrap, #createPassword .wrap{
     width: 500px;
@@ -498,6 +501,74 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
     width: 150px;
     height: 150px;
     background: url(../img/colorpicker_overlay.png);
+    
+//region Services
+#services{
+    #left {
+        height: 100%;
+        margin-right: 280px;
+    }
+    .k-datepicker{
+        width: 130px;
+        padding: 7px 7px 7px 0;
+    }
+    .k-grid td{
+        line-height: 1.3em;
+        font-size: 14px;
+    }
+    input[type="checkbox"]{
+        vertical-align: middle;
+    }
+    .k-dropdown-wrap{
+        padding: 0 22px 0 0;
+        border-radius: 0;
+    }
+    #top{
+        width:680px;
+        label{
+            padding-left: 10px;
+        }
+        .k-dropdown{
+            margin-right: 7px;
+            height: 30px;
+        }
+        .k-dropdown-wrap{
+            border-radius: 4px;
+            .k-input{
+                height: 1.5em;
+                line-height: 1.4em;
+            }
+        }
+    }
+}
+#serviceDetails {
+    position: absolute;
+    top: 50px;
+    right: 0;
+    width: 250px;
+    #startDatePicker{
+        width:150px;
+    }
+    #endDatePicker{
+        width:150px;
+    }
+    .km-listview .km-listview li{
+        padding-left: 15px;
+        font-size: .9em;
+    }
+    .textarea{
+        width: 168px !important;
+        margin: 0 0 -22px 5px;
+    }
+    li{
+        padding: 2px 0;
+    }
+    .k-timepicker, .k-combobox{
+        width: 218px;
+        margin-top: 2px;
+    }
+}
+//endregion
 }
 .colorpicker_color div div {
     position: absolute;

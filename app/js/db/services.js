@@ -44,6 +44,8 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
      */
     services.API_URL = apiUrl;
 
+    services.ROOT_API_URL = apiUrl.replace("api/", "");
+
     //functions to queue until after the role id is initially set
     var roleIdFunctionQueue = [];
     /**
@@ -120,19 +122,7 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
         return getThenInvokeCallback;
     };
 
-    /**
-     * Get the current session for the user
-     */
-    services.getSession = services._getHttp('settings/GetSession', {}, true);
-
-    /**
-     * Get the current service provider's Routes.
-     * @param {string} serviceDateUtc The service date to get routes for (in Utc).
-     * @param {!function(Array.<Object>)} callback A callback to pass the loaded routes to.
-     */
-    services.getRoutes = function (serviceDateUtc, callback) {
-        return services._getHttp('routes/GetRoutes', {serviceDateUtc: serviceDateUtc}, false)(callback);
-    };
+    //region Depots, Routes, TrackPoints
 
     /**
      * Get the service provider's depots.
@@ -145,6 +135,15 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
      * @param {!function(Array.<Object>)} callback The callback to pass the resources with latest points after they are loaded.
      */
     services.getResourcesWithLatestPoints = services._getHttp('trackpoint/GetResourcesWithLatestPoints', {}, false);
+
+    /**
+     * Get the current service provider's Routes.
+     * @param {string} serviceDateUtc The service date to get routes for (in Utc).
+     * @param {!function(Array.<Object>)} callback A callback to pass the loaded routes to.
+     */
+    services.getRoutes = function (serviceDateUtc, callback) {
+        return services._getHttp('routes/GetRoutes', {serviceDateUtc: serviceDateUtc}, false)(callback);
+    };
 
     /**
      * Get the service provider's TrackPoints.
@@ -175,29 +174,58 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
             });
     };
 
-    /**
-     * Get personal user settings.
-     * @param {!function(Array.<Object>)} callback A callback to pass the loaded settings.
-     */
-    services.getPersonalSettings = services._getHttp('settings/GetPersonalSettings', {}, false);
+    //endregion
+
+    //region Services
 
     /**
-     * Updates personal user settings.
-     * @param {!function(Array.<Object>)} settings The loaded settings.
+     * Get the list of services
+     * @param roleId The role to get the services for
      */
-    services.updatePersonalSettings = function (settings) {
+    services.getServiceTypes = services._getHttp('service/GetServiceTypes', {}, false);
+
+    /**
+     * Get the service and its fields.
+     * Need to pass the serviceId or the occurDate and the recurringServiceId.
+     * @param {?string} serviceId
+     * @param {?string} serviceDate
+     * @param {?string} recurringServiceId
+     * @param {!function(Object)} callback The callback to pass the Service it is loaded.
+     */
+    services.getServiceDetails = function (serviceId, serviceDate, recurringServiceId, callback) {
+        return services._getHttp('service/GetServiceDetails',
+            {serviceId: serviceId, serviceDate: tools.formatDate(serviceDate), recurringServiceId: recurringServiceId}, false)(function (data) {
+            //It will only have one item
+            var service = data[0];
+
+            //convert the all the dates
+            for (var i = 0; i < service.Fields.length; i++) {
+                var field = service.Fields[i];
+                if (field.Type === "DateTimeField") {
+                    field.Earliest = new Date(field.Earliest);
+                    field.Latest = new Date(field.Latest);
+                    field.Value = new Date(field.Value);
+                }
+            }
+
+            callback(service);
+        });
+    };
+
+    services.updateServiceDetails = function (service) {
         return saveHistory.linkNotification(
             $.ajax({
-                url: services.API_URL + "settings/UpdatePersonalSettings?roleId=" + services.RoleId,
+                url: services.API_URL + "service/UpdateServiceDetails",
                 type: "POST",
                 dataType: "json",
                 contentType: 'application/json',
-                data: JSON.stringify(settings)
+                data: JSON.stringify(service)
             }));
     };
 
-    // Get TimeZones.
-    services.getTimeZones = services._getHttp('settings/GetTimeZones', {}, false);
+    //endregion
+
+    //region Settings    
 
     /**
      * Creates personal password(for initial login).
@@ -211,6 +239,21 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
                 type: "POST"
             }));
     };
+
+    // Get Employees.
+    services.getAllEmployeesForBusiness = services._getHttp('settings/GetAllEmployeesForBusiness', {}, false);
+
+    /**
+     * Get business settings
+     * @param roleId The role to get the business settings for
+     */
+    services.getBusinessSettings = services._getHttp('settings/GetBusinessSettings', {}, false);
+
+    /**
+     * Get personal user settings.
+     * @param {!function(Array.<Object>)} callback A callback to pass the loaded settings.
+     */
+    services.getPersonalSettings = services._getHttp('settings/GetPersonalSettings', {}, false);
 
     /**
      * Updates personal password.
@@ -247,8 +290,26 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
             }));
     };
 
-    // Get Employees.
-    services.getAllEmployeesForBusiness = services._getHttp('settings/GetAllEmployeesForBusiness', {}, false);
+    /**
+     * Updates personal user settings.
+     * @param {!function(Array.<Object>)} settings The loaded settings.
+     */
+    services.updatePersonalSettings = function (settings) {
+        return notifications.linkNotification(
+            $.ajax({
+                url: services.API_URL + "settings/UpdatePersonalSettings?roleId=" + services.RoleId,
+                type: "POST",
+                dataType: "json",
+                contentType: 'application/json',
+                data: JSON.stringify(settings)
+            }));
+    };
+    
+     services.getTimeZones = services._getHttp('settings/GetTimeZones', {}, false);
+    
+    //endregion
+
+    //region User
 
     /**
      * Authenticate the user.
@@ -260,9 +321,16 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
         return services._getHttp('auth/Login', {email: email, pass: password}, true, null)(callback);
     };
 
+    /**
+     * Get the current session for the user
+     */
+    services.getSession = services._getHttp('settings/GetSession', {}, true);
+
     services.logout = function (callback) {
         return services._getHttp('auth/LogOut')(callback);
     };
+
+    //endregion
 
     services.trackError = function (error, business, section) {
         $.ajax({
