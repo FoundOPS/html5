@@ -9,11 +9,11 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
 
     services.undo = function (state) {
         vm.set("selectedService", state);
-        businessSettings.save();
+        services.save();
     };
 
     services.save = function () {
-        dbServices.updateServiceDetails(vm.get("selectedService"));
+        dbServices.updateService(vm.get("selectedService"));
     };
 
     /**
@@ -155,11 +155,11 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
                     column.template = "#= (" + key + "== null) ? ' ' : " + key + " #";
                 } else if (column.type === "date") {
                     if (value.detail === "datetime") {
-                        column.template = '#= moment(' + key + ').format("LLL") #';
+                        column.template = "#= (" + key + "== null) ? ' ' : moment(" + key + ").format('LLL') #";
                     } else if (value.detail === "time") {
-                        column.template = '#= moment(' + key + ').format("LT") #';
+                        column.template = "#= (" + key + "== null) ? ' ' : moment(" + key + ").format('LT') #";
                     } else if (value.detail === "date") {
-                        column.template = '#= moment(' + key + ').format("LL") #';
+                        column.template = "#= (" + key + "== null) ? ' ' : moment(" + key + ").format('LL') #";
                     }
                 }
 
@@ -176,9 +176,18 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
                     //Load the service details, and update the view model
                     dbServices.getServiceDetails(selectedItem.ServiceId, selectedItem.OccurDate, selectedItem.RecurringServiceId, function (service) {
                         services.vm.set("selectedService", service);
+
+                        saveHistory.close();
+                        saveHistory.resetHistory();
+
+                        //watch for input changes
+                        saveHistory.saveInputChanges("#serviceDetails");
                     });
                 },
                 columns: columns,
+                reorderColumn: function () {
+                    alert("yo");
+                },
                 dataSource: serviceHoldersDataSource,
                 filterable: true,
                 columnMenu: true,
@@ -210,9 +219,6 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
             var serviceType = $("#serviceTypes").data("kendoDropDownList").value();
 
             getDataSource(startDate, endDate, serviceType, setupGrid);
-
-            saveHistory.close();
-            saveHistory.resetHistory();
         };
 
         startDatePicker.kendoDatePicker({
@@ -231,9 +237,6 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
         $("#serviceDetails").kendoServiceDetails({
             source: vm.get("selectedService")
         });
-
-        //watch for input changes
-        saveHistory.saveInputChanges("#serviceDetails");
 
         $(window).resize(function () {
             resizeGrid(false);
