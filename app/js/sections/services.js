@@ -61,6 +61,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
                 } else {
                     return;
                 }
+
                 var fieldValues = {type: jType, defaultValue: "", detail: detail};
 
                 if (type === "System.Guid") {
@@ -122,11 +123,38 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
             dataTextField: "Name",
             dataValueField: "Id",
             dataSource: services.serviceTypes,
-            change: function (e) {
+            change: function() {
+                //load the saved column configuration
+                getColumnConfig();
+
                 //reload the services
                 services.updateServices();
             }
         });
+    };
+
+    var getColumnConfig = function () {
+//        dbServices.getColumnConfig(function (columns) {
+//            services.columnConfig = columns;
+//        });
+    };
+
+    //save the column configuration
+    var saveGridConfig = function () {
+        _.delay(function () {
+            var columns = services.grid.columns;
+            var columnConfig = [];
+            for(var c in columns){
+                var column = {};
+                column.name = columns[c].field;
+                column.width = columns[c].width;
+                if(columns[c].hidden){
+                    column.hide = columns[c].hidden;
+                }
+                columnConfig.push(column);
+            }
+            //dbServices.updateGridConfig(columnConfig);
+        }, 200);
     };
 
     services.initialize = function () {
@@ -148,7 +176,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
             //Setup the columns based on the fields
             var columns = [];
             _.each(fields, function (value, key) {
-                if (value.hidden) {
+                if(value.hidden){
                     return;
                 }
 
@@ -179,7 +207,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
 
             grid = $("#grid").kendoGrid({
                 autoBind: true,
-                change: function (e) {
+                change: function () {
                     var selectedItem = this.dataItem(this.select());
                     //Load the service details, and update the view model
                     dbServices.getServiceDetails(selectedItem.ServiceId, selectedItem.OccurDate, selectedItem.RecurringServiceId, function (service) {
@@ -193,12 +221,21 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
                     });
                 },
                 columns: columns,
-                reorderColumn: function () {
-                    alert("yo");
+                columnMenu: true,
+                columnReorder: function () {
+                    saveGridConfig();
+                },
+                columnResize: function () {
+                    saveGridConfig();
+                },
+                columnShow: function () {
+                    saveGridConfig();
+                },
+                columnHide: function () {
+                    saveGridConfig();
                 },
                 dataSource: serviceHoldersDataSource,
                 filterable: true,
-                columnMenu: true,
                 resizable: true,
                 reorderable: true,
                 sortable: {
@@ -213,6 +250,9 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
             services.serviceTypes = serviceTypes;
 
             setupServiceTypeDropdown();
+
+            //load the saved column configuration
+            getColumnConfig();
 
             //reload the services
             services.updateServices();
