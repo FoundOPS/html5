@@ -30,7 +30,7 @@ define(["jquery", "lib/kendo.all", "lib/jquery.maskMoney"], function ($) {
             var fieldElement;
             if (field.IsMultiLine) {
                 fieldElement = $(multiLineTextTemplate);
-                fieldElement.appendTo(listView).wrap("<li style='margin-bottom: 22px'>" + field.Name + "</li>");
+                fieldElement.appendTo(listView).wrap("<li>" + field.Name + "</li>");
             }
             else {
                 fieldElement = $(inputTemplate);
@@ -98,11 +98,11 @@ define(["jquery", "lib/kendo.all", "lib/jquery.maskMoney"], function ($) {
             return fieldElement;
         },
 
-        _createOptionsField: function (field, fieldIndex, listView) {
+        _createOptionsField: function (field, fieldIndex, elementToAppendTo) {
             var fieldElement;
             if (field.TypeInt === 0) {
                 //ComboBox
-                fieldElement = $(inputTemplate).appendTo(listView).wrap("<li>" + field.Name + "</li>");
+                fieldElement = $(inputTemplate).appendTo(elementToAppendTo).wrap("<li><label>" + field.Name + "</label></li>");
                 fieldElement.kendoComboBox({
                     change: function (e) {
                         var index = this.selectedIndex;
@@ -132,7 +132,7 @@ define(["jquery", "lib/kendo.all", "lib/jquery.maskMoney"], function ($) {
                 });
             } else {
                 //Checkbox (1) or checklist (2)
-                fieldElement = $("<ul data-role='listview' data-style='inset'>" + field.Name + "</ul>").appendTo(listView);
+                fieldElement = $('<ul data-role="listview" data-style="inset">' + field.Name + '</ul>').appendTo(elementToAppendTo);
 
                 for (var optionIndex = 0; optionIndex < field.Options.length; optionIndex++) {
                     var optionElement = $(inputTemplate).attr("type", "checkbox");
@@ -142,7 +142,7 @@ define(["jquery", "lib/kendo.all", "lib/jquery.maskMoney"], function ($) {
 
                     var option = field.Options[optionIndex];
 
-                    optionElement.appendTo(fieldElement).wrap("<li>" + option.Name + "</li>");
+                    optionElement.appendTo(fieldElement).wrap("<li><label>" + option.Name + "</label></li>");
                 }
             }
 
@@ -163,12 +163,20 @@ define(["jquery", "lib/kendo.all", "lib/jquery.maskMoney"], function ($) {
                 "OptionsField": that._createOptionsField
             };
 
-            var fieldsListView = $("<ul data-role='listview' data-style='inset'></ul>").appendTo(that.element).wrap("<form></form>");
+
+            var fieldsListView = $('<ul data-role="listview" data-style="inset"></ul>').appendTo(that.element).wrap("<form></form>");
+            var checkLists = $('<div></div>').appendTo(that.element);
 
             if (service) {
                 for (var fieldIndex = 0; fieldIndex < service.Fields.length; fieldIndex++) {
                     var field = service.Fields[fieldIndex];
-                    var fieldElement = fieldCreationFunctions[field.Type](field, fieldIndex, fieldsListView);
+
+                    //Checkbox (1) or checklist (2)
+                    var checkField = field.Type === "OptionsField" && (field.TypeInt === 1 || field.TypeInt === 2);
+
+                    var elementToAppendTo = checkField ? checkLists : fieldsListView;
+
+                    var fieldElement = fieldCreationFunctions[field.Type](field, fieldIndex, elementToAppendTo);
 
                     if (fieldElement) {
                         //setup the tooltip
@@ -186,6 +194,7 @@ define(["jquery", "lib/kendo.all", "lib/jquery.maskMoney"], function ($) {
             }
 
             kendo.bind(fieldsListView, service, kendo.mobile.ui);
+            kendo.bind(checkLists, service, kendo.mobile.ui);
 
             that.trigger(DATABOUND);
         },

@@ -61,7 +61,81 @@ table{border-collapse: collapse;border-spacing: 0;}
 .k-slider-horizontal .k-tick{background-image:url('../img/slider-h.gif')}
 .k-slider-vertical .k-tick{background-image:url('../img/slider-v.gif')}
 .k-tile .k-folder{background-image:url('../img/imagebrowser.png')}
+@font-face {
+    font-family: PTSans;
+    src: url(PTS55F.ttf);  /* TTF file for CSS3 browsers */
+}
+#personal, #business, #users, #dispatcher, #changePassword, #createPassword, #services{
+    h1, .km-content h1{
+        font-size: 1.5em;
+        margin: 36px 0 15px 184px;
+    }
 
+    h2, .km-content h2{
+        font-size: 1.2em;
+        border-bottom: 1px solid #666666;
+        margin: 0 0 15px 0;
+    }
+    .km-ios{
+        font-weight: normal;
+        font-family: PTSans;
+    }
+//    input:not([type]), input[type="color"], input[type="date"], input[type="datetime"],
+//    input[type="datetime-local"], input[type="email"], input[type="month"], input[type="number"],
+//    input[type="password"], input[type="tel"], input[type="text"], input[type="time"], input[type="url"], input[type="week"] {
+//        padding: 0 .18em 3px;
+//    }
+    .km-stretched-view{
+        display: block;
+    }
+}
+//.km-ios .km-list .k-dropdown-wrap .k-input{
+//    color: @black;
+//}
+//.km-ios .km-listinset > li, .km-ios .km-listgroupinset .km-list > li,
+//.km-ios .km-listinset > li:first-child, .km-ios .km-listgroupinset .km-list > li:first-child,
+//.km-ios .km-listinset > li:last-child, .km-ios .km-listgroupinset .km-list > li:last-child{
+//    border: none;
+//    border-radius: 0;
+//    box-shadow: none;
+//}
+.km-ios .km-listinset > li:last-child .k-widget, .km-ios .km-listgroupinset .km-list > li:last-child .k-widget{
+    margin-bottom: 4px;
+}
+.km-ios .km-list input:not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="image"]):not([type="checkbox"]):not([type="radio"]):not(.k-input):not(.k-button),
+.km-ios .km-list select:not([multiple]), .km-ios .km-list .k-dropdown-wrap{
+//    color: @black;
+//    font-size: 1em;
+//    border: 1px inset;
+//    background: #fff;
+//    -webkit-appearance: auto;
+    position: static;
+    font-family: PTSans;
+//    margin-left: 5px;
+}
+.km-ios .km-list > li{
+//    font-size: 1em;
+    font-weight: normal;
+//    background: none;
+//    overflow: visible;
+}
+//.km-root input:not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="image"]):not([type="checkbox"]):not([type="radio"]):not(.k-input):not(.k-button),
+//.km-root select:not([multiple]), .km-root .k-dropdown{
+//    font-size: 1em;
+//}
+.km-root .k-dropdown select, .km-root .k-dropdown .k-select {
+    display: block;
+}
+.km-root .k-dropdown-wrap {
+    display: block;
+}
+.km-ios, .km-ios .km-content{
+    background: none;
+}
+.km-ios{
+    font-weight: normal;
+    font-family: PTSans;
+}
 .km-view{
     z-index: 1;
     -webkit-box-sizing: border-box;
@@ -192,21 +266,8 @@ span.k-tooltip {
 h1, h2, h3, td, p{
     cursor: default;
 }
-h1{
-    font-size: 1.5em;
-    margin: 36px 0 15px 184px;
-}
 h1.title{
     width: 500px;
-}
-h2{
-    font-size: 1.2em;
-    border-bottom: 1px solid #666666;
-    margin-bottom: 15px;
-}
-@font-face {
-    font-family: PTSans;
-    src: url(PTS55F.ttf);  /* TTF file for CSS3 browsers */
 }
 body{
     font-family: PTSans;
@@ -675,6 +736,7 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
 #services{
     #left {
         height: 100%;
+        width: auto;
         margin-right: 280px;
     }
     .k-datepicker{
@@ -700,6 +762,7 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
         .k-dropdown{
             margin-right: 7px;
             height: 30px;
+            font-size: 1em;
         }
         .k-dropdown-wrap{
             border-radius: 4px;
@@ -712,29 +775,27 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
 }
 #serviceDetails {
     position: absolute;
-    top:95px;
-    right: 55px;
+    top:30px;
+    right: 15px;
     width: 250px;
-    #startDatePicker{
-        width:150px;
-    }
-    #endDatePicker{
-        width:150px;
-    }
-    .km-listview .km-listview li{
-        padding-left: 15px;
-        font-size: .9em;
-    }
-    .textarea{
-        width: 168px !important;
-        margin: 0 0 -22px 5px;
-    }
     li{
-        padding: 2px 0;
+        padding: 1px 0 1px 5px;
     }
     .k-timepicker, .k-combobox{
         width: 218px;
         margin-top: 2px;
+    }
+    textarea{
+        width: 168px !important;
+        margin: 0 0 0 5px;
+        font-size: 18px;
+        color: #385487;
+        min-width: 6em;
+        border: 0;
+        padding: .4em;
+        outline: 0;
+        background: transparent;
+        font-family: PTSans;
     }
 }
 /*endregion*/
