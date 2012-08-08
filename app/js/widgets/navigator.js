@@ -502,7 +502,7 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
                 console.log("Business not found!");
                 return;
             }
-            this.changeBusinessLogo(business);
+            this.changeBusinessLogo(business.businessLogoUrl);
             setSideBarSections(config, business.sections);
             $("#sideBarInnerWrapper").data('jsp').reinitialise();
         };
@@ -596,8 +596,7 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
             $(".profile").attr('src', imgLoc);
         };
 
-        this.changeBusinessLogo = function (business) {
-            var businessLogoUrl = business.businessLogoUrl;
+        this.changeBusinessLogo = function (businessLogoUrl) {
             var businessLogoEnabled = true;
 
             if (typeof(businessLogoUrl) === 'undefined') {

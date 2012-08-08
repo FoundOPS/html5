@@ -3,7 +3,7 @@
 'use strict';
 
 require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widgets/serviceDetails", "lib/jquery.form"], function ($, dbServices, tools, saveHistory) {
-    var services = {}, serviceHoldersDataSource, vm = kendo.observable(), grid;
+    var services = {}, serviceHoldersDataSource, grid, selectedServiceHolder, vm = kendo.observable();
 
     services.vm = vm;
 
@@ -14,10 +14,10 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
 
     services.save = function () {
         dbServices.updateService(vm.get("selectedService")).success(function (e) {
-            //Change the current row's ServiceId to match this Id in case this was a newly inserted service
+            //Now that the service has been updated, change the current row's ServiceId
+            //to match the Id in case this was a newly inserted service
             if (grid) {
-                var selectedItem = grid.dataItem(grid.select());
-                selectedItem.set("ServiceId", vm.get("selectedService.Id"));
+                selectedServiceHolder.set("ServiceId", vm.get("selectedService.Id"));
 
                 //TODO update all the columns
             }
@@ -123,7 +123,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
             dataTextField: "Name",
             dataValueField: "Id",
             dataSource: services.serviceTypes,
-            change: function() {
+            change: function(e) {
                 //load the saved column configuration
                 getGridConfig();
 
@@ -211,9 +211,9 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
             grid = $("#grid").kendoGrid({
                 autoBind: true,
                 change: function () {
-                    var selectedItem = this.dataItem(this.select());
+                    selectedServiceHolder = this.dataItem(this.select());
                     //Load the service details, and update the view model
-                    dbServices.getServiceDetails(selectedItem.ServiceId, selectedItem.OccurDate, selectedItem.RecurringServiceId, function (service) {
+                    dbServices.getServiceDetails(selectedServiceHolder.ServiceId, selectedServiceHolder.OccurDate, selectedServiceHolder.RecurringServiceId, function (service) {
                         services.vm.set("selectedService", service);
 
                         $.publish("selectedService", services.vm.get("selectedService"));
