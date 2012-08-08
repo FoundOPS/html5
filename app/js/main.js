@@ -116,7 +116,7 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "db/models
 //    document.addEventListener("deviceready", onDeviceReady, false);
 
     //hookup remote loading into remoteContent, by using the kendo mobile application
-    window.application = application = new kendo.mobile.Application($("#remoteContent"), { initial: "view/updates.html", platform: ""});
+    window.application = application = new kendo.mobile.Application($("#remoteContent"), { initial: "view/updates.html", platform: "ios"});
 
     //setup page tracking
     try {

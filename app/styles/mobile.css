@@ -1,6 +1,7 @@
 body {
     font-family: Roboto,HelveticaNeue,sans-serif;
 }
+/* Id Styles */
 #addressLabel {
     font-size: x-small;
     margin: -50px 0px -15px 0px;
@@ -10,9 +11,17 @@ body {
     margin: -15px 0px -15px 1px;
 }
 #locationInfo p {
-    margin-top: -10px;
-    font-size: 1.3em;
-    font-weight: normal;
+    margin-top: -5px;
+    font-size: 1.2em;
+}
+#locationInfo h1 {
+    font-size: 2em;
+    margin-top: 10px;
+}
+#locationInfo .km-button {
+    float: right;
+    margin-top: -50px;
+    margin-right: 5%;
 }
 #routeDestinations-listview li {
     line-height: 1em;
@@ -40,6 +49,7 @@ body {
 #taskStatuses-listview .km-listview-link::after {
     border: 0;
 }
+/* Class Styles */
 .km-vertical-scrollbar,
 .km-horizontal-scrollbar {
     height: 100%;
@@ -52,6 +62,7 @@ body {
 .km-list input[type="datetime"], .km-list select:not([multiple]), .km-list .k-dropdown {
     width: auto;
 }
+/* Device Specific Styles - Will be removed after FoundOPS Style is implemented*/
 .km-android #taskFieldName {
     margin-left:-10px;
 }
