@@ -227,6 +227,22 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
         );
     };
 
+    /**
+     * Get the column config
+     * @param roleId The role to get the columns for
+     */
+    services.getServiceColumns = services._getHttp('service/GetServiceColumns', {}, false);
+
+    services.updateServiceColumns = function (serviceId, columns) {
+        $.ajax({
+            url: services.API_URL + "service/UpdateServiceColumns?roleId=" + services.RoleId + "&serviceId=" + serviceId,
+            type: "POST",
+            dataType: "json",
+            contentType: 'application/json',
+            data: JSON.stringify(columns)
+        })
+    };
+
     //endregion
 
     //region Settings
