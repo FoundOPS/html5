@@ -11,7 +11,7 @@ define(["jquery", "lib/kendo.all", "underscore"], function ($) {
                 '<p style="top:10px; margin-bottom: -5px;">Contacts</p>' +
                 '<hr style="width:90%;"/>' +
                 '</div>',
-        listViewTemplate = "<ul data-role='listview' data-style='inset'></ul>",
+        listViewTemplate = "<ul></ul>",
         emailTemplate = '<a data-rel="external" href="mailto:${Data}">E-mail ${Label}<br/><p id="contactData">${Data}</p></a>',
         phoneTemplate = '<a data-rel="external" href="tel:${Data}">Call ${Label}<br/><p id="contactData">${Data}</p></a>',
         websiteTemplate = '<a data-rel="external" href="http://${Data}">Go to Website<br/><p id="contactData">${Data}</p></a>';
@@ -52,32 +52,35 @@ define(["jquery", "lib/kendo.all", "underscore"], function ($) {
 
                 _.each(contacts, function (value) {
                     switch (value.Type) {
-                        case "Email Address":
-                            emailContacts.push(value);
-                            break;
-                        case "Phone Number":
-                            phoneContacts.push(value);
-                            break;
-                        case "Website":
-                            websiteContacts.push(value);
-                            break;
+                    case "Email Address":
+                        emailContacts.push(value);
+                        break;
+                    case "Phone Number":
+                        phoneContacts.push(value);
+                        break;
+                    case "Website":
+                        websiteContacts.push(value);
+                        break;
                     }
                 });
 
                 //add the list views
                 $(listViewTemplate).appendTo(element).kendoMobileListView({
                     template: phoneTemplate,
-                    dataSource: phoneContacts
+                    dataSource: phoneContacts,
+                    style: "inset"
                 });
 
                 $(listViewTemplate).appendTo(element).kendoMobileListView({
                     template: emailTemplate,
-                    dataSource: emailContacts
+                    dataSource: emailContacts,
+                    style: "inset"
                 });
 
                 $(listViewTemplate).appendTo(element).kendoMobileListView({
                     template: websiteTemplate,
-                    dataSource: websiteContacts
+                    dataSource: websiteContacts,
+                    style: "inset"
                 });
 
                 that.trigger(DATABOUND);
