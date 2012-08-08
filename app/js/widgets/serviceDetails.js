@@ -53,6 +53,8 @@ define(["jquery", "lib/kendo.all", "lib/jquery.maskMoney"], function ($) {
 
             if (field.Mask === "c") {
                 //currency
+
+
                 var options = { showSymbol: true};
                 if (field.Minimum <= 0) {
                     options.allowZero = true;

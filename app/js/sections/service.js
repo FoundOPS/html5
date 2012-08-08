@@ -11,22 +11,22 @@ define(["jquery", "db/services", "lib/kendo.all", "widgets/serviceDetails"], fun
      * service = wrapper for all service objects
      */
     var service = {}, vm = kendo.observable();
-    window.service = service;
 
     service.vm = vm;
 
+    window.service = service;
+
     $.subscribe("selectedTask", function (data) {
-        vm.selectedTask = data;
-    });
-    $.subscribe("selectedService", function (data) {
-        vm.selectedService = data;
+        vm.set("selectedTask", data);
+        dbServices.getServiceDetails(vm.get("selectedTask.ServiceId"), new Date(), vm.get("selectedTask.recurringServiceId"),
+            function (service) {
+                vm.set("selectedService", service);
+            });
     });
 
     service.initialize = function () {
-//        dbServices.getServiceDetails(vm.get("selectedTask").Id, function (data) {
-//            vm.set("serviceDetailsSource", data[0]);
-//            vm.set("serviceFieldsSource", vm.get("serviceDetailsSource").Fields);
-//        });
+        $("#taskServiceDetails").kendoServiceDetails({
+            source: vm.get("selectedService")
+        });
     };
-
 });
