@@ -125,7 +125,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
             dataSource: services.serviceTypes,
             change: function(e) {
                 //load the saved column configuration
-                getColumnConfig();
+                getGridConfig();
 
                 //reload the services
                 services.updateServices();
@@ -133,27 +133,30 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
         });
     };
 
-    var getColumnConfig = function () {
-//        dbServices.getColumnConfig(function (columns) {
-//            services.columnConfig = columns;
-//        });
+    var getGridConfig = function () {
+        dbServices.getServiceColumns(function (columns) {
+            services.serviceColumns = columns;
+        });
     };
 
     //save the column configuration
     var saveGridConfig = function () {
         _.delay(function () {
-            var columns = services.grid.columns;
-            var columnConfig = [];
+            var columns = grid.columns;
+            var serviceColumns = [];
             for(var c in columns){
                 var column = {};
-                column.name = columns[c].field;
-                column.width = columns[c].width;
+                column.Name = columns[c].field;
+                column.Width = columns[c].width;
                 if(columns[c].hidden){
-                    column.hide = columns[c].hidden;
+                    column.Hidden = true;
+                }else{
+                    column.Hidden = false;
                 }
-                columnConfig.push(column);
+                serviceColumns.push(column);
             }
-            //dbServices.updateGridConfig(columnConfig);
+            var serviceId = $("#serviceTypes").data("kendoDropDownList")._old;
+            dbServices.updateServiceColumns(serviceId, serviceColumns);
         }, 200);
     };
 
@@ -252,7 +255,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
             setupServiceTypeDropdown();
 
             //load the saved column configuration
-            getColumnConfig();
+            getGridConfig();
 
             //reload the services
             services.updateServices();
@@ -270,7 +273,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
         };
 
         startDatePicker.kendoDatePicker({
-            value: moment().subtract('weeks', 2).toDate(),
+            value: moment().toDate(),
             min: new Date(1950, 0, 1),
             max: new Date(2049, 11, 31),
             change: services.updateServices
