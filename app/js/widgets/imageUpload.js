@@ -118,7 +118,13 @@ define(["tools", "db/saveHistory", "db/services", "jquery", "lib/kendo.all", "li
                     success: function (response) {
                         //get rid of the quotes, then set the image url
                         var url = response.replace(/['"]/g, '');
+
                         that.setImageUrl(url);
+                        //reset the images 1.5 seconds after loading to workaround a shared access key buy
+                        _.delay(function () {
+                            that.setImageUrl(url);
+                        }, 1500);
+
                         that.newImage = false;
                         that.trigger("uploaded", {data: that.imageDataField[0].value, fileName: that.imageFileNameField[0].value});
                         saveHistory.success();
