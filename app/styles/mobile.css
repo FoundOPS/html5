@@ -40,10 +40,6 @@ body {
 #taskStatuses-listview .km-listview-link::after {
     border: 0;
 }
-.k-animation-container {
-    width: 100% !important;
-    height: 100% !important;
-}
 .km-vertical-scrollbar,
 .km-horizontal-scrollbar {
     height: 100%;
