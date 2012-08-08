@@ -185,22 +185,24 @@ html{
 }
 
 // ========================================================================
-//                       jScrollPane Specific Css
+//                        jScrollPane Specific Css
 // ========================================================================
-//#popupContentWrapper .jspPane{
-//    width: 100% !important;
-//    border-radius: @borderRadius;
-//    box-shadow: 0px 0px 10px @lightCharcoal;
-//}
-//
-//#popupContentWrapper .jspContainer { //TODO: Find better fix.
-//    overflow: visible;
-//}
-//#popupContentWrapper .jspDrag {
-//    background: @lightCharcoal;
-//}
-//
-//#popupContentWrapper .jspCapTop {
-//    display: block;
-//    height: @popupHeaderHeight;
-//}
+#popupContentWrapper .jspPane{
+    width: 100% !important;
+    border-radius: 8px;
+    background: @lighterGrey;
+    box-shadow: 0px 0px 10px @lightCharcoal;
+}
+
+#popupContentWrapper .jspContainer {
+    //TODO: Find better fix.
+    //overflow: visible;
+}
+#popupContentWrapper .jspDrag {
+    background: @lightCharcoal;
+}
+
+#popupContentWrapper .jspCapTop {
+    display: block;
+    height: @popupHeaderHeight;
+}
