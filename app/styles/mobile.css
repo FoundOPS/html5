@@ -78,10 +78,10 @@ body {
     margin: -10px 0px -10px 2px;
 }
 .km-ios #textbox, .km-ios #textarea, .km-ios #dropdown, .km-ios #number, .km-ios #earliest-textbox,
- .km-ios #default-textbox, .km-ios #latest-textbox  {
-     border: inherit;
-     border-bottom:1px solid rgba(0, 0, 0, 0.1)
- }
+.km-ios #default-textbox, .km-ios #latest-textbox  {
+    border: inherit;
+    border-bottom:1px solid rgba(0, 0, 0, 0.1)
+}
 .km-ios #earl-text-label, .km-ios #def-text-label, .km-ios #late-text-label {
     position: relative;
     top: -5px;

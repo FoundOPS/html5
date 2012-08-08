@@ -66,49 +66,6 @@ table{border-collapse: collapse;border-spacing: 0;}
     font-family: PTSans;
     src: url(PTS55F.ttf);  /* TTF file for CSS3 browsers */
 }
-#personal, #business, #users, #dispatcher, #changePassword, #createPassword, #services{
-    h1, .km-content h1{
-        font-size: 1.5em;
-        margin: 36px 0 15px 184px;
-    }
-
-    h2, .km-content h2{
-        font-size: 1.2em;
-        border-bottom: 1px solid #666666;
-        margin: 0 0 15px 0;
-    }
-    .km-ios{
-        font-weight: normal;
-        font-family: PTSans;
-    }
-    .km-stretched-view{
-        display: block;
-    }
-}
-.km-ios .km-listinset > li:last-child .k-widget, .km-ios .km-listgroupinset .km-list > li:last-child .k-widget{
-    margin-bottom: 4px;
-}
-.km-ios .km-list input:not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="image"]):not([type="checkbox"]):not([type="radio"]):not(.k-input):not(.k-button),
-.km-ios .km-list select:not([multiple]), .km-ios .km-list .k-dropdown-wrap{
-    position: static;
-    font-family: PTSans;
-}
-.km-ios .km-list > li{
-    font-weight: normal;
-}
-.km-root .k-dropdown select, .km-root .k-dropdown .k-select {
-    display: block;
-}
-.km-root .k-dropdown-wrap {
-    display: block;
-}
-.km-ios, .km-ios .km-content{
-    background: none;
-}
-.km-ios{
-    font-weight: normal;
-    font-family: PTSans;
-}
 .km-view{
     z-index: 1;
     -webkit-box-sizing: border-box;
@@ -129,12 +86,14 @@ input[type="button"], button{
     background: none;
     border: none;
 }
+//keep add/delete buttons on the right side of grid
 .k-grid-toolbar{
     text-align: right;
 }
 .k-grid .k-button{
     margin: 3px 0 0 0;
 }
+//reduce the height of grid rows
 .k-grid td{
     padding-top: 3px;
     padding-bottom: 3px;
@@ -142,6 +101,7 @@ input[type="button"], button{
 .k-grid tbody td > .k-grid-delete{
     margin-top: 0;
 }
+//center button icons
 .k-button-icontext .k-icon {
     margin: -2px 3px 0 -3px;
     vertical-align: middle;
@@ -150,20 +110,18 @@ span.k-tooltip {
     position: relative;
     display: block;
 }
+//keep items in grid from shifting during edit mode
 .k-grid .k-edit-cell{
     padding-left: 8px;
 }
-
 .km-scroll-container{
     -webkit-user-select: auto;
     -moz-user-select: auto;
 }
-
 //BUG FIX: This fixes Kendo scrollbar bug!
 .km-horizontal-scrollbar{
     width: auto;
 }
-
 //BUG FIX: Fix for kinetic scrollbars on mobile only.
 @media only screen and (max-width:800px) {
     .km-view{
@@ -179,10 +137,10 @@ span.k-tooltip {
         height: 100%;
     }
 }
-
 .k-grid .k-edit-cell input{
     margin-left: 4px;
 }
+//override the orange selected row highlight with blue
 .k-state-selected, .k-list > .k-state-selected, .k-list > .k-state-focused,
 .k-panelbar > .k-state-selected, .k-panel > .k-state-selected,
 .k-button:active, .k-ghost-splitbar-vertical, .k-ghost-splitbar-horizontal,
@@ -190,6 +148,43 @@ span.k-tooltip {
     .rowGradient;
     border-color:#488FCD;
 }
+/*region Overrides for kendo mobile*/
+#personal, #business, #users, #dispatcher, #changePassword, #createPassword, #services{
+    h1, .km-content h1{
+        font-size: 1.5em;
+        margin: 36px 0 15px 184px;
+    }
+    h2, .km-content h2{
+        font-size: 1.2em;
+        border-bottom: 1px solid #666666;
+        margin: 0 0 15px 0;
+    }
+}
+.km-ios{
+    font-weight: normal;
+    font-family: PTSans;
+}
+//adds space after the last item in serviceDetails
+.km-ios .km-listinset > li:last-child .k-widget, .km-ios .km-listgroupinset .km-list > li:last-child .k-widget{
+    margin-bottom: 4px;
+}
+.km-ios .km-list input:not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="image"]):not([type="checkbox"]):not([type="radio"]):not(.k-input):not(.k-button),
+.km-ios .km-list select:not([multiple]){
+    position: static;
+    font-family: PTSans;
+}
+.km-stretched-view, .km-root .k-dropdown select, .km-root .k-dropdown .k-select, .km-root .k-dropdown-wrap  {
+    display: block;
+}
+//this keeps the grey background
+.km-ios, .km-ios .km-content{
+    background: none;
+}
+.km-ios, .km-ios .km-list > li{
+    font-weight: normal;
+    font-family: PTSans;
+}
+/*endregion*/
 /*endregion*/
 /*region Settings - Menu*/
 .settingsMenu{
@@ -755,7 +750,7 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
         padding: 1px 0 1px 5px;
     }
     .k-timepicker, .k-combobox{
-        width: 218px;
+        width: 210px;
         margin-top: 2px;
     }
     textarea{
