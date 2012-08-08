@@ -6,7 +6,7 @@
 
 'use strict';
 
-define(["jquery", "db/services", "lib/kendo.all",  "widgets/contacts"], function ($, dbServices) {
+define(["jquery", "lib/kendo.all", "widgets/contacts"], function ($) {
     /**
      * routeDestinationDetails = wrapper for all routeDestinationDetails objects
      */
@@ -15,27 +15,36 @@ define(["jquery", "db/services", "lib/kendo.all",  "widgets/contacts"], function
 
     routeDestinationDetails.vm = vm;
 
+    $.subscribe("selectedDestination", function (data) {
+        vm.selectedDestination = data;
+    });
+
     routeDestinationDetails.initialize = function () {
         /**
          * Creates dataSources for the contacts widget.
          * @return {*}
          */
         vm.contacts = function () {
-            return _.union(routeDestinations.vm.get("selectedDestination.Client.ContactInfoSet").slice(0), routeDestinations.vm.get("selectedDestination.Location.ContactInfoSet").slice(0));
+            return _.union(vm.get("selectedDestination.Client.ContactInfoSet").slice(0), vm.get("selectedDestination.Location.ContactInfoSet").slice(0));
         };
+        /**
+         * A kendo data source for the current user's selected route destination.
+         * @type {kendo.data.DataSource}
+         */
+        vm.set("routeTasksSource",
+            new kendo.data.DataSource({
+                data: vm.get("selectedDestination.RouteTasks")
+            }));
         /**
          * Select a task and create a dataSource for the task input fields.
          * @param e The event args from a list view click event (the selected Task)
          */
         vm.selectTask = function (e) {
             vm.set("selectedTask", e.dataItem);
-            dbServices.getTaskDetails(vm.get("selectedTask").Id, function (data) {
-                vm.set("taskDetailsSource", data[0]);
-                vm.set("taskFieldsSource", vm.get("taskDetailsSource").Fields);
-                //TODO: Navigate to task/service input fields when widget is implemented.
-            });
+
+            $.publish("selectedTask", [vm.get("selectedTask")]);
+            navigateToService();
         };
         kendo.bind($("#routeDestinationDetails"), vm, kendo.mobile.ui);
-        kendo.bind($("#contacts"), routeDestinations.vm);
     };
 });

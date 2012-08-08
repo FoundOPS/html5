@@ -19,10 +19,11 @@ require.config({
     }
 });
 
-require(["widgets/navigator", "containers/silverlight", "db/session", "db/models", "lib/kendo.all", "underscore", "lib/userVoice",
-    "sections/personalSettings", "sections/businessSettings", "sections/usersSettings",
-    "sections/dispatcherSettings", "sections/changePassword", "sections/createPassword",
-    "sections/services", "sections/routes", "sections/routeDestinations", "sections/routeDestinationDetails", "widgets/contacts"], function (Navigator, silverlight, session) {
+require(["widgets/navigator", "containers/silverlight", "db/session", "db/models", "lib/kendo.all", "underscore",
+    "lib/userVoice", "lib/pubsub", "sections/personalSettings", "sections/businessSettings", "sections/usersSettings",
+    "sections/dispatcherSettings", "sections/changePassword", "sections/createPassword", "sections/services",
+    "sections/routes", "sections/routeDestinations", "sections/routeDestinationDetails", "sections/service",
+    "widgets/contacts", "widgets/serviceDetails"], function (Navigator, silverlight, session) {
     var application, navigator;
 
     session.load(function (data) {
@@ -91,7 +92,7 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "db/models
         });
     });
 
-    //Commented out until mobile app is fully integrated with navigator.
+    //TODO: Create a version of these functions that are integrated with the navigator.
 //    //Overrides device's back button navigation - Phonegap
 //    application.onBack = function () {
 //        if (window.location.hash === "#view/routes.html") {
@@ -151,5 +152,8 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "db/models
     };
     window.navigateToRouteDestinationDetails = function () {
         application.navigate("view/routeDestinationDetails.html");
+    };
+    window.navigateToService = function () {
+        application.navigate("view/service.html");
     };
 });

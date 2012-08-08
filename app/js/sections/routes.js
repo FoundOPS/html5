@@ -47,17 +47,8 @@ define(["jquery", "db/services", "lib/kendo.all"], function ($, dbServices) {
          */
         vm.selectRoute = function (e) {
             vm.set("selectedRoute", e.dataItem);
-            vm.set("routeDestinationsSource",
-                new kendo.data.DataSource({
-                    data: vm.get("selectedRoute.RouteDestinations")
-                }));
-            //Commented out until new getTaskStatuses is worked out.
-//            dbServices.getTaskStatuses(vm.get("selectedRoute").BusinessAccountId, function (response) {
-//                mobile.viewModel.set("taskStatusesSource",
-//                    new kendo.data.DataSource({
-//                        data: response
-//                    }));
-//            });
+
+            $.publish('selectedRoute', [vm.get("selectedRoute")]);
             navigateToRouteDestinations();
         };
         kendo.bind($("#routes"), vm, kendo.mobile.ui);

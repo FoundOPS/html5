@@ -6,7 +6,7 @@
 
 'use strict';
 
-define(["jquery", "db/services", "lib/kendo.all", "db/models"], function ($, dbServices, models) {
+define(["jquery", "db/services", "db/models", "lib/kendo.all"], function ($, dbServices, models) {
     /**
      * routeDestinations = wrapper for all routeDestinations objects
      * serviceDate = the date for the routes that are acquired form the server
@@ -57,7 +57,8 @@ define(["jquery", "db/services", "lib/kendo.all", "db/models"], function ($, dbS
                 position.coords.latitude,
                 position.coords.longitude,
                 routeId,
-                mobile.CONFIG.DEVICE_PLATFORM,
+                //application.CONFIG.DEVICE_PLATFORM, TODO: Add back when Cordova functionality is added to navigator. Delete "default".
+                "default",
                 position.coords.speed
             );
             trackPointsToSend.push(newTrackPoint);
@@ -72,17 +73,33 @@ define(["jquery", "db/services", "lib/kendo.all", "db/models"], function ($, dbS
         };
 
         var onError = function (error) {
-            navigator.notification.alert("Can not collect track points at this time. Please check your GPS settings.", mobile.viewModel.endRoute(), "Alert", "Confirm");
+            navigator.notification.alert("Can not collect track points at this time. Please check your GPS settings.", vm.endRoute(), "Alert", "Confirm");
         };
 
         //Phonegap geolocation function
         navigator.geolocation.getCurrentPosition(onSuccess, onError, {enableHighAccuracy: true});
     };
 
+    $.subscribe("selectedRoute", function (data) {
+        vm.selectedRoute = data;
+    });
+
     routeDestinations.initialize = function () {
-        vm.goTo = function () {
-            navigateToRouteDestinationDetails();
-        };
+        /**
+         * A kendo data source for the current user's selected route.
+         * @type {kendo.data.DataSource}
+         */
+        vm.set("routeDestinationsSource",
+            new kendo.data.DataSource({
+                data: vm.get("selectedRoute.RouteDestinations")
+            }));
+        //Commented out until new getTaskStatuses is worked out.
+//            dbServices.getTaskStatuses(vm.get("selectedRoute").BusinessAccountId, function (response) {
+//                vm.set("taskStatusesSource",
+//                    new kendo.data.DataSource({
+//                        data: response
+//                    }));
+//            });
         /**
          * Select a route destination
          * @param e The event args from a list view click event (the selected Destination)
@@ -90,10 +107,7 @@ define(["jquery", "db/services", "lib/kendo.all", "db/models"], function ($, dbS
         vm.selectRouteDestination = function (e) {
             vm.set("selectedDestination", e.dataItem);
 
-            vm.set("routeTasksSource",
-                new kendo.data.DataSource({
-                    data: vm.get("selectedDestination.RouteTasks")
-                }));
+            $.publish("selectedDestination", [vm.get("selectedDestination")]);
             navigateToRouteDestinationDetails();
         };
         //Dictate the visibility of the startRoute and endRoute buttons.
@@ -124,11 +138,9 @@ define(["jquery", "db/services", "lib/kendo.all", "db/models"], function ($, dbS
             trackPointsToSend = [];
         };
         kendo.bind($("#routeDestinations"), vm, kendo.mobile.ui);
-        kendo.bind($("#routeDestinations-listview"), routes.vm);
     };
 
     routeDestinations.show = function () {
-        console.log("Route Destinations: ");
-        console.log(routes.vm.get("selectedRoute.RouteDestinations"));
+
     };
 });

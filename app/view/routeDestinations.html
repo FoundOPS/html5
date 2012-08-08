@@ -1,10 +1,7 @@
 <div id="routeDestinations" data-init="routeDestinations.initialize" data-role="view"
      data-show="routeDestinations.show" data-title="Route Destinations">
 
-    <ul id="routes-listview" data-bind="source:routesSource, click:selectRoute"
-        data-role="listview" data-style="inset" data-template="routeListViewTemplate">
-    </ul>
-    <ul id="routeDestinations-listview" data-bind="source:routeDestinationsSource, click: routeDestinations.vm.selectRouteDestination"
+    <ul id="routeDestinations-listview" data-bind="source: routeDestinationsSource, click: selectRouteDestination"
         data-role="listview" data-style="inset" data-template="routeDestinationsViewTemplate">
     </ul>
 
@@ -13,11 +10,6 @@
            data-role="button">Start Route</a>
         <a id="endButton" data-align="right" data-bind="click: endRoute, visible: endVisible"
            data-role="button">End Route</a>
-    </div>
-
-    <!-- For testing purposes !-->
-    <div style="text-align: center">
-        <a data-bind="click:goTo" data-role="button">Go to Route Destination Details</a>
     </div>
 </div>
 <script type="text/x-kendo-template" id="routeDestinationsViewTemplate">
