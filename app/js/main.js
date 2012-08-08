@@ -29,6 +29,12 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "db/models
         //setup the navigator
         navigator = new Navigator(data);
         navigator.hideSearch();
+
+        //reset the images 1.5 seconds after loading to workaround a shared access key buy
+        _.delay(function () {
+            navigator.changeAvatar(data.avatarUrl);
+            navigator.changeBusinessLogo(session.get("role.businessLogoUrl"));
+        }, 1500);
     });
 
     //TODO make sectionSelected a navigator event
@@ -119,7 +125,8 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "db/models
         window.trackEvent = function (section, action, label) {
             pageTracker._trackEvent(section, action, label);
         };
-    } catch (err) {}
+    } catch (err) {
+    }
 
     window.navigateToPersonal = function () {
         application.navigate("view/personalSettings.html");
