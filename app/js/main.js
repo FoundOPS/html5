@@ -19,10 +19,10 @@ require.config({
     }
 });
 
-require(["widgets/navigator", "containers/silverlight", "db/session", "lib/kendo.all", "underscore", "lib/userVoice",
+require(["widgets/navigator", "containers/silverlight", "db/session", "db/models", "lib/kendo.all", "underscore", "lib/userVoice",
     "sections/personalSettings", "sections/businessSettings", "sections/usersSettings",
     "sections/dispatcherSettings", "sections/changePassword", "sections/createPassword",
-    "sections/services", "sections/routes"], function (Navigator, silverlight, session) {
+    "sections/services", "sections/routes", "sections/routeDestinations", "sections/routeDestinationDetails", "widgets/contacts"], function (Navigator, silverlight, session) {
     var application, navigator;
 
     session.load(function (data) {
@@ -85,6 +85,29 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "lib/kendo
         });
     });
 
+    //Commented out until mobile app is fully integrated with navigator.
+//    //Overrides device's back button navigation - Phonegap
+//    application.onBack = function () {
+//        if (window.location.hash === "#view/routes.html") {
+//            navigator.logout();
+//        } else if (window.location.hash === "#view/routeDestinations.html") {
+//            navigateToRoutes();
+//        } else if (window.location.hash === "#view/routeDestinationDetails.html") {
+//            navigateToRouteDestinations();
+//    };
+//
+//    //Fires when Cordova is ready
+//    function onDeviceReady() {
+//        //The platform of the device running the app - Phonegap
+//        application.CONFIG.DEVICE_PLATFORM = device.platform;
+//
+//        //Listens for back button being pressed on mobile device - Phonegap
+//        document.addEventListener("backbutton", application.onBack, false);
+//    }
+//
+//    //Listens for Cordova to load
+//    document.addEventListener("deviceready", onDeviceReady, false);
+
     //hookup remote loading into remoteContent, by using the kendo mobile application
     window.application = application = new kendo.mobile.Application($("#remoteContent"), { initial: "view/updates.html", platform: ""});
 
@@ -96,8 +119,7 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "lib/kendo
         window.trackEvent = function (section, action, label) {
             pageTracker._trackEvent(section, action, label);
         };
-    }
-    catch (err) {}
+    } catch (err) {}
 
     window.navigateToPersonal = function () {
         application.navigate("view/personalSettings.html");
@@ -116,5 +138,11 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "lib/kendo
     };
     window.navigateToRoutes = function () {
         application.navigate("view/routes.html");
+    };
+    window.navigateToRouteDestinations = function () {
+        application.navigate("view/routeDestinations.html");
+    };
+    window.navigateToRouteDestinationDetails = function () {
+        application.navigate("view/routeDestinationDetails.html");
     };
 });

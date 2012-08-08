@@ -13,11 +13,7 @@ define(["jquery", "db/services", "lib/kendo.all"], function ($, dbServices) {
      * serviceDate = the date for the routes that are acquired form the server
      * vm = viewModel
      */
-    var routes = {}, vm = kendo.observable({
-        selectRoute: function () {
-
-        }
-    });
+    var routes = {}, vm = kendo.observable();
     window.routes = routes;
 
     routes.vm = vm;
@@ -37,11 +33,11 @@ define(["jquery", "db/services", "lib/kendo.all"], function ($, dbServices) {
                 }
             },
             change: function (e) {
-                console.log("Route list change: " + e);
+                console.log("Route list change: ");
+                console.log(e.items);
             },
             serverPaging: true
         }));
-
         vm.refreshRoutes = function () {
             vm.routesSource.read();
         };
@@ -55,18 +51,20 @@ define(["jquery", "db/services", "lib/kendo.all"], function ($, dbServices) {
                 new kendo.data.DataSource({
                     data: vm.get("selectedRoute.RouteDestinations")
                 }));
-            dbServices.getTaskStatuses(vm.get("selectedRoute").BusinessAccountId, function (response) {
-                mobile.viewModel.set("taskStatusesSource",
-                    new kendo.data.DataSource({
-                        data: response
-                    }));
-            });
+            //Commented out until new getTaskStatuses is worked out.
+//            dbServices.getTaskStatuses(vm.get("selectedRoute").BusinessAccountId, function (response) {
+//                mobile.viewModel.set("taskStatusesSource",
+//                    new kendo.data.DataSource({
+//                        data: response
+//                    }));
+//            });
+            navigateToRouteDestinations();
         };
-
         kendo.bind($("#routes"), vm, kendo.mobile.ui);
     };
 
     routes.show = function () {
-        console.log(vm.routesSource);
+        // Auto refresh - causes two calls on initializing.
+        //vm.refreshRoutes();
     };
 });

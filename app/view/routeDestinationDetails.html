@@ -1,5 +1,5 @@
-<div id="routeDestinationDetails" data-role="view" data-layout="mobile-view" data-model="mobile.viewModel"
-     data-title="Destination Info">
+<div id="routeDestinationDetails" data-init="routeDestinationDetails.initialize" data-role="view"
+     data-show="routeDestinationDetails.show" data-title="Destination Info">
     <div id="locationInfo" data-bind="source: this" data-template="locationTemplate"></div>
 
     <div id="contacts" data-role="contacts" data-bind="contacts: contacts"></div>
@@ -26,4 +26,18 @@
 </script>
 <script type="text/x-kendo-template" id="routeTasksTemplate">
     <a>${Name}</a>
+</script>
+
+<div id="routes" data-init="routes.initialize" data-role="view" data-show="routes.show" data-title="Routes">
+    <!--Add following attributes when supported server info is pagable
+    data-pull-to-refresh="true" style="margin-bottom: 600px;"-->
+    <ul id="routes-listview" data-bind="source:routesSource, click:selectRoute"
+        data-role="listview" data-style="inset" data-template="routeListViewTemplate">
+    </ul>
+    <div style="text-align: center">
+        <a id="refreshButton" data-bind="click: refreshRoutes" data-role="button">Refresh</a>
+    </div>
+</div>
+<script type="text/x-kendo-template" id="routeListViewTemplate">
+    <a>#= Name #</a>
 </script>

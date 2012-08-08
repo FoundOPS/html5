@@ -1,19 +1,25 @@
-<div id="routeDestinations" data-role="view" data-layout="mobile-view" data-model="mobile.viewModel"
-              data-title="Destinations">
-    <header data-role="header">
-        <div data-role="navbar">
-            <a id="backButton " class="nav-button km-button km-back" data-align="left" data-click="mobile.onBack" data-role="button">Back</a>
-            <a id="startButton" class="nav-button" data-align="right"
-               data-bind="click: startRoute, visible: startVisible" data-role="button">Start Route</a>
-            <a id="endButton" class="nav-button" data-align="right"
-               data-bind="click: endRoute, visible: endVisible" data-role="button">End Route</a>
-            <span data-role="view-title"></span>
-        </div>
-    </header>
-    <ul id="routeDestinations-listview" data-bind="source:routeDestinationsSource, click: selectRouteDestination"
+<div id="routeDestinations" data-init="routeDestinations.initialize" data-role="view"
+     data-show="routeDestinations.show" data-title="Route Destinations">
+
+    <ul id="routes-listview" data-bind="source:routesSource, click:selectRoute"
+        data-role="listview" data-style="inset" data-template="routeListViewTemplate">
+    </ul>
+    <ul id="routeDestinations-listview" data-bind="source:routeDestinationsSource, click: routeDestinations.vm.selectRouteDestination"
         data-role="listview" data-style="inset" data-template="routeDestinationsViewTemplate">
     </ul>
+
+    <div style="text-align: center">
+        <a id="startButton" data-align="right" data-bind="click: startRoute, visible: startVisible"
+           data-role="button">Start Route</a>
+        <a id="endButton" data-align="right" data-bind="click: endRoute, visible: endVisible"
+           data-role="button">End Route</a>
+    </div>
+
+    <!-- For testing purposes !-->
+    <div style="text-align: center">
+        <a data-bind="click:goTo" data-role="button">Go to Route Destination Details</a>
+    </div>
 </div>
 <script type="text/x-kendo-template" id="routeDestinationsViewTemplate">
-    <a class="km-listview-link"><span>${Client.Name}<br/><label id="addressLabel">${Location.AddressLineOne}</label></a>
+    <a class="km-listview-link">#= Client.Name #<br/><label id="addressLabel">#= Location.AddressLineOne #</label></a>
 </script>

@@ -25,7 +25,7 @@ require.config({
     }
 });
 
-require(["jquery", "developer", "tools", "db/services", "db/models", "widgets/contacts", "lib/moment", "lib/kendo.all", "underscore"], function ($, developer, tools, dbServices, models) {
+require(["jquery", "db/developer", "tools", "db/services", "db/models", "widgets/contacts", "lib/moment", "lib/kendo.all", "underscore"], function ($, developer, tools, dbServices, models) {
     /**
      * mobile = wrapper for all mobile objects
      * app = the kendoUI mobile app
