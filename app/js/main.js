@@ -28,7 +28,7 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "db/models
 
     main.history = [];
 
-
+    window.history.
 
     session.load(function (data) {
         //setup the navigator
