@@ -108,7 +108,7 @@ define(["jquery", "db/services", "db/models", "lib/kendo.all"], function ($, dbS
             vm.set("selectedDestination", e.dataItem);
 
             $.publish("selectedDestination", [vm.get("selectedDestination")]);
-            navigateToRouteDestinationDetails();
+            application.navigate("view/routeDestinationDetails.html");
         };
         //Dictate the visibility of the startRoute and endRoute buttons.
         vm.startVisible = true;

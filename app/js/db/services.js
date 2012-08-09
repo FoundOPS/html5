@@ -191,7 +191,7 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
      * Get the service and its fields.
      * Need to pass the serviceId or the occurDate and the recurringServiceId.
      * @param {?string} serviceId
-     * @param {?string} serviceDate
+     * @param {?Date} serviceDate
      * @param {?string} recurringServiceId
      * @param {!function(Object)} callback The callback to pass the Service it is loaded.
      */
@@ -225,6 +225,22 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
                 data: JSON.stringify(service)
             })
         );
+    };
+
+    /**
+     * Get the column config
+     * @param roleId The role to get the columns for
+     */
+    services.getServiceColumns = services._getHttp('service/GetServiceColumns', {}, false);
+
+    services.updateServiceColumns = function (serviceId, columns) {
+        $.ajax({
+            url: services.API_URL + "service/UpdateServiceColumns?roleId=" + services.RoleId + "&serviceId=" + serviceId,
+            type: "POST",
+            dataType: "json",
+            contentType: 'application/json',
+            data: JSON.stringify(columns)
+        })
     };
 
     //endregion
