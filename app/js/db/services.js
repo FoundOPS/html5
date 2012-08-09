@@ -200,19 +200,24 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
             {serviceId: serviceId, serviceDate: tools.formatDate(serviceDate), recurringServiceId: recurringServiceId}, false)(function (data) {
             //It will only have one item
             var service = data[0];
-
-            //convert the all the dates
-            for (var i = 0; i < service.Fields.length; i++) {
-                var field = service.Fields[i];
-                if (field.Type === "DateTimeField") {
-                    field.Earliest = new Date(field.Earliest);
-                    field.Latest = new Date(field.Latest);
-                    field.Value = new Date(field.Value);
-                }
-            }
-
+            services.convertServiceDates(service);
             callback(service);
         });
+    };
+
+    /**
+     * Converts the service's Field's DateTime values to dates
+     * @param service
+     */
+    services.convertServiceDates = function (service) {
+        for (var i = 0; i < service.Fields.length; i++) {
+            var field = service.Fields[i];
+            if (field.Type === "DateTimeField") {
+                field.Earliest = new Date(field.Earliest);
+                field.Latest = new Date(field.Latest);
+                field.Value = new Date(field.Value);
+            }
+        }
     };
 
     services.updateService = function (service) {
