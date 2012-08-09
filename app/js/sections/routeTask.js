@@ -8,13 +8,13 @@
 
 define(["jquery", "db/services", "lib/kendo.all", "widgets/serviceDetails"], function ($, dbServices) {
     /**
-     * service = wrapper for all service objects
+     * routeTask = wrapper for all service objects
      */
-    var service = {}, vm = kendo.observable();
+    var routeTask = {}, vm = kendo.observable();
 
-    service.vm = vm;
+    routeTask.vm = vm;
 
-    window.service = service;
+    window.routeTask = routeTask;
 
     $.subscribe("selectedTask", function (data) {
         vm.set("selectedTask", data);
@@ -24,7 +24,7 @@ define(["jquery", "db/services", "lib/kendo.all", "widgets/serviceDetails"], fun
             });
     });
 
-    service.initialize = function () {
+    routeTask.initialize = function () {
         $("#taskServiceDetails").kendoServiceDetails({
             source: vm.get("selectedService")
         });
