@@ -70,7 +70,7 @@ define(["jquery", "lib/kendo.all", "lib/jquery.maskMoney"], function ($) {
                     //manually handle change event so the format is correct
                     var newValue = e.sender.value();
                     if (newValue) {
-                        e.sender.fieldParent.Value = newValue;
+                        e.sender.fieldParent.set("Value", newValue);
                     }
                 },
                 min: field.Earliest,

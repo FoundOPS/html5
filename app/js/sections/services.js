@@ -3,7 +3,7 @@
 'use strict';
 
 require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widgets/serviceDetails", "lib/jquery.form"], function ($, dbServices, tools, saveHistory) {
-    var services = {}, serviceHoldersDataSource, grid, selectedServiceHolder, serviceTypesComboBox, vm;
+    var services = {}, serviceHoldersDataSource, grid, serviceTypesComboBox, vm;
 
     //region Public
     services.vm = vm = kendo.observable({
@@ -13,7 +13,11 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
     });
 
     services.undo = function (state) {
+        //fixes a problem when the state is stored bc it is converted to json and back
+        dbServices.convertServiceDates(state);
         vm.set("selectedService", state);
+        //because the input will be rerendered, rehookup input change listeners
+        saveHistory.saveInputChanges("#serviceDetails");
         services.save();
     };
 
@@ -22,9 +26,39 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
             //Now that the service has been updated, change the current row's ServiceId
             //to match the Id in case this was a newly inserted service
             if (grid) {
-                selectedServiceHolder.set("ServiceId", vm.get("selectedService.Id"));
+                var serviceHolder = vm.get("selectedServiceHolder");
+                var selectedService = vm.get("selectedService");
+                serviceHolder.set("ServiceId", selectedService.Id);
 
-                //TODO update all the columns
+                var fields = selectedService.Fields;
+
+                for(var f in fields){
+                    var field = fields[f];
+                    if(_.has(serviceHolder, field.Name)){
+                        var val = field.value;
+                        if(field.Type === "OptionsField"){
+                            val = "";
+                            var options = field.Options;
+                            for(var o in options){
+                                if(options[o].IsChecked){
+                                    val += options[o].Name + ", ";
+                                }
+                            }
+                            //remove the trailing comma and space
+                            val.substr(0, val.length - 2);
+                        }
+                        serviceHolder[field.Name] =  val;
+                    }
+                }
+
+//                foreach field in selectedService
+//                if selectedServiceHolder[field.Name] exists {
+     //                   var val =field.Value;
+//                    if field.Type === "OptionsField"
+//                       foreach option
+//                       val= field.Options (that IsChecked===true) concat with , Ex. "Op 1, Op 2"
+//
+//                }
             }
         });
     };
@@ -236,9 +270,12 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
         grid = $("#grid").kendoGrid({
             autoBind: true,
             change: function () {
-                selectedServiceHolder = this.dataItem(this.select());
+                //enable delete button
+                $('#services .k-grid-delete').removeAttr("disabled");
+
+                vm.set("selectedServiceHolder", this.dataItem(this.select()));
                 //Load the service details, and update the view model
-                dbServices.getServiceDetails(selectedServiceHolder.ServiceId, selectedServiceHolder.OccurDate, selectedServiceHolder.RecurringServiceId, function (service) {
+                dbServices.getServiceDetails(vm.get("selectedServiceHolder.ServiceId"), vm.get("selectedServiceHolder.OccurDate"), vm.get("selectedServiceHolder.RecurringServiceId"), function (service) {
                     services.vm.set("selectedService", service);
 
                     saveHistory.close();
@@ -284,6 +321,9 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
                 dataValueField: "Id",
                 dataSource: services.serviceTypes,
                 change: function () {
+                    //disable the delete button
+                    $('#services .k-grid-delete').attr("disabled", "disabled");
+
                     //reload the services whenever the service type changes
                     if (services.serviceColumns !== null) {
                         services.updateServices();
@@ -318,9 +358,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
             change: services.updateServices
         });
 
-        $("#serviceDetails").kendoServiceDetails({
-            source: vm.get("selectedService")
-        });
+        $("#serviceDetails").kendoServiceDetails();
 
         services.updateServices = function () {
             var startDate = startDatePicker.data("kendoDatePicker").value();
@@ -329,6 +367,14 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
 
             getDataSource(startDate, endDate, serviceTypeId, setupGrid);
         };
+
+        $("#services .k-grid-delete").on("click", function () {
+            var answer = confirm("Are you sure you want to delete the selected service?")
+            if (answer) {
+                grid.dataSource.remove(vm.get("selectedServiceHolder"));
+                dbServices.deleteService(vm.get("selectedService"));
+            }
+        });
 
         $(window).resize(function () {
             resizeGrid(false);

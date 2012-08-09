@@ -245,11 +245,6 @@ body{
 hr{
     border: 1px solid #666;
 }
-
-button:hover{
-    background: url("../img/btnBgHover.png") repeat-x;
-}
-
 .wrap{
     margin: 0 20px 10px 180px;
     padding: 15px;
@@ -258,7 +253,7 @@ button:hover{
     box-shadow: 0 5px 8px #aaa;
     background-color: #fff;
 }
-.addDeleteBtns{
+#dispatcher .addDeleteBtns{
     float: right;
     margin: -8px 0 0 0;
 }
@@ -307,12 +302,11 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
 /*endregion*/
 /*region ImageUploadButton */
 .imageupload-button{
-    margin-left: 185px;
+    margin-left: 192px;
 }
 .imageupload-button:hover{
     background-image: url("../img/highlight.png");
 }
-
 .imageupload-cropbox{
     margin-bottom: 10px;
 }
@@ -328,6 +322,14 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
 #personal table{
     margin: 0 0 0 102px;
 }
+#personal .k-dropdown {
+    width: 310px;
+    margin-left: 95px;
+    font-size: 1em;
+    .k-select{
+        margin-top: 2px;
+    }
+}
 #personal td, #business td, #changePassword td, #createPassword td{
     height: 30px;
     text-align: right;
@@ -340,9 +342,11 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
     width: 190px;
     height: 20px;
     border: 1px inset #ccc;
+    font-size: 1em;
+    padding-left: 2px;
 }
 #personal .changePassword{
-    margin-left: 156px;
+    margin-left: 164px;
 }
 #personal .k-image, #business .k-image{
     background-position: -115px -91px;
@@ -371,10 +375,6 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
 }
 #createPassword .save{
     margin-left: 217px;
-}
-#personal .k-dropdown{
-    width: 310px;
-    margin-left: 95px;
 }
 /*endregion*/
 /*endregion*/
@@ -470,7 +470,7 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
 /*endregion*/
 /*region Settings - Dispatcher*/
 #dispatcher .wrap{
-    min-width: 600px;
+    min-width: 450px;
 }
 #dispatcher .k-grid th{
     text-overflow:ellipsis;
@@ -693,11 +693,12 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
     max-width: 30px;
     padding: 5px;
 }
-#dispatcher #grid tbody tr{
+#dispatcherGrid tbody tr{
     min-height: 30px;
 }
-#dispatcher #grid{
+#dispatcherGrid{
     min-width: 262px;
+    font-size: 1.1em;
 }
 /*endregion*/
 /*region Services */
@@ -706,6 +707,10 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
         height: 100%;
         width: auto;
         margin-right: 280px;
+    }
+    .addDeleteBtns{
+        float: right;
+        margin: 12px -20px 0 0;
     }
     .k-datepicker{
         width: 130px;
