@@ -19,7 +19,7 @@ define(["db/services", "tools", "db/saveHistory", "widgets/settingsMenu"], funct
             $("#new")[0].value = "";
             $("#confirm")[0].value = "";
             tools.disableButtons("#changePassword");
-            window.navigateToPersonal();
+            application.navigate("view/personalSettings.html");
         }
     };
 
@@ -28,7 +28,7 @@ define(["db/services", "tools", "db/saveHistory", "widgets/settingsMenu"], funct
         $("#new")[0].value = "";
         $("#confirm")[0].value = "";
         tools.disableButtons("#changePassword");
-        window.navigateToPersonal();
+        application.navigate("view/personalSettings.html");
     };
 
     changePassword.initialize = function () {

@@ -43,7 +43,7 @@ define(["jquery", "lib/kendo.all", "widgets/contacts"], function ($) {
             vm.set("selectedTask", e.dataItem);
 
             $.publish("selectedTask", [vm.get("selectedTask")]);
-            navigateToService();
+            application.navigate("view/routeTask.html");
         };
         kendo.bind($("#routeDestinationDetails"), vm, kendo.mobile.ui);
     };
