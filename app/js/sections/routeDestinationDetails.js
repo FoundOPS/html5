@@ -47,9 +47,5 @@ define(["jquery", "lib/kendo.all", "widgets/contacts"], function ($) {
         };
         kendo.bind($("#routeDestinationDetails"), vm, kendo.mobile.ui);
     };
-    routeDestinationDetails.show = function () {
-        if (main.history[main.history.length - 2] === "#view/routeTask.html") {
-            //Open task statuses actionsheet.
-        }
-    };
+    routeDestinationDetails.show = function () { };
 });

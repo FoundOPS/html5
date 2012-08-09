@@ -215,6 +215,16 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
         });
     };
 
+    /**
+     * Get the statuses assigned to a route's task.
+     * @param businessAccountId
+     * @param callback
+     * @return {*}
+     */
+    services.getTaskStatuses = function(callback) {
+        return services._getHttp("TaskStatuses/GetStatuses")(callback);
+    };
+
     services.updateService = function (service) {
         return saveHistory.linkNotification(
             $.ajax({
