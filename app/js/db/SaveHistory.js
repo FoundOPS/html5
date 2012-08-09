@@ -107,8 +107,11 @@ define(['lib/noty'], function () {
         saveHistory.states = [];
         if (saveHistory.options.state) {
             var state = saveHistory.options.state();
+            if (!state) {
+                return;
+            }
             //deep copy
-            state = jQuery.extend(true, {}, state);
+            state = JSON.parse(JSON.stringify(state));
             saveHistory.states.push(state);
         }
     };
@@ -117,8 +120,11 @@ define(['lib/noty'], function () {
         //save the state (if there is a function to get it)
         if (saveHistory.options.state) {
             var state = saveHistory.options.state();
+            if (!state) {
+                return;
+            }
             //deep copy
-            state = jQuery.extend(true, {}, state);
+            state = JSON.parse(JSON.stringify(state));
 
             saveHistory.states.push(state);
         }

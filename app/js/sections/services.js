@@ -13,7 +13,10 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
     });
 
     services.undo = function (state) {
+        dbServices.convertServiceDates(state);
         vm.set("selectedService", state);
+        //because the input will be rerendered, rehookup input change listeners
+        saveHistory.saveInputChanges("#serviceDetails");
         services.save();
     };
 
@@ -324,9 +327,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
             change: services.updateServices
         });
 
-        $("#serviceDetails").kendoServiceDetails({
-            source: vm.get("selectedService")
-        });
+        $("#serviceDetails").kendoServiceDetails();
 
         services.updateServices = function () {
             var startDate = startDatePicker.data("kendoDatePicker").value();
