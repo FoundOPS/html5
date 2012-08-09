@@ -70,26 +70,30 @@ define(["jquery", "lib/kendo.all", "lib/jquery.maskMoney"], function ($) {
                     //manually handle change event so the format is correct
                     var newValue = e.sender.value();
                     if (newValue) {
-                        field.Value = newValue;
+                        e.sender.fieldParent.Value = newValue;
                     }
                 },
                 min: field.Earliest,
                 max: field.Latest
             };
 
+            var picker;
+
             if (field.TypeInt === 0) {
                 //DateTime
                 options.value = moment(field.Value).format("LLL");
-                fieldElement.kendoDateTimePicker(options);
+                picker = fieldElement.kendoDateTimePicker(options).data("kendoDateTimePicker");
             } else if (field.TypeInt === 1) {
                 //TimeOnly
                 options.value = moment(field.Value).format("LT");
-                fieldElement.kendoTimePicker(options);
+                picker = fieldElement.kendoTimePicker(options).data("kendoTimePicker");
             } else if (field.TypeInt === 2) {
                 //DateOnly
                 options.value = moment(field.Value).format("LL");
-                fieldElement.kendoDatePicker(options);
+                picker = fieldElement.kendoDatePicker(options).data("kendoDatePicker");
             }
+            //store a reference to the field for access by the change function
+            picker.fieldParent = field;
 
             return fieldElement;
         },
@@ -133,10 +137,19 @@ define(["jquery", "lib/kendo.all", "lib/jquery.maskMoney"], function ($) {
                 for (var optionIndex = 0; optionIndex < field.Options.length; optionIndex++) {
                     var optionElement = $(inputTemplate).attr("type", "checkbox");
 
-                    var dataBindAttr = "checked: Fields[" + fieldIndex + "].Options[" + optionIndex + "].IsChecked";
-                    optionElement.attr("data-bind", dataBindAttr);
-
                     var option = field.Options[optionIndex];
+
+                    //store a reference to the option for access by the change function
+                    optionElement[0].optionParent = option;
+
+                    //manually bind to avoid issues
+                    if (option.IsChecked) {
+                        optionElement.attr("checked", "checked");
+                    }
+                    optionElement.change(function () {
+                        var checked = !$(this).is(':checked');
+                        $(this)[0].optionParent.IsChecked = checked;
+                    });
 
                     optionElement.appendTo(fieldElement).wrap("<li><label>" + option.Name + "</label></li>");
                 }
