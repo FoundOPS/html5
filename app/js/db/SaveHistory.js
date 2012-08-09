@@ -161,7 +161,7 @@ define(['lib/noty'], function () {
      * param {string} pageDiv The id of the view. ex: "#personal"
      */
     saveHistory.saveInputChanges = function (pageDiv) {
-        $(pageDiv + ' input').each(function () {
+        $(pageDiv + ' input,' + pageDiv + ' textarea').each(function () {
             $(this).on("change", function () {
                 _.delay(function () {
                     saveHistory.save();

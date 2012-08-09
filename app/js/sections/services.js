@@ -13,6 +13,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
     });
 
     services.undo = function (state) {
+        //fixes a problem when the state is stored bc it is converted to json and back
         dbServices.convertServiceDates(state);
         vm.set("selectedService", state);
         //because the input will be rerendered, rehookup input change listeners
