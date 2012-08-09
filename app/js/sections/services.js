@@ -3,9 +3,14 @@
 'use strict';
 
 require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widgets/serviceDetails", "lib/jquery.form"], function ($, dbServices, tools, saveHistory) {
-    var services = {}, serviceHoldersDataSource, grid, selectedServiceHolder, vm = kendo.observable();
+    var services = {}, serviceHoldersDataSource, grid, selectedServiceHolder, serviceTypesComboBox, vm;
 
-    services.vm = vm;
+    //region Public
+    services.vm = vm = kendo.observable({
+        selectedServiceType: function () {
+            return serviceTypesComboBox.dataItem();
+        }
+    });
 
     services.undo = function (state) {
         vm.set("selectedService", state);
@@ -24,6 +29,17 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
         });
     };
 
+    services.exportToCSV = function () {
+        var content = tools.toCSV(serviceHoldersDataSource.view(), "Services", true, ['RecurringServiceId', 'ServiceId']);
+        var form = $("#csvForm");
+        form.find("input[name=content]").val(content);
+        form.find("input[name=fileName]").val("services.csv");
+        form[0].action = dbServices.ROOT_API_URL + "Helper/Download";
+        form.submit();
+    };
+    //endregion
+
+    //region Grid
     /**
      * A kendo data source for Services for the current business account.
      * It is initialized every time the data is loaded because the data schema is dynamic
@@ -118,25 +134,18 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
         dbServices._getHttp("service/GetServicesHoldersWithFields", {startDate: tools.formatDate(startDate), endDate: tools.formatDate(endDate), serviceType: serviceType}, false)(formatResponse);
     };
 
-    var setupServiceTypeDropdown = function () {
-        $("#serviceTypes").kendoDropDownList({
-            dataTextField: "Name",
-            dataValueField: "Id",
-            dataSource: services.serviceTypes,
-            change: function(e) {
-                //load the saved column configuration
-                getGridConfig();
-
-                //reload the services
-                services.updateServices();
-            }
-        });
-    };
-
-    var getGridConfig = function () {
-        dbServices.getServiceColumns(function (columns) {
-            services.serviceColumns = columns;
-        });
+    var resizeGrid = function (initialLoad) {
+        var extraMargin;
+        if (initialLoad) {
+            extraMargin = 50;
+        } else {
+            extraMargin = 85;
+        }
+        var windowHeight = $(window).height();
+        var topHeight = $('#top').outerHeight(true);
+        var contentHeight = windowHeight - topHeight - extraMargin;
+        $('#grid').css("height", contentHeight + 'px');
+        $('#grid .k-grid-content').css("height", contentHeight + 'px');
     };
 
     //save the column configuration
@@ -144,135 +153,158 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
         _.delay(function () {
             var columns = grid.columns;
             var serviceColumns = [];
-            for(var c in columns){
+            for (var c in columns) {
                 var column = {};
                 column.Name = columns[c].field;
                 column.Width = columns[c].width;
-                if(columns[c].hidden){
+                column.Order = c;
+                if (columns[c].hidden) {
                     column.Hidden = true;
-                }else{
+                } else {
                     column.Hidden = false;
                 }
                 serviceColumns.push(column);
             }
-            var serviceId = $("#serviceTypes").data("kendoDropDownList")._old;
-            dbServices.updateServiceColumns(serviceId, serviceColumns);
+
+            var id = vm.selectedServiceType().Id;
+            dbServices.updateServiceColumns(id, serviceColumns);
         }, 200);
     };
 
-    services.initialize = function () {
-        var resizeGrid = function (initialLoad) {
-            var extraMargin;
-            if (initialLoad) {
-                extraMargin = 50;
-            } else {
-                extraMargin = 85;
+    var setupGrid = function (fields) {
+        //Setup the columns based on the fields
+        var columns = [];
+        _.each(fields, function (value, key) {
+            if (value.hidden) {
+                return;
             }
-            var windowHeight = $(window).height();
-            var topHeight = $('#top').outerHeight(true);
-            var contentHeight = windowHeight - topHeight - extraMargin;
-            $('#grid').css("height", contentHeight + 'px');
-            $('#grid .k-grid-content').css("height", contentHeight + 'px');
-        };
 
-        var setupGrid = function (fields) {
-            //Setup the columns based on the fields
-            var columns = [];
-            _.each(fields, function (value, key) {
-                if(value.hidden){
-                    return;
+            var column = {};
+
+            //replace _ with spaces, and insert a space before each capital letter
+            column.title = key.split('_').join(' ').replace(/([A-Z])/g, ' $1');
+
+            column.field = key;
+            column.type = value.type;
+            if (column.type === "number") {
+                column.template = "#= (" + key + "== null) ? ' ' : " + key + " #";
+            } else if (column.type === "date") {
+                if (value.detail === "datetime") {
+                    column.template = "#= (" + key + "== null) ? ' ' : moment(" + key + ").format('LLL') #";
+                } else if (value.detail === "time") {
+                    column.template = "#= (" + key + "== null) ? ' ' : moment(" + key + ").format('LT') #";
+                } else if (value.detail === "date") {
+                    column.template = "#= (" + key + "== null) ? ' ' : moment(" + key + ").format('LL') #";
                 }
+            }
 
-                var column = {};
+            //calculate the width based on number off characters
+            var titleLength = column.title.length * 7.5 + 35;
+            column.width = titleLength + "px";
 
-                //replace _ with spaces, and insert a space before each capital letter
-                column.title = key.split('_').join(' ').replace(/([A-Z])/g, ' $1');
-
-                column.field = key;
-                column.type = value.type;
-                if (column.type === "number") {
-                    column.template = "#= (" + key + "== null) ? ' ' : " + key + " #";
-                } else if (column.type === "date") {
-                    if (value.detail === "datetime") {
-                        column.template = "#= (" + key + "== null) ? ' ' : moment(" + key + ").format('LLL') #";
-                    } else if (value.detail === "time") {
-                        column.template = "#= (" + key + "== null) ? ' ' : moment(" + key + ").format('LT') #";
-                    } else if (value.detail === "date") {
-                        column.template = "#= (" + key + "== null) ? ' ' : moment(" + key + ").format('LL') #";
-                    }
-                }
-
-                var titleLength = column.title.length * 7.5 + 35;
-                column.width = titleLength + "px";
-
-                columns.push(column);
+            var configColumn = _.find(services.serviceColumns, function (col) {
+                return col.Name === column.field;
             });
 
-            grid = $("#grid").kendoGrid({
-                autoBind: true,
-                change: function () {
-                    selectedServiceHolder = this.dataItem(this.select());
-                    //Load the service details, and update the view model
-                    dbServices.getServiceDetails(selectedServiceHolder.ServiceId, selectedServiceHolder.OccurDate, selectedServiceHolder.RecurringServiceId, function (service) {
-                        services.vm.set("selectedService", service);
+            //if there is a matching column in configColumns, use it's values
+            if (configColumn) {
+                //check if "px" is missing. If so, put it back
+                if (configColumn.Width.indexOf("px") === -1) {
+                    configColumn.Width += "px";
+                }
+                column.width = configColumn.Width;
+                column.hidden = configColumn.Hidden;
+                column.order = configColumn.Order;
+            }
 
-                        $.publish("selectedService", services.vm.get("selectedService"));
+            columns.push(column);
+        });
 
-                        saveHistory.close();
-                        saveHistory.resetHistory();
+        //check if there is any difference in the columns in config
+        //if so, save the current config
+        var storedCols = _.pluck(services.serviceColumns, 'Name');
+        var gridCols = _.pluck(columns, 'field');
+        if (_.difference(storedCols, gridCols).length > 0 || _.difference(gridCols, storedCols).length > 0) {
+            saveGridConfig();
+        }
 
-                        //watch for input changes
-                        saveHistory.saveInputChanges("#serviceDetails");
-                    });
-                },
-                columns: columns,
-                columnMenu: true,
-                columnReorder: function () {
-                    saveGridConfig();
-                },
-                columnResize: function () {
-                    saveGridConfig();
-                },
-                columnShow: function () {
-                    saveGridConfig();
-                },
-                columnHide: function () {
-                    saveGridConfig();
-                },
-                dataSource: serviceHoldersDataSource,
-                filterable: true,
-                resizable: true,
-                reorderable: true,
-                sortable: {
-                    mode: "multiple"
-                },
-                selectable: true,
-                scrollable: true
-            }).data("kendoGrid");
-        };
+        //reorder the columns
+        columns = _(columns).sortBy(function (column) {
+            return column.order;
+        });
 
+        grid = $("#grid").kendoGrid({
+            autoBind: true,
+            change: function () {
+                selectedServiceHolder = this.dataItem(this.select());
+                //Load the service details, and update the view model
+                dbServices.getServiceDetails(selectedServiceHolder.ServiceId, selectedServiceHolder.OccurDate, selectedServiceHolder.RecurringServiceId, function (service) {
+                    services.vm.set("selectedService", service);
+
+                    $.publish("selectedService", services.vm.get("selectedService"));
+
+                    saveHistory.close();
+                    saveHistory.resetHistory();
+
+                    //watch for input changes
+                    saveHistory.saveInputChanges("#serviceDetails");
+                });
+            },
+            columns: columns,
+            columnMenu: true,
+            columnReorder: function () {
+                saveGridConfig();
+            },
+            columnResize: function () {
+                saveGridConfig();
+            },
+            columnShow: function () {
+                saveGridConfig();
+            },
+            columnHide: function () {
+                saveGridConfig();
+            },
+            dataSource: serviceHoldersDataSource,
+            filterable: true,
+            resizable: true,
+            reorderable: true,
+            sortable: {
+                mode: "multiple"
+            },
+            selectable: true,
+            scrollable: true
+        }).data("kendoGrid");
+    };
+    //endregion
+
+    services.initialize = function () {
         dbServices.getServiceTypes(function (serviceTypes) {
             services.serviceTypes = serviceTypes;
 
-            setupServiceTypeDropdown();
+            serviceTypesComboBox = $("#serviceTypes").kendoDropDownList({
+                dataTextField: "Name",
+                dataValueField: "Id",
+                dataSource: services.serviceTypes,
+                change: function () {
+                    //reload the services whenever the service type changes
+                    if (services.serviceColumns !== null) {
+                        services.updateServices();
+                    }
+                }
+            }).data("kendoDropDownList");
 
             //load the saved column configuration
-            getGridConfig();
+            dbServices.getServiceColumns(function (columns) {
+                var id = vm.selectedServiceType().Id;
+                services.serviceColumns = columns[id];
 
-            //reload the services
-            services.updateServices();
+                //load the services initially
+                services.updateServices();
+            });
         });
 
         var startDatePicker = $("#startDatePicker");
         var endDatePicker = $("#endDatePicker");
-
-        services.updateServices = function () {
-            var startDate = startDatePicker.data("kendoDatePicker").value();
-            var endDate = endDatePicker.data("kendoDatePicker").value();
-            var serviceType = $("#serviceTypes").data("kendoDropDownList").value();
-
-            getDataSource(startDate, endDate, serviceType, setupGrid);
-        };
 
         startDatePicker.kendoDatePicker({
             value: moment().toDate(),
@@ -280,6 +312,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
             max: new Date(2049, 11, 31),
             change: services.updateServices
         });
+
         endDatePicker.kendoDatePicker({
             value: moment().add('weeks', 2).toDate(),
             min: new Date(1950, 0, 1),
@@ -290,6 +323,14 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
         $("#serviceDetails").kendoServiceDetails({
             source: vm.get("selectedService")
         });
+
+        services.updateServices = function () {
+            var startDate = startDatePicker.data("kendoDatePicker").value();
+            var endDate = endDatePicker.data("kendoDatePicker").value();
+            var serviceTypeId = vm.selectedServiceType().Id;
+
+            getDataSource(startDate, endDate, serviceTypeId, setupGrid);
+        };
 
         $(window).resize(function () {
             resizeGrid(false);
@@ -307,15 +348,6 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
                 return vm.get("selectedService");
             }
         });
-    };
-
-    services.exportToCSV = function () {
-        var content = tools.toCSV(serviceHoldersDataSource.view(), "Services", true, ['RecurringServiceId', 'ServiceId']);
-        var form = $("#csvForm");
-        form.find("input[name=content]").val(content);
-        form.find("input[name=fileName]").val("services.csv");
-        form[0].action = dbServices.ROOT_API_URL + "Helper/Download";
-        form.submit();
     };
 
     //set services to a global function, so the functions are accessible from the HTML element
