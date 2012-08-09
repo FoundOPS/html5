@@ -227,6 +227,16 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
         );
     };
 
+    services.deleteService = function (service) {
+        $.ajax({
+            url: services.API_URL + "service/DeleteService",
+            type: "POST",
+            dataType: "json",
+            contentType: 'application/json',
+            data: JSON.stringify(service)
+        })
+    };
+
     /**
      * Get the column config
      * @param roleId The role to get the columns for

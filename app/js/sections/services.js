@@ -236,6 +236,9 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
         grid = $("#grid").kendoGrid({
             autoBind: true,
             change: function () {
+                //enable delete button
+                $('#services .k-grid-delete').removeAttr("disabled");
+
                 selectedServiceHolder = this.dataItem(this.select());
                 //Load the service details, and update the view model
                 dbServices.getServiceDetails(selectedServiceHolder.ServiceId, selectedServiceHolder.OccurDate, selectedServiceHolder.RecurringServiceId, function (service) {
@@ -284,6 +287,9 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
                 dataValueField: "Id",
                 dataSource: services.serviceTypes,
                 change: function () {
+                    //disable the delete button
+                    $('#services .k-grid-delete').attr("disabled", "disabled");
+
                     //reload the services whenever the service type changes
                     if (services.serviceColumns !== null) {
                         services.updateServices();
@@ -329,6 +335,14 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
 
             getDataSource(startDate, endDate, serviceTypeId, setupGrid);
         };
+
+        $("#services .k-grid-delete").on("click", function () {
+            var answer = confirm("Are you sure you want to delete the selected service?")
+            if (answer) {
+                grid.dataSource.remove(selectedServiceHolder);
+                dbServices.deleteService(vm.get("selectedService"));
+            }
+        });
 
         $(window).resize(function () {
             resizeGrid(false);
