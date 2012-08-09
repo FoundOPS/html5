@@ -241,8 +241,6 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
                 dbServices.getServiceDetails(selectedServiceHolder.ServiceId, selectedServiceHolder.OccurDate, selectedServiceHolder.RecurringServiceId, function (service) {
                     services.vm.set("selectedService", service);
 
-                    $.publish("selectedService", services.vm.get("selectedService"));
-
                     saveHistory.close();
                     saveHistory.resetHistory();
 

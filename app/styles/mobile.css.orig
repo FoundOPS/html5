@@ -49,7 +49,10 @@ body {
 #taskStatuses-listview .km-listview-link::after {
     border: 0;
 }
+<<<<<<< HEAD
 /* Class Styles */
+=======
+>>>>>>> 68417e4601761f6c1e93e423baf331fd7548afb7
 .km-vertical-scrollbar,
 .km-horizontal-scrollbar {
     height: 100%;
@@ -77,10 +80,15 @@ body {
     font-size: x-small;
     margin: -10px 0px -10px 2px;
 }
-/* Styling for serviceDetails widget (in iOS)*/
-.km-ios #taskServiceDetails .textarea {
-    vertical-align: middle;
+.km-ios #textbox, .km-ios #textarea, .km-ios #dropdown, .km-ios #number, .km-ios #earliest-textbox,
+ .km-ios #default-textbox, .km-ios #latest-textbox  {
+     border: inherit;
+     border-bottom:1px solid rgba(0, 0, 0, 0.1)
+ }
+.km-ios #earl-text-label, .km-ios #def-text-label, .km-ios #late-text-label {
+    position: relative;
+    top: -5px;
 }
-.km-ios #taskServiceDetails input[type="text"], .km-ios #taskServiceDetails input[type="number"] {
-    border-bottom:1px solid rgba(0, 0, 0, 0.1)
+.km-ios .km-list select:not([multiple]), .km-ios .km-list .k-dropdown-wrap {
+    background: 100% 82% no-repeat url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAACWCAQAAABj2vCcAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAf0lEQVR4XuzLsQkAAAwCsP7/tD1CcAqZcykMsizLsizLsizLsizLsizLsizLsizL8ncuxzYAgEAAhJz893BazVfXE2quGc9z32asZahlqGWoZahlqGWoZahlqGWoZahlqGWoZahlqGWoZahlqGWoZahlqOUq5CrkKuStlKuS3QdJPtFaleZ1DgAAAABJRU5ErkJggg==") transparent;
 }

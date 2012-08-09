@@ -32,10 +32,7 @@ define(["jquery", "db/services", "lib/kendo.all"], function ($, dbServices) {
                     contentType: "application/json; charset=utf-8"
                 }
             },
-            change: function (e) {
-                console.log("Route list change: ");
-                console.log(e.items);
-            },
+            change: function (e) { },
             serverPaging: true
         }));
         vm.refreshRoutes = function () {
@@ -49,7 +46,7 @@ define(["jquery", "db/services", "lib/kendo.all"], function ($, dbServices) {
             vm.set("selectedRoute", e.dataItem);
 
             $.publish('selectedRoute', [vm.get("selectedRoute")]);
-            navigateToRouteDestinations();
+            application.navigate("view/routeDestinations.html");
         };
         kendo.bind($("#routes"), vm, kendo.mobile.ui);
     };

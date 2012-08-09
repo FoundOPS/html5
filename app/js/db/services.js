@@ -191,7 +191,7 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
      * Get the service and its fields.
      * Need to pass the serviceId or the occurDate and the recurringServiceId.
      * @param {?string} serviceId
-     * @param {?string} serviceDate
+     * @param {?Date} serviceDate
      * @param {?string} recurringServiceId
      * @param {!function(Object)} callback The callback to pass the Service it is loaded.
      */

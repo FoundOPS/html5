@@ -22,9 +22,11 @@ require.config({
 require(["widgets/navigator", "containers/silverlight", "db/session", "db/models", "lib/kendo.all", "underscore",
     "lib/userVoice", "lib/pubsub", "sections/personalSettings", "sections/businessSettings", "sections/usersSettings",
     "sections/dispatcherSettings", "sections/changePassword", "sections/createPassword", "sections/services",
-    "sections/routes", "sections/routeDestinations", "sections/routeDestinationDetails", "sections/service",
+    "sections/routes", "sections/routeDestinations", "sections/routeDestinationDetails", "sections/routeTask",
     "widgets/contacts", "widgets/serviceDetails"], function (Navigator, silverlight, session) {
-    var application, navigator;
+    var application, navigator, main = {};
+
+    main.history = [];
 
     session.load(function (data) {
         //setup the navigator
@@ -126,34 +128,5 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "db/models
         window.trackEvent = function (section, action, label) {
             pageTracker._trackEvent(section, action, label);
         };
-    } catch (err) {
-    }
-
-    window.navigateToPersonal = function () {
-        application.navigate("view/personalSettings.html");
-    };
-    window.navigateToBusiness = function () {
-        application.navigate("view/businessSettings.html");
-    };
-    window.navigateToUsers = function () {
-        application.navigate("view/usersSettings.html");
-    };
-    window.navigateToDispatcher = function () {
-        application.navigate("view/dispatcherSettings.html");
-    };
-    window.navigateToChangePassword = function () {
-        application.navigate("view/changePassword.html");
-    };
-    window.navigateToRoutes = function () {
-        application.navigate("view/routes.html");
-    };
-    window.navigateToRouteDestinations = function () {
-        application.navigate("view/routeDestinations.html");
-    };
-    window.navigateToRouteDestinationDetails = function () {
-        application.navigate("view/routeDestinationDetails.html");
-    };
-    window.navigateToService = function () {
-        application.navigate("view/service.html");
-    };
+    } catch (err) { }
 });
