@@ -16,16 +16,32 @@ define(["jquery", "db/session", "lib/kendo.all"], function ($, session) {
 
             // append the element that will be the menu
             _menu = $('<ul id="settingsList"> ' +
-                '<li class="active" onclick="application.navigate("view/businessSettings.html");"><a>Personal</a></li>' +
-                '<li onclick="application.navigate("view/businessSettings.html");"><a>Business</a></li>' +
-                '<li onclick="application.navigate("view/usersSettings.html");"><a>Users</a></li>' +
-                '<li onclick="application.navigate("view/dispatcherSettings.html");"><a>Dispatcher</a></li>' +
+                '<li class="active"><a>Personal</a></li>' +
+                '<li><a>Business</a></li>' +
+                '<li><a>Users</a></li>' +
+                '<li><a>Dispatcher</a></li>' +
                 '</ul>');
 
             var personalLi = _menu.find("li:nth-child(1)");
             var businessLi = _menu.find("li:nth-child(2)");
             var usersLi = _menu.find("li:nth-child(3)");
             var dispatcherLi = _menu.find("li:nth-child(4)");
+
+            personalLi.click(function () {
+                application.navigate("view/personalSettings.html");
+            });
+            businessLi.click(function () {
+                application.navigate("view/businessSettings.html");
+            });
+
+            usersLi.click(function () {
+                application.navigate("view/usersSettings.html");
+            });
+
+            dispatcherLi.click(function () {
+                application.navigate("view/dispatcherSettings.html");
+            });
+
 
             if (options.selectedItem === "Personal") {
                 personalLi.addClass('active');

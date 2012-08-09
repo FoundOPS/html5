@@ -26,7 +26,14 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "db/models
     "widgets/contacts", "widgets/serviceDetails"], function (Navigator, silverlight, session) {
     var application, navigator, main = {};
 
+    window.main = main;
+
+    // Array to keep track of the hash changes within the app.
     main.history = [];
+
+    window.onhashchange = function () {
+        main.history.push(location.hash);
+    };
 
     session.load(function (data) {
         //setup the navigator

@@ -81,7 +81,7 @@ define(["jquery", "db/services", "db/models", "lib/kendo.all"], function ($, dbS
     };
 
     $.subscribe("selectedRoute", function (data) {
-        vm.selectedRoute = data;
+        vm.set("selectedRoute", data);
     });
 
     routeDestinations.initialize = function () {
@@ -111,8 +111,8 @@ define(["jquery", "db/services", "db/models", "lib/kendo.all"], function ($, dbS
             application.navigate("view/routeDestinationDetails.html");
         };
         //Dictate the visibility of the startRoute and endRoute buttons.
-        vm.startVisible = true;
-        vm.endVisible = false;
+        vm.set("startVisible", true);
+        vm.set("endVisible", false);
         /**
          * Starts collecting and sending trackpoints for the selected route.
          */

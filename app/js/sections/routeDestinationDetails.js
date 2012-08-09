@@ -16,7 +16,7 @@ define(["jquery", "lib/kendo.all", "widgets/contacts"], function ($) {
     routeDestinationDetails.vm = vm;
 
     $.subscribe("selectedDestination", function (data) {
-        vm.selectedDestination = data;
+        vm.set("selectedDestination", data);
     });
 
     routeDestinationDetails.initialize = function () {
@@ -46,5 +46,10 @@ define(["jquery", "lib/kendo.all", "widgets/contacts"], function ($) {
             application.navigate("view/routeTask.html");
         };
         kendo.bind($("#routeDestinationDetails"), vm, kendo.mobile.ui);
+    };
+    routeDestinationDetails.show = function () {
+        if (main.history[main.history.length - 2] === "#view/routeTask.html") {
+            //Open task statuses actionsheet.
+        }
     };
 });

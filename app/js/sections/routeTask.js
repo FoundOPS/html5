@@ -28,5 +28,8 @@ define(["jquery", "db/services", "lib/kendo.all", "widgets/serviceDetails"], fun
         $("#taskServiceDetails").kendoServiceDetails({
             source: vm.get("selectedService")
         });
+        $("#taskStatuses").kendoTaskStatuses({
+            source: vm.get("selectedService")
+        });
     };
 });
