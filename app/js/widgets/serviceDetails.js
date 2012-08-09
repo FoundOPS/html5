@@ -36,42 +36,27 @@ define(["jquery", "lib/kendo.all", "lib/jquery.maskMoney"], function ($) {
                 fieldElement = $(inputTemplate);
                 fieldElement.attr("type", "text");
                 fieldElement.appendTo(listView).wrap("<li>" + field.Name + "</li>");
-
             }
 
             return fieldElement;
         },
 
         _createNumericField: function (field, fieldIndex, listView) {
-            var fieldElement = $(inputTemplate);
+            var fieldElement = $(inputTemplate).attr("type", "number");
 
-            if (field.Mask === "g" || field.Mask === "p") {
-                //number or percentage
-                fieldElement.attr("type", "number");
-            }
-            fieldElement.appendTo(listView).wrap("<li>" + field.Name + "</li>");
+            var step = 1 / Math.pow(10, field.DecimalPlaces);
+            fieldElement.attr("step", step).attr("min", field.Minimum).attr("max", field.Maximum)
+                .appendTo(listView).wrap("<li>" + field.Name + "</li>");
 
+            //TODO: improve using http://stackoverflow.com/questions/7933505/mask-input-for-number-percent
             if (field.Mask === "c") {
-                //currency
-                var options = { showSymbol: true};
-                if (field.Minimum <= 0) {
-                    options.allowZero = true;
-                    if (field.Minimum < 0) {
-                        options.allowNegative = true;
-                    }
-                }
-                options.precision = field.DecimalPlaces;
-                fieldElement.maskMoney(options);
+                $("<span> $</span>").insertBefore(fieldElement);
             } else if (field.Mask === "p") {
                 //percentage
                 //TODO: improve using http://stackoverflow.com/questions/7933505/mask-input-for-number-percent
                 $("<span>%</span>").insertAfter(fieldElement);
             }
 
-            var step = 1 / Math.pow(10, field.DecimalPlaces);
-            fieldElement.attr("step", step);
-            fieldElement.attr("min", field.Minimum);
-            fieldElement.attr("max", field.Maximum);
             return fieldElement;
         },
 
@@ -80,18 +65,29 @@ define(["jquery", "lib/kendo.all", "lib/jquery.maskMoney"], function ($) {
 
             //console.log(field);
 
-            var options = {min: field.Earliest, max: field.Latest};
+            var options = {
+                change: function (e) {
+                    //manually handle change event so the format is correct
+                    var newValue = e.sender.value();
+                    if (newValue) {
+                        field.Value = newValue;
+                    }
+                },
+                min: field.Earliest,
+                max: field.Latest
+            };
+
             if (field.TypeInt === 0) {
                 //DateTime
-                field.Value = moment(field.Value).format("LLL");
+                options.value = moment(field.Value).format("LLL");
                 fieldElement.kendoDateTimePicker(options);
             } else if (field.TypeInt === 1) {
                 //TimeOnly
-                field.Value = moment(field.Value).format("LT");
+                options.value = moment(field.Value).format("LT");
                 fieldElement.kendoTimePicker(options);
             } else if (field.TypeInt === 2) {
                 //DateOnly
-                field.Value = moment(field.Value).format("LL");
+                options.value = moment(field.Value).format("LL");
                 fieldElement.kendoDatePicker(options);
             }
 
@@ -108,7 +104,7 @@ define(["jquery", "lib/kendo.all", "lib/jquery.maskMoney"], function ($) {
                         var index = this.selectedIndex;
                         var field = this.fieldParent;
                         //clear the other checked items
-                        for (var i = 0; i < field.Options.count; i++) {
+                        for (var i = 0; i < field.Options.length; i++) {
                             field.Options[i].IsChecked = false;
                         }
                         if (index >= 0) {
@@ -163,7 +159,6 @@ define(["jquery", "lib/kendo.all", "lib/jquery.maskMoney"], function ($) {
                 "OptionsField": that._createOptionsField
             };
 
-
             var fieldsListView = $('<ul data-role="listview" data-style="inset"></ul>').appendTo(that.element).wrap("<form></form>");
             var checkLists = $('<div></div>').appendTo(that.element);
 
@@ -184,17 +179,21 @@ define(["jquery", "lib/kendo.all", "lib/jquery.maskMoney"], function ($) {
                             fieldElement.attr("text", field.ToolTip);
                         }
 
-                        if (field.Type !== "OptionsField") {
+                        if (field.Type !== "OptionsField" && field.Type !== "DateTimeField") {
                             //setup the value binding
                             var dataBindAttr = "value: Fields[" + fieldIndex + "].Value";
                             fieldElement.attr("data-bind", dataBindAttr);
                         }
                     }
                 }
-            }
 
-            kendo.bind(fieldsListView, service, kendo.mobile.ui);
-            kendo.bind(checkLists, service, kendo.mobile.ui);
+                service.bind("change", function (e) {
+                    console.log(e.field);
+                });
+
+                kendo.bind(fieldsListView, service, kendo.mobile.ui);
+                kendo.bind(checkLists, service, kendo.mobile.ui);
+            }
 
             that.trigger(DATABOUND);
         },

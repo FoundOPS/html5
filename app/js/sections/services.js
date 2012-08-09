@@ -272,7 +272,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
         };
 
         startDatePicker.kendoDatePicker({
-            value: moment().subtract('weeks', 2).toDate(),
+            value: moment().toDate(),
             min: new Date(1950, 0, 1),
             max: new Date(2049, 11, 31),
             change: services.updateServices
