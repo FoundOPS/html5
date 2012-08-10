@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(["jquery", "db/services", "lib/kendo.all"], function ($, dbServices) {
+define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all"], function ($, dbServices, saveHistory) {
     /**
      * routes = wrapper for all route list objects/logic
      * app = the kendoUI mobile app
@@ -32,7 +32,8 @@ define(["jquery", "db/services", "lib/kendo.all"], function ($, dbServices) {
                     contentType: "application/json; charset=utf-8"
                 }
             },
-            change: function (e) { },
+            change: function (e) {
+            },
             serverPaging: true
         }));
         vm.refreshRoutes = function () {
@@ -46,12 +47,13 @@ define(["jquery", "db/services", "lib/kendo.all"], function ($, dbServices) {
             vm.set("selectedRoute", e.dataItem);
 
             $.publish('selectedRoute', [vm.get("selectedRoute")]);
-            application.navigate("view/routeDestinations.html");
+            application.navigate("view/routeDetails.html");
         };
         kendo.bind($("#routes"), vm, kendo.mobile.ui);
     };
 
     routes.show = function () {
+        saveHistory.close();
         // Auto refresh - causes two calls on initializing.
         //vm.refreshRoutes();
     };

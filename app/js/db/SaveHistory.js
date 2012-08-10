@@ -40,9 +40,9 @@ define(['lib/noty'], function () {
             var numChanges = saveHistory.states.length - 1;
 
             if (numChanges > 1) {
-                text += "&nbsp;&nbsp;&nbsp;<a onclick='window.saveHistory.undo(true)'>Undo All Changes to " + saveHistory.options.page + "</a>&nbsp;&nbsp;&nbsp;<a onclick='window.saveHistory.undo(false)'>Undo Last Change</a>";
+                text += "&nbsp;&nbsp;&nbsp;<a onclick='saveHistory.undo(true)'>Undo All Changes to " + saveHistory.options.page + "</a>&nbsp;&nbsp;&nbsp;<a onclick='saveHistory.undo(false)'>Undo Last Change</a>";
             } else {
-                text += "&nbsp;&nbsp;&nbsp;<a onclick='window.saveHistory.undo(true)'>Undo</a>";
+                text += "&nbsp;&nbsp;&nbsp;<a onclick='saveHistory.undo(true)'>Undo</a>";
             }
         } else {
             timeout = 5000;
