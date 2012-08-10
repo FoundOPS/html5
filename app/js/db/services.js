@@ -231,6 +231,18 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
         return services._getHttp("TaskStatuses/GetStatuses")(callback);
     };
 
+    services.updateRouteTask = function (task) {
+        return saveHistory.linkNotification(
+            $.ajax({
+                url: services.API_URL + "routes/UpdateRouteTask",
+                type: "POST",
+                dataType: "json",
+                contentType: 'application/json',
+                data: JSON.stringify(task)
+            })
+        );
+    };
+
     services.updateService = function (service) {
         return saveHistory.linkNotification(
             $.ajax({
