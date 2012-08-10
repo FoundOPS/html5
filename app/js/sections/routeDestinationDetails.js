@@ -6,7 +6,7 @@
 
 'use strict';
 
-define(["jquery", "lib/kendo.all", "widgets/contacts"], function ($) {
+define(["jquery", "db/saveHistory", "lib/kendo.all", "widgets/contacts"], function ($, saveHistory) {
     /**
      * routeDestinationDetails = wrapper for all routeDestinationDetails objects
      */
@@ -23,6 +23,8 @@ define(["jquery", "lib/kendo.all", "widgets/contacts"], function ($) {
     var initialized = false;
 
     routeDestinationDetails.show = function () {
+        saveHistory.close();
+
         if (initialized) {
             return;
         }

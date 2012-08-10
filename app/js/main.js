@@ -22,7 +22,7 @@ require.config({
 require(["widgets/navigator", "containers/silverlight", "db/session", "db/models", "lib/kendo.all", "underscore",
     "lib/userVoice", "lib/pubsub", "sections/personalSettings", "sections/businessSettings", "sections/usersSettings",
     "sections/dispatcherSettings", "sections/changePassword", "sections/createPassword", "sections/services",
-    "sections/routes", "sections/routeDestinations", "sections/routeDestinationDetails", "sections/routeTask",
+    "sections/routes", "sections/routeDetails", "sections/routeDestinationDetails", "sections/routeTask",
     "widgets/contacts", "widgets/serviceDetails"], function (Navigator, silverlight, session) {
     var application, navigator, main = {};
 

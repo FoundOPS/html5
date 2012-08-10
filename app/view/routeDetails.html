@@ -1,7 +1,7 @@
-<div id="routeDestinations" data-role="view" data-show="routeDestinations.show" data-title="Route Destinations">
+<div id="routeDetails" data-role="view" data-show="routeDetails.show" data-title="Route Destinations">
 
     <ul id="routeDestinations-listview" data-bind="source: routeDestinationsSource, click: selectRouteDestination"
-        data-role="listview" data-style="inset" data-template="routeDestinationsViewTemplate">
+        data-role="listview" data-style="inset" data-template="routeDestinationViewTemplate">
     </ul>
 
     <div style="text-align: center">
@@ -11,6 +11,6 @@
            data-role="button">End Route</a>
     </div>
 </div>
-<script type="text/x-kendo-template" id="routeDestinationsViewTemplate">
+<script type="text/x-kendo-template" id="routeDestinationViewTemplate">
     <a class="km-listview-link">#= Client.Name #<br/><label id="addressLabel">#= Location.AddressLineOne #</label></a>
 </script>
