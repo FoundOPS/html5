@@ -1,0 +1,25 @@
+<div data-init="services.initialize" data-show="services.show" data-role="view" data-title="Services" data-model="services.vm" id="services" data-stretch="true">
+    <div id="top">
+        <label for="serviceTypes">Service Type:</label>
+        <input id="serviceTypes" class="k-dropdown"/>
+        <input id="startDatePicker" title="Start Date" />
+        <input id="endDatePicker" title="End Date" />
+        <button class="k-button k-button-icontext" type="export" onclick="services.exportToCSV()"><span class="k-icon k-goup"></span>Export</button>
+        <div class="addDeleteBtns">
+            <button class='k-button k-button-icontext k-grid-add'></button>
+            <button class='k-button k-button-icontext k-grid-delete' disabled></button>
+        </div>
+        <form id="csvForm" enctype="multipart/form-data" method="POST" target="csvFrame">
+            <input type="hidden" name="content"/>
+            <input type="hidden" name="contentType" value="text/csv"/>
+            <input type="hidden" name="fileName"/>
+        </form>
+        <iframe id="csvFrame" style="display:none;">
+        </iframe>
+    </div>
+    <div id="left">
+        <div id="grid"></div>
+    </div>
+    <div id="serviceDetails" data-role="kendoServiceDetails" data-bind="service: selectedService">
+    </div>
+</div>

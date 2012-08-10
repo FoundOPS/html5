@@ -1,22 +1,16 @@
 ({
     appDir: "../app",
     baseUrl: "js",
-    dir: "../buildsmobile",
+    dir: "../mobilebuild",
     paths: {
         // JavaScript folders
         lib: "../lib",
-        ui: "ui",
-        db: "db",
 
         // Libraries
-        cordova: "../lib/cordova",
-        jquery: '../lib/jquery',
-        underscore: "../lib/underscore"
+        underscore: "../lib/underscore",
+		jquery: "../lib/jquery"
     },
     shim: {
-        cordova: {
-            exports: "c"
-        },
         underscore: {
             exports: "_"
         }
@@ -25,7 +19,7 @@
     optimizeCss: "standard",
     modules: [
         {
-            name: "containers/mobile"
+            name: "main"
         }
     ]
 })
