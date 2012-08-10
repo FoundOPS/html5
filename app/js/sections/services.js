@@ -3,7 +3,7 @@
 'use strict';
 
 require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widgets/serviceDetails", "lib/jquery.form"], function ($, dbServices, tools, saveHistory) {
-    var services = {}, serviceHoldersDataSource, grid, serviceTypesComboBox, selectedServiceHolder, vm;
+    var services = {}, serviceHoldersDataSource, grid, handleChange, serviceTypesComboBox, selectedServiceHolder, vm;
 
     //region Public
     services.vm = vm = kendo.observable({
@@ -25,29 +25,41 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
         dbServices.updateService(vm.get("selectedService")).success(function (e) {
             //Now that the service has been updated, change the current row's ServiceId
             //to match the Id in case this was a newly inserted service
-            if (grid) {
-                var selectedService = vm.get("selectedService");
-                selectedServiceHolder.set("ServiceId", selectedService.Id);
 
-                var fields = selectedService.Fields;
+            //store the selected row, to reselect it
+            var selectedRowId = grid.select().attr("data-uid");
 
-                for (var f in fields) {
-                    var field = fields[f];
-                    var val = field.value;
-                    if (field.Type === "OptionsField") {
-                        val = "";
-                        var options = field.Options;
-                        for (var o in options) {
-                            if (options[o].IsChecked) {
-                                val += options[o].Name + ", ";
-                            }
-                        }
-                        //remove the trailing comma and space
-                        val.substr(0, val.length - 2);
-                    }
-                    selectedServiceHolder.set(field.Name, val);
-                }
+            var selectedService = vm.get("selectedService");
+            if (!selectedServiceHolder || !grid) {
+                return;
             }
+
+            selectedServiceHolder.set("ServiceId", selectedService.Id);
+
+            var fields = selectedService.Fields;
+
+            for (var i = 0; i < fields.length; i++) {
+                var field = fields[i];
+                var val = field.get("Value");
+                if (field.Type === "OptionsField") {
+                    val = "";
+                    var options = field.Options;
+                    for (var o = 0; o < options.length; o++) {
+                        if (options[o].IsChecked) {
+                            val += options[o].Name + ", ";
+                        }
+                    }
+                    //remove the trailing comma and space
+                    val = val.substr(0, val.length - 2);
+                }
+                //replace spaces with _
+                var columnName = field.Name.split(' ').join('_');
+                selectedServiceHolder.set(columnName, val);
+            }
+
+            //reselect the row, and prevent change from reloading the service
+            handleChange = true;
+            grid.select(grid.table.find('tr[data-uid="' + selectedRowId + '"]'));
         });
     };
 
@@ -258,12 +270,20 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
         grid = $("#grid").kendoGrid({
             autoBind: true,
             change: function () {
+                //whenever a field is changed, the grid needs to be reselected. handleChange is set to prevent triggering a reload
+                if (handleChange) {
+                    handleChange = false;
+                    return;
+                }
                 //enable delete button
                 $('#services .k-grid-delete').removeAttr("disabled");
 
                 selectedServiceHolder = this.dataItem(this.select());
+                if (!selectedServiceHolder) {
+                    return;
+                }
                 //Load the service details, and update the view model
-                dbServices.getServiceDetails(selectedServiceHolder.ServiceId, selectedServiceHolder.OccurDate, selectedServiceHolder.RecurringServiceId, function (service) {
+                dbServices.getServiceDetails(selectedServiceHolder.get("ServiceId"), selectedServiceHolder.get("OccurDate"), selectedServiceHolder.get("RecurringServiceId"), function (service) {
                     services.vm.set("selectedService", service);
 
                     saveHistory.close();

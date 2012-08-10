@@ -200,10 +200,6 @@ define(["jquery", "lib/kendo.all", "lib/jquery.maskMoney"], function ($) {
                     }
                 }
 
-                service.bind("change", function (e) {
-                    console.log(e.field);
-                });
-
                 kendo.bind(fieldsListView, service, kendo.mobile.ui);
                 kendo.bind(checkLists, service, kendo.mobile.ui);
             }
