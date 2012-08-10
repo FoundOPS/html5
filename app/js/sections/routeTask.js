@@ -10,9 +10,18 @@ define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all", "widgets/ser
     /**
      * routeTask = wrapper for all service objects
      */
-    var routeTask = {}, vm = kendo.observable();
+    var routeTask = {}, vm;
 
-    routeTask.vm = vm;
+    routeTask.vm = vm = kendo.observable({
+        selectStatus: function (e) {
+            var status = e.dataItem;
+            var routeTask = vm.get("selectedTask");
+            routeTask.set("TaskStatusId", status.Id);
+
+            dbServices.updateRouteTask(routeTask);
+
+            console.log(status);
+        }});
 
     window.routeTask = routeTask;
 
@@ -20,7 +29,7 @@ define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all", "widgets/ser
         //fixes a problem when the state is stored bc it is converted to json and back
         dbServices.convertServiceDates(state);
         vm.set("selectedService", state);
-        //because the input will be rerendered, rehookup input change listeners
+        //because the input will be re-rendered, re-hookup input change listeners
         saveHistory.saveInputChanges("#taskServiceDetails");
         routeTask.save();
     };
@@ -58,10 +67,6 @@ define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all", "widgets/ser
     });
 
     routeTask.initialize = function () {
-        vm.selectStatus = function () {
-            alert("Thank you for selecting a status!");
-        };
-
         $("#taskServiceDetails").kendoServiceDetails();
 
 //        $("#taskStatuses").kendoTaskStatuses({

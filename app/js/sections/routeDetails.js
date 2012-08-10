@@ -74,18 +74,18 @@ define(["jquery", "db/services", "db/models", "db/saveHistory", "lib/kendo.all"]
 
         var onError = function (error) {
             switch (error.code) {
-                case error.PERMISSION_DENIED:
-                    alert("You must accept the Geolocation request to enable mobile tracking.");
-                    break;
-                case error.POSITION_UNAVAILABLE:
-                    alert("Location information is unavailable at this time.");
-                    break;
-                case error.TIMEOUT:
-                    console.log("The Geolocation request has timed out. Please check your internet connectivity.");
-                    break;
-                default:
-                    console.log("Geolocation information is not available at this time. Please check your Geolocation settings.");
-                    break;
+            case error.PERMISSION_DENIED:
+                alert("You must accept the Geolocation request to enable mobile tracking.");
+                break;
+            case error.POSITION_UNAVAILABLE:
+                alert("Location information is unavailable at this time.");
+                break;
+            case error.TIMEOUT:
+                console.log("The Geolocation request has timed out. Please check your internet connectivity.");
+                break;
+            default:
+                console.log("Geolocation information is not available at this time. Please check your Geolocation settings.");
+                break;
             }
             vm.endRoute();
         };
@@ -105,14 +105,6 @@ define(["jquery", "db/services", "db/models", "db/saveHistory", "lib/kendo.all"]
             new kendo.data.DataSource({
                 data: vm.get("selectedRoute.RouteDestinations")
             }));
-
-        //Commented out until new getTaskStatuses is worked out.
-//            dbServices.getTaskStatuses(vm.get("selectedRoute").BusinessAccountId, function (response) {
-//                vm.set("taskStatusesSource",
-//                    new kendo.data.DataSource({
-//                        data: response
-//                    }));
-//            });
     });
 
     var initialized = false;
@@ -138,6 +130,7 @@ define(["jquery", "db/services", "db/models", "db/saveHistory", "lib/kendo.all"]
         vm.selectRouteDestination = function (e) {
             vm.set("selectedDestination", e.dataItem);
 
+            localStorage.setItem("selectedDestination", vm.get("selectedDestination.Id"));
             $.publish("selectedDestination", [vm.get("selectedDestination")]);
             application.navigate("view/routeDestinationDetails.html");
         };

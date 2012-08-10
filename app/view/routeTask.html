@@ -1,18 +1,16 @@
 <div id="routeTask" data-init="routeTask.initialize" data-show="routeTask.show" data-role="view" data-title="Route Task" data-model="routeTask.vm">
 
     <div id="taskServiceDetails" data-role="kendoServiceDetails" data-bind="service: selectedService"></div>
-    <!--<div id="taskStatuses" data-role="kendoTaskStatuses" data-bind="service: selectedService"></div>-->
 
     <ul id="taskStatuses-actionsheet" data-role="actionsheet">
         <p id="actionSheetTitle">Mark Task As:</p>
         <ul id="taskStatuses-listview" style="text-align: center" data-bind="source:taskStatusesSource, click:selectStatus"
             data-role="listview" data-style="inset" data-template="taskStatusesTemplate"></ul>
     </ul>
-
-    <div style="text-align: center">
-        <a id="statusesButton" data-role="button" data-rel="actionsheet" href="#taskStatuses-actionsheet" class="km-button">Task Statuses</a>
-    </div>
+    <!--<div style="text-align: center">-->
+        <!--<a id="statusesButton" data-role="button" data-rel="actionsheet" href="#taskStatuses-actionsheet" class="km-button">Task Statuses</a>-->
+    <!--</div>-->
 </div>
 <script type="text/x-kendo-template" id="taskStatusesTemplate">
-    <a class="km-listview-link" style="background-color:${Color}">${Name}</a>
+    <a class="km-listview-link" style="background-color:#=Color#" taskId="#=Id#">#=Name#</a>
 </script>

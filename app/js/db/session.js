@@ -182,8 +182,8 @@ define(['db/services', "lib/kendo.all"], function (dbservices) {
 //                "isSilverlight": true
 //            }
 //        ]
-//    };
-//    session._role = session._data.roles[0];
+//};
+//session._role = session._data.roles[0];
 
     return session;
 });
