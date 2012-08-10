@@ -1,5 +1,5 @@
 'use strict';
-define(["jquery", "lib/kendo.all", "lib/jquery.maskMoney"], function ($) {
+define(["jquery", "lib/kendo.all", "lib/jquery.maskMoney", "lib/jquery.autosize"], function ($) {
 
     var kendo = window.kendo,
         ui = kendo.ui,
@@ -29,7 +29,7 @@ define(["jquery", "lib/kendo.all", "lib/jquery.maskMoney"], function ($) {
         _createTextBoxField: function (field, fieldIndex, listView) {
             var fieldElement;
             if (field.IsMultiLine) {
-                fieldElement = $(multiLineTextTemplate);
+                fieldElement = $(multiLineTextTemplate).autosize();
                 fieldElement.appendTo(listView).wrap("<li>" + field.Name + "</li>");
             }
             else {
