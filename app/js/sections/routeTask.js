@@ -70,6 +70,12 @@ define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all", "widgets/ser
     };
 
     routeTask.show = function () {
+        //a task has not been selected, so jump there
+        if (!vm.get("selectedTask")) {
+            application.navigate("view/routeDestinationDetails.html");
+            return;
+        }
+
         saveHistory.setCurrentSection({
             page: "Route Task",
             save: routeTask.save,

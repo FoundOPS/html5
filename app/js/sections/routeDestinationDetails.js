@@ -19,7 +19,20 @@ define(["jquery", "lib/kendo.all", "widgets/contacts"], function ($) {
         vm.set("selectedDestination", data);
     });
 
-    routeDestinationDetails.initialize = function () {
+
+    var initialized = false;
+
+    routeDestinationDetails.show = function () {
+        if (initialized) {
+            return;
+        }
+        //a destination has not been selected, so go to routes view
+        if (!vm.get("selectedDestination")) {
+            application.navigate("view/routes.html");
+            return;
+        }
+        initialized = true;
+
         /**
          * Creates dataSources for the contacts widget.
          * @return {*}
@@ -47,5 +60,4 @@ define(["jquery", "lib/kendo.all", "widgets/contacts"], function ($) {
         };
         kendo.bind($("#routeDestinationDetails"), vm, kendo.mobile.ui);
     };
-    routeDestinationDetails.show = function () { };
 });
