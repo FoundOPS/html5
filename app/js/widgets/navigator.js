@@ -277,8 +277,8 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
 
             setSideBarSections(config, config.roles[0].sections);
 
-            $(window).load(function() {
-                if($(document).width()<=800){
+            $(document).ready(function() {
+                if($(window).width()<=800){
                     //TODO: Condense into another function?
                     sBar.addClass("hidden");
                     var offset = -1 * (sBar.offset().top + sBar.outerHeight());
