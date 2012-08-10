@@ -46,6 +46,7 @@ define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all"], function ($
         vm.selectRoute = function (e) {
             vm.set("selectedRoute", e.dataItem);
 
+            localStorage.setItem("selectedRoute", vm.get("selectedRoute.Id"));
             $.publish('selectedRoute', [vm.get("selectedRoute")]);
             application.navigate("view/routeDetails.html");
         };
