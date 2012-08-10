@@ -10,20 +10,34 @@ define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all", "widgets/ser
     /**
      * routeTask = wrapper for all service objects
      */
-    var routeTask = {}, vm;
+    var routeTask = {}, vm, statusUpdated;
 
     routeTask.vm = vm = kendo.observable({
+        openTaskStatuses: function () {
+            $("#taskStatuses-actionsheet").kendoMobileActionSheet("open");
+        },
         selectStatus: function (e) {
-            var status = e.dataItem;
-            var routeTask = vm.get("selectedTask");
-            routeTask.set("TaskStatusId", status.Id);
+            var statusId = e.dataItem.Id;
 
-            dbServices.updateRouteTask(routeTask);
+            var task = vm.get("selectedTask");
+            task.TaskStatusId = statusId;
 
-            console.log(status);
-        }});
+            dbServices.updateRouteTask(task);
+            updateSelectedStatus();
+
+            statusUpdated = true;
+        }
+    });
 
     window.routeTask = routeTask;
+
+    var updateSelectedStatus = function () {
+        var selectedStatusId = vm.get("selectedTask.TaskStatusId");
+        var selectedStatus = _.find(vm.get("taskStatusesSource").data(), function (status) {
+            return status.Id === selectedStatusId;
+        });
+        vm.set("selectedTaskStatus", selectedStatus);
+    };
 
     routeTask.undo = function (state) {
         //fixes a problem when the state is stored bc it is converted to json and back
@@ -52,29 +66,30 @@ define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all", "widgets/ser
             });
 
         dbServices.getTaskStatuses(function (response) {
-            vm.set("taskStatusesSource",
-                new kendo.data.DataSource({
-                    data: response
-                }));
+            var taskStatuses = new kendo.data.DataSource({data: response});
+            vm.set("taskStatusesSource", taskStatuses);
+            updateSelectedStatus();
         });
     });
+
     //If when going back from routeTask prompt selection of task status.
     $.subscribe("hashChange", function (data) {
         if (data.comingFrom === "#view/routeTask.html" && data.goingTo === "#view/routeDestinationDetails.html") {
             //Open task statuses actionsheet
-            $("#taskStatuses-actionsheet").kendoMobileActionSheet("open");
+            if (!statusUpdated) {
+                $("#taskStatuses-actionsheet").kendoMobileActionSheet("open");
+            }
         }
     });
 
     routeTask.initialize = function () {
         $("#taskServiceDetails").kendoServiceDetails();
-
-//        $("#taskStatuses").kendoTaskStatuses({
-//            source: vm.get("selectedService")
-//        });
     };
 
     routeTask.show = function () {
+        //clear statusUpdated
+        statusUpdated = false;
+
         saveHistory.close();
 
         //a task has not been selected, so jump there
