@@ -210,6 +210,7 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
      * @param service
      */
     services.convertServiceDates = function (service) {
+        service.Date = new Date(service.Date);
         for (var i = 0; i < service.Fields.length; i++) {
             var field = service.Fields[i];
             if (field.Type === "DateTimeField") {

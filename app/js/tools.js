@@ -49,6 +49,9 @@ define(['lib/moment'], function () {
      * @return {string} The date formatted in "m-dd-yyyy".
      */
     tools.formatDate = function (date) {
+        if (typeof date === "string") {
+            date = new Date(date);
+        }
         var month = date.getUTCMonth() + 1,
             day = date.getUTCDate(),
             year = date.getUTCFullYear();

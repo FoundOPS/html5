@@ -6,7 +6,7 @@
 
 'use strict';
 
-define(["jquery", "db/services", "lib/kendo.all", "widgets/serviceDetails"], function ($, dbServices) {
+define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all", "widgets/serviceDetails"], function ($, dbServices, saveHistory) {
     /**
      * routeTask = wrapper for all service objects
      */
@@ -16,8 +16,38 @@ define(["jquery", "db/services", "lib/kendo.all", "widgets/serviceDetails"], fun
 
     window.routeTask = routeTask;
 
+    routeTask.undo = function (state) {
+        //fixes a problem when the state is stored bc it is converted to json and back
+        dbServices.convertServiceDates(state);
+        vm.set("selectedService", state);
+        //because the input will be rerendered, rehookup input change listeners
+        saveHistory.saveInputChanges("#taskServiceDetails");
+        routeTask.save();
+    };
+
+    routeTask.save = function () {
+        dbServices.updateService(vm.get("selectedService"));
+    };
+
     $.subscribe("selectedTask", function (data) {
         vm.set("selectedTask", data);
+        dbServices.getServiceDetails(data.get("ServiceId"), data.get("Date"), data.get("RecurringServiceId"),
+            function (service) {
+                vm.set("selectedService", service);
+
+                saveHistory.close();
+                saveHistory.resetHistory();
+
+                //watch for input changes
+                saveHistory.saveInputChanges("#taskServiceDetails");
+            });
+
+        dbServices.getTaskStatuses(function (response) {
+            vm.set("taskStatusesSource",
+                new kendo.data.DataSource({
+                    data: response
+                }));
+        });
     });
     //If when going back from routeTask prompt selection of task status.
     $.subscribe("hashChange", function (data) {
@@ -28,26 +58,25 @@ define(["jquery", "db/services", "lib/kendo.all", "widgets/serviceDetails"], fun
     });
 
     routeTask.initialize = function () {
-        dbServices.getServiceDetails(vm.get("selectedTask.ServiceId"), new Date(), vm.get("selectedTask.recurringServiceId"),
-            function (service) {
-                vm.set("selectedService", service);
-            });
-        dbServices.getTaskStatuses(function (response) {
-            vm.set("taskStatusesSource",
-                new kendo.data.DataSource({
-                    data: response
-                }));
-        });
         vm.selectStatus = function () {
             alert("Thank you for selecting a status!");
         };
 
-        $("#taskServiceDetails").kendoServiceDetails({
-            source: vm.get("selectedService")
-        });
+        $("#taskServiceDetails").kendoServiceDetails();
 
 //        $("#taskStatuses").kendoTaskStatuses({
 //            source: vm.get("selectedService")
 //        });
+    };
+
+    routeTask.show = function () {
+        saveHistory.setCurrentSection({
+            page: "Route Task",
+            save: routeTask.save,
+            undo: routeTask.undo,
+            state: function () {
+                return vm.get("selectedService");
+            }
+        });
     };
 });
