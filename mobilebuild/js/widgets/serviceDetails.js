@@ -9,7 +9,7 @@ define(["jquery", "lib/kendo.all", "lib/jquery.maskMoney"], function ($) {
         inputTemplate = "<input />",
         multiLineTextTemplate = "<textarea class='textarea'></textarea>";
 
-    var TaskStatuses = Widget.extend({
+    var ServiceDetails = Widget.extend({
         init: function (element, options) {
             var that = this;
 
@@ -70,7 +70,7 @@ define(["jquery", "lib/kendo.all", "lib/jquery.maskMoney"], function ($) {
                     //manually handle change event so the format is correct
                     var newValue = e.sender.value();
                     if (newValue) {
-                        e.sender.fieldParent.Value = newValue;
+                        e.sender.fieldParent.set("Value", newValue);
                     }
                 },
                 min: field.Earliest,
@@ -211,11 +211,11 @@ define(["jquery", "lib/kendo.all", "lib/jquery.maskMoney"], function ($) {
             that.trigger(DATABOUND);
         },
         options: new kendo.data.ObservableObject({
-            name: "TaskStatuses"
+            name: "ServiceDetails"
         })
     });
 
-    ui.plugin(TaskStatuses);
+    ui.plugin(ServiceDetails);
 
     kendo.data.binders.service = kendo.data.Binder.extend(({
         init: function (element, bindings, options) {
@@ -224,9 +224,9 @@ define(["jquery", "lib/kendo.all", "lib/jquery.maskMoney"], function ($) {
 
         refresh: function (e) {
             var service = this.bindings.service.get();
-            var taskStatuses = $(this.element).data("kendoTaskStatuses");
-            if (taskStatuses) {
-                taskStatuses.render(service);
+            var serviceDetails = $(this.element).data("kendoServiceDetails");
+            if (serviceDetails) {
+                serviceDetails.render(service);
             }
         }
     }));
