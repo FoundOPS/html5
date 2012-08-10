@@ -502,12 +502,37 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
                 console.log("Business not found!");
                 return;
             }
-            this.changeBusinessLogo(business.businessLogoUrl);
+            thisNavigator.changeBusinessLogo(business.businessLogoUrl);
             setSideBarSections(config, business.sections);
             $("#sideBarInnerWrapper").data('jsp').reinitialise();
         };
-
         Navigator.prototype.changeBusiness = changeBusiness;
+
+        this.changeAvatar = function (imgLoc) {
+            $(".profile").attr('src', imgLoc);
+        };
+
+        this.changeBusinessLogo = function (businessLogoUrl) {
+            var businessLogoEnabled = true;
+
+            if (typeof(businessLogoUrl) === 'undefined') {
+                businessLogoEnabled = false;
+                businessLogoUrl = "";
+            }
+            var clientLogoDiv = $("#clientLogo");
+            clientLogoDiv.attr('src', businessLogoUrl);
+
+            //Hide business logo if undefined.
+            var navClientIconDiv = $("#navClient .navIcon");
+            if (!businessLogoEnabled) {
+                navClientIconDiv.css("border", "0");
+                clientLogoDiv.css("display", "none");
+            } else {
+                navClientIconDiv.css("border", "");
+                clientLogoDiv.css("display", "");
+            }
+            // console.log("Logo: " + businessLogoUrl);
+        };
 
         var initPopup = function (config) {
             //var popup = new Popup(config, ".navElement");
@@ -590,32 +615,6 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
 
         this.showSearch = function () {
             $("#navSearch").show();
-        };
-
-        this.changeAvatar = function (imgLoc) {
-            $(".profile").attr('src', imgLoc);
-        };
-
-        this.changeBusinessLogo = function (businessLogoUrl) {
-            var businessLogoEnabled = true;
-
-            if (typeof(businessLogoUrl) === 'undefined') {
-                businessLogoEnabled = false;
-                businessLogoUrl = "";
-            }
-            var clientLogoDiv = $("#clientLogo");
-            clientLogoDiv.attr('src', businessLogoUrl);
-
-            //Hide business logo if undefined.
-            var navClientIconDiv = $("#navClient .navIcon");
-            if (!businessLogoEnabled) {
-                navClientIconDiv.css("border", "0");
-                clientLogoDiv.css("display", "none");
-            } else {
-                navClientIconDiv.css("border", "");
-                clientLogoDiv.css("display", "");
-            }
-            // console.log("Logo: " + businessLogoUrl);
         };
     }
 

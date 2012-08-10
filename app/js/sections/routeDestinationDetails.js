@@ -57,6 +57,7 @@ define(["jquery", "db/saveHistory", "lib/kendo.all", "widgets/contacts"], functi
         vm.selectTask = function (e) {
             vm.set("selectedTask", e.dataItem);
 
+            localStorage.setItem("selectedTask", vm.get("selectedTask.Id"));
             $.publish("selectedTask", [vm.get("selectedTask")]);
             application.navigate("view/routeTask.html");
         };
