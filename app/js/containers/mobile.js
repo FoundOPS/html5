@@ -65,10 +65,10 @@ require(["jquery", "db/developer", "tools", "db/services", "db/models", "widgets
     mobile.onBack = function () {
         if (window.location.hash === "#view/routeList.html") {
             mobile.logout();
-        } else if (window.location.hash === "#view/routeDestinations.html") {
+        } else if (window.location.hash === "#view/routeDetails.html") {
             app.navigate("view/routeList.html");
         } else if (window.location.hash === "#view/routeDestinationDetails.html") {
-            app.navigate("view/routeDestinations.html");
+            app.navigate("view/routeDetails.html");
         } else if (window.location.hash === "#view/taskDetails.html") {
             app.navigate("view/routeDestinationDetails.html");
         }
@@ -250,7 +250,7 @@ require(["jquery", "db/developer", "tools", "db/services", "db/models", "widgets
                         data: response
                     }));
             });
-            app.navigate("view/routeDestinations.html");
+            app.navigate("view/routeDetails.html");
         },
         /**
          * Select a route destination

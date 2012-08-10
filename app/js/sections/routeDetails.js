@@ -6,24 +6,24 @@
 
 'use strict';
 
-define(["jquery", "db/services", "db/models", "lib/kendo.all"], function ($, dbServices, models) {
+define(["jquery", "db/services", "db/models", "db/saveHistory", "lib/kendo.all"], function ($, dbServices, models, saveHistory) {
     /**
-     * routeDestinations = wrapper for all routeDestinations objects
+     * routeDetails = wrapper for all routeDetails objects
      * serviceDate = the date for the routes that are acquired form the server
      * intervalId = used to start and stop a route
      * trackPointsToSend = stores the track points that will be sent to the API
      */
-    var routeDestinations = {}, vm = kendo.observable(), serviceDate, intervalId = null, trackPointsToSend = [];
-    window.routeDestinations = routeDestinations;
+    var routeDetails = {}, vm = kendo.observable(), serviceDate, intervalId = null, trackPointsToSend = [];
+    window.routeDetails = routeDetails;
 
-    routeDestinations.vm = vm;
+    routeDetails.vm = vm;
 
     /**
      * The configuration object for trackPoint creation.
      * @const
      * @type {Array.<Object>}
      */
-    routeDestinations.CONFIG = {
+    routeDetails.CONFIG = {
         /**
          * The frequency to collect trackPoints in seconds.
          * @const
@@ -74,18 +74,18 @@ define(["jquery", "db/services", "db/models", "lib/kendo.all"], function ($, dbS
 
         var onError = function (error) {
             switch (error.code) {
-            case error.PERMISSION_DENIED:
-                alert("You must accept the Geolocation request to enable mobile tracking.");
-                break;
-            case error.POSITION_UNAVAILABLE:
-                alert("Location information is unavailable at this time.");
-                break;
-            case error.TIMEOUT:
-                console.log("The Geolocation request has timed out. Please check your internet connectivity.");
-                break;
-            default:
-                console.log("Geolocation information is not available at this time. Please check your Geolocation settings.");
-                break;
+                case error.PERMISSION_DENIED:
+                    alert("You must accept the Geolocation request to enable mobile tracking.");
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    alert("Location information is unavailable at this time.");
+                    break;
+                case error.TIMEOUT:
+                    console.log("The Geolocation request has timed out. Please check your internet connectivity.");
+                    break;
+                default:
+                    console.log("Geolocation information is not available at this time. Please check your Geolocation settings.");
+                    break;
             }
             vm.endRoute();
         };
@@ -96,9 +96,7 @@ define(["jquery", "db/services", "db/models", "lib/kendo.all"], function ($, dbS
 
     $.subscribe("selectedRoute", function (data) {
         vm.set("selectedRoute", data);
-    });
 
-    routeDestinations.initialize = function () {
         /**
          * A kendo data source for the current user's selected route.
          * @type {kendo.data.DataSource}
@@ -107,6 +105,7 @@ define(["jquery", "db/services", "db/models", "lib/kendo.all"], function ($, dbS
             new kendo.data.DataSource({
                 data: vm.get("selectedRoute.RouteDestinations")
             }));
+
         //Commented out until new getTaskStatuses is worked out.
 //            dbServices.getTaskStatuses(vm.get("selectedRoute").BusinessAccountId, function (response) {
 //                vm.set("taskStatusesSource",
@@ -114,6 +113,24 @@ define(["jquery", "db/services", "db/models", "lib/kendo.all"], function ($, dbS
 //                        data: response
 //                    }));
 //            });
+    });
+
+    var initialized = false;
+
+    routeDetails.show = function () {
+        saveHistory.close();
+
+        if (initialized) {
+            return;
+        }
+        //routes has not been opened yet, so jump there
+        if (!vm.get("routeDestinationsSource")) {
+            application.navigate("view/routes.html");
+            return;
+        }
+
+        initialized = true;
+
         /**
          * Select a route destination
          * @param e The event args from a list view click event (the selected Destination)
@@ -127,6 +144,7 @@ define(["jquery", "db/services", "db/models", "lib/kendo.all"], function ($, dbS
         //Dictate the visibility of the startRoute and endRoute buttons.
         vm.set("startVisible", true);
         vm.set("endVisible", false);
+
         /**
          * Starts collecting and sending trackpoints for the selected route.
          */
@@ -138,7 +156,7 @@ define(["jquery", "db/services", "db/models", "lib/kendo.all"], function ($, dbS
             //store the intervalId
             intervalId = window.setInterval(function () {
                 addPushTrackPoints(routes.vm.get("selectedRoute").Id);
-            }, routeDestinations.CONFIG.TRACKPOINT_COLLECTION_FREQUENCY_SECONDS * 1000);
+            }, routeDetails.CONFIG.TRACKPOINT_COLLECTION_FREQUENCY_SECONDS * 1000);
         };
         /**
          * Ends the collection of trackpoints for the selected route.
@@ -151,10 +169,7 @@ define(["jquery", "db/services", "db/models", "lib/kendo.all"], function ($, dbS
             clearInterval(intervalId);
             trackPointsToSend = [];
         };
-        kendo.bind($("#routeDestinations"), vm, kendo.mobile.ui);
-    };
 
-    routeDestinations.show = function () {
-
+        kendo.bind($("#routeDetails"), vm, kendo.mobile.ui);
     };
 });
