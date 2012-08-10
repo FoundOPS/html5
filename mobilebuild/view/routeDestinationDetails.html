@@ -1,0 +1,26 @@
+<div id="routeDestinationDetails" data-init="routeDestinationDetails.initialize" data-role="view"
+     data-show="routeDestinationDetails.show" data-title="Destination Info">
+
+    <div id="locationInfo" data-bind="source: this" data-template="locationTemplate"></div>
+
+    <div id="contacts" data-role="contacts" data-bind="contacts: contacts"></div>
+
+    <p style="top:10px; margin-bottom: -5px;">Tasks</p>
+    <hr style="width:90%;"/>
+    <ul id="routeTasksListView" data-bind="source: routeTasksSource, click: selectTask"
+        data-role="listview" data-style="inset" data-template="routeTasksTemplate">
+    </ul>
+</div>
+<script type="text/x-kendo-template" id="locationTemplate">
+    <h1>${selectedDestination.Client.Name}</h1>
+    <hr style="width:95%; margin: 10px 0px 20px 0px"/>
+    <p>${selectedDestination.Location.AddressLineOne}</p>
+    <p>${selectedDestination.Location.AddressLineTwo}</p>
+    <p>${selectedDestination.Location.City}, ${selectedDestination.Location.State}<br/>
+        ${selectedDestination.Location.ZipCode}</p>
+    <p style="margin-top:10px;"><a data-rel="external" data-role="button" href="http://maps.google.com/maps?q=${selectedDestination.Location.Latitude},${selectedDestination.Location.Longitude}"
+       class="km-button">Directions</a></p>
+</script>
+<script type="text/x-kendo-template" id="routeTasksTemplate">
+    <a>${Name}</a>
+</script>
