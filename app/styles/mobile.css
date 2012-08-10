@@ -49,12 +49,17 @@ body {
 #taskStatuses-listview .km-listview-link::after {
     border: 0;
 }
-/* Class Styles */
-.km-vertical-scrollbar,
-.km-horizontal-scrollbar {
-    height: 100%;
-    width: 100%;
+#actionSheetTitle {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 1.4em;
 }
+/* Fixes growing actionsheet. Breaks other widgets like comboBoxes and timePickers */
+/*.k-animation-container {*/
+    /*width:100% !important;*/
+    /*height:100% !important;*/
+/*}*/
+/* Class Styles */
 .km-list input[type="password"], .km-list input[type="search"], .km-list input[type="number"],
 .km-list input[type="tel"], .km-list input[type="url"], .km-list input[type="email"],
 .km-list input[type="text"]:not(.k-input), .km-list input[type="month"], .km-list input[type="color"],

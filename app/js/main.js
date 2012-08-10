@@ -33,6 +33,12 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "db/models
 
     window.onhashchange = function () {
         main.history.push(location.hash);
+
+        main.history.currentPage = main.history[main.history.length - 2];
+        main.history.nextPage = main.history[main.history.length - 1];
+        main.history.publish = {"comingFrom": main.history.currentPage, "goingTo": main.history.nextPage};
+
+        $.publish("hashChange", [main.history.publish]);
     };
 
     session.load(function (data) {
