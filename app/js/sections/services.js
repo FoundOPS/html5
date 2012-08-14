@@ -32,8 +32,11 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
                 return;
             }
 
+            //update the service id, client name, TODO: and location (address line 1 + 2)
             selectedServiceHolder.set("ServiceId", selectedService.Id);
+            selectedServiceHolder.set("ClientName", selectedService.get("Client.Name"));
 
+            //update all the field columns
             var fields = selectedService.Fields;
 
             for (var i = 0; i < fields.length; i++) {

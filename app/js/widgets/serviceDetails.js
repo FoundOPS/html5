@@ -203,14 +203,16 @@ define(["jquery", "db/services", "db/session", "lib/kendo.all", "lib/jquery.mask
                     formatResult: format,
                     dropdownCssClass: "bigdrop"
                 }).on("change", function (e) {
-                        var clientId = e.val;
-                        service.set("ClientId", clientId);
+                        var client = clientAutoComplete.select2("data");
+                        service.set("ClientId", client.Id);
+                        service.set("Client", client);
 
                         //todo clear/disable locations comboxbox
                         //load the client's locations
                         //select first automatically
                     });
             }
+
             //set the initial selection
             clientAutoComplete.select2("data", service.Client);
 
