@@ -16,8 +16,6 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
         //fixes a problem when the state is stored bc it is converted to json and back
         dbServices.convertServiceDates(state);
         vm.set("selectedService", state);
-        //because the input will be rerendered, rehookup input change listeners
-        saveHistory.saveInputChanges("#serviceDetails");
         services.save();
     };
 
@@ -43,10 +41,11 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
                 var val = field.get("Value");
                 if (field.Type === "OptionsField") {
                     val = "";
-                    var options = field.Options;
+                    var options = field.get("Options");
                     for (var o = 0; o < options.length; o++) {
-                        if (options[o].IsChecked) {
-                            val += options[o].Name + ", ";
+                        var option = field.get("Options[" + o + "]");
+                        if (option.get("IsChecked")) {
+                            val += option.get("Name") + ", ";
                         }
                     }
                     //remove the trailing comma and space
@@ -263,7 +262,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
         }
 
         //reorder the columns
-        columns = _(columns).sortBy(function (column) {
+        columns = _.sortBy(columns, function (column) {
             return column.order;
         });
 
@@ -288,9 +287,6 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
 
                     saveHistory.close();
                     saveHistory.resetHistory();
-
-                    //watch for input changes
-                    saveHistory.saveInputChanges("#serviceDetails");
                 });
             },
             columns: columns,
@@ -321,6 +317,14 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
     //endregion
 
     services.initialize = function () {
+        //save changes whenever the selected service has a change
+        vm.bind("change", function (e) {
+            if (e.field.indexOf("selectedService.") > -1) {
+                console.log(e.field);
+                saveHistory.save();
+            }
+        });
+
         dbServices.getServiceTypes(function (serviceTypes) {
             services.serviceTypes = serviceTypes;
 
@@ -377,7 +381,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widg
         };
 
         $("#services .k-grid-delete").on("click", function () {
-            var answer = confirm("Are you sure you want to delete the selected service?")
+            var answer = confirm("Are you sure you want to delete the selected service?");
             if (answer) {
                 grid.dataSource.remove(selectedServiceHolder);
                 dbServices.deleteService(vm.get("selectedService"));

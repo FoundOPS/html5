@@ -43,8 +43,6 @@ define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all", "widgets/ser
         //fixes a problem when the state is stored bc it is converted to json and back
         dbServices.convertServiceDates(state);
         vm.set("selectedService", state);
-        //because the input will be re-rendered, re-hookup input change listeners
-        saveHistory.saveInputChanges("#taskServiceDetails");
         routeTask.save();
     };
 
@@ -60,9 +58,6 @@ define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all", "widgets/ser
 
                 saveHistory.close();
                 saveHistory.resetHistory();
-
-                //watch for input changes
-                saveHistory.saveInputChanges("#taskServiceDetails");
             });
 
         dbServices.getTaskStatuses(function (response) {
@@ -84,6 +79,14 @@ define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all", "widgets/ser
 
     routeTask.initialize = function () {
         $("#taskServiceDetails").kendoServiceDetails();
+
+        //save changes whenever the selected service has a change
+        vm.bind("change", function (e) {
+            if (e.field.indexOf("selectedService.") > -1) {
+                console.log(e.field);
+                saveHistory.save();
+            }
+        });
     };
 
     routeTask.show = function () {
