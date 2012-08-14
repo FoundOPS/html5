@@ -40,14 +40,10 @@ body {
     border-bottom: 0px;
     border-top: 0px;
 }
-#clientPhoneContactInfoListView .km-listview-link::after,
-#locationPhoneContactInfoListView .km-listview-link::after,
-#clientEmailContactInfoListView .km-listview-link::after,
-#locationEmailContactInfoListView .km-listview-link::after,
-#clientWebsiteContactInfoListView .km-listview-link::after,
-#locationWebsiteContactInfoListView .km-listview-link::after,
-#taskStatuses-listview .km-listview-link::after {
-    border: 0;
+#contacts .km-listview-link::after, #contacts .km-detaildisclose::after,
+#routeStatus-listview .km-listview-link::after, #routeStatus-listview .km-detaildisclose::after,
+#taskStatuses-listview .km-listview-link::after, #taskStatuses-listview .km-detaildisclose::after {
+    border: 0 none white;
 }
 #actionSheetTitle {
     text-align: center;

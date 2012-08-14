@@ -1,12 +1,31 @@
-:: Build the project with requirejs
-
-node r.js -o main.build.js 
-
-:: optimize and combine all the css
-node r.js -o cssIn=../app/styles/main.less out=main/main.less
+COPY C:\FoundOPS\ng\app\styles\jquery.jscrollpane.less main
+COPY C:\FoundOPS\ng\app\styles\popup.less main
+COPY C:\FoundOPS\ng\app\styles\navigator.less main
+COPY C:\FoundOPS\ng\app\styles\mobile.css main
+COPY C:\FoundOPS\ng\app\styles\kendo.mobile.all.min.css main
+COPY C:\FoundOPS\ng\app\styles\kendo.common.min.css main
+COPY C:\FoundOPS\ng\app\styles\kendo.default.min.css main
+COPY C:\FoundOPS\ng\app\styles\main.less main
 
 :: Convert less to css
 cd  main
 CALL lessless
-del "main.less"
+del "*.less"
+del "jquery.jscrollpane.css"
+del "popup.css"
+del "navigator.css"
+
+:: optimize and combine all the css
+
+node ../r.js -o cssIn=main.css out=main-built.css optimizeCss=standard
+del "kendo.mobile.all.min.css"
+del "kendo.common.min.css"
+del "kendo.default.min.css"
+del "mobile.css"
+del "main.css"
+
+:: Build the project with requirejs
+cd ..
+node r.js -o main.build.js 
+
 PAUSE
