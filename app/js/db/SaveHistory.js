@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(['lib/noty'], function () {
+define(['underscore', 'lib/noty'], function (_) {
     var saveHistory = {}, successText = "Your Changes Have Been Saved.", errorText = "Error - Your Changes May Not Have Been Saved";
 
     //Stores the states of the current section
@@ -116,7 +116,7 @@ define(['lib/noty'], function () {
         }
     };
 
-    saveHistory.save = function () {
+    saveHistory.save = _.debounce(function () {
         //save the state (if there is a function to get it)
         if (saveHistory.options.state) {
             var state = saveHistory.options.state();
@@ -131,7 +131,7 @@ define(['lib/noty'], function () {
 
         saveHistory.close();
         saveHistory.options.save();
-    };
+    }, 200);
 
     /**
      * A function to undo changes

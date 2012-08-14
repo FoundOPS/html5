@@ -1,5 +1,5 @@
 'use strict';
-define(["jquery", "lib/kendo.all", "lib/jquery.maskMoney", "lib/jquery.autosize"], function ($) {
+define(["jquery", "db/services", "db/session", "lib/kendo.all", "lib/jquery.maskMoney", "lib/jquery.autosize", "lib/select2"], function ($, dbServices, session) {
 
     var kendo = window.kendo,
         ui = kendo.ui,
@@ -113,7 +113,7 @@ define(["jquery", "lib/kendo.all", "lib/jquery.maskMoney", "lib/jquery.autosize"
                         }
                         if (index >= 0) {
                             //check this item
-                            field.Options[index].IsChecked = true;
+                            field.set('Options[' + index + '].IsChecked', true);
                         }
                     },
                     dataTextField: "Name",
@@ -128,7 +128,7 @@ define(["jquery", "lib/kendo.all", "lib/jquery.maskMoney", "lib/jquery.autosize"
 
                 //select the first checked option
                 comboBox.select(function (dataItem) {
-                    return dataItem.IsChecked;
+                    return dataItem.get("IsChecked");
                 });
             } else {
                 //Checkbox (1) or checklist (2)
@@ -148,7 +148,7 @@ define(["jquery", "lib/kendo.all", "lib/jquery.maskMoney", "lib/jquery.autosize"
                     }
                     optionElement.change(function () {
                         var checked = !$(this).is(':checked');
-                        $(this)[0].optionParent.IsChecked = checked;
+                        $(this)[0].optionParent.set("IsChecked", checked);
                     });
 
                     optionElement.appendTo(fieldElement).wrap("<li><label>" + option.Name + "</label></li>");
@@ -165,6 +165,59 @@ define(["jquery", "lib/kendo.all", "lib/jquery.maskMoney", "lib/jquery.autosize"
 
             that.element.empty();
 
+            if (!service) {
+                return;
+            }
+
+            if (!that.options.clientReadonly) {
+                var format = function (client) {
+                    return client.Name;
+                };
+
+                //Add the Client auto-complete
+                var clientAutoComplete = $(inputTemplate).attr("type", "hidden").attr("style", "width: 90%").appendTo(that.element).wrap("<label>Client</label>");
+                clientAutoComplete.select2({
+                    placeholder: "Choose a client",
+                    minimumInputLength: 1,
+                    ajax: {
+                        url: dbServices.API_URL + "Clients/Get?roleId=" + session.get("role.id"),
+                        dataType: 'jsonp',
+                        quietMillis: 100,
+                        data: function (term, page) { // page is the one-based page number tracked by Select2
+                            return {
+                                search: term,
+                                skip: (page - 1) * 10,
+                                take: 10 // page size
+                            };
+                        },
+                        results: function (data, page) {
+                            // whether or not there are more results available
+                            var more = data.length > 9;
+                            return {results: data, more: more};
+                        }
+                    },
+                    id: function (client) {
+                        return client.Id;
+                    },
+                    formatSelection: format,
+                    formatResult: format,
+                    dropdownCssClass: "bigdrop"
+                }).on("change", function (e) {
+                        var clientId = e.val;
+                        service.set("ClientId", clientId);
+
+                        //todo clear/disable locations comboxbox
+                        //load the client's locations
+                        //select first automatically
+                    });
+            }
+            //set the initial selection
+            clientAutoComplete.select2("data", service.Client);
+
+            //Add the Location auto-complete //address line one & 2
+//            var locationAutoComplete = $(inputTemplate).appendTo(that.element).wrap("<li><label>Location</label></li>");
+
+            //Add all the fields
             var fieldCreationFunctions = {
                 "TextBoxField": that._createTextBoxField,
                 "NumericField": that._createNumericField,
@@ -172,42 +225,41 @@ define(["jquery", "lib/kendo.all", "lib/jquery.maskMoney", "lib/jquery.autosize"
                 "OptionsField": that._createOptionsField
             };
 
-            var fieldsListView = $('<ul data-role="listview" data-style="inset"></ul>').appendTo(that.element).wrap("<form></form>");
+            var fieldsListView = $('<ul></ul>').appendTo(that.element);
             var checkLists = $('<div></div>').appendTo(that.element);
 
-            if (service) {
-                for (var fieldIndex = 0; fieldIndex < service.Fields.length; fieldIndex++) {
-                    var field = service.Fields[fieldIndex];
+            for (var fieldIndex = 0; fieldIndex < service.Fields.length; fieldIndex++) {
+                var field = service.Fields[fieldIndex];
 
-                    //Checkbox (1) or checklist (2)
-                    var checkField = field.Type === "OptionsField" && (field.TypeInt === 1 || field.TypeInt === 2);
+                //Checkbox (1) or checklist (2)
+                var checkField = field.Type === "OptionsField" && (field.TypeInt === 1 || field.TypeInt === 2);
 
-                    var elementToAppendTo = checkField ? checkLists : fieldsListView;
+                var elementToAppendTo = checkField ? checkLists : fieldsListView;
 
-                    var fieldElement = fieldCreationFunctions[field.Type](field, fieldIndex, elementToAppendTo);
+                var fieldElement = fieldCreationFunctions[field.Type](field, fieldIndex, elementToAppendTo);
 
-                    if (fieldElement) {
-                        //setup the tooltip
-                        if (field.ToolTip) {
-                            fieldElement.attr("text", field.ToolTip);
-                        }
+                if (fieldElement) {
+                    //setup the tooltip
+                    if (field.ToolTip) {
+                        fieldElement.attr("text", field.ToolTip);
+                    }
 
-                        if (field.Type !== "OptionsField" && field.Type !== "DateTimeField") {
-                            //setup the value binding
-                            var dataBindAttr = "value: Fields[" + fieldIndex + "].Value";
-                            fieldElement.attr("data-bind", dataBindAttr);
-                        }
+                    if (field.Type !== "OptionsField" && field.Type !== "DateTimeField") {
+                        //setup the value binding
+                        var dataBindAttr = "value: Fields[" + fieldIndex + "].Value";
+                        fieldElement.attr("data-bind", dataBindAttr);
                     }
                 }
-
-                kendo.bind(fieldsListView, service, kendo.mobile.ui);
-                kendo.bind(checkLists, service, kendo.mobile.ui);
             }
+
+            kendo.bind(fieldsListView, service, kendo.mobile.ui);
+            kendo.bind(checkLists, service, kendo.mobile.ui);
 
             that.trigger(DATABOUND);
         },
         options: new kendo.data.ObservableObject({
-            name: "ServiceDetails"
+            name: "ServiceDetails",
+            clientReadonly: false
         })
     });
 
