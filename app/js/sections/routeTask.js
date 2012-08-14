@@ -78,12 +78,13 @@ define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all", "widgets/ser
     });
 
     routeTask.initialize = function () {
-        $("#taskServiceDetails").kendoServiceDetails();
+        $("#taskServiceDetails").kendoServiceDetails({
+            clientIsReadOnly: true
+        });
 
         //save changes whenever the selected service has a change
         vm.bind("change", function (e) {
             if (e.field.indexOf("selectedService.") > -1) {
-                console.log(e.field);
                 saveHistory.save();
             }
         });

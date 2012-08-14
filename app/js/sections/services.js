@@ -323,7 +323,6 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "widgets/serviceDet
         //save changes whenever the selected service has a change
         vm.bind("change", function (e) {
             if (e.field.indexOf("selectedService.") > -1) {
-                console.log(e.field);
                 saveHistory.save();
             }
         });

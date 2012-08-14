@@ -63,8 +63,6 @@ define(["jquery", "db/services", "db/session", "lib/kendo.all", "lib/jquery.mask
         _createDateTimeField: function (field, fieldIndex, listView) {
             var fieldElement = $(inputTemplate).appendTo(listView).wrap("<li>" + field.Name + "</li>");
 
-            //console.log(field);
-
             var options = {
                 change: function (e) {
                     //manually handle change event so the format is correct
@@ -169,7 +167,7 @@ define(["jquery", "db/services", "db/session", "lib/kendo.all", "lib/jquery.mask
                 return;
             }
 
-            if (!that.options.clientReadonly) {
+            if (!that.options.clientIsReadOnly) {
                 var format = function (client) {
                     return client.Name;
                 };
@@ -211,13 +209,13 @@ define(["jquery", "db/services", "db/session", "lib/kendo.all", "lib/jquery.mask
                         //load the client's locations
                         //select first automatically
                     });
-            }
 
-            //set the initial selection
-            clientAutoComplete.select2("data", service.Client);
+                //set the initial selection
+                clientAutoComplete.select2("data", service.Client);
 
-            //Add the Location auto-complete //address line one & 2
+                //Add the Location auto-complete //address line one & 2
 //            var locationAutoComplete = $(inputTemplate).appendTo(that.element).wrap("<li><label>Location</label></li>");
+            }
 
             //Add all the fields
             var fieldCreationFunctions = {
@@ -261,7 +259,7 @@ define(["jquery", "db/services", "db/session", "lib/kendo.all", "lib/jquery.mask
         },
         options: new kendo.data.ObservableObject({
             name: "ServiceDetails",
-            clientReadonly: false
+            clientIsReadOnly: false
         })
     });
 
