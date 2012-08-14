@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(['lib/moment'], function () {
+define(function () {
     var tools = {};
 
     /**

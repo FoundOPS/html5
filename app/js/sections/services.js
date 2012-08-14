@@ -2,7 +2,7 @@
 
 'use strict';
 
-require(["jquery", "db/services", "tools", "db/saveHistory", "lib/moment", "widgets/serviceDetails", "lib/jquery.form"], function ($, dbServices, tools, saveHistory) {
+require(["jquery", "db/services", "tools", "db/saveHistory", "widgets/serviceDetails", "lib/jquery.form"], function ($, dbServices, tools, saveHistory) {
     var services = {}, serviceHoldersDataSource, grid, handleChange, serviceTypesComboBox, selectedServiceHolder, vm;
 
     //region Public

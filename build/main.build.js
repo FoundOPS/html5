@@ -3,16 +3,17 @@
     paths: {
         lib: '../lib',
         jquery: 'empty:',
-        underscore: "../lib/underscore"
+        underscore: "../lib/underscore",
+        moment: "../lib/moment"
     },
     shim: {
         underscore: {
             exports: '_'
-        }
+        },
+        moment: {}
     },
     optimize: "uglify",
-    optimizeCss: "none",
-	
-	name: "main",
-	out: "main/main-built.js"
+
+    name: "main",
+    out: "main/main-built.js"
 })

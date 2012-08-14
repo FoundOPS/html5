@@ -1,0 +1,3 @@
+// Copyright 2012 FoundOPS LLC. All Rights Reserved.
+
+define(["db/developer"],function(developer){var ui={};ui.ITEM_COLORS=["#194A91","#ff0000","#03EA03","#663300","#660099","#FF9900","#0099ff","#006600","#990000","#FF00CC"],ui.ITEM_OPACITIES=[.8,.75,.7,.65,.6,.55,.5,.45,.4,.35,.3];var imageRootUrl="../Content/";return developer.CURRENT_FRAME===developer.Frame.BROWSER&&(imageRootUrl="img/"),ui.ImageUrls={ANDROID:imageRootUrl+"android.png",APPLE:imageRootUrl+"apple.png",DEPOT:imageRootUrl+"depot.png",OUTER_CIRCLE:imageRootUrl+"outerCircle.png",TRUCK:imageRootUrl+"truck.png"},ui})

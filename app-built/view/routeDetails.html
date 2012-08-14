@@ -1,0 +1,16 @@
+<div id="routeDetails" data-role="view" data-show="routeDetails.show" data-title="Route Destinations">
+
+    <ul id="routeDestinations-listview" data-bind="source: routeDestinationsSource, click: selectRouteDestination"
+        data-role="listview" data-style="inset" data-template="routeDestinationViewTemplate">
+    </ul>
+
+    <div style="text-align: center">
+        <a id="startButton" data-align="right" data-bind="click: startRoute, visible: startVisible"
+           data-role="button">Start Route</a>
+        <a id="endButton" data-align="right" data-bind="click: endRoute, visible: endVisible"
+           data-role="button">End Route</a>
+    </div>
+</div>
+<script type="text/x-kendo-template" id="routeDestinationViewTemplate">
+    <a class="km-listview-link">#= Client.Name #<br/><label id="addressLabel">#= Location.AddressLineOne #</label></a>
+</script>

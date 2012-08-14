@@ -10,17 +10,19 @@ require.config({
     baseUrl: 'js',
     paths: {
         lib: "../lib",
-        underscore: "../lib/underscore"
+        underscore: "../lib/underscore",
+        moment: "../lib/moment"
     },
     shim: {
         underscore: {
             exports: '_'
-        }
+        },
+        moment: {}
     }
 });
 
 require(["widgets/navigator", "containers/silverlight", "db/session", "db/models", "lib/kendo.all", "underscore",
-    "lib/userVoice", "lib/pubsub", "sections/personalSettings", "sections/businessSettings", "sections/usersSettings",
+    "lib/userVoice", "lib/pubsub", "moment", "sections/personalSettings", "sections/businessSettings", "sections/usersSettings",
     "sections/dispatcherSettings", "sections/changePassword", "sections/createPassword", "sections/services",
     "sections/routes", "sections/routeDetails", "sections/routeDestinationDetails", "sections/routeTask",
     "widgets/contacts", "widgets/serviceDetails"], function (Navigator, silverlight, session) {
@@ -117,5 +119,6 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "db/models
         window.trackEvent = function (section, action, label) {
             pageTracker._trackEvent(section, action, label);
         };
-    } catch (err) { }
+    } catch (err) {
+    }
 });
