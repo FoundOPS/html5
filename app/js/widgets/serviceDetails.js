@@ -265,9 +265,6 @@ define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "li
 
             return fieldElement;
         },
-
-            clientSelector = $(inputTemplate).attr("type", "hidden").appendTo(that.element).wrap("<label>Client</label>");
-            locationSelector = $(inputTemplate).attr("type", "hidden").appendTo(that.element).wrap("<label>Location</label>");
         render: function (service) {
             var that = this;
 
