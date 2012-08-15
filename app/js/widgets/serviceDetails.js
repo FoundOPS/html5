@@ -162,14 +162,38 @@ define(["jquery", "db/services", "db/session", "lib/kendo.all", "lib/jquery.mask
          * @private
          */
         _addClientLocation: function (service) {
-            var that = this;
+            var that = this, clientSelector, locationSelector;
 
             var formatClientName = function (client) {
                 return client.Name;
             };
 
+            var updateLocations = function (client) {
+                //clear & disable the locations comboxbox
+                if (locationSelector) {
+                    locationSelector.select2("data", {AddressLineOne: "", AddressLineTwo: ""});
+                    locationSelector.select2("disable");
+                }
+
+                if (client) {
+                    //load the client's locations
+                    dbServices.getClientLocations(client.Id, function (locations) {
+                        that._locations = locations;
+
+                        //Select the selected location
+                        //If there is no location selected, select the first location automatically
+                        if (locations.length > 0) {
+                            locationSelector.select2("enable");
+
+
+                            locationSelector.select2("data", locations[0]);
+                        }
+                    });
+                }
+            };
+
             //Add the Client selector w auto-complete and infinite scrolling
-            var clientSelector = $(inputTemplate).attr("type", "hidden").attr("style", "width: 90%").appendTo(that.element).wrap("<label>Client</label>");
+            clientSelector = $(inputTemplate).attr("type", "hidden").attr("style", "width: 90%").appendTo(that.element).wrap("<label>Client</label>");
             clientSelector.select2({
                 placeholder: "Choose a client",
                 minimumInputLength: 1,
@@ -198,50 +222,49 @@ define(["jquery", "db/services", "db/session", "lib/kendo.all", "lib/jquery.mask
                 dropdownCssClass: "bigdrop"
             }).on("change", function (e) {
                     var client = clientSelector.select2("data");
-                    service.set("ClientId", client.Id);
                     service.set("Client", client);
 
-                    //todo clear/disable locations comboxbox
-                    //load the client's locations
-                    //select first automatically
-                    dbServices.getClientLocations(client.Id, function (locations) {
-                        that._locations = locations;
-                    });
+                    if (client) {
+                        service.set("ClientId", client.Id);
+                    } else {
+                        service.set("ClientId", "");
+                    }
+                    updateLocations(client);
                 });
 
-            //set the initial selection
-            clientSelector.select2("data", service.Client);
+            if (service.Client) {
+                //set the initial selection
+                clientSelector.select2("data", service.Client);
+                updateLocations(service.Client);
+            }
 
             //Add the Location selector //address line one & 2
 
-//            var formatLocationName = function (location) {
-//                return location.AddressLineTwo + " " + location.AddressLineTwo;
-//            };
-//            var locationSelector = $(inputTemplate).attr("type", "hidden").attr("style", "width: 90%").appendTo(that.element).wrap("<label>Location</label>");
-//            locationSelector.select2({
-//                placeholder: "Choose a location",
-//                id: function (location) {
-//                    return location.Id;
-//                },
-//                query: function (query) {
-//                    var data = {results: []}, i, j, s;
-//                    for (i = 1; i < 5; i++) {
-//                        s = "";
-//                        for (j = 0; j < i; j++) {
-//                            s = s + query.term;
-//                        }
-//                        data.results.push({id: query.term + i, text: s});
-//                    }
-//                    query.callback(data);
-//                },
-//                formatSelection: formatLocationName,
-//                formatResult: formatLocationName,
-//                dropdownCssClass: "bigdrop"
-//            }).on("change", function (e) {
-////                        var client = clientAutoComplete.select2("data");
-////                        service.set("ClientId", client.Id);
-////                        service.set("Client", client);
-//                });
+            var formatLocationName = function (location) {
+                return location.AddressLineOne + " " + location.AddressLineTwo;
+            };
+            locationSelector = $(inputTemplate).attr("type", "hidden").attr("style", "width: 90%").appendTo(that.element).wrap("<label>Location</label>");
+            locationSelector.select2({
+                placeholder: "Choose a location",
+                id: function (location) {
+                    return location.Id;
+                },
+                query: function (query) {
+                    if (!that._locations) {
+                        that._locations = [];
+                    }
+                    var data = {results: that._locations};
+                    query.callback(data);
+                },
+                formatSelection: formatLocationName,
+                formatResult: formatLocationName,
+                dropdownCssClass: "bigdrop"
+            }).on("change", function (e) {
+                    console.log(locationSelector.select2("data"));
+//                        var client = clientAutoComplete.select2("data");
+//                        service.set("ClientId", client.Id);
+//                        service.set("Client", client);
+                });
         },
 
         render: function (service) {

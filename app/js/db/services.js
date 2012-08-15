@@ -182,7 +182,7 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
     //region
 
     services.getClientLocations = function (clientId, callback) {
-        return services._getHttp("Locations/Get")(callback, {clientId: clientId});
+        return services._getHttp("Locations/Get", {clientId: clientId})(callback);
     };
 
     //endregion
