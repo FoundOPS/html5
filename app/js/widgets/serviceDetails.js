@@ -57,6 +57,8 @@ define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "li
                             var destination = models.firstFromId(locations, destinationField.LocationId);
                             if (destination) {
                                 locationSelector.select2("data", destination);
+                                //for updating the services grid
+                                destinationField.Value = destination;
                             }
 
                             locationSelector.select2("enable");
@@ -130,7 +132,7 @@ define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "li
                     var location = locationSelector.select2("data");
                     var destinationField = models.getDestinationField(service);
                     //Used for updating the grid
-                    destinationField.set("Value", location);
+                    destinationField.Value = location;
                     destinationField.set("LocationId", location.Id);
                 });
         },

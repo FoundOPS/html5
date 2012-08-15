@@ -54,7 +54,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "widgets/serviceDet
                     //remove the trailing comma and space
                     val = val.substr(0, val.length - 2);
                 }
-                if (field.Type === "LocationField") {
+                if (field.Type === "LocationField" && field.Value) {
                     val = field.Value.AddressLineOne + " " + field.Value.AddressLineTwo;
                 }
                 //replace spaces with _
