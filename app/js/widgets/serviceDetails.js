@@ -29,8 +29,9 @@ define(["jquery", "db/services", "db/session", "lib/kendo.all", "lib/jquery.mask
         _createTextBoxField: function (field, fieldIndex, listView) {
             var fieldElement;
             if (field.IsMultiLine) {
+                //use autosize plugin to keep textarea the right size
                 fieldElement = $(multiLineTextTemplate).autosize();
-                fieldElement.appendTo(listView).wrap("<li>" + field.Name + "</li>");
+                fieldElement.appendTo(listView).wrap("<li class='textarea'>" + field.Name + "</li>");
             }
             else {
                 fieldElement = $(inputTemplate);
@@ -54,7 +55,7 @@ define(["jquery", "db/services", "db/session", "lib/kendo.all", "lib/jquery.mask
             } else if (field.Mask === "p") {
                 //percentage
                 //TODO: improve using http://stackoverflow.com/questions/7933505/mask-input-for-number-percent
-                $("<span>%</span>").insertAfter(fieldElement);
+                //$("<span>%</span>").insertAfter(fieldElement);
             }
 
             return fieldElement;
@@ -193,7 +194,7 @@ define(["jquery", "db/services", "db/session", "lib/kendo.all", "lib/jquery.mask
             };
 
             //Add the Client selector w auto-complete and infinite scrolling
-            clientSelector = $(inputTemplate).attr("type", "hidden").attr("style", "width: 90%").appendTo(that.element).wrap("<label>Client</label>");
+            clientSelector = $(inputTemplate).attr("type", "hidden").appendTo(that.element).wrap("<label>Client</label>");
             clientSelector.select2({
                 placeholder: "Choose a client",
                 minimumInputLength: 1,
@@ -243,7 +244,7 @@ define(["jquery", "db/services", "db/session", "lib/kendo.all", "lib/jquery.mask
             var formatLocationName = function (location) {
                 return location.AddressLineOne + " " + location.AddressLineTwo;
             };
-            locationSelector = $(inputTemplate).attr("type", "hidden").attr("style", "width: 90%").appendTo(that.element).wrap("<label>Location</label>");
+            locationSelector = $(inputTemplate).attr("type", "hidden").appendTo(that.element).wrap("<label>Location</label>");
             locationSelector.select2({
                 placeholder: "Choose a location",
                 id: function (location) {
