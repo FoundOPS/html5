@@ -20,5 +20,5 @@
 		}
 	],
     optimize: "uglify",
-	optimizeCSS: "standard"
+	optimizeCSS: "none"
 })

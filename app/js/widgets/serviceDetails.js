@@ -140,8 +140,9 @@ define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "li
         _createTextBoxField: function (field, fieldIndex, listView) {
             var fieldElement;
             if (field.IsMultiLine) {
+                //use autosize plugin to keep textarea the right size
                 fieldElement = $(multiLineTextTemplate).autosize();
-                fieldElement.appendTo(listView).wrap("<li>" + field.Name + "</li>");
+                fieldElement.appendTo(listView).wrap("<li class='textarea'>" + field.Name + "</li>");
             }
             else {
                 fieldElement = $(inputTemplate);
@@ -165,7 +166,7 @@ define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "li
             } else if (field.Mask === "p") {
                 //percentage
                 //TODO: improve using http://stackoverflow.com/questions/7933505/mask-input-for-number-percent
-                $("<span>%</span>").insertAfter(fieldElement);
+                //$("<span>%</span>").insertAfter(fieldElement);
             }
 
             return fieldElement;
@@ -266,7 +267,6 @@ define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "li
 
             return fieldElement;
         },
-
         render: function (service) {
             var that = this;
 

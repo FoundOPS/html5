@@ -1,33 +1,66 @@
-COPY C:\FoundOPS\ng\app\styles\jquery.jscrollpane.less C:\FoundOPS\ng\app-built\styles
-COPY C:\FoundOPS\ng\app\styles\popup.less C:\FoundOPS\ng\app-built\styles
-COPY C:\FoundOPS\ng\app\styles\navigator.less C:\FoundOPS\ng\app-built\styles
-COPY C:\FoundOPS\ng\app\styles\mobile.css C:\FoundOPS\ng\app-built\styles
-COPY C:\FoundOPS\ng\app\styles\kendo.mobile.all.min.css C:\FoundOPS\ng\app-built\styles
-COPY C:\FoundOPS\ng\app\styles\kendo.common.min.css C:\FoundOPS\ng\app-built\styles
-COPY C:\FoundOPS\ng\app\styles\kendo.default.min.css C:\FoundOPS\ng\app-built\styles
-COPY C:\FoundOPS\ng\app\styles\main.less C:\FoundOPS\ng\app-built\styles
+:: Build the project with requirejs
+node r.js -o app.build.js
 
-PAUSE
+
 
 :: Convert less to css
-cd  ../app-built/styles
+cd  ..
+cd app-built/styles
 CALL lessless
+
+
+
+:: optimize and combine all the css
+
+cd ..
+cd ..
+node build/r.js -o cssIn=app-built/styles/main.css out=app-built/styles/main-built.css optimizeCss=standard
+
+
+
+cd app-built/styles
 del "*.less"
 del "jquery.jscrollpane.css"
 del "popup.css"
 del "navigator.css"
-
-PAUSE
-
-:: Build the project with requirejs
-cd ../../build
-node r.js -o app.build.js
-cd ..
-cd app-built/styles
+del "kendo.metro.min.css"
+del "leaflet.css"
+del "leaflet.ie.css"
+del "map.css"
+del "mapIE.css"
+del "PTS55F.eot"
+::del "select2.css"
 del "kendo.mobile.all.min.css"
 del "kendo.common.min.css"
 del "kendo.default.min.css"
 del "mobile.css"
 del "main.css"
 
-PAUSE
+
+
+cd ..
+rd /s /q "lib"
+mkdir "lib\images"
+COPY C:\FoundOPS\ng\app\lib\require-jquery.js C:\FoundOPS\ng\app-built\lib
+COPY C:\FoundOPS\ng\app\lib\images C:\FoundOPS\ng\app-built\lib\images
+
+
+
+cd js
+del "tools.js"
+rd /s /q "widgets"
+rd /s /q "ui"
+rd /s /q "sections"
+rd /s /q "db"
+rd /s /q "containers"
+
+
+
+cd..
+del "navigator.html"
+ren "navigator-built.html" "index.html"
+
+
+del "build.txt"
+rd /s /q ".idea"
+

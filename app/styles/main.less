@@ -1,5 +1,5 @@
 @import "navigator.less";
-@import "styles/select2.css";
+@import url("select2.css");
 
 /*region Reset*/
 /* http://meyerweb.com/eric/tools/css/reset/   v2.0 | 20110126   License: none (public domain)*/
@@ -709,7 +709,7 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
     #left {
         height: 100%;
         width: auto;
-        margin-right: 280px;
+        margin-right: 290px;
     }
     .addDeleteBtns{
         float: right;
@@ -751,27 +751,39 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
 }
 #serviceDetails {
     position: absolute;
-    top:30px;
-    right: 15px;
-    width: 250px;
+    top:45px;
+    right: 30px;
+    width: 200px;
+    background-color:#fff;
+    border: 1px solid #ccc;
+    padding:15px;
     li{
-        padding: 1px 0 1px 5px;
+        padding: 1px 0 1px 0;
     }
-    .k-timepicker, .k-combobox{
-        width: 210px;
-        margin-top: 2px;
+    li.textarea{
+        vertical-align: top;
+        padding-top: 5px;
+    }
+    .k-timepicker, .k-combobox, input[type="text"], input[type="number"], .select2-container{
+        width: 100%;
+        margin-top: 4px;
     }
     textarea{
-        width: 168px !important;
-        margin: 0 0 0 5px;
-        font-size: 18px;
+        width: 100% !important;
+        margin: 0;
+        font-size: 17px;
         color: #385487;
         min-width: 6em;
         border: 0;
         padding: .4em;
+        padding-left: 0px;
         outline: 0;
         background: transparent;
         font-family: PTSans;
+    }
+    .km-listview-wrapper ul{
+        width: 100%;
+        margin-left: 0;
     }
 }
 /*endregion*/
