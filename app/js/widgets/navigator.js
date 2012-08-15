@@ -103,10 +103,10 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
          * Converts an image url to its colored version, for the hover url
          * Ex. dispatcher.png -> dispatcherColor.png
          */
-    //    function toHoverImage(imgLoc) {
-    //        var extIndex = imgLoc.lastIndexOf('.');
-    //        return imgLoc.substring(0, extIndex) + "Color" + imgLoc.substring(extIndex);
-    //    }
+        //    function toHoverImage(imgLoc) {
+        //        var extIndex = imgLoc.lastIndexOf('.');
+        //        return imgLoc.substring(0, extIndex) + "Color" + imgLoc.substring(extIndex);
+        //    }
 
         var getSection = function (sections, name) {
             var section;
@@ -194,7 +194,7 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
                     //TODO: Will this work every time?
                     var section = getSection(config.sections, name);
                     $(this).trigger("sectionSelected", section);
-                    if($("#sideBar").hasClass("cover")){
+                    if ($("#sideBar").hasClass("cover")) {
                         closeCoverWindow();
                     }
                 }
@@ -218,7 +218,7 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
 
         };
 
-        var coverWindow = function(){
+        var coverWindow = function () {
             var sideBarDiv = $("#sideBar");
             sideBarDiv.removeClass("hover");
             sideBarDiv.removeClass("expand");
@@ -232,7 +232,7 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
             $(".iconExpand").addClass("flip");
         };
 
-        var closeCoverWindow = function(){
+        var closeCoverWindow = function () {
             slideMenuClosed();
             $("#sideBar").removeClass("cover");
             $(".iconExpand").removeClass("flip");
@@ -267,7 +267,7 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
             sBarInnerWrapper.append(sBar);
             sBarWrapper.append(sBarInnerWrapper);
 
-            if(typeof(config.coverWindow)!=='undefined' && config.coverWindow==true){
+            if (typeof(config.coverWindow) !== 'undefined' && config.coverWindow == true) {
                 $(sBarInnerWrapper).after("<div id='coverWindowButton'>Cover Window</div>");
                 thisNavigator.isCoverWindowButtonEnabled = true;
                 console.log("It's enabled");
@@ -277,13 +277,13 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
 
             setSideBarSections(config, config.roles[0].sections);
 
-            $(document).ready(function() {
-                if($(window).width()<=800){
+            $(document).ready(function () {
+                if ($(window).width() <= 800) {
                     //TODO: Condense into another function?
                     sBar.addClass("hidden");
                     var offset = -1 * (sBar.offset().top + sBar.outerHeight());
                     sBar.css("top", offset);
-                }else{
+                } else {
                     //$(".iconShow").addClass("rotateIcon");
                 }
             });
@@ -326,20 +326,20 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
                     sideBarDiv.removeClass("hover");
                     $(".iconExpand").removeClass("flip");
 
-                    if(sideBarDiv.hasClass("cover")){
+                    if (sideBarDiv.hasClass("cover")) {
                         sideBarDiv.removeClass("cover");
                         sideBarDiv.attr("style", "");
                         $("#sideBarWrapper").attr("style", "");
                         $("#sideBarInnerWrapper").attr("style", "");
                     }
 
-                    if(!sideBarDiv.hasClass("shown")){
+                    if (!sideBarDiv.hasClass("shown")) {
                         $("#sideBarWrapper").css("width", "");
 
                         //TODO: Condense.
                         sideBarDiv.addClass("hidden");
                         //console.log("sBar.offset().top: " + sBar.offset().top);
-                        if(sBar.offset().top>=0){
+                        if (sBar.offset().top >= 0) {
                             var offset = -1 * (sBar.offset().top + sBar.outerHeight());
                             //console.log("Offset: "+ offset);
                             sBar.css("top", offset);
@@ -355,7 +355,7 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
                         $("#sideBarInnerWrapper").attr("style", "");
                     }
                 } else if ($(window).width() > 800) {
-                    if (sideBarDiv.hasClass("hidden")||sideBarDiv.hasClass("shown")) {
+                    if (sideBarDiv.hasClass("hidden") || sideBarDiv.hasClass("shown")) {
                         sideBarDiv.removeClass("hidden");
                         sideBarDiv.removeClass("shown");
                         sideBarDiv.attr("style", "");
@@ -407,10 +407,10 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
             );
 
             $("#coverWindowButton").stop().click(
-                function(){
+                function () {
                     if (sideBarDiv.hasClass("cover")) {
                         closeCoverWindow();
-                    } else{
+                    } else {
                         coverWindow();
                     }
                 }
@@ -548,30 +548,30 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
             });
 
             var changeBusinessMenu = {
-                id:"changeBusiness",
-                title:"Businesses",
-                contents:config.roles
+                id: "changeBusiness",
+                title: "Businesses",
+                contents: config.roles
             };
             $("#navClient").popup('addMenu', changeBusinessMenu);
 
             /*$("#logo").popup({
-                id: "logo",
-                title: "Test Menu",
-                contents: [
-                    {"name": "Testing long menu names..............", url: config.settingsUrl},
-                    {"name": "Test 1", id: "test1"},
-                    {"name": "Log Out", url: ""}
-                ]
-            });
-            $("#logo").popup('addMenu',{
-                    id:"test1",
-                    title: "Testing 1",
-                    contents:
-                        [
-                            {"name": "Test a"},
-                            {"name": "Test b"},
-                            {"name": "Test c"}
-                        ]
+             id: "logo",
+             title: "Test Menu",
+             contents: [
+             {"name": "Testing long menu names..............", url: config.settingsUrl},
+             {"name": "Test 1", id: "test1"},
+             {"name": "Log Out", url: ""}
+             ]
+             });
+             $("#logo").popup('addMenu',{
+             id:"test1",
+             title: "Testing 1",
+             contents:
+             [
+             {"name": "Test a"},
+             {"name": "Test b"},
+             {"name": "Test c"}
+             ]
              });*/
 
             $(document).on("popup.created", function () {
@@ -607,7 +607,9 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
         initTopNav(config);
         initSideBar(config);
         initPopup(config);
-        this.closePopup = $(document).popup('closePopup');
+        this.closePopup = function () {
+            $("#navClient").popup('closePopup');
+        };
 
         this.hideSearch = function () {
             $("#navSearch").hide();
