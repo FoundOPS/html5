@@ -54,6 +54,9 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "widgets/serviceDet
                     //remove the trailing comma and space
                     val = val.substr(0, val.length - 2);
                 }
+                if (field.Type === "LocationField") {
+                    val = field.Value.AddressLineOne + " " + field.Value.AddressLineTwo;
+                }
                 //replace spaces with _
                 var columnName = field.Name.split(' ').join('_');
                 selectedServiceHolder.set(columnName, val);

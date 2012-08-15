@@ -7,6 +7,7 @@
 	hidden = 'hidden',
 	borderBox = 'border-box',
 	lineHeight = 'lineHeight',
+
 	copy = '<textarea tabindex="-1" style="position:absolute; top:-9999px; left:-9999px; right:auto; bottom:auto; -moz-box-sizing:content-box; -webkit-box-sizing:content-box; box-sizing:content-box; word-wrap:break-word; height:0 !important; min-height:0 !important; overflow:hidden;">',
 	// line-height is omitted because IE7/IE8 doesn't return the correct value.
 	copyStyle = [
@@ -59,7 +60,7 @@
 				} else {
 					mirror = $(copy).data('ismirror', true).addClass(className || 'autosizejs')[0];
 
-					resize = $ta.css('resize') === 'none' ? 'none' : 'horizontal';
+					resize = $ta.css('resize') === 'none' ? 'none' : 'vertical';
 
 					$ta.data('mirror', $(mirror)).css({
 						overflow: hidden,

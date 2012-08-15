@@ -1,5 +1,5 @@
 'use strict';
-define(["jquery", "db/services", "db/session", "lib/kendo.all", "lib/jquery.maskMoney", "lib/jquery.autosize", "lib/select2"], function ($, dbServices, session) {
+define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "lib/jquery.maskMoney", "lib/jquery.autosize", "lib/select2"], function ($, dbServices, session, models) {
 
     var kendo = window.kendo,
         ui = kendo.ui,
@@ -26,11 +26,121 @@ define(["jquery", "db/services", "db/session", "lib/kendo.all", "lib/jquery.mask
             return this.element.children();
         },
 
+        /**
+         * Add the client and location selectors
+         * @param service
+         * @private
+         */
+        _createClientLocation: function (service) {
+            var that = this, clientSelector, locationSelector;
+
+            var formatClientName = function (client) {
+                return client.Name;
+            };
+
+            //updates the location's comboBox to the current client's locations
+            var updateLocations = function (client) {
+                //clear & disable the locations comboxbox
+                if (locationSelector) {
+                    locationSelector.select2("data", {AddressLineOne: "", AddressLineTwo: ""});
+                    locationSelector.select2("disable");
+                }
+
+                if (client) {
+                    //load the client's locations
+                    dbServices.getClientLocations(client.Id, function (locations) {
+                        that._locations = locations;
+
+                        // select the selected destination
+                        var destinationField = models.getDestinationField(service);
+                        if (locations.length > 0) {
+                            var destination = models.firstFromId(locations, destinationField.LocationId);
+                            if (destination) {
+                                locationSelector.select2("data", destination);
+                            }
+
+                            locationSelector.select2("enable");
+                        }
+                    });
+                }
+            };
+
+            //Add the Client selector w auto-complete and infinite scrolling
+            clientSelector = $(inputTemplate).attr("type", "hidden").attr("style", "width: 90%").appendTo(that.element).wrap("<label>Client</label>");
+            clientSelector.select2({
+                placeholder: "Choose a client",
+                minimumInputLength: 1,
+                ajax: {
+                    url: dbServices.API_URL + "Clients/Get?roleId=" + session.get("role.id"),
+                    dataType: 'jsonp',
+                    quietMillis: 100,
+                    data: function (term, page) { // page is the one-based page number tracked by Select2
+                        return {
+                            search: term,
+                            skip: (page - 1) * 10,
+                            take: 10 // page size
+                        };
+                    },
+                    results: function (data, page) {
+                        // whether or not there are more results available
+                        var more = data.length > 9;
+                        return {results: data, more: more};
+                    }
+                },
+                id: function (client) {
+                    return client.Id;
+                },
+                formatSelection: formatClientName,
+                formatResult: formatClientName,
+                dropdownCssClass: "bigdrop"
+            }).on("change", function (e) {
+                    var client = clientSelector.select2("data");
+                    service.set("Client", client);
+                    service.set("ClientId", client.Id);
+                    updateLocations(client);
+                });
+
+            if (service.Client) {
+                //set the initial selection
+                clientSelector.select2("data", service.Client);
+                updateLocations(service.Client);
+            }
+
+            //Add the Location selector
+            var formatLocationName = function (location) {
+                return location.AddressLineOne + " " + location.AddressLineTwo;
+            };
+            locationSelector = $(inputTemplate).attr("type", "hidden").attr("style", "width: 90%").appendTo(that.element).wrap("<label>Location</label>");
+            locationSelector.select2({
+                placeholder: "Choose a location",
+                id: function (location) {
+                    return location.Id;
+                },
+                query: function (query) {
+                    if (!that._locations) {
+                        that._locations = [];
+                    }
+                    var data = {results: that._locations};
+                    query.callback(data);
+                },
+                formatSelection: formatLocationName,
+                formatResult: formatLocationName,
+                dropdownCssClass: "bigdrop"
+            }).on("change", function (e) {
+                    var location = locationSelector.select2("data");
+                    var destinationField = models.getDestinationField(service);
+                    //Used for updating the grid
+                    destinationField.set("Value", location);
+                    destinationField.set("LocationId", location.Id);
+                });
+        },
+
         _createTextBoxField: function (field, fieldIndex, listView) {
             var fieldElement;
             if (field.IsMultiLine) {
+                //use autosize plugin to keep textarea the right size
                 fieldElement = $(multiLineTextTemplate).autosize();
-                fieldElement.appendTo(listView).wrap("<li>" + field.Name + "</li>");
+                fieldElement.appendTo(listView).wrap("<li class='textarea'>" + field.Name + "</li>");
             }
             else {
                 fieldElement = $(inputTemplate);
@@ -54,7 +164,7 @@ define(["jquery", "db/services", "db/session", "lib/kendo.all", "lib/jquery.mask
             } else if (field.Mask === "p") {
                 //percentage
                 //TODO: improve using http://stackoverflow.com/questions/7933505/mask-input-for-number-percent
-                $("<span>%</span>").insertAfter(fieldElement);
+                //$("<span>%</span>").insertAfter(fieldElement);
             }
 
             return fieldElement;
@@ -156,94 +266,8 @@ define(["jquery", "db/services", "db/session", "lib/kendo.all", "lib/jquery.mask
             return fieldElement;
         },
 
-        /**
-         * Add the client and location selectors
-         * @param service
-         * @private
-         */
-        _addClientLocation: function (service) {
-            var that = this;
-
-            var formatClientName = function (client) {
-                return client.Name;
-            };
-
-            //Add the Client selector w auto-complete and infinite scrolling
-            var clientSelector = $(inputTemplate).attr("type", "hidden").attr("style", "width: 90%").appendTo(that.element).wrap("<label>Client</label>");
-            clientSelector.select2({
-                placeholder: "Choose a client",
-                minimumInputLength: 1,
-                ajax: {
-                    url: dbServices.API_URL + "Clients/Get?roleId=" + session.get("role.id"),
-                    dataType: 'jsonp',
-                    quietMillis: 100,
-                    data: function (term, page) { // page is the one-based page number tracked by Select2
-                        return {
-                            search: term,
-                            skip: (page - 1) * 10,
-                            take: 10 // page size
-                        };
-                    },
-                    results: function (data, page) {
-                        // whether or not there are more results available
-                        var more = data.length > 9;
-                        return {results: data, more: more};
-                    }
-                },
-                id: function (client) {
-                    return client.Id;
-                },
-                formatSelection: formatClientName,
-                formatResult: formatClientName,
-                dropdownCssClass: "bigdrop"
-            }).on("change", function (e) {
-                    var client = clientSelector.select2("data");
-                    service.set("ClientId", client.Id);
-                    service.set("Client", client);
-
-                    //todo clear/disable locations comboxbox
-                    //load the client's locations
-                    //select first automatically
-                    dbServices.getClientLocations(client.Id, function (locations) {
-                        that._locations = locations;
-                    });
-                });
-
-            //set the initial selection
-            clientSelector.select2("data", service.Client);
-
-            //Add the Location selector //address line one & 2
-
-//            var formatLocationName = function (location) {
-//                return location.AddressLineTwo + " " + location.AddressLineTwo;
-//            };
-//            var locationSelector = $(inputTemplate).attr("type", "hidden").attr("style", "width: 90%").appendTo(that.element).wrap("<label>Location</label>");
-//            locationSelector.select2({
-//                placeholder: "Choose a location",
-//                id: function (location) {
-//                    return location.Id;
-//                },
-//                query: function (query) {
-//                    var data = {results: []}, i, j, s;
-//                    for (i = 1; i < 5; i++) {
-//                        s = "";
-//                        for (j = 0; j < i; j++) {
-//                            s = s + query.term;
-//                        }
-//                        data.results.push({id: query.term + i, text: s});
-//                    }
-//                    query.callback(data);
-//                },
-//                formatSelection: formatLocationName,
-//                formatResult: formatLocationName,
-//                dropdownCssClass: "bigdrop"
-//            }).on("change", function (e) {
-////                        var client = clientAutoComplete.select2("data");
-////                        service.set("ClientId", client.Id);
-////                        service.set("Client", client);
-//                });
-        },
-
+            clientSelector = $(inputTemplate).attr("type", "hidden").appendTo(that.element).wrap("<label>Client</label>");
+            locationSelector = $(inputTemplate).attr("type", "hidden").appendTo(that.element).wrap("<label>Location</label>");
         render: function (service) {
             var that = this;
 
@@ -256,7 +280,7 @@ define(["jquery", "db/services", "db/session", "lib/kendo.all", "lib/jquery.mask
             }
 
             if (!that.options.clientIsReadOnly) {
-                that._addClientLocation(service);
+                that._createClientLocation(service);
             }
 
             //Add all the fields
@@ -272,6 +296,11 @@ define(["jquery", "db/services", "db/session", "lib/kendo.all", "lib/jquery.mask
 
             for (var fieldIndex = 0; fieldIndex < service.Fields.length; fieldIndex++) {
                 var field = service.Fields[fieldIndex];
+
+                //Location Destination is manually handled for now
+                if (field.Type === "LocationField") {
+                    continue;
+                }
 
                 //Checkbox (1) or checklist (2)
                 var checkField = field.Type === "OptionsField" && (field.TypeInt === 1 || field.TypeInt === 2);
