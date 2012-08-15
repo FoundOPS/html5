@@ -179,6 +179,14 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
 
     //endregion
 
+    //region
+
+    services.getClientLocations = function (clientId, callback) {
+        return services._getHttp("Locations/Get")(callback, {clientId: clientId});
+    };
+
+    //endregion
+
     //region Services
 
     /**
@@ -221,28 +229,6 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
         }
     };
 
-    /**
-     * Get the statuses assigned to a route's task.
-     * @param businessAccountId
-     * @param callback
-     * @return {*}
-     */
-    services.getTaskStatuses = function(callback) {
-        return services._getHttp("TaskStatuses/GetStatuses")(callback);
-    };
-
-    services.updateRouteTask = function (task) {
-        return saveHistory.linkNotification(
-            $.ajax({
-                url: services.API_URL + "routes/UpdateRouteTask",
-                type: "POST",
-                dataType: "json",
-                contentType: 'application/json',
-                data: JSON.stringify(task)
-            })
-        );
-    };
-
     services.updateService = function (service) {
         return saveHistory.linkNotification(
             $.ajax({
@@ -251,8 +237,7 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
                 dataType: "json",
                 contentType: 'application/json',
                 data: JSON.stringify(service)
-            })
-        );
+            }));
     };
 
     services.deleteService = function (service) {
@@ -262,7 +247,7 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
             dataType: "json",
             contentType: 'application/json',
             data: JSON.stringify(service)
-        })
+        });
     };
 
     /**
@@ -278,7 +263,7 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
             dataType: "json",
             contentType: 'application/json',
             data: JSON.stringify(columns)
-        })
+        });
     };
 
     //endregion
@@ -366,6 +351,28 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
     };
 
     services.getTimeZones = services._getHttp('settings/GetTimeZones', {}, false);
+
+    //endregion
+
+    //region Tasks
+
+    /**
+     * Get the statuses assigned to a route's task.
+     * @param callback
+     */
+    services.getTaskStatuses = services._getHttp("TaskStatuses/GetStatuses");
+
+    services.updateRouteTask = function (task) {
+        return saveHistory.linkNotification(
+            $.ajax({
+                url: services.API_URL + "routes/UpdateRouteTask",
+                type: "POST",
+                dataType: "json",
+                contentType: 'application/json',
+                data: JSON.stringify(task)
+            })
+        );
+    };
 
     //endregion
 

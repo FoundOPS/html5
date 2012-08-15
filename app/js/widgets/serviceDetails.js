@@ -156,6 +156,94 @@ define(["jquery", "db/services", "db/session", "lib/kendo.all", "lib/jquery.mask
             return fieldElement;
         },
 
+        /**
+         * Add the client and location selectors
+         * @param service
+         * @private
+         */
+        _addClientLocation: function (service) {
+            var that = this;
+
+            var formatClientName = function (client) {
+                return client.Name;
+            };
+
+            //Add the Client selector w auto-complete and infinite scrolling
+            var clientSelector = $(inputTemplate).attr("type", "hidden").attr("style", "width: 90%").appendTo(that.element).wrap("<label>Client</label>");
+            clientSelector.select2({
+                placeholder: "Choose a client",
+                minimumInputLength: 1,
+                ajax: {
+                    url: dbServices.API_URL + "Clients/Get?roleId=" + session.get("role.id"),
+                    dataType: 'jsonp',
+                    quietMillis: 100,
+                    data: function (term, page) { // page is the one-based page number tracked by Select2
+                        return {
+                            search: term,
+                            skip: (page - 1) * 10,
+                            take: 10 // page size
+                        };
+                    },
+                    results: function (data, page) {
+                        // whether or not there are more results available
+                        var more = data.length > 9;
+                        return {results: data, more: more};
+                    }
+                },
+                id: function (client) {
+                    return client.Id;
+                },
+                formatSelection: formatClientName,
+                formatResult: formatClientName,
+                dropdownCssClass: "bigdrop"
+            }).on("change", function (e) {
+                    var client = clientSelector.select2("data");
+                    service.set("ClientId", client.Id);
+                    service.set("Client", client);
+
+                    //todo clear/disable locations comboxbox
+                    //load the client's locations
+                    //select first automatically
+                    dbServices.getClientLocations(client.Id, function (locations) {
+                        that._locations = locations;
+                    });
+                });
+
+            //set the initial selection
+            clientSelector.select2("data", service.Client);
+
+            //Add the Location selector //address line one & 2
+
+//            var formatLocationName = function (location) {
+//                return location.AddressLineTwo + " " + location.AddressLineTwo;
+//            };
+//            var locationSelector = $(inputTemplate).attr("type", "hidden").attr("style", "width: 90%").appendTo(that.element).wrap("<label>Location</label>");
+//            locationSelector.select2({
+//                placeholder: "Choose a location",
+//                id: function (location) {
+//                    return location.Id;
+//                },
+//                query: function (query) {
+//                    var data = {results: []}, i, j, s;
+//                    for (i = 1; i < 5; i++) {
+//                        s = "";
+//                        for (j = 0; j < i; j++) {
+//                            s = s + query.term;
+//                        }
+//                        data.results.push({id: query.term + i, text: s});
+//                    }
+//                    query.callback(data);
+//                },
+//                formatSelection: formatLocationName,
+//                formatResult: formatLocationName,
+//                dropdownCssClass: "bigdrop"
+//            }).on("change", function (e) {
+////                        var client = clientAutoComplete.select2("data");
+////                        service.set("ClientId", client.Id);
+////                        service.set("Client", client);
+//                });
+        },
+
         render: function (service) {
             var that = this;
 
@@ -168,53 +256,7 @@ define(["jquery", "db/services", "db/session", "lib/kendo.all", "lib/jquery.mask
             }
 
             if (!that.options.clientIsReadOnly) {
-                var format = function (client) {
-                    return client.Name;
-                };
-
-                //Add the Client auto-complete
-                var clientAutoComplete = $(inputTemplate).attr("type", "hidden").attr("style", "width: 90%").appendTo(that.element).wrap("<label>Client</label>");
-                clientAutoComplete.select2({
-                    placeholder: "Choose a client",
-                    minimumInputLength: 1,
-                    ajax: {
-                        url: dbServices.API_URL + "Clients/Get?roleId=" + session.get("role.id"),
-                        dataType: 'jsonp',
-                        quietMillis: 100,
-                        data: function (term, page) { // page is the one-based page number tracked by Select2
-                            return {
-                                search: term,
-                                skip: (page - 1) * 10,
-                                take: 10 // page size
-                            };
-                        },
-                        results: function (data, page) {
-                            // whether or not there are more results available
-                            var more = data.length > 9;
-                            return {results: data, more: more};
-                        }
-                    },
-                    id: function (client) {
-                        return client.Id;
-                    },
-                    formatSelection: format,
-                    formatResult: format,
-                    dropdownCssClass: "bigdrop"
-                }).on("change", function (e) {
-                        var client = clientAutoComplete.select2("data");
-                        service.set("ClientId", client.Id);
-                        service.set("Client", client);
-
-                        //todo clear/disable locations comboxbox
-                        //load the client's locations
-                        //select first automatically
-                    });
-
-                //set the initial selection
-                clientAutoComplete.select2("data", service.Client);
-
-                //Add the Location auto-complete //address line one & 2
-//            var locationAutoComplete = $(inputTemplate).appendTo(that.element).wrap("<li><label>Location</label></li>");
+                that._addClientLocation(service);
             }
 
             //Add all the fields
