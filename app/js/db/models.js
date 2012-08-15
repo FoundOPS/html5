@@ -52,6 +52,27 @@ define(function () {
         this.Speed = speed;
     };
 
+    /**
+     * Gets the destination field of a service
+     * @param service
+     */
+    models.getDestinationField = function (service) {
+        return _.find(service.Fields, function (field) {
+            return field.$type.indexOf("LocationField") !== -1;
+        });
+    };
+
+    /**
+     * Returns the first element in a collection if it's id matches
+     * @param arrayElements
+     * @param id
+     */
+    models.firstFromId = function (elements, id) {
+        return _.find(elements, function (element) {
+            return element.Id === id;
+        });
+    };
+
     return models;
 });
 
