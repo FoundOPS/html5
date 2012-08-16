@@ -1,106 +1,137 @@
-<!doctype html>
-
-<!--[if IEMobile 7 ]>
-<html class="no-js iem7" lang="en"> <![endif]-->
-<!--[if (gt IEMobile 7)|!(IEMobile)]><!-->
-<html class="no-js" lang="en"> <!--<![endif]-->
-
+<!DOCTYPE HTML>
+<html style="height:100%;">
 <head>
-    <meta charset="utf-8">
     <title>FoundOPS</title>
-
-    <meta name="description" content="">
     <meta name="HandheldFriendly" content="True">
     <meta name="MobileOptimized" content="320">
     <!-- Enabling user-scalable=no or calling $("#nav").toggleClass("androidFixedPositionFix"); fixes fixed position bug in android 2.3 -->
-    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <link rel="apple-touch-icon-precomposed" sizes="114x114" href="img/Icon-96x96.png">
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="img/Icon-72x72.png">
     <link rel="apple-touch-icon-precomposed" href="img/Icon-36x36.png">
     <link rel="shortcut icon" href="img/Icon-36x36.png">
-    <!--For built VS-->
-    <!--<link rel="apple-touch-icon-precomposed" sizes="114x114" href="@Model["BlobRoot"]img/Icon-96x96.png">-->
-    <!--<link rel="apple-touch-icon-precomposed" sizes="72x72" href="@Model["BlobRoot"]img/Icon-72x72.png">-->
-    <!--<link rel="apple-touch-icon-precomposed" href="@Model["BlobRoot"]img/Icon-36x36.png">-->
-    <!--<link rel="shortcut icon" href="@Model["BlobRoot"]img/Icon-36x36.png">-->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <script>(function(a,b,c){if(c in b&&b[c]){var d,e=a.location,f=/^(a|html)$/i;a.addEventListener("click",function(a){d=a.target;while(!f.test(d.nodeName))d=d.parentNode;"href"in d&&(d.href.indexOf("http")||~d.href.indexOf(e.host))&&(a.preventDefault(),e.href=d.href)},!1)}})(document,window.navigator,"standalone")</script>
-    <meta http-equiv="cleartype" content="on">
-    <!-- more tags for your 'head' to consider h5bp.com/d/head-Tips -->
+    <style>
+        input[type="submit"] {
+            -moz-border-radius: 5pt;
+            -moz-box-sizing: border-box;
+            -webkit-border-radius: 5pt;
+            -webkit-box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.3);
+            -webkit-box-sizing: border-box;
+            -webkit-tap-highlight-color: rgba(0,0,0,0);
+            -webkit-touch-callout: none;
+            background-color: #7185A2;
+            background-image: -moz-linear-gradient(top,rgba(255, 255, 255, 0.5),rgba(255, 255, 255, 0.45) 6%,rgba(255, 255, 255, 0.2) 50%,rgba(255, 255, 255, 0.15) 50%,rgba(100, 100, 100, 0));
+            background-image: -ms-linear-gradient(top,rgba(255, 255, 255, 0.5),rgba(255, 255, 255, 0.45) 6%,rgba(255, 255, 255, 0.2) 50%,rgba(255, 255, 255, 0.15) 50%,rgba(100, 100, 100, 0));
+            background-image: -o-linear-gradient(top,rgba(255, 255, 255, 0.5),rgba(255, 255, 255, 0.45) 6%,rgba(255, 255, 255, 0.2) 50%,rgba(255, 255, 255, 0.15) 50%,rgba(100, 100, 100, 0));
+            background-image: -webkit-gradient(linear,50% 0,50% 100%,color-stop(0,rgba(255, 255, 255, 0.5)),color-stop(0.06,rgba(255, 255, 255, 0.45)),color-stop(0.5,rgba(255, 255, 255, 0.2)),color-stop(0.5,rgba(255, 255, 255, 0.15)),color-stop(1,rgba(100, 100, 100, 0)));
+            border-radius: 5pt;
+            border: 1px solid #394D68;
+            box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.3);
+            box-sizing: border-box;
+            color: white;
+            cursor: pointer;
+            display: inline-block;
+            font: bold .9em HelveticaNeue,sans-serif;
+            line-height: 1.66em;
+            margin: 0;
+            overflow: visible;
+            padding: .4em .8em;
+            text-align: center;
+            text-decoration: none;
+            text-shadow: 0 -1px rgba(0, 0, 0, 0.3);
+            display: inline-block;
+        }
+        input[type="email"], input[type="password"] {
+            width: 190px;
+            height: 20px;
+            border: 1px inset #CCC;
+            font-size: 1em;
+            padding-left: 2px;
+        }
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="application/javascript"></script>
 </head>
-
-<body ontouchstart="">
-<div id="contentWrapper">
-    <div id="content">
-        <div id="remoteContent">
-            <div data-role="view" id="silverlight"></div>
-        </div>
-        <div id="silverlightControlHost">
-            <object id="silverlightPlugin" data="data:application/x-silverlight-2," type="application/x-silverlight-2"
-                    style="height: 1px; width: 1px">
-                <param name="onSourceDownloadProgressChanged" value="onSourceDownloadProgressChanged"/>
-                <!--<param name="splashscreensource" value="http://localhost:31820/ClientBin/SplashScreen.xaml"/>-->
-                <!--<param name="source" value="http://localhost:31820/ClientBin/FoundOps.SLClient.Navigator.xap?rev=1"/>-->
-                <!--&lt;!&ndash;for built in VS&ndash;&gt;-->
-                <!--<param name="splashscreensource" value='@Model["SplashSource"]' />-->
-                <!--<param name="source" value='@Model["XapSource"]'/>-->
-                <param name="onError" value="onSilverlightError"/>
-                <param name="background" value="#ff333335"/>
-                <param name="windowless" value="true"/>
-                <param name="minRuntimeVersion" value="5.0.61118.0"/>
-                <param name="enableHtmlAccess" value="true"/>
-                <param name="autoUpgrade" value="true"/>
-                <a href="http://go.microsoft.com/fwlink/?LinkID=149156&v=5.0.61118.0" style="text-decoration: none">
-                    <img src="http://go.microsoft.com/fwlink/?LinkId=161376" alt="Get Microsoft Silverlight"
-                         style="border-style: none"/>
-                </a>
-            </object>
-            <iframe id="_sl_historyFrame" style="visibility: hidden; height: 0px; width: 0px; z-index: -1;
-            border: 0px"></iframe>
+<body onload="window.scrollTo(0, 1);" style="height:100%; margin: 0;
+background-image: -webkit-linear-gradient(bottom, #222224 0%, #555556 100%);
+background-image: -moz-linear-gradient(bottom, #222224 0%, #555556 100%);
+background-image: -ms-linear-gradient(bottom, #222224 0%, #555556 100%);
+background-image: -o-linear-gradient(bottom, #222224 0%, #555556 100%);
+background-image: linear-gradient(bottom, #222224 0%, #555556 100%);
+}">
+    <div style="display: table; height: 85%; width: 100%; #position: relative; overflow: hidden;">  <!--Used to-->
+        <div style=" #position: absolute; #top: 50%;display: table-cell; vertical-align: middle;">  <!--place content-->
+            <div style=" #position: relative; #top: -50%">                                          <!--in middle-->
+                <div style="text-align: center">                                                    <!--of page.-->
+                    <img src="img/LogoWhiteText(TransparentBg).png" alt="FoundOPS" style="width:70%; max-width:1000px"/>
+                    <p style="margin:1px"><input id="EmailAddress" name="EmailAddress" placeholder="E-mail Address" required="required" type="email"/></p>
+                    <p style="margin:1px"><input id="Password" name="Password" placeholder="Password" required="required" type="password"/></p>
+                    <p style="margin:5px">
+                        <input id="rememberMe" style="position: relative; left: -5px; top:4px" type="checkbox"/>
+                        <label style="position: relative; left: -7px; top:4px">Remember Me</label>
+                        <input id="submit" type="submit" onclick="login()" value="Login"/>
+                    </p>
+                </div>
+            </div>
         </div>
     </div>
-</div>
-<!--Setup an empty silverlight view, so there is something to navigate to-->
+<script>
+    function login() {
+        var email = $("#EmailAddress").val();
+        var password = $("#Password").val();
+
+        if ($("#rememberMe").prop("checked") === true) {
+            localStorage.setItem("rememberMe", true);
+            localStorage.setItem("email", email);
+        } else {
+            localStorage.setItem("rememberMe", false);
+            localStorage.removeItem("email");
+        }
+
+//        var request = new XMLHttpRequest();
+//        request.onreadystatechange = function () {
+//            if (request.readyState === 4) {
+//                console.log(request);
+//            }
+//        };
+//        request.open("GET", "http://api.foundops.com/api/auth/Login", true, email, password);
+//        request.send(null);
+
+        $.ajax({
+            //must use JSONP because the javascript may be hosted on a different url than the api
+            type: "GET",
+            dataType: 'JSONP',
+            url: 'http://api.foundops.com/api/auth/Login',
+            data: {email: email, pass: password},
+            timeout: 5000,
+            error: function (errorThrown, textStatus) {
+                    console.log(errorThrown);
+            },
+            success: function (response) {
+                if (response) {
+                    //Save the application's login state.
+                    localStorage.setItem("loggedIn", true);
+                    window.location.pathname = "/navigator.html";
+                } else {
+                    alert("Login information is incorrect.");
+                }
+            }
+        });
+    }
+    //Used to "get rid" of the browser bar in mobile devices (only works for certain cases and breaks vertical centering in others.).
+//    $(document).ready(function() {
+//        if (navigator.userAgent.match(/Android/i)) {
+//            window.scrollTo(0,0); // reset in case prev not scrolled
+//            var nPageH = $(document).height();
+//            var nViewH = window.outerHeight;
+//            if (nViewH > nPageH) {
+//                nViewH -= 250;
+//                $('BODY').css('height',nViewH + 'px');
+//            }
+//            window.scrollTo(0,1);
+//        }
+//    });
+</script>
 </body>
-<script type="text/javascript">
-    var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-    document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-</script>
-
-<link rel="stylesheet" type="text/css" href="styles/main-built.css">
-<script src="lib/require-jquery.js"></script>
-<script src="js/main.js"></script>
-<!--For built VS-->
-<!--<link rel="stylesheet" type="text/css" href="@Model["BlobRoot"]main.css">-->
-<!--<script data-main="@Model["BlobRoot"]main-built.js" src="@Model["BlobRoot"]require-jquery.js"></script>-->
-
-<script id="navTemplate" type="text/x-kendo-template">
-    <div id='navContainer'>
-        <div id='navSearch' class='navElement'><input name='search' type='text' placeholder='Search...'/>
-            <a><img src='img/search.png'/></a>
-        </div>
-        <div id='navClient' class='navElement last'>
-            <a><img class='navIcon profile' src='#= data[0] #'/><img id='clientLogo' src='#= data[1] #'/></a>
-        </div>
-    </div>
-    <img id='logo' src='./img/Logo.png' alt='FoundOPS'/>
-</script>
-<script id="expandTemplate" type="text/x-kendo-template">
-    <a id="expandMenuButton">
-        <div id='slideMenu'><img class='iconExpand' src='img/Expand.png'/></div>
-    </a>
-</script>
-<script id="showMenuTemplate" type="text/x-kendo-template">
-    <div id="showMenu">
-        <a><img class='iconShow' src='img/Expand.png'/></a>
-    </div>
-</script>
-<script id="sideBarElementTemplate" type="text/x-kendo-template">
-    <a #= href # class='sideBarElement' data-color='#= color #' data-iconUrl='#= iconUrl #' data-hoverIconUrl='#=
-    hoverIconUrl #'>
-    <span class='icon' style="background: url('#= iconUrl #') #= bgX # #= bgY # no-repeat"></span>
-    <span class='sectionName'>#= name #</span>
-    </a>
-</script>
 </html>
