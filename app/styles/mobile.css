@@ -50,8 +50,19 @@ body {
     margin-top: 10px;
     font-size: 1.4em;
 }
+#routeStatus-listview{
+    margin: 0 auto;
+    width:200px;
+}
 #routeStatus-listview a{
     min-height: 42px;
+}
+.statusLabel{
+    margin: 0 auto;
+    width: 200px;
+}
+.statusLabel span{
+    font-size: 16px;
 }
 /* Fixes growing actionsheet. Breaks other widgets like comboBoxes and timePickers */
 /*.k-animation-container {*/
