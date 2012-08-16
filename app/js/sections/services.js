@@ -302,6 +302,8 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "widgets/serviceDet
     };
 
     var setupGrid = function (fields) {
+        var storedColumns = services.serviceColumns[vm.selectedServiceType().Id];
+
         //Setup the columns based on the fields
         var columns = [];
         _.each(fields, function (value, key) {
@@ -332,7 +334,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "widgets/serviceDet
             var titleLength = column.title.length * 7.5 + 35;
             column.width = titleLength + "px";
 
-            var configColumn = _.find(services.serviceColumns, function (col) {
+            var configColumn = _.find(storedColumns, function (col) {
                 return col.Name === column.field;
             });
 
@@ -353,7 +355,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "widgets/serviceDet
 
         //check if there is any difference in the columns in config
         //if so, save the current config
-        var storedCols = _.pluck(services.serviceColumns, 'Name');
+        var storedCols = _.pluck(storedColumns, 'Name');
         var gridCols = _.pluck(columns, 'field');
         if (_.difference(storedCols, gridCols).length > 0 || _.difference(gridCols, storedCols).length > 0) {
             saveGridConfig();
@@ -361,13 +363,14 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "widgets/serviceDet
 
         //reorder the columns
         columns = _.sortBy(columns, function (column) {
-            return column.order;
+            return parseInt(column.order);
         });
 
         grid = $("#grid").data("kendoGrid");
         if (grid) {
             grid.destroy();
         }
+        $("#grid").empty();
 
         grid = $("#grid").kendoGrid({
             autoBind: true,
@@ -417,6 +420,8 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "widgets/serviceDet
             },
             selectable: true
         }).data("kendoGrid");
+
+        grid.refresh();
     };
     //endregion
 
@@ -444,16 +449,13 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "widgets/serviceDet
                     $("#serviceDetails").attr("style", "display:none");
 
                     //reload the services whenever the service type changes
-                    if (services.serviceColumns !== null) {
-                        createDataSourceAndGrid();
-                    }
+                    createDataSourceAndGrid();
                 }
             }).data("kendoDropDownList");
 
             //load the saved column configuration
             dbServices.getServiceColumns(function (columns) {
-                var id = vm.selectedServiceType().Id;
-                services.serviceColumns = columns[id];
+                services.serviceColumns = columns;
 
                 //load the services initially
                 createDataSourceAndGrid();
