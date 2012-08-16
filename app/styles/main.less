@@ -759,6 +759,17 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
     padding:15px;
     li{
         padding: 1px 0 1px 0;
+        .percentSign{
+            position: absolute;
+            margin-top: 5px;
+            font-size: 15px;
+        }
+    .dollarSign{
+        position: absolute;
+        margin-top: 4px;
+        font-size: 16px;
+        margin-left: 2px;
+    }
     }
     li.textarea{
         vertical-align: top;
@@ -766,7 +777,13 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
     }
     .k-timepicker, .k-combobox, input[type="text"], input[type="number"], .select2-container{
         width: 100%;
-        margin-top: 4px;
+    }
+    input[type="text"]{
+        width: 196px;
+    }
+    input[type="number"]{
+        width: 194px;
+        padding-left: 2px;
     }
     textarea{
         width: 100% !important;
@@ -775,8 +792,7 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
         color: #385487;
         min-width: 6em;
         border: 0;
-        padding: .4em;
-        padding-left: 0px;
+        padding: .4em 0;
         outline: 0;
         background: transparent;
         font-family: PTSans;
@@ -784,6 +800,10 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
     .km-listview-wrapper ul{
         width: 100%;
         margin-left: 0;
+        margin-bottom: 0;
+    }
+    .km-listview-label{
+        padding-left: 15px;
     }
 }
 /*endregion*/
