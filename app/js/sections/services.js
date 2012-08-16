@@ -274,7 +274,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "widgets/serviceDet
         var contentHeight = windowHeight - topHeight - extraMargin;
         $('#grid').css("height", contentHeight + 'px');
         $('#grid .k-grid-content').css("height", contentHeight + 'px');
-        $("#serviceDetails").css("height", contentHeight + 15 + 'px');
+        $("#serviceDetails").css("max-height", contentHeight + 15 + 'px');
     };
 
     //save the column configuration
