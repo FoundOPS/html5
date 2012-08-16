@@ -7,7 +7,7 @@ define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "li
         DATABINDING = "dataBinding",
         DATABOUND = "dataBound",
         inputTemplate = "<input />",
-        multiLineTextTemplate = "<textarea class='textarea'></textarea>";
+        multiLineTextTemplate = "<textarea class='textarea' style='padding: 5px 0 5px 2px;'></textarea>";
 
     var ServiceDetails = Widget.extend({
         init: function (element, options) {
@@ -140,8 +140,7 @@ define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "li
         _createTextBoxField: function (field, fieldIndex, listView) {
             var fieldElement;
             if (field.IsMultiLine) {
-                //use autosize plugin to keep textarea the right size
-                fieldElement = $(multiLineTextTemplate).autosize();
+                fieldElement = $(multiLineTextTemplate);
                 fieldElement.appendTo(listView).wrap("<li class='textarea'>" + field.Name + "</li>");
             }
             else {
@@ -168,7 +167,7 @@ define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "li
                 //percentage
                 //TODO: improve using http://stackoverflow.com/questions/7933505/mask-input-for-number-percent
                 $("<span class='percentSign'>%</span>").insertAfter(fieldElement);
-                fieldElement.attr("style", "width:181px;padding-right:15px;margin-right:-32px;border: 1px solid #aaa;");
+                fieldElement.attr("style", "width:179px;padding-right:15px;margin-right:-32px;");
             }
 
             return fieldElement;
@@ -328,6 +327,12 @@ define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "li
             kendo.bind(checkLists, service, kendo.mobile.ui);
 
             that.trigger(DATABOUND);
+
+            //wait until data is bound
+            //then setup autosize to keep textarea the right size
+            _.delay(function () {
+                fieldsListView.find('textarea').autosize();
+            }, 200);
         },
         options: new kendo.data.ObservableObject({
             name: "ServiceDetails",

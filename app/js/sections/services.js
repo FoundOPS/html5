@@ -224,6 +224,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "widgets/serviceDet
         var contentHeight = windowHeight - topHeight - extraMargin;
         $('#grid').css("height", contentHeight + 'px');
         $('#grid .k-grid-content').css("height", contentHeight + 'px');
+        $("#serviceDetails").css("height", contentHeight + 15 + 'px');
     };
 
     //save the column configuration
@@ -333,6 +334,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "widgets/serviceDet
                     saveHistory.close();
                     saveHistory.resetHistory();
                 });
+                $("#serviceDetails").attr("style", "display:block");
             },
             columns: columns,
             columnMenu: true,
@@ -382,6 +384,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "widgets/serviceDet
                 change: function () {
                     //disable the delete button
                     $('#services .k-grid-delete').attr("disabled", "disabled");
+                    $("#serviceDetails").attr("style", "display:none");
 
                     //reload the services whenever the service type changes
                     if (services.serviceColumns !== null) {
