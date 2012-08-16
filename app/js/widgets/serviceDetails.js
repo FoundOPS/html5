@@ -57,6 +57,8 @@ define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "li
                             var destination = models.firstFromId(locations, destinationField.LocationId);
                             if (destination) {
                                 locationSelector.select2("data", destination);
+                                //for updating the services grid
+                                destinationField.Value = destination;
                             }
 
                             locationSelector.select2("enable");
@@ -66,7 +68,7 @@ define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "li
             };
 
             //Add the Client selector w auto-complete and infinite scrolling
-            clientSelector = $(inputTemplate).attr("type", "hidden").attr("style", "width: 90%").appendTo(that.element).wrap("<label>Client</label>");
+            clientSelector = $(inputTemplate).attr("type", "hidden").appendTo(that.element).wrap("<label>Client</label>");
             clientSelector.select2({
                 placeholder: "Choose a client",
                 minimumInputLength: 1,
@@ -110,7 +112,7 @@ define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "li
             var formatLocationName = function (location) {
                 return location.AddressLineOne + " " + location.AddressLineTwo;
             };
-            locationSelector = $(inputTemplate).attr("type", "hidden").attr("style", "width: 90%").appendTo(that.element).wrap("<label>Location</label>");
+            locationSelector = $(inputTemplate).attr("type", "hidden").appendTo(that.element).wrap("<label>Location</label>");
             locationSelector.select2({
                 placeholder: "Choose a location",
                 id: function (location) {
@@ -130,7 +132,7 @@ define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "li
                     var location = locationSelector.select2("data");
                     var destinationField = models.getDestinationField(service);
                     //Used for updating the grid
-                    destinationField.set("Value", location);
+                    destinationField.Value = location;
                     destinationField.set("LocationId", location.Id);
                 });
         },
@@ -160,11 +162,13 @@ define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "li
 
             //TODO: improve using http://stackoverflow.com/questions/7933505/mask-input-for-number-percent
             if (field.Mask === "c") {
-                $("<span> $</span>").insertBefore(fieldElement);
+                $("<br /><span class='dollarSign'> $</span>").insertBefore(fieldElement);
+                fieldElement.attr("style", "width:181px;padding-left:15px;");
             } else if (field.Mask === "p") {
                 //percentage
                 //TODO: improve using http://stackoverflow.com/questions/7933505/mask-input-for-number-percent
-                //$("<span>%</span>").insertAfter(fieldElement);
+                $("<span class='percentSign'>%</span>").insertAfter(fieldElement);
+                fieldElement.attr("style", "width:181px;padding-right:15px;margin-right:-32px;border: 1px solid #aaa;");
             }
 
             return fieldElement;
