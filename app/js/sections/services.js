@@ -78,138 +78,188 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "widgets/serviceDet
     };
     //endregion
 
-    //region Grid
+    //region DataSource
+
     /**
-     * A kendo data source for Services for the current business account.
-     * It is initialized every time the data is loaded because the data schema is dynamic
-     * and kendo datasource does not allow you to change the schema.
-     * @param {Date} startDate The first date to load services for
-     * @param {Date} endDate The last date to load services for
-     * @param {!function(kendo.data.DataSource, Array.<Object>, Array.<Object>} callback When the data is loaded it will call
-     * this function and pass 3 parameters: the datasource, the fields, and the formatted data
+     * Converts the types returned in the first row of the data returned from
+     * GetServicesHoldersWithFields to DataSource fields
+     * @param data
      */
-    var getDataSource = function (startDate, endDate, serviceType, dataSourceLoaded) {
-        dbServices._getHttp("service/GetServicesHoldersWithFields", {startDate: tools.formatDate(startDate), endDate: tools.formatDate(endDate), serviceType: serviceType}, false)(
-            function (data) {
-                //The types will be returned in the first row
-                var types = _.first(data);
+    var getFields = function (data) {
+        var types = _.first(data);
 
-                var fieldTypes = {
-                    "System.Decimal": {type: "number"},
-                    "System.DateTime": {type: "date", detail: "datetime"},
-                    "Time": {type: "date", detail: "time"},
-                    "Date": {type: "date", detail: "date"},
-                    "System.String": {type: "string"},
-                    "System.Guid": {type: "string"}
-                };
+        var fieldTypes = {
+            "System.Decimal": {type: "number"},
+            "System.DateTime": {type: "date", detail: "datetime"},
+            "Time": {type: "date", detail: "time"},
+            "Date": {type: "date", detail: "date"},
+            "System.String": {type: "string"},
+            "System.Guid": {type: "string"}
+        };
 
-                //Setup the data source fields info
-                var fields = {};
-                _.each(types, function (type, name) {
-                    var fieldInfo = fieldTypes[type];
-                    if (type === "System.Guid") {
-                        fieldInfo.hidden = true;
+        //Setup the data source fields info
+        var fields = {};
+        _.each(types, function (type, name) {
+            var fieldInfo = fieldTypes[type];
+            if (type === "System.Guid") {
+                fieldInfo.hidden = true;
+            }
+
+            //Add the type to fields
+            //Example ShipCity: { type: "string" }
+            fields[name] = fieldInfo;
+        });
+
+        return fields;
+    };
+
+    /**
+     * Formats the data returned by GetServicesHoldersWithFields
+     * to a readable type for kendo's datasource
+     * @param data
+     */
+    var formatData = function (data) {
+        var fields = getFields(data);
+
+        //format the data
+        var formattedData = [];
+        //exclude the type data in the first row
+        _.each(_.rest(data), function (row) {
+            var formattedRow = {};
+            //go through each field type, and convert the data to the proper type
+            _.each(fields, function (value, key) {
+                var originalValue = row[key];
+                var convertedValue;
+                if (originalValue === null) {
+                    convertedValue = "";
+                } else if (value.type === "number") {
+                    convertedValue = parseFloat(originalValue);
+                } else if (value.type === "date") {
+                    convertedValue = new Date(originalValue);
+                } else if (value.type === "string") {
+                    convertedValue = originalValue.toString();
+                } else {
+                    return;
+                }
+
+                formattedRow[key] = convertedValue;
+            });
+
+            formattedData.push(formattedRow);
+        });
+
+        return formattedData;
+    };
+
+    /*
+     * Create a data source and grid.
+     * This is called whenever the service is changed because the data schema is dynamic
+     * and kendo datasource does not allow you to change the schema.
+     */
+    var createDataSourceAndGrid = function () {
+        var serviceType = vm.selectedServiceType().Name;
+
+        var readAction = "service/GetServicesHoldersWithFields";
+        var params = {
+            startDate: tools.formatDate(vm.get("startDate")),
+            endDate: tools.formatDate(vm.get("endDate")),
+            serviceType: serviceType
+        };
+
+        //load the fields types
+        //then create the datasource
+        //then create the grid
+        dbServices._getHttp(readAction + "?take=1", params)(function (data) {
+            var fields = getFields(data);
+            serviceHoldersDataSource = new kendo.data.DataSource({
+                schema: {
+                    model: {
+                        id: "ServiceId",
+                        fields: fields
+                    }
+                },
+                transport: {
+                    read: {
+                        url: dbServices.API_URL + readAction,
+                        data: params
+                    }
+                },
+                change: function (e) {
+                    var filterSet = serviceHoldersDataSource.filter();
+                    if (filterSet) {
+                        filterSet = filterSet.filters;
                     }
 
-                    //Add the type to fields
-                    //Example ShipCity: { type: "string" }
-                    fields[name] = fieldInfo;
-                });
-
-                //format the data
-                var formattedData = [];
-                //exclude the type data in the first row
-                _.each(_.rest(data), function (row) {
-                    var formattedRow = {};
-                    //go through each field type, and convert the data to the proper type
-                    _.each(fields, function (value, key) {
-                        var originalValue = row[key];
-                        var convertedValue;
-                        if (originalValue === null) {
-                            convertedValue = "";
-                        } else if (value.type === "number") {
-                            convertedValue = parseFloat(originalValue);
-                        } else if (value.type === "date") {
-                            convertedValue = new Date(originalValue);
-                        } else if (value.type === "string") {
-                            convertedValue = originalValue.toString();
-                        } else {
-                            return;
-                        }
-
-                        formattedRow[key] = convertedValue;
+                    var startDateFilter = _.find(filterSet, function (f) {
+                        return f.field === "OccurDate" && f.operator === "gte";
+                    });
+                    var endDateFilter = _.find(filterSet, function (f) {
+                        return f.field === "OccurDate" && f.operator === "lte";
                     });
 
-                    formattedData.push(formattedRow);
-                });
-
-                //Setup the datasource
-                serviceHoldersDataSource = new kendo.data.DataSource({
-                    change: function (e) {
-                        var filterSet = serviceHoldersDataSource.filter();
-                        if (filterSet) {
-                            filterSet = filterSet.filters;
-                        }
-
-                        var startDateFilter = _.find(filterSet, function (f) {
-                            return f.field === "OccurDate" && f.operator === "gte";
-                        });
-                        var endDateFilter = _.find(filterSet, function (f) {
-                            return f.field === "OccurDate" && f.operator === "lte";
-                        });
-
-                        var missingFilter = !startDateFilter || !endDateFilter;
-                        //correct any missing filters
-                        if (!startDateFilter && !endDateFilter) {
-                            //if there are neither start date or end date filters, set them to the vm's startDate and endDate
-                            startDateFilter = {field: "OccurDate", operator: "gte", value: vm.get("startDate")};
-                            endDateFilter = {field: "OccurDate", operator: "lte", value: vm.get("endDate")};
-                        } else if (!endDateFilter) {
-                            //if there is a startDateFilter but not a endDateFilter
-                            //set it to 2 weeks later
-                            endDateFilter = {field: "OccurDate", operator: "lte",
-                                value: moment(startDateFilter.value).add('weeks', 2).toDate()};
-                        } else if (!startDateFilter) {
-                            //if there is a endDateFilter but not a startDateFilter
-                            //set it to 2 weeks prior
-                            startDateFilter = {field: "OccurDate", operator: "gte",
-                                value: moment(endDateFilter.value).subtract('weeks', 2).toDate()};
-                        }
-                        //if the start and endDate changed reload
-                        //update the vm's startDate and endDate, then update the services
-                        if (vm.get("startDate").toDateString() !== startDateFilter.value.toDateString() ||
-                            vm.get("endDate").toDateString() !== endDateFilter.value.toDateString()) {
-                            vm.set("startDate", startDateFilter.value);
-                            vm.set("endDate", endDateFilter.value);
-                            services.updateServices();
-                            return;
-                        }
-                        //if there was a missing filter, refilter
-                        else if (missingFilter) {
-                            var otherFilters = _.filter(filterSet, function (f) {
-                                return f.field !== "OccurDate";
-                            });
-                            otherFilters.push(startDateFilter);
-                            otherFilters.push(endDateFilter);
-
-                            _.delay(function () {
-                                serviceHoldersDataSource.filter(otherFilters);
-                            }, 200);
-                        }
-                    },
-                    data: formattedData,
-                    schema: {
-                        model: {
-                            id: "ServiceId",
-                            fields: fields
-                        }
+                    var vmStartDate = vm.get("startDate");
+                    var vmEndDate = vm.get("endDate");
+                    var missingFilter = !startDateFilter || !endDateFilter;
+                    //correct any missing filters
+                    if (!startDateFilter && !endDateFilter) {
+                        //if there are neither start date or end date filters, set them to the vm's startDate and endDate
+                        startDateFilter = {field: "OccurDate", operator: "gte", value: vmStartDate};
+                        endDateFilter = {field: "OccurDate", operator: "lte", value: vmEndDate};
+                    } else if (!endDateFilter) {
+                        //if there is a startDateFilter but not a endDateFilter
+                        //set it to 2 weeks later
+                        endDateFilter = {field: "OccurDate", operator: "lte",
+                            value: moment(startDateFilter.value).add('weeks', 2).toDate()};
+                    } else if (!startDateFilter) {
+                        //if there is a endDateFilter but not a startDateFilter
+                        //set it to 2 weeks prior
+                        startDateFilter = {field: "OccurDate", operator: "gte",
+                            value: moment(endDateFilter.value).subtract('weeks', 2).toDate()};
                     }
-                });
-                serviceHoldersDataSource.sort({ field: "OccurDate", dir: "asc" });
 
-                dataSourceLoaded(fields, formattedData);
+                    //if the start and endDate changed
+                    //update the vm's startDate and endDate
+                    //then reload the dataSource
+                    if (vmStartDate.toDateString() !== startDateFilter.value.toDateString() ||
+                        vmEndDate.toDateString() !== endDateFilter.value.toDateString()) {
+                        vm.set("startDate", startDateFilter.value);
+                        vm.set("endDate", endDateFilter.value);
+
+                        //reload the services
+                        serviceHoldersDataSource.options.transport.read.data.startDate = tools.formatDate(vm.get("startDate"));
+                        serviceHoldersDataSource.options.transport.read.data.endDate = tools.formatDate(vm.get("endDate"));
+                        serviceHoldersDataSource.read();
+
+                        return;
+                    }
+                    //if there was a missing filter, refilter
+                    else if (missingFilter) {
+                        var otherFilters = _.filter(filterSet, function (f) {
+                            return f.field !== "OccurDate";
+                        });
+                        otherFilters.push(startDateFilter);
+                        otherFilters.push(endDateFilter);
+
+                        _.delay(function () {
+                            serviceHoldersDataSource.filter(otherFilters);
+                        }, 200);
+                    }
+                },
+                parse: function (response) {
+                    var formatted = formatData(response);
+                    return formatted;
+                }
             });
+            serviceHoldersDataSource.sort({ field: "OccurDate", dir: "asc" });
+
+            //Create the grid
+            setupGrid(fields);
+        });
     };
+
+    //endregion
+
+    //region Grid
 
     //resize the grid based on the current window's height
     var resizeGrid = function (initialLoad) {
@@ -247,6 +297,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "widgets/serviceDet
 
             var id = vm.selectedServiceType().Id;
             dbServices.updateServiceColumns(id, serviceColumns);
+            services.serviceColumns[id] = serviceColumns;
         }, 200);
     };
 
@@ -288,6 +339,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "widgets/serviceDet
             //if there is a matching column in configColumns, use it's values
             if (configColumn) {
                 //check if "px" is missing. If so, put it back
+                //check if "px" is missing. If so, put it back
                 if (configColumn.Width.indexOf("px") === -1) {
                     configColumn.Width += "px";
                 }
@@ -311,6 +363,11 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "widgets/serviceDet
         columns = _.sortBy(columns, function (column) {
             return column.order;
         });
+
+        grid = $("#grid").data("kendoGrid");
+        if (grid) {
+            grid.destroy();
+        }
 
         grid = $("#grid").kendoGrid({
             autoBind: true,
@@ -354,11 +411,11 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "widgets/serviceDet
             filterable: true,
             resizable: true,
             reorderable: true,
+            scrollable: true,
             sortable: {
                 mode: "multiple"
             },
-            selectable: true,
-            scrollable: true
+            selectable: true
         }).data("kendoGrid");
     };
     //endregion
@@ -388,7 +445,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "widgets/serviceDet
 
                     //reload the services whenever the service type changes
                     if (services.serviceColumns !== null) {
-                        services.updateServices();
+                        createDataSourceAndGrid();
                     }
                 }
             }).data("kendoDropDownList");
@@ -399,7 +456,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "widgets/serviceDet
                 services.serviceColumns = columns[id];
 
                 //load the services initially
-                services.updateServices();
+                createDataSourceAndGrid();
             });
         });
 
@@ -408,11 +465,6 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "widgets/serviceDet
         vm.set("endDate", moment().sod().add('weeks', 2).toDate());
 
         $("#serviceDetails").kendoServiceDetails();
-
-        services.updateServices = function () {
-            var serviceTypeId = vm.selectedServiceType().Id;
-            getDataSource(vm.get("startDate"), vm.get("endDate"), serviceTypeId, setupGrid);
-        };
 
         $("#services .k-grid-delete").on("click", function () {
             var answer = confirm("Are you sure you want to delete the selected service?");

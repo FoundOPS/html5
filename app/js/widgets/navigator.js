@@ -145,8 +145,8 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
                 //console.log(availableSections[section]);
                 var currentSection = getSection(config.sections, availableSections[section]);//config.sections[section];
                 var href = "";
-                if (typeof(currentSection.url) !== 'undefined') {
-                    href = "href='" + currentSection.url + "'";
+                if (typeof (currentSection.url) !== 'undefined') {
+                    href = currentSection.url;
                 }
                 var name = currentSection.name;
                 var color = currentSection.color;

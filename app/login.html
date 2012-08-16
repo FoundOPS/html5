@@ -14,45 +14,34 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <style>
         input[type="submit"] {
-            display: inline-block;
-            margin: 0;
-            line-height: 1.66em;
-            text-align: center;
-            cursor: pointer;
-            text-decoration: none;
-            -webkit-box-sizing: border-box;
-            -moz-box-sizing: border-box;
-            box-sizing: border-box;
-            color: white;
-            font: bold .9em HelveticaNeue,sans-serif;
-            text-align: center;
-            padding: .4em .8em;
-            background: linear-gradient(top,rgba(0, 0, 0, 0.3),transparent 10%,transparent 98%,rgba(70, 70, 70, 0.5)),linear-gradient(top,rgba(255, 255, 255, 0.35),rgba(255, 255, 255, 0.1) 50%,rgba(255, 255, 255, 0) 50%,rgba(255, 255, 255, 0)) #496B9A;
-            box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.3);
-            -webkit-box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.3);
-            background-image: linear-gradient(top,rgba(255, 255, 255, 0.5),rgba(255, 255, 255, 0.45) 6%,rgba(255, 255, 255, 0.2) 50%,rgba(255, 255, 255, 0.15) 50%,rgba(100, 100, 100, 0));
-            -webkit-tap-highlight-color: rgba(0,0,0,0);
-            overflow: visible;
-            border-radius: 5pt;
             -moz-border-radius: 5pt;
+            -moz-box-sizing: border-box;
             -webkit-border-radius: 5pt;
-            text-shadow: 0 -1px rgba(0, 0, 0, 0.3);
-            text-decoration: none;
-            border: 1px solid #394D68;
-            border-color: #2F3740 #394D68 #375073;
+            -webkit-box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.3);
+            -webkit-box-sizing: border-box;
+            -webkit-tap-highlight-color: rgba(0,0,0,0);
+            -webkit-touch-callout: none;
             background-color: #7185A2;
-            background-image: -webkit-gradient(linear,50% 0,50% 100%,color-stop(0,rgba(255, 255, 255, 0.5)),color-stop(0.06,rgba(255, 255, 255, 0.45)),color-stop(0.5,rgba(255, 255, 255, 0.2)),color-stop(0.5,rgba(255, 255, 255, 0.15)),color-stop(1,rgba(100, 100, 100, 0)));
             background-image: -moz-linear-gradient(top,rgba(255, 255, 255, 0.5),rgba(255, 255, 255, 0.45) 6%,rgba(255, 255, 255, 0.2) 50%,rgba(255, 255, 255, 0.15) 50%,rgba(100, 100, 100, 0));
             background-image: -ms-linear-gradient(top,rgba(255, 255, 255, 0.5),rgba(255, 255, 255, 0.45) 6%,rgba(255, 255, 255, 0.2) 50%,rgba(255, 255, 255, 0.15) 50%,rgba(100, 100, 100, 0));
             background-image: -o-linear-gradient(top,rgba(255, 255, 255, 0.5),rgba(255, 255, 255, 0.45) 6%,rgba(255, 255, 255, 0.2) 50%,rgba(255, 255, 255, 0.15) 50%,rgba(100, 100, 100, 0));
+            background-image: -webkit-gradient(linear,50% 0,50% 100%,color-stop(0,rgba(255, 255, 255, 0.5)),color-stop(0.06,rgba(255, 255, 255, 0.45)),color-stop(0.5,rgba(255, 255, 255, 0.2)),color-stop(0.5,rgba(255, 255, 255, 0.15)),color-stop(1,rgba(100, 100, 100, 0)));
+            border-radius: 5pt;
+            border: 1px solid #394D68;
+            box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.3);
+            box-sizing: border-box;
+            color: white;
             cursor: pointer;
-            outline: 0;
-            position: relative;
             display: inline-block;
-            -moz-border-radius: 5pt;
-            -webkit-touch-callout: none;
-            -webkit-tap-highlight-color: rgba(0,0,0,0);
+            font: bold .9em HelveticaNeue,sans-serif;
+            line-height: 1.66em;
+            margin: 0;
+            overflow: visible;
+            padding: .4em .8em;
+            text-align: center;
+            text-decoration: none;
             text-shadow: 0 -1px rgba(0, 0, 0, 0.3);
+            display: inline-block;
         }
         input[type="email"], input[type="password"] {
             width: 190px;
@@ -62,45 +51,87 @@
             padding-left: 2px;
         }
     </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="application/javascript"></script>
 </head>
-<body style="height:100%; margin: 0;
+<body onload="window.scrollTo(0, 1);" style="height:100%; margin: 0;
 background-image: -webkit-linear-gradient(bottom, #222224 0%, #555556 100%);
 background-image: -moz-linear-gradient(bottom, #222224 0%, #555556 100%);
 background-image: -ms-linear-gradient(bottom, #222224 0%, #555556 100%);
 background-image: -o-linear-gradient(bottom, #222224 0%, #555556 100%);
 background-image: linear-gradient(bottom, #222224 0%, #555556 100%);
-}" onload="window.scrollTo(0, 1);">
-    <div style="display: table; height: 85%; width: 100%; #position: relative; overflow: hidden;">
-        <div style=" #position: absolute; #top: 50%;display: table-cell; vertical-align: middle;">
-            <div style=" #position: relative; #top: -50%">
-                <div id="logo" style="text-align: center">
+}">
+    <div style="display: table; height: 85%; width: 100%; #position: relative; overflow: hidden;">  <!--Used to-->
+        <div style=" #position: absolute; #top: 50%;display: table-cell; vertical-align: middle;">  <!--place content-->
+            <div style=" #position: relative; #top: -50%">                                          <!--in middle-->
+                <div style="text-align: center">                                                    <!--of page.-->
                     <img src="img/LogoWhiteText(TransparentBg).png" alt="FoundOPS" style="width:70%; max-width:1000px"/>
-                    <!-- URL will replace # in action attribute !-->
-                    <form name="login" method="POST" action="http://app.foundops.com/Account/Login">
-                        <input id="EmailAddress" name="EmailAddress" placeholder="E-mail Address" required="required" type="email"/><br/>
-                        <input id="Password" name="Password" placeholder="Password" required="required" type="password" />
-                        <p style="margin:5px"><input id="submit" type="submit" value="Login"/></p>
-                    </form>
+                    <p style="margin:1px"><input id="EmailAddress" name="EmailAddress" placeholder="E-mail Address" required="required" type="email"/></p>
+                    <p style="margin:1px"><input id="Password" name="Password" placeholder="Password" required="required" type="password"/></p>
+                    <p style="margin:5px">
+                        <input id="rememberMe" style="position: relative; left: -5px; top:4px" type="checkbox"/>
+                        <label style="position: relative; left: -7px; top:4px">Remember Me</label>
+                        <input id="submit" type="submit" onclick="login()" value="Login"/>
+                    </p>
                 </div>
             </div>
         </div>
     </div>
 <script>
-    //Used to get rid of the browser bar in mobile devices (only works for certain cases).
-    $(document).ready(function() {
-        if (navigator.userAgent.match(/Android/i)) {
-            window.scrollTo(0,0); // reset in case prev not scrolled
-            var nPageH = $(document).height();
-            var nViewH = window.outerHeight;
-            if (nViewH > nPageH) {
-                nViewH -= 250;
-                $('BODY').css('height',nViewH + 'px');
-            }
-            window.scrollTo(0,1);
-            window.toolbar.hide();
-        }
-    });
-</script>
+    function login() {
+        var email = $("#EmailAddress").val();
+        var password = $("#Password").val();
 
+        if ($("#rememberMe").prop("checked") === true) {
+            localStorage.setItem("rememberMe", true);
+            localStorage.setItem("email", email);
+        } else {
+            localStorage.setItem("rememberMe", false);
+            localStorage.removeItem("email");
+        }
+
+//        var request = new XMLHttpRequest();
+//        request.onreadystatechange = function () {
+//            if (request.readyState === 4) {
+//                console.log(request);
+//            }
+//        };
+//        request.open("GET", "http://api.foundops.com/api/auth/Login", true, email, password);
+//        request.send(null);
+
+        $.ajax({
+            //must use JSONP because the javascript may be hosted on a different url than the api
+            type: "GET",
+            dataType: 'JSONP',
+            url: 'http://api.foundops.com/api/auth/Login',
+            data: {email: email, pass: password},
+            timeout: 5000,
+            error: function (errorThrown, textStatus) {
+                    console.log(errorThrown);
+            },
+            success: function (response) {
+                if (response) {
+                    //Save the application's login state.
+                    localStorage.setItem("loggedIn", true);
+                    window.location.pathname = "navigator.html";
+                } else {
+                    alert("Login information is incorrect.");
+                }
+            }
+        });
+    }
+    //Used to "get rid" of the browser bar in mobile devices (only works for certain cases and breaks vertical centering in others.).
+//    $(document).ready(function() {
+//        if (navigator.userAgent.match(/Android/i)) {
+//            window.scrollTo(0,0); // reset in case prev not scrolled
+//            var nPageH = $(document).height();
+//            var nViewH = window.outerHeight;
+//            if (nViewH > nPageH) {
+//                nViewH -= 250;
+//                $('BODY').css('height',nViewH + 'px');
+//            }
+//            window.scrollTo(0,1);
+//        }
+//    });
+</script>
 </body>
 </html>
