@@ -710,7 +710,7 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
     }
     .addDeleteBtns{
         float: right;
-        margin: 12px -20px 0 0;
+        margin: 5px -190px 0 0;
     }
     .k-datepicker{
         width: 130px;
@@ -729,6 +729,7 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
     }
     #top{
         width:680px;
+        padding: 5px 0;
         label{
             padding-left: 10px;
         }
@@ -746,16 +747,22 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
         }
     }
 }
-#serviceDetails {
-    position: absolute;
-    top:45px;
-    right: 30px;
+#serviceDetails, #taskServiceDetails {
+
     width: 200px;
-    background-color:#fff;
-    border: 1px solid #ccc;
-    padding:15px;
     li{
         padding: 1px 0 1px 0;
+        .percentSign{
+            position: absolute;
+            margin-top: 5px;
+            font-size: 15px;
+        }
+        .dollarSign{
+            position: absolute;
+            margin-top: 4px;
+            font-size: 16px;
+            margin-left: 2px;
+        }
     }
     li.textarea{
         vertical-align: top;
@@ -763,7 +770,13 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
     }
     .k-timepicker, .k-combobox, input[type="text"], input[type="number"], .select2-container{
         width: 100%;
-        margin-top: 4px;
+    }
+    input[type="text"]{
+        width: 196px;
+    }
+    input[type="number"]{
+        width: 194px;
+        padding-left: 2px;
     }
     textarea{
         width: 100% !important;
@@ -772,8 +785,7 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
         color: #385487;
         min-width: 6em;
         border: 0;
-        padding: .4em;
-        padding-left: 0px;
+        padding: .4em 0;
         outline: 0;
         background: transparent;
         font-family: PTSans;
@@ -781,7 +793,22 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
     .km-listview-wrapper ul{
         width: 100%;
         margin-left: 0;
+        margin-bottom: 0;
     }
+    .km-listview-label{
+        padding-left: 15px;
+    }
+}
+#serviceDetails {
+    position: absolute;
+    top:40px;
+    right: 30px;
+    background-color:#fff;
+    border: 1px solid #ccc;
+    padding:15px;
+}
+#taskServiceDetails{
+    padding: 15px;
 }
 /*endregion*/
 /*region Noty*/

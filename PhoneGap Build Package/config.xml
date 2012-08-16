@@ -1,31 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <widget xmlns		= "http://www.w3.org/ns/widgets"
 	xmlns:gap	= "http://phonegap.com/ns/1.0"
-	id		= "foundOps.mobile"
-	version 	= "0.5.0"
-	versionCode = "12">
+	id		= "com.foundOps.mobile"
+	version 	= "0.5.5"
+	versionCode = "14">
 
 	<name>FoundOPS</name>
 
-	<description>FoundOPS Mobile Application</description>
+	<description>FoundOPS's Mobile Application 
+	Acts as a front end tool for FoundOPS's fleet managing software. Allows a field operator to send and recieve customized data to and from their base of operations. All data is shared and automatically synced with a database located back at the base of operations.</description>
 
 	<author href="http://www.foundops.com" email="info@foundops.com">FoundOPS</author>
 
-	<icon src="icon.png" />
-	<icon src="icon/ios/icon.png" gap:platform="ios" width="57" height="57"/>
-	<icon src="icon/ios/icon-72.png" gap:platform="ios" width="72" height="72"/>
-	<icon src="icon/ios/icon@2x.png" gap:platform="ios" width="114" height="114"/>
-	<icon src="icon/android/ldpi.png" gap:platform="android" gap:density="ldpi"/>
-	<icon src="icon/android/mdpi.png" gap:platform="android" gap:density="mdpi"/>
-	<icon src="icon/android/hdpi.png" gap:platform="android" gap:density="hdpi"/>
+	<preference name="phonegap-version" value="2.0.0"/>
 	
-	<preference name="phonegap-version" value="2.0.0" />
-	<preference name="prerendered-icon" value="true" />
-	<preference name="orientation" value="default" />
+	<preference name="orientation" value="default"/>
+
+	<preference name="android-minSdkVersion" value="8" />
+	
+	<icon src="icon.png" />
+	<icon src="icons/ios/icon.png" gap:platform="ios" width="57" height="57"/>
+	<icon src="icons/ios/icon-72.png" gap:platform="ios" width="72" height="72"/>
+	<icon src="icons/ios/icon@2x.png" gap:platform="ios" width="114" height="114"/>
+	<icon src="icons/android/ldpi.png" gap:platform="android" gap:density="ldpi"/>
+	<icon src="icons/android/mdpi.png" gap:platform="android" gap:density="mdpi"/>
+	<icon src="icons/android/hdpi.png" gap:platform="android" gap:density="hdpi"/>
+	<preference name="prerendered-icon" value="true"/>
 
 	<feature name="http://api.phonegap.com/1.0/device"/>
 	<feature name="http://api.phonegap.com/1.0/geolocation"/>
 	<feature name="http://api.phonegap.com/1.0/network"/>
-	<feature name="http://api.phonegap.com/1.0/notification"/>
 
 </widget>
