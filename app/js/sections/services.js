@@ -338,6 +338,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "widgets/serviceDet
             //if there is a matching column in configColumns, use it's values
             if (configColumn) {
                 //check if "px" is missing. If so, put it back
+                //check if "px" is missing. If so, put it back
                 if (configColumn.Width.indexOf("px") === -1) {
                     configColumn.Width += "px";
                 }
@@ -361,6 +362,11 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "widgets/serviceDet
         columns = _.sortBy(columns, function (column) {
             return column.order;
         });
+
+        grid = $("#grid").data("kendoGrid");
+        if (grid) {
+            grid.destroy();
+        }
 
         grid = $("#grid").kendoGrid({
             autoBind: true,
