@@ -394,6 +394,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "widgets/serviceDet
                     saveHistory.close();
                     saveHistory.resetHistory();
                 });
+                //show the service details
                 $("#serviceDetails").attr("style", "display:block");
             },
             columns: columns,
@@ -423,6 +424,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "widgets/serviceDet
 
         grid.refresh();
     };
+
     //endregion
 
     services.initialize = function () {
@@ -444,7 +446,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "widgets/serviceDet
                 dataValueField: "Id",
                 dataSource: services.serviceTypes,
                 change: function () {
-                    //disable the delete button
+                    //disable the delete button and hide the service details
                     $('#services .k-grid-delete').attr("disabled", "disabled");
                     $("#serviceDetails").attr("style", "display:none");
 
