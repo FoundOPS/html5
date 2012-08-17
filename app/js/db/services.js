@@ -385,7 +385,7 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
      * @param {!function(boolean)} callback The callback to pass true (success) or false (failed) to after attempting to authenticate the credentials.
      */
     services.authenticate = function (email, password, callback) {
-        return services._getHttp('auth/Login', {email: email, pass: password}, true, null)(callback);
+        return services._getHttp('session/Login', {email: email, pass: password}, true, null)(callback);
     };
 
     /**
@@ -394,7 +394,7 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
     services.getSession = services._getHttp('settings/GetSession', {}, true);
 
     services.logout = function (callback) {
-        return services._getHttp('auth/LogOut')(callback);
+        return services._getHttp('session/LogOut')(callback);
     };
 
     //endregion
