@@ -2,12 +2,15 @@
 
 'use strict';
 
-require(["jquery", "db/services", "tools", "db/saveHistory", "widgets/serviceDetails", "lib/jquery.form"], function ($, dbServices, tools, saveHistory) {
+require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widgets/serviceDetails", "lib/jquery.form"], function ($, dbServices, tools, saveHistory, gridTools) {
     var services = {}, serviceHoldersDataSource, grid, handleChange, serviceTypesComboBox, selectedServiceHolder, vm;
 
     //region Public
     services.vm = vm = kendo.observable({
-        selectedServiceType: function () {
+        /**
+         * The selected service type
+         */
+        serviceType: function () {
             return serviceTypesComboBox.dataItem();
         }
     });
@@ -69,7 +72,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "widgets/serviceDet
     };
 
     services.exportToCSV = function () {
-        var content = tools.toCSV(serviceHoldersDataSource.view(), "Services", true, ['RecurringServiceId', 'ServiceId']);
+        var content = gridTools.toCSV(serviceHoldersDataSource.view(), "Services", true, ['RecurringServiceId', 'ServiceId']);
         var form = $("#csvForm");
         form.find("input[name=content]").val(content);
         form.find("input[name=fileName]").val("services.csv");
@@ -157,7 +160,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "widgets/serviceDet
      * and kendo datasource does not allow you to change the schema.
      */
     var createDataSourceAndGrid = function () {
-        var serviceType = vm.selectedServiceType().Name;
+        var serviceType = vm.serviceType().Name;
 
         var readAction = "service/GetServicesHoldersWithFields";
         var params = {
@@ -277,33 +280,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "widgets/serviceDet
         $("#serviceDetails").css("max-height", contentHeight + 15 + 'px');
     };
 
-    //save the column configuration
-    var saveGridConfig = function () {
-        _.delay(function () {
-            var columns = grid.columns;
-            var serviceColumns = [];
-            for (var c in columns) {
-                var column = {};
-                column.Name = columns[c].field;
-                column.Width = columns[c].width;
-                column.Order = c;
-                if (columns[c].hidden) {
-                    column.Hidden = true;
-                } else {
-                    column.Hidden = false;
-                }
-                serviceColumns.push(column);
-            }
-
-            var id = vm.selectedServiceType().Id;
-            dbServices.updateServiceColumns(id, serviceColumns);
-            services.serviceColumns[id] = serviceColumns;
-        }, 200);
-    };
-
     var setupGrid = function (fields) {
-        var storedColumns = services.serviceColumns[vm.selectedServiceType().Id];
-
         //Setup the columns based on the fields
         var columns = [];
         _.each(fields, function (value, key) {
@@ -334,37 +311,27 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "widgets/serviceDet
             var titleLength = column.title.length * 7.5 + 35;
             column.width = titleLength + "px";
 
-            var configColumn = _.find(storedColumns, function (col) {
-                return col.Name === column.field;
-            });
-
-            //if there is a matching column in configColumns, use it's values
-            if (configColumn) {
-                //check if "px" is missing. If so, put it back
-                //check if "px" is missing. If so, put it back
-                if (configColumn.Width.indexOf("px") === -1) {
-                    configColumn.Width += "px";
-                }
-                column.width = configColumn.Width;
-                column.hidden = configColumn.Hidden;
-                column.order = configColumn.Order;
-            }
-
             columns.push(column);
         });
 
-        //check if there is any difference in the columns in config
-        //if so, save the current config
-        var storedCols = _.pluck(storedColumns, 'Name');
-        var gridCols = _.pluck(columns, 'field');
-        if (_.difference(storedCols, gridCols).length > 0 || _.difference(gridCols, storedCols).length > 0) {
-            saveGridConfig();
-        }
-
-        //reorder the columns
-        columns = _.sortBy(columns, function (column) {
-            return parseInt(column.order);
+        //order the columns alphabetically
+        //then put the OccurDate and Client Name first
+        //dont worry, this will be overridden next if a column configuration is already saved
+        var i = 2; //start after client name
+        var alphabetically = _(columns).sortBy("field");
+        _(alphabetically).each(function (c) {
+            c.order = i;
+            i++;
         });
+        _.find(columns,function (c) {
+            return c.field === "OccurDate";
+        }).order = 0;
+        _.find(columns,function (c) {
+            return c.field === "ClientName";
+        }).order = 1;
+
+        //configure the columns based on the user's stored configuration
+        columns = gridTools.configureColumns(columns, vm.serviceType().Id);
 
         grid = $("#grid").data("kendoGrid");
         if (grid) {
@@ -399,18 +366,6 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "widgets/serviceDet
             },
             columns: columns,
             columnMenu: true,
-            columnReorder: function () {
-                saveGridConfig();
-            },
-            columnResize: function () {
-                saveGridConfig();
-            },
-            columnShow: function () {
-                saveGridConfig();
-            },
-            columnHide: function () {
-                saveGridConfig();
-            },
             dataSource: serviceHoldersDataSource,
             filterable: true,
             resizable: true,
@@ -421,6 +376,9 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "widgets/serviceDet
             },
             selectable: true
         }).data("kendoGrid");
+
+        //Keep track of any changes to the columns, and store the configuration
+        gridTools.storeConfiguration(grid, vm.serviceType().Id);
 
         grid.refresh();
     };
@@ -455,13 +413,8 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "widgets/serviceDet
                 }
             }).data("kendoDropDownList");
 
-            //load the saved column configuration
-            dbServices.getServiceColumns(function (columns) {
-                services.serviceColumns = columns;
-
-                //load the services initially
-                createDataSourceAndGrid();
-            });
+            //load the services initially
+            createDataSourceAndGrid();
         });
 
         //set the initial start date to today and end date in two weeks

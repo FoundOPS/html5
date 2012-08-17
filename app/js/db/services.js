@@ -254,15 +254,19 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
      * Get the column config
      * @param roleId The role to get the columns for
      */
-    services.getServiceColumns = services._getHttp('service/GetServiceColumns', {}, false);
+    services.getColumnConfigurations = services._getHttp('session/GetColumnConfigurations', {}, false);
 
-    services.updateServiceColumns = function (serviceId, columns) {
+    /**
+     * Updates the column configurations for the current role (for the current user)
+     * @param columnConfigurations
+     */
+    services.updateColumnConfigurations = function (columnConfigurations) {
         $.ajax({
-            url: services.API_URL + "service/UpdateServiceColumns?roleId=" + services.RoleId + "&serviceId=" + serviceId,
+            url: services.API_URL + "session/UpdateColumnConfigurations?roleId=" + services.RoleId,
             type: "POST",
             dataType: "json",
             contentType: 'application/json',
-            data: JSON.stringify(columns)
+            data: JSON.stringify(columnConfigurations)
         });
     };
 
@@ -391,7 +395,7 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
     /**
      * Get the current session for the user
      */
-    services.getSession = services._getHttp('settings/GetSession', {}, true);
+    services.getSession = services._getHttp('session/Get', {}, true);
 
     services.logout = function (callback) {
         return services._getHttp('session/LogOut')(callback);
