@@ -39,11 +39,7 @@ define(['db/session', 'db/services'], function (session, dbServices) {
             storedColumn.Width = gridColumn.width;
             storedColumn.Order = order;
             order++;
-            if (gridColumn.hidden) {
-                storedColumn.Hidden = true;
-            } else {
-                storedColumn.Hidden = false;
-            }
+            storedColumn.Hidden = gridColumn.hidden;
             columnConfiguration.Columns.push(storedColumn);
         });
 

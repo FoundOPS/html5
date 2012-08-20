@@ -283,7 +283,6 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
         $("#serviceDetails").css("max-height", contentHeight + 5 + 'px');
     };
 
-                column.Hidden = columns[c].hidden;
     var setupGrid = function (fields) {
         //Setup the columns based on the fields
         var columns = [];
