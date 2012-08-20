@@ -60,6 +60,7 @@
 				} else {
 					mirror = $(copy).data('ismirror', true).addClass(className || 'autosizejs')[0];
 
+                    //FoundOPS Change: changes "horizontal" to "vertical"
 					resize = $ta.css('resize') === 'none' ? 'none' : 'vertical';
 
 					$ta.data('mirror', $(mirror)).css({
@@ -82,7 +83,7 @@
 					if (!active) {
 						active = true;
 
-						mirror.value = ta.value;
+                        mirror.value = ta.value;
 
 						mirror.style.overflowY = ta.style.overflowY;
 

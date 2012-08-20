@@ -73,6 +73,10 @@ define(['underscore', 'lib/noty'], function (_) {
             text = "File is Too Large! Maximum Allowed is 5MB.";
         } else if (code === "File Type") {
             text = "Only .JPG, .PNG, and .GIF Files Types Allowed!";
+        }else if (code === "No Client") {
+            text = "You Must Select a Client";
+        }else if (code === "No Location") {
+            text = "You Must Select a Location";
         }
         $.noty({
             type: 'error',
