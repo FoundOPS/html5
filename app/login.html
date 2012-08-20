@@ -13,6 +13,14 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <style>
+        @font-face {
+            font-family: PTSans;
+            src: url(styles/PTS55F.ttf);  /* TTF file for CSS3 browsers */
+        }
+        @font-face {
+            font-family: PTSansIE;
+            src: url(styles/PTS55F.eot);  /* TTF file for CSS3 browsers */
+        }
         input[type="submit"] {
             -moz-border-radius: 5pt;
             -moz-box-sizing: border-box;
@@ -53,31 +61,36 @@
     </style>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="application/javascript"></script>
 </head>
-<body onload="window.scrollTo(0, 1);" style="height:100%; margin: 0;
+<body onload="window.scrollTo(0, 1);" style="height:100%; margin: 0; font-family: PTSans, PTSansIE;
 background-image: -webkit-linear-gradient(bottom, #222224 0%, #555556 100%);
 background-image: -moz-linear-gradient(bottom, #222224 0%, #555556 100%);
 background-image: -ms-linear-gradient(bottom, #222224 0%, #555556 100%);
 background-image: -o-linear-gradient(bottom, #222224 0%, #555556 100%);
 background-image: linear-gradient(bottom, #222224 0%, #555556 100%);
 }">
-    <div style="display: table; height: 85%; width: 100%; #position: relative; overflow: hidden;">  <!--Used to-->
-        <div style=" #position: absolute; #top: 50%;display: table-cell; vertical-align: middle;">  <!--place content-->
-            <div style=" #position: relative; #top: -50%">                                          <!--in middle-->
-                <div style="text-align: center">                                                    <!--of page.-->
-                    <img src="img/LogoWhiteText(TransparentBg).png" alt="FoundOPS" style="width:70%; max-width:1000px"/>
+<div style="display: table; height: 85%; width: 100%; #position: relative; overflow: hidden;">  <!--Used to-->
+    <div style=" #position: absolute; #top: 50%;display: table-cell; vertical-align: middle;">  <!--place content-->
+        <div style=" #position: relative; #top: -50%">                                          <!--in middle-->
+            <div style="text-align: center">                                                    <!--of page.-->
+                <img src="img/LogoWhiteText(TransparentBg).png" alt="FoundOPS" style="width:70%; max-width:1000px"/>
+                <form id="loginForm" name="loginForm" onsubmit="login();">
                     <p style="margin:1px"><input id="EmailAddress" name="EmailAddress" placeholder="E-mail Address" required="required" type="email"/></p>
                     <p style="margin:1px"><input id="Password" name="Password" placeholder="Password" required="required" type="password"/></p>
                     <p style="margin:5px">
-                        <input id="rememberMe" style="position: relative; left: -5px; top:4px" type="checkbox"/>
-                        <label style="position: relative; left: -7px; top:4px">Remember Me</label>
-                        <input id="submit" type="submit" onclick="login()" value="Login"/>
+                        <input id="submit" type="submit" style="margin-bottom: 5px; margin-top: 0px" value="Login"/><br/>
+                        <input id="rememberMe" style="position: relative; top:1px" type="checkbox"/>
+                        <label style="font-size: 14px" >Remember Me</label>
+                        <!--<a id="submit" type="submit" onclick="login()">Login</a>-->
                     </p>
-                </div>
+                </form>
             </div>
         </div>
     </div>
+</div>
 <script>
-    function login() {
+    $("#loginForm").submit( function(event) {
+        event.preventDefault();
+
         var email = $("#EmailAddress").val();
         var password = $("#Password").val();
 
@@ -89,39 +102,49 @@ background-image: linear-gradient(bottom, #222224 0%, #555556 100%);
             localStorage.removeItem("email");
         }
 
-//        var request = new XMLHttpRequest();
-//        request.onreadystatechange = function () {
-//            if (request.readyState === 4) {
-//                console.log(request);
-//            }
-//        };
-//        request.open("GET", "http://api.foundops.com/api/auth/Login", true, email, password);
-//        request.send(null);
-
         $.ajax({
             //must use JSONP because the javascript may be hosted on a different url than the api
             type: "GET",
             dataType: 'JSONP',
-            url: 'http://api.foundops.com/api/auth/Login',
+            url: 'http://localhost:9711/api/session/Login',        //LOCAL
+//            url: 'http://api.foundops.com/api/session/Login',    //LIVE
             data: {email: email, pass: password},
-            timeout: 5000,
+//            timeout: 5000,
             error: function (errorThrown, textStatus) {
-                    console.log(errorThrown);
+                console.log(textStatus);
+                console.log(errorThrown);
             },
             success: function (response) {
                 if (response) {
                     //Save the application's login state.
                     localStorage.setItem("loggedIn", true);
-                    window.location.pathname = "navigator.html";
+                    window.location.href = "navigator.html";
                 } else {
                     alert("Login information is incorrect.");
                 }
             }
         });
-    }
-    //Used to "get rid" of the browser bar in mobile devices (only works for certain cases and breaks vertical centering in others.).
-//    $(document).ready(function() {
-//        if (navigator.userAgent.match(/Android/i)) {
+    });
+
+    var login = function () { };
+
+    $(document).ready(function() {
+        var checkLogin = function () {
+            //Wait until the application is initialized
+            setTimeout(function () {
+                if (localStorage.getItem("loggedIn") === "true") {
+                    console.log("Logged In");
+                    //window.location.hash = "view/routeList.html";
+                } else if (localStorage.getItem("rememberMe") === "true") {
+                    $("#email").val(localStorage.getItem("email"));
+                    $("#rememberMe").prop("checked", true);
+                }
+            }, 0);
+
+        };
+        checkLogin();
+        //Used to "get rid" of the browser bar in mobile devices (only works for certain cases and breaks vertical centering in others.).
+//                if (navigator.userAgent.match(/Android/i)) {
 //            window.scrollTo(0,0); // reset in case prev not scrolled
 //            var nPageH = $(document).height();
 //            var nViewH = window.outerHeight;
@@ -131,7 +154,7 @@ background-image: linear-gradient(bottom, #222224 0%, #555556 100%);
 //            }
 //            window.scrollTo(0,1);
 //        }
-//    });
+    });
 </script>
 </body>
 </html>

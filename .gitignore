@@ -4,9 +4,10 @@ manifest.mf
 build.xml
 
 .idea/
-Android/assets/www
-Android/bin/
-Android-Build/bin/
+Android/assets/*
+Android/bin/*
+Android - Built/assets/*
+Android - Built/bin/*
 buildsmap/
 buildsmobile/
 PhoneGap Build Package/
