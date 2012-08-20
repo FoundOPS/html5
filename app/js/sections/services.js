@@ -42,13 +42,15 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
             //update all the field columns
             var fields = selectedService.Fields;
 
-            for (var i = 0; i < fields.length; i++) {
+            var i;
+            for (i = 0; i < fields.length; i++) {
                 var field = fields[i];
                 var val = field.get("Value");
                 if (field.Type === "OptionsField") {
                     val = "";
                     var options = field.get("Options");
-                    for (var o = 0; o < options.length; o++) {
+                    var o;
+                    for (o = 0; o < options.length; o++) {
                         var option = field.get("Options[" + o + "]");
                         if (option.get("IsChecked")) {
                             val += option.get("Name") + ", ";
@@ -224,7 +226,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
                     //update the vm's startDate and endDate
                     //then reload the dataSource
                     if (vmStartDate.toDateString() !== startDateFilter.value.toDateString() ||
-                        vmEndDate.toDateString() !== endDateFilter.value.toDateString()) {
+                            vmEndDate.toDateString() !== endDateFilter.value.toDateString()) {
                         vm.set("startDate", startDateFilter.value);
                         vm.set("endDate", endDateFilter.value);
 
@@ -232,9 +234,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
                         serviceHoldersDataSource.options.transport.read.data.startDate = tools.formatDate(vm.get("startDate"));
                         serviceHoldersDataSource.options.transport.read.data.endDate = tools.formatDate(vm.get("endDate"));
                         serviceHoldersDataSource.read();
-                    }
-                    //if there was a missing filter, refilter
-                    else if (missingFilter) {
+                    } else if (missingFilter) { //if there was a missing filter, refilter
                         var otherFilters = _.filter(filterSet, function (f) {
                             return f.field !== "OccurDate";
                         });
@@ -326,10 +326,10 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
             c.order = i;
             i++;
         });
-        _.find(columns,function (c) {
+        _.find(columns, function (c) {
             return c.field === "OccurDate";
         }).order = 0;
-        _.find(columns,function (c) {
+        _.find(columns, function (c) {
             return c.field === "ClientName";
         }).order = 1;
 
@@ -358,7 +358,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
                     return;
                 }
                 //make sure there is a client and a location(there won't be if this is a new service)
-                if(selectedServiceHolder.get("ClientName") && selectedServiceHolder.get("Destination")){
+                if (selectedServiceHolder.get("ClientName") && selectedServiceHolder.get("Destination")) {
                     //Load the service details, and update the view model
                     dbServices.getServiceDetails(selectedServiceHolder.get("ServiceId"), selectedServiceHolder.get("OccurDate"), selectedServiceHolder.get("RecurringServiceId"), function (service) {
                         services.vm.set("selectedService", service);
@@ -398,14 +398,14 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
         vm.bind("change", function (e) {
             if (e.field.indexOf("selectedService.") > -1) {
                 //check if a client is selected. If not, show error
-                if(selectedServiceHolder.get("ClientName")){
+                if (selectedServiceHolder.get("ClientName")) {
                     //check if a location is selected. If not, show error
-                    if(selectedServiceHolder.get("Destination")){
+                    if (selectedServiceHolder.get("Destination")) {
                         saveHistory.save();
-                    }else{
+                    } else {
                         saveHistory.error("No Location");
                     }
-                }else{
+                } else {
                     saveHistory.error("No Client");
                 }
             }

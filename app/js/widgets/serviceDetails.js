@@ -96,11 +96,11 @@ define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "li
                 formatResult: formatClientName,
                 dropdownCssClass: "bigdrop"
             }).on("change", function (e) {
-                    var client = clientSelector.select2("data");
-                    service.set("Client", client);
-                    service.set("ClientId", client.Id);
-                    updateLocations(client);
-                });
+                var client = clientSelector.select2("data");
+                service.set("Client", client);
+                service.set("ClientId", client.Id);
+                updateLocations(client);
+            });
 
             if (service.Client) {
                 //set the initial selection
@@ -129,12 +129,12 @@ define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "li
                 formatResult: formatLocationName,
                 dropdownCssClass: "bigdrop"
             }).on("change", function (e) {
-                    var location = locationSelector.select2("data");
-                    var destinationField = models.getDestinationField(service);
-                    //Used for updating the grid
-                    destinationField.Value = location;
-                    destinationField.set("LocationId", location.Id);
-                });
+                var location = locationSelector.select2("data");
+                var destinationField = models.getDestinationField(service);
+                //Used for updating the grid
+                destinationField.Value = location;
+                destinationField.set("LocationId", location.Id);
+            });
         },
 
         _createTextBoxField: function (field, fieldIndex, listView) {
@@ -142,8 +142,7 @@ define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "li
             if (field.IsMultiLine) {
                 fieldElement = $(multiLineTextTemplate);
                 fieldElement.appendTo(listView).wrap("<li class='textarea'>" + field.Name + "</li>");
-            }
-            else {
+            } else {
                 fieldElement = $(inputTemplate);
                 fieldElement.attr("type", "text");
                 fieldElement.appendTo(listView).wrap("<li>" + field.Name + "</li>");
@@ -218,8 +217,9 @@ define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "li
                     change: function (e) {
                         var index = this.selectedIndex;
                         var field = this.fieldParent;
+                        var i;
                         //clear the other checked items
-                        for (var i = 0; i < field.Options.length; i++) {
+                        for (i = 0; i < field.Options.length; i++) {
                             field.Options[i].IsChecked = false;
                         }
                         if (index >= 0) {
@@ -245,7 +245,8 @@ define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "li
                 //Checkbox (1) or checklist (2)
                 fieldElement = $('<ul data-role="listview" data-style="inset">' + field.Name + '</ul>').appendTo(elementToAppendTo);
 
-                for (var optionIndex = 0; optionIndex < field.Options.length; optionIndex++) {
+                var optionIndex;
+                for (optionIndex = 0; optionIndex < field.Options.length; optionIndex++) {
                     var optionElement = $(inputTemplate).attr("type", "checkbox");
 
                     var option = field.Options[optionIndex];
@@ -294,7 +295,8 @@ define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "li
             var fieldsListView = $('<ul></ul>').appendTo(that.element);
             var checkLists = $('<div></div>').appendTo(that.element);
 
-            for (var fieldIndex = 0; fieldIndex < service.Fields.length; fieldIndex++) {
+            var fieldIndex;
+            for (fieldIndex = 0; fieldIndex < service.Fields.length; fieldIndex++) {
                 var field = service.Fields[fieldIndex];
 
                 //Location Destination is manually handled for now
@@ -355,5 +357,4 @@ define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "li
             }
         }
     }));
-})
-;
+});
