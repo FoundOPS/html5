@@ -162,12 +162,12 @@ define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "li
             //TODO: improve using http://stackoverflow.com/questions/7933505/mask-input-for-number-percent
             if (field.Mask === "c") {
                 $("<br /><span class='dollarSign'> $</span>").insertBefore(fieldElement);
-                fieldElement.attr("style", "width:181px;padding-left:15px;");
+                fieldElement.attr("style", "width:231px;padding-left:15px;");
             } else if (field.Mask === "p") {
                 //percentage
                 //TODO: improve using http://stackoverflow.com/questions/7933505/mask-input-for-number-percent
                 $("<span class='percentSign'>%</span>").insertAfter(fieldElement);
-                fieldElement.attr("style", "width:179px;padding-right:15px;margin-right:-32px;");
+                fieldElement.attr("style", "width:229px;padding-right:15px;margin-right:-32px;");
             }
 
             return fieldElement;

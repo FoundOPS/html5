@@ -20,7 +20,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "widgets/serviceDet
     };
 
     services.save = function () {
-        dbServices.updateService(vm.get("selectedService")).success(function (e) {
+        dbServices.updateService(vm.get("selectedService")).success(function () {
             //Now that the service has been updated, change the current row's ServiceId
             //to match the Id in case this was a newly inserted service
 
@@ -184,7 +184,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "widgets/serviceDet
                         data: params
                     }
                 },
-                change: function (e) {
+                change: function () {
                     var filterSet = serviceHoldersDataSource.filter();
                     if (filterSet) {
                         filterSet = filterSet.filters;
@@ -229,8 +229,6 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "widgets/serviceDet
                         serviceHoldersDataSource.options.transport.read.data.startDate = tools.formatDate(vm.get("startDate"));
                         serviceHoldersDataSource.options.transport.read.data.endDate = tools.formatDate(vm.get("endDate"));
                         serviceHoldersDataSource.read();
-
-                        return;
                     }
                     //if there was a missing filter, refilter
                     else if (missingFilter) {
@@ -246,8 +244,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "widgets/serviceDet
                     }
                 },
                 parse: function (response) {
-                    var formatted = formatData(response);
-                    return formatted;
+                    return formatData(response);
                 }
             });
             serviceHoldersDataSource.sort({ field: "OccurDate", dir: "asc" });
@@ -261,20 +258,26 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "widgets/serviceDet
 
     //region Grid
 
+    //called when grid data is loaded
+    var dataBound = function () {
+        // selects first grid row
+        grid.select(grid.tbody.find(">tr:first"));
+    };
+
     //resize the grid based on the current window's height
     var resizeGrid = function (initialLoad) {
         var extraMargin;
         if (initialLoad) {
-            extraMargin = 50;
+            extraMargin = 70;
         } else {
             extraMargin = 85;
         }
         var windowHeight = $(window).height();
         var topHeight = $('#top').outerHeight(true);
         var contentHeight = windowHeight - topHeight - extraMargin;
-        $('#grid').css("height", contentHeight + 'px');
-        $('#grid .k-grid-content').css("height", contentHeight + 'px');
-        $("#serviceDetails").css("max-height", contentHeight + 15 + 'px');
+        $('#grid').css("height", contentHeight + 9 + 'px');
+        $('#grid .k-grid-content').css("height", contentHeight - 8 + 'px');
+        $("#serviceDetails").css("max-height", contentHeight + 5 + 'px');
     };
 
     //save the column configuration
@@ -287,11 +290,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "widgets/serviceDet
                 column.Name = columns[c].field;
                 column.Width = columns[c].width;
                 column.Order = c;
-                if (columns[c].hidden) {
-                    column.Hidden = true;
-                } else {
-                    column.Hidden = false;
-                }
+                column.Hidden = columns[c].hidden;
                 serviceColumns.push(column);
             }
 
@@ -387,15 +386,19 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "widgets/serviceDet
                 if (!selectedServiceHolder) {
                     return;
                 }
-                //Load the service details, and update the view model
-                dbServices.getServiceDetails(selectedServiceHolder.get("ServiceId"), selectedServiceHolder.get("OccurDate"), selectedServiceHolder.get("RecurringServiceId"), function (service) {
-                    services.vm.set("selectedService", service);
+                //make sure there is a client and a location(there won't be if this is a new service)
+                if(selectedServiceHolder.get("ClientName") && selectedServiceHolder.get("Destination")){
+                    //Load the service details, and update the view model
+                    dbServices.getServiceDetails(selectedServiceHolder.get("ServiceId"), selectedServiceHolder.get("OccurDate"), selectedServiceHolder.get("RecurringServiceId"), function (service) {
+                        services.vm.set("selectedService", service);
 
-                    saveHistory.close();
-                    saveHistory.resetHistory();
-                });
+                        saveHistory.close();
+                        saveHistory.resetHistory();
+                    });
+                }
                 //show the service details
                 $("#serviceDetails").attr("style", "display:block");
+                resizeGrid(false);
             },
             columns: columns,
             columnMenu: true,
@@ -411,6 +414,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "widgets/serviceDet
             columnHide: function () {
                 saveGridConfig();
             },
+            dataBound: dataBound,
             dataSource: serviceHoldersDataSource,
             filterable: true,
             resizable: true,
@@ -431,7 +435,17 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "widgets/serviceDet
         //save changes whenever the selected service has a change
         vm.bind("change", function (e) {
             if (e.field.indexOf("selectedService.") > -1) {
-                saveHistory.save();
+                //check if a client is selected. If not, show error
+                if(selectedServiceHolder.get("ClientName")){
+                    //check if a location is selected. If not, show error
+                    if(selectedServiceHolder.get("Destination")){
+                        saveHistory.save();
+                    }else{
+                        saveHistory.error("No Location");
+                    }
+                }else{
+                    saveHistory.error("No Client");
+                }
             }
         });
 
@@ -469,6 +483,21 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "widgets/serviceDet
         vm.set("endDate", moment().sod().add('weeks', 2).toDate());
 
         $("#serviceDetails").kendoServiceDetails();
+
+        $("#services .k-grid-add").on("click", function () {
+            serviceHoldersDataSource.add();
+
+            selectedServiceHolder.set("OccurDate", new Date());
+            selectedServiceHolder.set("RecurringServiceId", vm.selectedServiceType().Id);
+            selectedServiceHolder.set("ServiceName", vm.selectedServiceType().Name);
+            //selectedServiceHolder.set("ServiceId", tools.newGuid());
+            //selectedServiceHolder.set("Fields", serviceHoldersDataSource.reader.model.fields);
+
+            services.vm.set("selectedService", selectedServiceHolder);
+
+            saveHistory.close();
+            saveHistory.resetHistory();
+        });
 
         $("#services .k-grid-delete").on("click", function () {
             var answer = confirm("Are you sure you want to delete the selected service?");

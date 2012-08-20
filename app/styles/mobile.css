@@ -52,14 +52,14 @@ body {
 }
 #routeStatus-listview{
     margin: 0 auto;
-    width:200px;
+    width:250px;
 }
 #routeStatus-listview a{
     min-height: 42px;
 }
 .statusLabel{
     margin: 0 auto;
-    width: 200px;
+    width: 250px;
 }
 .statusLabel span{
     font-size: 16px;
