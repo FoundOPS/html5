@@ -94,19 +94,19 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
         var types = _.first(data);
 
         var fieldTypes = {
-            "System.Decimal": {type: "number"},
-            "System.DateTime": {type: "date", detail: "datetime"},
-            "Time": {type: "date", detail: "time"},
-            "Date": {type: "date", detail: "date"},
-            "System.String": {type: "string"},
-            "System.Guid": {type: "string"}
+            "number": {type: "number"},
+            "dateTime": {type: "date", detail: "datetime"},
+            "time": {type: "string", detail: "time"},
+            "date": {type: "date", detail: "date"},
+            "string": {type: "string"},
+            "guid": {type: "guid"}
         };
 
         //Setup the data source fields info
         var fields = {};
         _.each(types, function (type, name) {
             var fieldInfo = fieldTypes[type];
-            if (type === "System.Guid") {
+            if (type === "guid") {
                 fieldInfo.hidden = true;
             }
 
@@ -226,7 +226,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
                     //update the vm's startDate and endDate
                     //then reload the dataSource
                     if (vmStartDate.toDateString() !== startDateFilter.value.toDateString() ||
-                            vmEndDate.toDateString() !== endDateFilter.value.toDateString()) {
+                        vmEndDate.toDateString() !== endDateFilter.value.toDateString()) {
                         vm.set("startDate", startDateFilter.value);
                         vm.set("endDate", endDateFilter.value);
 
@@ -264,7 +264,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
     //called when grid data is loaded
     var dataBound = function () {
         //check if this is the first load or the service type has changed
-        if(selectFirst){
+        if (selectFirst) {
             // selects first grid row
             //grid.select(grid.tbody.find(">tr:first"));
             selectFirst = false;
@@ -304,14 +304,12 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
             column.type = value.type;
             if (column.type === "number") {
                 column.template = "#= (" + key + "== null) ? ' ' : " + key + " #";
-            } else if (column.type === "date") {
-                if (value.detail === "datetime") {
-                    column.template = "#= (" + key + "== null) ? ' ' : moment(" + key + ").format('LLL') #";
-                } else if (value.detail === "time") {
-                    column.template = "#= (" + key + "== null) ? ' ' : moment(" + key + ").format('LT') #";
-                } else if (value.detail === "date") {
-                    column.template = "#= (" + key + "== null) ? ' ' : moment(" + key + ").format('LL') #";
-                }
+            } else if (value.detail === "datetime") {
+                column.template = "#= (" + key + "== null) ? ' ' : moment.utc(" + key + ").format('LLL') #";
+            } else if (value.detail === "date") {
+                column.template = "#= (" + key + "== null) ? ' ' : moment.utc(" + key + ").format('LL') #";
+            } else if (value.detail === "time") {
+                column.template = "#= (" + key + "== null) ? ' ' : moment.utc(" + key + ").format('LT') #";
             }
 
             //calculate the width based on number off characters
@@ -322,7 +320,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
         });
 
         //order the columns alphabetically
-        //then put the OccurDate and Client Name first
+        //then put the OccurDate, Client Name, and Destination first
         //dont worry, this will be overridden next if a column configuration is already saved
         var i = 2; //start after client name
         var alphabetically = _(columns).sortBy("field");
@@ -330,12 +328,15 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
             c.order = i;
             i++;
         });
-        _.find(columns, function (c) {
+        _.find(columns,function (c) {
             return c.field === "OccurDate";
         }).order = 0;
-        _.find(columns, function (c) {
+        _.find(columns,function (c) {
             return c.field === "ClientName";
         }).order = 1;
+        _.find(columns,function (c) {
+            return c.field === "Destination";
+        }).order = 2;
 
         //configure the columns based on the user's stored configuration
         columns = gridTools.configureColumns(columns, vm.serviceType().Id);
@@ -363,13 +364,13 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
                 }
                 //make sure there is a client and a location(there won't be if this is a new service)
                 //if (selectedServiceHolder.get("ClientName") && selectedServiceHolder.get("Destination")) {
-                    //Load the service details, and update the view model
-                    dbServices.getServiceDetails(selectedServiceHolder.get("ServiceId"), selectedServiceHolder.get("OccurDate"), selectedServiceHolder.get("RecurringServiceId"), function (service) {
-                        services.vm.set("selectedService", service);
+                //Load the service details, and update the view model
+                dbServices.getServiceDetails(selectedServiceHolder.get("ServiceId"), selectedServiceHolder.get("OccurDate"), selectedServiceHolder.get("RecurringServiceId"), function (service) {
+                    services.vm.set("selectedService", service);
 
-                        saveHistory.close();
-                        saveHistory.resetHistory();
-                    });
+                    saveHistory.close();
+                    saveHistory.resetHistory();
+                });
                 //}
                 //show the service details
                 $("#serviceDetails").attr("style", "display:block");
