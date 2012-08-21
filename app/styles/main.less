@@ -184,6 +184,10 @@ span.k-tooltip {
     font-weight: normal;
     font-family: PTSans;
 }
+//make alternate grid rows background color white instead of transparent
+.k-grid tbody tr:not(.k-alt){
+    background-color: #fff;
+}
 /*endregion*/
 /*endregion*/
 /*region Settings - Menu*/
@@ -820,6 +824,9 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
     .km-listview-label{
         font-size: 14px;
         padding-left: 15px;
+    }
+    .k-select{
+        margin-top: 2px;
     }
 }
 #serviceDetails {

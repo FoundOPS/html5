@@ -3,7 +3,7 @@
 'use strict';
 
 require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widgets/serviceDetails", "lib/jquery.form"], function ($, dbServices, tools, saveHistory, gridTools) {
-    var services = {}, serviceHoldersDataSource, grid, handleChange, serviceTypesComboBox, selectedServiceHolder, vm;
+    var services = {}, serviceHoldersDataSource, grid, handleChange, serviceTypesComboBox, selectedServiceHolder, vm, selectFirst = true;
 
     //region Public
     services.vm = vm = kendo.observable({
@@ -263,8 +263,12 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
 
     //called when grid data is loaded
     var dataBound = function () {
-        // selects first grid row
-        grid.select(grid.tbody.find(">tr:first"));
+        //check if this is the first load or the service type has changed
+        if(selectFirst){
+            // selects first grid row
+            //grid.select(grid.tbody.find(">tr:first"));
+            selectFirst = false;
+        }
     };
 
     //resize the grid based on the current window's height
@@ -426,6 +430,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
                     $('#services .k-grid-delete').attr("disabled", "disabled");
                     $("#serviceDetails").attr("style", "display:none");
 
+                    selectFirst = true;
                     //reload the services whenever the service type changes
                     createDataSourceAndGrid();
                 }
@@ -444,13 +449,20 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
         $("#services .k-grid-add").on("click", function () {
             serviceHoldersDataSource.add();
 
-            selectedServiceHolder.set("OccurDate", new Date());
-            selectedServiceHolder.set("RecurringServiceId", vm.selectedServiceType().Id);
-            selectedServiceHolder.set("ServiceName", vm.selectedServiceType().Name);
-            //selectedServiceHolder.set("ServiceId", tools.newGuid());
-            //selectedServiceHolder.set("Fields", serviceHoldersDataSource.reader.model.fields);
+            var service = {
+                Date: new Date(),
+                Name: serviceTypesComboBox._current[0].innerText,
+                Id: tools.newGuid(),
+                Fields: serviceHoldersDataSource.reader.model.fields
+            };
 
-            services.vm.set("selectedService", selectedServiceHolder);
+//            selectedServiceHolder.set("OccurDate", new Date());
+//            selectedServiceHolder.set("RecurringServiceId", vm.selectedService.Id);
+//            selectedServiceHolder.set("ServiceName", vm.selectedService.Name);
+//            selectedServiceHolder.set("ServiceId", tools.newGuid());
+//            selectedServiceHolder.set("Fields", serviceHoldersDataSource.reader.model.fields);
+//
+            services.vm.set("selectedService", service);
 
             saveHistory.close();
             saveHistory.resetHistory();
