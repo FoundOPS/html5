@@ -266,7 +266,7 @@ define(["tools", "db/services", "db/session", "db/saveHistory", "widgets/setting
             //disable the checkboxes for the default rows
             dispatcherSettings.disableDefaultCheckboxes();
             if (e.sender._editContainer.context) {
-                if (e.sender._editContainer.context.cellIndex == 1) {
+                if (e.sender._editContainer.context.cellIndex === 1) {
                     $('.colorSelector2').ColorPickerShow();
                 }
             }

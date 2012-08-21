@@ -75,7 +75,7 @@ define(["db/services", "db/session", "db/saveHistory", "tools", "widgets/setting
                 //TODO: set a timeout and notify if it is reached('complete' doesn't register a timeout error)
                 complete: function (jqXHR, textStatus) {
                     if (textStatus == "error") {
-                        saveHistory.error("Get")
+                        saveHistory.error("Get");
                     }
                 }
             },

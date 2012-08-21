@@ -395,7 +395,10 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
     /**
      * Get the current session for the user
      */
-    services.getSession = services._getHttp('session/Get', {}, true);
+    services.getSession = function(callback){
+        var isMobile = developer.CURRENT_FRAME === developer.Frame.MOBILE_APP;
+        return services._getHttp('session/Get', {isMobile: isMobile}, true)(callback);
+    };
 
     services.logout = function (callback) {
         return services._getHttp('session/LogOut')(callback);

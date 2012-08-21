@@ -67,7 +67,7 @@ define(['db/services', 'db/session'], function (dbServices, session) {
 
     window.onSilverlightError = function (sender, args) {
         var appSource = "";
-        if (sender != null && sender != 0) {
+        if (sender !== null && sender !== 0) {
             appSource = sender.getHost().Source;
         }
 
@@ -88,8 +88,7 @@ define(['db/services', 'db/session'], function (dbServices, session) {
             errMsg += "File: " + args.xamlFile + "     \n";
             errMsg += "Line: " + args.lineNumber + "     \n";
             errMsg += "Position: " + args.charPosition + "     \n";
-        }
-        else if (errorType === "RuntimeError") {
+        } else if (errorType === "RuntimeError") {
             if (args.lineNumber !== 0) {
                 errMsg += "Line: " + args.lineNumber + "     \n";
                 errMsg += "Position: " + args.charPosition + "     \n";
@@ -97,13 +96,13 @@ define(['db/services', 'db/session'], function (dbServices, session) {
             errMsg += "MethodName: " + args.methodName + "     \n";
         }
 
+        dbServices.trackError(errMsg, currentSection, session.get("role.name"));
+
         //for chrome
         console.log(errMsg);
 
         //for IE
         throw new Error(errMsg);
-
-        dbServices.trackError(errMsg, currentSection, session.get("role.name"));
     };
     window.onSourceDownloadProgressChanged = function (sender, eventArgs) {
         var myText = sender.findName("progressText");

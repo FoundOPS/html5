@@ -38,7 +38,7 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
             var businessLogoUrl = config.roles[0].businessLogoUrl;
 
             //TODO: Check if avatarUrl is undefined.
-            if (typeof(businessLogoUrl) === 'undefined') {
+            if (typeof (businessLogoUrl) === 'undefined') {
                 businessLogoEnabled = false;
                 businessLogoUrl = "";
             }
@@ -82,20 +82,17 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
             //From jScrollPane examples: http://jscrollpane.kelvinluck.com/dynamic_height.html
             var throttleTimeout;
             $(window).bind('resize', function () {
-                    if ($.browser.msie) {
-                        if (!throttleTimeout) {
-                            throttleTimeout = setTimeout(
-                                function () {
-                                    sideBarScrollBar.reinitialise();
-                                    throttleTimeout = null;
-                                }, 50
-                            );
-                        }
-                    } else {
-                        sideBarScrollBar.reinitialise();
+                if ($.browser.msie) {
+                    if (!throttleTimeout) {
+                        throttleTimeout = setTimeout(function () {
+                            sideBarScrollBar.reinitialise();
+                            throttleTimeout = null;
+                        }, 50);
                     }
+                } else {
+                    sideBarScrollBar.reinitialise();
                 }
-            );
+            });
             sideBarScrollBar.reinitialise();
         };
 
@@ -143,15 +140,15 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
             //TODO: Take a look at this again.
             for (section in availableSections) {
                 //console.log(availableSections[section]);
-                var currentSection = getSection(config.sections, availableSections[section]);//config.sections[section];
-                var href = "";
-                if (typeof (currentSection.url) !== 'undefined') {
-                    href = currentSection.url;
+                var currentSection = getSection(config.sections, availableSections[section]), //config.sections[section];
+                    href = "";
+                if (typeof (currentSection.url) !== "undefined") {
+                    href = "href='" + currentSection.url + "'";
                 }
-                var name = currentSection.name;
-                var color = currentSection.color;
-                var iconUrl = currentSection.iconUrl;
-                var hoverIconUrl = currentSection.hoverIconUrl;
+                var name = currentSection.name,
+                    color = currentSection.color,
+                    iconUrl = currentSection.iconUrl,
+                    hoverIconUrl = currentSection.hoverIconUrl;
                 //TODO: Implement sprite selection.
                 $('<img/>').src = hoverIconUrl;//toHoverImage(iconUrl);
                 //Default values unless sprite.
@@ -267,7 +264,7 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
             sBarInnerWrapper.append(sBar);
             sBarWrapper.append(sBarInnerWrapper);
 
-            if (typeof(config.coverWindow) !== 'undefined' && config.coverWindow == true) {
+            if (typeof (config.coverWindow) !== 'undefined' && config.coverWindow === true) {
                 $(sBarInnerWrapper).after("<div id='coverWindowButton'>Cover Window</div>");
                 thisNavigator.isCoverWindowButtonEnabled = true;
                 console.log("It's enabled");
@@ -283,9 +280,9 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
                     sBar.addClass("hidden");
                     var offset = -1 * (sBar.offset().top + sBar.outerHeight());
                     sBar.css("top", offset);
-                } else {
-                    //$(".iconShow").addClass("rotateIcon");
-                }
+                } /* else {
+                    $(".iconShow").addClass("rotateIcon");
+                } */
             });
 
             //Add showMenuSpan to topNav.
@@ -429,7 +426,7 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
                 },
                 //Hover Out
                 function () {
-                    if ($(document).width() <= 800)return;
+                    if ($(document).width() <= 800) { return; }
                     if (sideBarDiv.hasClass("expand")) {
                         slideMenuClosed();
                         sideBarDiv.removeClass("expand");
@@ -489,7 +486,7 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
 
             for (role in roles) {
                 //console.log(roles[role]);
-                if (roles[role].name === name)return roles[role];
+                if (roles[role].name === name) { return roles[role]; }
             }
             return null;
         };
@@ -515,7 +512,7 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
         this.changeBusinessLogo = function (businessLogoUrl) {
             var businessLogoEnabled = true;
 
-            if (typeof(businessLogoUrl) === 'undefined') {
+            if (typeof (businessLogoUrl) === 'undefined') {
                 businessLogoEnabled = false;
                 businessLogoUrl = "";
             }

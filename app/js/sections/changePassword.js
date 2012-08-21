@@ -42,7 +42,7 @@ define(["db/services", "tools", "db/saveHistory", "widgets/settingsMenu"], funct
         changePassword.validator = $("#changePasswordForm").kendoValidator({
             rules: {
                 custom: function (input) {
-                    return (input.is("[name=confirm]") && input.val() === $("#new")[0].value) || !(input.is("[name=confirm]"))
+                    return (input.is("[name=confirm]") && input.val() === $("#new")[0].value) || !(input.is("[name=confirm]"));
                 }
             },
             messages: {

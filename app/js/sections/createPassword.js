@@ -26,14 +26,14 @@ define(["db/services", "tools", "widgets/settingsMenu"], function (services, too
         kendo.bind(menu);
         menu.kendoSettingsMenu();
 
-        $("#createPassword input").on("change", function(){
+        $("#createPassword input").on("change", function () {
             tools.enableButtons("#createPassword");
         });
 
         createPassword.validator = $("#createPasswordForm").kendoValidator({
             rules: {
                 custom: function (input) {
-                    return (input.is("[name=createConfirm]") && input.val() === $("#createNew")[0].value) || !(input.is("[name=createConfirm]"))
+                    return (input.is("[name=createConfirm]") && input.val() === $("#createNew")[0].value) || !(input.is("[name=createConfirm]"));
                 }
             },
             messages: {

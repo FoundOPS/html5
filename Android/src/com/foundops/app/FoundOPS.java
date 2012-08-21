@@ -6,11 +6,11 @@ import android.os.Bundle;
 import android.view.Menu;
 
 public class FoundOPS extends DroidGap {
-
+	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        super.loadUrl("file:///android_asset/www/login.html");
+        super.loadUrl("file:///android_asset/www/navigator.html");
     }
 
     @Override
