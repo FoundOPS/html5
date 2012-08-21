@@ -362,7 +362,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
                     return;
                 }
                 //make sure there is a client and a location(there won't be if this is a new service)
-                if (selectedServiceHolder.get("ClientName") && selectedServiceHolder.get("Destination")) {
+                //if (selectedServiceHolder.get("ClientName") && selectedServiceHolder.get("Destination")) {
                     //Load the service details, and update the view model
                     dbServices.getServiceDetails(selectedServiceHolder.get("ServiceId"), selectedServiceHolder.get("OccurDate"), selectedServiceHolder.get("RecurringServiceId"), function (service) {
                         services.vm.set("selectedService", service);
@@ -370,7 +370,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
                         saveHistory.close();
                         saveHistory.resetHistory();
                     });
-                }
+                //}
                 //show the service details
                 $("#serviceDetails").attr("style", "display:block");
                 resizeGrid(false);
@@ -447,25 +447,19 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
         $("#serviceDetails").kendoServiceDetails();
 
         $("#services .k-grid-add").on("click", function () {
-            serviceHoldersDataSource.add();
-
-            var service = {
-                Date: new Date(),
-                Name: serviceTypesComboBox._current[0].innerText,
-                Id: tools.newGuid(),
-                Fields: serviceHoldersDataSource.reader.model.fields
-            };
-
-//            selectedServiceHolder.set("OccurDate", new Date());
-//            selectedServiceHolder.set("RecurringServiceId", vm.selectedService.Id);
-//            selectedServiceHolder.set("ServiceName", vm.selectedService.Name);
-//            selectedServiceHolder.set("ServiceId", tools.newGuid());
-//            selectedServiceHolder.set("Fields", serviceHoldersDataSource.reader.model.fields);
+//            serviceHoldersDataSource.add();
 //
-            services.vm.set("selectedService", service);
-
-            saveHistory.close();
-            saveHistory.resetHistory();
+//            var service = {
+//                Date: new Date(),
+//                Name: serviceTypesComboBox._current[0].innerText,
+//                Id: tools.newGuid(),
+//                Fields: serviceHoldersDataSource.reader.model.fields
+//            };
+//
+//            services.vm.set("selectedService", service);
+//
+//            saveHistory.close();
+//            saveHistory.resetHistory();
         });
 
         $("#services .k-grid-delete").on("click", function () {
