@@ -23,7 +23,16 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
     };
 
     services.save = function () {
-        dbServices.updateService(vm.get("selectedService")).success(function () {
+        var service = vm.get("selectedService");
+        //check if a client is selected. If not, show error
+        if (service.get("Client") === null) {
+            saveHistory.error("No Client");
+            return;
+        }
+
+        //TODO perform validation (this will also check if a location is selected)
+
+        dbServices.updateService(service).success(function () {
             //Now that the service has been updated, change the current row's ServiceId
             //to match the Id in case this was a newly inserted service
 
@@ -35,7 +44,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
                 return;
             }
 
-            //update the service id, client name, TODO: and location (address line 1 + 2)
+            //update the service id, client name
             selectedServiceHolder.set("ServiceId", selectedService.Id);
             selectedServiceHolder.set("ClientName", selectedService.get("Client.Name"));
 
@@ -58,8 +67,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
                     }
                     //remove the trailing comma and space
                     val = val.substr(0, val.length - 2);
-                }
-                if (field.Type === "LocationField" && field.Value) {
+                } else if (field.Type === "LocationField" && field.Value) {
                     val = field.Value.AddressLineOne + " " + field.Value.AddressLineTwo;
                 }
                 //replace spaces with _
@@ -81,9 +89,9 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
         form[0].action = dbServices.ROOT_API_URL + "Helper/Download";
         form.submit();
     };
-    //endregion
+//endregion
 
-    //region DataSource
+//region DataSource
 
     /**
      * Converts the types returned in the first row of the data returned from
@@ -257,11 +265,11 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
         });
     };
 
-    //endregion
+//endregion
 
-    //region Grid
+//region Grid
 
-    //called when grid data is loaded
+//called when grid data is loaded
     var dataBound = function () {
         //check if this is the first load or the service type has changed
         if (selectFirst) {
@@ -271,7 +279,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
         }
     };
 
-    //resize the grid based on the current window's height
+//resize the grid based on the current window's height
     var resizeGrid = function (initialLoad) {
         var extraMargin;
         if (initialLoad) {
@@ -396,23 +404,13 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
         grid.refresh();
     };
 
-    //endregion
+//endregion
 
     services.initialize = function () {
         //save changes whenever the selected service has a change
         vm.bind("change", function (e) {
             if (e.field.indexOf("selectedService.") > -1) {
-                //check if a client is selected. If not, show error
-                if (selectedServiceHolder.get("ClientName")) {
-                    //check if a location is selected. If not, show error
-                    if (selectedServiceHolder.get("Destination")) {
-                        saveHistory.save();
-                    } else {
-                        saveHistory.error("No Location");
-                    }
-                } else {
-                    saveHistory.error("No Client");
-                }
+                saveHistory.save();
             }
         });
 
@@ -488,6 +486,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
         });
     };
 
-    //set services to a global function, so the functions are accessible from the HTML element
+//set services to a global function, so the functions are accessible from the HTML element
     window.services = services;
-});
+})
+;
