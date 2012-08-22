@@ -197,15 +197,22 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
 
     /**
      * Get the service and its fields.
-     * Need to pass the serviceId or the occurDate and the recurringServiceId.
+     * Need to pass either the serviceId, or the occurDate and the recurringServiceId, or the service provider's serviceTemplateId
      * @param {?string} serviceId
      * @param {?Date} serviceDate
      * @param {?string} recurringServiceId
+     * @param {?string} serviceTemplateId
      * @param {!function(Object)} callback The callback to pass the Service it is loaded.
      */
-    services.getServiceDetails = function (serviceId, serviceDate, recurringServiceId, callback) {
-        return services._getHttp('service/GetServiceDetails',
-            {serviceId: serviceId, serviceDate: tools.formatDate(serviceDate), recurringServiceId: recurringServiceId}, false)(function (data) {
+    services.getServiceDetails = function (serviceId, serviceDate, recurringServiceId, serviceTemplateId, callback) {
+        var data = {
+            serviceId: serviceId,
+            serviceDate: tools.formatDate(serviceDate),
+            recurringServiceId: recurringServiceId,
+            serviceTemplateId: serviceTemplateId
+        };
+
+        return services._getHttp('service/GetServiceDetails', data, false)(function (data) {
             //It will only have one item
             var service = data[0];
             services.convertServiceDates(service);
@@ -395,7 +402,7 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
     /**
      * Get the current session for the user
      */
-    services.getSession = function(callback){
+    services.getSession = function (callback) {
         var isMobile = developer.CURRENT_FRAME === developer.Frame.MOBILE_APP;
         return services._getHttp('session/Get', {isMobile: isMobile}, true)(callback);
     };
