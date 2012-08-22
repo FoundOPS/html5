@@ -36,9 +36,9 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "db/models
     window.onhashchange = function () {
         main.history.push(location.hash);
 
-        main.history.currentPage = main.history[main.history.length - 2];
-        main.history.nextPage = main.history[main.history.length - 1];
-        main.history.publish = {"comingFrom": main.history.currentPage, "goingTo": main.history.nextPage};
+        main.history.previousPage = main.history[main.history.length - 2];
+        main.history.currentPage = main.history[main.history.length - 1];
+        main.history.publish = {"comingFrom": main.history.previousPage, "goingTo": main.history.currentPage};
 
         $.publish("hashChange", [main.history.publish]);
     };
@@ -108,6 +108,28 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "db/models
         });
     });
 
+    //Overrides phone's back button navigation - Phonegap
+    main.onBack = function () {
+        if (window.location.hash === "#view/routes.html") {
+            application.navigate("view/updates.html");
+        } else if (window.location.hash === "#view/routeDetails.html") {
+            application.navigate("view/routes.html");
+        } else if (window.location.hash === "#view/routeDestinationDetails.html") {
+            application.navigate("view/routeDetails.html");
+        } else if (window.location.hash === "#view/routeTask.html") {
+            application.navigate("view/routeDestinationDetails.html");
+        }
+    };
+
+    // Fires when Cordova is ready
+    function onDeviceReady() {
+        //Listens for back button being pressed on a mobile device.
+        document.addEventListener("backbutton", main.onBack, false);
+    }
+
+    // Listens for Cordova to load
+    document.addEventListener("deviceready", onDeviceReady, false);
+
     //hookup remote loading into remoteContent, by using the kendo mobile application
     window.application = application = new kendo.mobile.Application($("#remoteContent"), { initial: "view/updates.html", platform: "ios"});
 
@@ -119,6 +141,5 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "db/models
         window.trackEvent = function (section, action, label) {
             pageTracker._trackEvent(section, action, label);
         };
-    } catch (err) {
-    }
+    } catch (err) { }
 });
