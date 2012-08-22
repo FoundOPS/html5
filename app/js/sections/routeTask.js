@@ -78,6 +78,12 @@ define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all", "widgets/ser
     });
 
     routeTask.initialize = function () {
+        //a task has not been selected, so jump there
+        if (!vm.get("selectedTask")) {
+            application.navigate("view/routeDestinationDetails.html");
+            return;
+        }
+
         $("#taskServiceDetails").kendoServiceDetails({
             clientIsReadOnly: true
         });
@@ -95,12 +101,6 @@ define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all", "widgets/ser
         statusUpdated = false;
 
         saveHistory.close();
-
-        //a task has not been selected, so jump there
-        if (!vm.get("selectedTask")) {
-            application.navigate("view/routeDestinationDetails.html");
-            return;
-        }
 
         saveHistory.setCurrentSection({
             page: "Route Task",

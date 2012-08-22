@@ -51,6 +51,21 @@ define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all"], function ($
             application.navigate("view/routeDetails.html");
         };
         kendo.bind($("#routes"), vm, kendo.mobile.ui);
+
+        if (main.history.length !== 0  && main.history.previousPage !== "#view/updates.html") {
+            setTimeout(function () {
+                if (localStorage.getItem("selectedRoute")) {
+                    var route;
+                    for (route in vm.get("routesSource")._data) {
+                        if (localStorage.getItem("selectedRoute") === vm.get("routesSource")._data[route].Id) {
+                            var e = {};
+                            e.dataItem = vm.get("routesSource")._data[route];
+                            vm.selectRoute(e);
+                        }
+                    }
+                }
+            }, 100);
+        }
     };
 
     routes.show = function () {

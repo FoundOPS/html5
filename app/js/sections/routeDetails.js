@@ -57,8 +57,7 @@ define(["jquery", "db/services", "db/models", "db/saveHistory", "lib/kendo.all"]
                 position.coords.latitude,
                 position.coords.longitude,
                 routeId,
-                //application.CONFIG.DEVICE_PLATFORM, TODO: Change to browser detection.
-                "Mobile",
+                device.platform, //TODO: Change to browser detection?
                 position.coords.speed
             );
             trackPointsToSend.push(newTrackPoint);
@@ -81,10 +80,10 @@ define(["jquery", "db/services", "db/models", "db/saveHistory", "lib/kendo.all"]
                 alert("Location information is unavailable at this time.");
                 break;
             case error.TIMEOUT:
-                console.log("The Geolocation request has timed out. Please check your internet connectivity.");
+                alert("The Geolocation request has timed out. Please check your internet connectivity.");
                 break;
             default:
-                console.log("Geolocation information is not available at this time. Please check your Geolocation settings.");
+                alert("Geolocation information is not available at this time. Please check your Geolocation settings.");
                 break;
             }
             vm.endRoute();
@@ -115,12 +114,6 @@ define(["jquery", "db/services", "db/models", "db/saveHistory", "lib/kendo.all"]
         if (initialized) {
             return;
         }
-        //routes has not been opened yet, so jump there
-        if (!vm.get("routeDestinationsSource")) {
-            application.navigate("view/routes.html");
-            return;
-        }
-
         initialized = true;
 
         /**
@@ -164,5 +157,25 @@ define(["jquery", "db/services", "db/models", "db/saveHistory", "lib/kendo.all"]
         };
 
         kendo.bind($("#routeDetails"), vm, kendo.mobile.ui);
+    };
+
+    routeDetails.initialize = function () {
+        //routes has not been opened yet, so jump there
+        if (!vm.get("selectedRoute")) {
+            application.navigate("view/routes.html");
+            return;
+        }
+        setTimeout(function () {
+            if (localStorage.getItem("selectedDestination")) {
+                var destination;
+                for (destination in vm.get("routeDestinationsSource")._data) {
+                    if (localStorage.getItem("selectedDestination") === vm.get("routeDestinationsSource")._data[destination].Id) {
+                        var e = {};
+                        e.dataItem = vm.get("routeDestinationsSource")._data[destination];
+                        vm.selectRouteDestination(e);
+                    }
+                }
+            }
+        }, 100);
     };
 });
