@@ -426,9 +426,12 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
 //endregion
 
     services.initialize = function () {
+        //add validation to the service details
+        services.validator = $("#serviceDetails").kendoValidator().data("kendoValidator");
+
         //save changes whenever the selected service has a change
         vm.bind("change", function (e) {
-            if (e.field.indexOf("selectedService.") > -1) {
+            if (services.validator.validate() && e.field.indexOf("selectedService.") > -1) {
                 saveHistory.save();
             }
         });
