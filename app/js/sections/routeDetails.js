@@ -178,6 +178,6 @@ define(["jquery", "db/services", "db/models", "db/saveHistory", "lib/kendo.all"]
                     }
                 }
             }
-        }, 500);
+        }, 0);
     };
 });

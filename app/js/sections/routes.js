@@ -33,6 +33,7 @@ define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all"], function ($
                 }
             },
             change: function (e) {
+                $.publish("routesSourceLoaded");
             },
             serverPaging: true
         }));
@@ -53,8 +54,8 @@ define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all"], function ($
         kendo.bind($("#routes"), vm, kendo.mobile.ui);
 
         // If user refreshes app on browser -> automatically redirect based on user's previous choices.
-        if (main.history[0] !== "#view/routes.html" && main.history.previousPage !== "#view/updates.html") {
-            setTimeout(function () {
+        $.subscribe("routesSourceLoaded", function () {
+            if (main.history[0] !== "#view/routes.html" && main.history.previousPage !== "#view/updates.html") {
                 if (localStorage.getItem("selectedRoute")) {
                     var route;
                     for (route in vm.get("routesSource")._data) {
@@ -65,8 +66,8 @@ define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all"], function ($
                         }
                     }
                 }
-            }, 500);
-        }
+            }
+        })
     };
 
     routes.show = function () {

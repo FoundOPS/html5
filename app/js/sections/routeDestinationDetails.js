@@ -77,6 +77,6 @@ define(["jquery", "db/saveHistory", "lib/kendo.all", "widgets/contacts"], functi
                     }
                 }
             }
-        }, 500);
+        }, 0);
     };
 });
