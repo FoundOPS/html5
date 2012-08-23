@@ -1,5 +1,5 @@
 'use strict';
-define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "lib/jquery.maskMoney", "lib/jquery.autosize", "lib/select2"], function ($, dbServices, session, models) {
+define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "lib/jquery.maskMoney", "lib/jquery.autosize", "lib/select2", "lib/jquery.tooltip.min"], function ($, dbServices, session, models) {
 
     var kendo = window.kendo,
         ui = kendo.ui,
@@ -156,7 +156,7 @@ define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "li
 
             var step = 1 / Math.pow(10, field.DecimalPlaces);
             fieldElement.attr("step", step).attr("min", field.Minimum).attr("max", field.Maximum)
-                .attr("validationMessage", "Incorrect Input").appendTo(listView).wrap("<li>" + field.Name + "</li>");
+                .appendTo(listView).wrap("<li>" + field.Name + "</li>");
 
             //TODO: improve using http://stackoverflow.com/questions/7933505/mask-input-for-number-percent
             if (field.Mask === "c") {
@@ -315,11 +315,17 @@ define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "li
                     //setup the tooltip
                     if (field.ToolTip) {
                         fieldElement.attr("title", field.ToolTip);
+                        //use jquery tooltip plugin http://docs.jquery.com/Plugins/Tooltip
+                        //this removes the title attribute and adds a custom tooltip
+                        //important because having a title messes up the validation messages
+                        fieldElement.tooltip({
+                            left: -65
+                        });
                     }
 
                     //add "required" to the element if it's required
                     if (field.Required) {
-                        fieldElement.attr("required");
+                        fieldElement.attr("required", "true");
                     }
 
                     if (field.Type !== "OptionsField" && field.Type !== "DateTimeField") {

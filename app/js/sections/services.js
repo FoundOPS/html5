@@ -441,7 +441,12 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
 
     services.initialize = function () {
         //add validation to the service details
-        services.validator = $("#serviceDetails").kendoValidator().data("kendoValidator");
+        services.validator = $("#serviceDetails").kendoValidator({
+            messages: {
+                required: "Required",
+                step: "Incorrect decimal places"
+            }
+        }).data("kendoValidator");
 
         //save changes whenever the selected service has a change
         vm.bind("change", function (e) {
