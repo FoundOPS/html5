@@ -52,6 +52,7 @@ define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all"], function ($
         };
         kendo.bind($("#routes"), vm, kendo.mobile.ui);
 
+        // If user refreshes app on browser -> automatically redirect based on user's previous choices.
         if (main.history.length !== 0  && main.history.previousPage !== "#view/updates.html") {
             setTimeout(function () {
                 if (localStorage.getItem("selectedRoute")) {

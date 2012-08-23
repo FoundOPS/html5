@@ -114,6 +114,11 @@ define(["jquery", "db/services", "db/models", "db/saveHistory", "lib/kendo.all"]
         if (initialized) {
             return;
         }
+        //routes has not been opened yet, so jump there
+        if (!vm.get("selectedRoute")) {
+            application.navigate("view/routes.html");
+            return;
+        }
         initialized = true;
 
         /**
@@ -160,22 +165,20 @@ define(["jquery", "db/services", "db/models", "db/saveHistory", "lib/kendo.all"]
     };
 
     routeDetails.initialize = function () {
-        //routes has not been opened yet, so jump there
-        if (!vm.get("selectedRoute")) {
-            application.navigate("view/routes.html");
-            return;
-        }
+        // If user refreshes app on browser -> automatically redirect based on user's previous choices.
         setTimeout(function () {
-            if (localStorage.getItem("selectedDestination")) {
-                var destination;
-                for (destination in vm.get("routeDestinationsSource")._data) {
-                    if (localStorage.getItem("selectedDestination") === vm.get("routeDestinationsSource")._data[destination].Id) {
-                        var e = {};
-                        e.dataItem = vm.get("routeDestinationsSource")._data[destination];
-                        vm.selectRouteDestination(e);
+            if (main.history[0] !== "#view/updates.html") {
+                if (localStorage.getItem("selectedDestination")) {
+                    var destination;
+                    for (destination in vm.get("routeDestinationsSource")._data) {
+                        if (localStorage.getItem("selectedDestination") === vm.get("routeDestinationsSource")._data[destination].Id) {
+                            var e = {};
+                            e.dataItem = vm.get("routeDestinationsSource")._data[destination];
+                            vm.selectRouteDestination(e);
+                        }
                     }
                 }
             }
-        }, 100);
+        }, 1000);
     };
 });

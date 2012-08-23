@@ -28,6 +28,11 @@ define(["jquery", "db/saveHistory", "lib/kendo.all", "widgets/contacts"], functi
         if (initialized) {
             return;
         }
+        //a destination has not been selected, so go to routes view
+        if (!vm.get("selectedDestination")) {
+            application.navigate("view/routes.html");
+            return;
+        }
         initialized = true;
 
         /**
@@ -60,25 +65,20 @@ define(["jquery", "db/saveHistory", "lib/kendo.all", "widgets/contacts"], functi
     };
 
     routeDestinationDetails.initialize = function () {
-        //a destination has not been selected, so go to routes view
-        if (!vm.get("selectedDestination")) {
-            application.navigate("view/routes.html");
-            return;
-        }
-
-        if (main.history.length === 0) {
-            setTimeout(function () {
-                if (localStorage.getItem("selectedTask")) {
-                    var task;
-                    for (task in vm.get("routeTasksSource")._data) {
-                        if (localStorage.getItem("selectedTask") === vm.get("routeTasksSource")._data[task].Id) {
-                            var e = {};
-                            e.dataItem = vm.get("routeTasksSource")._data[task];
-                            vm.selectTask(e);
-                        }
-                    }
-                }
-            }, 100);
-        }
+        // If user refreshes app on browser -> automatically redirect based on user's previous choices.
+//        if (main.history.length === 0) {
+//            setTimeout(function () {
+//                if (localStorage.getItem("selectedTask")) {
+//                    var task;
+//                    for (task in vm.get("routeTasksSource")._data) {
+//                        if (localStorage.getItem("selectedTask") === vm.get("routeTasksSource")._data[task].Id) {
+//                            var e = {};
+//                            e.dataItem = vm.get("routeTasksSource")._data[task];
+//                            vm.selectTask(e);
+//                        }
+//                    }
+//                }
+//            }, 100);
+//        }
     };
 });
