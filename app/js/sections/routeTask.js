@@ -52,7 +52,7 @@ define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all", "widgets/ser
 
     $.subscribe("selectedTask", function (data) {
         vm.set("selectedTask", data);
-        dbServices.getServiceDetails(data.get("ServiceId"), data.get("Date"), data.get("RecurringServiceId"),
+        dbServices.getServiceDetails(data.get("ServiceId"), data.get("Date"), data.get("RecurringServiceId"), data.get("ServiceTemplateId"),
             function (service) {
                 vm.set("selectedService", service);
 
