@@ -156,7 +156,7 @@ define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "li
 
             var step = 1 / Math.pow(10, field.DecimalPlaces);
             fieldElement.attr("step", step).attr("min", field.Minimum).attr("max", field.Maximum)
-                .appendTo(listView).wrap("<li>" + field.Name + "</li>");
+                .attr("validationMessage", "Incorrect Input").appendTo(listView).wrap("<li>" + field.Name + "</li>");
 
             //TODO: improve using http://stackoverflow.com/questions/7933505/mask-input-for-number-percent
             if (field.Mask === "c") {
@@ -314,7 +314,12 @@ define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "li
                 if (fieldElement) {
                     //setup the tooltip
                     if (field.ToolTip) {
-                        fieldElement.attr("text", field.ToolTip);
+                        fieldElement.attr("title", field.ToolTip);
+                    }
+
+                    //add "required" to the element if it's required
+                    if (field.Required) {
+                        fieldElement.attr("required");
                     }
 
                     if (field.Type !== "OptionsField" && field.Type !== "DateTimeField") {
