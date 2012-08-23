@@ -113,10 +113,11 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
         }
 
         //TODO perform validation (this will also check if a location is selected)
-
-        dbServices.updateService(service).success(function () {
-            vm.syncServiceHolder();
-        });
+        if (services.validator.validate()){
+            dbServices.updateService(service).success(function () {
+                vm.syncServiceHolder();
+            });
+        }
     };
 
     services.exportToCSV = function () {
@@ -439,6 +440,9 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
 //endregion
 
     services.initialize = function () {
+        //add validation to the service details
+        services.validator = $("#serviceDetails").kendoValidator().data("kendoValidator");
+
         //save changes whenever the selected service has a change
         vm.bind("change", function (e) {
             if (e.field.indexOf("selectedService.") > -1) {
