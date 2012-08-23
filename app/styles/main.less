@@ -719,7 +719,7 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
         position: absolute;
         width: 80px;
         right: 350px;
-        top: 8px;
+        top: 22px;
         .csvBtn{
             background-position: 0 -176px;
         }
@@ -736,13 +736,20 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
     }
     .k-dropdown-wrap{
         padding: 0 22px 0 0;
-        border-radius: 0;
+        border-radius: 4px;
+    }
+    .k-grid-content{
+        overflow-x: scroll;
     }
     #top{
         width:680px;
-        padding: 5px 0;
+        padding: 10px 0;
         label{
+            position: relative;
+            top: 3px;
+            margin-right: 5px;
             padding-left: 20px;
+            font-size: 1.5em;
         }
         .k-dropdown{
             margin-right: 7px;
@@ -790,15 +797,28 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
         font-size: 14px;
     }
     input[type="number"], input[type="text"]{
-        height: 22px;
+        height: 24px;
         width: 244px;
         padding-left: 2px;
         font-family: "PTSans";
+    }
+    input[type="text"].k-input{
+        height: 19px;
+    }
+    .k-combobox input[type="text"]{
+        height: 21px;
+    }
+    .k-picker-wrap{
+        padding: 1px 22px 1px 1px;
     }
     //exclude dropdown and timepicker
     input[type="number"], input[type="text"]:not(.k-input), textarea{
         border: 1px solid #aaa;
         border-radius: 4px;
+    }
+    input::-webkit-inner-spin-button,
+    input::-webkit-outer-spin-button {
+        right: 1px;
     }
     textarea{
         width: 246px !important;
@@ -823,23 +843,58 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
         font-size: 14px;
         padding-left: 15px;
     }
-    .k-select{
-        margin-top: 2px;
-    }
+}
+.km-ios .km-listinset > li:first-child:last-child, .km-ios .km-listgroupinset .km-list > li:first-child:last-child {
+    border-color: #aaa;
+    border-radius: 4px;
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+}
+.km-ios .km-listinset > li:first-child, .km-ios .km-listgroupinset .km-list > li:first-child, .km-ios .km-listinset
+li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > .km-listview-link, .km-ios
+.km-listinset li:first-child > .km-listview-label, .km-ios .km-listgroupinset li:first-child > .km-listview-label {
+    border-color: #aaa;
+    -webkit-border-top-left-radius: 4px;
+    -webkit-border-top-right-radius: 4px;
+    border-radius: 4px 4px 0 0;
+    -moz-border-radius: 4px 4px 0 0;
+    -webkit-border-radius: 4px 4px 0 0;
+}
+.km-ios .km-listinset > li:last-child, .km-ios .km-listgroupinset .km-list > li:last-child {
+    border-color: #aaa;
+    border-radius: 0 0 4px 4px;
+    -moz-border-radius: 0 0 4px 4px;
+    -webkit-border-radius: 0 0 4px 4px;
 }
 #serviceDetails {
     display:none;
     position: absolute;
-    top:40px;
+    top:54px;
     right: 30px;
     background-color:#fff;
-    border: 1px solid #ccc;
     padding:10px 20px;
     overflow-y: auto;
+    -moz-box-shadow: 0 5px 8px #aaa;
+    -webkit-box-shadow: 0 5px 8px #aaa;
+    box-shadow: 0 5px 8px #aaa;
 }
 #taskServiceDetails{
     padding: 15px 15px 0 15px;
     margin: 0 auto;
+}
+/*Tooltip*/
+#tooltip {
+    position: absolute;
+    margin-right: 60px;
+    z-index: 3000;
+    color: #fff;
+    border-radius:4px;
+    background-color: #000;
+    padding: 4px 8px;
+    opacity: .8;
+}
+#tooltip h3, #tooltip div {
+    margin: 0;
 }
 /*endregion*/
 /*region Noty*/

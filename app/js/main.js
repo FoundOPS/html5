@@ -26,12 +26,20 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "db/models
     "sections/dispatcherSettings", "sections/changePassword", "sections/createPassword", "sections/services",
     "sections/routes", "sections/routeDetails", "sections/routeDestinationDetails", "sections/routeTask",
     "widgets/contacts", "widgets/serviceDetails"], function (Navigator, silverlight, session) {
-    var application, navigator, main = {};
+    var application, navigator, main = {}, initialized = false;
 
     window.main = main;
 
     // Array to keep track of the hash changes within the app.
     main.history = [];
+
+    if (!initialized) {
+        // App is just being loaded. Set starting location.
+        if (location.hash !== "") {
+            main.history.push(location.hash);
+        }
+        initialized = true;
+    }
 
     window.onhashchange = function () {
         main.history.push(location.hash);

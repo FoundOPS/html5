@@ -10,7 +10,7 @@ define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all", "widgets/ser
     /**
      * routeTask = wrapper for all service objects
      */
-    var routeTask = {}, vm, statusUpdated;
+    var routeTask = {}, vm, statusUpdated, initialized = false;
 
     routeTask.vm = vm = kendo.observable({
         openTaskStatuses: function () {
@@ -52,7 +52,7 @@ define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all", "widgets/ser
 
     $.subscribe("selectedTask", function (data) {
         vm.set("selectedTask", data);
-        dbServices.getServiceDetails(data.get("ServiceId"), data.get("Date"), data.get("RecurringServiceId"), data.get("ServiceTemplateId"),
+        dbServices.getServiceDetails(data.get("ServiceId"), data.get("Date"), data.get("RecurringServiceId"),
             function (service) {
                 vm.set("selectedService", service);
 
@@ -78,12 +78,6 @@ define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all", "widgets/ser
     });
 
     routeTask.initialize = function () {
-        //a task has not been selected, so jump there
-        if (!vm.get("selectedTask")) {
-            application.navigate("view/routeDestinationDetails.html");
-            return;
-        }
-
         $("#taskServiceDetails").kendoServiceDetails({
             clientIsReadOnly: true
         });
@@ -97,10 +91,26 @@ define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all", "widgets/ser
     };
 
     routeTask.show = function () {
+        if (!initialized) {
+            //a task has not been selected, so go to routes view
+            if (!vm.get("selectedTask")) {
+                application.navigate("view/routes.html");
+                return;
+            }
+            initialized = true;
+        }
+
+
         //clear statusUpdated
         statusUpdated = false;
 
         saveHistory.close();
+
+        //a task has not been selected, so jump there
+        if (!vm.get("selectedTask")) {
+            application.navigate("view/routeDestinationDetails.html");
+            return;
+        }
 
         saveHistory.setCurrentSection({
             page: "Route Task",

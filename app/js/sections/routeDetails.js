@@ -111,15 +111,14 @@ define(["jquery", "db/services", "db/models", "db/saveHistory", "lib/kendo.all"]
     routeDetails.show = function () {
         saveHistory.close();
 
-        if (initialized) {
-            return;
+        if (!initialized) {
+            //routes has not been opened yet, so jump there
+            if (!vm.get("selectedRoute")) {
+                application.navigate("view/routes.html");
+                return;
+            }
+            initialized = true;
         }
-        //routes has not been opened yet, so jump there
-        if (!vm.get("selectedRoute")) {
-            application.navigate("view/routes.html");
-            return;
-        }
-        initialized = true;
 
         /**
          * Select a route destination
@@ -167,7 +166,7 @@ define(["jquery", "db/services", "db/models", "db/saveHistory", "lib/kendo.all"]
     routeDetails.initialize = function () {
         // If user refreshes app on browser -> automatically redirect based on user's previous choices.
         setTimeout(function () {
-            if (main.history[0] !== "#view/updates.html") {
+            if (main.history[0] !== "#view/updates.html" && main.history[0] !== "#view/routes.html" && main.history[0] !== "#view/routeDetails.html") {
                 if (localStorage.getItem("selectedDestination")) {
                     var destination;
                     for (destination in vm.get("routeDestinationsSource")._data) {
@@ -179,6 +178,6 @@ define(["jquery", "db/services", "db/models", "db/saveHistory", "lib/kendo.all"]
                     }
                 }
             }
-        }, 1000);
+        }, 500);
     };
 });
