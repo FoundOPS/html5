@@ -443,8 +443,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
         //add validation to the service details
         services.validator = $("#serviceDetails").kendoValidator({
             messages: {
-                required: "Required",
-                step: "Incorrect decimal places"
+                required: "Required"
             }
         }).data("kendoValidator");
 

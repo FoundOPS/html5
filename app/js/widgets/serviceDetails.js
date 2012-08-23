@@ -155,19 +155,26 @@ define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "li
             var fieldElement = $(inputTemplate).attr("type", "number");
 
             var step = 1 / Math.pow(10, field.DecimalPlaces);
-            fieldElement.attr("step", step).attr("min", field.Minimum).attr("max", field.Maximum)
-                .appendTo(listView).wrap("<li>" + field.Name + "</li>");
+            fieldElement.appendTo(listView).wrap("<li>" + field.Name + "</li>");
 
-            //TODO: improve using http://stackoverflow.com/questions/7933505/mask-input-for-number-percent
+            var format = "#";
             if (field.Mask === "c") {
-                $("<br /><span class='dollarSign'> $</span>").insertBefore(fieldElement);
-                fieldElement.attr("style", "width:231px;padding-left:15px;");
+                format = "c";
             } else if (field.Mask === "p") {
                 //percentage
-                //TODO: improve using http://stackoverflow.com/questions/7933505/mask-input-for-number-percent
-                $("<span class='percentSign'>%</span>").insertAfter(fieldElement);
-                fieldElement.attr("style", "width:229px;padding-right:15px;margin-right:-32px;");
+                format = "p0";
+                step = ".01";
+                //TODO: remove
+                field.Value = field.Value / 100;
             }
+
+            fieldElement.kendoNumericTextBox({
+                step: step,
+                min: field.Minimum,
+                max: field.Maximum,
+                format: format,
+                value: field.Value
+            });
 
             return fieldElement;
         },
@@ -326,6 +333,12 @@ define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "li
                     //add "required" to the element if it's required
                     if (field.Required) {
                         fieldElement.attr("required", "true");
+                    }
+
+                    if (field.Name) {
+                        var name = field.Name.replace(/\s/g, "");
+                        name.toLowerCase();
+                        fieldElement.attr("name", name);
                     }
 
                     if (field.Type !== "OptionsField" && field.Type !== "DateTimeField") {
