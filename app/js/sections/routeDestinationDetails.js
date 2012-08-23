@@ -72,7 +72,7 @@ define(["jquery", "db/saveHistory", "lib/kendo.all", "widgets/contacts"], functi
                         if (localStorage.getItem("selectedTask") === vm.get("routeTasksSource")._data[task].Id) {
                             var e = {};
                             e.dataItem = vm.get("routeTasksSource")._data[task];
-                            vm.selectRouteDestination(e);
+                            vm.selectTask(e);
                         }
                     }
                 }
