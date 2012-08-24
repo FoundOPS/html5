@@ -107,8 +107,14 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
     services.save = function () {
         var service = vm.get("selectedService");
         //check if a client is selected. If not, show error
-        if (service.get("Client") === null) {
+        if (selectedServiceHolder.ClientName === "") {
             saveHistory.error("No Client");
+            return;
+        }
+
+        //check if a location is selected. If not, show error
+        if (selectedServiceHolder.Destination == "") {
+            saveHistory.error("No Location");
             return;
         }
 

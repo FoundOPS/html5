@@ -164,7 +164,6 @@ define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "li
                 //percentage
                 format = "p0";
                 step = ".01";
-                //TODO: remove
                 field.Value = field.Value / 100;
             }
 
