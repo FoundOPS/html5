@@ -162,7 +162,7 @@ define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "li
                 format = "c";
             } else if (field.Mask === "p") {
                 //percentage
-                format = "## '%'";
+                format = "# \\%";
             }
 
             fieldElement.kendoNumericTextBox({
