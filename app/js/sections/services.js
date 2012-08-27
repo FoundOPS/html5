@@ -233,15 +233,16 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
         var readAction = "service/GetServicesHoldersWithFields";
         var params = {
             startDate: tools.formatDate(vm.get("startDate")),
-            endDate: tools.formatDate(vm.get("endDate")),
+            endDate: tools.formatDate(vm.get("startDate")), //for single it will be changed before used in the datasource
             serviceType: serviceType
         };
 
         //load the fields types
         //then create the datasource
         //then create the grid
-        dbServices._getHttp(readAction + "?take=1", params)(function (data) {
+        dbServices._getHttp(readAction + "?single=true", params)(function (data) {
             var fields = getFields(data);
+            params.endDate = tools.formatDate(vm.get("endDate"));
             serviceHoldersDataSource = new kendo.data.DataSource({
                 schema: {
                     model: {
