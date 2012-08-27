@@ -106,11 +106,13 @@ background-image: linear-gradient(bottom, #222224 0%, #555556 100%);
             //must use JSONP because the javascript may be hosted on a different url than the api
             type: "GET",
             dataType: 'JSONP',
-            url: 'http://localhost:9711/api/session/Login',    //LOCAL
+//            url: 'http://localhost:9711/api/session/Login',    //LOCAL
 //            url: 'http://api.foundops.com/api/auth/Login',    //LIVE
+            url: 'http://192.168.0.111:70/api/session/Login',   //REMOTE
             data: {email: email, pass: password},
-//            timeout: 5000,
+            timeout: 5000,
             error: function (errorThrown, textStatus) {
+                alert("You login request has timed out. Please check your internet connection and your login information.")
                 console.log(textStatus);
                 console.log(errorThrown);
             },
@@ -129,15 +131,15 @@ background-image: linear-gradient(bottom, #222224 0%, #555556 100%);
     var checkLogin = function () {
         //Wait until the application is initialized
         setTimeout(function () {
-            if (localStorage.getItem("loggedIn") === "true") {
-                console.log("Logged In");
-                location.href = "navigator.html";
-            } else if (localStorage.getItem("rememberMe") === "true") {
+            if (localStorage.getItem("rememberMe") === "true") {
                 $("#EmailAddress").val(localStorage.getItem("email"));
                 $("#rememberMe").prop("checked", true);
             }
+            if (localStorage.getItem("loggedIn") === "true") {
+                console.log("Logged In");
+//                location.href = "navigator.html";
+            }
         }, 0);
-
     };
 
     $(document).ready(function() {

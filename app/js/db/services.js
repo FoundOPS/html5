@@ -34,6 +34,8 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
         apiUrl = 'http://10.0.2.2:9711/api/';
     } else if (mode === developer.DataSource.LIVE) {
         apiUrl = 'http://api.foundops.com/api/';
+    } else if (mode === developer.DataSource.REMOTE_API) {
+        apiUrl = "http://192.168.0.111:70/api/";
     } else if (mode === developer.DataSource.TESTAPI) {
         apiUrl = 'http://testapi.foundops.com/api/';
     }
@@ -57,7 +59,8 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
         services.RoleId = roleId;
 
         //invoke any function in the queue
-        for (var i in roleIdFunctionQueue) {
+        var i;
+        for (i in roleIdFunctionQueue) {
             roleIdFunctionQueue[i]();
         }
         roleIdFunctionQueue.length = 0;
@@ -91,18 +94,18 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
                     url: url,
                     data: params
                 }).success(function (response) {
-                        var convertedData = response;
+                    var convertedData = response;
 
-                        //if there is a converter, convert the data
-                        if (opt_convertItem) {
-                            convertedData = tools.convertArray(response, opt_convertItem);
-                        }
+                    //if there is a converter, convert the data
+                    if (opt_convertItem) {
+                        convertedData = tools.convertArray(response, opt_convertItem);
+                    }
 
-                        //perform the callback function by passing the response data
-                        if (callback !== null) {
-                            callback(convertedData);
-                        }
-                    });
+                    //perform the callback function by passing the response data
+                    if (callback !== null) {
+                        callback(convertedData);
+                    }
+                });
             };
 
             //if opt_excludeRoleId was not set add it as a parameter
@@ -173,8 +176,8 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
             contentType: 'application/json',
             data: JSON.stringify(trackPoints)
         }).success(function (response) {
-                callback(response);
-            });
+            callback(response);
+        });
     };
 
     //endregion
@@ -226,7 +229,8 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
      */
     services.convertServiceDates = function (service) {
         service.Date = new Date(service.Date);
-        for (var i = 0; i < service.Fields.length; i++) {
+        var i;
+        for (i = 0; i < service.Fields.length; i++) {
             var field = service.Fields[i];
             if (field.Type === "DateTimeField") {
                 field.Earliest = new Date(field.Earliest);
@@ -244,7 +248,8 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
                 dataType: "json",
                 contentType: 'application/json',
                 data: JSON.stringify(service)
-            }));
+            })
+        );
     };
 
     services.deleteService = function (service) {
@@ -343,7 +348,8 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
                 dataType: "json",
                 contentType: 'application/json',
                 data: JSON.stringify(settings)
-            }));
+            })
+        );
     };
 
     /**
@@ -358,7 +364,8 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
                 dataType: "json",
                 contentType: 'application/json',
                 data: JSON.stringify(settings)
-            }));
+            })
+        );
     };
 
     services.getTimeZones = services._getHttp('settings/GetTimeZones', {}, false);
@@ -421,8 +428,8 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
             contentType: 'application/json',
             data: error
         }).success(function (response) {
-                callback(response);
-            });
+            callback(response);
+        });
     };
 
     /**
