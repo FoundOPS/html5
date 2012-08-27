@@ -1,7 +1,7 @@
 'use strict';
 
-define(["lib/csv" , "ui/importerSelect"], function (csv, select) {
-    var upload = {};
+define(["lib/csv" , "sections/importerSelect", "lib/jquery-ui-1.8.21.core.min", "lib/jquery.FileReader", "lib/swfobject"], function (csv, select) {
+    var importerUpload = {};
 
     //TODO: try to use this
     //checks for .csv file type
@@ -15,7 +15,7 @@ define(["lib/csv" , "ui/importerSelect"], function (csv, select) {
 
     var parse = function (file) {
         var data = csv.parseRows(file);
-        upload.data = data;
+        importerUpload.data = data;
         var newData = [];
         //turn the array sideways, ex [{1,2,3}, {4,5,6}] becomes [{1,4}, {2,5}, {3,6}]
         //this is all under assumption that all the arrays are the same size
@@ -26,7 +26,8 @@ define(["lib/csv" , "ui/importerSelect"], function (csv, select) {
         select.data = newData;
     };
 
-    upload.initialize = function () {
+    importerUpload.initialize = function () {
+
         //setup the FileReader on the fileUpload button
         //this will enable the flash FileReader polyfill from https://github.com/Jahdrien/FileReader
         $("#fileUpload").fileReader({
@@ -71,5 +72,5 @@ define(["lib/csv" , "ui/importerSelect"], function (csv, select) {
         color.select(0);
     };
 
-    window.upload = upload;
+    window.importerUpload = importerUpload;
 });

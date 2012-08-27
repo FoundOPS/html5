@@ -1,10 +1,10 @@
 'use strict';
 
 define(function () {
-    var select = {};
-    select.data = [];
+    var importerSelect = {};
+    importerSelect.data = [];
 
-    select.initialize = function () {
+    importerSelect.initialize = function () {
         var list = [
             {Name: "Do not Import"},
             {Name: 'Client Name'},
@@ -18,7 +18,7 @@ define(function () {
 
         $("#listView").kendoListView({
             template: "<li><div class='header'>#=data[0]#</div><div class='value'>#=data[1]#</div><input class='fields' /></li>",
-            dataSource: select.data
+            dataSource: importerSelect.data
         });
 
         $(".fields").kendoDropDownList({
@@ -26,9 +26,9 @@ define(function () {
             dataValueField: "Id",
             dataSource: list
         });
-    }
+    };
 
-    window.select = select;
+    window.importerSelect = importerSelect;
 
-    return select;
+    return importerSelect;
 });

@@ -25,7 +25,7 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "db/models
     "lib/userVoice", "lib/pubsub", "moment", "sections/personalSettings", "sections/businessSettings", "sections/usersSettings",
     "sections/dispatcherSettings", "sections/changePassword", "sections/createPassword", "sections/services",
     "sections/routes", "sections/routeDetails", "sections/routeDestinationDetails", "sections/routeTask",
-    "widgets/contacts", "widgets/serviceDetails"], function (Navigator, silverlight, session) {
+    "widgets/contacts", "widgets/serviceDetails", "sections/importerUpload", "sections/importerSelect", "sections/importerReview"], function (Navigator, silverlight, session) {
     var application, navigator, main = {}, initialized = false;
 
     window.main = main;
@@ -150,4 +150,34 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "db/models
             pageTracker._trackEvent(section, action, label);
         };
     } catch (err) { }
+
+    //setup breadcrumbs
+    var li1 = $('#crumbs li:nth-child(1)');
+    var li2 = $('#crumbs li:nth-child(2)');
+    var li3 = $('#crumbs li:nth-child(3)');
+    window.viewImporterUpload = function () {
+        application.navigate("view/importerUpload.html");
+        li2.removeClass('active');
+        li3.removeClass('active');
+        li1.addClass('active');
+        li2.unbind('click');
+    };
+
+    window.viewImporterSelect = function () {
+        application.navigate("view/importerSelect.html");
+        li1.removeClass('active');
+        li3.removeClass('active');
+        li2.addClass('active');
+        li2.unbind('click');
+    };
+
+    window.viewImporterReview = function () {
+        application.navigate("view/importerReview.html");
+        li1.removeClass('active');
+        li2.removeClass('active');
+        li3.addClass('active');
+        li2.on('click', function(){
+            window.viewImporterSelect();
+        });
+    };
 });
