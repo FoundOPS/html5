@@ -24,6 +24,7 @@
 	<true/>
 	<key>ExternalHosts</key>
 	<array>
+		<string>*.*</string>
 		<string>*.foundops.com</string>
 	</array>
 	<key>Plugins</key>
