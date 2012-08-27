@@ -22,6 +22,11 @@
         });
         localStorage.setItem("loggedIn", false);
 
+        //Erases localStorage picks.
+        localStorage.removeItem("selectedRoute");
+        localStorage.removeItem("selectedDestination");
+        localStorage.removeItem("selectedTask");
+
         //Erases history so user can't hit back button to access application and redirects user to the login page.
         var Backlen = history.length;
         history.go(-Backlen);

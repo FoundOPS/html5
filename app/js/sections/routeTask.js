@@ -10,7 +10,7 @@ define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all", "widgets/ser
     /**
      * routeTask = wrapper for all service objects
      */
-    var routeTask = {}, vm, statusUpdated;
+    var routeTask = {}, vm, statusUpdated, initialized = false;
 
     routeTask.vm = vm = kendo.observable({
         openTaskStatuses: function () {
@@ -91,6 +91,16 @@ define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all", "widgets/ser
     };
 
     routeTask.show = function () {
+        if (!initialized) {
+            //a task has not been selected, so go to routes view
+            if (!vm.get("selectedTask")) {
+                application.navigate("view/routes.html");
+                return;
+            }
+            initialized = true;
+        }
+
+
         //clear statusUpdated
         statusUpdated = false;
 
