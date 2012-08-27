@@ -107,10 +107,12 @@ background-image: linear-gradient(bottom, #222224 0%, #555556 100%);
             type: "GET",
             dataType: 'JSONP',
 //            url: 'http://localhost:9711/api/session/Login',    //LOCAL
-            url: 'http://api.foundops.com/api/auth/Login',    //LIVE
+//            url: 'http://api.foundops.com/api/auth/Login',    //LIVE
+            url: 'http://192.168.0.111:70/api/session/Login',   //REMOTE
             data: {email: email, pass: password},
-//            timeout: 5000,
+            timeout: 5000,
             error: function (errorThrown, textStatus) {
+                alert("You login request has timed out. Please check your internet connection and your login information.")
                 console.log(textStatus);
                 console.log(errorThrown);
             },
@@ -129,30 +131,19 @@ background-image: linear-gradient(bottom, #222224 0%, #555556 100%);
     var checkLogin = function () {
         //Wait until the application is initialized
         setTimeout(function () {
-            if (localStorage.getItem("loggedIn") === "true") {
-                console.log("Logged In");
-                //window.location.hash = "view/routeList.html";
-            } else if (localStorage.getItem("rememberMe") === "true") {
-                $("#email").val(localStorage.getItem("email"));
+            if (localStorage.getItem("rememberMe") === "true") {
+                $("#EmailAddress").val(localStorage.getItem("email"));
                 $("#rememberMe").prop("checked", true);
             }
+            if (localStorage.getItem("loggedIn") === "true") {
+                console.log("Logged In");
+//                location.href = "navigator.html";
+            }
         }, 0);
-
     };
 
     $(document).ready(function() {
         checkLogin();
-        //Used to "get rid" of the browser bar in mobile devices (only works for certain cases and breaks vertical centering in others.).
-//                if (navigator.userAgent.match(/Android/i)) {
-//            window.scrollTo(0,0); // reset in case prev not scrolled
-//            var nPageH = $(document).height();
-//            var nViewH = window.outerHeight;
-//            if (nViewH > nPageH) {
-//                nViewH -= 250;
-//                $('BODY').css('height',nViewH + 'px');
-//            }
-//            window.scrollTo(0,1);
-//        }
     });
 </script>
 </body>

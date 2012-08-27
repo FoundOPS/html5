@@ -61,7 +61,7 @@ define(['db/services', "lib/kendo.all"], function (dbservices) {
 //    session._data = {
 //        "name": "Jonathan Perl",
 //        "settingsUrl": "#view/personalSettings.html",
-//        "logOutUrl": "../Account/LogOut",
+//        "logOutUrl": "../view/logout.html",
 //        "avatarUrl": "img/emptyPerson.png",
 //        "roles": [
 //            {
@@ -115,6 +115,14 @@ define(['db/services', "lib/kendo.all"], function (dbservices) {
 //                    "Regions",
 //                    "Services",
 //                    "Vehicles"
+//                ]
+//            },
+//            {
+//                "id": "1",
+//                "name": "Nero's Grease Recovery",
+//                "type": "Mobile",
+//                "sections": [
+//                    "Routes"
 //                ]
 //            }
 //        ],
@@ -180,9 +188,16 @@ define(['db/services', "lib/kendo.all"], function (dbservices) {
 //                "iconUrl": "img/vehicles.png",
 //                "hoverIconUrl": "img/vehiclesColor.png",
 //                "isSilverlight": true
+//            },
+//            {
+//                "name": "Routes",
+//                "color": "green",
+//                "iconUrl": "img/routes.png",
+//                "hoverIconUrl": "img/routesColor.png",
+//                "isSilverlight": false
 //            }
 //        ]
-//};
+//    };
 //session._role = session._data.roles[0];
 
     return session;

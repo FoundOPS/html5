@@ -1,6 +1,9 @@
 body {
     font-family: Roboto,HelveticaNeue,sans-serif;
 }
+footer {
+    height: 10px;
+}
 /* Id Styles */
 #addressLabel {
     font-size: x-small;

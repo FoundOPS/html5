@@ -118,7 +118,10 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "db/models
 
     //Overrides phone's back button navigation - Phonegap
     main.onBack = function () {
-        if (window.location.hash === "#view/routes.html") {
+        if (window.location.hash === "#view/updates.html") {
+            alert("You will now be logged out.");
+            application.navigate("view/logout.html");
+        } else if (window.location.hash === "#view/routes.html") {
             application.navigate("view/updates.html");
         } else if (window.location.hash === "#view/routeDetails.html") {
             application.navigate("view/routes.html");
