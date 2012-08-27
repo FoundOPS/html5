@@ -113,13 +113,13 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
         }
 
         //check if a location is selected. If not, show error
-        if (selectedServiceHolder.Destination == "") {
+        if (selectedServiceHolder.Destination === "") {
             saveHistory.error("No Location");
             return;
         }
 
         //TODO perform validation (this will also check if a location is selected)
-        if (services.validator.validate()){
+        if (services.validator.validate()) {
             dbServices.updateService(service).success(function () {
                 vm.syncServiceHolder();
             });
@@ -177,6 +177,10 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
      * @param data
      */
     var formatData = function (data) {
+        if (_.isString(data)) {
+            data = JSON.parse(data);
+        }
+
         var fields = getFields(data);
 
         //format the data
@@ -195,9 +199,14 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
                 } else if (value.type === "date") {
                     convertedValue = new Date(originalValue);
                 } else if (value.type === "string") {
-                    convertedValue = originalValue.toString();
+                    if (originalValue) {
+                        convertedValue = originalValue.toString();
+                    }
+                    else {
+                        convertedValue = "";
+                    }
                 } else {
-                    return;
+                    convertedValue = originalValue;
                 }
 
                 formattedRow[key] = convertedValue;
@@ -234,6 +243,9 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
                     model: {
                         id: "ServiceId",
                         fields: fields
+                    },
+                    parse: function (response) {
+                        return formatData(response);
                     }
                 },
                 transport: {
@@ -293,14 +305,10 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
                         });
                         otherFilters.push(startDateFilter);
                         otherFilters.push(endDateFilter);
-
                         _.delay(function () {
                             serviceHoldersDataSource.filter(otherFilters);
                         }, 200);
                     }
-                },
-                parse: function (response) {
-                    return formatData(response);
                 }
             });
             serviceHoldersDataSource.sort({ field: "OccurDate", dir: "asc" });
