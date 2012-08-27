@@ -5,8 +5,8 @@
             //must use JSONP because the javascript may be hosted on a different url than the api
             type: "GET",
             dataType: 'JSONP',
-            url: 'http://localhost:9711/api/session/LogOut',       //LOCAL
-//            url: 'http://api.foundops.com/api/session/LogOut',       //LIVE
+//            url: 'http://localhost:9711/api/session/LogOut',       //LOCAL
+            url: 'http://api.foundops.com/api/session/LogOut',       //LIVE
             error: function (errorThrown, textStatus) {
                 console.log(textStatus);
                 console.log(errorThrown);
@@ -31,7 +31,7 @@
         var Backlen = history.length;
         history.go(-Backlen);
         history.length = 0;
-        window.location.href="login.html";      //DEBUG
-//        window.location.href="index.html";    //BUILT
+//        window.location.href="login.html";      //DEBUG
+        window.location.href="index.html";    //BUILT
     }
 </script>

@@ -857,6 +857,28 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
     -moz-box-shadow: 0 5px 8px #aaa;
     -webkit-box-shadow: 0 5px 8px #aaa;
     box-shadow: 0 5px 8px #aaa;
+    .km-ios .km-listinset > li:first-child:last-child, .km-ios .km-listgroupinset .km-list > li:first-child:last-child {
+        border-color: #aaa;
+        border-radius: 4px;
+        -moz-border-radius: 4px;
+        -webkit-border-radius: 4px;
+    }
+    .km-ios .km-listinset > li:first-child, .km-ios .km-listgroupinset .km-list > li:first-child, .km-ios .km-listinset
+li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > .km-listview-link, .km-ios
+.km-listinset li:first-child > .km-listview-label, .km-ios .km-listgroupinset li:first-child > .km-listview-label {
+        border-color: #aaa;
+        -webkit-border-top-left-radius: 4px;
+        -webkit-border-top-right-radius: 4px;
+        border-radius: 4px 4px 0 0;
+        -moz-border-radius: 4px 4px 0 0;
+        -webkit-border-radius: 4px 4px 0 0;
+    }
+    .km-ios .km-listinset > li:last-child, .km-ios .km-listgroupinset .km-list > li:last-child {
+        border-color: #aaa;
+        border-radius: 0 0 4px 4px;
+        -moz-border-radius: 0 0 4px 4px;
+        -webkit-border-radius: 0 0 4px 4px;
+    }
 }
 #taskServiceDetails{
     padding: 15px 15px 0 15px;

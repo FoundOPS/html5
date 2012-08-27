@@ -19,21 +19,19 @@ define(["jquery", "db/saveHistory", "lib/kendo.all", "widgets/contacts"], functi
         vm.set("selectedDestination", data);
     });
 
-
     var initialized = false;
 
     routeDestinationDetails.show = function () {
         saveHistory.close();
 
-        if (initialized) {
-            return;
+        if (!initialized) {
+            //a destination has not been selected, so go to routes view
+            if (!vm.get("selectedDestination")) {
+                application.navigate("view/routes.html");
+                return;
+            }
+            initialized = true;
         }
-        //a destination has not been selected, so go to routes view
-        if (!vm.get("selectedDestination")) {
-            application.navigate("view/routes.html");
-            return;
-        }
-        initialized = true;
 
         /**
          * Creates dataSources for the contacts widget.
@@ -62,5 +60,23 @@ define(["jquery", "db/saveHistory", "lib/kendo.all", "widgets/contacts"], functi
             application.navigate("view/routeTask.html");
         };
         kendo.bind($("#routeDestinationDetails"), vm, kendo.mobile.ui);
+    };
+
+    routeDestinationDetails.initialize = function () {
+//      If user refreshes app on browser -> automatically redirect based on user's previous choices.
+        setTimeout(function () {
+            if (main.history[0] !== "#view/updates.html" && main.history[0] !== "#view/routes.html" && main.history[0] !== "#view/routeDetails.html" && main.history[0] !== "#view/routeDestinationDetails.html") {
+                if (localStorage.getItem("selectedTask")) {
+                    var task;
+                    for (task in vm.get("routeTasksSource")._data) {
+                        if (localStorage.getItem("selectedTask") === vm.get("routeTasksSource")._data[task].Id) {
+                            var e = {};
+                            e.dataItem = vm.get("routeTasksSource")._data[task];
+                            vm.selectTask(e);
+                        }
+                    }
+                }
+            }
+        }, 0);
     };
 });
