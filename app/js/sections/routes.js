@@ -59,15 +59,17 @@ define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all"], function ($
                 if (localStorage.getItem("selectedRoute")) {
                     var route;
                     for (route in vm.get("routesSource")._data) {
-                        if (localStorage.getItem("selectedRoute") === vm.get("routesSource")._data[route].Id) {
-                            var e = {};
-                            e.dataItem = vm.get("routesSource")._data[route];
-                            vm.selectRoute(e);
+                        if (vm.get("routesSource")._data.hasOwnProperty(route)) {
+                            if (localStorage.getItem("selectedRoute") === vm.get("routesSource")._data[route].Id) {
+                                var e = {};
+                                e.dataItem = vm.get("routesSource")._data[route];
+                                vm.selectRoute(e);
+                            }
                         }
                     }
                 }
             }
-        })
+        });
     };
 
     routes.show = function () {
