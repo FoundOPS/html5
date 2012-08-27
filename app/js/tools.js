@@ -64,7 +64,9 @@ define(function () {
      * @return {Date}
      */
     tools.stripTimeZone = function (date) {
-        return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+        var stripped = moment.utc(date).format("YYYY-MM-DDTHH:mm:ss");
+        var result = moment(stripped).toDate();
+        return result;
     };
 
     /**

@@ -127,7 +127,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
     };
 
     services.exportToCSV = function () {
-        var content = gridTools.toCSV(serviceHoldersDataSource.view(), "Services", true, ['RecurringServiceId', 'ServiceId']);
+        var content = gridTools.toCSV(serviceHoldersDataSource.data(), "Services", true, ['RecurringServiceId', 'ServiceId']);
         var form = $("#csvForm");
         form.find("input[name=content]").val(content);
         form.find("input[name=fileName]").val("services.csv");
@@ -196,7 +196,11 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
                     convertedValue = "";
                 } else if (value.type === "number") {
                     convertedValue = parseFloat(originalValue);
-                } else if (value.type === "date") {
+                } else if (value.detail === "date") {
+                    //strip the timezone if it is only a date
+                    convertedValue = tools.stripTimeZone(originalValue);
+                } else if (value.detail === "datetime" || value.detail === "time") {
+                    //TODO: Load timezone setting, instead of using local one
                     convertedValue = new Date(originalValue);
                 } else if (value.type === "string") {
                     if (originalValue) {
@@ -254,6 +258,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
                         data: params
                     }
                 },
+                pageSize: 50,
                 change: function () {
                     var filterSet = serviceHoldersDataSource.filter();
                     if (filterSet) {
@@ -333,18 +338,13 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
     };
 
 //resize the grid based on the current window's height
-    var resizeGrid = function (initialLoad) {
-        var extraMargin;
-        if (initialLoad) {
-            extraMargin = 70;
-        } else {
-            extraMargin = 85;
-        }
+    var resizeGrid = function () {
+        var extraMargin = 85;
         var windowHeight = $(window).height();
         var topHeight = $('#top').outerHeight(true);
         var contentHeight = windowHeight - topHeight - extraMargin;
-        $('#grid').css("height", contentHeight + 9 + 'px');
-        $('#grid .k-grid-content').css("height", contentHeight - 8 + 'px');
+        $('#grid').css("height", contentHeight + 24 + 'px');
+        $('#grid .k-grid-content').css("height", contentHeight - 41 + 'px');
         $("#serviceDetails").css("max-height", contentHeight + 5 + 'px');
     };
 
@@ -428,14 +428,13 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
                 dbServices.getServiceDetails(selectedServiceHolder.get("ServiceId"), selectedServiceHolder.get("OccurDate"), selectedServiceHolder.get("RecurringServiceId"), null, function (service) {
                     vm.setSelectedService(service);
                 });
-
-                resizeGrid(false);
             },
             columns: columns,
             columnMenu: true,
             dataBound: dataBound,
             dataSource: serviceHoldersDataSource,
             filterable: true,
+            pageable: true,
             resizable: true,
             reorderable: true,
             scrollable: true,
@@ -508,9 +507,9 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
         });
 
         $(window).resize(function () {
-            resizeGrid(false);
+            resizeGrid();
         });
-        resizeGrid(true);
+        resizeGrid();
     };
 
     services.show = function () {

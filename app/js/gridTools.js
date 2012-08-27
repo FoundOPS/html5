@@ -136,51 +136,64 @@ define(['db/session', 'db/services'], function (session, dbServices) {
             "unbind", "uid", "dirty", "id", "parent" ]);
 
         //add the header row
-        if (data.length > 0) {
-            for (var col in data[0]) {
-                //do not include inherited properties
-                if (!data[0].hasOwnProperty(col) || _.include(ignore, col)) {
-                    continue;
+        if (_.any(data)) {
+            var firstRow = _.first(data);
+
+            var firstValue = true;
+            _.each(firstRow, function (value, key) {
+                //exclude ignored properties
+                if (_.include(ignore, key)) {
+                    return;
                 }
 
                 if (humanize) {
-                    col = col.split('_').join(' ').replace(/([A-Z])/g, ' $1');
+                    key = key.split('_').join(' ').replace(/([A-Z])/g, ' $1');
                 }
 
-                col = col.replace(/"/g, '""');
-                csv += '"' + col + '"';
-                if (col != data[0].length - 1) {
+                key = key.replace(/"/g, '""');
+
+                key = $.trim(key);
+
+                if (!firstValue) {
                     csv += ",";
                 }
-            }
+                csv += '"' + key + '"';
+
+                firstValue = false;
+            });
             csv += "\n";
         }
 
         //add each row of data
-        for (var row in data) {
-            for (var col in data[row]) {
-                //do not include inherited properties
-                if (!data[row].hasOwnProperty(col) || _.include(ignore, col)) {
-                    continue;
+        _.each(data, function (row) {
+            firstValue = true;
+            _.each(row, function (value, key) {
+                //exclude ignored properties
+                if (_.include(ignore, key)) {
+                    return;
                 }
 
-                var value = data[row][col];
                 if (value === null) {
                     value = "";
                 } else if (value instanceof Date) {
                     value = moment(value).format("MM/D/YYYY");
-                } else {
+                } else if (value !== undefined) {
                     value = value.toString();
+                } else {
+                    value = "";
                 }
 
                 value = value.replace(/"/g, '""');
-                csv += '"' + value + '"';
-                if (col !== data[row].length - 1) {
+
+                if (!firstValue) {
                     csv += ",";
                 }
-            }
+                csv += '"' + value + '"';
+
+                firstValue = false;
+            });
             csv += "\n";
-        }
+        });
 
         return csv;
     };
