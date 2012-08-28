@@ -5,6 +5,19 @@ footer {
     height: 10px;
 }
 /* Id Styles */
+#backButtonContainer {
+    height: 100%;
+    display: inline-block;
+    padding-left:7px;
+}
+#backButtonContainer a {
+    display: inline-block;
+    height:100%;
+    width: 100%;
+}
+.clicked img {
+    opacity: .5;
+}
 #addressLabel {
     font-size: x-small;
     margin: -50px 0px -15px 0px;
