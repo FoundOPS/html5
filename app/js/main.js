@@ -130,6 +130,18 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "db/models
             application.navigate("view/routeDetails.html");
         } else if (window.location.hash === "#view/routeTask.html") {
             application.navigate("view/routeDestinationDetails.html");
+        } else if (window.location.hash === "#view/personalSettings.html") {
+            application.navigate("view/updates.html");
+        } else if (window.location.hash === "#view/businessSettings.html") {
+            application.navigate("view/updates.html");
+        } else if (window.location.hash === "#view/personalSettings.html") {
+            application.navigate("view/updates.html");
+        } else if (window.location.hash === "#view/usersSettings.html") {
+            application.navigate("view/updates.html");
+        } else if (window.location.hash === "#view/dispatcherSettings.html") {
+            application.navigate("view/updates.html");
+        } else if (window.location.hash === "#view/changePassword.html") {
+            application.navigate("view/personalSettings.html");
         }
         setTimeout (function () {
             $('#backButtonContainer').toggleClass("clicked");
