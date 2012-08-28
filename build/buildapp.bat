@@ -52,3 +52,4 @@ ren "login.html" "index.html"
 del "build.txt"
 rd /s /q ".idea"
 
+PAUSE
