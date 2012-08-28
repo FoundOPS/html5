@@ -32,7 +32,6 @@ define(['db/services', "lib/kendo.all"], function (dbservices) {
         });
     };
 
-
     var roleFunctions = [];
     /**
      * A method which will set the RoleId initially and whenever it changes.

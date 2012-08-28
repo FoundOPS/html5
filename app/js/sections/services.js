@@ -127,11 +127,15 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
     };
 
     services.exportToCSV = function () {
-        var content = gridTools.toCSV(serviceHoldersDataSource.data(), "Services", true, ['RecurringServiceId', 'ServiceId']);
         var form = $("#csvForm");
-        form.find("input[name=content]").val(content);
-        form.find("input[name=fileName]").val("services.csv");
-        form[0].action = dbServices.ROOT_API_URL + "Helper/Download";
+
+        form.find("input[name=roleId]").val(session.get("role.id"));
+        form.find("input[name=serviceType]").val(vm.serviceType().Name);
+
+        form.find("input[name=startDate]").val(tools.formatDate(vm.get("startDate")));
+        form.find("input[name=endDate]").val( tools.formatDate(vm.get("endDate")));
+
+        form[0].action = dbServices.ROOT_API_URL + "Service/GetServicesHoldersWithFieldsCsv";
         form.submit();
     };
 //endregion
