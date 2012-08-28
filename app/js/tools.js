@@ -59,13 +59,10 @@ define(function () {
     };
 
     /**
-     * Strips the time zone from a date (to UTC) but keeps the same date.
-     * @param date
-     * @return {Date}
+     * Converts the API date string to UTC
      */
-    tools.stripTimeZone = function (date) {
-        var stripped = moment.utc(date).format("YYYY-MM-DDTHH:mm:ss");
-        var result = moment(stripped).toDate();
+    tools.toUtc = function (dateString) {
+        var result = moment.utc(dateString).toDate();
         return result;
     };
 

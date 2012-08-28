@@ -94,18 +94,18 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
                     url: url,
                     data: params
                 }).success(function (response) {
-                    var convertedData = response;
+                        var convertedData = response;
 
-                    //if there is a converter, convert the data
-                    if (opt_convertItem) {
-                        convertedData = tools.convertArray(response, opt_convertItem);
-                    }
+                        //if there is a converter, convert the data
+                        if (opt_convertItem) {
+                            convertedData = tools.convertArray(response, opt_convertItem);
+                        }
 
-                    //perform the callback function by passing the response data
-                    if (callback !== null) {
-                        callback(convertedData);
-                    }
-                });
+                        //perform the callback function by passing the response data
+                        if (callback !== null) {
+                            callback(convertedData);
+                        }
+                    });
             };
 
             //if opt_excludeRoleId was not set add it as a parameter
@@ -176,8 +176,8 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
             contentType: 'application/json',
             data: JSON.stringify(trackPoints)
         }).success(function (response) {
-            callback(response);
-        });
+                callback(response);
+            });
     };
 
     //endregion
@@ -233,14 +233,23 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
         for (i = 0; i < service.Fields.length; i++) {
             var field = service.Fields[i];
             if (field.Type === "DateTimeField") {
-                field.Earliest = new Date(field.Earliest);
-                field.Latest = new Date(field.Latest);
-                field.Value = new Date(field.Value);
+                if (field.TypeInt === 0 || field.TypeInt === 1) {
+                    //DateTime or TimeOnly
+                    field.Earliest = new Date(field.Earliest);
+                    field.Latest = new Date(field.Latest);
+                    field.Value = new Date(field.Value);
+                } else if (field.TypeInt === 2) {
+                    //DateOnly
+                    field.Earliest = tools.toUtc(field.Earliest);
+                    field.Latest = tools.toUtc(field.Latest);
+                    field.Value = tools.toUtc(field.Value);
+                }
             }
         }
     };
 
     services.updateService = function (service) {
+        services.convertServiceDates(service);
         return saveHistory.linkNotification(
             $.ajax({
                 url: services.API_URL + "service/UpdateService",
@@ -428,8 +437,8 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
             contentType: 'application/json',
             data: error
         }).success(function (response) {
-            callback(response);
-        });
+                callback(response);
+            });
     };
 
     /**
