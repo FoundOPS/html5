@@ -118,9 +118,10 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "db/models
 
     //Overrides phone's back button navigation - Phonegap
     main.onBack = function () {
+        $('#backButtonContainer').toggleClass("clicked");
         if (window.location.hash === "#view/updates.html") {
-            alert("You will now be logged out.");
-            application.navigate("view/logout.html");
+            var r = confirm("Are you sure you would like to log out?");
+            if (r) { application.navigate("view/logout.html"); }
         } else if (window.location.hash === "#view/routes.html") {
             application.navigate("view/updates.html");
         } else if (window.location.hash === "#view/routeDetails.html") {
@@ -130,6 +131,9 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "db/models
         } else if (window.location.hash === "#view/routeTask.html") {
             application.navigate("view/routeDestinationDetails.html");
         }
+        setTimeout (function () {
+            $('#backButtonContainer').toggleClass("clicked");
+        }, 100);
     };
 
     // Fires when Cordova is ready
