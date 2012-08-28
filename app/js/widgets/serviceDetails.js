@@ -59,6 +59,12 @@ define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "li
                                 locationSelector.select2("data", destination);
                                 //for updating the services grid
                                 destinationField.Value = destination;
+                            } else {
+                                //set the destination to the first location
+                                //in serviceDetails
+                                locationSelector.select2("data", locations[0]);
+                                //in grid
+                                destinationField.Value = locations[0];
                             }
 
                             locationSelector.select2("enable");
@@ -68,7 +74,7 @@ define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "li
             };
 
             //Add the Client selector w auto-complete and infinite scrolling
-            clientSelector = $(inputTemplate).attr("type", "hidden").appendTo(that.element).wrap("<label>Client</label>");
+            clientSelector = $(inputTemplate).attr("type", "hidden").attr("required", "required").appendTo(that.element).wrap("<label class='client'>Client</label>");
             clientSelector.select2({
                 placeholder: "Choose a client",
                 minimumInputLength: 1,
@@ -95,12 +101,12 @@ define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "li
                 formatSelection: formatClientName,
                 formatResult: formatClientName,
                 dropdownCssClass: "bigdrop"
-            }).on("change", function (e) {
-                var client = clientSelector.select2("data");
-                service.set("Client", client);
-                service.set("ClientId", client.Id);
-                updateLocations(client);
-            });
+            }).on("change", function () {
+                    var client = clientSelector.select2("data");
+                    service.set("Client", client);
+                    service.set("ClientId", client.Id);
+                    updateLocations(client);
+                });
 
             if (service.Client) {
                 //set the initial selection
@@ -112,7 +118,7 @@ define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "li
             var formatLocationName = function (location) {
                 return location.AddressLineOne + " " + location.AddressLineTwo;
             };
-            locationSelector = $(inputTemplate).attr("type", "hidden").appendTo(that.element).wrap("<label>Location</label>");
+            locationSelector = $(inputTemplate).attr("type", "hidden").appendTo(that.element).wrap("<label class='location'>Location</label>");
             locationSelector.select2({
                 placeholder: "Choose a location",
                 id: function (location) {
@@ -128,13 +134,13 @@ define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "li
                 formatSelection: formatLocationName,
                 formatResult: formatLocationName,
                 dropdownCssClass: "bigdrop"
-            }).on("change", function (e) {
-                var location = locationSelector.select2("data");
-                var destinationField = models.getDestinationField(service);
-                //Used for updating the grid
-                destinationField.Value = location;
-                destinationField.set("LocationId", location.Id);
-            });
+            }).on("change", function () {
+                    var location = locationSelector.select2("data");
+                    var destinationField = models.getDestinationField(service);
+                    //Used for updating the grid
+                    destinationField.Value = location;
+                    destinationField.set("LocationId", location.Id);
+                });
         },
 
         _createTextBoxField: function (field, fieldIndex, listView) {
@@ -329,7 +335,7 @@ define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "li
 
                     //add "required" to the element if it's required
                     if (field.Required) {
-                        fieldElement.attr("required", "true");
+                        fieldElement.attr("required", "required");
                     }
 
                     if (field.Name) {
