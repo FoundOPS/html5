@@ -196,12 +196,8 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
                     convertedValue = "";
                 } else if (value.type === "number") {
                     convertedValue = parseFloat(originalValue);
-                } else if (value.detail === "date") {
-                    //strip the timezone if it is only a date
-                    convertedValue = tools.stripTimeZone(originalValue);
-                } else if (value.detail === "datetime" || value.detail === "time") {
-                    //TODO: Load timezone setting, instead of using local one
-                    convertedValue = new Date(originalValue);
+                } else if (value.detail === "date" || value.detail === "datetime" || value.detail === "time") {
+                    convertedValue = tools.toUtc(originalValue);
                 } else if (value.type === "string") {
                     if (originalValue) {
                         convertedValue = originalValue.toString();
@@ -366,10 +362,12 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
             column.type = value.type;
             if (column.type === "number") {
                 column.template = "#= (" + key + "== null) ? ' ' : " + key + " #";
+            }
+            //TODO: Adjust below, show time zone
+            else if (value.detail === "date") {
+                column.template = "#= (" + key + "== null) ? ' ' : moment.utc(" + key + ").format('LL') #";
             } else if (value.detail === "datetime") {
                 column.template = "#= (" + key + "== null) ? ' ' : moment.utc(" + key + ").format('LLL') #";
-            } else if (value.detail === "date") {
-                column.template = "#= (" + key + "== null) ? ' ' : moment.utc(" + key + ").format('LL') #";
             } else if (value.detail === "time") {
                 column.template = "#= (" + key + "== null) ? ' ' : moment.utc(" + key + ").format('LT') #";
             }
