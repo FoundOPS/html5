@@ -119,11 +119,15 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
     };
 
     services.exportToCSV = function () {
-        var content = gridTools.toCSV(serviceHoldersDataSource.data(), "Services", true, ['RecurringServiceId', 'ServiceId']);
         var form = $("#csvForm");
-        form.find("input[name=content]").val(content);
-        form.find("input[name=fileName]").val("services.csv");
-        form[0].action = dbServices.ROOT_API_URL + "Helper/Download";
+
+        form.find("input[name=roleId]").val(session.get("role.id"));
+        form.find("input[name=serviceType]").val(vm.serviceType().Name);
+
+        form.find("input[name=startDate]").val(tools.formatDate(vm.get("startDate")));
+        form.find("input[name=endDate]").val( tools.formatDate(vm.get("endDate")));
+
+        form[0].action = dbServices.ROOT_API_URL + "Service/GetServicesHoldersWithFieldsCsv";
         form.submit();
     };
 //endregion
@@ -188,12 +192,8 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
                     convertedValue = "";
                 } else if (value.type === "number") {
                     convertedValue = parseFloat(originalValue);
-                } else if (value.detail === "date") {
-                    //strip the timezone if it is only a date
-                    convertedValue = tools.stripTimeZone(originalValue);
-                } else if (value.detail === "datetime" || value.detail === "time") {
-                    //TODO: Load timezone setting, instead of using local one
-                    convertedValue = new Date(originalValue);
+                } else if (value.detail === "date" || value.detail === "datetime" || value.detail === "time") {
+                    convertedValue = tools.toUtc(originalValue);
                 } else if (value.type === "string") {
                     if (originalValue) {
                         convertedValue = originalValue.toString();
@@ -358,10 +358,12 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
             column.type = value.type;
             if (column.type === "number") {
                 column.template = "#= (" + key + "== null) ? ' ' : " + key + " #";
+            }
+            //TODO: Adjust below, show time zone
+            else if (value.detail === "date") {
+                column.template = "#= (" + key + "== null) ? ' ' : moment.utc(" + key + ").format('LL') #";
             } else if (value.detail === "datetime") {
                 column.template = "#= (" + key + "== null) ? ' ' : moment.utc(" + key + ").format('LLL') #";
-            } else if (value.detail === "date") {
-                column.template = "#= (" + key + "== null) ? ' ' : moment.utc(" + key + ").format('LL') #";
             } else if (value.detail === "time") {
                 column.template = "#= (" + key + "== null) ? ' ' : moment.utc(" + key + ").format('LT') #";
             }
@@ -373,24 +375,30 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
             columns.push(column);
         });
 
-        //order the columns alphabetically
-        //then put the OccurDate, Client Name, and Destination first
+        //put the OccurDate, Client Name, and Destination first
         //dont worry, this will be overridden next if a column configuration is already saved
-        var i = 2; //start after client name
-        var alphabetically = _(columns).sortBy("field");
-        _(alphabetically).each(function (c) {
-            c.order = i;
-            i++;
+        var prioritize = ['OccurDate', 'ClientName', 'Destination'];
+        //find the columns
+        var priorityColumns = _.map(prioritize, function (colName) {
+            return _.find(columns, function (c) {
+                return colName === c.field;
+            });
         });
-        _.find(columns,function (c) {
-            return c.field === "OccurDate";
-        }).order = 0;
-        _.find(columns,function (c) {
-            return c.field === "ClientName";
-        }).order = 1;
-        _.find(columns,function (c) {
-            return c.field === "Destination";
-        }).order = 2;
+        //put them first
+        var order = 0;
+        _.each(priorityColumns, function (pcol) {
+            if (pcol) {
+                pcol.order = order;
+                order++;
+            }
+        });
+
+        //then order the other columns alphabetically
+        var alphabetically = _.sortBy(_.difference(columns, priorityColumns), "field");
+        _.each(alphabetically, function (c) {
+            c.order = order;
+            order++;
+        });
 
         //configure the columns based on the user's stored configuration
         columns = gridTools.configureColumns(columns, vm.serviceType().Id);

@@ -68,16 +68,21 @@
     document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
 </script>
 <script src="lib/cordova-2.0.0.js" type="application/javascript"></script>
-<link rel="stylesheet/less" type="text/less" href="styles/main.less">
-<script type="text/javascript" src="lib/less.min.js"></script>
+<link rel="stylesheet" type="text/less" href="styles/main.css">
 <script data-main="js/main.js" src="lib/require-jquery.js"></script>
 <!--For built VS-->
 <!--<link rel="stylesheet" type="text/css" href="@Model["BlobRoot"]main.css">-->
 <!--<script data-main="@Model["BlobRoot"]main-built.js" src="@Model["BlobRoot"]require-jquery.js"></script>-->
 
+<script id="backButtonTemplate" type="text/x-kendo-template">
+    <div id="backButtonContainer">
+        <a onclick="main.onBack()"><img id="backArrow" src="img/backArrow.png"/></a>
+    </div>
+</script>
 <script id="navTemplate" type="text/x-kendo-template">
     <div id='navContainer'>
-        <div id='navSearch' class='navElement'><input name='search' type='text' placeholder='Search...'/>
+        <div id='navSearch' class='navElement'>
+            <input name='search' type='text' placeholder='Search...'/>
             <a><img src='img/Search.png'/></a>
         </div>
         <div id='navClient' class='navElement last'>
@@ -97,6 +102,7 @@
     </div>
 </script>
 <script id="sideBarElementTemplate" type="text/x-kendo-template">
+    <!-- href - Weird KendoUI Binding. Maybe fix in the future but works fine as is for now.!-->
     <a #= href # class='sideBarElement' data-color='#= color #' data-iconUrl='#= iconUrl #' data-hoverIconUrl='#=
     hoverIconUrl #'>
         <span class='icon' style="background: url('#= iconUrl #') #= bgX # #= bgY # no-repeat"></span>

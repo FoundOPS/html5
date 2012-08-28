@@ -35,15 +35,18 @@
         <label for="serviceTypes">Services:</label>
         <input id="serviceTypes" class="k-dropdown"/>
         <form id="csvForm" enctype="multipart/form-data" method="POST" target="csvFrame">
-            <input type="hidden" name="content"/>
-            <input type="hidden" name="contentType" value="text/csv"/>
-            <input type="hidden" name="fileName"/>
+            <input type="hidden" name="roleId"/>
+            <input type="hidden" name="serviceType"/>
+            <input type="hidden" name="clientContext"/>
+            <input type="hidden" name="recurringServiceContext"/>
+            <input type="hidden" name="startDate"/>
+            <input type="hidden" name="endDate"/>
         </form>
         <iframe id="csvFrame" style="display:none;">
         </iframe>
     </div>
     <div class="addDeleteBtns">
-        <button class="k-button k-button-icontext k-grid-add csvBtn" type="export" onclick="services.exportToCSV()"></button>
+        <button class="k-button k-button-icontext k-grid-edit csvBtn" type="export" onclick="services.exportToCSV()"></button>
         <button class='k-button k-button-icontext k-grid-add'></button>
         <button class='k-button k-button-icontext k-grid-delete' disabled></button>
     </div>

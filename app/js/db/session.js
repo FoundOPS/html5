@@ -4,7 +4,6 @@
 
 define(['db/services', "lib/kendo.all"], function (dbservices) {
     var session = new kendo.data.ObservableObject({});
-
     window.session = session;
 
     session.setRole = function (role) {

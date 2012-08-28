@@ -1,6 +1,6 @@
 "use strict";
 
-define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.all"], function ($, Popup) {
+define(["jquery", "ui/popup", "db/developer", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.all"], function ($, Popup, developer) {
     /**
      * Initializes the navigator
      * @param config Example below
@@ -289,6 +289,14 @@ define(["jquery", "ui/popup", "lib/jquery.mousewheel", "lib/jquery.jScrollPane",
             var showMenuTemplateHtml = $("#showMenuTemplate").html();
             var showMenuTemplate = kendo.template(showMenuTemplateHtml);
             $('#navContainer').after(showMenuTemplate);
+
+            //Add backButton to topNav.
+            if (developer.CURRENT_FRAME === developer.Frame.MOBILE_APP) {
+                var backButtonTemplateHtml = $("#backButtonTemplate").html();
+                var backButtonTemplate = kendo.template(backButtonTemplateHtml);
+                $('#navContainer').before(backButtonTemplate);
+                $('#navContainer').addClass("mobileMode");
+            }
 
             /** Initialize sidebar scrollbar **/
             initSideBarScrollBar();
