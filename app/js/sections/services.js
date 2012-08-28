@@ -381,24 +381,30 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
             columns.push(column);
         });
 
-        //order the columns alphabetically
-        //then put the OccurDate, Client Name, and Destination first
+        //put the OccurDate, Client Name, and Destination first
         //dont worry, this will be overridden next if a column configuration is already saved
-        var i = 2; //start after client name
-        var alphabetically = _(columns).sortBy("field");
-        _(alphabetically).each(function (c) {
-            c.order = i;
-            i++;
+        var prioritize = ['OccurDate', 'ClientName', 'Destination'];
+        //find the columns
+        var priorityColumns = _.map(prioritize, function (colName) {
+            return _.find(columns, function (c) {
+                return colName === c.field;
+            });
         });
-        _.find(columns,function (c) {
-            return c.field === "OccurDate";
-        }).order = 0;
-        _.find(columns,function (c) {
-            return c.field === "ClientName";
-        }).order = 1;
-        _.find(columns,function (c) {
-            return c.field === "Destination";
-        }).order = 2;
+        //put them first
+        var order = 0;
+        _.each(priorityColumns, function (pcol) {
+            if (pcol) {
+                pcol.order = order;
+                order++;
+            }
+        });
+
+        //then order the other columns alphabetically
+        var alphabetically = _.sortBy(_.difference(columns, priorityColumns), "field");
+        _.each(alphabetically, function (c) {
+            c.order = order;
+            order++;
+        });
 
         //configure the columns based on the user's stored configuration
         columns = gridTools.configureColumns(columns, vm.serviceType().Id);
