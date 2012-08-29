@@ -4,9 +4,9 @@
     <div id="taskServiceDetails" data-role="kendoServiceDetails" data-bind="service: selectedService"></div>
 
     <div class="statusLabel"><span>Status</span></div>
-    <ul id="routeStatus-listview" data-role="listview" data-style="inset" style="margin-top:0;">
+    <ul id="routeStatus-listview" data-role="listview" data-style="inset" data-bind="click: openTaskStatuses" style="margin-top:0;">
         <li style="padding-bottom: 8px; text-align: center; color: black">
-            <a class="km-button" data-bind="click: openTaskStatuses, style: { backgroundColor: selectedTaskStatus.Color}">
+            <a class="km-button" data-bind="style: { backgroundColor: selectedTaskStatus.Color}">
                 <span style="color:black" data-bind="text: selectedTaskStatus.Name"></span>
             </a>
         </li>

@@ -6,17 +6,17 @@ footer {
 }
 /* Id Styles */
 #backButtonContainer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 0 10px;
+    border-right: 2px solid;
     height: 100%;
-    display: inline-block;
-    padding-left:7px;
 }
 #backButtonContainer a {
     display: inline-block;
     height:100%;
     width: 100%;
-}
-.clicked img {
-    opacity: .5;
 }
 #addressLabel {
     font-size: x-small;
@@ -34,9 +34,9 @@ footer {
     font-size: 2em;
     margin-top: 10px;
 }
-#locationInfo .km-button {
+#directionsButton {
     float: right;
-    margin-top: -50px;
+    margin-top: -40px;
     margin-right: 5%;
 }
 #routeDestinations-listview li {
@@ -73,7 +73,11 @@ footer {
 #routeStatus-listview a{
     min-height: 42px;
 }
-.statusLabel{
+/* Class Styles */
+.mobileMode { /* Changes the padding of the Client icon in the navigator to accomodate for the back button on mobile */
+    padding-left: 57px !important;
+}
+.statusLabel {
     margin: 0 auto;
     width: 250px;
 }
@@ -85,24 +89,12 @@ footer {
     /*width:100% !important;*/
     /*height:100% !important;*/
 /*}*/
-/* Class Styles */
 .km-list input[type="password"], .km-list input[type="search"], .km-list input[type="number"],
 .km-list input[type="tel"], .km-list input[type="url"], .km-list input[type="email"],
 .km-list input[type="text"]:not(.k-input), .km-list input[type="month"], .km-list input[type="color"],
 .km-list input[type="week"], .km-list input[type="date"], .km-list input[type="time"],
 .km-list input[type="datetime"], .km-list select:not([multiple]), .km-list .k-dropdown {
     width: auto;
-}
-/* Device Specific Styles - Will be removed after FoundOPS Style is implemented*/
-.km-android #taskFieldName {
-    margin-left:-10px;
-}
-.km-android .km-listview .km-list {
-    border-bottom:1px solid #333;
-}
-.km-android #earl-text-label, .km-android #def-text-label, .km-android #late-text-label {
-    position: relative;
-    top: -10px;
 }
 .km-ios #contactData{
     font-size: x-small;
@@ -114,4 +106,12 @@ footer {
 }
 .km-ios #taskServiceDetails input[type="text"], .km-ios #taskServiceDetails input[type="number"] {
     border-bottom:1px solid rgba(0, 0, 0, 0.1)
+}
+/* On event styles */
+.clicked img {
+    opacity: .5;
+}
+
+a {
+    border: 1px solid red;
 }

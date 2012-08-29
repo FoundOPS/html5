@@ -143,13 +143,14 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "db/models
         } else if (window.location.hash === "#view/changePassword.html") {
             application.navigate("view/personalSettings.html");
         }
-        setTimeout (function () {
+        setTimeout(function () {
             $('#backButtonContainer').toggleClass("clicked");
         }, 100);
     };
 
     // Fires when Cordova is ready
     function onDeviceReady() {
+        main.DevicePlatform = device.platform;
         //Listens for back button being pressed on a mobile device.
         document.addEventListener("backbutton", main.onBack, false);
     }
