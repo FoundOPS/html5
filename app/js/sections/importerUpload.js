@@ -1,9 +1,9 @@
 'use strict';
 
-define(["lib/csv", "sections/importerSelect", "sections/importerReview", "db/services", "lib/jquery-ui-1.8.21.core.min", "lib/jquery.FileReader", "lib/swfobject"], function (csv, importerSelect, importerReview, dbServices) {
+define(["lib/csv", "sections/importerSelect", "sections/importerReview", "db/services", "lib/jquery-ui-1.8.21.core.min",
+    "lib/jquery.FileReader", "lib/swfobject"], function (csv, importerSelect, importerReview, dbServices) {
     var importerUpload = {};
 
-    //TODO: try to use this
     //checks for .csv file type
     function checkFileType(file){
         if(!file.name.match(/(.*\.csv$)/)){
@@ -56,19 +56,13 @@ define(["lib/csv", "sections/importerSelect", "sections/importerReview", "db/ser
         });
 
         dbServices.getImporterServiceTypes(function (serviceTypes) {
-            importerUpload.serviceTypes = serviceTypes;
+            //create the service types dropdown
+            importerUpload.serviceTypeDropDown = $("#serviceType").kendoDropDownList({
+                dataTextField: "Name",
+                dataValueField: "Id",
+                dataSource: serviceTypes
+            }).data("kendoDropDownList");
         });
-
-        //create DropDownList from input HTML element
-        $("#serviceType").kendoDropDownList({
-            dataTextField: "Name",
-            dataValueField: "Id",
-            dataSource: importerUpload.serviceTypes
-        });
-
-        //get a reference to the DropDownList
-        var color = $("#serviceType").data("kendoDropDownList");
-        color.select(0);
     };
 
     window.importerUpload = importerUpload;
