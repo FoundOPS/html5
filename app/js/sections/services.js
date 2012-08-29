@@ -106,32 +106,28 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
 
     services.save = function () {
         var service = vm.get("selectedService");
-        //check if a client is selected. If not, show error
-        if (selectedServiceHolder.ClientName === "") {
-            saveHistory.error("No Client");
-            return;
-        }
 
-        //check if a location is selected. If not, show error
-        if (selectedServiceHolder.Destination === "") {
-            saveHistory.error("No Location");
-            return;
-        }
-
-        //TODO perform validation (this will also check if a location is selected)
         if (services.validator.validate()) {
             dbServices.updateService(service).success(function () {
                 vm.syncServiceHolder();
             });
+        } else {
+            //force validate clients
+            var clientInput = $("#serviceDetails .client input:not(.select2-input)");
+            services.validator.validateInput(clientInput);
         }
     };
 
     services.exportToCSV = function () {
-        var content = gridTools.toCSV(serviceHoldersDataSource.data(), "Services", true, ['RecurringServiceId', 'ServiceId']);
         var form = $("#csvForm");
-        form.find("input[name=content]").val(content);
-        form.find("input[name=fileName]").val("services.csv");
-        form[0].action = dbServices.ROOT_API_URL + "Helper/Download";
+
+        form.find("input[name=roleId]").val(session.get("role.id"));
+        form.find("input[name=serviceType]").val(vm.serviceType().Name);
+
+        form.find("input[name=startDate]").val(tools.formatDate(vm.get("startDate")));
+        form.find("input[name=endDate]").val( tools.formatDate(vm.get("endDate")));
+
+        form[0].action = dbServices.ROOT_API_URL + "Service/GetServicesHoldersWithFieldsCsv";
         form.submit();
     };
 //endregion
@@ -448,6 +444,27 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
             },
             selectable: true
         }).data("kendoGrid");
+
+        //region Start work on visual cue for filter
+        //http://feedback.kendoui.com/forums/127393-kendo-ui-feedback/suggestions/3026413-add-a-visual-queue-to-grid-column-headers-when-a-c#comments
+//        // Save the reference to the original filter function.
+//        grid.dataSource.originalFilter = grid.dataSource.filter;
+//
+//        // Replace the original filter function.
+//        grid.dataSource.filter = function() {
+//            // If a column is about to be filtered, then raise a new "filtering" event.
+//            if (arguments.length > 0) {
+//                this.trigger("filtering", arguments);
+//            }
+//            // Call the original filter function.
+//            return grid.dataSource.originalFilter.apply(this, arguments);
+//        };
+//
+//        // Bind to the dataSource filtering event.
+//        grid.dataSource.bind("filtering", function(e) {
+//            console.log("about to filter.");
+//        });
+        //endregion
 
         //Keep track of any changes to the columns, and store the configuration
         gridTools.storeConfiguration(grid, vm.serviceType().Id);
