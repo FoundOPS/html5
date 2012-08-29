@@ -1,4 +1,4 @@
-﻿//
+//
 // This is the new tab.js -- it can add a Feedback tab to the page, and it can pop up an iframe.  It's included on a 3rd party customer site.
 //
 //

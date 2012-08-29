@@ -55,12 +55,6 @@ define(['db/services', 'db/session'], function (dbServices, session) {
         }
     };
 
-    //a workaround for opening the importer
-    //this is called when the importer view is shown
-    window.openImporter = function () {
-        silverlight.setSection({name: "Importer", isSilverlight: true});
-    };
-
     //endregion
 
     //region functions for the silverlight object

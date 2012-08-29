@@ -66,6 +66,10 @@ table{border-collapse: collapse;border-spacing: 0;}
     font-family: PTSans;
     src: url(PTS55F.ttf);  /* TTF file for CSS3 browsers */
 }
+@font-face {
+    font-family: kurzetsType;
+    src: url("kurzetsType.ttf") /* TTF file for CSS3 browsers */
+}
 .km-view{
     z-index: 1;
     -webkit-box-sizing: border-box;
@@ -219,10 +223,11 @@ span.k-tooltip {
 .settingsMenu li a{
     color: @charcoal;
 }
-.settingsMenu li:nth-child(2), .settingsMenu li:nth-child(3){
+.settingsMenu li:nth-child(2), .settingsMenu li:nth-child(3), .settingsMenu li:nth-child(4), .settingsMenu li:nth-child(5){
     display: none;
 }
-.settingsMenu li:nth-child(1):hover a, .settingsMenu li:nth-child(1).active a{
+.settingsMenu li:nth-child(1):hover a, .settingsMenu li:nth-child(1).active a,
+.settingsMenu li:nth-child(5):hover a, .settingsMenu li:nth-child(5).active a{
     color:@green;
 }
 .settingsMenu li:nth-child(2):hover a, .settingsMenu li:nth-child(2).active a{
@@ -706,6 +711,280 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
     font-size: 1.1em;
 }
 /*endregion*/
+
+
+/*region Importer*/
+#importerUpload .k-input, #importerSelect .k-input{
+    color: #000;
+}
+#importerUpload, #importerSelect, #importerReview{
+    .wrap{
+        margin-top: 40px;
+        margin-left: 320px;
+        min-width: 300px;
+    }
+    .border{
+        border: 1px solid #ccc;
+        padding: 10px;
+    }
+    .km-vertical-scrollbar{
+        height: 0;
+    }
+    .km-horizontal-scrollbar{
+        width: 0;
+    }
+    .k-dropdown-wrap.k-state-default, .k-dropdown-wrap.k-state-active, .k-dropdown-wrap.k-state-focused,
+    .k-dropdown-wrap.k-state-focused:hover, .k-dropdown-wrap.k-state-hover{
+        background: none;
+    }
+    .k-list-container .k-state-hover:hover{
+        background-color: #ccc;
+    }
+    .k-list-container{
+        background-color: #fff;
+    }
+    .k-dropdown{
+        width: 280px;
+    }
+    .k-listview{
+        border: none;
+        margin-left: 5px;
+    }
+    .help{
+        position: absolute;
+        top:15px;
+        /* The next line does not exist, except in IE :) */
+        top: 50px\9;
+        width: 200px;
+        margin-left: 15px;
+        font-family: kurzetsType;
+        font-size: 16px;
+        li{
+            margin-bottom: 15px;
+        }
+    }
+    .arrowA, .arrowB{
+        width: 91px;
+        height: 50px;
+        margin: 0 0 -50px 200px;
+        background: url("../img/arrowA.png") no-repeat;
+    }
+    .arrowB{
+        background: url("../img/arrowB.png") no-repeat;
+    }
+    .low{
+        margin: 40px 0 -75px 200px;
+    }
+    .km-scroll-wrapper{
+        overflow: visible !important;
+    }
+    .saveBtn{
+        margin-left: 5px;
+    }
+    #hints{
+        margin-bottom: 10px;
+        padding: 10px;
+        background-color: #ffff99;
+        fieldset{
+            padding: 0;
+            border: none;
+        }
+        legend{
+            font-size: 18px;
+        }
+        ul{
+            padding: 10px 0 0 20px;
+            li{
+                list-style: disc;
+                a{
+                    color: @blue;
+                }
+            }
+        }
+    }
+    #importerUpload .k-dropdown{
+        margin-top: 5px;
+    }
+    #fileUpload{
+        margin: 5px 0 0 0;
+    }
+    #fileName{
+        color: green;
+    }
+}
+#importerUpload .wrap, #importerSelect .wrap{
+    width: 620px;
+}
+/* region Upload */
+#importerUpload{
+    .help{
+        margin-top:180px;
+    }
+    ol{
+    /*margin-top: -20px;*/
+    }
+}
+/*endregion*/
+/* region Select */
+#importerSelect .k-dropdown-wrap.k-state-default, #importerSelect .k-dropdown-wrap.k-state-active, #importerSelect .k-dropdown-wrap.k-state-focused,
+#importerSelect .k-dropdown-wrap.k-state-focused:hover, #importerSelect .k-dropdown-wrap.k-state-hover{
+    margin-left: 15px;
+}
+#importerSelect{
+    p{
+        padding-left: 3px;
+        margin-top: 5px;
+    }
+    #listView{
+        .k-dropdown{
+            font-size: 1em;
+        }
+        .k-dropdown-wrap .k-input{
+            height: 18px;
+            padding-top: 2px;
+        }
+    }
+    #topHeader{
+        margin: 0 3px 0 0;
+        li{
+            display: inline;
+            font-size: 18px;
+            margin-left: 2px;
+        }
+        li:first-child{
+            margin-left: 80px;
+            margin-right: 265px;
+        }
+    }
+    #bottomHeader {
+        margin: 5px 0 10px 4px;
+        padding: 3px 0;
+        border-top: 1px solid #ccc;
+        border-bottom: 1px solid #ccc;
+        li{
+            display: inline;
+            margin-right: 128px;
+            font-size: 12px;
+        }
+    }
+    .header{
+        padding: 5px 0;
+        float: left;
+        width: 200px;
+    }
+    .value{
+        padding: 5px;
+        white-space: nowrap;
+    }
+    #listView .k-dropdown{
+        width: 200px;
+        float: right;
+        margin: -30px 0 0 0;
+        background-color: #fff;
+    }
+    #listView li{
+        margin-bottom: 3px;
+    }
+    .wrap li{
+        list-style: none;
+    }
+}
+/*endregion*/
+/* region Review*/
+#importerReview{
+    ol{
+        button{
+            margin-top: 0;
+        }
+    }
+    .help{
+        ul{
+            padding-left: 0;
+            li{
+                list-style: none;
+                margin: 10px 0;
+                p{
+                    margin: -17px 0 0 25px;
+                }
+            }
+        }
+    }
+    .warning{
+        width: 16px;
+        height: 14px;
+        position: relative;
+        top: 2px;
+        background: url("../img/warning.png") no-repeat;
+    }
+    #exists, #autofilled, #synced{
+        width: 16px;
+        height: 16px;
+        border: 1px solid #000;
+    }
+    #exists{
+        background-color: #659A41;
+    }
+    #autofilled{
+        background-color: #488FCD;
+    }
+    #synced{
+        background-color: #991A36;
+    }
+}
+/*endregion*/
+/*region Breadcrumbs*/
+/*--------------- Simple scalable breadcrumb by Veerle Pieters --------------*/
+.crumbs {
+    position: relative;
+    top:20px;
+    left:320px;
+    font:71%/165% "Lucida Grande", Lucida, Verdana, sans-serif;
+    height:2.3em;
+    width: 300px;
+    padding: 0;
+}
+.crumbs ul, .crumbs li {
+    list-style-type:none;
+    padding:0;
+    margin:0;
+}
+.crumbs li {
+    float:left;
+    line-height:2.3em;
+    color:#777;
+    padding-left: 0;
+    border-top:1px solid #dedede;
+    border-bottom:1px solid #dedede;
+}
+.crumbs li a {
+    background:url(../img/crumbs.png) no-repeat right center;
+    display:block;
+    padding:0 15px 0 10px;
+    color: #777;
+    z-index: 100;
+}
+.crumbs li a:link,
+.crumbs li a:visited {
+    color:#777;
+    text-decoration:none;
+}
+.crumbs a:link, .crumbs a:visited,
+.crumbs li a:hover,
+.crumbs li a:focus {
+    cursor: default;
+}
+.crumbs li.active a{
+    background:url(../img/crumbsActive.png) no-repeat right center;
+}
+.cover{
+    position: absolute;
+    top: 17px;
+    left: 587px;
+}
+/*endregion*/
+/*endregion*/
+
+
 /*region Services */
 #services{
     .km-content{

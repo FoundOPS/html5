@@ -199,6 +199,12 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
     services.getServiceTypes = services._getHttp('service/GetServiceTypes', {}, false);
 
     /**
+     * Get the list of services for the importer
+     * @param roleId The role to get the services for
+     */
+    services.getImporterServiceTypes = services._getHttp('importer/GetServiceTypes', {}, false);
+
+    /**
      * Get the service and its fields.
      * Need to pass either the serviceId, or the occurDate and the recurringServiceId, or the service provider's serviceTemplateId
      * @param {?string} serviceId
