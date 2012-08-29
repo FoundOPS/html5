@@ -152,9 +152,9 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "db/models
     } catch (err) { }
 
     //setup breadcrumbs
-    var li1 = $('#crumbs li:nth-child(1)');
-    var li2 = $('#crumbs li:nth-child(2)');
-    var li3 = $('#crumbs li:nth-child(3)');
+    var li1 = $('.crumbs li:nth-child(1)');
+    var li2 = $('.crumbs li:nth-child(2)');
+    var li3 = $('.crumbs li:nth-child(3)');
     window.viewImporterUpload = function () {
         application.navigate("view/importerUpload.html");
         li2.removeClass('active');

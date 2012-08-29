@@ -1,6 +1,6 @@
 'use strict';
 
-define(["lib/csv" , "sections/importerSelect", "lib/jquery-ui-1.8.21.core.min", "lib/jquery.FileReader", "lib/swfobject"], function (csv, select) {
+define(["lib/csv", "sections/importerSelect", "sections/importerReview", "db/services", "lib/jquery-ui-1.8.21.core.min", "lib/jquery.FileReader", "lib/swfobject"], function (csv, importerSelect, importerReview, dbServices) {
     var importerUpload = {};
 
     //TODO: try to use this
@@ -15,7 +15,8 @@ define(["lib/csv" , "sections/importerSelect", "lib/jquery-ui-1.8.21.core.min", 
 
     var parse = function (file) {
         var data = csv.parseRows(file);
-        importerUpload.data = data;
+        //save this data for later use
+        importerReview.data = data;
         var newData = [];
         //turn the array sideways, ex [{1,2,3}, {4,5,6}] becomes [{1,4}, {2,5}, {3,6}]
         //this is all under assumption that all the arrays are the same size
@@ -23,7 +24,7 @@ define(["lib/csv" , "sections/importerSelect", "lib/jquery-ui-1.8.21.core.min", 
         for(var i = 0; i < data[0].length; i++){
             newData.push([data[0][i], data[1][i]]);
         }
-        select.data = newData;
+        importerSelect.data = newData;
     };
 
     importerUpload.initialize = function () {
@@ -54,17 +55,15 @@ define(["lib/csv" , "sections/importerSelect", "lib/jquery-ui-1.8.21.core.min", 
             $('#uploadBtn').removeAttr('disabled');
         });
 
-        var list = [
-            {Name: 'Septic Pumping'},
-            {Name: 'WVO'},
-            {Name: 'Grease Trap'}
-        ]
+        dbServices.getImporterServiceTypes(function (serviceTypes) {
+            importerUpload.serviceTypes = serviceTypes;
+        });
 
         //create DropDownList from input HTML element
         $("#serviceType").kendoDropDownList({
             dataTextField: "Name",
             dataValueField: "Id",
-            dataSource: list
+            dataSource: importerUpload.serviceTypes
         });
 
         //get a reference to the DropDownList
@@ -73,4 +72,6 @@ define(["lib/csv" , "sections/importerSelect", "lib/jquery-ui-1.8.21.core.min", 
     };
 
     window.importerUpload = importerUpload;
+
+    return importerUpload;
 });
