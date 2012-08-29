@@ -14,7 +14,18 @@ define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all", "widgets/ser
 
     routeTask.vm = vm = kendo.observable({
         openTaskStatuses: function () {
-            $("#taskStatuses-actionsheet").kendoMobileActionSheet("open");
+            $("#taskStatuses-dimmer").css("z-index", "1000");
+            $("#taskStatuses-dimmer").fadeTo(400, 0.5);
+            $("#taskStatuses").css("z-index", "10000");
+            $("#taskStatuses").fadeTo(400, 1);
+        },
+        closeTaskStatuses: function () {
+            $("#taskStatuses-dimmer").fadeTo(400, 0);
+            $("#taskStatuses").fadeTo(400, 0);
+            setTimeout(function () {
+                $("#taskStatuses-dimmer").css("z-index", "-10");
+                $("#taskStatuses").css("z-index", "-1");
+            }, 400);
         },
         selectStatus: function (e) {
             var statusId = e.dataItem.Id;
@@ -26,6 +37,7 @@ define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all", "widgets/ser
             updateSelectedStatus();
 
             statusUpdated = true;
+            this.closeTaskStatuses();
         }
     });
 
@@ -72,7 +84,10 @@ define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all", "widgets/ser
         if (data.comingFrom === "#view/routeTask.html" && data.goingTo === "#view/routeDestinationDetails.html") {
             //Open task statuses actionsheet
             if (!statusUpdated) {
-                $("#taskStatuses-actionsheet").kendoMobileActionSheet("open");
+                $("#taskStatuses-dimmer").css("z-index", "1000");
+                $("#taskStatuses-dimmer").fadeTo(400, 0.5);
+                $("#taskStatuses").css("z-index", "10000");
+                $("#taskStatuses").fadeTo(400, 1);
             }
         }
     });

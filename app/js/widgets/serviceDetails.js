@@ -102,11 +102,11 @@ define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "li
                 formatResult: formatClientName,
                 dropdownCssClass: "bigdrop"
             }).on("change", function () {
-                    var client = clientSelector.select2("data");
-                    service.set("Client", client);
-                    service.set("ClientId", client.Id);
-                    updateLocations(client);
-                });
+                var client = clientSelector.select2("data");
+                service.set("Client", client);
+                service.set("ClientId", client.Id);
+                updateLocations(client);
+            });
 
             if (service.Client) {
                 //set the initial selection
@@ -135,12 +135,12 @@ define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "li
                 formatResult: formatLocationName,
                 dropdownCssClass: "bigdrop"
             }).on("change", function () {
-                    var location = locationSelector.select2("data");
-                    var destinationField = models.getDestinationField(service);
-                    //Used for updating the grid
-                    destinationField.Value = location;
-                    destinationField.set("LocationId", location.Id);
-                });
+                var location = locationSelector.select2("data");
+                var destinationField = models.getDestinationField(service);
+                //Used for updating the grid
+                destinationField.Value = location;
+                destinationField.set("LocationId", location.Id);
+            });
         },
 
         _createTextBoxField: function (field, fieldIndex, listView) {
@@ -149,8 +149,7 @@ define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "li
                 fieldElement = $(multiLineTextTemplate);
                 fieldElement.appendTo(listView).wrap("<li class='textarea'>" + field.Name + "</li>");
             } else {
-                fieldElement = $(inputTemplate);
-                fieldElement.attr("type", "text");
+                fieldElement = $(inputTemplate).attr("type", "text");
                 fieldElement.appendTo(listView).wrap("<li>" + field.Name + "</li>");
             }
 
@@ -278,7 +277,7 @@ define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "li
             }
 
             return fieldElement;
-        },
+        }, //______________________________________________________________________________________________________________________
         render: function (service) {
             var that = this;
 
@@ -302,8 +301,8 @@ define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "li
                 "OptionsField": that._createOptionsField
             };
 
-            var fieldsListView = $('<ul></ul>').appendTo(that.element);
-            var checkLists = $('<div></div>').appendTo(that.element);
+            var fieldsListView = $('<ul id="fields"></ul>').appendTo(that.element);
+            var checkLists = $('<ul id="checkLists"></ul>').appendTo(that.element);
 
             var fieldIndex;
             for (fieldIndex = 0; fieldIndex < service.Fields.length; fieldIndex++) {

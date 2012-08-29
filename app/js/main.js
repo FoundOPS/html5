@@ -136,7 +136,11 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "hasher", 
         } else if (currentHash.substring(0, "#view/routeDestinationDetails.html".length) === "#view/routeDestinationDetails.html") {
             application.navigate("view/routeDetails.html");
         } else if (currentHash.substring(0, "#view/routeTask.html".length) === "#view/routeTask.html") {
-            application.navigate("view/routeDestinationDetails.html");
+            $("#taskStatuses-dimmer").css("z-index", "1000");
+            $("#taskStatuses-dimmer").fadeTo(400, 0.5);
+            $("#taskStatuses").css("z-index", "10000");
+            $("#taskStatuses").fadeTo(400, 1);
+//            application.navigate("view/routeDestinationDetails.html");
         } else if (currentHash.substring(0, "#view/services.html".length) === "#view/services.html") {
             application.navigate("view/updates.html");
         } else if (currentHash.substring(0, "#view/personalSettings.html".length) === "#view/personalSettings.html") {
