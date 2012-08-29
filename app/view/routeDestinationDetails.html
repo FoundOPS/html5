@@ -18,7 +18,7 @@
     <p>${selectedDestination.Location.AddressLineTwo}</p>
     <p>${selectedDestination.Location.City}, ${selectedDestination.Location.State}<br/>
         ${selectedDestination.Location.ZipCode}</p>
-    <a id="directionsButton" class="km-button" data-role="button" data-bind="click: getDirections">Directions</a>
+    <div id="directionsButton" data-bind="click: getDirections">Directions</div>
 </script>
 <script type="text/x-kendo-template" id="routeTasksTemplate">
     <a>${Name}</a>

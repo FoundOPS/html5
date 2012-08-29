@@ -60,10 +60,14 @@ define(["jquery", "db/saveHistory", "lib/kendo.all", "widgets/contacts"], functi
             application.navigate("view/routeTask.html");
         };
         vm.getDirections = function () {
-            window.location = "http://maps.google.com/maps?q=" + vm.get("selectedDestination.Location.Latitude") + "," + vm.get("selectedDestination.Location.Longitude");
+            $("#directionsButton").toggleClass("clicked2");
+            setTimeout(function () {
+                window.location = "http://maps.google.com/maps?q=" + vm.get("selectedDestination.Location.Latitude") + "," + vm.get("selectedDestination.Location.Longitude");
+                $("#directionsButton").toggleClass("clicked2");
+            }, 500);
         };
         kendo.bind($("#routeDestinationDetails"), vm, kendo.mobile.ui);
-        kendo.bind($("#directionsButton"), vm)
+        kendo.bind($("#directionsButton"), vm);
     };
 
     routeDestinationDetails.initialize = function () {
