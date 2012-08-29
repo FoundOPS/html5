@@ -18,8 +18,16 @@
     <p>${selectedDestination.Location.AddressLineTwo}</p>
     <p>${selectedDestination.Location.City}, ${selectedDestination.Location.State}<br/>
         ${selectedDestination.Location.ZipCode}</p>
-    <div id="directionsButton" data-bind="click: getDirections">Directions</div>
+    <a id="directionsButton" data-bind="click: getDirections">Directions</a>
 </script>
 <script type="text/x-kendo-template" id="routeTasksTemplate">
     <a>${Name}</a>
+</script>
+<script>
+    $("#directionsButton").mousedown(function (e) {
+        $("#directionsButton").toggleClass("buttonClicked");
+    });
+    $("#directionsButton").mouseup(function (e) {
+        $("#directionsButton").toggleClass("buttonClicked");
+    });
 </script>

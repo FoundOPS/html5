@@ -60,10 +60,11 @@ define(["jquery", "db/saveHistory", "lib/kendo.all", "widgets/contacts"], functi
             application.navigate("view/routeTask.html");
         };
         vm.getDirections = function () {
-            $("#directionsButton").toggleClass("clicked2");
+            $("#directionsButton").toggleClass("buttonClicked");
+            // This timeout makes the buttonClicked animation visible to the user (otherwise it happens too fast).
             setTimeout(function () {
                 window.location = "http://maps.google.com/maps?q=" + vm.get("selectedDestination.Location.Latitude") + "," + vm.get("selectedDestination.Location.Longitude");
-                $("#directionsButton").toggleClass("clicked2");
+                $("#directionsButton").toggleClass("buttonClicked");
             }, 500);
         };
         kendo.bind($("#routeDestinationDetails"), vm, kendo.mobile.ui);

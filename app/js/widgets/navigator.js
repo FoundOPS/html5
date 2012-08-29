@@ -296,6 +296,12 @@ define(["jquery", "ui/popup", "db/developer", "lib/jquery.mousewheel", "lib/jque
                 var backButtonTemplate = kendo.template(backButtonTemplateHtml);
                 $('#navContainer').before(backButtonTemplate);
                 $('#navContainer').addClass("mobileMode");
+                $("#backButtonContainer").mousedown(function (e) {
+                    $('#backButtonContainer').toggleClass("backButtonClicked");
+                });
+                $("#backButtonContainer").mouseup(function (e) {
+                    $('#backButtonContainer').toggleClass("backButtonClicked");
+                });
             }
 
             /** Initialize sidebar scrollbar **/

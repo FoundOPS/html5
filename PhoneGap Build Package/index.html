@@ -58,6 +58,11 @@
             font-size: 1em;
             padding-left: 2px;
         }
+        .buttonClicked {
+            background-color: #5E7391 !important;
+            -webkit-box-shadow: inset 0 0 0 1px rgba(0,0,0,0.3),inset 0 0 0 1000px rgba(0,0,0,0.2) !important;
+            box-shadow: inset 0 0 0 1px rgba(0,0,0,0.3),inset 0 0 0 1000px rgba(0,0,0,0.2) !important;
+        }
     </style>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="application/javascript"></script>
 </head>
@@ -126,6 +131,13 @@ background-image: linear-gradient(bottom, #222224 0%, #555556 100%);
                 }
             }
         });
+    });
+
+    $("#submit").mousedown(function (e) {
+        $("#submit").toggleClass("buttonClicked");
+    });
+    $("#submit").mouseup(function (e) {
+        $("#submit").toggleClass("buttonClicked");
     });
 
     var checkLogin = function () {

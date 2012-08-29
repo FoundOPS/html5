@@ -46,7 +46,7 @@ define(function () {
      * This is for sections that are in the Silverlight application and is used for debugging.
      * @type {developer.Frame}
      */
-    developer.CURRENT_FRAME = developer.Frame.BROWSER;
+    developer.CURRENT_FRAME = developer.Frame.MOBILE_APP;
 
     /**
      * The local server's RoleId for GotGrease.
