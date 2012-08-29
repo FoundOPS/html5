@@ -6,8 +6,8 @@
 
 "use strict";
 
-define(['db/session', 'db/services'], function (session, dbServices) {
-    var gridTools = {};
+define(['db/session', 'db/services', "hasher"], function (session, dbServices, hasher) {
+    var kendoTools = {};
 
     //region Column Configuration
 
@@ -17,9 +17,9 @@ define(['db/session', 'db/services'], function (session, dbServices) {
      * @param grid
      * @param id A unique Id for the column configuration
      */
-    gridTools.storeConfiguration = function (grid, id) {
+    kendoTools.storeConfiguration = function (grid, id) {
         var saveConfiguration = function () {
-            gridTools._saveConfigurations(grid.columns, id);
+            kendoTools._saveConfigurations(grid.columns, id);
         };
 
         //save the column configuration when it changes
@@ -30,7 +30,7 @@ define(['db/session', 'db/services'], function (session, dbServices) {
     };
 
     //save the configurations to the DB
-    gridTools._saveConfigurations = _.debounce(function (gridColumns, id) {
+    kendoTools._saveConfigurations = _.debounce(function (gridColumns, id) {
         var columnConfiguration = {Id: id, Columns: []};
         var order = 0;
         _.each(gridColumns, function (gridColumn) {
@@ -43,11 +43,11 @@ define(['db/session', 'db/services'], function (session, dbServices) {
             columnConfiguration.Columns.push(storedColumn);
         });
 
-        var newConfigurations = _.reject(gridTools._columnConfigurations, function (config) {
+        var newConfigurations = _.reject(kendoTools._columnConfigurations, function (config) {
             return config.Id === id;
         });
         newConfigurations.push(columnConfiguration);
-        gridTools._columnConfigurations = newConfigurations;
+        kendoTools._columnConfigurations = newConfigurations;
 
         dbServices.updateColumnConfigurations(newConfigurations);
     }, 300);
@@ -58,8 +58,8 @@ define(['db/session', 'db/services'], function (session, dbServices) {
      * @param id The Id for getting the column configuration
      * @returns The properly configured columns
      */
-    gridTools.configureColumns = function (gridColumns, id) {
-        var configuration = _.find(gridTools._columnConfigurations, function (configuration) {
+    kendoTools.configureColumns = function (gridColumns, id) {
+        var configuration = _.find(kendoTools._columnConfigurations, function (configuration) {
             return configuration.Id === id;
         });
 
@@ -92,7 +92,7 @@ define(['db/session', 'db/services'], function (session, dbServices) {
         var storedCols = _.pluck(storedColumns, 'Name');
         var gridCols = _.pluck(gridColumns, 'field');
         if (_.difference(storedCols, gridCols).length > 0 || _.difference(gridCols, storedCols).length > 0) {
-            gridTools._saveConfigurations(gridColumns, id);
+            kendoTools._saveConfigurations(gridColumns, id);
         }
 
         //reorder the columns
@@ -109,7 +109,7 @@ define(['db/session', 'db/services'], function (session, dbServices) {
     //load the users column configurations whenever the role changes
     session.followRole(function () {
         dbServices.getColumnConfigurations(function (configurations) {
-            gridTools._columnConfigurations = configurations;
+            kendoTools._columnConfigurations = configurations;
         });
     });
 
@@ -124,7 +124,7 @@ define(['db/session', 'db/services'], function (session, dbServices) {
      * @param {Array.<String>} ignore Columns to ignore.
      * @returns {string} The csv string.
      */
-    gridTools.toCSV = function (data, fileName, humanize, ignore) {
+    kendoTools.toCSV = function (data, fileName, humanize, ignore) {
         var csv = '';
         if (!ignore) {
             ignore = [];
@@ -198,5 +198,115 @@ define(['db/session', 'db/services'], function (session, dbServices) {
         return csv;
     };
 
-    return gridTools;
+    /**
+     * Adds a filtered event to the dataSource
+     * @param dataSource
+     */
+    kendoTools.addFilterEvent = function (dataSource) {
+        // Save the reference to the original filter function.
+        dataSource.originalFilter = dataSource.filter;
+
+        var filtered = _.debounce(function (args) {
+            dataSource.trigger("filtered", args);
+        }, 200);
+
+        // Replace the original filter function.
+        dataSource.filter = function () {
+            // Call the original filter function.
+            var filter = dataSource.originalFilter.apply(dataSource, arguments);
+
+            // If a column is about to be filtered, then raise a new "filtered" event.
+            if (arguments.length > 0) {
+                filtered(arguments);
+            }
+
+            return filter;
+        };
+    };
+
+    /*
+     * Sync the url parameters and the filters
+     * TODO fix the start and end date filters.
+     * @dataSource The dataSource to sync the filters with.
+     * @param parameters If this is set: adjust the filters to the url parameters
+     *                   If it is null: adjust the url parameters to the filters
+     * @processFilters (Optional) Process and adjust the filters after they are synced. This is for forcing validation
+     */
+    kendoTools.syncFilters = function (dataSource, parameters, processFilters) {
+        if (!dataSource) {
+            return;
+        }
+
+        if (dataSource._handleFilterSync) {
+            dataSource._handleFilterSync = false;
+            return;
+        }
+
+        var filterSet;
+        if (parameters) {
+            //set the filterSet to the url parameters
+            filterSet = [];
+            _.each(parameters, function (value, parameter) {
+                //remove the number
+                parameter = parameter.replace(/[0-9]/g, '');
+
+                //add a filter for every possible parameter
+                var filter = value.split("$");
+                var formattedValue;
+                if (filter[2] === "d") {
+                    formattedValue = new Date(filter[1]);
+                } else if (filter[2] === "n") {
+                    formattedValue = parseFloat(filter[1]);
+                } else {
+                    formattedValue = filter[1];
+                }
+
+                filterSet.push({field: parameter, operator: filter[0], value: formattedValue});
+            });
+        } else {
+            filterSet = dataSource.filter();
+            if (filterSet) {
+                filterSet = filterSet.filters;
+            }
+        }
+
+        //process the filters
+        if (processFilters) {
+            var newFilterSet = processFilters(filterSet);
+            if (newFilterSet) {
+                dataSource.filter(newFilterSet);
+                return;
+            }
+        }
+
+        //adjust the filters accordingly
+        if (parameters) {
+            dataSource._handleFilterSync = true;
+            dataSource.filter(filterSet);
+        }
+        //adjust the url parameters to the filters
+        else {
+            dataSource._handleFilterSync = true;
+            var i = 0;
+            parameters = _.map(filterSet, function (filter) {
+                var type;
+                var val = filter.value;
+                if (val instanceof Date) {
+                    type = "d";
+                    val = val.toDateString();
+                } else if (typeof val === "number") {
+                    type = "n";
+                } else {
+                    type = "s";
+                }
+                i++; //add a new number to each parameter to avoid issues when there are duplicates
+                return i + filter.field + "=" + filter.operator + "$" + val + "$" + type;
+            });
+
+            var query = parameters.join("&");
+            hasher.setHash('#view/services.html?' + query);
+        }
+    };
+
+    return kendoTools;
 });

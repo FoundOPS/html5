@@ -11,21 +11,25 @@ require.config({
     paths: {
         lib: "../lib",
         underscore: "../lib/underscore",
-        moment: "../lib/moment"
+        moment: "../lib/moment",
+        signals: "../lib/signals",
+        hasher: "../lib/hasher",
+        crossroads: "../lib/crossroads"
     },
     shim: {
         underscore: {
             exports: '_'
         },
-        moment: {}
+        moment: {},
+        signals: {}
     }
 });
 
-require(["widgets/navigator", "containers/silverlight", "db/session", "db/models", "lib/kendo.all", "underscore",
+require(["widgets/navigator", "containers/silverlight", "db/session", "hasher", "crossroads", "db/models", "lib/kendo.all", "underscore",
     "lib/userVoice", "lib/pubsub", "moment", "sections/personalSettings", "sections/businessSettings", "sections/usersSettings",
     "sections/dispatcherSettings", "sections/changePassword", "sections/createPassword", "sections/services",
     "sections/routes", "sections/routeDetails", "sections/routeDestinationDetails", "sections/routeTask",
-    "widgets/contacts", "widgets/serviceDetails"], function (Navigator, silverlight, session) {
+    "widgets/contacts", "widgets/serviceDetails"], function (Navigator, silverlight, session, hasher, crossroads) {
     var application, navigator, main = {}, initialized = false;
 
     window.main = main;
@@ -121,7 +125,9 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "db/models
         $('#backButtonContainer').toggleClass("clicked");
         if (window.location.hash === "#view/updates.html") {
             var r = confirm("Are you sure you would like to log out?");
-            if (r) { application.navigate("view/logout.html"); }
+            if (r) {
+                application.navigate("view/logout.html");
+            }
         } else if (window.location.hash === "#view/routes.html") {
             application.navigate("view/updates.html");
         } else if (window.location.hash === "#view/routeDetails.html") {
@@ -143,7 +149,7 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "db/models
         } else if (window.location.hash === "#view/changePassword.html") {
             application.navigate("view/personalSettings.html");
         }
-        setTimeout (function () {
+        setTimeout(function () {
             $('#backButtonContainer').toggleClass("clicked");
         }, 100);
     };
@@ -153,6 +159,14 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "db/models
         //Listens for back button being pressed on a mobile device.
         document.addEventListener("backbutton", main.onBack, false);
     }
+
+    //setup hasher and crossroads
+    var parseHash = function (newHash) {
+        crossroads.parse(newHash);
+    };
+    hasher.changed.add(parseHash); //parse hash changes
+    hasher.prependHash = '';
+    hasher.init(); //start listening for history change
 
     // Listens for Cordova to load
     document.addEventListener("deviceready", onDeviceReady, false);
@@ -168,5 +182,6 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "db/models
         window.trackEvent = function (section, action, label) {
             pageTracker._trackEvent(section, action, label);
         };
-    } catch (err) { }
+    } catch (err) {
+    }
 });

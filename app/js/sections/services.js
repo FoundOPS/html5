@@ -2,7 +2,7 @@
 
 'use strict';
 
-require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widgets/serviceDetails", "lib/jquery.form"], function ($, dbServices, tools, saveHistory, gridTools) {
+require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "crossroads", "hasher", "widgets/serviceDetails", "lib/jquery.form"], function ($, dbServices, tools, saveHistory, kendoTools, crossroads, hasher) {
     var services = {}, serviceHoldersDataSource, grid, handleChange, serviceTypesComboBox, selectedServiceHolder, vm, selectFirst = true;
 
     //region Public
@@ -125,7 +125,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
         form.find("input[name=serviceType]").val(vm.serviceType().Name);
 
         form.find("input[name=startDate]").val(tools.formatDate(vm.get("startDate")));
-        form.find("input[name=endDate]").val( tools.formatDate(vm.get("endDate")));
+        form.find("input[name=endDate]").val(tools.formatDate(vm.get("endDate")));
 
         form[0].action = dbServices.ROOT_API_URL + "Service/GetServicesHoldersWithFieldsCsv";
         form.submit();
@@ -214,12 +214,76 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
         return formattedData;
     };
 
+    /**
+     * Fixup the filter's for start date and end date
+     * @param filterSet
+     */
+    var processFilters = function (filterSet) {
+        //reload if the start or end date changed
+        var startDateFilter = _.find(filterSet, function (f) {
+            return f.field === "OccurDate" && f.operator === "gte";
+        });
+        var endDateFilter = _.find(filterSet, function (f) {
+            return f.field === "OccurDate" && f.operator === "lte";
+        });
+
+        var vmStartDate = vm.get("startDate");
+        var vmEndDate = vm.get("endDate");
+        var missingFilter = !startDateFilter || !endDateFilter;
+
+        //correct any missing filters
+        if (!startDateFilter && !endDateFilter) {
+            //if there are neither start date or end date filters, set them to the vm's startDate and endDate
+            startDateFilter = {field: "OccurDate", operator: "gte", value: vmStartDate};
+            endDateFilter = {field: "OccurDate", operator: "lte", value: vmEndDate};
+        } else if (!endDateFilter) {
+            //if there is a startDateFilter but not a endDateFilter
+            //set it to 2 weeks later
+            endDateFilter = {field: "OccurDate", operator: "lte",
+                value: moment(startDateFilter.value).add('weeks', 2).toDate()};
+        } else if (!startDateFilter) {
+            //if there is a endDateFilter but not a startDateFilter
+            //set it to 2 weeks prior
+            startDateFilter = {field: "OccurDate", operator: "gte",
+                value: moment(endDateFilter.value).subtract('weeks', 2).toDate()};
+        }
+
+        //if the start and endDate changed
+        //update the vm's startDate and endDate
+        //then reload the dataSource
+        if (vmStartDate.toDateString() !== startDateFilter.value.toDateString() ||
+            vmEndDate.toDateString() !== endDateFilter.value.toDateString()) {
+            vm.set("startDate", startDateFilter.value);
+            vm.set("endDate", endDateFilter.value);
+
+            //reload the services
+            serviceHoldersDataSource.options.transport.read.data.startDate = tools.formatDate(vm.get("startDate"));
+            serviceHoldersDataSource.options.transport.read.data.endDate = tools.formatDate(vm.get("endDate"));
+            serviceHoldersDataSource.read();
+        } else if (missingFilter) { //if there was a missing filter, refilter
+            var otherFilters = _.filter(filterSet, function (f) {
+                return f.field !== "OccurDate";
+            });
+            otherFilters.push(startDateFilter);
+            otherFilters.push(endDateFilter);
+            return otherFilters;
+        }
+    };
+
+    //a route that will filter the grid
+    var filterRoute;
+
+
     /*
      * Create a data source and grid.
      * This is called whenever the service is changed because the data schema is dynamic
      * and kendo datasource does not allow you to change the schema.
      */
     var createDataSourceAndGrid = function () {
+        if (filterRoute) {
+            filterRoute.dispose();
+        }
+
         var serviceType = vm.serviceType().Name;
 
         var readAction = "service/GetServicesHoldersWithFields";
@@ -251,71 +315,27 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
                         data: params
                     }
                 },
-                pageSize: 50,
-                change: function () {
-                    var filterSet = serviceHoldersDataSource.filter();
-                    if (filterSet) {
-                        filterSet = filterSet.filters;
-                    }
-
-                    var startDateFilter = _.find(filterSet, function (f) {
-                        return f.field === "OccurDate" && f.operator === "gte";
-                    });
-                    var endDateFilter = _.find(filterSet, function (f) {
-                        return f.field === "OccurDate" && f.operator === "lte";
-                    });
-
-                    var vmStartDate = vm.get("startDate");
-                    var vmEndDate = vm.get("endDate");
-                    var missingFilter = !startDateFilter || !endDateFilter;
-                    //correct any missing filters
-                    if (!startDateFilter && !endDateFilter) {
-                        //if there are neither start date or end date filters, set them to the vm's startDate and endDate
-                        startDateFilter = {field: "OccurDate", operator: "gte", value: vmStartDate};
-                        endDateFilter = {field: "OccurDate", operator: "lte", value: vmEndDate};
-                    } else if (!endDateFilter) {
-                        //if there is a startDateFilter but not a endDateFilter
-                        //set it to 2 weeks later
-                        endDateFilter = {field: "OccurDate", operator: "lte",
-                            value: moment(startDateFilter.value).add('weeks', 2).toDate()};
-                    } else if (!startDateFilter) {
-                        //if there is a endDateFilter but not a startDateFilter
-                        //set it to 2 weeks prior
-                        startDateFilter = {field: "OccurDate", operator: "gte",
-                            value: moment(endDateFilter.value).subtract('weeks', 2).toDate()};
-                    }
-
-                    //if the start and endDate changed
-                    //update the vm's startDate and endDate
-                    //then reload the dataSource
-                    if (vmStartDate.toDateString() !== startDateFilter.value.toDateString() ||
-                        vmEndDate.toDateString() !== endDateFilter.value.toDateString()) {
-                        vm.set("startDate", startDateFilter.value);
-                        vm.set("endDate", endDateFilter.value);
-
-                        //reload the services
-                        serviceHoldersDataSource.options.transport.read.data.startDate = tools.formatDate(vm.get("startDate"));
-                        serviceHoldersDataSource.options.transport.read.data.endDate = tools.formatDate(vm.get("endDate"));
-                        serviceHoldersDataSource.read();
-                    } else if (missingFilter) { //if there was a missing filter, refilter
-                        var otherFilters = _.filter(filterSet, function (f) {
-                            return f.field !== "OccurDate";
-                        });
-                        otherFilters.push(startDateFilter);
-                        otherFilters.push(endDateFilter);
-                        _.delay(function () {
-                            serviceHoldersDataSource.filter(otherFilters);
-                        }, 200);
-                    }
-                }
+                pageSize: 50
             });
             serviceHoldersDataSource.sort({ field: "OccurDate", dir: "asc" });
 
             //Create the grid
             setupGrid(fields);
+
+            //Setup filtering
+            kendoTools.addFilterEvent(serviceHoldersDataSource);
+            serviceHoldersDataSource.bind("filtered", function () {
+                kendoTools.syncFilters(serviceHoldersDataSource, null, processFilters);
+            });
+            //the route for updating the filters
+            filterRoute = crossroads.addRoute('view/services.html:?query:', function (query) {
+                kendoTools.syncFilters(serviceHoldersDataSource, query, processFilters);
+            });
+
+            //force reparse
+            crossroads.parse(hasher.getHash());
         });
     };
-
 //endregion
 
     //region Grid
@@ -401,7 +421,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
         });
 
         //configure the columns based on the user's stored configuration
-        columns = gridTools.configureColumns(columns, vm.serviceType().Id);
+        columns = kendoTools.configureColumns(columns, vm.serviceType().Id);
 
         grid = $("#grid").data("kendoGrid");
         if (grid) {
@@ -445,29 +465,8 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "gridTools", "widge
             selectable: true
         }).data("kendoGrid");
 
-        //region Start work on visual cue for filter
-        //http://feedback.kendoui.com/forums/127393-kendo-ui-feedback/suggestions/3026413-add-a-visual-queue-to-grid-column-headers-when-a-c#comments
-//        // Save the reference to the original filter function.
-//        grid.dataSource.originalFilter = grid.dataSource.filter;
-//
-//        // Replace the original filter function.
-//        grid.dataSource.filter = function() {
-//            // If a column is about to be filtered, then raise a new "filtering" event.
-//            if (arguments.length > 0) {
-//                this.trigger("filtering", arguments);
-//            }
-//            // Call the original filter function.
-//            return grid.dataSource.originalFilter.apply(this, arguments);
-//        };
-//
-//        // Bind to the dataSource filtering event.
-//        grid.dataSource.bind("filtering", function(e) {
-//            console.log("about to filter.");
-//        });
-        //endregion
-
         //Keep track of any changes to the columns, and store the configuration
-        gridTools.storeConfiguration(grid, vm.serviceType().Id);
+        kendoTools.storeConfiguration(grid, vm.serviceType().Id);
 
         grid.refresh();
     };
