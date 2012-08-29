@@ -35,18 +35,29 @@ define(["sections/importerReview"], function (importerReview) {
             //iterate through all the dropdowns
             $("#importerSelect input.fields").each(function () {
                 //check if the dropdown is not "Do not Import"
-                if(this.value != "Do not Import") {
+                var value = this.value;
+                //remove whitespaces
+                var trimmedValue = value.replace(/\s+/g,'');
+                if(value != "Do not Import") {
                     //setup the column
                     var column = {
-                        field: this.value
+                        field: trimmedValue,
+                        title: value
+                    };
+                    var field = {
+                        id: tools.newGuid,
+                        type: "string"
                     };
                     //add it to the list of columns
                     //TODO: replace if statement with "importerReview.columns.push(column);" and remove "i" once the above TODO is solved
                     if(i == 0){
                         importerReview.columns = [];
+                        importerReview.fields = [];
                         importerReview.columns.push(column);
+                        importerReview.fields[trimmedValue] = field;
                     }else{
                         importerReview.columns.push(column);
+                        importerReview.fields[trimmedValue] = field;
                     }
                     i++;
                 }

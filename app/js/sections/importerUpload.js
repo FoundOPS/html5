@@ -55,7 +55,7 @@ define(["lib/csv", "sections/importerSelect", "sections/importerReview", "db/ser
             $('#uploadBtn').removeAttr('disabled');
         });
 
-        dbServices.getImporterServiceTypes(function (serviceTypes) {
+        dbServices.getServiceTypes(function (serviceTypes) {
             //create the service types dropdown
             importerUpload.serviceTypeDropDown = $("#serviceType").kendoDropDownList({
                 dataTextField: "Name",
