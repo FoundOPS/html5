@@ -67,14 +67,18 @@
     var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
     document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
 </script>
-
 <link rel="stylesheet" type="text/css" href="styles/main-built.css">
 <script src="lib/require-jquery.js"></script>
 <script src="js/main.js"></script>
 <!--For built VS-->
-<!--<link rel="stylesheet" type="text/css" href="@Model["BlobRoot"]main.css">-->
+<!--<link rel="stylesheet" type="text/css" href="@Model["BlobRoot"]main-built.css">-->
 <!--<script data-main="@Model["BlobRoot"]main-built.js" src="@Model["BlobRoot"]require-jquery.js"></script>-->
 
+<script id="backButtonTemplate" type="text/x-kendo-template">
+    <div id="backButtonContainer">
+        <a onclick="main.onBack()"><img id="backArrow" src="img/backArrow.png"/></a>
+    </div>
+</script>
 <script id="navTemplate" type="text/x-kendo-template">
     <div id='navContainer'>
         <div id='navSearch' class='navElement'><input name='search' type='text' placeholder='Search...'/>
@@ -97,6 +101,7 @@
     </div>
 </script>
 <script id="sideBarElementTemplate" type="text/x-kendo-template">
+    <!-- href - Weird KendoUI Binding. Maybe fix in the future but works fine as is for now.!-->
     <a #= href # class='sideBarElement' data-color='#= color #' data-iconUrl='#= iconUrl #' data-hoverIconUrl='#=
     hoverIconUrl #'>
     <span class='icon' style="background: url('#= iconUrl #') #= bgX # #= bgY # no-repeat"></span>

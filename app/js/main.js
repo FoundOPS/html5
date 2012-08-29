@@ -122,36 +122,39 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "hasher", 
 
     //Overrides phone's back button navigation - Phonegap
     main.onBack = function () {
-        $('#backButtonContainer').toggleClass("clicked");
-        if (window.location.hash === "#view/updates.html") {
+        var currentHash = window.location.hash;
+        // Use of substring function allows us to ignore url params to determine app location.
+        if (currentHash.substring(0, "#view/updates.html".length) === "#view/updates.html") {
             var r = confirm("Are you sure you would like to log out?");
             if (r) {
                 application.navigate("view/logout.html");
             }
-        } else if (window.location.hash === "#view/routes.html") {
+        } else if (currentHash.substring(0, "#view/routes.html".length) === "#view/routes.html") {
             application.navigate("view/updates.html");
-        } else if (window.location.hash === "#view/routeDetails.html") {
+        } else if (currentHash.substring(0, "#view/routeDetails.html".length) === "#view/routeDetails.html") {
             application.navigate("view/routes.html");
-        } else if (window.location.hash === "#view/routeDestinationDetails.html") {
+        } else if (currentHash.substring(0, "#view/routeDestinationDetails.html".length) === "#view/routeDestinationDetails.html") {
             application.navigate("view/routeDetails.html");
-        } else if (window.location.hash === "#view/routeTask.html") {
+        } else if (currentHash.substring(0, "#view/routeTask.html".length) === "#view/routeTask.html") {
             application.navigate("view/routeDestinationDetails.html");
-        } else if (window.location.hash === "#view/personalSettings.html") {
+        } else if (currentHash.substring(0, "#view/services.html".length) === "#view/services.html") {
             application.navigate("view/updates.html");
-        } else if (window.location.hash === "#view/businessSettings.html") {
+        } else if (currentHash.substring(0, "#view/personalSettings.html".length) === "#view/personalSettings.html") {
             application.navigate("view/updates.html");
-        } else if (window.location.hash === "#view/personalSettings.html") {
+        } else if (currentHash.substring(0, "#view/businessSettings.html".length) === "#view/businessSettings.html") {
             application.navigate("view/updates.html");
-        } else if (window.location.hash === "#view/usersSettings.html") {
+        } else if (currentHash.substring(0, "#view/personalSettings.html".length) === "#view/personalSettings.html") {
             application.navigate("view/updates.html");
-        } else if (window.location.hash === "#view/dispatcherSettings.html") {
+        } else if (currentHash.substring(0, "#view/usersSettings.html".length) === "#view/usersSettings.html") {
             application.navigate("view/updates.html");
-        } else if (window.location.hash === "#view/changePassword.html") {
+        } else if (currentHash.substring(0, "#view/dispatcherSettings.html".length) === "#view/dispatcherSettings.html") {
+            application.navigate("view/updates.html");
+        } else if (currentHash.substring(0, "#view/changePassword.html".length) === "#view/changePassword.html") {
             application.navigate("view/personalSettings.html");
+        } else if (currentHash.substring(0, "#silverlight".length) === "#silverlight") {
+            application.navigate("view/updates.html");
+            document.location.reload();
         }
-        setTimeout(function () {
-            $('#backButtonContainer').toggleClass("clicked");
-        }, 100);
     };
 
     // Fires when Cordova is ready

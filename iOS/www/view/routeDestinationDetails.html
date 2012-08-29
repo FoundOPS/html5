@@ -2,13 +2,14 @@
 
     <div id="locationInfo" data-bind="source: this" data-template="locationTemplate"></div>
 
-    <div id="contacts" data-role="contacts" data-bind="contacts: contacts"></div>
+    <div style="padding-top:10px;" id="contacts" data-role="contacts" data-bind="contacts: contacts"></div>
 
     <p style="top:10px; margin-bottom: -5px;">Tasks</p>
     <hr style="width:90%;"/>
     <ul id="routeTasksListView" data-bind="source: routeTasksSource, click: selectTask"
         data-role="listview" data-style="inset" data-template="routeTasksTemplate">
     </ul>
+    <footer></footer>
 </div>
 <script type="text/x-kendo-template" id="locationTemplate">
     <h1>${selectedDestination.Client.Name}</h1>
@@ -17,9 +18,16 @@
     <p>${selectedDestination.Location.AddressLineTwo}</p>
     <p>${selectedDestination.Location.City}, ${selectedDestination.Location.State}<br/>
         ${selectedDestination.Location.ZipCode}</p>
-    <p style="margin-top:10px;"><a data-rel="external" data-role="button" href="http://maps.google.com/maps?q=${selectedDestination.Location.Latitude},${selectedDestination.Location.Longitude}"
-       class="km-button">Directions</a></p>
+    <a id="directionsButton" data-bind="click: getDirections">Directions</a>
 </script>
 <script type="text/x-kendo-template" id="routeTasksTemplate">
     <a>${Name}</a>
+</script>
+<script>
+    $("#directionsButton").mousedown(function (e) {
+        $("#directionsButton").toggleClass("buttonClicked");
+    });
+    $("#directionsButton").mouseup(function (e) {
+        $("#directionsButton").toggleClass("buttonClicked");
+    });
 </script>
