@@ -32,9 +32,8 @@ del "main.css"
 
 cd ..
 rd /s /q "lib"
-mkdir "lib\images"
+mkdir "lib"
 COPY C:\FoundOPS\ng\app\lib\require-jquery.js C:\FoundOPS\ng\app-built\lib
-COPY C:\FoundOPS\ng\app\lib\images C:\FoundOPS\ng\app-built\lib\images
 
 cd js
 del "tools.js"

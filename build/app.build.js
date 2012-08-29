@@ -6,7 +6,10 @@
 		lib:"../lib",
         jquery: 'empty:',
         underscore: "../lib/underscore",
-        moment: "../lib/moment"
+        moment: "../lib/moment",
+		signals: "../lib/signals",
+        hasher: "../lib/hasher",
+        crossroads: "../lib/crossroads"
     },
     shim: {
         underscore: {
