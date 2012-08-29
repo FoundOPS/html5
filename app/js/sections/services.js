@@ -271,8 +271,12 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "cros
     };
 
     //a route that will filter the grid
-    var filterRoute;
-
+    //the route for updating the filters
+    crossroads.addRoute('view/services.html:?query:', function (query) {
+        if (serviceHoldersDataSource) {
+            kendoTools.syncFilters(serviceHoldersDataSource, query, processFilters);
+        }
+    }).greedy = true;
 
     /*
      * Create a data source and grid.
@@ -280,10 +284,6 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "cros
      * and kendo datasource does not allow you to change the schema.
      */
     var createDataSourceAndGrid = function () {
-        if (filterRoute) {
-            filterRoute.dispose();
-        }
-
         var serviceType = vm.serviceType().Name;
 
         var readAction = "service/GetServicesHoldersWithFields";
@@ -325,15 +325,13 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "cros
             //Setup filtering
             kendoTools.addFilterEvent(serviceHoldersDataSource);
             serviceHoldersDataSource.bind("filtered", function () {
-                kendoTools.syncFilters(serviceHoldersDataSource, null, processFilters);
-            });
-            //the route for updating the filters
-            filterRoute = crossroads.addRoute('view/services.html:?query:', function (query) {
-                kendoTools.syncFilters(serviceHoldersDataSource, query, processFilters);
+                if (serviceHoldersDataSource) {
+                    kendoTools.syncFilters(serviceHoldersDataSource, null, processFilters);
+                }
             });
 
             //force reparse
-            crossroads.parse(hasher.getHash());
+            hasher.setHash("view/services.html?");
         });
     };
 //endregion
