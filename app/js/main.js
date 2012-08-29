@@ -156,6 +156,7 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "hasher", 
 
     // Fires when Cordova is ready
     function onDeviceReady() {
+        main.DevicePlatform = device.platform;
         //Listens for back button being pressed on a mobile device.
         document.addEventListener("backbutton", main.onBack, false);
     }

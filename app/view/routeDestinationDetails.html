@@ -2,7 +2,7 @@
 
     <div id="locationInfo" data-bind="source: this" data-template="locationTemplate"></div>
 
-    <div id="contacts" data-role="contacts" data-bind="contacts: contacts"></div>
+    <div style="padding-top:10px;" id="contacts" data-role="contacts" data-bind="contacts: contacts"></div>
 
     <p style="top:10px; margin-bottom: -5px;">Tasks</p>
     <hr style="width:90%;"/>
@@ -18,8 +18,7 @@
     <p>${selectedDestination.Location.AddressLineTwo}</p>
     <p>${selectedDestination.Location.City}, ${selectedDestination.Location.State}<br/>
         ${selectedDestination.Location.ZipCode}</p>
-    <p style="margin-top:10px;"><a data-rel="external" data-role="button" href="http://maps.google.com/maps?q=${selectedDestination.Location.Latitude},${selectedDestination.Location.Longitude}"
-       class="km-button">Directions</a></p>
+    <div id="directionsButton" data-bind="click: getDirections">Directions</div>
 </script>
 <script type="text/x-kendo-template" id="routeTasksTemplate">
     <a>${Name}</a>

@@ -12,9 +12,9 @@ define(["jquery", "lib/kendo.all", "underscore"], function ($) {
                 '<hr style="width:90%;"/>' +
                 '</div>',
         listViewTemplate = "<ul></ul>",
-        emailTemplate = '<a data-rel="external" href="mailto:${Data}">E-mail ${Label}<br/><p id="contactData">${Data}</p></a>',
-        phoneTemplate = '<a data-rel="external" href="tel:${Data}">Call ${Label}<br/><p id="contactData">${Data}</p></a>',
-        websiteTemplate = '<a data-rel="external" href="http://${Data}">Go to Website<br/><p id="contactData">${Data}</p></a>';
+        emailTemplate = '<a>E-mail ${Label}<br/><p id="contactData">${Data}</p></a>',
+        phoneTemplate = '<a>Call ${Label}<br/><p id="contactData">${Data}</p></a>',
+        websiteTemplate = '<a>Go to Website<br/><p id="contactData">${Data}</p></a>';
 
     var Contacts = Widget.extend({
         // method called when a new widget is created
@@ -52,15 +52,15 @@ define(["jquery", "lib/kendo.all", "underscore"], function ($) {
 
                 _.each(contacts, function (value) {
                     switch (value.Type) {
-                    case "Email Address":
-                        emailContacts.push(value);
-                        break;
-                    case "Phone Number":
-                        phoneContacts.push(value);
-                        break;
-                    case "Website":
-                        websiteContacts.push(value);
-                        break;
+                        case "Email Address":
+                            emailContacts.push(value);
+                            break;
+                        case "Phone Number":
+                            phoneContacts.push(value);
+                            break;
+                        case "Website":
+                            websiteContacts.push(value);
+                            break;
                     }
                 });
 
@@ -68,19 +68,28 @@ define(["jquery", "lib/kendo.all", "underscore"], function ($) {
                 $(listViewTemplate).appendTo(element).kendoMobileListView({
                     template: phoneTemplate,
                     dataSource: phoneContacts,
-                    style: "inset"
+                    style: "inset",
+                    click: function (e) {
+                        window.location = "tel:" + e.dataItem.Data;
+                    }
                 });
 
                 $(listViewTemplate).appendTo(element).kendoMobileListView({
                     template: emailTemplate,
                     dataSource: emailContacts,
-                    style: "inset"
+                    style: "inset",
+                    click: function (e) {
+                        window.location = "mailto:" + e.dataItem.Data;
+                    }
                 });
 
                 $(listViewTemplate).appendTo(element).kendoMobileListView({
                     template: websiteTemplate,
                     dataSource: websiteContacts,
-                    style: "inset"
+                    style: "inset",
+                    click: function (e) {
+                        window.location = "http://" + e.dataItem.Data;
+                    }
                 });
 
                 that.trigger(DATABOUND);

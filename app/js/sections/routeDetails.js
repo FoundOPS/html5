@@ -57,7 +57,7 @@ define(["jquery", "db/services", "db/models", "db/saveHistory", "lib/kendo.all"]
                 position.coords.latitude,
                 position.coords.longitude,
                 routeId,
-                device.platform, //TODO: Change to browser detection?
+                main.DevicePlatform, //TODO: Change to browser detection?
                 position.coords.speed
             );
             trackPointsToSend.push(newTrackPoint);
