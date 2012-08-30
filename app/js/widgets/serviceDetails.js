@@ -182,6 +182,9 @@ define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "li
         },
 
         _createDateTimeField: function (field, fieldIndex, listView) {
+            //TODO: implement time zones, and fixup below
+            return;
+
             var fieldElement = $(inputTemplate).appendTo(listView).wrap("<li>" + field.Name + "</li>");
 
             var options = {
