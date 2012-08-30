@@ -51,8 +51,6 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "hasher", 
         main.history.previousPage = main.history[main.history.length - 2];
         main.history.currentPage = main.history[main.history.length - 1];
         main.history.publish = {"comingFrom": main.history.previousPage, "goingTo": main.history.currentPage};
-
-        $.publish("hashChange", [main.history.publish]);
     };
 
     session.load(function (data) {
@@ -136,11 +134,13 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "hasher", 
         } else if (currentHash.substring(0, "#view/routeDestinationDetails.html".length) === "#view/routeDestinationDetails.html") {
             application.navigate("view/routeDetails.html");
         } else if (currentHash.substring(0, "#view/routeTask.html".length) === "#view/routeTask.html") {
-            $("#taskStatuses-dimmer").css("z-index", "1000");
-            $("#taskStatuses-dimmer").fadeTo(400, 0.5);
-            $("#taskStatuses").css("z-index", "10000");
-            $("#taskStatuses").fadeTo(400, 1);
-//            application.navigate("view/routeDestinationDetails.html");
+            /* If user has already selected a status -> go back
+                otherwise open the task status popup */
+            if (routeTask.vm.statusUpdated) {
+                application.navigate("view/routeDestinationDetails.html");
+            } else {
+                routeTask.vm.openTaskStatuses("backButton");
+            }
         } else if (currentHash.substring(0, "#view/services.html".length) === "#view/services.html") {
             application.navigate("view/updates.html");
         } else if (currentHash.substring(0, "#view/personalSettings.html".length) === "#view/personalSettings.html") {

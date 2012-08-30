@@ -9,23 +9,30 @@
 define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all", "widgets/serviceDetails"], function ($, dbServices, saveHistory) {
     /**
      * routeTask = wrapper for all service objects
+     * popupCaller the button who's click opened the popup.
      */
-    var routeTask = {}, vm, statusUpdated, initialized = false;
+    var routeTask = {}, vm, initialized = false, popupCaller;
 
     routeTask.vm = vm = kendo.observable({
-        openTaskStatuses: function () {
+        openTaskStatuses: function (originator) {
             $("#taskStatuses-dimmer").css("z-index", "1000");
             $("#taskStatuses-dimmer").fadeTo(400, 0.5);
             $("#taskStatuses").css("z-index", "10000");
             $("#taskStatuses").fadeTo(400, 1);
+            popupCaller = originator;
         },
-        closeTaskStatuses: function () {
+        closeTaskStatuses: function (e) {
+            console.log(e);
             $("#taskStatuses-dimmer").fadeTo(400, 0);
             $("#taskStatuses").fadeTo(400, 0);
             setTimeout(function () {
                 $("#taskStatuses-dimmer").css("z-index", "-10");
                 $("#taskStatuses").css("z-index", "-1");
             }, 400);
+            // If popup was opened by clicking backButton go back if and only if user selects status.
+            if (popupCaller === "backButton" && !e) {
+                application.navigate("view/routeDestinationDetails.html");
+            }
         },
         selectStatus: function (e) {
             var statusId = e.dataItem.Id;
@@ -36,9 +43,10 @@ define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all", "widgets/ser
             dbServices.updateRouteTask(task);
             updateSelectedStatus();
 
-            statusUpdated = true;
+            vm.statusUpdated = true;
             this.closeTaskStatuses();
-        }
+        },
+        statusUpdated: false
     });
 
     window.routeTask = routeTask;
@@ -79,19 +87,6 @@ define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all", "widgets/ser
         });
     });
 
-    //If when going back from routeTask prompt selection of task status.
-    $.subscribe("hashChange", function (data) {
-        if (data.comingFrom === "#view/routeTask.html" && data.goingTo === "#view/routeDestinationDetails.html") {
-            //Open task statuses actionsheet
-            if (!statusUpdated) {
-                $("#taskStatuses-dimmer").css("z-index", "1000");
-                $("#taskStatuses-dimmer").fadeTo(400, 0.5);
-                $("#taskStatuses").css("z-index", "10000");
-                $("#taskStatuses").fadeTo(400, 1);
-            }
-        }
-    });
-
     routeTask.initialize = function () {
         $("#taskServiceDetails").kendoServiceDetails({
             clientIsReadOnly: true
@@ -115,9 +110,8 @@ define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all", "widgets/ser
             initialized = true;
         }
 
-
         //clear statusUpdated
-        statusUpdated = false;
+        vm.statusUpdated = false;
 
         saveHistory.close();
 
