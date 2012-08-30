@@ -220,9 +220,9 @@ define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "li
         _createOptionsField: function (field, fieldIndex, elementToAppendTo) {
             var fieldElement;
             if (field.TypeInt === 0) {
-                //ComboBox
+                //DropDownList
                 fieldElement = $(inputTemplate).appendTo(elementToAppendTo).wrap("<li><label>" + field.Name + "</label></li>");
-                fieldElement.kendoComboBox({
+                fieldElement.kendoDropDownList({
                     change: function (e) {
                         var index = this.selectedIndex;
                         var field = this.fieldParent;
@@ -238,16 +238,14 @@ define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "li
                     },
                     dataTextField: "Name",
                     dataValueField: "Id",
-                    dataSource: field.Options,
-                    filter: "contains",
-                    suggest: true
+                    dataSource: field.Options
                 });
-                var comboBox = fieldElement.data("kendoComboBox");
+                var dropDownList = fieldElement.data("kendoDropDownList");
                 //store a reference to the field for access by the change function
-                comboBox.fieldParent = field;
+                dropDownList.fieldParent = field;
 
                 //select the first checked option
-                comboBox.select(function (dataItem) {
+                dropDownList.select(function (dataItem) {
                     return dataItem.get("IsChecked");
                 });
             } else {
