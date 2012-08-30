@@ -25,8 +25,8 @@ define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all", "widgets/ser
             $("#taskStatuses-dimmer").fadeTo(400, 0);
             $("#taskStatuses").fadeTo(400, 0);
             setTimeout(function () {
-                $("#taskStatuses-dimmer").css("z-index", "-10");
-                $("#taskStatuses").css("z-index", "-1");
+                $("#taskStatuses-dimmer").css("z-index", "-1");
+                $("#taskStatuses").css("z-index", "-10");
             }, 400);
             // If popup was opened by clicking backButton go back if and only if user selects status.
             if (popupCaller === "backButton" && !e) {
