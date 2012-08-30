@@ -277,7 +277,7 @@ define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "li
             }
 
             return fieldElement;
-        }, //______________________________________________________________________________________________________________________
+        },
         render: function (service) {
             var that = this;
 
