@@ -18,7 +18,7 @@ define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all", "widgets/ser
             $("#taskStatuses-dimmer").css("visibility", "visible");
             $("#taskStatuses").css("visibility", "visible");
             $("#taskStatuses-dimmer").css("z-index", "1000");
-            $("#taskStatuses-dimmer").fadeTo(400, 0.5);
+            $("#taskStatuses-dimmer").fadeTo(400, 0.8);
             $("#taskStatuses").css("z-index", "10000");
             $("#taskStatuses").fadeTo(400, 1);
             popupCaller = originator;
