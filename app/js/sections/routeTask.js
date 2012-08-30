@@ -22,7 +22,6 @@ define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all", "widgets/ser
             popupCaller = originator;
         },
         closeTaskStatuses: function (e) {
-            console.log(e);
             $("#taskStatuses-dimmer").fadeTo(400, 0);
             $("#taskStatuses").fadeTo(400, 0);
             setTimeout(function () {
@@ -68,6 +67,7 @@ define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all", "widgets/ser
 
     routeTask.save = function () {
         dbServices.updateService(vm.get("selectedService"));
+        vm.statusUpdated = false;
     };
 
     $.subscribe("selectedTask", function (data) {
