@@ -268,7 +268,7 @@ define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "li
                         optionElement.attr("checked", "checked");
                     }
                     optionElement.change(function () {
-                        var checked = !$(this).is(':checked');
+                        var checked = $(this).is(':checked');
                         $(this)[0].optionParent.set("IsChecked", checked);
                     });
 
