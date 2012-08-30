@@ -1,6 +1,18 @@
 <div id="routeTask" data-init="routeTask.initialize" data-show="routeTask.show" data-role="view" data-title="Route Task"
      data-model="routeTask.vm">
 
+    <div id="taskStatuses-dimmer"></div>
+
+    <div id="taskStatuses">
+        <p id="taskStatusesTitle">Mark Task As:</p>
+        <ul id="taskStatuses-listview" style="text-align: center"
+            data-bind="source:taskStatusesSource, click:selectStatus"
+            data-role="listview" data-style="inset" data-template="taskStatusTemplate"></ul>
+        <ul id="taskStatuses-cancelButton" style="text-align: center" data-role="listview" data-style="inset" data-bind="click: closeTaskStatuses">
+            <li><a>Cancel</a></li>
+        </ul>
+    </div>
+
     <div id="taskServiceDetails" data-role="kendoServiceDetails" data-bind="service: selectedService"></div>
 
     <div class="statusLabel"><span>Status</span></div>
@@ -12,12 +24,12 @@
         </li>
     </ul>
 
-    <ul id="taskStatuses-actionsheet" data-role="actionsheet">
-        <p id="actionSheetTitle">Mark Task As:</p>
-        <ul id="taskStatuses-listview" style="text-align: center"
-            data-bind="source:taskStatusesSource, click:selectStatus"
-            data-role="listview" data-style="inset" data-template="taskStatusTemplate"></ul>
-    </ul>
+    <!--<ul id="taskStatuses-actionsheet" data-role="actionsheet">-->
+        <!--<p id="actionSheetTitle">Mark Task As:</p>-->
+        <!--<ul id="taskStatuses-listview" style="text-align: center"-->
+            <!--data-bind="source:taskStatusesSource, click:selectStatus"-->
+            <!--data-role="listview" data-style="inset" data-template="taskStatusTemplate"></ul>-->
+    <!--</ul>-->
     <footer></footer>
 </div>
 <script type="text/x-kendo-template" id="taskStatusTemplate">
