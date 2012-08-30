@@ -15,6 +15,8 @@ define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all", "widgets/ser
 
     routeTask.vm = vm = kendo.observable({
         openTaskStatuses: function (originator) {
+            $("#taskStatuses-dimmer").css("visibility", "visible");
+            $("#taskStatuses").css("visibility", "visible");
             $("#taskStatuses-dimmer").css("z-index", "1000");
             $("#taskStatuses-dimmer").fadeTo(400, 0.5);
             $("#taskStatuses").css("z-index", "10000");
@@ -27,6 +29,8 @@ define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all", "widgets/ser
             setTimeout(function () {
                 $("#taskStatuses-dimmer").css("z-index", "-1");
                 $("#taskStatuses").css("z-index", "-10");
+                $("#taskStatuses-dimmer").css("visibility", "hidden");
+                $("#taskStatuses").css("visibility", "hidden");
             }, 400);
             // If popup was opened by clicking backButton go back if and only if user selects status.
             if (popupCaller === "backButton" && !e) {
