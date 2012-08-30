@@ -199,6 +199,15 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
     services.getServiceTypes = services._getHttp('service/GetServiceTypes', {}, false);
 
     /**
+     * Get the list of services
+     * @param roleId The role to get the fields for
+     * @param serviceType The serviceType to get the fields for
+     */
+    services.getFields = function (serviceType, callback) {
+        return services._getHttp("service/GetFields", {serviceType: serviceType})(callback);
+    };
+
+    /**
      * Get the service and its fields.
      * Need to pass either the serviceId, or the occurDate and the recurringServiceId, or the service provider's serviceTemplateId
      * @param {?string} serviceId

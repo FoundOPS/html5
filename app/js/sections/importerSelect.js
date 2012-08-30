@@ -1,11 +1,11 @@
 'use strict';
 
-define(["sections/importerReview"], function (importerReview) {
+define(["sections/importerUpload", "db/services"], function (importerUpload, dbServices) {
     var importerSelect = {};
-    importerSelect.data = [];
+    importerSelect.columns = [];
 
     importerSelect.initialize = function () {
-        var list = [
+        var fieldList = [
             {Name: "Do not Import"},
             {Name: 'Client Name'},
             {Name: 'Location Name'},
@@ -17,16 +17,33 @@ define(["sections/importerReview"], function (importerReview) {
             {Name: 'Repeat Start Date'}
         ];
 
-        importerSelect.listView = $("#listView").kendoListView({
+        $("#listView").kendoListView({
             template: "<li><div class='header'>#=data[0]#</div><div class='value'>#=data[1]#</div><input class='fields' /></li>",
-            dataSource: importerSelect.data
-        }).data("kendoListView");
-
-        $(".fields").kendoDropDownList({
-            dataTextField: "Name",
-            dataValueField: "Id",
-            dataSource: list
+            dataSource: importerUpload.data
         });
+
+        var serviceType = importerUpload.selectedService;
+
+        if(serviceType){
+            dbServices.getFields(serviceType, function (fields) {
+                var newFields = [];
+                var newField = fields[0];
+                for(var i in newField){
+                    newFields.push({Name: i});
+                }
+
+                var allFields = fieldList.concat(newFields);
+
+                $(".fields").kendoDropDownList({
+                    dataTextField: "Name",
+                    dataValueField: "Id",
+                    dataSource: allFields
+                });
+            });
+        }else{
+            window.application.navigate("view/importerUpload.html");
+        }
+
 
         //when a dropdown is changed, update the columns
         //TODO: find out why this gets hit twice for every change
@@ -40,55 +57,24 @@ define(["sections/importerReview"], function (importerReview) {
                 var trimmedValue = value.replace(/\s+/g,'');
                 if(value != "Do not Import") {
                     //setup the column
+                    var field = "c" + i;
+                    var template = "#=" + field + ".v#";
                     var column = {
-                        field: trimmedValue,
-                        title: value
-                    };
-                    var field = {
-                        id: tools.newGuid,
-                        type: "string"
+                        field: field,
+                        title: value,
+                        template: template
                     };
                     //add it to the list of columns
                     //TODO: replace if statement with "importerReview.columns.push(column);" and remove "i" once the above TODO is solved
                     if(i == 0){
-                        importerReview.columns = [];
-                        importerReview.fields = [];
-                        importerReview.columns.push(column);
-                        importerReview.fields[trimmedValue] = field;
+                        importerSelect.columns = [];
+                        importerSelect.columns.push(column);
                     }else{
-                        importerReview.columns.push(column);
-                        importerReview.fields[trimmedValue] = field;
+                        importerSelect.columns.push(column);
                     }
                     i++;
                 }
             });
-
-//            importerReview.columns = [
-//                {
-//                    field: "Client Name"
-//                },
-//                {
-//                    field: "Location Name"
-//                },
-//                {
-//                    field: "Address Line 1"
-//                },
-//                {
-//                    field: "Service"
-//                },
-//                {
-//                    field: "Frequency"
-//                },
-//                {
-//                    field: "Repeat On"
-//                },
-//                {
-//                    field: "Repeat Every"
-//                },
-//                {
-//                    field: "Repeat Start Date"
-//                }
-//            ];
         });
     };
 
