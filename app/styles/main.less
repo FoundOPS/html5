@@ -874,14 +874,21 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
         padding: 5px;
         white-space: nowrap;
     }
-    #listView .k-dropdown{
-        width: 200px;
-        float: right;
-        margin: -30px 0 0 0;
-        background-color: #fff;
-    }
-    #listView li{
-        margin-bottom: 3px;
+    #listView{
+        .k-dropdown, input.field{
+            width: 200px;
+            float: right;
+            margin: -30px 0 0 0;
+            background-color: #fff;
+        }
+        li{
+             margin-bottom: 3px;
+        }
+        input.field{
+            width: 185px;
+            border: 1px solid #c5c5c5;
+            border-radius: 4px;
+        }
     }
     .wrap li{
         list-style: none;
@@ -890,12 +897,16 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
 /*endregion*/
 /* region Review*/
 #importerReview{
+    #gridView{
+        margin-bottom: 15px;
+    }
     ol{
         button{
             margin-top: 0;
         }
     }
     .help{
+        top:50px;
         ul{
             padding-left: 0;
             li{

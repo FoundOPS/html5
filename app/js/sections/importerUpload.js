@@ -66,6 +66,7 @@ define(["lib/csv", "db/services", "lib/jquery-ui-1.8.21.core.min",
             importerUpload.selectedService = importerUpload.serviceTypeDropDown._current[0].innerText;
         });
 
+        //listen to change event of the serviceType dropdown
         $("#serviceType").on("change", function () {
             importerUpload.selectedService = importerUpload.serviceTypeDropDown._current[0].innerText;
         });

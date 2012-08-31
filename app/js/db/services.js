@@ -182,14 +182,6 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
 
     //endregion
 
-    //region
-
-    services.getClientLocations = function (clientId, callback) {
-        return services._getHttp("Locations/Get", {clientId: clientId})(callback);
-    };
-
-    //endregion
-
     //region Services
 
     /**
@@ -205,6 +197,10 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
      */
     services.getFields = function (serviceType, callback) {
         return services._getHttp("service/GetFields", {serviceType: serviceType})(callback);
+    };
+
+    services.getClientLocations = function (clientId, callback) {
+        return services._getHttp("Locations/Get", {clientId: clientId})(callback);
     };
 
     /**
@@ -434,6 +430,30 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
 
     services.logout = function (callback) {
         return services._getHttp('session/LogOut')(callback);
+    };
+
+    //endregion
+
+    //region Importer
+
+    services.validateData = function (rows, headers, callback) {
+        $.ajax({
+            url: services.API_URL + "importer/SubmitData?roleId=" + services.RoleId + "&headers=" + headers,
+            type: "POST",
+            dataType: "json",
+            contentType: 'application/json',
+            data: JSON.stringify(rows)
+        })(callback);
+    };
+
+    services.submitData = function (rows, headers, serviceType) {
+        $.ajax({
+            url: services.API_URL + "importer/SubmitData?roleId=" + services.RoleId + "&headers=" + headers + "&serviceType=" + serviceType,
+            type: "POST",
+            dataType: "json",
+            contentType: 'application/json',
+            data: JSON.stringify(rows)
+        });
     };
 
     //endregion
