@@ -81,12 +81,12 @@ background-image: linear-gradient(bottom, #222224 0%, #555556 100%);
     <div style=" #position: absolute; #top: 50%;display: table-cell; vertical-align: middle;">  <!--place content-->
         <div style=" #position: relative; #top: -50%">                                          <!--in middle-->
             <div style="text-align: center">                                                    <!--of page.-->
-                <img src="img/LogoWhiteText(TransparentBg).png" alt="FoundOPS" style="width:70%; max-width:1000px"/>
+                <img src="img/LogoWhiteText(TransparentBg).png" alt="FoundOPS" style="width:70%; max-width:1000px"/><br/>
                 <form id="loginForm" name="loginForm">
-                    <p style="margin:1px"><input id="EmailAddress" name="EmailAddress" placeholder="E-mail Address" required="required" type="email"/></p>
-                    <p style="margin:1px"><input id="Password" name="Password" placeholder="Password" required="required" type="password"/></p>
+                    <p style="margin-bottom: 7px; margin-top: 16px;"><input id="EmailAddress" name="EmailAddress" placeholder="E-mail Address" required="required" type="email"/></p>
+                    <p style="margin:1px"><input id="Password" name="Password" placeholder="Password" required="required" type="password"/></p><br/>
                     <p style="margin:5px">
-                        <input id="submit" type="submit" style="margin-bottom: 5px; margin-top: 0px" value="Login"/><br/>
+                        <input id="submit" type="submit" style="margin-bottom: 5px; margin-top: 0px" value="Login"/><br/><br/>
                         <input id="rememberMe" style="position: relative; top:1px" type="checkbox"/>
                         <label style="font-size: 14px" >Remember Me</label>
                         <!--<a id="submit" type="submit" onclick="login()">Login</a>-->
@@ -115,8 +115,8 @@ background-image: linear-gradient(bottom, #222224 0%, #555556 100%);
             //must use JSONP because the javascript may be hosted on a different url than the api
             type: "GET",
             dataType: 'JSONP',
-            url: 'http://localhost:9711/api/session/Login',    //LOCAL
-//            url: 'http://api.foundops.com/api/session/Login',    //LIVE
+//            url: 'http://localhost:9711/api/session/Login',    //LOCAL
+            url: 'http://api.foundops.com/api/session/Login',    //LIVE
 //            url: 'http://192.168.0.114:70/api/session/Login',   //REMOTE - Local IP of host computer (might change everyday).
             data: {email: email, pass: password},
             timeout: 5000,
