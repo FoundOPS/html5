@@ -50,7 +50,7 @@ define(function () {
      */
     tools.formatDate = function (date) {
         if (typeof date === "string") {
-            date = new Date(date);
+            date = moment(date).toDate();
         }
         var month = date.getUTCMonth() + 1,
             day = date.getUTCDate(),

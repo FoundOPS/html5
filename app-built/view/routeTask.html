@@ -1,6 +1,17 @@
 <div id="routeTask" data-init="routeTask.initialize" data-show="routeTask.show" data-role="view" data-title="Route Task"
      data-model="routeTask.vm">
 
+    <div id="taskServiceDetails" data-role="kendoServiceDetails" data-bind="service: selectedService"></div>
+
+    <div class="statusLabel"><span>Status</span></div>
+    <ul id="routeStatus-listview" data-role="listview" data-style="inset" data-bind="click: openTaskStatuses" style="margin-top:0;">
+        <li style="padding-bottom: 8px; text-align: center; color: black">
+            <a class="km-button" data-bind="style: { backgroundColor: selectedTaskStatus.Color}">
+                <span style="color:black" data-bind="text: selectedTaskStatus.Name"></span>
+            </a>
+        </li>
+    </ul>
+
     <div id="taskStatuses-dimmer"></div>
 
     <div id="taskStatuses">
@@ -12,17 +23,6 @@
             <li><a>Cancel</a></li>
         </ul>
     </div>
-
-    <div id="taskServiceDetails" data-role="kendoServiceDetails" data-bind="service: selectedService"></div>
-
-    <div class="statusLabel"><span>Status</span></div>
-    <ul id="routeStatus-listview" data-role="listview" data-style="inset" data-bind="click: openTaskStatuses" style="margin-top:0;">
-        <li style="padding-bottom: 8px; text-align: center; color: black">
-            <a class="km-button" data-bind="style: { backgroundColor: selectedTaskStatus.Color}">
-                <span style="color:black" data-bind="text: selectedTaskStatus.Name"></span>
-            </a>
-        </li>
-    </ul>
 
     <!--<ul id="taskStatuses-actionsheet" data-role="actionsheet">-->
         <!--<p id="actionSheetTitle">Mark Task As:</p>-->
