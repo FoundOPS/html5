@@ -438,12 +438,14 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
 
     services.validateData = function (rows, headers, callback) {
         $.ajax({
-            url: services.API_URL + "importer/SubmitData?roleId=" + services.RoleId + "&headers=" + headers,
+            url: services.API_URL + "importer/ValidateData?roleId=" + services.RoleId + "&headers=" + headers,
             type: "POST",
             dataType: "json",
             contentType: 'application/json',
             data: JSON.stringify(rows)
-        })(callback);
+        }).success(function (response) {
+                callback(response);
+            });
     };
 
     services.submitData = function (rows, headers, serviceType) {

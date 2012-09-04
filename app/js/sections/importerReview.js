@@ -1,39 +1,74 @@
 'use strict';
 
 define(["tools", "sections/importerUpload", "sections/importerSelect", "db/services"], function (tools, importerUpload, importerSelect, dbServices) {
-    var importerReview = {}, dataSource, grid;
+    var importerReview = {}, dataSource, grid, gridData, dataToValidate = [], validatedData, headers = [];
 
     //import on button click
     $("#importBtn").on("click", function () {
-
-
         //dbServices.submitData(rows, headers, importerUpload.selectedService);
     });
 
-    var validate= function () {
-        //dbServices.validateData(rows, headers, function () {
+    var validate = function (data) {
+        dataToValidate = formatGridDataForValidation(data);
 
-        //});
+        for(var i in grid.columns){
+            var column = grid.columns[i];
+            headers.push(column.title);
+        }
+
+        dbServices.validateData(dataToValidate, headers, function (data) {
+            validatedData = formatValidatedDataForGrid(data);
+        });
     };
 
-    //converts an array to an object
-    var toObject = function(arr) {
-        var rv = {}, value, obj;
-        for (var i = 0, len = arr.length; i < len; ++i){
-            value = arr[i];
-            if (value !== undefined){
-                obj = {
-                    v: value,
-                    s: 0,
-                    h: ""
-                };
-                rv["c" + i] = obj;
+    var formatGridDataForValidation = function (data) {
+        var object;
+        dataToValidate = [];
+        for (var r in data) {
+            object = data[r];
+            var newArray = [], newObject, key, keyNum;
+            for (var c in importerSelect.columns) {
+                key = importerSelect.columns[c].field;
+                keyNum = key.substr(1,1);
+                newObject = object[key];
+                if(!newObject){
+                    newObject = {
+                        h: "",
+                        s: 0,
+                        v: ""
+                    }
+                }
+                newObject["r"] = r;
+                newObject["c"] = c;
+                newArray.push(newObject);
             }
+            dataToValidate.push(newArray);
+        }
+        return dataToValidate;
+    };
+
+    var formatValidatedDataForGrid = function (data) {
+
+    };
+
+    //converts row array to an object
+    var toObject = function(arr) {
+        var rv = {}, value, obj, num, field;
+        for (var c in importerSelect.columns) {
+            field = importerSelect.columns[c].field;
+            num = field.substr(1, 3);
+            value = arr[num] ? arr[num] : "";
+            obj = {
+                v: value,
+                s: 0,
+                h: ""
+            };
+            rv["c" + num] = obj;
         }
         return rv;
     };
 
-    var formatDataForGrid = function (data) {
+    var formatOriginalDataForGrid = function (data) {
         var newData = [];
         var obj;
         for(var i in data){
@@ -60,14 +95,19 @@ define(["tools", "sections/importerUpload", "sections/importerSelect", "db/servi
         //check if importerUpload exists
         //if not, then no data has been loaded
         if(importerUpload.oldData){
-            var data = formatDataForGrid(importerUpload.oldData);
+            gridData = formatOriginalDataForGrid(importerUpload.oldData);
         }else{
             //redirect to upload page
             window.application.navigate("view/importerUpload.html");
         }
 
         dataSource = new kendo.data.DataSource({
-            data: data
+            data: gridData,
+            schema: {
+                model: {
+                    fields: importerSelect.fields
+                }
+            }
         });
 
         $(window).resize(function () {
@@ -83,7 +123,7 @@ define(["tools", "sections/importerUpload", "sections/importerSelect", "db/servi
         grid = $("#gridView").kendoGrid({
             columns: importerSelect.columns,
             dataSource: dataSource,
-            editable: true,
+            editable: false,
             resizable: true,
             scrollable: true,
             sortable: "multiple"
@@ -91,7 +131,7 @@ define(["tools", "sections/importerUpload", "sections/importerSelect", "db/servi
 
         resizeGrid();
 
-        validate();
+        //validate(gridData);
     };
 
     window.importerReview = importerReview;
