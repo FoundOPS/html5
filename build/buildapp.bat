@@ -51,4 +51,7 @@ ren "login.html" "index.html"
 del "build.txt"
 rd /s /q ".idea"
 
+XCOPY /s /y "C:\FoundOPS\ng\app-built" "C:\FoundOPS\ng\PhoneGap Build Package"
+XCOPY /s /y "C:\FoundOPS\ng\app-built" "C:\FoundOPS\ng\iOS\www"
+
 PAUSE
