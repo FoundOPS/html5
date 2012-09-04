@@ -11,3 +11,5 @@ Android - Built/bin/
 buildsmap/
 buildsmobile/
 PhoneGap Build Package/
+
+*.xcuserstate
