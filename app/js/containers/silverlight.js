@@ -144,6 +144,11 @@ define(['db/services', 'db/session'], function (dbServices, session) {
         img.src = url;
     };
 
+    //to get around occasional security violation
+    silverlight.setHash = function (hash) {
+        window.location.hash = hash;
+    };
+
     //endregion
 
 //region Public
