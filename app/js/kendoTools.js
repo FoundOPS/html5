@@ -225,9 +225,8 @@ define(['db/session', 'db/services', "hasher"], function (session, dbServices, h
     };
 
     /*
-     * Sync the url parameters and the filters
-     * TODO fix the start and end date filters.
-     * @dataSource The dataSource to sync the filters with.
+     * Sync the url parameters and the dataSource's filters
+     * @dataSource The dataSource to sync the filters with
      * @param parameters If this is set: adjust the filters to the url parameters
      *                   If it is null: adjust the url parameters to the filters
      * @processFilters (Optional) Process and adjust the filters after they are synced. This is for forcing validation

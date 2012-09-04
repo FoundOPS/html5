@@ -3,18 +3,16 @@
 'use strict';
 
 require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "crossroads", "hasher", "widgets/serviceDetails", "lib/jquery.form"], function ($, dbServices, tools, saveHistory, kendoTools, crossroads, hasher) {
-    var services = {}, serviceHoldersDataSource, grid, handleChange, serviceTypesComboBox, selectedServiceHolder, vm, selectFirst = true;
+    var services = {}, serviceHoldersDataSource, grid, handleChange, serviceTypesDropDown, selectedServiceHolder, vm, selectFirst = true;
 
     //region Public
     services.vm = vm = kendo.observable({
         /**
          * The selected service type
          */
-        serviceType: function () {
-            return serviceTypesComboBox.dataItem();
-        },
+        serviceType: null,
         addNewService: function () {
-            dbServices.getServiceDetails(null, vm.get("startDate"), null, vm.serviceType().Id, function (service) {
+            dbServices.getServiceDetails(null, vm.get("startDate"), null, vm.get("serviceType.Id"), function (service) {
                 //add a new service holder
                 selectedServiceHolder = serviceHoldersDataSource.add();
                 handleChange = true;  //prevent loading service details after the row is selected (this is a new service)
@@ -122,7 +120,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "cros
         var form = $("#csvForm");
 
         form.find("input[name=roleId]").val(session.get("role.id"));
-        form.find("input[name=serviceType]").val(vm.serviceType().Name);
+        form.find("input[name=serviceType]").val(vm.get("serviceType.Name"));
 
         form.find("input[name=startDate]").val(tools.formatDate(vm.get("startDate")));
         form.find("input[name=endDate]").val(tools.formatDate(vm.get("endDate")));
@@ -215,11 +213,13 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "cros
     };
 
     /**
-     * Fixup the filter's for start date and end date
+     * Correct missing start or end date filters
      * @param filterSet
      */
     var processFilters = function (filterSet) {
-        //reload if the start or end date changed
+        var filtersChanged = false;
+
+        //1) correct missing start or end date filters
         var startDateFilter = _.find(filterSet, function (f) {
             return f.field === "OccurDate" && f.operator === "gte";
         });
@@ -229,50 +229,46 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "cros
 
         var vmStartDate = vm.get("startDate");
         var vmEndDate = vm.get("endDate");
-        var missingFilter = !startDateFilter || !endDateFilter;
 
-        //correct any missing filters
+        //if there are neither start date or end date filters, set them to the vm's startDate and endDate
         if (!startDateFilter && !endDateFilter) {
-            //if there are neither start date or end date filters, set them to the vm's startDate and endDate
             startDateFilter = {field: "OccurDate", operator: "gte", value: vmStartDate};
             endDateFilter = {field: "OccurDate", operator: "lte", value: vmEndDate};
-        } else if (!endDateFilter) {
-            //if there is a startDateFilter but not a endDateFilter
-            //set it to 2 weeks later
-            endDateFilter = {field: "OccurDate", operator: "lte",
-                value: moment(startDateFilter.value).add('weeks', 2).toDate()};
-        } else if (!startDateFilter) {
-            //if there is a endDateFilter but not a startDateFilter
-            //set it to 2 weeks prior
-            startDateFilter = {field: "OccurDate", operator: "gte",
-                value: moment(endDateFilter.value).subtract('weeks', 2).toDate()};
+            filtersChanged = true;
+        }
+        //if there is a startDateFilter but not a endDateFilter: set it to 2 weeks later
+        else if (!endDateFilter) {
+            endDateFilter = {field: "OccurDate", operator: "lte", value: moment(startDateFilter.value).add('weeks', 2).toDate()};
+            filtersChanged = true;
+        }
+        //if there is a endDateFilter but not a startDateFilter: set it to 2 weeks prior
+        else if (!startDateFilter) {
+            startDateFilter = {field: "OccurDate", operator: "gte", value: moment(endDateFilter.value).subtract('weeks', 2).toDate()};
+            filtersChanged = true;
         }
 
-        //if the start and endDate changed
-        //update the vm's startDate and endDate
-        //then reload the dataSource
-        if (vmStartDate.toDateString() !== startDateFilter.value.toDateString() ||
-            vmEndDate.toDateString() !== endDateFilter.value.toDateString()) {
+        var dateChanged = vmStartDate.toDateString() !== startDateFilter.value.toDateString() ||
+            vmEndDate.toDateString() !== endDateFilter.value.toDateString();
+        if (dateChanged) {
             vm.set("startDate", startDateFilter.value);
             vm.set("endDate", endDateFilter.value);
+        }
 
-            //reload the services
-            serviceHoldersDataSource.options.transport.read.data.startDate = tools.formatDate(vm.get("startDate"));
-            serviceHoldersDataSource.options.transport.read.data.endDate = tools.formatDate(vm.get("endDate"));
-            serviceHoldersDataSource.read();
-        } else if (missingFilter) { //if there was a missing filter, refilter
+        //if the filtersChanged, return the new filters
+        if (filtersChanged) {
             var otherFilters = _.filter(filterSet, function (f) {
                 return f.field !== "OccurDate";
             });
+
             otherFilters.push(startDateFilter);
             otherFilters.push(endDateFilter);
+
             return otherFilters;
         }
     };
 
-    //a route that will filter the grid
-    //the route for updating the filters
-    crossroads.addRoute('view/services.html:?query:', function (query) {
+    //whenever the url parameters change, update the grid's filters
+    crossroads.addRoute('view/services.html:?query:',function (query) {
         if (serviceHoldersDataSource) {
             kendoTools.syncFilters(serviceHoldersDataSource, query, processFilters);
         }
@@ -284,7 +280,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "cros
      * and kendo datasource does not allow you to change the schema.
      */
     var createDataSourceAndGrid = function () {
-        var serviceType = vm.serviceType().Name;
+        var serviceType = vm.get("serviceType.Name");
 
         var readAction = "service/GetServicesHoldersWithFields";
         var params = {
@@ -309,6 +305,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "cros
                         return formatData(response);
                     }
                 },
+                sort: { field: "OccurDate", dir: "asc" },
                 transport: {
                     read: {
                         url: dbServices.API_URL + readAction,
@@ -317,12 +314,11 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "cros
                 },
                 pageSize: 50
             });
-            serviceHoldersDataSource.sort({ field: "OccurDate", dir: "asc" });
 
-            //Create the grid
+            //create the grid
             setupGrid(fields);
 
-            //Setup filtering
+            //whenever the grid is filtered, update the URL parameters
             kendoTools.addFilterEvent(serviceHoldersDataSource);
             serviceHoldersDataSource.bind("filtered", function () {
                 if (serviceHoldersDataSource) {
@@ -330,23 +326,13 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "cros
                 }
             });
 
-            //force reparse
+            //force reparse, to fix start/end date filters
             hasher.setHash("view/services.html?");
         });
     };
 //endregion
 
     //region Grid
-
-//called when grid data is loaded
-    var dataBound = function () {
-        //check if this is the first load or the service type has changed
-        if (selectFirst) {
-            // selects first grid row
-            //grid.select(grid.tbody.find(">tr:first"));
-            selectFirst = false;
-        }
-    };
 
 //resize the grid based on the current window's height
     var resizeGrid = function () {
@@ -419,7 +405,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "cros
         });
 
         //configure the columns based on the user's stored configuration
-        columns = kendoTools.configureColumns(columns, vm.serviceType().Id);
+        columns = kendoTools.configureColumns(columns, vm.get("serviceType.Id"));
 
         grid = $("#grid").data("kendoGrid");
         if (grid) {
@@ -428,7 +414,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "cros
         $("#grid").empty();
 
         grid = $("#grid").kendoGrid({
-            autoBind: true,
+            autoBind: false,
             change: function () {
                 //enable delete button
                 $('#services .k-grid-delete').removeAttr("disabled");
@@ -450,7 +436,14 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "cros
             },
             columns: columns,
             columnMenu: true,
-            dataBound: dataBound,
+            dataBound: function () {
+                //check if this is the first load or the service type has changed
+//                if (selectFirst) {
+                // selects first grid row
+                //grid.select(grid.tbody.find(">tr:first"));
+//                    selectFirst = false;
+//                }
+            },
             dataSource: serviceHoldersDataSource,
             filterable: true,
             pageable: true,
@@ -464,12 +457,29 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "cros
         }).data("kendoGrid");
 
         //Keep track of any changes to the columns, and store the configuration
-        kendoTools.storeConfiguration(grid, vm.serviceType().Id);
+        kendoTools.storeConfiguration(grid, vm.get("serviceType.Id"));
 
         grid.refresh();
     };
 
 //endregion
+
+    var vmChanged = function (e) {
+        //save changes whenever the selected service has a change
+        if (e.field.indexOf("selectedService.") > -1) {
+            saveHistory.save();
+        }
+        //re-setup the data source/grid whenever the service type changes
+        else if (e.field === "serviceType") {
+            createDataSourceAndGrid();
+        }
+        //reload the services whenever the start or end date changes
+        else if (e.field === "startDate" || e.field === "endDate") {
+            serviceHoldersDataSource.options.transport.read.data.startDate = tools.formatDate(vm.get("startDate"));
+            serviceHoldersDataSource.options.transport.read.data.endDate = tools.formatDate(vm.get("endDate"));
+            serviceHoldersDataSource.read();
+        }
+    };
 
     services.initialize = function () {
         //add validation to the service details
@@ -479,52 +489,49 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "cros
             }
         }).data("kendoValidator");
 
-        //save changes whenever the selected service has a change
-        vm.bind("change", function (e) {
-            if (e.field.indexOf("selectedService.") > -1) {
-                saveHistory.save();
-            }
-        });
-
         //set the initial start date to today and end date in two weeks
         vm.set("startDate", moment().sod().toDate());
         vm.set("endDate", moment().sod().add('weeks', 2).toDate());
 
-        //load the current business account's service types
-        //choose the first type and then load the saved column configuration
-        //then load the initial services
+        vm.bind("change", _.debounce(vmChanged, 200));
+
+        //load the current business account's service types then
+        //1) setup the service types drop down
+        //2) choose the first service+ type
         dbServices.getServiceTypes(function (serviceTypes) {
             services.serviceTypes = serviceTypes;
 
-            serviceTypesComboBox = $("#serviceTypes").kendoDropDownList({
+            serviceTypesDropDown = $("#serviceTypes").kendoDropDownList({
                 dataTextField: "Name",
                 dataValueField: "Id",
                 dataSource: services.serviceTypes,
-                change: function () {
+                change: function (e) {
+                    //TODO check correct
+                    vm.set("serviceType", this.dataItem());
+
                     //disable the delete button and hide the service details
                     $('#services .k-grid-delete').attr("disabled", "disabled");
                     $("#serviceDetails").attr("style", "display:none");
 
                     selectFirst = true;
-                    //reload the services whenever the service type changes
-                    createDataSourceAndGrid();
                 }
             }).data("kendoDropDownList");
 
-            //load the services initially
-            createDataSourceAndGrid();
+            //set the initial service type
+            vm.set("serviceType", serviceTypesDropDown.dataItem());
         });
 
         $("#serviceDetails").kendoServiceDetails();
 
+        //hookup the add & delete buttons
         $("#services .k-grid-add").on("click", function () {
             vm.addNewService();
         });
-
         $("#services .k-grid-delete").on("click", function () {
             vm.deleteSelectedService();
         });
 
+        //setup resizing
         $(window).resize(function () {
             resizeGrid();
         });
