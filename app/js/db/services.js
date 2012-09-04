@@ -228,24 +228,7 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
      * @param service
      */
     services.convertServiceDates = function (service) {
-        service.Date = new Date(service.Date);
-        var i;
-        for (i = 0; i < service.Fields.length; i++) {
-            var field = service.Fields[i];
-            if (field.Type === "DateTimeField") {
-                if (field.TypeInt === 0 || field.TypeInt === 1) {
-                    //DateTime or TimeOnly
-                    field.Earliest = new Date(field.Earliest);
-                    field.Latest = new Date(field.Latest);
-                    field.Value = new Date(field.Value);
-                } else if (field.TypeInt === 2) {
-                    //DateOnly
-                    field.Earliest = tools.toUtc(field.Earliest);
-                    field.Latest = tools.toUtc(field.Latest);
-                    field.Value = tools.toUtc(field.Value);
-                }
-            }
-        }
+        service.ServiceDate = moment(service.ServiceDate).toDate();
     };
 
     services.updateService = function (service) {
