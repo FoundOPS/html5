@@ -246,6 +246,11 @@ define(['db/session', 'db/services', "hasher"], function (session, dbServices, h
             //set the filterSet to the url parameters
             filterSet = [];
             _.each(parameters, function (value, parameter) {
+                //if there is no number prefix it is not a filter. ignore this parameter
+                if (!parameter.match(/[0-9]/g)) {
+                    return;
+                }
+
                 //remove the number
                 parameter = parameter.replace(/[0-9]/g, '');
 

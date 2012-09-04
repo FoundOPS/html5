@@ -3,7 +3,7 @@
 'use strict';
 
 require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "crossroads", "hasher", "widgets/serviceDetails", "lib/jquery.form"], function ($, dbServices, tools, saveHistory, kendoTools, crossroads, hasher) {
-    var services = {}, serviceHoldersDataSource, grid, handleChange, serviceTypesDropDown, selectedServiceHolder, vm, selectFirst = true;
+    var services = {}, serviceHoldersDataSource, grid, handleChange, serviceTypesDropDown, selectedServiceHolder, vm;
 
     //region Public
     services.vm = vm = kendo.observable({
@@ -213,17 +213,27 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "cros
     };
 
     /**
-     * Correct missing start or end date filters
+     * 1) Correct missing start or end date filters
+     * 2) Correct missing service type filters
      * @param filterSet
      */
     var processFilters = function (filterSet) {
         var filtersChanged = false;
 
+        var normalized = [];
+        _.each(filterSet, function (filter) {
+            if (filter.filters) {
+                normalized.push(filter.filters);
+            } else {
+                normalized.push(filter);
+            }
+        });
+
         //1) correct missing start or end date filters
-        var startDateFilter = _.find(filterSet, function (f) {
+        var startDateFilter = _.find(normalized, function (f) {
             return f.field === "OccurDate" && f.operator === "gte";
         });
-        var endDateFilter = _.find(filterSet, function (f) {
+        var endDateFilter = _.find(normalized, function (f) {
             return f.field === "OccurDate" && f.operator === "lte";
         });
 
@@ -436,14 +446,6 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "cros
             },
             columns: columns,
             columnMenu: true,
-            dataBound: function () {
-                //check if this is the first load or the service type has changed
-//                if (selectFirst) {
-                // selects first grid row
-                //grid.select(grid.tbody.find(">tr:first"));
-//                    selectFirst = false;
-//                }
-            },
             dataSource: serviceHoldersDataSource,
             filterable: true,
             pageable: true,
@@ -506,19 +508,16 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "cros
                 dataValueField: "Id",
                 dataSource: services.serviceTypes,
                 change: function (e) {
-                    //TODO check correct
                     vm.set("serviceType", this.dataItem());
 
                     //disable the delete button and hide the service details
                     $('#services .k-grid-delete').attr("disabled", "disabled");
                     $("#serviceDetails").attr("style", "display:none");
-
-                    selectFirst = true;
                 }
             }).data("kendoDropDownList");
 
             //set the initial service type
-            vm.set("serviceType", serviceTypesDropDown.dataItem());
+//            vm.set("serviceType", serviceTypesDropDown.dataItem());
         });
 
         $("#serviceDetails").kendoServiceDetails();
