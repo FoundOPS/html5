@@ -1,18 +1,59 @@
 'use strict';
 
 define(["tools", "sections/importerUpload", "sections/importerSelect", "db/services"], function (tools, importerUpload, importerSelect, dbServices) {
-    var importerReview = {}, dataSource, grid, gridData, dataToValidate = [], validatedData;
+    var importerReview = {}, dataSource, grid, gridData, dataToValidate = [];
 
     var validateData = function () {
         dataToValidate = formatGridDataForValidation(gridData);
 
         dbServices.validateData(dataToValidate, importerSelect.headers, function (data) {
-            validatedData = formatValidatedDataForGrid(data);
-            //TODO: check if there are errors
-            //if(!error){
-            //  //enable import button
+            gridData = formatDataForGrid(data, true);
+
+            //remake the grid columns to include lat, lng, and any other fields that were hidden originally
+            //use importerSelect.headers to know what all should show up
+
+            //calculate how many are missing
+            var column, fieldName, name, template, width, hiddenNum = 1;
+            for(var i = 0; i < importerSelect.headers.length; i++){
+                if(i > importerSelect.columns.length - 1){
+                    name = importerSelect.headers[i];
+                    fieldName = "c10" + hiddenNum;
+                    template = "#=" + fieldName + ".V#"; //"# if ( #=" + fieldName + ".S# != '2') { # <div class='cellError'></div> # } # #=" + fieldName + ".V#";
+                    //calculate the width of the title
+                    width = name.length * 6.5 + 35;
+                    //set the width to 100 if it's less than 100
+                    if(width < 100){
+                        width = 100;
+                    }
+                    column = {
+                        field: fieldName, //ex. "c0"
+                        title: name, //ex. "Client Name"
+                        template: template,
+                        width: width + "px"
+                    };
+                    importerSelect.columns.push(column);
+                    hiddenNum ++;
+                }
+            }
+
+            //refresh the grid's data with the new data
+            dataSource.data(gridData);
+
+            //check for errors
+            var row, cell, error = false;
+            for(var r in data){
+                row = data[r];
+                for(var c in row){
+                    cell = row[c];
+                    if(cell.S == 3){
+                        error = true;
+                    }
+                }
+            }
+            if(!error){
+                //enable import button
                 $("#importBtn").removeAttr("disabled");
-            //}
+            }
         });
     };
 
@@ -53,43 +94,49 @@ define(["tools", "sections/importerUpload", "sections/importerSelect", "db/servi
         return dataToValidate;
     };
 
-    var formatValidatedDataForGrid = function (data) {
-
-    };
-
     //converts row array to an object
-    var toObject = function(arr) {
+    var toObject = function(row, validated) {
         var newRow = {}, value, obj, num, field;
-        //iterate through each column
-        for (var c in importerSelect.columns) {
-            //get the column name ex. "c0"
-            field = importerSelect.columns[c].field;
-            //remove the "c" from the name
-            num = field.substr(1, 3);
-            //if there is a corresponding grid column to the data column,
-            //set value equal to it, otherwise set value to ""
-            value = arr[num] ? arr[num] : "";
-            //create the cell
-            obj = {
-                h: "",
-                s: 0,
-                v: value
-            };
-            //save the object as a property of newRow
-            newRow["c" + num] = obj;
+        if(validated){
+            //iterate through each column
+            for (var r in row) {
+                field = row[r];
+                //save the whole field as a property of newRow
+                newRow["c" + r] = field;
+            }
+        }else{
+            //iterate through each column
+            for (var c in importerSelect.columns) {
+                //get the column name ex. "c0"
+                field = importerSelect.columns[c].field;
+                //remove the "c" from the name
+                num = field.substr(1, 3);
+                //if there is a corresponding grid column to the data column,
+                //set value equal to it, otherwise set value to ""
+                value = row[num] ? row[num] : "";
+                //create the cell
+                obj = {
+                    H: "",
+                    S: 0,
+                    V: value
+                };
+                //save the object as a property of newRow
+                newRow["c" + num] = obj;
+            }
         }
         return newRow;
     };
 
-    var formatOriginalDataForGrid = function (data) {
+    var formatDataForGrid = function (data, validated) {
         var newData = [];
         var obj;
         //iterate through each row of the data
         for(var i in data){
-            //skip the first row, because that is the row with the headers
-            if(i != 0){
+            //skip the first row, because that is the row with the headers,
+            //unless this is validated data
+            if(i != 0 || validated){
                 //convert row to an object
-                obj = toObject(data[i]);
+                obj = toObject(data[i], validated);
                 //add it to the new array
                 newData.push(obj);
             }
@@ -110,7 +157,7 @@ define(["tools", "sections/importerUpload", "sections/importerSelect", "db/servi
         //check if importerUpload exists
         //if not, then no data has been loaded
         if(importerUpload.oldData){
-            gridData = formatOriginalDataForGrid(importerUpload.oldData);
+            gridData = formatDataForGrid(importerUpload.oldData, false);
         }else{
             //redirect to upload page
             window.application.navigate("view/importerUpload.html");
@@ -136,10 +183,6 @@ define(["tools", "sections/importerUpload", "sections/importerSelect", "db/servi
     };
 
     importerReview.show = function () {
-        if(grid){
-
-        }
-
         grid = $("#gridView").kendoGrid({
             columns: importerSelect.columns,
             dataSource: dataSource,
@@ -151,7 +194,7 @@ define(["tools", "sections/importerUpload", "sections/importerSelect", "db/servi
 
         resizeGrid();
 
-        //validateData();
+        validateData();
     };
 
     window.importerReview = importerReview;

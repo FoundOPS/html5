@@ -2,6 +2,16 @@
 
 define(["sections/importerUpload", "db/services"], function (importerUpload, dbServices) {
     var importerSelect = {};
+    importerSelect.requiredFields = [
+            "Client Name",
+            "Address Line One",
+            "Address Line Two",
+            "City",
+            "State",
+            "Zip Code",
+            "Latitude",
+            "Longitude"
+        ];
 
     //region Custon Editors
 //    importerSelect.numberEditor = function (container, options) {
@@ -86,7 +96,7 @@ define(["sections/importerUpload", "db/services"], function (importerUpload, dbS
         //make sure there is a selected service type
         if(!importerUpload.selectedService){
             window.application.navigate("view/importerUpload.html");
-
+            return;
         }
         //get the list of fields for the selected service
         dbServices.getFields(importerUpload.selectedService, function (fields) {
@@ -113,7 +123,7 @@ define(["sections/importerUpload", "db/services"], function (importerUpload, dbS
                 dataValueField: "Name",
                 dataSource: allFields,
                 change: function () {
-                    var i = 0, type, name, width, fieldName, template, column;
+                    var i = 0, type, name, width, fieldName, template, column, hiddenNum = 0;
                     importerSelect.columns = [];
                     importerSelect.headers = [];
                     importerSelect.fields = {};
@@ -131,7 +141,7 @@ define(["sections/importerUpload", "db/services"], function (importerUpload, dbS
                         if(name != "Do not Import") {
                             //setup the column
                             fieldName = "c" + i;
-                            template = "#=" + fieldName + ".v#";
+                            template = "#=" + fieldName + ".V#"; //"# if ( #=" + fieldName + ".S# != '2') { # <div class='cellError'></div> # } # #=" + fieldName + ".V#";
                             //if(type != "string"){
 //                                    var editor;
 //                                    if(name == "Repeat On"){
@@ -173,22 +183,9 @@ define(["sections/importerUpload", "db/services"], function (importerUpload, dbS
 
                     //this section checks if each of the required fields has been included
                     //if it hasn't, a hidden field is added
-                    var requiredFields = [
-                        "Client Name",
-                        "Address Line One",
-                        "Address Line Two",
-                        "City",
-                        "State",
-                        "Zip Code",
-                        "Latitude",
-                        "Longitude",
-                        "Region Name"
-                    ];
 
-                    for(var f in requiredFields){
-                        var field = requiredFields[f];
-                        var fName = "c10" + f;
-                        template = "#=" + fName + ".v#";
+                    for(var f in importerSelect.requiredFields){
+                        var field = importerSelect.requiredFields[f];
                         var hasField = false;
                         //iterate through the columns
                         for(var c in importerSelect.columns){
@@ -201,11 +198,14 @@ define(["sections/importerUpload", "db/services"], function (importerUpload, dbS
                         if(!hasField){
                             //add the field name to the list of headers
                             importerSelect.headers.push(field);
+
+                            var fName = "c10" + hiddenNum;
                             //save the field(hidden) as a property of importerSelect.fields
                             importerSelect.fields[fName] = {
                                 defaultValue: "",
                                 type: "hidden"
                             };
+                            hiddenNum ++;
                         }
                     }
                 }
