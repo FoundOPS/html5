@@ -1,36 +1,41 @@
 'use strict';
 
 define(["tools", "sections/importerUpload", "sections/importerSelect", "db/services"], function (tools, importerUpload, importerSelect, dbServices) {
-    var importerReview = {}, dataSource, grid, gridData, dataToValidate = [], validatedData, headers = [];
+    var importerReview = {}, dataSource, grid, gridData, dataToValidate = [], validatedData;
 
-    //import on button click
-    $("#importBtn").on("click", function () {
-        //dbServices.submitData(rows, headers, importerUpload.selectedService);
-    });
+    var validateData = function () {
+        dataToValidate = formatGridDataForValidation(gridData);
 
-    var validate = function (data) {
-        dataToValidate = formatGridDataForValidation(data);
-
-        for(var i in grid.columns){
-            var column = grid.columns[i];
-            headers.push(column.title);
-        }
-
-        dbServices.validateData(dataToValidate, headers, function (data) {
+        dbServices.validateData(dataToValidate, importerSelect.headers, function (data) {
             validatedData = formatValidatedDataForGrid(data);
+            //TODO: check if there are errors
+            //if(!error){
+            //  //enable import button
+                $("#importBtn").removeAttr("disabled");
+            //}
         });
     };
 
+    var submitData = function () {
+        dataToValidate = formatGridDataForValidation(gridData);
+
+        dbServices.submitData(dataToValidate, importerSelect.headers, importerUpload.selectedService);
+    };
+
+    //region Data Conversions
     var formatGridDataForValidation = function (data) {
-        var object;
-        dataToValidate = [];
+        var object, dataToValidate = [];
+        //iterate through each row of the data
         for (var r in data) {
             object = data[r];
-            var newArray = [], newObject, key, keyNum;
-            for (var c in importerSelect.columns) {
-                key = importerSelect.columns[c].field;
-                keyNum = key.substr(1,1);
-                newObject = object[key];
+            var newArray = [], newObject, keyNum;
+            //iterate through each of the grid fields
+            for (var c in importerSelect.fields) {
+                //remove the "c" from the name
+                keyNum = c.substr(1,3);
+                //get the object from the data that corresponds to the current field
+                newObject = object[c];
+                //if no corresponding object exists, create a blank one
                 if(!newObject){
                     newObject = {
                         h: "",
@@ -38,8 +43,9 @@ define(["tools", "sections/importerUpload", "sections/importerSelect", "db/servi
                         v: ""
                     }
                 }
+                //set the row and cell
                 newObject["r"] = r;
-                newObject["c"] = c;
+                newObject["c"] = keyNum;
                 newArray.push(newObject);
             }
             dataToValidate.push(newArray);
@@ -53,24 +59,32 @@ define(["tools", "sections/importerUpload", "sections/importerSelect", "db/servi
 
     //converts row array to an object
     var toObject = function(arr) {
-        var rv = {}, value, obj, num, field;
+        var newRow = {}, value, obj, num, field;
+        //iterate through each column
         for (var c in importerSelect.columns) {
+            //get the column name ex. "c0"
             field = importerSelect.columns[c].field;
+            //remove the "c" from the name
             num = field.substr(1, 3);
+            //if there is a corresponding grid column to the data column,
+            //set value equal to it, otherwise set value to ""
             value = arr[num] ? arr[num] : "";
+            //create the cell
             obj = {
-                v: value,
+                h: "",
                 s: 0,
-                h: ""
+                v: value
             };
-            rv["c" + num] = obj;
+            //save the object as a property of newRow
+            newRow["c" + num] = obj;
         }
-        return rv;
+        return newRow;
     };
 
     var formatOriginalDataForGrid = function (data) {
         var newData = [];
         var obj;
+        //iterate through each row of the data
         for(var i in data){
             //skip the first row, because that is the row with the headers
             if(i != 0){
@@ -82,6 +96,7 @@ define(["tools", "sections/importerUpload", "sections/importerSelect", "db/servi
         }
         return newData;
     };
+    //endregion
 
     //resize the grid based on the current window's height
     var resizeGrid = function () {
@@ -113,6 +128,11 @@ define(["tools", "sections/importerUpload", "sections/importerSelect", "db/servi
         $(window).resize(function () {
             resizeGrid();
         });
+
+        //import on button click
+        $("#importBtn").on("click", function () {
+            submitData();
+        });
     };
 
     importerReview.show = function () {
@@ -131,7 +151,7 @@ define(["tools", "sections/importerUpload", "sections/importerSelect", "db/servi
 
         resizeGrid();
 
-        //validate(gridData);
+        //validateData();
     };
 
     window.importerReview = importerReview;

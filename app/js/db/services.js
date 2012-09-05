@@ -449,13 +449,15 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
     };
 
     services.submitData = function (rows, headers, serviceType) {
-        $.ajax({
-            url: services.API_URL + "importer/SubmitData?roleId=" + services.RoleId + "&headers=" + headers + "&serviceType=" + serviceType,
-            type: "POST",
-            dataType: "json",
-            contentType: 'application/json',
-            data: JSON.stringify(rows)
-        });
+        return saveHistory.linkNotification(
+            $.ajax({
+                url: services.API_URL + "importer/SubmitData?roleId=" + services.RoleId + "&headers=" + headers + "&serviceType=" + serviceType,
+                type: "POST",
+                dataType: "json",
+                contentType: 'application/json',
+                data: JSON.stringify(rows)
+            })
+        );
     };
 
     //endregion
