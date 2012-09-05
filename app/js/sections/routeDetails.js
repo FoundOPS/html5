@@ -6,7 +6,7 @@
 
 'use strict';
 
-define(["jquery", "db/services", "db/models", "db/saveHistory", "lib/kendo.all"], function ($, dbServices, models, saveHistory) {
+define(["jquery", "db/services", "db/models", "db/saveHistory", "hasher", "lib/kendo.all"], function ($, dbServices, models, saveHistory, hasher) {
     /**
      * routeDetails = wrapper for all routeDetails objects
      * serviceDate = the date for the routes that are acquired form the server
@@ -18,6 +18,7 @@ define(["jquery", "db/services", "db/models", "db/saveHistory", "lib/kendo.all"]
 
     routeDetails.vm = vm;
 
+//region TrackPoint Collection & Management
     /**
      * The configuration object for trackPoint creation.
      * @const
@@ -73,18 +74,18 @@ define(["jquery", "db/services", "db/models", "db/saveHistory", "lib/kendo.all"]
 
         var onError = function (error) {
             switch (error.code) {
-            case error.PERMISSION_DENIED:
-                alert("You must accept the Geolocation request to enable mobile tracking.");
-                break;
-            case error.POSITION_UNAVAILABLE:
-                alert("Location information is unavailable at this time.");
-                break;
-            case error.TIMEOUT:
-                alert("The Geolocation request has timed out. Please check your internet connectivity.");
-                break;
-            default:
-                alert("Geolocation information is not available at this time. Please check your Geolocation settings.");
-                break;
+                case error.PERMISSION_DENIED:
+                    alert("You must accept the Geolocation request to enable mobile tracking.");
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    alert("Location information is unavailable at this time.");
+                    break;
+                case error.TIMEOUT:
+                    alert("The Geolocation request has timed out. Please check your internet connectivity.");
+                    break;
+                default:
+                    alert("Geolocation information is not available at this time. Please check your Geolocation settings.");
+                    break;
             }
             vm.endRoute();
         };
@@ -92,6 +93,7 @@ define(["jquery", "db/services", "db/models", "db/saveHistory", "lib/kendo.all"]
         //Phonegap geolocation function
         navigator.geolocation.getCurrentPosition(onSuccess, onError, {enableHighAccuracy: true});
     };
+//endregion
 
     $.subscribe("selectedRoute", function (data) {
         vm.set("selectedRoute", data);
@@ -109,6 +111,8 @@ define(["jquery", "db/services", "db/models", "db/saveHistory", "lib/kendo.all"]
     var initialized = false;
 
     routeDetails.show = function () {
+        main.parseHash();
+
         saveHistory.close();
 
         if (!initialized) {
@@ -127,9 +131,12 @@ define(["jquery", "db/services", "db/models", "db/saveHistory", "lib/kendo.all"]
         vm.selectRouteDestination = function (e) {
             vm.set("selectedDestination", e.dataItem);
 
-            localStorage.setItem("selectedDestination", vm.get("selectedDestination.Id"));
+            var params = {routeId: vm.get("selectedRoute.Id"), routeDestinationId: vm.get("selectedDestination.Id")};
+            var query = main.setHash("routeDestinationDetails", params);
+
+//            localStorage.setItem("selectedDestination", vm.get("selectedDestination.Id"));
             $.publish("selectedDestination", [vm.get("selectedDestination")]);
-            application.navigate("view/routeDestinationDetails.html");
+//            application.navigate("view/routeDestinationDetails.html");
         };
         //Dictate the visibility of the startRoute and endRoute buttons.
         vm.set("startVisible", true);
@@ -165,19 +172,26 @@ define(["jquery", "db/services", "db/models", "db/saveHistory", "lib/kendo.all"]
 
     routeDetails.initialize = function () {
         // If user refreshes app on browser -> automatically redirect based on user's previous choices.
-        setTimeout(function () {
-            if (main.history[0] !== "#view/updates.html" && main.history[0] !== "#view/routes.html" && main.history[0] !== "#view/routeDetails.html") {
-                if (localStorage.getItem("selectedDestination")) {
-                    var destination;
-                    for (destination in vm.get("routeDestinationsSource")._data) {
-                        if (localStorage.getItem("selectedDestination") === vm.get("routeDestinationsSource")._data[destination].Id) {
-                            var e = {};
-                            e.dataItem = vm.get("routeDestinationsSource")._data[destination];
-                            vm.selectRouteDestination(e);
-                        }
-                    }
-                }
+//        setTimeout(function () {
+//            if (main.history[0] !== "#view/updates.html" && main.history[0] !== "#view/routes.html" && main.history[0] !== "#view/routeDetails.html") {
+//                if (localStorage.getItem("selectedDestination")) {
+//                    var destination;
+//                    for (destination in vm.get("routeDestinationsSource")._data) {
+//                        if (localStorage.getItem("selectedDestination") === vm.get("routeDestinationsSource")._data[destination].Id) {
+//                            var e = {};
+//                            e.dataItem = vm.get("routeDestinationsSource")._data[destination];
+//                            vm.selectRouteDestination(e);
+//                        }
+//                    }
+//                }
+//            }
+//        }, 0);
+
+        main.route.matched.add(function (section, query) {
+            if (section !== "routeDetails") {
+                return;
             }
-        }, 0);
+            console.log(query);
+        });
     };
 });

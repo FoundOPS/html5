@@ -102,9 +102,18 @@ define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all", "widgets/ser
                 saveHistory.save();
             }
         });
+
+        main.route.matched.add(function (section, query) {
+            if (section !== "routeTask") {
+                return;
+            }
+            console.log(query);
+        });
     };
 
     routeTask.show = function () {
+        main.parseHash();
+
         if (!initialized) {
             //a task has not been selected, so go to routes view
             if (!vm.get("selectedTask")) {

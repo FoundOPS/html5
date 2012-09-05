@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all"], function ($, dbServices, saveHistory) {
+define(["jquery", "db/services", "db/saveHistory", "hasher", "lib/kendo.all"], function ($, dbServices, saveHistory, hasher) {
     /**
      * routes = wrapper for all route list objects/logic
      * app = the kendoUI mobile app
@@ -47,34 +47,43 @@ define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all"], function ($
         vm.selectRoute = function (e) {
             vm.set("selectedRoute", e.dataItem);
 
-            localStorage.setItem("selectedRoute", vm.get("selectedRoute.Id"));
+            var params = {routeId: vm.get("selectedRoute.Id")};
+            var query = main.setHash("routeDetails", params);
+
+//            localStorage.setItem("selectedRoute", vm.get("selectedRoute.Id"));
             $.publish('selectedRoute', [vm.get("selectedRoute")]);
-            application.navigate("view/routeDetails.html");
+//            application.navigate("view/routeDetails.html");
         };
         kendo.bind($("#routes"), vm, kendo.mobile.ui);
 
         // If user refreshes app on browser -> automatically redirect based on user's previous choices.
-        $.subscribe("routesSourceLoaded", function () {
-            if (main.history[0] !== "#view/routes.html" && main.history.previousPage !== "#view/updates.html") {
-                if (localStorage.getItem("selectedRoute")) {
-                    var route;
-                    for (route in vm.get("routesSource")._data) {
-                        if (vm.get("routesSource")._data.hasOwnProperty(route)) {
-                            if (localStorage.getItem("selectedRoute") === vm.get("routesSource")._data[route].Id) {
-                                var e = {};
-                                e.dataItem = vm.get("routesSource")._data[route];
-                                vm.selectRoute(e);
-                            }
-                        }
-                    }
-                }
+//        $.subscribe("routesSourceLoaded", function () {
+//            if (main.history[0] !== "#view/routes.html" && main.history.previousPage !== "#view/updates.html") {
+//                if (localStorage.getItem("selectedRoute")) {
+//                    var route;
+//                    for (route in vm.get("routesSource")._data) {
+//                        if (vm.get("routesSource")._data.hasOwnProperty(route)) {
+//                            if (localStorage.getItem("selectedRoute") === vm.get("routesSource")._data[route].Id) {
+//                                var e = {};
+//                                e.dataItem = vm.get("routesSource")._data[route];
+//                                vm.selectRoute(e);
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        });
+        main.route.matched.add(function (section, query) {
+            if (section !== "route") {
+                return;
             }
+            console.log(query);
         });
     };
 
     routes.show = function () {
+        main.parseHash();
+
         saveHistory.close();
-        // Auto refresh - causes two calls on initializing.
-        //vm.refreshRoutes();
     };
 });

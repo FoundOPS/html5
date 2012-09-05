@@ -22,6 +22,8 @@ define(["jquery", "db/saveHistory", "lib/kendo.all", "widgets/contacts"], functi
     var initialized = false;
 
     routeDestinationDetails.show = function () {
+        main.parseHash();
+
         saveHistory.close();
 
         if (!initialized) {
@@ -55,9 +57,12 @@ define(["jquery", "db/saveHistory", "lib/kendo.all", "widgets/contacts"], functi
         vm.selectTask = function (e) {
             vm.set("selectedTask", e.dataItem);
 
-            localStorage.setItem("selectedTask", vm.get("selectedTask.Id"));
+            var params = {routeId: vm.get("selectedRoute.Id"), routeDestinationId: vm.get("selectedDestination.Id"), routeTaskId: vm.get("selectedTask.Id")};
+            var query = main.setHash("routeTask", params);
+
+//            localStorage.setItem("selectedTask", vm.get("selectedTask.Id"));
             $.publish("selectedTask", [vm.get("selectedTask")]);
-            application.navigate("view/routeTask.html");
+//            application.navigate("view/routeTask.html");
         };
         vm.getDirections = function () {
             $("#directionsButton").toggleClass("buttonClicked");
@@ -73,19 +78,26 @@ define(["jquery", "db/saveHistory", "lib/kendo.all", "widgets/contacts"], functi
 
     routeDestinationDetails.initialize = function () {
 //      If user refreshes app on browser -> automatically redirect based on user's previous choices.
-        setTimeout(function () {
-            if (main.history[0] !== "#view/updates.html" && main.history[0] !== "#view/routes.html" && main.history[0] !== "#view/routeDetails.html" && main.history[0] !== "#view/routeDestinationDetails.html") {
-                if (localStorage.getItem("selectedTask")) {
-                    var task;
-                    for (task in vm.get("routeTasksSource")._data) {
-                        if (localStorage.getItem("selectedTask") === vm.get("routeTasksSource")._data[task].Id) {
-                            var e = {};
-                            e.dataItem = vm.get("routeTasksSource")._data[task];
-                            vm.selectTask(e);
-                        }
-                    }
-                }
+//        setTimeout(function () {
+//            if (main.history[0] !== "#view/updates.html" && main.history[0] !== "#view/routes.html" && main.history[0] !== "#view/routeDetails.html" && main.history[0] !== "#view/routeDestinationDetails.html") {
+//                if (localStorage.getItem("selectedTask")) {
+//                    var task;
+//                    for (task in vm.get("routeTasksSource")._data) {
+//                        if (localStorage.getItem("selectedTask") === vm.get("routeTasksSource")._data[task].Id) {
+//                            var e = {};
+//                            e.dataItem = vm.get("routeTasksSource")._data[task];
+//                            vm.selectTask(e);
+//                        }
+//                    }
+//                }
+//            }
+//        }, 0);
+
+        main.route.matched.add(function (section, query) {
+            if (section !== "routeDestinationDetails") {
+                return;
             }
-        }, 0);
+            console.log(query);
+        });
     };
 });
