@@ -466,8 +466,13 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "widg
         else if (e.field === "serviceType") {
             createDataSourceAndGrid();
 
-            //TODO update the url parameter
+            //make sure dropdownlist has service type selected
+            serviceTypesDropDown.select(function (item) {
+                return item.Id === vm.get("serviceType.Id");
+            });
 
+            //force reparse url parameters
+            main.parseHash();
         }
         //reload the services whenever the start or end date changes
         else if (e.field === "startDate" || e.field === "endDate") {
@@ -510,7 +515,8 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "widg
                 }
             }).data("kendoDropDownList");
 
-            //force parse the hash, to try and setup the grid properly
+            //now that the service types are loaded,
+            //setup the grid by reparsing the hash
             main.parseHash();
         });
 
@@ -544,9 +550,14 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "widg
 
             //1) update the service type (if it changed)
 
-            //if it is not chosen, select the first one
+            //if it is not chosen:
+            //choose the vm's selected service, or choose the first one
             if (!query.service) {
-                var serviceType = services.serviceTypes[0];
+                var serviceType = vm.get("serviceType");
+                if (!serviceType) {
+                    serviceType = services.serviceTypes[0];
+                }
+
                 query.service = serviceType.Name;
                 main.setHash("services", query);
             }
@@ -556,8 +567,10 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "widg
                     return st.Name === query.service;
                 });
                 vm.set("serviceType", serviceType);
-            } else {
-                kendoTools.updateFiltersToHash(serviceHoldersDataSource, query, processFilters);
+            }
+            //setup the filters
+            else {
+//                kendoTools.updateFiltersToHash(serviceHoldersDataSource, query, processFilters);
             }
         });
     };
