@@ -225,54 +225,80 @@ define(['db/session', 'db/services', "hasher"], function (session, dbServices, h
     };
 
     /*
-     * Sync the url parameters and the dataSource's filters
+     * Set the url parameters based on the dataSource's filters
      * @dataSource The dataSource to sync the filters with
-     * @param parameters If this is set: adjust the filters to the url parameters
-     *                   If it is null: adjust the url parameters to the filters
-     * @processFilters (Optional) Process and adjust the filters after they are synced. This is for forcing validation
      */
-    kendoTools.syncFilters = function (dataSource, parameters, processFilters) {
+    kendoTools.updateHashToFilters = function (dataSource, base) {
+        //TODO: return if it is already correct
+        var filterSet = dataSource.filter().filters;
+
+        var i = 0;
+        var parameters = _.map(filterSet, function (filter) {
+            var type;
+            var val = filter.value;
+            if (val instanceof Date) {
+                type = "d";
+                val = val.toDateString();
+            } else if (typeof val === "number") {
+                type = "n";
+            } else {
+                type = "s";
+            }
+            i++; //add a new number to each parameter to avoid issues when there are duplicates
+            return i + filter.field + "=" + filter.operator + "$" + val + "$" + type;
+        });
+
+        var query = parameters.join("&");
+        hasher.setHash('#' + base + '?' + query);
+    };
+
+    /*
+     * Set the dataSource's filters to the url parameters
+     * @dataSource The dataSource to adjust
+     * @param parameters The parameters to build filters from
+     * @processFilters (Optional) Process and adjust the filters before setting them. This is for forcing validation
+     */
+    kendoTools.updateFiltersToHash = function (dataSource, parameters, processFilters) {
         if (!dataSource) {
             return;
         }
 
-        if (dataSource._handleFilterSync) {
-            dataSource._handleFilterSync = false;
+        if (dataSource.f_handleFilterUpdate) {
+            dataSource.f_handleFilterUpdate = false;
             return;
         }
 
-        var filterSet;
-        if (parameters) {
-            //set the filterSet to the url parameters
-            filterSet = [];
-            _.each(parameters, function (value, parameter) {
-                //if there is no number prefix it is not a filter. ignore this parameter
-                if (!parameter.match(/[0-9]/g)) {
-                    return;
-                }
-
-                //remove the number
-                parameter = parameter.replace(/[0-9]/g, '');
-
-                //add a filter for every possible parameter
-                var filter = value.split("$");
-                var formattedValue;
-                if (filter[2] === "d") {
-                    formattedValue = new Date(filter[1]);
-                } else if (filter[2] === "n") {
-                    formattedValue = parseFloat(filter[1]);
-                } else {
-                    formattedValue = filter[1];
-                }
-
-                filterSet.push({field: parameter, operator: filter[0], value: formattedValue});
-            });
-        } else {
-            filterSet = dataSource.filter();
-            if (filterSet) {
-                filterSet = filterSet.filters;
-            }
+        //return if the parameters are equal
+        if (_.isEqual(parameters, dataSource.f_lastFilterParameters)) {
+            return;
         }
+
+        dataSource.f_lastFilterParameters = parameters;
+
+        var filterSet = [];
+        //set the filterSet to the url parameters
+        _.each(parameters, function (value, parameter) {
+            //if there is no number prefix it is not a filter. ignore this parameter
+            if (!parameter.match(/[0-9]/g)) {
+                return;
+            }
+
+            //remove the number
+            parameter = parameter.replace(/[0-9]/g, '');
+
+            //add a filter for every possible parameter
+            var filter = value.split("$");
+            var formattedValue;
+            if (filter[2] === "d") {
+                formattedValue = new Date(filter[1]);
+            } else if (filter[2] === "n") {
+                formattedValue = parseFloat(filter[1]);
+            } else {
+                formattedValue = filter[1];
+            }
+
+            filterSet.push({field: parameter, operator: filter[0], value: formattedValue});
+        });
 
         //process the filters
         if (processFilters) {
@@ -283,33 +309,11 @@ define(['db/session', 'db/services', "hasher"], function (session, dbServices, h
             }
         }
 
-        //adjust the filters accordingly
-        if (parameters) {
-            dataSource._handleFilterSync = true;
-            dataSource.filter(filterSet);
-        }
-        //adjust the url parameters to the filters
-        else {
-            dataSource._handleFilterSync = true;
-            var i = 0;
-            parameters = _.map(filterSet, function (filter) {
-                var type;
-                var val = filter.value;
-                if (val instanceof Date) {
-                    type = "d";
-                    val = val.toDateString();
-                } else if (typeof val === "number") {
-                    type = "n";
-                } else {
-                    type = "s";
-                }
-                i++; //add a new number to each parameter to avoid issues when there are duplicates
-                return i + filter.field + "=" + filter.operator + "$" + val + "$" + type;
-            });
 
-            var query = parameters.join("&");
-            hasher.setHash('#view/services.html?' + query);
-        }
+        //TODO check if they are different first
+        //adjust the filters accordingly
+        dataSource.f_handleFilterUpdate = true;
+        dataSource.filter(filterSet);
     };
 
     return kendoTools;

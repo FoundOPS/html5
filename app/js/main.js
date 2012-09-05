@@ -118,6 +118,42 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "hasher", 
         });
     });
 
+    //setup hasher and crossroads
+    crossroads.bypassed.add(function (request) {
+        console.log(request);
+    });
+
+    /**
+     * Call this in every view's show method
+     */
+    main.parseHash = function () {
+        crossroads.resetState();
+        crossroads.parse(hasher.getHash());
+    };
+    hasher.prependHash = '';
+    hasher.init();
+
+    main.route = crossroads.addRoute("view/{section}.html:?query:");
+    main.route.greedy = true;
+
+    main.setHash = function (section, parameters) {
+        var query = "view/" + section + ".html?";
+
+        var first = true;
+        _.each(parameters, function (value, key) {
+            if (!first) {
+                query += "&";
+            } else {
+                first = false;
+            }
+            query += key + "=" + value;
+        });
+        crossroads.resetState();
+        hasher.setHash(query);
+        main.parseHash();
+    };
+
+    //TODO REFACTOR
     //Overrides phone's back button navigation - Phonegap
     main.onBack = function () {
         var currentHash = window.location.hash;
@@ -128,35 +164,36 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "hasher", 
                 application.navigate("view/logout.html");
             }
         } else if (currentHash.substring(0, "#view/routes.html".length) === "#view/routes.html") {
-            application.navigate("view/updates.html");
+            hasher.setHash("view/updates.html");
         } else if (currentHash.substring(0, "#view/routeDetails.html".length) === "#view/routeDetails.html") {
-            application.navigate("view/routes.html");
+            hasher.setHash("view/routes.html");
         } else if (currentHash.substring(0, "#view/routeDestinationDetails.html".length) === "#view/routeDestinationDetails.html") {
             application.navigate("view/routeDetails.html");
         } else if (currentHash.substring(0, "#view/routeTask.html".length) === "#view/routeTask.html") {
             /* If user has already selected a status -> go back
-                otherwise open the task status popup */
+             otherwise open the task status popup */
             if (routeTask.vm.statusUpdated) {
                 application.navigate("view/routeDestinationDetails.html");
             } else {
                 routeTask.vm.openTaskStatuses("backButton");
             }
         } else if (currentHash.substring(0, "#view/services.html".length) === "#view/services.html") {
-            application.navigate("view/updates.html");
+            hasher.setHash("view/updates.html");
         } else if (currentHash.substring(0, "#view/personalSettings.html".length) === "#view/personalSettings.html") {
-            application.navigate("view/updates.html");
+            hasher.setHash("view/updates.html");
         } else if (currentHash.substring(0, "#view/businessSettings.html".length) === "#view/businessSettings.html") {
-            application.navigate("view/updates.html");
+            hasher.setHash("view/updates.html");
         } else if (currentHash.substring(0, "#view/personalSettings.html".length) === "#view/personalSettings.html") {
-            application.navigate("view/updates.html");
+            hasher.setHash("view/updates.html");
         } else if (currentHash.substring(0, "#view/usersSettings.html".length) === "#view/usersSettings.html") {
-            application.navigate("view/updates.html");
+            hasher.setHash("view/updates.html");
         } else if (currentHash.substring(0, "#view/dispatcherSettings.html".length) === "#view/dispatcherSettings.html") {
-            application.navigate("view/updates.html");
+            hasher.setHash("view/updates.html");
         } else if (currentHash.substring(0, "#view/changePassword.html".length) === "#view/changePassword.html") {
-            application.navigate("view/personalSettings.html");
+            hasher.setHash("view/personalSettings.html");
         } else if (currentHash.substring(0, "#silverlight".length) === "#silverlight") {
-            application.navigate("view/updates.html");
+            hasher.setHash("view/updates.html");
+            // Reload is necessary when coming from silverlight section.
             document.location.reload();
         }
     };
@@ -167,14 +204,6 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "hasher", 
         //Listens for back button being pressed on a mobile device.
         document.addEventListener("backbutton", main.onBack, false);
     }
-
-    //setup hasher and crossroads
-    var parseHash = function (newHash) {
-        crossroads.parse(newHash);
-    };
-    hasher.changed.add(parseHash); //parse hash changes
-    hasher.prependHash = '';
-    hasher.init(); //start listening for history change
 
     // Listens for Cordova to load
     document.addEventListener("deviceready", onDeviceReady, false);
