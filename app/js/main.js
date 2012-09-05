@@ -128,6 +128,7 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "hasher", 
     };
 
     hasher.prependHash = '';
+    hasher.init();
 
     main.route = crossroads.addRoute("view/{section}.html:?query:");
     main.route.greedy = true;

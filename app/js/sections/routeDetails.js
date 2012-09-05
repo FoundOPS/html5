@@ -95,19 +95,6 @@ define(["jquery", "db/services", "db/models", "db/saveHistory", "hasher", "lib/k
     };
 //endregion
 
-    $.subscribe("selectedRoute", function (data) {
-        vm.set("selectedRoute", data);
-
-        /**
-         * A kendo data source for the current user's selected route.
-         * @type {kendo.data.DataSource}
-         */
-        vm.set("routeDestinationsSource",
-            new kendo.data.DataSource({
-                data: vm.get("selectedRoute.RouteDestinations")
-            }));
-    });
-
     var initialized = false;
 
     routeDetails.show = function () {
@@ -132,11 +119,7 @@ define(["jquery", "db/services", "db/models", "db/saveHistory", "hasher", "lib/k
             vm.set("selectedDestination", e.dataItem);
 
             var params = {routeId: vm.get("selectedRoute.Id"), routeDestinationId: vm.get("selectedDestination.Id")};
-            var query = main.setHash("routeDestinationDetails", params);
-
-//            localStorage.setItem("selectedDestination", vm.get("selectedDestination.Id"));
-            $.publish("selectedDestination", [vm.get("selectedDestination")]);
-//            application.navigate("view/routeDestinationDetails.html");
+            main.setHash("routeDestinationDetails", params);
         };
         //Dictate the visibility of the startRoute and endRoute buttons.
         vm.set("startVisible", true);
@@ -171,27 +154,27 @@ define(["jquery", "db/services", "db/models", "db/saveHistory", "hasher", "lib/k
     };
 
     routeDetails.initialize = function () {
-        // If user refreshes app on browser -> automatically redirect based on user's previous choices.
-//        setTimeout(function () {
-//            if (main.history[0] !== "#view/updates.html" && main.history[0] !== "#view/routes.html" && main.history[0] !== "#view/routeDetails.html") {
-//                if (localStorage.getItem("selectedDestination")) {
-//                    var destination;
-//                    for (destination in vm.get("routeDestinationsSource")._data) {
-//                        if (localStorage.getItem("selectedDestination") === vm.get("routeDestinationsSource")._data[destination].Id) {
-//                            var e = {};
-//                            e.dataItem = vm.get("routeDestinationsSource")._data[destination];
-//                            vm.selectRouteDestination(e);
-//                        }
-//                    }
-//                }
-//            }
-//        }, 0);
-
         main.route.matched.add(function (section, query) {
             if (section !== "routeDetails") {
                 return;
             }
-            console.log(query);
+
+            var route;
+            var source = routes.vm.get("routesSource");
+            for (route in source._data) {
+                if (query.routeId === source._data[route].Id) {
+                    vm.set("selectedRoute", source._data[route]);
+                }
+            }
+
+            /**
+             * A kendo data source for the current user's selected route.
+             * @type {kendo.data.DataSource}
+             */
+            vm.set("routeDestinationsSource",
+                new kendo.data.DataSource({
+                    data: vm.get("selectedRoute.RouteDestinations")
+                }));
         });
     };
 });

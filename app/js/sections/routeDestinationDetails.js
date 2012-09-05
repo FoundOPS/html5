@@ -15,10 +15,6 @@ define(["jquery", "db/saveHistory", "lib/kendo.all", "widgets/contacts"], functi
 
     routeDestinationDetails.vm = vm;
 
-    $.subscribe("selectedDestination", function (data) {
-        vm.set("selectedDestination", data);
-    });
-
     var initialized = false;
 
     routeDestinationDetails.show = function () {
@@ -43,14 +39,6 @@ define(["jquery", "db/saveHistory", "lib/kendo.all", "widgets/contacts"], functi
             return _.union(vm.get("selectedDestination.Client.ContactInfoSet").slice(0), vm.get("selectedDestination.Location.ContactInfoSet").slice(0));
         };
         /**
-         * A kendo data source for the current user's selected route destination.
-         * @type {kendo.data.DataSource}
-         */
-        vm.set("routeTasksSource",
-            new kendo.data.DataSource({
-                data: vm.get("selectedDestination.RouteTasks")
-            }));
-        /**
          * Select a task and create a dataSource for the task input fields.
          * @param e The event args from a list view click event (the selected Task)
          */
@@ -58,11 +46,7 @@ define(["jquery", "db/saveHistory", "lib/kendo.all", "widgets/contacts"], functi
             vm.set("selectedTask", e.dataItem);
 
             var params = {routeId: vm.get("selectedRoute.Id"), routeDestinationId: vm.get("selectedDestination.Id"), routeTaskId: vm.get("selectedTask.Id")};
-            var query = main.setHash("routeTask", params);
-
-//            localStorage.setItem("selectedTask", vm.get("selectedTask.Id"));
-            $.publish("selectedTask", [vm.get("selectedTask")]);
-//            application.navigate("view/routeTask.html");
+            main.setHash("routeTask", params);
         };
         vm.getDirections = function () {
             $("#directionsButton").toggleClass("buttonClicked");
@@ -77,27 +61,27 @@ define(["jquery", "db/saveHistory", "lib/kendo.all", "widgets/contacts"], functi
     };
 
     routeDestinationDetails.initialize = function () {
-//      If user refreshes app on browser -> automatically redirect based on user's previous choices.
-//        setTimeout(function () {
-//            if (main.history[0] !== "#view/updates.html" && main.history[0] !== "#view/routes.html" && main.history[0] !== "#view/routeDetails.html" && main.history[0] !== "#view/routeDestinationDetails.html") {
-//                if (localStorage.getItem("selectedTask")) {
-//                    var task;
-//                    for (task in vm.get("routeTasksSource")._data) {
-//                        if (localStorage.getItem("selectedTask") === vm.get("routeTasksSource")._data[task].Id) {
-//                            var e = {};
-//                            e.dataItem = vm.get("routeTasksSource")._data[task];
-//                            vm.selectTask(e);
-//                        }
-//                    }
-//                }
-//            }
-//        }, 0);
-
         main.route.matched.add(function (section, query) {
             if (section !== "routeDestinationDetails") {
                 return;
             }
-            console.log(query);
+
+            var destination;
+            var source = routeDetails.vm.get("routeDestinationsSource");
+            for (destination in source._data) {
+                if (query.routeDestinationId === source._data[destination].Id) {
+                    vm.set("selectedDestination", source._data[destination]);
+                }
+            }
+
+            /**
+             * A kendo data source for the current user's selected route destination.
+             * @type {kendo.data.DataSource}
+             */
+            vm.set("routeTasksSource",
+                new kendo.data.DataSource({
+                    data: vm.get("selectedDestination.RouteTasks")
+                }));
         });
     };
 });

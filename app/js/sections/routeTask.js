@@ -74,23 +74,6 @@ define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all", "widgets/ser
         vm.statusUpdated = false;
     };
 
-    $.subscribe("selectedTask", function (data) {
-        vm.set("selectedTask", data);
-        dbServices.getServiceDetails(data.get("ServiceId"), data.get("Date"), data.get("RecurringServiceId"), data.get("ServiceTemplateId"),
-            function (service) {
-                vm.set("selectedService", service);
-
-                saveHistory.close();
-                saveHistory.resetHistory();
-            });
-
-        dbServices.getTaskStatuses(function (response) {
-            var taskStatuses = new kendo.data.DataSource({data: response});
-            vm.set("taskStatusesSource", taskStatuses);
-            updateSelectedStatus();
-        });
-    });
-
     routeTask.initialize = function () {
         $("#taskServiceDetails").kendoServiceDetails({
             clientIsReadOnly: true
@@ -107,6 +90,27 @@ define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all", "widgets/ser
             if (section !== "routeTask") {
                 return;
             }
+
+            var task;
+            var source = routeDestinationDetails.vm.get("routeTasksSource");
+            for (task in source._data) {
+                if (query.routeTaskId === source._data[task].Id) {
+                    vm.set("selectedTask", source._data[task]);
+                }
+            }
+            dbServices.getTaskStatuses(function (response) {
+                var taskStatuses = new kendo.data.DataSource({data: response});
+                vm.set("taskStatusesSource", taskStatuses);
+                updateSelectedStatus();
+            });
+            dbServices.getServiceDetails(vm.get("selectedTask.ServiceId"), vm.get("selectedTask.Date"), vm.get("selectedTask.RecurringServiceId"), vm.get("selectedTask.ServiceTemplateId"),
+                function (service) {
+                    vm.set("selectedService", service);
+
+                    saveHistory.close();
+                    saveHistory.resetHistory();
+                });
+
             console.log(query);
         });
     };

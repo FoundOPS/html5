@@ -48,36 +48,14 @@ define(["jquery", "db/services", "db/saveHistory", "hasher", "lib/kendo.all"], f
             vm.set("selectedRoute", e.dataItem);
 
             var params = {routeId: vm.get("selectedRoute.Id")};
-            var query = main.setHash("routeDetails", params);
-
-//            localStorage.setItem("selectedRoute", vm.get("selectedRoute.Id"));
-            $.publish('selectedRoute', [vm.get("selectedRoute")]);
-//            application.navigate("view/routeDetails.html");
+            main.setHash("routeDetails", params);
         };
         kendo.bind($("#routes"), vm, kendo.mobile.ui);
 
-        // If user refreshes app on browser -> automatically redirect based on user's previous choices.
-//        $.subscribe("routesSourceLoaded", function () {
-//            if (main.history[0] !== "#view/routes.html" && main.history.previousPage !== "#view/updates.html") {
-//                if (localStorage.getItem("selectedRoute")) {
-//                    var route;
-//                    for (route in vm.get("routesSource")._data) {
-//                        if (vm.get("routesSource")._data.hasOwnProperty(route)) {
-//                            if (localStorage.getItem("selectedRoute") === vm.get("routesSource")._data[route].Id) {
-//                                var e = {};
-//                                e.dataItem = vm.get("routesSource")._data[route];
-//                                vm.selectRoute(e);
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        });
         main.route.matched.add(function (section, query) {
             if (section !== "route") {
                 return;
             }
-            console.log(query);
         });
     };
 
