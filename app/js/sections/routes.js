@@ -32,9 +32,7 @@ define(["jquery", "db/services", "db/saveHistory", "hasher", "lib/kendo.all"], f
                     contentType: "application/json; charset=utf-8"
                 }
             },
-            change: function (e) {
-                $.publish("routesSourceLoaded");
-            },
+            change: function (e) { },
             serverPaging: true
         }));
         vm.refreshRoutes = function () {
@@ -53,6 +51,7 @@ define(["jquery", "db/services", "db/saveHistory", "hasher", "lib/kendo.all"], f
         kendo.bind($("#routes"), vm, kendo.mobile.ui);
 
         main.route.matched.add(function (section, query) {
+            console.log(query);
             if (section !== "route") {
                 return;
             }

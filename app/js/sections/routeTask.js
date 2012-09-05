@@ -34,7 +34,8 @@ define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all", "widgets/ser
             }, 400);
             // If popup was opened by clicking backButton go back if and only if user selects status.
             if (popupCaller === "backButton" && !e) {
-                application.navigate("view/routeDestinationDetails.html");
+                var params = {routeId: routeDetails.vm.get("selectedRoute.Id"), routeDestinationId: routeDestinationDetails.vm.get("selectedDestination.Id")};
+                main.setHash("routeDestinationDetails", params);
             }
         },
         selectStatus: function (e) {
@@ -93,25 +94,25 @@ define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all", "widgets/ser
 
             var task;
             var source = routeDestinationDetails.vm.get("routeTasksSource");
-            for (task in source._data) {
-                if (query.routeTaskId === source._data[task].Id) {
-                    vm.set("selectedTask", source._data[task]);
+            if (source) {
+                for (task in source._data) {
+                    if (query.routeTaskId === source._data[task].Id) {
+                        vm.set("selectedTask", source._data[task]);
+                    }
                 }
-            }
-            dbServices.getTaskStatuses(function (response) {
-                var taskStatuses = new kendo.data.DataSource({data: response});
-                vm.set("taskStatusesSource", taskStatuses);
-                updateSelectedStatus();
-            });
-            dbServices.getServiceDetails(vm.get("selectedTask.ServiceId"), vm.get("selectedTask.Date"), vm.get("selectedTask.RecurringServiceId"), vm.get("selectedTask.ServiceTemplateId"),
-                function (service) {
-                    vm.set("selectedService", service);
-
-                    saveHistory.close();
-                    saveHistory.resetHistory();
+                dbServices.getTaskStatuses(function (response) {
+                    var taskStatuses = new kendo.data.DataSource({data: response});
+                    vm.set("taskStatusesSource", taskStatuses);
+                    updateSelectedStatus();
                 });
+                dbServices.getServiceDetails(vm.get("selectedTask.ServiceId"), vm.get("selectedTask.Date"), vm.get("selectedTask.RecurringServiceId"), vm.get("selectedTask.ServiceTemplateId"),
+                    function (service) {
+                        vm.set("selectedService", service);
 
-            console.log(query);
+                        saveHistory.close();
+                        saveHistory.resetHistory();
+                    });
+            }
         });
     };
 
@@ -131,12 +132,6 @@ define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all", "widgets/ser
         vm.statusUpdated = false;
 
         saveHistory.close();
-
-        //a task has not been selected, so jump there
-        if (!vm.get("selectedTask")) {
-            application.navigate("view/routeDestinationDetails.html");
-            return;
-        }
 
         saveHistory.setCurrentSection({
             page: "Route Task",

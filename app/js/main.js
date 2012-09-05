@@ -26,7 +26,7 @@ require.config({
 });
 
 require(["widgets/navigator", "containers/silverlight", "db/session", "hasher", "crossroads", "db/models", "lib/kendo.all", "underscore",
-    "lib/userVoice", "lib/pubsub", "moment", "sections/personalSettings", "sections/businessSettings", "sections/usersSettings",
+    "lib/userVoice", "moment", "sections/personalSettings", "sections/businessSettings", "sections/usersSettings",
     "sections/dispatcherSettings", "sections/changePassword", "sections/createPassword", "sections/services",
     "sections/routes", "sections/routeDetails", "sections/routeDestinationDetails", "sections/routeTask",
     "widgets/contacts", "widgets/serviceDetails"], function (Navigator, silverlight, session, hasher, crossroads) {
@@ -50,7 +50,6 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "hasher", 
 
         main.history.previousPage = main.history[main.history.length - 2];
         main.history.currentPage = main.history[main.history.length - 1];
-        main.history.publish = {"comingFrom": main.history.previousPage, "goingTo": main.history.currentPage};
     };
 
     session.load(function (data) {
@@ -152,24 +151,26 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "hasher", 
     //TODO REFACTOR
     //Overrides phone's back button navigation - Phonegap
     main.onBack = function () {
-        var currentHash = window.location.hash;
+        var currentHash = window.location.hash, params;
         // Use of substring function allows us to ignore url params to determine app location.
         if (currentHash.substring(0, "#view/updates.html".length) === "#view/updates.html") {
             var r = confirm("Are you sure you would like to log out?");
             if (r) {
-                application.navigate("view/logout.html");
+                hasher.setHash("view/logout.html");
             }
         } else if (currentHash.substring(0, "#view/routes.html".length) === "#view/routes.html") {
             hasher.setHash("view/updates.html");
         } else if (currentHash.substring(0, "#view/routeDetails.html".length) === "#view/routeDetails.html") {
-            hasher.setHash("view/routes.html");
+            main.setHash("routes", params);
         } else if (currentHash.substring(0, "#view/routeDestinationDetails.html".length) === "#view/routeDestinationDetails.html") {
-            application.navigate("view/routeDetails.html");
+            params = {routeId: routeDetails.vm.get("selectedRoute.Id")};
+            main.setHash("routeDetails", params);
         } else if (currentHash.substring(0, "#view/routeTask.html".length) === "#view/routeTask.html") {
+            params = {routeId: routeDetails.vm.get("selectedRoute.Id"), routeDestinationId: routeDestinationDetails.vm.get("selectedDestination.Id")};
             /* If user has already selected a status -> go back
              otherwise open the task status popup */
             if (routeTask.vm.statusUpdated) {
-                application.navigate("view/routeDestinationDetails.html");
+                main.setHash("routeDestinationDetails", params);
             } else {
                 routeTask.vm.openTaskStatuses("backButton");
             }

@@ -45,7 +45,7 @@ define(["jquery", "db/saveHistory", "lib/kendo.all", "widgets/contacts"], functi
         vm.selectTask = function (e) {
             vm.set("selectedTask", e.dataItem);
 
-            var params = {routeId: vm.get("selectedRoute.Id"), routeDestinationId: vm.get("selectedDestination.Id"), routeTaskId: vm.get("selectedTask.Id")};
+            var params = {routeId: routeDetails.vm.get("selectedRoute.Id"), routeDestinationId: vm.get("selectedDestination.Id"), routeTaskId: vm.get("selectedTask.Id")};
             main.setHash("routeTask", params);
         };
         vm.getDirections = function () {
@@ -68,20 +68,22 @@ define(["jquery", "db/saveHistory", "lib/kendo.all", "widgets/contacts"], functi
 
             var destination;
             var source = routeDetails.vm.get("routeDestinationsSource");
-            for (destination in source._data) {
-                if (query.routeDestinationId === source._data[destination].Id) {
-                    vm.set("selectedDestination", source._data[destination]);
+            if (source) {
+                for (destination in source._data) {
+                    if (query.routeDestinationId === source._data[destination].Id) {
+                        vm.set("selectedDestination", source._data[destination]);
+                    }
                 }
-            }
 
-            /**
-             * A kendo data source for the current user's selected route destination.
-             * @type {kendo.data.DataSource}
-             */
-            vm.set("routeTasksSource",
-                new kendo.data.DataSource({
-                    data: vm.get("selectedDestination.RouteTasks")
-                }));
+                /**
+                 * A kendo data source for the current user's selected route destination.
+                 * @type {kendo.data.DataSource}
+                 */
+                vm.set("routeTasksSource",
+                    new kendo.data.DataSource({
+                        data: vm.get("selectedDestination.RouteTasks")
+                    }));
+            }
         });
     };
 });

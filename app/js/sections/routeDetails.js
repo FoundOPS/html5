@@ -161,20 +161,22 @@ define(["jquery", "db/services", "db/models", "db/saveHistory", "hasher", "lib/k
 
             var route;
             var source = routes.vm.get("routesSource");
-            for (route in source._data) {
-                if (query.routeId === source._data[route].Id) {
-                    vm.set("selectedRoute", source._data[route]);
+            if (source) {
+                for (route in source._data) {
+                    if (query.routeId === source._data[route].Id) {
+                        vm.set("selectedRoute", source._data[route]);
+                    }
                 }
-            }
 
-            /**
-             * A kendo data source for the current user's selected route.
-             * @type {kendo.data.DataSource}
-             */
-            vm.set("routeDestinationsSource",
-                new kendo.data.DataSource({
-                    data: vm.get("selectedRoute.RouteDestinations")
-                }));
+                /**
+                 * A kendo data source for the current user's selected route.
+                 * @type {kendo.data.DataSource}
+                 */
+                vm.set("routeDestinationsSource",
+                    new kendo.data.DataSource({
+                        data: vm.get("selectedRoute.RouteDestinations")
+                    }));
+            }
         });
     };
 });
