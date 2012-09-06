@@ -13,12 +13,12 @@ define(["tools", "sections/importerUpload", "sections/importerSelect", "db/servi
             //use importerSelect.headers to know what all should show up
 
             //calculate how many are missing
-            var column, fieldName, name, template, width, hiddenNum = 1;
+            var column, fieldName, name, template, width, hiddenNum = 0;
             for(var i = 0; i < importerSelect.headers.length; i++){
                 if(i > importerSelect.columns.length - 1){
                     name = importerSelect.headers[i];
                     fieldName = "c10" + hiddenNum;
-                    template = "#=" + fieldName + ".V#"; //"# if ( #=" + fieldName + ".S# != '2') { # <div class='cellError'></div> # } # #=" + fieldName + ".V#";
+                    template = "# if (" + fieldName + ".S == 3) { # <div class='cellError'></div> # } # #=" + fieldName + ".V#";
                     //calculate the width of the title
                     width = name.length * 6.5 + 35;
                     //set the width to 100 if it's less than 100
@@ -38,6 +38,8 @@ define(["tools", "sections/importerUpload", "sections/importerSelect", "db/servi
 
             //refresh the grid's data with the new data
             dataSource.data(gridData);
+            //TODO: this doesn't work
+            //grid.columns = importerSelect.columns;
 
             //check for errors
             var row, cell, error = false;
@@ -79,9 +81,9 @@ define(["tools", "sections/importerUpload", "sections/importerSelect", "db/servi
                 //if no corresponding object exists, create a blank one
                 if(!newObject){
                     newObject = {
-                        h: "",
-                        s: 0,
-                        v: ""
+                        H: "",
+                        S: 2,
+                        V: ""
                     }
                 }
                 //set the row and cell
@@ -94,7 +96,12 @@ define(["tools", "sections/importerUpload", "sections/importerSelect", "db/servi
         return dataToValidate;
     };
 
-    //converts row array to an object
+    /**
+     * converts row array to an object
+     * @param {Array} row
+     * @param {boolean} validated If this data is coming from the API
+     * @return {Object} newRow
+     */
     var toObject = function(row, validated) {
         var newRow = {}, value, obj, num, field;
         if(validated){
@@ -117,7 +124,7 @@ define(["tools", "sections/importerUpload", "sections/importerSelect", "db/servi
                 //create the cell
                 obj = {
                     H: "",
-                    S: 0,
+                    S: 2,
                     V: value
                 };
                 //save the object as a property of newRow
@@ -127,6 +134,11 @@ define(["tools", "sections/importerUpload", "sections/importerSelect", "db/servi
         return newRow;
     };
 
+    /**
+     * @param data
+     * @param validated
+     * @return {Array} newData
+     */
     var formatDataForGrid = function (data, validated) {
         var newData = [];
         var obj;
@@ -144,6 +156,17 @@ define(["tools", "sections/importerUpload", "sections/importerSelect", "db/servi
         return newData;
     };
     //endregion
+
+    var setupGrid = function () {
+        grid = $("#gridView").kendoGrid({
+            columns: importerSelect.columns,
+            dataSource: dataSource,
+            editable: false,
+            resizable: true,
+            scrollable: true,
+            sortable: "multiple"
+        }).data("kendoGrid");
+    };
 
     //resize the grid based on the current window's height
     var resizeGrid = function () {
@@ -183,14 +206,7 @@ define(["tools", "sections/importerUpload", "sections/importerSelect", "db/servi
     };
 
     importerReview.show = function () {
-        grid = $("#gridView").kendoGrid({
-            columns: importerSelect.columns,
-            dataSource: dataSource,
-            editable: false,
-            resizable: true,
-            scrollable: true,
-            sortable: "multiple"
-        }).data("kendoGrid");
+        setupGrid();
 
         resizeGrid();
 

@@ -80,6 +80,8 @@ define(["sections/importerUpload", "db/services"], function (importerUpload, dbS
             {Name: 'City', Type: "string"},
             {Name: 'State', Type: "string"},
             {Name: 'Zip Code', Type: "string"},
+            {Name: 'Latitude', Type: "string"},
+            {Name: 'Longitude', Type: "string"},
             {Name: 'Region Name', Type: "string"},
             {Name: 'Frequency', Type: "none"},
             {Name: 'Repeat On', Type: "none"},
@@ -87,25 +89,26 @@ define(["sections/importerUpload", "db/services"], function (importerUpload, dbS
             {Name: 'Repeat Start Date', Type: "date"}
         ];
 
+        //make sure there is a selected service type
+        if(!importerUpload.selectedService){
+            window.application.navigate("view/importerUpload.html");
+            return;
+        }
+
         $("#listView").kendoListView({
             //setup the template to only include the header and the first row of data
             template: "<li><div class='header'>#=data[0]#</div><div class='value'>#=data[1]#</div><input class='field' /></li>",
             dataSource: importerUpload.data
         });
 
-        //make sure there is a selected service type
-        if(!importerUpload.selectedService){
-            window.application.navigate("view/importerUpload.html");
-            return;
-        }
         //get the list of fields for the selected service
         dbServices.getFields(importerUpload.selectedService, function (fields) {
             var newFields = [];
             var newField = fields[0];
             //iterate throught the list of fields
             for(var i in newField){
-                //don't add if type is guid
-                if(newField[i] != "guid"){
+                //don't add if type is guid or if name is ClientName or OccurDate
+                if(newField[i] != "guid" && i != "ClientName" && i != "OccurDate"){
                     //add field to list
                     newFields.push({
                         //replace "_" with " "
@@ -123,7 +126,7 @@ define(["sections/importerUpload", "db/services"], function (importerUpload, dbS
                 dataValueField: "Name",
                 dataSource: allFields,
                 change: function () {
-                    var i = 0, type, name, width, fieldName, template, column, hiddenNum = 0;
+                    var i = 0, type, name, width, fieldName, template, column;
                     importerSelect.columns = [];
                     importerSelect.headers = [];
                     importerSelect.fields = {};
@@ -141,7 +144,7 @@ define(["sections/importerUpload", "db/services"], function (importerUpload, dbS
                         if(name != "Do not Import") {
                             //setup the column
                             fieldName = "c" + i;
-                            template = "#=" + fieldName + ".V#"; //"# if ( #=" + fieldName + ".S# != '2') { # <div class='cellError'></div> # } # #=" + fieldName + ".V#";
+                            template = "# if (" + fieldName + ".S == 3) { # <div class='cellError'></div> # } # #=" + fieldName + ".V#";
                             //if(type != "string"){
 //                                    var editor;
 //                                    if(name == "Repeat On"){
@@ -183,7 +186,7 @@ define(["sections/importerUpload", "db/services"], function (importerUpload, dbS
 
                     //this section checks if each of the required fields has been included
                     //if it hasn't, a hidden field is added
-
+                    var hiddenNum = 0;
                     for(var f in importerSelect.requiredFields){
                         var field = importerSelect.requiredFields[f];
                         var hasField = false;
