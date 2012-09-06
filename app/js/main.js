@@ -25,11 +25,11 @@ require.config({
     }
 });
 
-require(["widgets/navigator", "containers/silverlight", "db/session", "hasher", "crossroads", "db/models", "lib/kendo.all", "underscore",
-    "lib/userVoice", "lib/pubsub", "lib/jquery.address", "moment", "sections/personalSettings", "sections/businessSettings", "sections/usersSettings",
+require(["widgets/navigator", "containers/silverlight", "db/session", "tools", "hasher", "crossroads", "db/models", "lib/kendo.all", "underscore",
+    "lib/userVoice", "lib/pubsub", "moment", "sections/personalSettings", "sections/businessSettings", "sections/usersSettings",
     "sections/dispatcherSettings", "sections/changePassword", "sections/createPassword", "sections/services",
     "sections/routes", "sections/routeDetails", "sections/routeDestinationDetails", "sections/routeTask",
-    "widgets/contacts", "widgets/serviceDetails"], function (Navigator, silverlight, session, hasher, crossroads) {
+    "widgets/contacts", "widgets/serviceDetails"], function (Navigator, silverlight, session, tools, hasher, crossroads) {
     var application, navigator, main = {}, initialized = false;
 
     window.main = main;
@@ -44,9 +44,6 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "hasher", 
         }
         initialized = true;
     }
-
-    //prevents leading slash
-    $.address.strict(false);
 
     window.onhashchange = function () {
         main.history.push(location.hash);
@@ -145,26 +142,6 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "hasher", 
     main.route.greedy = true;
 
     /**
-     * Gets the hash's query parameters
-     */
-    main.getParameters = function () {
-        var parameters = {};
-        (function () {
-            var match,
-                pl = /\+/g, // Regex for replacing addition symbol with a space
-                search = /([^&=]+)=?([^&]*)/g,
-                decode = function (s) {
-                    return decodeURIComponent(s.replace(pl, " "));
-                },
-                query = window.location.search.substring(1);
-
-            while (match = search.exec(query))
-                parameters[decode(match[1])] = decode(match[2]);
-        })();
-        return parameters;
-    };
-
-    /**
      * Set the hash
      * @param section
      * @param parameters
@@ -173,7 +150,7 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "hasher", 
         var query = "view/" + section + ".html?";
 
         //check the parameters are not already the same
-        if (_.isEqual(parameters, main.getParameters())) {
+        if (_.isEqual(parameters, tools.getParameters())) {
             return;
         }
 

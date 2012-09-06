@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(function () {
+define(['hasher'], function (hasher) {
     var tools = {};
 
     /**
@@ -59,11 +59,24 @@ define(function () {
     };
 
     /**
-     * Converts the API date string to UTC
+     * Gets the hash's query parameters
      */
-    tools.toUtc = function (dateString) {
-        var result = moment.utc(dateString).toDate();
-        return result;
+    tools.getParameters = function () {
+        var urlParams = {};
+        var hash = hasher.getHash();
+        var query = hash.substring(hash.indexOf('?') + 1);
+        (function () {
+            var match,
+                pl = /\+/g, // Regex for replacing addition symbol with a space
+                search = /([^&=]+)=?([^&]*)/g,
+                decode = function (s) {
+                    return decodeURIComponent(s.replace(pl, " "));
+                };
+
+            while (match = search.exec(query))
+                urlParams[decode(match[1])] = decode(match[2]);
+        })();
+        return urlParams;
     };
 
     /**
@@ -128,6 +141,14 @@ define(function () {
         });
 
         return newGuidString;
+    };
+
+    /**
+     * Converts the API date string to UTC
+     */
+    tools.toUtc = function (dateString) {
+        var result = moment.utc(dateString).toDate();
+        return result;
     };
 
     /**

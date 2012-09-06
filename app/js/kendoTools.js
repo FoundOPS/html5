@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(['db/session', 'db/services', "hasher"], function (session, dbServices, hasher) {
+define(['tools', 'db/session', 'db/services'], function (tools, session, dbServices) {
     var kendoTools = {};
 
     //region Column Configuration
@@ -198,6 +198,26 @@ define(['db/session', 'db/services', "hasher"], function (session, dbServices, h
         return csv;
     };
 
+    //pass a query parameter and this will return the filter's name
+    //or null if it is not a filter
+    var filterName = function (parameter) {
+        //match f_operator_name format
+        var matches = parameter.match(/^f_(lt|lte|eq|gt|gte)_.*$/);
+        if (matches === null) {
+            return null;
+        }
+        return parameter.substring(3 + matches[1].length);
+    };
+    //pass a query parameter and this will return the filter operator
+    //or null if it is not a filter
+    var filterOperator = function (parameter) {
+        var matches = parameter.match(/^f_(lt|lte|eq|gt|gte)_.*$/);
+        if (matches === null) {
+            return null;
+        }
+        return matches[1];
+    };
+
     /**
      * Adds a filtered event to the dataSource
      * @param dataSource
@@ -226,21 +246,19 @@ define(['db/session', 'db/services', "hasher"], function (session, dbServices, h
 
     /*
      * Set the url parameters based on the dataSource's filters
+     * Filter url parameters will be in this format f_operator_name Ex: f_lte_OccurDate
      * @dataSource The dataSource to sync the filters with
      */
     kendoTools.updateHashToFilters = function (section, dataSource) {
         var filterSet = dataSource.filter().filters;
 
-        var i = 0;
-        var query = {};
+        var currentParams = tools.getParameters();
 
         //add the parameters that are not filter parameters to the query
-        var otherParams = _.filter($.address.parameterNames(), function (name) {
-            return !name.match(/[0-9]/g);
+        var otherKeys = _.filter(_.keys(currentParams), function (name) {
+            return filterName(name) === null;
         });
-        _.each(otherParams, function (param) {
-            query[param] = $.address.parameter(param);
-        });
+        var query = _.pick(currentParams, otherKeys);
 
         //add the filter parameters to the query
         _.each(filterSet, function (filter) {
@@ -254,20 +272,18 @@ define(['db/session', 'db/services', "hasher"], function (session, dbServices, h
             } else {
                 type = "s";
             }
-            i++;
 
-            //add a new number to each parameter to:
-            //1) identify this as a filter parameter
-            //2) avoid issues when there are duplicates
-            var key = i + filter.field;
-            query[key] = filter.operator + "$" + val + "$" + type;
+            //prefix the parameter key with f_ to identify this as a filter parameter
+            //prefix it with the operator to avoid issues when there are duplicates
+            var key = 'f_' + filter.operator + '_' + filter.field;
+            query[key] = val + "$" + type;
         });
 
         main.setHash(section, query);
     };
 
     /*
-     * Set the dataSource's filters to the url parameters
+     * Set the dataSource's filters to the url parameters (if they are different)
      * @dataSource The dataSource to adjust
      * @param parameters The parameters to build filters from
      * @processFilters (Optional) Process and adjust the filters before setting them. This is for forcing validation
@@ -277,41 +293,29 @@ define(['db/session', 'db/services', "hasher"], function (session, dbServices, h
             return;
         }
 
-        if (dataSource.f_handleFilterUpdate) {
-            dataSource.f_handleFilterUpdate = false;
-            return;
-        }
-
-        //return if the parameters are equal
-        if (_.isEqual(parameters, dataSource.f_lastFilterParameters)) {
-            return;
-        }
-
-        dataSource.f_lastFilterParameters = parameters;
-
         var filterSet = [];
         //set the filterSet to the url parameters
         _.each(parameters, function (value, parameter) {
-            //if there is no number prefix it is not a filter. ignore this parameter
-            if (!parameter.match(/[0-9]/g)) {
+            var name = filterName(parameter);
+
+            //if it is not a filter parameter. ignore it
+            if (name === null) {
                 return;
             }
-
-            //remove the number
-            parameter = parameter.replace(/[0-9]/g, '');
 
             //add a filter for every possible parameter
             var filter = value.split("$");
             var formattedValue;
-            if (filter[2] === "d") {
-                formattedValue = new Date(filter[1]);
-            } else if (filter[2] === "n") {
-                formattedValue = parseFloat(filter[1]);
+            if (filter[1] === "d") {
+                formattedValue = new Date(filter[0]);
+            } else if (filter[1] === "n") {
+                formattedValue = parseFloat(filter[0]);
             } else {
-                formattedValue = filter[1];
+                formattedValue = filter[0];
             }
 
-            filterSet.push({field: parameter, operator: filter[0], value: formattedValue});
+            var operator = filterOperator(parameter);
+            filterSet.push({field: name, operator: operator, value: formattedValue});
         });
 
         //process the filters
@@ -323,11 +327,17 @@ define(['db/session', 'db/services', "hasher"], function (session, dbServices, h
             }
         }
 
+        //check if they are different
+        var existing = dataSource.filter();
+        if (existing.filters) {
+            existing = existing.filters;
+        }
+        var same = _.isEqual(filterSet, existing);
 
-        //TODO check if they are different first
-        //adjust the filters accordingly
-        dataSource.f_handleFilterUpdate = true;
-        dataSource.filter(filterSet);
+        //then adjust the filters accordingly
+        if (!same) {
+            dataSource.filter(filterSet);
+        }
     };
 
     return kendoTools;

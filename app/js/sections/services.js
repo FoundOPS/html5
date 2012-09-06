@@ -465,8 +465,11 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "widg
         //re-setup the data source/grid whenever the service type changes
         else if (e.field === "serviceType") {
             var serviceName = vm.get("serviceType.Name");
-            if ($.address.parameter("service") !== serviceName) {
-                $.address.parameter("service", serviceName);
+
+            var currentParams = tools.getParameters();
+            if (currentParams.service !== serviceName) {
+                currentParams.service = serviceName;
+                main.setHash("services", currentParams);
             }
 
             createDataSourceAndGrid();
