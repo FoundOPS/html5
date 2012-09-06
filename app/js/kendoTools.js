@@ -329,6 +329,9 @@ define(['tools', 'db/session', 'db/services'], function (tools, session, dbServi
 
         //check if they are different
         var existing = dataSource.filter();
+        if (!existing) {
+            existing = {};
+        }
         if (existing.filters) {
             existing = existing.filters;
         }
