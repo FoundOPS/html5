@@ -457,6 +457,12 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "widg
 
 //endregion
 
+    var reloadServices = _.debounce(function () {
+        serviceHoldersDataSource.options.transport.read.data.startDate = tools.formatDate(vm.get("startDate"));
+        serviceHoldersDataSource.options.transport.read.data.endDate = tools.formatDate(vm.get("endDate"));
+        serviceHoldersDataSource.read();
+    }, 250);
+
     var vmChanged = function (e) {
         //save changes whenever the selected service has a change
         if (e.field.indexOf("selectedService.") > -1) {
@@ -483,9 +489,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "widg
         }
         //reload the services whenever the start or end date changes
         else if (e.field === "startDate" || e.field === "endDate") {
-            serviceHoldersDataSource.options.transport.read.data.startDate = tools.formatDate(vm.get("startDate"));
-            serviceHoldersDataSource.options.transport.read.data.endDate = tools.formatDate(vm.get("endDate"));
-            serviceHoldersDataSource.read();
+            reloadServices();
         }
     };
 
