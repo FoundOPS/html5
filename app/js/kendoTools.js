@@ -198,11 +198,12 @@ define(['tools', 'db/session', 'db/services'], function (tools, session, dbServi
         return csv;
     };
 
+    var filterMatchRegEx = /^f_(lt|lte|eq|neq|gt|gte|startswith|endswith|contains|doesnotcontain)_.*$/;
     //pass a query parameter and this will return the filter's name
     //or null if it is not a filter
     var filterName = function (parameter) {
         //match f_operator_name format
-        var matches = parameter.match(/^f_(lt|lte|eq|gt|gte)_.*$/);
+        var matches = parameter.match(filterMatchRegEx);
         if (matches === null) {
             return null;
         }
@@ -211,7 +212,7 @@ define(['tools', 'db/session', 'db/services'], function (tools, session, dbServi
     //pass a query parameter and this will return the filter operator
     //or null if it is not a filter
     var filterOperator = function (parameter) {
-        var matches = parameter.match(/^f_(lt|lte|eq|gt|gte)_.*$/);
+        var matches = parameter.match(filterMatchRegEx);
         if (matches === null) {
             return null;
         }
