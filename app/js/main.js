@@ -118,16 +118,24 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "hasher", 
     });
 
     //setup hasher and crossroads
+    crossroads.bypassed.add(function (request) {
+        console.log(request);
+    });
 
     /**
-     * Call this in every view's show method
+     * Call this to force calling the parser.
+     * It should be called at least in every view's show method.
      */
     main.parseHash = function () {
+        //resetting the state forces crossroads to trigger route.matched again on parse
+        crossroads.resetState();
         crossroads.parse(hasher.getHash());
     };
-
     hasher.prependHash = '';
     hasher.init();
+
+    //whenever the hash is changed, parse it with cross roads
+    hasher.changed.add(main.parseHash);
 
     main.route = crossroads.addRoute("view/{section}.html:?query:");
     main.route.greedy = true;
@@ -144,7 +152,7 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "hasher", 
             }
             query += key + "=" + value;
         });
-
+        crossroads.resetState();
         hasher.setHash(query);
     };
 
@@ -218,6 +226,4 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "hasher", 
         };
     } catch (err) {
     }
-
-    return main;
 });
