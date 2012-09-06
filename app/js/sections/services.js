@@ -464,15 +464,19 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "widg
         }
         //re-setup the data source/grid whenever the service type changes
         else if (e.field === "serviceType") {
+            var serviceName = vm.get("serviceType.Name");
+            if ($.address.parameter("service") !== serviceName) {
+                $.address.parameter("service", serviceName);
+            }
+
             createDataSourceAndGrid();
 
-            //make sure dropdownlist has service type selected
-            serviceTypesDropDown.select(function (item) {
-                return item.Id === vm.get("serviceType.Id");
-            });
+            var serviceTypeId = vm.get("serviceType.Id");
 
-            //force reparse url parameters
-            main.parseHash();
+            //make sure dropdownlist has service type selected
+            if (serviceTypesDropDown.dataItem().Id !== serviceTypeId) {
+                serviceTypesDropDown.value(serviceTypeId);
+            }
         }
         //reload the services whenever the start or end date changes
         else if (e.field === "startDate" || e.field === "endDate") {
@@ -548,12 +552,13 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "widg
                 query = {};
             }
 
+            var serviceType = vm.get("serviceType");
+
             //1) update the service type (if it changed)
 
             //if it is not chosen:
             //choose the vm's selected service, or choose the first one
             if (!query.service) {
-                var serviceType = vm.get("serviceType");
                 if (!serviceType) {
                     serviceType = services.serviceTypes[0];
                 }
@@ -562,8 +567,8 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "widg
                 main.setHash("services", query);
             }
             //if it changed, update it
-            else if (query.service !== vm.get("serviceType.Name")) {
-                var serviceType = _.find(services.serviceTypes, function (st) {
+            else if (serviceType === null || query.service !== serviceType.Name) {
+                serviceType = _.find(services.serviceTypes, function (st) {
                     return st.Name === query.service;
                 });
                 vm.set("serviceType", serviceType);
@@ -589,5 +594,4 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "widg
 
 //set services to a global function, so the functions are accessible from the HTML element
     window.services = services;
-})
-;
+});

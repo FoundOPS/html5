@@ -26,7 +26,7 @@ require.config({
 });
 
 require(["widgets/navigator", "containers/silverlight", "db/session", "hasher", "crossroads", "db/models", "lib/kendo.all", "underscore",
-    "lib/userVoice", "lib/pubsub", "moment", "sections/personalSettings", "sections/businessSettings", "sections/usersSettings",
+    "lib/userVoice", "lib/pubsub", "lib/jquery.address", "moment", "sections/personalSettings", "sections/businessSettings", "sections/usersSettings",
     "sections/dispatcherSettings", "sections/changePassword", "sections/createPassword", "sections/services",
     "sections/routes", "sections/routeDetails", "sections/routeDestinationDetails", "sections/routeTask",
     "widgets/contacts", "widgets/serviceDetails"], function (Navigator, silverlight, session, hasher, crossroads) {
@@ -44,6 +44,9 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "hasher", 
         }
         initialized = true;
     }
+
+    //prevents leading slash
+    $.address.strict(false);
 
     window.onhashchange = function () {
         main.history.push(location.hash);
