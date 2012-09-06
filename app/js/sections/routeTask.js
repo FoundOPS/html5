@@ -9,9 +9,11 @@
 define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all", "widgets/serviceDetails"], function ($, dbServices, saveHistory) {
     /**
      * routeTask = wrapper for all service objects
-     * popupCaller the button who's click opened the popup.
+     * vm = viewModel
+     * popupCaller = the button who's click opened the popup.
+     * initialized = Detects whether the view is being loaded for the first time (useful for refreshing functionality).
      */
-    var routeTask = {}, vm = kendo.observable(), initialized = false, popupCaller;
+    var routeTask = {}, vm = kendo.observable(), popupCaller, initialized = false;
     window.routeTask = routeTask;
 
     routeTask.vm = vm;

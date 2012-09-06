@@ -9,9 +9,11 @@
 define(["jquery", "db/services", "db/models", "db/saveHistory", "hasher", "lib/kendo.all"], function ($, dbServices, models, saveHistory, hasher) {
     /**
      * routeDetails = wrapper for all routeDetails objects
-     * serviceDate = the date for the routes that are acquired form the server
+     * vm = viewModel
+     * serviceDate = Date when service is being performed.
      * intervalId = used to start and stop a route
      * trackPointsToSend = stores the track points that will be sent to the API
+     * initialized = Detects whether the view is being loaded for the first time (useful for refreshing functionality).
      */
     var routeDetails = {}, vm = kendo.observable(), serviceDate, intervalId = null, trackPointsToSend = [], initialized = false;
     window.routeDetails = routeDetails;

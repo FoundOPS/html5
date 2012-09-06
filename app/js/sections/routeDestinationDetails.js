@@ -9,6 +9,8 @@
 define(["jquery", "db/saveHistory", "lib/kendo.all", "widgets/contacts"], function ($, saveHistory) {
     /**
      * routeDestinationDetails = wrapper for all routeDestinationDetails objects
+     * vm = viewModel
+     * initialized = Detects whether the view is being loaded for the first time (useful for refreshing functionality).
      */
     var routeDestinationDetails = {}, vm = kendo.observable(), initialized = false;
     window.routeDestinationDetails = routeDestinationDetails;

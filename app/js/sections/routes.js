@@ -9,8 +9,6 @@
 define(["jquery", "db/services", "db/saveHistory", "hasher", "lib/kendo.all"], function ($, dbServices, saveHistory, hasher) {
     /**
      * routes = wrapper for all route list objects/logic
-     * app = the kendoUI mobile app
-     * serviceDate = the date for the routes that are acquired form the server
      * vm = viewModel
      */
     var routes = {}, vm = kendo.observable();
@@ -37,12 +35,6 @@ define(["jquery", "db/services", "db/saveHistory", "hasher", "lib/kendo.all"], f
 //region routes Objects
     routes.initialize = function () {
         kendo.bind($("#routes"), vm, kendo.mobile.ui);
-
-        main.route.matched.add(function (section, query) {
-            if (section !== "route") {
-                return;
-            }
-        });
     };
     routes.show = function () {
         main.parseHash();

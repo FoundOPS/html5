@@ -30,8 +30,13 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "hasher", 
     "sections/dispatcherSettings", "sections/changePassword", "sections/createPassword", "sections/services",
     "sections/routes", "sections/routeDetails", "sections/routeDestinationDetails", "sections/routeTask",
     "widgets/contacts", "widgets/serviceDetails"], function (Navigator, silverlight, session, hasher, crossroads) {
+    /**
+     * application = The app object.
+     * navigator = The navigator object.
+     * main = A wrapper for methods that should be exposed throughout the app.
+     * initialized = Detects whether the app is being loaded for the first time (useful for refreshing functionality).
+     */
     var application, navigator, main = {}, initialized = false;
-
     window.main = main;
 
     // Array to keep track of the hash changes within the app.
@@ -46,11 +51,9 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "hasher", 
         initialized = true;
     }
 
+    // Listens to changes in the URL's hash and adds them to the history.
     window.onhashchange = function () {
         main.history.push(location.hash);
-
-        main.history.previousPage = main.history[main.history.length - 2];
-        main.history.currentPage = main.history[main.history.length - 1];
     };
 
     main.route = crossroads.addRoute("view/{section}.html:?query:");
@@ -64,11 +67,8 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "hasher", 
     // Used to parse the URL on refresh
     main.parseURLParams = function (url) {
         var queryStart = url.indexOf("?") + 1,
-            query = url.slice(queryStart);
-
-        if (query === url || query === "") { return; }
-
-        var params = {},
+            query = url.slice(queryStart),
+            params = {},
             param = query.split("&"),
             i;
 
@@ -103,6 +103,7 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "hasher", 
     //whenever the hash is changed, parse it with cross roads - this is redundant since main.parseHash() gets called in view's show methods.
 //    hasher.changed.add(main.parseHash);
 
+    // Builds a hash for the URL and navigates to it.
     main.setHash = function (section, parameters) {
         var query = "view/" + section + ".html?";
 
@@ -122,21 +123,18 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "hasher", 
     //TODO REFACTOR
     //Overrides phone's back button navigation - Phonegap
     main.onBack = function () {
-        var currentHash = window.location.hash, params;
-        // Use of substring function allows us to ignore url params to determine app location.
-        if (currentHash.substring(0, "#view/updates.html".length) === "#view/updates.html") {
+        var currentView = window.location.hash.slice(location.hash.indexOf("/") + 1, location.hash.indexOf(".")), params;
+        if (currentView === "updates") {
             var r = confirm("Are you sure you would like to log out?");
             if (r) {
                 hasher.setHash("view/logout.html");
             }
-        } else if (currentHash.substring(0, "#view/routes.html".length) === "#view/routes.html") {
-            hasher.setHash("view/updates.html");
-        } else if (currentHash.substring(0, "#view/routeDetails.html".length) === "#view/routeDetails.html") {
+        } else if (currentView === "routeDetails") {
             hasher.setHash("view/routes.html");
-        } else if (currentHash.substring(0, "#view/routeDestinationDetails.html".length) === "#view/routeDestinationDetails.html") {
+        } else if (currentView === "routeDestinationDetails") {
             params = {routeId: routeDetails.vm.get("selectedRoute.Id")};
             main.setHash("routeDetails", params);
-        } else if (currentHash.substring(0, "#view/routeTask.html".length) === "#view/routeTask.html") {
+        } else if (currentView === "routeTask") {
             params = {routeId: routeDetails.vm.get("selectedRoute.Id"), routeDestinationId: routeDestinationDetails.vm.get("selectedDestination.Id")};
             /* If user has already selected a status -> go back
              otherwise open the task status popup */
@@ -145,24 +143,14 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "hasher", 
             } else {
                 routeTask.vm.openTaskStatuses("backButton");
             }
-        } else if (currentHash.substring(0, "#view/services.html".length) === "#view/services.html") {
-            hasher.setHash("view/updates.html");
-        } else if (currentHash.substring(0, "#view/personalSettings.html".length) === "#view/personalSettings.html") {
-            hasher.setHash("view/updates.html");
-        } else if (currentHash.substring(0, "#view/businessSettings.html".length) === "#view/businessSettings.html") {
-            hasher.setHash("view/updates.html");
-        } else if (currentHash.substring(0, "#view/personalSettings.html".length) === "#view/personalSettings.html") {
-            hasher.setHash("view/updates.html");
-        } else if (currentHash.substring(0, "#view/usersSettings.html".length) === "#view/usersSettings.html") {
-            hasher.setHash("view/updates.html");
-        } else if (currentHash.substring(0, "#view/dispatcherSettings.html".length) === "#view/dispatcherSettings.html") {
-            hasher.setHash("view/updates.html");
-        } else if (currentHash.substring(0, "#view/changePassword.html".length) === "#view/changePassword.html") {
+        } else if (currentView === "changePassword") {
             hasher.setHash("view/personalSettings.html");
-        } else if (currentHash.substring(0, "#silverlight".length) === "#silverlight") {
+        } else if (currentView === "#silverligh") {
             hasher.setHash("view/updates.html");
             // Reload is necessary when coming from silverlight section.
             document.location.reload();
+        } else {
+            hasher.setHash("view/updates.html");
         }
     };
 
@@ -245,7 +233,8 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "hasher", 
         });
     });
 
-    //hookup remote loading into remoteContent, by using the kendo mobile application
+    //TODO: Change initial view to routes.html if mobile session (need to look at object getSession returns).
+    //Hookup remote loading into remoteContent, by using the kendo mobile application
     window.application = application = new kendo.mobile.Application($("#remoteContent"), { initial: "view/updates.html", platform: "ios"});
 
     //setup page tracking
