@@ -263,6 +263,10 @@ define(['tools', 'db/session', 'db/services'], function (tools, session, dbServi
 
         //add the filter parameters to the query
         _.each(filterSet, function (filter) {
+            //normalize
+            if (filter.filters) {
+                filter = filter.filters;
+            }
             var type;
             var val = filter.value;
             if (val instanceof Date) {
