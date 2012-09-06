@@ -144,8 +144,38 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "hasher", 
     main.route = crossroads.addRoute("view/{section}.html:?query:");
     main.route.greedy = true;
 
+    /**
+     * Gets the hash's query parameters
+     */
+    main.getParameters = function () {
+        var parameters = {};
+        (function () {
+            var match,
+                pl = /\+/g, // Regex for replacing addition symbol with a space
+                search = /([^&=]+)=?([^&]*)/g,
+                decode = function (s) {
+                    return decodeURIComponent(s.replace(pl, " "));
+                },
+                query = window.location.search.substring(1);
+
+            while (match = search.exec(query))
+                parameters[decode(match[1])] = decode(match[2]);
+        })();
+        return parameters;
+    };
+
+    /**
+     * Set the hash
+     * @param section
+     * @param parameters
+     */
     main.setHash = function (section, parameters) {
         var query = "view/" + section + ".html?";
+
+        //check the parameters are not already the same
+        if (_.isEqual(parameters, main.getParameters())) {
+            return;
+        }
 
         var first = true;
         _.each(parameters, function (value, key) {

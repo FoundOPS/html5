@@ -228,12 +228,22 @@ define(['db/session', 'db/services', "hasher"], function (session, dbServices, h
      * Set the url parameters based on the dataSource's filters
      * @dataSource The dataSource to sync the filters with
      */
-    kendoTools.updateHashToFilters = function (dataSource, base) {
-        //TODO: return if it is already correct
+    kendoTools.updateHashToFilters = function (section, dataSource) {
         var filterSet = dataSource.filter().filters;
 
         var i = 0;
-        var parameters = _.map(filterSet, function (filter) {
+        var query = {};
+
+        //add the parameters that are not filter parameters to the query
+        var otherParams = _.filter($.address.parameterNames(), function (name) {
+            return !name.match(/[0-9]/g);
+        });
+        _.each(otherParams, function (param) {
+            query[param] = $.address.parameter(param);
+        });
+
+        //add the filter parameters to the query
+        _.each(filterSet, function (filter) {
             var type;
             var val = filter.value;
             if (val instanceof Date) {
@@ -244,12 +254,16 @@ define(['db/session', 'db/services', "hasher"], function (session, dbServices, h
             } else {
                 type = "s";
             }
-            i++; //add a new number to each parameter to avoid issues when there are duplicates
-            return i + filter.field + "=" + filter.operator + "$" + val + "$" + type;
+            i++;
+
+            //add a new number to each parameter to:
+            //1) identify this as a filter parameter
+            //2) avoid issues when there are duplicates
+            var key = i + filter.field;
+            query[key] = filter.operator + "$" + val + "$" + type;
         });
 
-        var query = parameters.join("&");
-        hasher.setHash('#' + base + '?' + query);
+        main.setHash(section, query);
     };
 
     /*

@@ -324,11 +324,11 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "widg
             //whenever the grid is filtered, update the URL parameters
             kendoTools.addFilterEvent(serviceHoldersDataSource);
             serviceHoldersDataSource.bind("filtered", function () {
-                kendoTools.updateHashToFilters(serviceHoldersDataSource, 'view/services.html');
+                kendoTools.updateHashToFilters("services", serviceHoldersDataSource);
             });
 
             //force reparse, to fix start/end date filters
-//            main.parseHash();
+            main.parseHash();
         });
     };
 //endregion
@@ -542,7 +542,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "widg
 
         //whenever the url parameters change:
         //1) update the service type (if it changed)
-        //2) update the grid's filters (if it changed)
+        //2) update the grid's filters (if they changed)
         main.route.matched.add(function (section, query) {
             if (section !== "services" || !services.serviceTypes) {
                 return;
@@ -556,15 +556,18 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "widg
 
             //1) update the service type (if it changed)
 
-            //if it is not chosen:
-            //choose the vm's selected service, or choose the first one
+            //if there is none, choose the vm's selected service
             if (!query.service) {
+                //if it is not chosen choose the first one
                 if (!serviceType) {
                     serviceType = services.serviceTypes[0];
                 }
 
                 query.service = serviceType.Name;
+
+                //update the query parameters
                 main.setHash("services", query);
+                return;
             }
             //if it changed, update it
             else if (serviceType === null || query.service !== serviceType.Name) {
@@ -573,10 +576,9 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "widg
                 });
                 vm.set("serviceType", serviceType);
             }
-            //setup the filters
-            else {
-//                kendoTools.updateFiltersToHash(serviceHoldersDataSource, query, processFilters);
-            }
+
+            //update the filters based on the hash
+            kendoTools.updateFiltersToHash(serviceHoldersDataSource, query, processFilters);
         });
     };
 
