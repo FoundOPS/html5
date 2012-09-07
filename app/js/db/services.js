@@ -414,7 +414,7 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
 
     services.trackError = function (error, business, section) {
         $.ajax({
-            url: services.API_URL + "Error/Track?business=" + business + "&section=" + section,
+            url: services.API_URL + "Error/Track?business=" + business + "&section=" + section.name,
             type: "POST",
             dataType: "json",
             contentType: 'application/json',

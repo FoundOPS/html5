@@ -2,8 +2,8 @@
 
 'use strict';
 
-require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "crossroads", "hasher", "widgets/serviceDetails", "lib/jquery.form"], function ($, dbServices, tools, saveHistory, kendoTools, crossroads, hasher) {
-    var services = {}, serviceHoldersDataSource, grid, handleChange, serviceTypesDropDown, selectedServiceHolder, vm, selectFirst = true;
+require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "widgets/serviceDetails", "lib/jquery.form"], function ($, dbServices, tools, saveHistory, kendoTools) {
+    var services = {}, serviceHoldersDataSource, grid, handleChange, serviceTypesDropDown, selectedServiceHolder, vm;
 
     //region Public
     services.vm = vm = kendo.observable({
@@ -213,17 +213,27 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "cros
     };
 
     /**
-     * Correct missing start or end date filters
+     * 1) Correct missing start or end date filters
+     * 2) Correct missing service type filters
      * @param filterSet
      */
     var processFilters = function (filterSet) {
         var filtersChanged = false;
 
+        var normalized = [];
+        _.each(filterSet, function (filter) {
+            if (filter.filters) {
+                normalized.push(filter.filters);
+            } else {
+                normalized.push(filter);
+            }
+        });
+
         //1) correct missing start or end date filters
-        var startDateFilter = _.find(filterSet, function (f) {
+        var startDateFilter = _.find(normalized, function (f) {
             return f.field === "OccurDate" && f.operator === "gte";
         });
-        var endDateFilter = _.find(filterSet, function (f) {
+        var endDateFilter = _.find(normalized, function (f) {
             return f.field === "OccurDate" && f.operator === "lte";
         });
 
@@ -266,13 +276,6 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "cros
             return otherFilters;
         }
     };
-
-    //whenever the url parameters change, update the grid's filters
-    crossroads.addRoute('view/services.html:?query:',function (query) {
-        if (serviceHoldersDataSource) {
-            kendoTools.syncFilters(serviceHoldersDataSource, query, processFilters);
-        }
-    }).greedy = true;
 
     /*
      * Create a data source and grid.
@@ -321,13 +324,11 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "cros
             //whenever the grid is filtered, update the URL parameters
             kendoTools.addFilterEvent(serviceHoldersDataSource);
             serviceHoldersDataSource.bind("filtered", function () {
-                if (serviceHoldersDataSource) {
-                    kendoTools.syncFilters(serviceHoldersDataSource, null, processFilters);
-                }
+                kendoTools.updateHashToFilters("services", serviceHoldersDataSource);
             });
 
             //force reparse, to fix start/end date filters
-            hasher.setHash("view/services.html?");
+            main.parseHash();
         });
     };
 //endregion
@@ -436,14 +437,6 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "cros
             },
             columns: columns,
             columnMenu: true,
-            dataBound: function () {
-                //check if this is the first load or the service type has changed
-//                if (selectFirst) {
-                // selects first grid row
-                //grid.select(grid.tbody.find(">tr:first"));
-//                    selectFirst = false;
-//                }
-            },
             dataSource: serviceHoldersDataSource,
             filterable: true,
             pageable: true,
@@ -464,6 +457,12 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "cros
 
 //endregion
 
+    var reloadServices = _.debounce(function () {
+        serviceHoldersDataSource.options.transport.read.data.startDate = tools.formatDate(vm.get("startDate"));
+        serviceHoldersDataSource.options.transport.read.data.endDate = tools.formatDate(vm.get("endDate"));
+        serviceHoldersDataSource.read();
+    }, 250);
+
     var vmChanged = function (e) {
         //save changes whenever the selected service has a change
         if (e.field.indexOf("selectedService.") > -1) {
@@ -471,13 +470,26 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "cros
         }
         //re-setup the data source/grid whenever the service type changes
         else if (e.field === "serviceType") {
+            var serviceName = vm.get("serviceType.Name");
+
+            var currentParams = tools.getParameters();
+            if (currentParams.service !== serviceName) {
+                currentParams.service = serviceName;
+                main.setHash("services", currentParams);
+            }
+
             createDataSourceAndGrid();
+
+            var serviceTypeId = vm.get("serviceType.Id");
+
+            //make sure dropdownlist has service type selected
+            if (serviceTypesDropDown.dataItem().Id !== serviceTypeId) {
+                serviceTypesDropDown.value(serviceTypeId);
+            }
         }
         //reload the services whenever the start or end date changes
         else if (e.field === "startDate" || e.field === "endDate") {
-            serviceHoldersDataSource.options.transport.read.data.startDate = tools.formatDate(vm.get("startDate"));
-            serviceHoldersDataSource.options.transport.read.data.endDate = tools.formatDate(vm.get("endDate"));
-            serviceHoldersDataSource.read();
+            reloadServices();
         }
     };
 
@@ -506,19 +518,17 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "cros
                 dataValueField: "Id",
                 dataSource: services.serviceTypes,
                 change: function (e) {
-                    //TODO check correct
                     vm.set("serviceType", this.dataItem());
 
                     //disable the delete button and hide the service details
                     $('#services .k-grid-delete').attr("disabled", "disabled");
                     $("#serviceDetails").attr("style", "display:none");
-
-                    selectFirst = true;
                 }
             }).data("kendoDropDownList");
 
-            //set the initial service type
-            vm.set("serviceType", serviceTypesDropDown.dataItem());
+            //now that the service types are loaded,
+            //setup the grid by reparsing the hash
+            main.parseHash();
         });
 
         $("#serviceDetails").kendoServiceDetails();
@@ -536,9 +546,51 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "cros
             resizeGrid();
         });
         resizeGrid();
+
+        //whenever the url parameters change:
+        //1) update the service type (if it changed)
+        //2) update the grid's filters (if they changed)
+        main.route.matched.add(function (section, query) {
+            if (section !== "services" || !services.serviceTypes) {
+                return;
+            }
+
+            if (!query) {
+                query = {};
+            }
+
+            var serviceType = vm.get("serviceType");
+
+            //1) update the service type (if it changed)
+
+            //if there is none, choose the vm's selected service
+            if (!query.service) {
+                //if it is not chosen choose the first one
+                if (!serviceType) {
+                    serviceType = services.serviceTypes[0];
+                }
+
+                query.service = serviceType.Name;
+
+                //update the query parameters
+                main.setHash("services", query);
+                return;
+            }
+            //if it changed, update it
+            else if (serviceType === null || query.service !== serviceType.Name) {
+                serviceType = _.find(services.serviceTypes, function (st) {
+                    return st.Name === query.service;
+                });
+                vm.set("serviceType", serviceType);
+            }
+
+            //update the filters based on the hash
+            kendoTools.updateFiltersToHash(serviceHoldersDataSource, query, processFilters);
+        });
     };
 
     services.show = function () {
+        main.parseHash();
         saveHistory.setCurrentSection({
             page: "Services",
             save: services.save,
@@ -551,5 +603,4 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "cros
 
 //set services to a global function, so the functions are accessible from the HTML element
     window.services = services;
-})
-;
+});

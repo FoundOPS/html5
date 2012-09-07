@@ -25,11 +25,11 @@ require.config({
     }
 });
 
-require(["widgets/navigator", "containers/silverlight", "db/session", "hasher", "crossroads", "db/models", "lib/kendo.all", "underscore",
+require(["widgets/navigator", "containers/silverlight", "db/session", "tools", "hasher", "crossroads", "db/models", "lib/kendo.all", "underscore",
     "lib/userVoice", "moment", "sections/personalSettings", "sections/businessSettings", "sections/usersSettings",
     "sections/dispatcherSettings", "sections/changePassword", "sections/createPassword", "sections/services",
     "sections/routes", "sections/routeDetails", "sections/routeDestinationDetails", "sections/routeTask",
-    "widgets/contacts", "widgets/serviceDetails"], function (Navigator, silverlight, session, hasher, crossroads) {
+    "widgets/contacts", "widgets/serviceDetails"], function (Navigator, silverlight, session, tools, hasher, crossroads) {
     /**
      * application = The app object.
      * navigator = The navigator object.

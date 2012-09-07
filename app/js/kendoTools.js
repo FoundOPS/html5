@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(['db/session', 'db/services', "hasher"], function (session, dbServices, hasher) {
+define(['tools', 'db/session', 'db/services'], function (tools, session, dbServices) {
     var kendoTools = {};
 
     //region Column Configuration
@@ -198,6 +198,27 @@ define(['db/session', 'db/services', "hasher"], function (session, dbServices, h
         return csv;
     };
 
+    var filterMatchRegEx = /^f_(lt|lte|eq|neq|gt|gte|startswith|endswith|contains|doesnotcontain)_.*$/;
+    //pass a query parameter and this will return the filter's name
+    //or null if it is not a filter
+    var filterName = function (parameter) {
+        //match f_operator_name format
+        var matches = parameter.match(filterMatchRegEx);
+        if (matches === null) {
+            return null;
+        }
+        return parameter.substring(3 + matches[1].length);
+    };
+    //pass a query parameter and this will return the filter operator
+    //or null if it is not a filter
+    var filterOperator = function (parameter) {
+        var matches = parameter.match(filterMatchRegEx);
+        if (matches === null) {
+            return null;
+        }
+        return matches[1];
+    };
+
     /**
      * Adds a filtered event to the dataSource
      * @param dataSource
@@ -225,49 +246,82 @@ define(['db/session', 'db/services', "hasher"], function (session, dbServices, h
     };
 
     /*
-     * Sync the url parameters and the dataSource's filters
+     * Set the url parameters based on the dataSource's filters
+     * Filter url parameters will be in this format f_operator_name Ex: f_lte_OccurDate
      * @dataSource The dataSource to sync the filters with
-     * @param parameters If this is set: adjust the filters to the url parameters
-     *                   If it is null: adjust the url parameters to the filters
-     * @processFilters (Optional) Process and adjust the filters after they are synced. This is for forcing validation
      */
-    kendoTools.syncFilters = function (dataSource, parameters, processFilters) {
+    kendoTools.updateHashToFilters = function (section, dataSource) {
+        var filterSet = dataSource.filter().filters;
+
+        var currentParams = tools.getParameters();
+
+        //add the parameters that are not filter parameters to the query
+        var otherKeys = _.filter(_.keys(currentParams), function (name) {
+            return filterName(name) === null;
+        });
+        var query = _.pick(currentParams, otherKeys);
+
+        //add the filter parameters to the query
+        _.each(filterSet, function (filter) {
+            //normalize
+            if (filter.filters) {
+                filter = filter.filters;
+            }
+            var type;
+            var val = filter.value;
+            if (val instanceof Date) {
+                type = "d";
+                val = val.toDateString();
+            } else if (typeof val === "number") {
+                type = "n";
+            } else {
+                type = "s";
+            }
+
+            //prefix the parameter key with f_ to identify this as a filter parameter
+            //prefix it with the operator to avoid issues when there are duplicates
+            var key = 'f_' + filter.operator + '_' + filter.field;
+            query[key] = val + "$" + type;
+        });
+
+        main.setHash(section, query);
+    };
+
+    /*
+     * Set the dataSource's filters to the url parameters (if they are different)
+     * @dataSource The dataSource to adjust
+     * @param parameters The parameters to build filters from
+     * @processFilters (Optional) Process and adjust the filters before setting them. This is for forcing validation
+     */
+    kendoTools.updateFiltersToHash = function (dataSource, parameters, processFilters) {
         if (!dataSource) {
             return;
         }
 
-        if (dataSource._handleFilterSync) {
-            dataSource._handleFilterSync = false;
-            return;
-        }
+        var filterSet = [];
+        //set the filterSet to the url parameters
+        _.each(parameters, function (value, parameter) {
+            var name = filterName(parameter);
 
-        var filterSet;
-        if (parameters) {
-            //set the filterSet to the url parameters
-            filterSet = [];
-            _.each(parameters, function (value, parameter) {
-                //remove the number
-                parameter = parameter.replace(/[0-9]/g, '');
-
-                //add a filter for every possible parameter
-                var filter = value.split("$");
-                var formattedValue;
-                if (filter[2] === "d") {
-                    formattedValue = new Date(filter[1]);
-                } else if (filter[2] === "n") {
-                    formattedValue = parseFloat(filter[1]);
-                } else {
-                    formattedValue = filter[1];
-                }
-
-                filterSet.push({field: parameter, operator: filter[0], value: formattedValue});
-            });
-        } else {
-            filterSet = dataSource.filter();
-            if (filterSet) {
-                filterSet = filterSet.filters;
+            //if it is not a filter parameter. ignore it
+            if (name === null) {
+                return;
             }
-        }
+
+            //add a filter for every possible parameter
+            var filter = value.split("$");
+            var formattedValue;
+            if (filter[1] === "d") {
+                formattedValue = new Date(filter[0]);
+            } else if (filter[1] === "n") {
+                formattedValue = parseFloat(filter[0]);
+            } else {
+                formattedValue = filter[0];
+            }
+
+            var operator = filterOperator(parameter);
+            filterSet.push({field: name, operator: operator, value: formattedValue});
+        });
 
         //process the filters
         if (processFilters) {
@@ -278,32 +332,19 @@ define(['db/session', 'db/services', "hasher"], function (session, dbServices, h
             }
         }
 
-        //adjust the filters accordingly
-        if (parameters) {
-            dataSource._handleFilterSync = true;
-            dataSource.filter(filterSet);
+        //check if they are different
+        var existing = dataSource.filter();
+        if (!existing) {
+            existing = {};
         }
-        //adjust the url parameters to the filters
-        else {
-            dataSource._handleFilterSync = true;
-            var i = 0;
-            parameters = _.map(filterSet, function (filter) {
-                var type;
-                var val = filter.value;
-                if (val instanceof Date) {
-                    type = "d";
-                    val = val.toDateString();
-                } else if (typeof val === "number") {
-                    type = "n";
-                } else {
-                    type = "s";
-                }
-                i++; //add a new number to each parameter to avoid issues when there are duplicates
-                return i + filter.field + "=" + filter.operator + "$" + val + "$" + type;
-            });
+        if (existing.filters) {
+            existing = existing.filters;
+        }
+        var same = _.isEqual(filterSet, existing);
 
-            var query = parameters.join("&");
-            hasher.setHash('#view/services.html?' + query);
+        //then adjust the filters accordingly
+        if (!same) {
+            dataSource.filter(filterSet);
         }
     };
 
