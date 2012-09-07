@@ -15,8 +15,8 @@ define(["tools", "sections/importerUpload", "sections/importerSelect", "db/servi
             //calculate how many are missing
             var column, fieldName, name, template, width, hiddenNum = 0;
             for(var i = 0; i < importerSelect.headers.length; i++){
-                if(i > importerSelect.columns.length - 1){
-                    name = importerSelect.headers[i];
+                name = importerSelect.headers[i];
+                if((i > importerSelect.columns.length - 1) || name !== "Latitude" || name !== "Longitude"){
                     fieldName = "c10" + hiddenNum;
                     template = "# if (" + fieldName + ".S == 3) { # <div class='cellError'></div> # } # #=" + fieldName + ".V#";
                     //calculate the width of the title
@@ -42,15 +42,17 @@ define(["tools", "sections/importerUpload", "sections/importerSelect", "db/servi
             //grid.columns = importerSelect.columns;
 
             //check for errors
-            var row, cell, error = false;
+            var error = false;
             for(var r in data){
-                row = data[r];
-                for(var c in row){
-                    cell = row[c];
-                    if(cell.S == 3){
-                        error = true;
-                    }
-                }
+                error = _.any(data[r], function (cell) {
+                    return cell.S === 3;
+                });
+//                for(var c in row){
+//                    cell = row[c];
+//                    if(cell.S == 3){
+//                        error = true;
+//                    }
+//                }
             }
             if(!error){
                 //enable import button

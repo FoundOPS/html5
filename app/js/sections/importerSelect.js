@@ -10,7 +10,8 @@ define(["sections/importerUpload", "db/services"], function (importerUpload, dbS
             "State",
             "Zip Code",
             "Latitude",
-            "Longitude"
+            "Longitude",
+            "Location"
         ];
 
     //region Custon Editors
@@ -80,8 +81,6 @@ define(["sections/importerUpload", "db/services"], function (importerUpload, dbS
             {Name: 'City', Type: "string"},
             {Name: 'State', Type: "string"},
             {Name: 'Zip Code', Type: "string"},
-            {Name: 'Latitude', Type: "string"},
-            {Name: 'Longitude', Type: "string"},
             {Name: 'Region Name', Type: "string"},
             {Name: 'Frequency', Type: "none"},
             {Name: 'Repeat On', Type: "none"},
@@ -133,17 +132,17 @@ define(["sections/importerUpload", "db/services"], function (importerUpload, dbS
                     //iterate through all the dropdowns
                     $("#importerSelect input.field").each( function () {
                         name = this.value;
-                        type = allFields[i].Type;
-                        //calculate the width of the title
-                        width = name.length * 6.5 + 35;
-                        //set the width to 100 if it's less than 100
-                        if(width < 100){
-                            width = 100;
-                        }
                         //check if the dropdown is not "Do not Import"
                         if(name != "Do not Import") {
                             //setup the column
                             fieldName = "c" + i;
+                            type = allFields[i].Type;
+                            //calculate the width of the title
+                            width = name.length * 6.5 + 35;
+                            //set the width to 100 if it's less than 100
+                            if(width < 100){
+                                width = 100;
+                            }
                             template = "# if (" + fieldName + ".S == 3) { # <div class='cellError'></div> # } # #=" + fieldName + ".V#";
                             //if(type != "string"){
 //                                    var editor;
@@ -184,19 +183,23 @@ define(["sections/importerUpload", "db/services"], function (importerUpload, dbS
                         i++;
                     });
 
-                    //this section checks if each of the required fields has been included
+                    //this section checks if each of the required fields have been included
                     //if it hasn't, a hidden field is added
                     var hiddenNum = 0;
                     for(var f in importerSelect.requiredFields){
                         var field = importerSelect.requiredFields[f];
                         var hasField = false;
-                        //iterate through the columns
-                        for(var c in importerSelect.columns){
-                            //check if the current required field is included
-                            if(field == importerSelect.columns[c].title){
-                                hasField = true;
-                            }
-                        }
+                        //check if the current required field is included in the columns
+                        hasField = _.any(importerSelect.columns, function (column) {
+                            return column.title === field;
+                        });
+//                        //iterate through the columns
+//                        for(var c in importerSelect.columns){
+//                            //check if the current required field is included
+//                            if(field == importerSelect.columns[c].title){
+//                                hasField = true;
+//                            }
+//                        }
                         //if the required field is not included
                         if(!hasField){
                             //add the field name to the list of headers
