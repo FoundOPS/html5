@@ -14,9 +14,14 @@ define(["tools", "sections/importerUpload", "sections/importerSelect", "db/servi
 
             //calculate how many are missing
             var column, fieldName, name, template, width, hiddenNum = 0;
+            importerSelect.rowTemplateString = importerSelect.rowTemplateString.replace("</tr>", "");
             for(var i = 0; i < importerSelect.headers.length; i++){
                 name = importerSelect.headers[i];
-                if((i > importerSelect.columns.length - 1) || name !== "Latitude" || name !== "Longitude"){
+//                if(name === "Location"){
+//                    importerSelect.columns[i].hidden = false;
+//                    importerSelect.rowTemplateString += "<td>c" + i + ".V</td>";
+//                }
+                if((i > importerSelect.columns.length - 1) && name !== "Latitude" && name !== "Longitude"){
                     fieldName = "c10" + hiddenNum;
                     template = "# if (" + fieldName + ".S == 3) { # <div class='cellError'></div> # } # #=" + fieldName + ".V#";
                     //calculate the width of the title
@@ -31,31 +36,30 @@ define(["tools", "sections/importerUpload", "sections/importerSelect", "db/servi
                         template: template,
                         width: width + "px"
                     };
+                    importerSelect.rowTemplateString += "<td>" + fieldName + ".V</td>";
                     importerSelect.columns.push(column);
                     hiddenNum ++;
                 }
             }
+            importerSelect.rowTemplateString += "</tr>";
 
             //refresh the grid's data with the new data
-            dataSource.data(gridData);
-            //TODO: this doesn't work
-            //grid.columns = importerSelect.columns;
+            grid.columns = importerSelect.columns;
+            grid.thead.remove();
+            grid.options.rowTemplate = kendo.template(importerSelect.rowTemplateString);
+            grid._thead();
+            grid.dataSource.data(gridData);
+            grid.dataSource.read();
 
             //check for errors
-            var error = false;
+            var error;
             for(var r in data){
                 error = _.any(data[r], function (cell) {
                     return cell.S === 3;
                 });
-//                for(var c in row){
-//                    cell = row[c];
-//                    if(cell.S == 3){
-//                        error = true;
-//                    }
-//                }
             }
+            //if no errors, enable import button
             if(!error){
-                //enable import button
                 $("#importBtn").removeAttr("disabled");
             }
         });
@@ -116,21 +120,23 @@ define(["tools", "sections/importerUpload", "sections/importerSelect", "db/servi
         }else{
             //iterate through each column
             for (var c in importerSelect.columns) {
-                //get the column name ex. "c0"
-                field = importerSelect.columns[c].field;
-                //remove the "c" from the name
-                num = field.substr(1, 3);
-                //if there is a corresponding grid column to the data column,
-                //set value equal to it, otherwise set value to ""
-                value = row[num] ? row[num] : "";
-                //create the cell
-                obj = {
-                    H: "",
-                    S: 2,
-                    V: value
-                };
-                //save the object as a property of newRow
-                newRow["c" + num] = obj;
+                if(importerSelect.columns[c].title !== "Latitude" && importerSelect.columns[c].title !== "Longitude"){
+                    //get the column name ex. "c0"
+                    field = importerSelect.columns[c].field;
+                    //remove the "c" from the name
+                    num = field.substr(1, 3);
+                    //if there is a corresponding grid column to the data column,
+                    //set value equal to it, otherwise set value to ""
+                    value = row[num] ? row[num] : "";
+                    //create the cell
+                    obj = {
+                        H: "",
+                        S: 2,
+                        V: value
+                    };
+                    //save the object as a property of newRow
+                    newRow["c" + num] = obj;
+                }
             }
         }
         return newRow;

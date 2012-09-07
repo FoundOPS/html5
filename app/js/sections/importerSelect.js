@@ -10,8 +10,7 @@ define(["sections/importerUpload", "db/services"], function (importerUpload, dbS
             "State",
             "Zip Code",
             "Latitude",
-            "Longitude",
-            "Location"
+            "Longitude"
         ];
 
     //region Custon Editors
@@ -85,7 +84,8 @@ define(["sections/importerUpload", "db/services"], function (importerUpload, dbS
             {Name: 'Frequency', Type: "none"},
             {Name: 'Repeat On', Type: "none"},
             {Name: 'Repeat Every', Type: "number"},
-            {Name: 'Repeat Start Date', Type: "date"}
+            {Name: 'Repeat Start Date', Type: "date"},
+            {Name: 'Location', Type: "string"}
         ];
 
         //make sure there is a selected service type
@@ -127,6 +127,7 @@ define(["sections/importerUpload", "db/services"], function (importerUpload, dbS
                 change: function () {
                     var i = 0, type, name, width, fieldName, template, column;
                     importerSelect.columns = [];
+                    importerSelect.rowTemplateString = "<tr>";
                     importerSelect.headers = [];
                     importerSelect.fields = {};
                     //iterate through all the dropdowns
@@ -175,6 +176,7 @@ define(["sections/importerUpload", "db/services"], function (importerUpload, dbS
                                 defaultValue: ""
                             };
 
+                            importerSelect.rowTemplateString += "<td>" + fieldName + ".V</td>";
                             //add the column to the list of columns
                             importerSelect.columns.push(column);
                             //add the column name to the list of headers
@@ -182,6 +184,21 @@ define(["sections/importerUpload", "db/services"], function (importerUpload, dbS
                         }
                         i++;
                     });
+//                    fieldName = "c" + (importerSelect.headers.length);
+//                    importerSelect.rowTemplateString += "</tr>";
+//
+//                    var locationColumn = {
+//                        field: fieldName, //ex. "c0"
+//                        title: "Location",
+//                        template: "# if (" + fieldName + ".S == 3) { # <div class='cellError'></div> # } # #=" + fieldName + ".V#",
+//                        width: "100px",
+//                        hidden: true
+//                    };
+//                    importerSelect.columns.push(locationColumn);
+//                    importerSelect.headers.push("Location");
+//                    importerSelect.fields[fieldName] = {
+//                        defaultValue: ""
+//                    };
 
                     //this section checks if each of the required fields have been included
                     //if it hasn't, a hidden field is added
@@ -193,13 +210,6 @@ define(["sections/importerUpload", "db/services"], function (importerUpload, dbS
                         hasField = _.any(importerSelect.columns, function (column) {
                             return column.title === field;
                         });
-//                        //iterate through the columns
-//                        for(var c in importerSelect.columns){
-//                            //check if the current required field is included
-//                            if(field == importerSelect.columns[c].title){
-//                                hasField = true;
-//                            }
-//                        }
                         //if the required field is not included
                         if(!hasField){
                             //add the field name to the list of headers
@@ -216,6 +226,16 @@ define(["sections/importerUpload", "db/services"], function (importerUpload, dbS
                     }
                 }
             });
+
+            //automatically select fields if there is a matching header
+            var dropdown, headers = importerUpload.oldData[0];
+            for(var h in headers){
+                dropdown = $("#importerSelect input.field:eq(" + h + ")").data("kendoDropDownList");
+                //try to select a matching item
+                dropdown.select(function(field) {
+                    return field.Name == headers[h];
+                });
+            }
         });
     };
 
