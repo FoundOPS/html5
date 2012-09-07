@@ -129,11 +129,12 @@ footer {
 }
 #taskStatuses-cancelButton a {
     color: white;
-    background: -webkit-linear-gradient(bottom, #222224 0%, #555556 100%);
-    background: -moz-linear-gradient(bottom, #222224 0%, #555556 100%);
-    background: -ms-linear-gradient(bottom, #222224 0%, #555556 100%);
-    background: -o-linear-gradient(bottom, #222224 0%, #555556 100%);
-    background: linear-gradient(bottom, #222224 0%, #555556 100%);
+    background-image: linear-gradient(bottom, rgb(34,34,36) 31%, rgb(85,85,86) 100%);
+    background-image: -o-linear-gradient(bottom, rgb(34,34,36) 31%, rgb(85,85,86) 100%);
+    background-image: -moz-linear-gradient(bottom, rgb(34,34,36) 31%, rgb(85,85,86) 100%);
+    background-image: -webkit-linear-gradient(bottom, rgb(34,34,36) 31%, rgb(85,85,86) 100%);
+    background-image: -ms-linear-gradient(bottom, rgb(34,34,36) 31%, rgb(85,85,86) 100%);
+    background-image: -webkit-gradient(linear,left bottom,left top,color-stop(0.31, rgb(34,34,36)),color-stop(1, rgb(85,85,86)));
 }
 #taskStatuses-cancelButton a.km-listview-link::after  {
     border: none;
