@@ -369,7 +369,7 @@ var hasher = (function(window){
 
 }(window));
 
-
+        window.hasher = hasher;
         return hasher;
     });
 }(typeof define === 'function' && define.amd ? define : function (id, deps, factory) {

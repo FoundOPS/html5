@@ -12,9 +12,9 @@ define(["jquery", "lib/kendo.all", "underscore"], function ($) {
                 '<hr style="width:90%;"/>' +
                 '</div>',
         listViewTemplate = "<ul></ul>",
-        emailTemplate = '<a>E-mail ${Label}<br/><p id="contactData">${Data}</p></a>',
-        phoneTemplate = '<a>Call ${Label}<br/><p id="contactData">${Data}</p></a>',
-        websiteTemplate = '<a>Go to Website<br/><p id="contactData">${Data}</p></a>';
+        emailTemplate = '<a data-rel="external" href="mailto:${Data}">E-mail ${Label}<br/><p id="contactData">${Data}</p></a>',
+        phoneTemplate = '<a data-rel="external" href="tel:${Data}">Call ${Label}<br/><p id="contactData">${Data}</p></a>',
+        websiteTemplate = '<a data-rel="external" href="http://${Data}">Go to Website<br/><p id="contactData">${Data}</p></a>';
 
     var Contacts = Widget.extend({
         // method called when a new widget is created
@@ -52,15 +52,15 @@ define(["jquery", "lib/kendo.all", "underscore"], function ($) {
 
                 _.each(contacts, function (value) {
                     switch (value.Type) {
-                        case "Email Address":
-                            emailContacts.push(value);
-                            break;
-                        case "Phone Number":
-                            phoneContacts.push(value);
-                            break;
-                        case "Website":
-                            websiteContacts.push(value);
-                            break;
+                    case "Email Address":
+                        emailContacts.push(value);
+                        break;
+                    case "Phone Number":
+                        phoneContacts.push(value);
+                        break;
+                    case "Website":
+                        websiteContacts.push(value);
+                        break;
                     }
                 });
 
@@ -70,7 +70,7 @@ define(["jquery", "lib/kendo.all", "underscore"], function ($) {
                     dataSource: phoneContacts,
                     style: "inset",
                     click: function (e) {
-                        window.location = "tel:" + e.dataItem.Data;
+                        window.open("tel:" + e.dataItem.Data);
                     }
                 });
 
@@ -79,7 +79,7 @@ define(["jquery", "lib/kendo.all", "underscore"], function ($) {
                     dataSource: emailContacts,
                     style: "inset",
                     click: function (e) {
-                        window.location = "mailto:" + e.dataItem.Data;
+                        window.open("mailto:" + e.dataItem.Data);
                     }
                 });
 
@@ -88,7 +88,7 @@ define(["jquery", "lib/kendo.all", "underscore"], function ($) {
                     dataSource: websiteContacts,
                     style: "inset",
                     click: function (e) {
-                        window.location = "http://" + e.dataItem.Data;
+                        window.open("http://" + e.dataItem.Data);
                     }
                 });
 
