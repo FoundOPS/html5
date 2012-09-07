@@ -115,6 +115,11 @@ span.k-tooltip {
 .k-grid .k-edit-cell{
     padding-left: 8px;
 }
+
+.km-content, .km-scroll-container{
+    height: 100%;
+}
+
 .km-scroll-container{
     -webkit-user-select: auto;
     -moz-user-select: auto;
@@ -129,13 +134,9 @@ span.k-tooltip {
         height: 100%;
     }
     .km-content{
-        height: 100%;
         //BUG FIX: Required to fix content size in firefox.
         overflow: visible !important;
     //padding-bottom: 18px;  //BUG FIX: This fixes Kendo scrollbar bug! (disabled for second bugfix)
-    }
-    .km-scroll-container{
-        height: 100%;
     }
 }
 .k-grid .k-edit-cell input{
