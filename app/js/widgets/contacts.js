@@ -12,9 +12,9 @@ define(["jquery", "lib/kendo.all", "underscore"], function ($) {
                 '<hr style="width:90%;"/>' +
                 '</div>',
         listViewTemplate = "<ul></ul>",
-        emailTemplate = '<a data-rel="external">E-mail ${Label}<br/><p id="contactData">${Data}</p></a>',
-        phoneTemplate = '<a data-rel="external">Call ${Label}<br/><p id="contactData">${Data}</p></a>',
-        websiteTemplate = '<a data-rel="external">Go to Website<br/><p id="contactData">${Data}</p></a>';
+        emailTemplate = '<a data-rel="external" href="mailto:${Data}">E-mail ${Label}<br/><p id="contactData">${Data}</p></a>',
+        phoneTemplate = '<a data-rel="external" href="tel:${Data}">Call ${Label}<br/><p id="contactData">${Data}</p></a>',
+        websiteTemplate = '<a data-rel="external" href="http://${Data}">Go to Website<br/><p id="contactData">${Data}</p></a>';
 
     var Contacts = Widget.extend({
         // method called when a new widget is created
