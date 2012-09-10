@@ -1,6 +1,22 @@
 "use strict";
 
 define(["jquery", "ui/popup", "db/developer", "lib/jquery.mousewheel", "lib/jquery.jScrollPane", "lib/kendo.all"], function ($, Popup, developer) {
+    var backButtonTemplate = kendo.template('<div id="backButtonContainer"><a onclick="main.onBack()"><img id="backArrow" src="img/backArrow.png"/></a></div>');
+    var navTemplate = kendo.template('<div id="navContainer">' +
+        '<div id="navSearch" class="navElement">' +
+        ' <input name="search" type="text" placeholder="Search..."/>' +
+        '<a><img src="img/Search.png"/></a></div>' +
+        '<div id="navClient" class="navElement last">' +
+        '<a><img class="navIcon profile" src="#= data[0] #"/><img id="clientLogo" src="#= data[1] #"/></a></div>' +
+        '</div>' +
+        '<img id="logo" src="./img/Logo.png" alt="FoundOPS"/>');
+    var expandTemplate = kendo.template('<a id="expandMenuButton"><div id="slideMenu"><img class="iconExpand" src="img/Expand.png"/></div>');
+    var showMenuTemplate = kendo.template('<div id="showMenu"><a><img class="iconShow" src="img/Expand.png"/></a></div>');
+    var sideBarElementTemplate = kendo.template(
+        '<a #= href # class="sideBarElement" data-color="#= color #" data-iconUrl="#= iconUrl #" data-hoverIconUrl="#=hoverIconUrl #">' +
+        '   <span class="icon" style="background: url(\'#= iconUrl #\') #= bgX # #= bgY # no-repeat"></span>' +
+        '   <span class="sectionName">#= name #</span></a>');
+
     /**
      * Initializes the navigator
      * @param config Example below
@@ -30,9 +46,6 @@ define(["jquery", "ui/popup", "db/developer", "lib/jquery.mousewheel", "lib/jque
         var initTopNav = function (config) {
             var topNav = $(document.createElement('div'));
             topNav.attr('id', 'nav');
-
-            var navTemplateHtml = $("#navTemplate").html();
-            var navTemplate = kendo.template(navTemplateHtml);
 
             var businessLogoEnabled = true;
             var businessLogoUrl = config.roles[0].businessLogoUrl;
@@ -155,8 +168,6 @@ define(["jquery", "ui/popup", "db/developer", "lib/jquery.mousewheel", "lib/jque
                 var bgX = 'center';
                 var bgY = 'center';
 
-                var sideBarElementTemplateHtml = $("#sideBarElementTemplate").html();
-                var sideBarElementTemplate = kendo.template(sideBarElementTemplateHtml);
                 var templateData = {
                     href: href,
                     color: color,
@@ -257,8 +268,6 @@ define(["jquery", "ui/popup", "db/developer", "lib/jquery.mousewheel", "lib/jque
             sBar.attr('id', 'sideBar');
 
             //extract the template from the html
-            var expandTemplateHtml = $("#expandTemplate").html();
-            var expandTemplate = kendo.template(expandTemplateHtml);
             sBar.html(expandTemplate);
             sBar.append("<div id='sideBarSections'></div>");
             sBarInnerWrapper.append(sBar);
@@ -286,14 +295,10 @@ define(["jquery", "ui/popup", "db/developer", "lib/jquery.mousewheel", "lib/jque
             });
 
             //Add showMenuSpan to topNav.
-            var showMenuTemplateHtml = $("#showMenuTemplate").html();
-            var showMenuTemplate = kendo.template(showMenuTemplateHtml);
             $('#navContainer').after(showMenuTemplate);
 
             //Add backButton to topNav.
             if (developer.CURRENT_FRAME === developer.Frame.MOBILE_APP) {
-                var backButtonTemplateHtml = $("#backButtonTemplate").html();
-                var backButtonTemplate = kendo.template(backButtonTemplateHtml);
                 $('#navContainer').before(backButtonTemplate);
                 $('#navContainer').addClass("mobileMode");
                 $("#backButtonContainer").mousedown(function (e) {
