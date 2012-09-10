@@ -1,7 +1,6 @@
 package com.foundops.app;
 
-import org.apache.cordova.DroidGap;
-
+import org.apache.cordova.*;
 import android.os.Bundle;
 import android.view.Menu;
 
