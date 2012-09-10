@@ -7,49 +7,27 @@ define(["tools", "sections/importerUpload", "sections/importerSelect", "db/servi
         dataToValidate = formatGridDataForValidation(gridData);
 
         dbServices.validateData(dataToValidate, importerSelect.headers, function (data) {
-            gridData = formatDataForGrid(data, true);
-
-            //remake the grid columns to include lat, lng, and any other fields that were hidden originally
-            //use importerSelect.headers to know what all should show up
-
-            //calculate how many are missing
-            var column, fieldName, name, template, width, hiddenNum = 0;
-            importerSelect.rowTemplateString = importerSelect.rowTemplateString.replace("</tr>", "");
+            //add the required fields that were missing before validation
+            var fieldName, name, hiddenNum = 0;
             for(var i = 0; i < importerSelect.headers.length; i++){
                 name = importerSelect.headers[i];
-//                if(name === "Location"){
-//                    importerSelect.columns[i].hidden = false;
-//                    importerSelect.rowTemplateString += "<td>c" + i + ".V</td>";
-//                }
+                //unhide the Location column
+                if(name === "Location"){
+                    importerSelect.columns[i].hidden = false;
+                }
                 if((i > importerSelect.columns.length - 1) && name !== "Latitude" && name !== "Longitude"){
                     fieldName = "c10" + hiddenNum;
-                    template = "# if (" + fieldName + ".S == 3) { # <div class='cellError'></div> # } # #=" + fieldName + ".V#";
-                    //calculate the width of the title
-                    width = name.length * 6.5 + 35;
-                    //set the width to 100 if it's less than 100
-                    if(width < 100){
-                        width = 100;
-                    }
-                    column = {
-                        field: fieldName, //ex. "c0"
-                        title: name, //ex. "Client Name"
-                        template: template,
-                        width: width + "px"
-                    };
-                    importerSelect.rowTemplateString += "<td>" + fieldName + ".V</td>";
-                    importerSelect.columns.push(column);
+                    importerSelect.createColumn(fieldName, name, false);
                     hiddenNum ++;
                 }
             }
-            importerSelect.rowTemplateString += "</tr>";
 
-            //refresh the grid's data with the new data
-            grid.columns = importerSelect.columns;
-            grid.thead.remove();
-            grid.options.rowTemplate = kendo.template(importerSelect.rowTemplateString);
-            grid._thead();
-            grid.dataSource.data(gridData);
-            grid.dataSource.read();
+            gridData = formatDataForGrid(data, true);
+
+            //re-create the grid with the new data
+            removeGrid();
+            setupGrid();
+            resizeGrid();
 
             //check for errors
             var error;
@@ -111,11 +89,14 @@ define(["tools", "sections/importerUpload", "sections/importerSelect", "db/servi
     var toObject = function(row, validated) {
         var newRow = {}, value, obj, num, field;
         if(validated){
-            //iterate through each column
-            for (var r in row) {
-                field = row[r];
-                //save the whole field as a property of newRow
-                newRow["c" + r] = field;
+            //iterate through each header(use importerSelect.headers because it contains the columns that were hidden before validation)
+            for (var h in importerSelect.headers) {
+                if(importerSelect.headers[h] !== "Latitude" && importerSelect.headers[h] !== "Longitude"){
+                    field = row[h];
+                    //save the whole field as a property of newRow
+                    //save the object as a property of newRow
+                    newRow["c" + field.C] = field;
+                }
             }
         }else{
             //iterate through each column
@@ -165,7 +146,17 @@ define(["tools", "sections/importerUpload", "sections/importerSelect", "db/servi
     };
     //endregion
 
+    //region Grid Methods
     var setupGrid = function () {
+        dataSource = new kendo.data.DataSource({
+            data: gridData,
+            schema: {
+                model: {
+                    fields: importerSelect.fields
+                }
+            }
+        });
+
         grid = $("#gridView").kendoGrid({
             columns: importerSelect.columns,
             dataSource: dataSource,
@@ -176,6 +167,11 @@ define(["tools", "sections/importerUpload", "sections/importerSelect", "db/servi
         }).data("kendoGrid");
     };
 
+    var removeGrid = function () {
+        $("#gridView").empty();
+        dataSource = "";
+    };
+
     //resize the grid based on the current window's height
     var resizeGrid = function () {
         var extraMargin = 230;
@@ -183,6 +179,7 @@ define(["tools", "sections/importerUpload", "sections/importerSelect", "db/servi
         var contentHeight = windowHeight - extraMargin;
         $('#gridView .k-grid-content').css("height", contentHeight + 'px');
     };
+    //endregion
 
     importerReview.initialize = function () {
         //check if importerUpload exists
@@ -193,15 +190,6 @@ define(["tools", "sections/importerUpload", "sections/importerSelect", "db/servi
             //redirect to upload page
             window.application.navigate("view/importerUpload.html");
         }
-
-        dataSource = new kendo.data.DataSource({
-            data: gridData,
-            schema: {
-                model: {
-                    fields: importerSelect.fields
-                }
-            }
-        });
 
         $(window).resize(function () {
             resizeGrid();
@@ -214,10 +202,11 @@ define(["tools", "sections/importerUpload", "sections/importerSelect", "db/servi
     };
 
     importerReview.show = function () {
+        if(grid){
+            removeGrid();
+        }
         setupGrid();
-
         resizeGrid();
-
         validateData();
     };
 

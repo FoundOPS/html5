@@ -13,7 +13,7 @@ define(["sections/importerUpload", "db/services"], function (importerUpload, dbS
             "Longitude"
         ];
 
-    //region Custon Editors
+    //region Custom Editors
 //    importerSelect.numberEditor = function (container, options) {
 //        $('<input data-text-field="Name" data-value-field="Name" data-bind="value:' + options.field + '"/>')
 //            .appendTo(container).kendoDatePicker();
@@ -70,6 +70,39 @@ define(["sections/importerUpload", "db/services"], function (importerUpload, dbS
 //    };
     //endregion
 
+    importerSelect.createColumn = function (field, name, addToFieldsAndHeaders) {
+        var column, template, hidden = false;
+        if(name === "Location"){
+            template = "# if (" + field + ".S == 3) { # <div class='cellError'></div> # } else { # <a href='https://maps.google.com/maps?q=#=" + field + ".V#&z=17' class='locationLink'>&nbsp;&nbsp;&nbsp;&nbsp;</a>  # } #";
+            hidden = true;
+        }else{
+            template = "# if (" + field + ".S == 3) { # <div class='cellError'></div> # } # #=" + field + ".V#";
+        }
+        //calculate the width of the title
+        var width = name.length * 6.5 + 35;
+        //set the width to 100 if it's less than 100
+        if(width < 100){
+            width = 100;
+        }
+        column = {
+            field: field, //ex. "c0"
+            title: name, //ex. "Client Name"
+            template: template,
+            width: width + "px",
+            hidden: hidden
+        };
+        //add the column to the list of columns
+        importerSelect.columns.push(column);
+        if(addToFieldsAndHeaders){
+            //save the field as a property of importerSelect.fields
+            importerSelect.fields[field] = {
+                defaultValue: ""
+            };
+            //add the column name to the list of headers
+            importerSelect.headers.push(name);
+        }
+    };
+
     importerSelect.initialize = function () {
         //setup the default fields
         var fieldList = [
@@ -84,8 +117,7 @@ define(["sections/importerUpload", "db/services"], function (importerUpload, dbS
             {Name: 'Frequency', Type: "none"},
             {Name: 'Repeat On', Type: "none"},
             {Name: 'Repeat Every', Type: "number"},
-            {Name: 'Repeat Start Date', Type: "date"},
-            {Name: 'Location', Type: "string"}
+            {Name: 'Repeat Start Date', Type: "date"}
         ];
 
         //make sure there is a selected service type
@@ -125,9 +157,8 @@ define(["sections/importerUpload", "db/services"], function (importerUpload, dbS
                 dataValueField: "Name",
                 dataSource: allFields,
                 change: function () {
-                    var i = 0, type, name, width, fieldName, template, column;
+                    var i = 0, type, name, fieldName;
                     importerSelect.columns = [];
-                    importerSelect.rowTemplateString = "<tr>";
                     importerSelect.headers = [];
                     importerSelect.fields = {};
                     //iterate through all the dropdowns
@@ -137,14 +168,8 @@ define(["sections/importerUpload", "db/services"], function (importerUpload, dbS
                         if(name != "Do not Import") {
                             //setup the column
                             fieldName = "c" + i;
-                            type = allFields[i].Type;
-                            //calculate the width of the title
-                            width = name.length * 6.5 + 35;
-                            //set the width to 100 if it's less than 100
-                            if(width < 100){
-                                width = 100;
-                            }
-                            template = "# if (" + fieldName + ".S == 3) { # <div class='cellError'></div> # } # #=" + fieldName + ".V#";
+                            importerSelect.createColumn(fieldName, name, true);
+                            //type = allFields[i].Type;
                             //if(type != "string"){
 //                                    var editor;
 //                                    if(name == "Repeat On"){
@@ -164,41 +189,12 @@ define(["sections/importerUpload", "db/services"], function (importerUpload, dbS
 //                                        editor: editor
 //                                    };
                             //}else{
-                            column = {
-                                field: fieldName, //ex. "c0"
-                                title: name, //ex. "Client Name"
-                                template: template,
-                                width: width + "px"
-                            };
                             //}
-
-                            importerSelect.fields[fieldName] = {
-                                defaultValue: ""
-                            };
-
-                            importerSelect.rowTemplateString += "<td>" + fieldName + ".V</td>";
-                            //add the column to the list of columns
-                            importerSelect.columns.push(column);
-                            //add the column name to the list of headers
-                            importerSelect.headers.push(name);
                         }
                         i++;
                     });
-//                    fieldName = "c" + (importerSelect.headers.length);
-//                    importerSelect.rowTemplateString += "</tr>";
-//
-//                    var locationColumn = {
-//                        field: fieldName, //ex. "c0"
-//                        title: "Location",
-//                        template: "# if (" + fieldName + ".S == 3) { # <div class='cellError'></div> # } # #=" + fieldName + ".V#",
-//                        width: "100px",
-//                        hidden: true
-//                    };
-//                    importerSelect.columns.push(locationColumn);
-//                    importerSelect.headers.push("Location");
-//                    importerSelect.fields[fieldName] = {
-//                        defaultValue: ""
-//                    };
+                    //manually add location
+                    importerSelect.createColumn("c" + i, "Location", true);
 
                     //this section checks if each of the required fields have been included
                     //if it hasn't, a hidden field is added
@@ -218,8 +214,7 @@ define(["sections/importerUpload", "db/services"], function (importerUpload, dbS
                             var fName = "c10" + hiddenNum;
                             //save the field(hidden) as a property of importerSelect.fields
                             importerSelect.fields[fName] = {
-                                defaultValue: "",
-                                type: "hidden"
+                                defaultValue: ""
                             };
                             hiddenNum ++;
                         }
