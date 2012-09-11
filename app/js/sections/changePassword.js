@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(["db/services", "tools", "db/saveHistory", "widgets/settingsMenu"], function (services, tools, saveHistory) {
+define(["db/services", "tools", "db/saveHistory", "hasher", "widgets/settingsMenu"], function (services, tools, saveHistory, hasher) {
     var changePassword = {};
 
     changePassword.save = function () {
@@ -49,6 +49,10 @@ define(["db/services", "tools", "db/saveHistory", "widgets/settingsMenu"], funct
                 custom: "The passwords do not match."
             }
         }).data("kendoValidator");
+    };
+
+    changePassword.onBack = function () {
+        hasher.setHash("view/personalSettings.html");
     };
 
     window.changePassword = changePassword;

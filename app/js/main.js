@@ -98,15 +98,10 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "tools", "
         hasher.setHash(query);
     };
 
-    //TODO REFACTOR
     //Overrides phone's back button navigation - Phonegap
     main.onBack = function () {
-        var hash = hasher.getHash(),
-            currentView = hash.slice(hash.indexOf("/") + 1, hash.indexOf(".")),
-            params;
-        if (currentView === "changePassword") {
-            hasher.setHash("view/personalSettings.html");
-        } else if (currentView === "routes" || currentView === "routeDetails" || currentView === "routeDestinationDetails" || currentView === "routeTask") {
+        var currentView = hasher.getHash().slice(hash.indexOf("/"), hasher.getHash().indexOf("."));
+        if (currentView === "routes" || currentView === "routeDetails" || currentView === "routeDestinationDetails" || currentView === "routeTask" || currentView === "changePassword") {
             window[currentView].onBack();
         } else {
             hasher.setHash("view/routes.html");
