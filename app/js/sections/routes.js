@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(["jquery", "db/services", "db/saveHistory", "hasher", "lib/kendo.all"], function ($, dbServices, saveHistory, hasher) {
+define(["jquery", "db/services", "db/saveHistory", "hasher", "tools", "lib/kendo.all"], function ($, dbServices, saveHistory, hasher, tools) {
     /**
      * routes = wrapper for all route list objects/logic
      * vm = viewModel
@@ -41,6 +41,12 @@ define(["jquery", "db/services", "db/saveHistory", "hasher", "lib/kendo.all"], f
 
         saveHistory.close();
     };
+    routes.onBack = function () {
+        var r = confirm("Are you sure you would like to log out?");
+        if (r) {
+            hasher.setHash("view/logout.html");
+        }
+    };
 //endregion
 
 //region VM Objects
@@ -58,7 +64,7 @@ define(["jquery", "db/services", "db/saveHistory", "hasher", "lib/kendo.all"], f
             }
         },
         change: function (e) {
-            onRefresh(main.parseURLParams(main.history[0]));
+            onRefresh(tools.getParameters(main.history[0]));
         },
         serverPaging: true
     }));

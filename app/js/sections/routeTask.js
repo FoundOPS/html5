@@ -6,7 +6,7 @@
 
 'use strict';
 
-define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all", "widgets/serviceDetails"], function ($, dbServices, saveHistory) {
+define(["jquery", "db/services", "db/saveHistory", "hasher", "lib/kendo.all", "widgets/serviceDetails"], function ($, dbServices, saveHistory, hasher) {
     /**
      * routeTask = wrapper for all service objects
      * vm = viewModel
@@ -68,6 +68,16 @@ define(["jquery", "db/services", "db/saveHistory", "lib/kendo.all", "widgets/ser
                 return vm.get("selectedService");
             }
         });
+    };
+    routeTask.onBack = function () {
+        var params = {routeId: routeDetails.vm.get("selectedRoute.Id"), routeDestinationId: routeDestinationDetails.vm.get("selectedDestination.Id")};
+        /* If user has already selected a status -> go back
+         otherwise open the task status popup */
+        if (routeTask.vm.statusUpdated) {
+            main.setHash("routeDestinationDetails", params);
+        } else {
+            routeTask.vm.openTaskStatuses("backButton");
+        }
     };
     routeTask.undo = function (state) {
         //fixes a problem when the state is stored bc it is converted to json and back

@@ -6,7 +6,7 @@
 
 'use strict';
 
-define(["jquery", "db/saveHistory", "lib/kendo.all", "widgets/contacts"], function ($, saveHistory) {
+define(["jquery", "db/saveHistory", "hasher", "tools", "lib/kendo.all", "widgets/contacts"], function ($, saveHistory, hasher, tools) {
     /**
      * routeDestinationDetails = wrapper for all routeDestinationDetails objects
      * vm = viewModel
@@ -43,7 +43,7 @@ define(["jquery", "db/saveHistory", "lib/kendo.all", "widgets/contacts"], functi
             }
             vm.getDestinationDetails(query);
         });
-        onRefresh(main.parseURLParams(main.history[0]));
+        onRefresh(tools.getParameters(main.history[0]));
     };
     routeDestinationDetails.show = function () {
         main.parseHash();
@@ -60,6 +60,10 @@ define(["jquery", "db/saveHistory", "lib/kendo.all", "widgets/contacts"], functi
         }
         kendo.bind($("#routeDestinationDetails"), vm, kendo.mobile.ui);
         kendo.bind($("#directionsButton"), vm);
+    };
+    routeDestinationDetails.onBack = function () {
+        var params = {routeId: routeDetails.vm.get("selectedRoute.Id")};
+        main.setHash("routeDetails", params);
     };
 //endregion
 

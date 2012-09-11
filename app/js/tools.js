@@ -61,9 +61,14 @@ define(['hasher'], function (hasher) {
     /**
      * Gets the hash's query parameters
      */
-    tools.getParameters = function () {
-        var urlParams = {};
-        var hash = hasher.getHash();
+    tools.getParameters = function (urlHash) {
+        var hash,
+            urlParams = {};
+        if (urlHash) {
+            hash = urlHash;
+        } else {
+            hash = hasher.getHash();
+        }
         var query = hash.substring(hash.indexOf('?') + 1);
         (function () {
             var match,
@@ -72,7 +77,6 @@ define(['hasher'], function (hasher) {
                 decode = function (s) {
                     return decodeURIComponent(s.replace(pl, " "));
                 };
-
             while (match = search.exec(query))
                 urlParams[decode(match[1])] = decode(match[2]);
         })();
