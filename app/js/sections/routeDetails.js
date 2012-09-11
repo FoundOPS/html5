@@ -6,7 +6,7 @@
 
 'use strict';
 
-define(["jquery", "db/services", "db/models", "db/saveHistory", "hasher", "lib/kendo.all"], function ($, dbServices, models, saveHistory, hasher) {
+define(["jquery", "db/services", "db/models", "db/saveHistory", "hasher", "tools", "lib/kendo.all"], function ($, dbServices, models, saveHistory, hasher, tools) {
     /**
      * routeDetails = wrapper for all routeDetails objects
      * vm = viewModel
@@ -121,7 +121,7 @@ define(["jquery", "db/services", "db/models", "db/saveHistory", "hasher", "lib/k
             }
             vm.getDestinations(query);
         });
-        onRefresh(main.parseURLParams(main.history[0]));
+        onRefresh(tools.getParameters(main.history[0]));
     };
     routeDetails.show = function () {
         main.parseHash();
@@ -137,6 +137,9 @@ define(["jquery", "db/services", "db/models", "db/saveHistory", "hasher", "lib/k
             initialized = true;
         }
         kendo.bind($("#routeDetails"), vm, kendo.mobile.ui);
+    };
+    routeDetails.onBack = function () {
+        hasher.setHash("view/routes.html");
     };
 //endregion
 

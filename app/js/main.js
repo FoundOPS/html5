@@ -45,16 +45,20 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "tools", "
 //region History and navigation objects
     if (!initialized) {
         // App is just being loaded. Set starting location.
-        if (location.hash !== "") {
-            main.history.push(location.hash);
+        var hash = location.hash;
+        if (hash !== "") {
+            main.history.push(hash);
         }
         initialized = true;
     }
 
+    // Setup Hasher
+    hasher.prependHash = '';
+    hasher.init();
     // Listens to changes in the URL's hash and adds them to the history.
-    window.onhashchange = function () {
-        main.history.push(location.hash);
-    };
+    hasher.changed.add(function () {
+        main.history.push(hasher.getHash());
+    });
 
     main.route = crossroads.addRoute("view/{section}.html:?query:");
     main.route.greedy = true;
@@ -64,25 +68,6 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "tools", "
         console.log(request);
     });
 
-    // Used to parse the URL on refresh
-    main.parseURLParams = function (url) {
-        var queryStart = url.indexOf("?") + 1,
-            query = url.slice(queryStart),
-            params = {},
-            param = query.split("&"),
-            i;
-
-        for (i = 0; i < param.length; i++) {
-            var nameValue = param[i].split("=");
-            var name = nameValue[0];
-            var value = nameValue[1];
-            if (!params.hasOwnProperty(name)) {
-                params[name] = value;
-            }
-        }
-        return params;
-    };
-
     /**
      * Call this to force calling the parser.
      * It should be called at least in every view's show method.
@@ -91,14 +76,7 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "tools", "
         //resetting the state forces crossroads to trigger route.matched again on parse
         crossroads.resetState();
         crossroads.parse(hasher.getHash());
-//        console.log("Crossroads.parse:")
-//        console.log(crossroads.parse(hasher.getHash()));
-//
-//        console.log("parseURLParams:");
-//        console.log(main.parseURLParams(hasher.getHash()));
     };
-    hasher.prependHash = '';
-    hasher.init();
 
     //whenever the hash is changed, parse it with cross roads - this is redundant since main.parseHash() gets called in view's show methods.
 //    hasher.changed.add(main.parseHash);
@@ -123,34 +101,15 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "tools", "
     //TODO REFACTOR
     //Overrides phone's back button navigation - Phonegap
     main.onBack = function () {
-        var currentView = window.location.hash.slice(location.hash.indexOf("/") + 1, location.hash.indexOf(".")), params;
-        if (currentView === "updates") {
-            var r = confirm("Are you sure you would like to log out?");
-            if (r) {
-                hasher.setHash("view/logout.html");
-            }
-        } else if (currentView === "routeDetails") {
-            hasher.setHash("view/routes.html");
-        } else if (currentView === "routeDestinationDetails") {
-            params = {routeId: routeDetails.vm.get("selectedRoute.Id")};
-            main.setHash("routeDetails", params);
-        } else if (currentView === "routeTask") {
-            params = {routeId: routeDetails.vm.get("selectedRoute.Id"), routeDestinationId: routeDestinationDetails.vm.get("selectedDestination.Id")};
-            /* If user has already selected a status -> go back
-             otherwise open the task status popup */
-            if (routeTask.vm.statusUpdated) {
-                main.setHash("routeDestinationDetails", params);
-            } else {
-                routeTask.vm.openTaskStatuses("backButton");
-            }
-        } else if (currentView === "changePassword") {
+        var hash = hasher.getHash(),
+            currentView = hash.slice(hash.indexOf("/") + 1, hash.indexOf(".")),
+            params;
+        if (currentView === "changePassword") {
             hasher.setHash("view/personalSettings.html");
-        } else if (currentView === "#silverligh") {
-            hasher.setHash("view/updates.html");
-            // Reload is necessary when coming from silverlight section.
-            document.location.reload();
+        } else if (currentView === "routes" || currentView === "routeDetails" || currentView === "routeDestinationDetails" || currentView === "routeTask") {
+            window[currentView].onBack();
         } else {
-            hasher.setHash("view/updates.html");
+            hasher.setHash("view/routes.html");
         }
     };
 

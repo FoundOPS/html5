@@ -12,9 +12,9 @@ define(["jquery", "lib/kendo.all", "underscore"], function ($) {
                 '<hr style="width:90%;"/>' +
                 '</div>',
         listViewTemplate = "<ul></ul>",
-        // data-rel="external" href="mailto:${Data}"
-        // data-rel="external" href="tel:${Data}"
-        // data-rel="external" href="http://${Data}"
+        // data-rel="external" href="mailto:${Data}" target="_blank"
+        // data-rel="external" href="tel:${Data}" target="_blank"
+        // data-rel="external" href="http://${Data}" target="_blank"
         emailTemplate = '<a>E-mail ${Label}<br/><p id="contactData">${Data}</p></a>',
         phoneTemplate = '<a>Call ${Label}<br/><p id="contactData">${Data}</p></a>',
         websiteTemplate = '<a>Go to Website<br/><p id="contactData">${Data}</p></a>';
