@@ -170,7 +170,7 @@ input:focus {
     width: 100%;
     height: @navHeight;
     line-height: @navHeight - 4;
-    box-shadow: 0px 1px 6px #888;
+    box-shadow: 0 1px 6px #888;
     text-align: left;
 
     img {
@@ -212,7 +212,7 @@ zoom: 1;*/
     &:focus {
         outline: white solid thin;
     }
-    box-shadow: inset 0px 0px 5px #777779;
+    box-shadow: inset 0 0 5px #777779;
     .roundedIcon;
     background: white;
     display: inline-block;
@@ -337,7 +337,7 @@ zoom: 1;*/
     overflow-y: auto;
     width: @sideBarWrapperWidth;
     max-height: 100%;
-    right: 0px;
+    right: 0;
 
     padding: 0 0 40px 0;
     white-space: nowrap;
@@ -498,8 +498,8 @@ zoom: 1;*/
 .createColors(@color){
     (~".@{color}") {
         color: @@color;
-        outline: 0 none; //text-shadow: 0px 2px 20px @@color, 0px 2px 30px @@color+#222;
-    //text-shadow: 0px 0px 1px @lightGrey;
+        outline: 0 none; //text-shadow: 0 2px 20px @@color, 0 2px 30px @@color+#222;
+    //text-shadow: 0 0 1px @lightGrey;
     }
 }
 
@@ -579,7 +579,7 @@ zoom: 1;*/
         height: auto;
         width: @sideBarExpandedWidth;
 
-        box-shadow: 0px 0px 10px #888;
+        box-shadow: 0 0 10px #888;
         padding: 0;
         /*background: @lightGrey;
         color: @charcoal;*/
@@ -658,7 +658,7 @@ zoom: 1;*/
     }
 
     #nav .last {
-        margin-right: 0px;
+        margin-right: 0;
     }
 
     #content {

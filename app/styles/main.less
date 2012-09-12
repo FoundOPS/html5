@@ -1,5 +1,5 @@
 @import "navigator.less";
-@import url("select2.css");
+@import "select2.less";
 
 /*region Reset*/
 /* http://meyerweb.com/eric/tools/css/reset/   v2.0 | 20110126   License: none (public domain)*/
@@ -45,13 +45,10 @@ table{border-collapse: collapse;border-spacing: 0;}
 /*endregion*/
 /*region Kendo */
 
-@import url("kendo.mobile.all.min.css");
-@import url("mobile.css");
-
-/* kendo.common.min v2012.2.803 */
-@import url("kendo.common.min.css");
-/* kendo.default.min v2012.2.803 */
-@import url("kendo.default.min.css");
+@import url("kendo/kendo.mobile.all.less");
+@import url("mobile.less");
+@import url("kendo/kendo.common.less");
+@import url("kendo/kendo.default.less");
 
 /****** Kendo overrides ******/
 .k-header,.k-grid-header,.k-toolbar,.k-dropdown-wrap,.k-picker-wrap,.k-grouping-header,.k-tooltip,.k-pager-wrap,.k-button,.k-draghandle,.k-tile,
@@ -373,7 +370,7 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
     margin-left: 89px;
 }
 #changePassword .k-edit, #createPassword .k-edit {
-    background-position: -32px 0px;
+    background-position: -32px 0;
 }
 #changePassword .save, #createPassword .save{
     margin-left: 187px;
@@ -567,7 +564,7 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
     overflow: hidden;
     background: url(../img/custom_indic.gif) left top;
     margin: -4px 0 0 0;
-    left: 0px;
+    left: 0;
 }
 .colorpicker_new_color {
     position: absolute;
@@ -692,7 +689,7 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
     left:5px;
     width:26px;
     height:26px;
-    margin-right: 0px;
+    margin-right: 0;
 }
 #dispatcher .colorInput{
     visibility: hidden;
@@ -943,8 +940,8 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
 ul.noty_cont {
     position: fixed;
     z-index: 10000000;
-    margin: 0px;
-    padding: 0px;
+    margin: 0;
+    padding: 0;
     list-style: none;
     width: 300px;
 }
@@ -953,7 +950,7 @@ ul.noty_cont li {
     float: left;
     clear: both;
     list-style: none;
-    padding: 0px;
+    padding: 0;
     margin: 10px 0 0 0;
     width: 300px; /* Fix for: http://bugs.jquery.com/ticket/2278 */
 }
@@ -970,9 +967,9 @@ ul.noty_cont.noty_layout_topRight li {float:right}
     top: 0;
     left: 0;
     width: 100%;
-    -webkit-border-radius: 0px;
-    -moz-border-radius: 0px;
-    border-radius: 0px;
+    -webkit-border-radius: 0;
+    -moz-border-radius: 0;
+    border-radius: 0;
 }
 
 /* noty_layout_bottom */
@@ -980,9 +977,9 @@ ul.noty_cont.noty_layout_topRight li {float:right}
     bottom: 0;
     left: 0;
     width: 100%;
-    -webkit-border-radius: 0px;
-    -moz-border-radius: 0px;
-    border-radius: 0px;
+    -webkit-border-radius: 0;
+    -moz-border-radius: 0;
+    border-radius: 0;
 }
 
 /* noty_layout_center */
@@ -1165,7 +1162,7 @@ ul.noty_cont.noty_layout_topRight li {float:right}
 }
 .noty_bar.noty_theme_default.noty_layout_topCenter .noty_message .noty_buttons {
     margin-left: 15px;
-    margin-top: 0px
+    margin-top: 0;
 }
 
 /* NOTIFICATION TYPES */
@@ -1210,7 +1207,7 @@ ul.noty_cont.noty_layout_topRight li {float:right}
 
 /* noty_error */
 .noty_bar.noty_theme_default.noty_error {
-    background-color: red;
+    background-color: #ff0000;
     color: #fff;
     border-color: darkred;
 }
@@ -1260,8 +1257,8 @@ ul.noty_cont.noty_layout_topRight li {float:right}
 }
 /* noty_layout_topCenter */
 .noty_bar.noty_theme_default.noty_layout_topCenter {
-    -webkit-border-radius: 0px;
-    -moz-border-radius: 0px;
+    -webkit-border-radius: 0;
+    -moz-border-radius: 0;
     border-radius: 0 0 4px 4px;
 }
 /* noty_success */
