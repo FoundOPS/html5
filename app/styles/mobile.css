@@ -22,10 +22,6 @@ footer {
     font-size: x-small;
     margin: -50px 0px -15px 0px;
  }
-#contactData {
-    font-size: x-small;
-    margin: -15px 0px -15px 1px;
-}
 #locationInfo p {
     margin-top: -5px;
     font-size: 1.2em;
@@ -74,7 +70,7 @@ footer {
 #earliest-textbox, #default-textbox, #latest-textbox {
     text-align: center;
 }
-#contacts .km-listview-link::after, #contacts .km-detaildisclose::after,
+#contacts-listview .km-listview-link::after, #contacts-listview .km-detaildisclose::after,
 #routeStatus-listview .km-listview-link::after, #routeStatus-listview .km-detaildisclose::after,
 #taskStatuses-listview .km-listview-link::after, #taskStatuses-listview .km-detaildisclose::after {
     border: 0 none white;
@@ -140,6 +136,12 @@ footer {
     border: none;
 }
 /* Class Styles */
+.contactData{
+    font-size: x-small;
+    margin: -10px 0px -10px 2px;
+    position: relative;
+    left: -14px;
+}
 .mobileMode { /* Changes the padding of the Client icon in the navigator to accomodate for the back button on mobile */
     padding-left: 57px !important;
 }
@@ -171,10 +173,6 @@ footer {
 .km-list input[type="week"], .km-list input[type="date"], .km-list input[type="time"],
 .km-list input[type="datetime"], .km-list select:not([multiple]), .km-list .k-dropdown {
     width: auto;
-}
-.km-ios #contactData{
-    font-size: x-small;
-    margin: -10px 0px -10px 2px;
 }
 /* Styling for serviceDetails widget (in iOS)*/
 .km-ios #taskServiceDetails .textarea {
