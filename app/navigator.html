@@ -4,7 +4,7 @@
 <html class="no-js iem7" lang="en"> <![endif]-->
 <!--[if (gt IEMobile 7)|!(IEMobile)]><!-->
 <html class="no-js" lang="en"> <!--<![endif]-->
-
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ipp="">
 <head>
     <meta charset="utf-8">
     <title>FoundOPS</title>
@@ -32,6 +32,7 @@
 
 <body ontouchstart="">
 <div id="contentWrapper">
+    <ipp:blueDot></ipp:blueDot>
     <div id="content">
         <div id="remoteContent">
             <div data-role="view" id="silverlight"></div>
@@ -71,6 +72,15 @@
 <link rel="stylesheet/less" type="text/less" href="styles/main.less">
 <script type="text/javascript" src="lib/less.min.js"></script>
 <script data-main="js/main.js" src="lib/require-jquery.js"></script>
+<script type="text/javascript" src="https://appcenter.intuit.com/Content/IA/intuit.ipp.anywhere.js"></script>
+<script>
+$(document).ready(function (){
+    intuit.ipp.anywhere.setup({
+        menuProxy: 'http://example.com/myapp/BlueDotMenu',
+        grantUrl: 'http://example.com/myapp/RequestOAuthToken'
+    });
+});
+</script>
 <!--For built VS-->
 <!--<link rel="stylesheet" type="text/css" href="@Model["BlobRoot"]main-built.css">-->
 <!--<script data-main="@Model["BlobRoot"]main-built.js" src="@Model["BlobRoot"]require-jquery.js"></script>-->
