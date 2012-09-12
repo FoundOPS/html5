@@ -1,6 +1,6 @@
-#foundOPS-ng — the FoundOPS &lt;angular/&gt; app
+#HTML5 — the FoundOPS HTML5 app
 
-This is the FoundOPS javascript application. The primary framework is Angular, this is why the repository is called foundOPS ng.
+This is the FoundOPS javascript application. The primary framework is Kendo, this is why the repository is called html5.
 
 TESTING IS ALSO IMPORTANT. TEST INFO HERE.
 
