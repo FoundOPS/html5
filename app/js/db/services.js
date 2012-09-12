@@ -278,20 +278,6 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
 
     //region Settings
 
-    /**
-     * Creates personal password(for initial login).
-     * @param {string} newPass.
-     * @param {string} confirmPass.
-     */
-    services.createPassword = function (newPass, confirmPass) {
-        return saveHistory.linkNotification(
-            $.ajax({
-                url: services.API_URL + "settings/CreatePassword?newPass=" + newPass + "&confirmPass=" + confirmPass,
-                type: "POST"
-            })
-        );
-    };
-
     // Get Employees.
     services.getAllEmployeesForBusiness = services._getHttp('settings/GetAllEmployeesForBusiness', {}, false);
 
