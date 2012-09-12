@@ -66,6 +66,7 @@ define(["jquery", "db/services", "db/models", "db/saveHistory", "hasher", "tools
      */
     var addPushTrackPoints = function (routeId) {
         var onSuccess = function (position) {
+            console.log("In onSuccess");
             //Add a trackpoint for now in UTC
             var collectedTime = moment.utc().toDate();
 
@@ -76,10 +77,12 @@ define(["jquery", "db/services", "db/models", "db/saveHistory", "hasher", "tools
                 position.coords.latitude,
                 position.coords.longitude,
                 routeId,
-                main.DevicePlatform, //TODO: Change to browser detection?
+                kendo.support.detectOS(navigator.userAgent).device,
                 position.coords.speed
             );
             trackPointsToSend.push(newTrackPoint);
+
+            console.log(newTrackPoint);
 
             dbServices.postTrackPoints(trackPointsToSend, function (data) {
                 if (data) {

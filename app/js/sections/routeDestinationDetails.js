@@ -89,7 +89,7 @@ define(["jquery", "db/saveHistory", "hasher", "tools", "lib/kendo.all", "widgets
         }
     };
     /**
-     * Creates dataSources for the contacts widget.
+     * Creates dataSources for the contacts listview.
      * @return {*}
      */
     vm.contacts = function () {

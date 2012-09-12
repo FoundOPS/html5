@@ -14,14 +14,16 @@ require.config({
         moment: "../lib/moment",
         signals: "../lib/signals",
         hasher: "../lib/hasher",
-        crossroads: "../lib/crossroads"
+        crossroads: "../lib/crossroads",
+        cordova: "../cordova"
     },
     shim: {
         underscore: {
             exports: '_'
         },
         moment: {},
-        signals: {}
+        signals: {},
+        cordova: {}
     }
 });
 
@@ -29,7 +31,7 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "tools", "
     "lib/userVoice", "moment", "sections/personalSettings", "sections/businessSettings", "sections/usersSettings",
     "sections/dispatcherSettings", "sections/changePassword", "sections/services",
     "sections/routes", "sections/routeDetails", "sections/routeDestinationDetails", "sections/routeTask",
-    "widgets/contacts", "widgets/serviceDetails"], function (Navigator, silverlight, session, tools, hasher, crossroads) {
+    "widgets/serviceDetails"], function (Navigator, silverlight, session, tools, hasher, crossroads) {
     /**
      * application = The app object.
      * navigator = The navigator object.

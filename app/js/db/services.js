@@ -169,15 +169,23 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
      * @param callback
      */
     services.postTrackPoints = function (trackPoints, callback) {
+        console.log(trackPoints);
         $.ajax({
             url: services.API_URL + "trackpoint/PostEmployeeTrackPoint",
             type: "POST",
             dataType: "json",
             contentType: 'application/json',
-            data: JSON.stringify(trackPoints)
-        }).success(function (response) {
+            data: JSON.stringify(trackPoints),
+            success: function (response) {
+                console.log("Ajax Success");
+                console.log(response);
                 callback(response);
-            });
+            },
+            error: function (response) {
+                console.log("Ajax Error");
+                console.log(response);
+            }
+        });
     };
 
     //endregion

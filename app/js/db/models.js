@@ -9,12 +9,17 @@ define(function () {
      * @enum {string}
      */
     models.DevicePlatform = {
-        ANDROID: "Android",
-        BLACKBERRY: "BlackBerry",
-        IPHONE: "iPhone",
-        WEBOS: "webOS",
-        WINCE: "WinCE",
-        UNKNOWN: "Unknown"
+        ANDROID: "android",
+        BLACKBERRY: "blackBerry",
+        FIRE: "fire",
+        IPAD: "ipad",
+        IPHONE: "iphone",
+        MEEGO: "meego",
+        PLAYBOOK: "playbook",
+        WEBOS: "webos",
+        WINDOWS: "windows",
+        WINPHONE: "winphone",
+        UNDEFINED: "undefined"
     };
 
     /**
