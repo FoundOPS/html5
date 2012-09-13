@@ -92,6 +92,14 @@ define(['hasher', 'underscore.string'], function (hasher, _s) {
         return urlParams;
     };
 
+    //gets the current section from the url
+    tools.getCurrentSection = function () {
+        var url = document.URL;
+        //get the section name(what's between "view/" and ".html")
+        var section = url.match(/view\/(.*)\.html/)[1];
+        return section;
+    };
+
     /**
      * Build a query string from a record object
      * @param parameters Ex. { prop1: value1, prop2: value2 }

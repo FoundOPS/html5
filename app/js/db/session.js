@@ -6,10 +6,23 @@ define(['db/services', "lib/kendo.all"], function (dbservices) {
     var session = new kendo.data.ObservableObject({});
     window.session = session;
 
+    //window.main.route.matched.add(function (section, query) {
+//query.roleId !== session.get("role.id"
+//
+// if exists in _.find(sesson._data.roles, r=> r.id == query.roleId) then setRole
+// if not, change url back to current roleId
+
+        //NOTE: only happens if it changed
+        //tools.setParameter("roleId", value)
+    //});
+
     session.setRole = function (role) {
         session.set("role", role);
 
         dbservices.setRoleId(role.id);
+
+        //change the url parameter roleId
+        //tools.getParameters().roleId = role.id;
     };
 
     /**

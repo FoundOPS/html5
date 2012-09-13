@@ -66,14 +66,8 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "tools", "
     main.route = crossroads.addRoute("view/{section}.html:?query:");
     main.route.greedy = true;
 
-    //setup hasher and crossroads
-    crossroads.bypassed.add(function (request) {
-        console.log(request);
-    });
-
     /**
-     * Call this to force calling the parser.
-     * It should be called at least in every view's show method.
+     * Call this to force calling the parser.\
      */
     main.parseHash = function () {
         //resetting the state forces crossroads to trigger route.matched again on parse
@@ -84,9 +78,18 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "tools", "
     //whenever the hash is changed, parse it with cross roads
     hasher.changed.add(main.parseHash);
 
-    // Builds a hash for the URL and navigates to it.
+    /**
+     * Builds a hash for the URL and navigates to it
+     * @param section (Optional) If null it will keep the current section
+     * @param parameters The parameters to set
+     */
     main.setHash = function (section, parameters) {
-        var query = "view/" + section + ".html?" + tools.buildQuery(parameters);
+        if(section == null){
+            section = tools.getCurrentSection();
+        }
+
+        var query = section ? "view/" + section + ".html?" : "?";
+        query += tools.buildQuery(parameters);
 
         crossroads.resetState();
         hasher.setHash(query);
@@ -118,8 +121,13 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "tools", "
 
     session.load(function (data) {
         //setup the navigator
-        navigator = new Navigator(data);
-        navigator.hideSearch();
+        //check if disableNavigator param exists
+        var query = tools.getParameters();
+        //if not, create navigator
+        if(!query.disableNavigator){
+            navigator = new Navigator(data);
+            navigator.hideSearch();
+        }
 
         //reset the images 1.5 seconds after loading to workaround a shared access key buy
         _.delay(function () {
