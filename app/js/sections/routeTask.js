@@ -6,7 +6,7 @@
 
 'use strict';
 
-define(["entityJumperBase", "db/services", "db/saveHistory", "tools", "widgets/serviceDetails"], function (createBase, dbServices, saveHistory, tools) {
+define(["db/services", "db/saveHistory", "tools", "widgets/serviceDetails"], function (dbServices, saveHistory, tools) {
     return;
 
     /**

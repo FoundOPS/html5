@@ -6,16 +6,27 @@
 
 'use strict';
 
-define(["entityJumperBase", "sections/routes", "tools", "db/services", "db/models"], function (createBase, routes, tools, dbServices) {
-    var vm, onShow = function () {
+define(["sections/linkedEntitySection", "sections/routes", "tools", "db/services", "db/models"], function (createBase, routes, tools, dbServices) {
+    var vm, section = createBase("routeDestinationDetails", "routeDestinationId", function () {
+        var routeDestinations = routes.vm.get("selectedEntity.RouteDestinations");
+
+        if (!routeDestinations) {
+            section.onBack();
+            return;
+        }
+
+        vm.set("dataSource", new kendo.data.DataSource({
+            data: routeDestinations
+        }));
+
         kendo.bind($("#routeDetails"), vm, kendo.mobile.ui);
-    };
 
-    var routeDetails = createBase("routeId", routes, "routeDestinationDetails", "routeDestinationId", onShow, "RouteDestinations");
+        //try to move forward
+        section._moveForward();
+    });
 
-    window.routeDetails = routeDetails;
-
-    vm = routeDetails.vm;
+    window.routeDetails = section;
+    vm = section.vm;
 
     /**
      * serviceDate = Date when service is being performed.
@@ -100,7 +111,7 @@ define(["entityJumperBase", "sections/routes", "tools", "db/services", "db/model
 //endregion
 
 //region public
-    routeDetails.onBack = function () {
+    section.onBack = function () {
         main.setHash("routes", tools.getParameters());
     };
 //endregion
@@ -136,5 +147,5 @@ define(["entityJumperBase", "sections/routes", "tools", "db/services", "db/model
     };
 //endregion
 
-    return routeDetails;
+    return section;
 });

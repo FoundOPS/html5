@@ -6,19 +6,32 @@
 
 'use strict';
 
-define(["entityJumperBase", "sections/routeDetails", "tools", "widgets/contacts"], function (createBase, routeDetails, tools) {
-    var vm, onShow = function () {
+define(["sections/linkedEntitySection", "sections/routeDetails", "tools", "widgets/contacts"], function (createBase, routeDetails, tools) {
+    var vm, section = createBase("routeTask", "routeTaskId", function () {
+        var routeDestination = routeDetails.vm.get("selectedEntity");
+
+        if (!routeDestination || !routeDestination.RouteTasks) {
+            section.onBack();
+            return;
+        }
+
+        vm.set("selectedEntity", routeDestination);
+        vm.set("dataSource", new kendo.data.DataSource({
+            data: routeDestination.RouteTasks
+        }));
+
         kendo.bind($("#routeDestinationDetails"), vm, kendo.mobile.ui);
         kendo.bind($("#directionsButton"), vm);
-    };
 
-    var routeDestinationDetails = createBase("routeDestinationId", routeDetails, "routeTask", "routeTaskId", onShow, "RouteDestinations");
+        //try to move forward
+        section._moveForward();
+    });
 
-    window.routeDestinationDetails = routeDetails;
-    vm = routeDestinationDetails.vm;
+    window.routeDestinationDetails = section;
+    vm = section.vm;
 
 //region public
-    routeDestinationDetails.onBack = function () {
+    section.onBack = function () {
         main.setHash("routeDetails", tools.getParameters());
     };
 //endregion
@@ -42,5 +55,5 @@ define(["entityJumperBase", "sections/routeDetails", "tools", "widgets/contacts"
     };
 //endregion
 
-    return routeDestinationDetails;
+    return section;
 });

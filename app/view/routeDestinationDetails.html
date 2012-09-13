@@ -12,12 +12,12 @@
     <footer></footer>
 </div>
 <script type="text/x-kendo-template" id="locationTemplate">
-    <h1>${selectedDestination.Client.Name}</h1>
+    <h1>${selectedEntity.Client.Name}</h1>
     <hr style="width:95%; margin: 10px 0px 20px 0px"/>
-    <p>${selectedDestination.Location.AddressLineOne}</p>
-    <p>${selectedDestination.Location.AddressLineTwo}</p>
-    <p>${selectedDestination.Location.City}, ${selectedDestination.Location.State}<br/>
-        ${selectedDestination.Location.ZipCode}</p>
+    <p>${selectedEntity.Location.AddressLineOne}</p>
+    <p>${selectedEntity.Location.AddressLineTwo}</p>
+    <p>${selectedEntity.Location.City}, ${selectedEntity.Location.State}<br/>
+        ${selectedEntity.Location.ZipCode}</p>
     <span class="km-text"><a id="directionsButton" data-bind="click: getDirections">Directions</a></span>
 </script>
 <script type="text/x-kendo-template" id="routeTasksTemplate">

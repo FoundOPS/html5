@@ -6,18 +6,18 @@
 
 "use strict";
 
-define(["db/services", "entityJumperBase"], function (dbServices, createBase) {
-    var routes = createBase(null, null, "routeDetails", "routeId");
-    window.routes = routes;
+define(["db/services", "sections/linkedEntitySection"], function (dbServices, createBase) {
+    var section = createBase("routeDetails", "routeId");
+    window.routes = section;
 
-    var vm = routes.vm;
+    var vm = section.vm;
 
 //region public
-    routes.initialize = function () {
+    section.initialize = function () {
         kendo.bind($("#routes"), vm, kendo.mobile.ui);
     };
 
-    routes.onBack = function () {
+    section.onBack = function () {
         var r = confirm("Are you sure you would like to log out?");
         if (r) {
             hasher.setHash("view/logout.html");
@@ -41,7 +41,7 @@ define(["db/services", "entityJumperBase"], function (dbServices, createBase) {
             }
         },
         change: function () {
-            routes._moveForward();
+            section._moveForward();
         }
     }));
 
@@ -50,5 +50,5 @@ define(["db/services", "entityJumperBase"], function (dbServices, createBase) {
     };
 //endregion
 
-    return routes;
+    return section;
 });
