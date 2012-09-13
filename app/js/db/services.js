@@ -331,6 +331,21 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
     };
 
     /**
+     * Get quickbooks status
+     * @param roleId The role to get the quickbooks settings for
+     */
+    services.getQuickbooksStatus = services._getHttp('quickbooks/GetUserInfo', {}, false);
+
+    services.updateQuickBooksStatus = function (enabled) {
+        return saveHistory.linkNotification(
+            $.ajax({
+                url: services.API_URL + "quickbooks/UpdateQuickBooksStatus?roleId=" + services.RoleId + "&enabled=" + enabled,
+                type: "POST"
+            })
+        );
+    };
+
+    /**
      * Updates personal user settings.
      * @param {!function(Array.<Object>)} settings The loaded settings.
      */

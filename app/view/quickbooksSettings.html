@@ -3,22 +3,22 @@
     <h1 class="title">QuickBooks</h1>
     <div class="wrap">
         <h2>QuickBooks Online Integration</h2>
-        <span id="toggleLabel">Enable:</span>
-        <span class="small on-off gray switch">
-            <a class="on" href="javascript:void(0)"><span>On</span></a>
-            <a class="off active" href="javascript:void(0)"><span>Off</span></a>
-        </span>
-        <br />
-        <br />
-        <div id="enabledContent">
-            <div>
-                <div id="connectIcon"></div>
-                <p>Connect to QuickBooks</p>
-            </div>
+        <div class="center">
+            <span id="toggleLabel">Enabled:</span>
+            <span class="switch">
+                <a class="on" href="javascript:void(0)"><span>On</span></a>
+                <a class="off active" href="javascript:void(0)"><span>Off</span></a>
+            </span>
             <br />
-            <p>Status: <span>Active</span></p>
+            <div id="connect">
+                <ipp:connectToIntuit></ipp:connectToIntuit>
+            </div>
+            <div id="status">
+                <p>Status: <span>Inactive</span></p>
+            </div>
         </div>
         <br />
-        <p>Note: We currently only integrate with QuickBooks Online. If you have QuickBooks Desktop, you can upgrade <a href="">here</a></p>
+        <p>Note: We currently only integrate with QuickBooks Online. If you have QuickBooks Desktop, you can upgrade <a href="http://quickbooksonline.intuit.com/
+">here</a></p>
     </div>
 </div>
