@@ -1,6 +1,6 @@
-<div id="routeDetails" data-role="view" data-init="routeDetails.initialize" data-show="routeDetails.show" data-title="Route Destinations">
+<div id="routeDetails" data-role="view" data-show="routeDetails.show" data-title="Route Destinations">
 
-    <ul id="routeDestinations-listview" data-bind="source: routeDestinationsSource, click: selectRouteDestination"
+    <ul id="routeDestinations-listview" data-bind="source: dataSource, click: select"
         data-role="listview" data-style="inset" data-template="routeDestinationViewTemplate">
     </ul>
 

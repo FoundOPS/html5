@@ -1,11 +1,11 @@
 <div id="routes" data-init="routes.initialize" data-role="view" data-show="routes.show" data-title="Routes">
     <!--Add following attributes when supported server info is pagable
     data-pull-to-refresh="true" style="margin-bottom: 600px;"-->
-    <ul id="routes-listview" data-bind="source:routesSource, click:selectRoute"
+    <ul id="routes-listview" data-bind="source:dataSource, click:select"
         data-role="listview" data-style="inset" data-template="routeListViewTemplate">
     </ul>
     <div style="text-align: center">
-        <a id="refreshButton" data-bind="click: refreshRoutes" data-role="button">Refresh</a>
+        <a id="refreshButton" data-bind="click: refresh" data-role="button">Refresh</a>
     </div>
     <footer></footer>
 </div>

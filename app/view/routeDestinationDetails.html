@@ -1,4 +1,4 @@
-<div id="routeDestinationDetails" data-role="view" data-init="routeDestinationDetails.initialize" data-show="routeDestinationDetails.show" data-title="Destination Info">
+<div id="routeDestinationDetails" data-role="view" data-show="routeDestinationDetails.show" data-title="Destination Info">
 
     <div id="locationInfo" data-bind="source: this" data-template="locationTemplate"></div>
 
@@ -6,7 +6,7 @@
 
     <p style="top:10px; margin-bottom: -5px;">Tasks</p>
     <hr style="width:90%;"/>
-    <ul id="routeTasksListView" data-bind="source: routeTasksSource, click: selectTask"
+    <ul id="routeTasksListView" data-bind="source: dataSource, click: select"
         data-role="listview" data-style="inset" data-template="routeTasksTemplate">
     </ul>
     <footer></footer>

@@ -14,7 +14,8 @@ require.config({
         moment: "../lib/moment",
         signals: "../lib/signals",
         hasher: "../lib/hasher",
-        crossroads: "../lib/crossroads"
+        crossroads: "../lib/crossroads",
+        "underscore.string": "../lib/underscore.string"
     },
     shim: {
         underscore: {
@@ -78,22 +79,13 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "tools", "
         crossroads.parse(hasher.getHash());
     };
 
-    //whenever the hash is changed, parse it with cross roads - this is redundant since main.parseHash() gets called in view's show methods.
-//    hasher.changed.add(main.parseHash);
+    //whenever the hash is changed, parse it with cross roads
+    hasher.changed.add(main.parseHash);
 
     // Builds a hash for the URL and navigates to it.
     main.setHash = function (section, parameters) {
-        var query = "view/" + section + ".html?";
+        var query = "view/" + section + ".html?" + tools.buildQuery(parameters);
 
-        var first = true;
-        _.each(parameters, function (value, key) {
-            if (!first) {
-                query += "&";
-            } else {
-                first = false;
-            }
-            query += key + "=" + value;
-        });
         crossroads.resetState();
         hasher.setHash(query);
     };
@@ -199,5 +191,6 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "tools", "
         window.trackEvent = function (section, action, label) {
             pageTracker._trackEvent(section, action, label);
         };
-    } catch (err) { }
+    } catch (err) {
+    }
 });
