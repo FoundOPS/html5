@@ -11,9 +11,9 @@ COPY C:\FoundOPS\ng\app\styles\main.less main
 cd  main
 CALL lessless
 del "*.less"
-del "jquery.jscrollpane.css"
-del "popup.css"
-del "navigator.css"
+del "jquery.jscrollpane.less"
+del "popup.less"
+del "navigator.less"
 
 :: optimize and combine all the css
 
