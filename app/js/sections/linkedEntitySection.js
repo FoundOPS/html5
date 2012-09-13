@@ -14,7 +14,7 @@ define(["../db/SaveHistory", "tools", "lib/kendo.all"], function (saveHistory, t
         //setup a function on the vm to select an entity and
         //move forward to the next section
         vm.select = function (e) {
-            vm.set("selectedEntity", e.dataItem);
+            vm.set("nextEntity", e.dataItem);
 
             var query = tools.getParameters();
             query[nextIdParameter] = e.dataItem.Id;

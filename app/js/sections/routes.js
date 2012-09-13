@@ -12,7 +12,8 @@ define(["db/services", "sections/linkedEntitySection"], function (dbServices, cr
 
     var vm = section.vm;
 
-//region public
+//public methods
+
     section.initialize = function () {
         kendo.bind($("#routes"), vm, kendo.mobile.ui);
     };
@@ -23,9 +24,8 @@ define(["db/services", "sections/linkedEntitySection"], function (dbServices, cr
             hasher.setHash("view/logout.html");
         }
     };
-//endregion
 
-//region vm
+//vm additions
 
     /**
      * A kendo data source for the current user's routes.
@@ -48,7 +48,6 @@ define(["db/services", "sections/linkedEntitySection"], function (dbServices, cr
     vm.refresh = function () {
         vm.dataSource.read();
     };
-//endregion
 
     return section;
 });

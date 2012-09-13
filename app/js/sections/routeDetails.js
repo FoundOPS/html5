@@ -1,29 +1,31 @@
 // Copyright 2012 FoundOPS LLC. All Rights Reserved.
 
 /**
- * @fileoverview Class to hold route destinations list logic.
+ * @fileoverview Class to hold a route's route destinations list logic.
  */
 
 'use strict';
 
 define(["sections/linkedEntitySection", "sections/routes", "tools", "db/services", "db/models"], function (createBase, routes, tools, dbServices) {
-    var vm, section = createBase("routeDestinationDetails", "routeDestinationId", function () {
-        var routeDestinations = routes.vm.get("selectedEntity.RouteDestinations");
+    var vm, section = createBase("routeDestinationDetails", "routeDestinationId",
+        //on show
+        function () {
+            var routeDestinations = routes.vm.get("nextEntity.RouteDestinations");
 
-        if (!routeDestinations) {
-            section.onBack();
-            return;
-        }
+            if (!routeDestinations) {
+                section.onBack();
+                return;
+            }
 
-        vm.set("dataSource", new kendo.data.DataSource({
-            data: routeDestinations
-        }));
+            vm.set("dataSource", new kendo.data.DataSource({
+                data: routeDestinations
+            }));
 
-        kendo.bind($("#routeDetails"), vm, kendo.mobile.ui);
+            kendo.bind($("#routeDetails"), vm, kendo.mobile.ui);
 
-        //try to move forward
-        section._moveForward();
-    });
+            //try to move forward
+            section._moveForward();
+        });
 
     window.routeDetails = section;
     vm = section.vm;
@@ -110,13 +112,13 @@ define(["sections/linkedEntitySection", "sections/routes", "tools", "db/services
     };
 //endregion
 
-//region public
+//public methods
+
     section.onBack = function () {
         main.setHash("routes", tools.getParameters());
     };
-//endregion
 
-//region vm
+//vm additions
 
     //Dictate the visibility of the startRoute and endRoute buttons.
     vm.set("startVisible", true);
@@ -131,7 +133,7 @@ define(["sections/linkedEntitySection", "sections/routes", "tools", "db/services
 
         //store the intervalId
         intervalId = window.setInterval(function () {
-            addPushTrackPoints(routes.vm.get("selectedEntity").Id);
+            addPushTrackPoints(routes.vm.get("nextEntity").Id);
         }, TRACKPOINTCONFIG.TRACKPOINT_COLLECTION_FREQUENCY_SECONDS * 1000);
     };
     /**
@@ -145,7 +147,6 @@ define(["sections/linkedEntitySection", "sections/routes", "tools", "db/services
         clearInterval(intervalId);
         trackPointsToSend = [];
     };
-//endregion
 
     return section;
 });

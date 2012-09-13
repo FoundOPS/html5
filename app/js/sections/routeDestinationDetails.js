@@ -7,36 +7,39 @@
 'use strict';
 
 define(["sections/linkedEntitySection", "sections/routeDetails", "tools", "widgets/contacts"], function (createBase, routeDetails, tools) {
-    var vm, section = createBase("routeTask", "routeTaskId", function () {
-        var routeDestination = routeDetails.vm.get("selectedEntity");
+    var vm, section = createBase("routeTask", "routeTaskId",
+        //on show
+        function () {
+            var routeDestination = routeDetails.vm.get("nextEntity");
 
-        if (!routeDestination || !routeDestination.RouteTasks) {
-            section.onBack();
-            return;
-        }
+            if (!routeDestination || !routeDestination.RouteTasks) {
+                section.onBack();
+                return;
+            }
 
-        vm.set("selectedEntity", routeDestination);
-        vm.set("dataSource", new kendo.data.DataSource({
-            data: routeDestination.RouteTasks
-        }));
+            vm.set("selectedEntity", routeDestination);
+            vm.set("dataSource", new kendo.data.DataSource({
+                data: routeDestination.RouteTasks
+            }));
 
-        kendo.bind($("#routeDestinationDetails"), vm, kendo.mobile.ui);
-        kendo.bind($("#directionsButton"), vm);
+            kendo.bind($("#routeDestinationDetails"), vm, kendo.mobile.ui);
+            kendo.bind($("#directionsButton"), vm);
 
-        //try to move forward
-        section._moveForward();
-    });
+            //try to move forward
+            section._moveForward();
+        });
 
     window.routeDestinationDetails = section;
     vm = section.vm;
 
-//region public
+//public methods
+
     section.onBack = function () {
         main.setHash("routeDetails", tools.getParameters());
     };
-//endregion
 
-//region vm
+//vm additions
+
     /**
      * Creates dataSources for the contacts widget.
      * @return {*}
@@ -53,7 +56,6 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "tools", "widge
             $("#directionsButton").toggleClass("buttonClicked");
         }, 500);
     };
-//endregion
 
     return section;
 });

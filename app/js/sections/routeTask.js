@@ -1,23 +1,21 @@
 // Copyright 2012 FoundOPS LLC. All Rights Reserved.
 
 /**
- * @fileoverview Class to hold selected service's logic.
+ * @fileoverview Class to hold the selected route task's logic.
  */
 
 'use strict';
 
-define(["db/services", "db/saveHistory", "tools", "widgets/serviceDetails"], function (dbServices, saveHistory, tools) {
-    return;
-
+define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "tools", "widgets/serviceDetails"], function (routeDestinationDetails, dbServices, saveHistory, tools) {
     /**
      * routeTask = wrapper for all service objects
      * vm = viewModel
      * popupCaller = the button who's click opened the popup.
      */
-    var routeTask = {}, vm = kendo.observable(), popupCaller;
-    window.routeTask = routeTask;
+    var section = {}, vm = kendo.observable(), popupCaller;
+    window.routeTask = section;
 
-    routeTask.vm = vm;
+    section.vm = vm;
 
     var updateSelectedStatus = function () {
         var selectedStatusId = vm.get("selectedTask.TaskStatusId");
@@ -27,8 +25,9 @@ define(["db/services", "db/saveHistory", "tools", "widgets/serviceDetails"], fun
         vm.set("selectedTaskStatus", selectedStatus);
     };
 
-//region routeTask Objects
-    routeTask.initialize = function () {
+//public methods
+
+    section.initialize = function () {
         $("#taskServiceDetails").kendoServiceDetails({
             clientIsReadOnly: true
         });
@@ -39,12 +38,28 @@ define(["db/services", "db/saveHistory", "tools", "widgets/serviceDetails"], fun
             }
         });
     };
-    routeTask.show = function () {
-        if (!mobileHelpers.setupData(routeDestinationDetails, routeDestinationDetails.vm.get("routeTasksSource"), "routeTaskId", "selectedTask")) {
+    /**
+     * Move back to routeDestinationDetails
+     * @param force Do not require task status selection
+     */
+    section.onBack = function (force) {
+        /* If user has already selected a status -> go back
+         otherwise open the task status popup */
+        if (force || vm.statusUpdated) {
+            main.setHash("routeDestinationDetails", tools.getParameters());
+        } else {
+            vm.openTaskStatuses("backButton");
+        }
+    };
+    section.show = function () {
+        saveHistory.close();
+        var routeTask = routeDestinationDetails.vm.get("nextEntity");
+        if (!routeTask) {
+            section.onBack(true);
             return;
         }
 
-        saveHistory.close();
+        vm.set("selectedTask", routeTask);
 
         //clear statusUpdated
         vm.statusUpdated = false;
@@ -64,35 +79,27 @@ define(["db/services", "db/saveHistory", "tools", "widgets/serviceDetails"], fun
 
         saveHistory.setCurrentSection({
             page: "Route Task",
-            save: routeTask.save,
-            undo: routeTask.undo,
+            save: section.save,
+            undo: section.undo,
             state: function () {
                 return vm.get("selectedService");
             }
         });
     };
-    routeTask.onBack = function (force) {
-        /* If user has already selected a status -> go back
-         otherwise open the task status popup */
-        if (force || routeTask.vm.statusUpdated) {
-            main.setHash("routeDestinationDetails", tools.getParameters());
-        } else {
-            routeTask.vm.openTaskStatuses("backButton");
-        }
-    };
-    routeTask.undo = function (state) {
-        //fixes a problem when the state is stored bc it is converted to json and back
-        dbServices.convertServiceDates(state);
-        vm.set("selectedService", state);
-        routeTask.save();
-    };
-    routeTask.save = function () {
+
+    section.save = function () {
         dbServices.updateService(vm.get("selectedService"));
         vm.statusUpdated = false;
     };
-//endregion
+    section.undo = function (state) {
+        //fixes a problem when the state is stored bc it is converted to json and back
+        dbServices.convertServiceDates(state);
+        vm.set("selectedService", state);
+        section.save();
+    };
 
-//region VM Objects
+//vm methods
+
     vm.openTaskStatuses = function (originator) {
         $("#taskStatuses-dimmer").css("visibility", "visible");
         $("#taskStatuses").css("visibility", "visible");
@@ -130,6 +137,6 @@ define(["db/services", "db/saveHistory", "tools", "widgets/serviceDetails"], fun
         this.closeTaskStatuses();
     };
     vm.statusUpdated = false;
-//endregion
-})
-;
+
+    return section;
+});
