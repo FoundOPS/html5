@@ -31,7 +31,7 @@ require.config({
 require(["widgets/navigator", "containers/silverlight", "db/session", "tools", "hasher", "crossroads", "db/models", "lib/kendo.all", "underscore",
     "lib/userVoice", "moment", "sections/personalSettings", "sections/businessSettings", "sections/usersSettings",
     "sections/dispatcherSettings", "sections/changePassword", "sections/services",
-    "sections/routes", "sections/routeDetails", "sections/routeDestinationDetails", "sections/routeTask",
+    "sections/routes", "sections/routeDetails", "sections/routeDestinationDetails", "sections/routeTask", "sections/mapView",
     "widgets/serviceDetails"], function (Navigator, silverlight, session, tools, hasher, crossroads) {
     /**
      * application = The app object.
@@ -127,12 +127,15 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "tools", "
         if(!query.disableNavigator){
             navigator = new Navigator(data);
             navigator.hideSearch();
+            //TODO disable other sections, disable silverlight
         }
 
         //reset the images 1.5 seconds after loading to workaround a shared access key buy
         _.delay(function () {
-            navigator.changeAvatar(data.avatarUrl);
-            navigator.changeBusinessLogo(session.get("role.businessLogoUrl"));
+            if(navigator){
+                navigator.changeAvatar(data.avatarUrl);
+                navigator.changeBusinessLogo(session.get("role.businessLogoUrl"));
+            }
         }, 1500);
     });
 

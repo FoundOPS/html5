@@ -1,66 +1,4 @@
-﻿/* region Map */
-@font-face {
-    font-family: PTSans;
-    src: url(PTS55F.ttf);  /* TTF file for CSS3 browsers */
-}
-body{
-    font-family: PTSans;
-    margin: 0;
-}
-#map{
-    position: absolute;
-    height: 100%;
-    width: 100%
-}
-​ .leaflet-popup-content{
-      min-width: 155px;
-}
-.leaflet-marker-icon .number{
-	position: relative;
-	top: -6.5px;
-    left: -3px;
-	font-size: 8.5px;
-    color: #fff;
-    margin: 0;
-    padding: 0;
-    text-align: center;
-}
-.speed{
-    min-width: 130px;
-}
-/*endregion*/
-/* region Mobile App */
-
-.menu {
-    list-style: none;
-    border-bottom: 0.1em solid black;
-    margin-bottom: 2em;
-    padding: 0 0 0.5em;
-}
-
-.menu:before {
-    content: "[";
-}
-
-.menu:after {
-    content: "]";
-}
-
-.menu > li {
-    display: inline;
-}
-
-.menu > li:before {
-    content: "|";
-    padding-right: 0.3em;
-}
-
-.menu > li:nth-child(1):before {
-    content: "";
-    padding: 0;
-}
-/*endregion*/
-/*region Leaflet*/
+﻿/*region Leaflet*/
 /* required styles */
 
 .leaflet-map-pane,
@@ -380,5 +318,60 @@ a.leaflet-active {
 .leaflet-popup-content {
     font: 12px/1.4 "Helvetica Neue", Arial, Helvetica, sans-serif;
 }
+/*endregion*/
+/* region Map */
+@font-face {
+    font-family: PTSans;
+    src: url(PTS55F.ttf);  /* TTF file for CSS3 browsers */
+}
+#map {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    font-family: PTSans;
+}
+.leaflet-marker-icon .number {
+	position: relative;
+	top: -6.5px;
+    left: -3px;
+	font-size: 8.5px;
+    color: #fff;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}
+.speed {
+    min-width: 130px;
+}
+/*endregion*/
+/* region Mobile App */
 
+.menu {
+    list-style: none;
+    border-bottom: 0.1em solid black;
+    margin-bottom: 2em;
+    padding: 0 0 0.5em;
+}
+
+.menu:before {
+    content: "[";
+}
+
+.menu:after {
+    content: "]";
+}
+
+.menu > li {
+    display: inline;
+}
+
+.menu > li:before {
+    content: "|";
+    padding-right: 0.3em;
+}
+
+.menu > li:nth-child(1):before {
+    content: "";
+    padding: 0;
+}
 /*endregion*/
