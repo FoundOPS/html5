@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(['hasher'], function (hasher) {
+define(['hasher', 'underscore.string'], function (hasher, _s) {
     var tools = {};
 
     /**
@@ -80,7 +80,36 @@ define(['hasher'], function (hasher) {
             while (match = search.exec(query))
                 urlParams[decode(match[1])] = decode(match[2]);
         })();
+
+        //remove the view parameter
+        var viewParameter = _.find(_.keys(urlParams), function (key) {
+            return _s.startsWith(key, "view");
+        });
+        if (viewParameter) {
+            delete urlParams[viewParameter];
+        }
+
         return urlParams;
+    };
+
+    /**
+     * Build a query string from a record object
+     * @param parameters Ex. { prop1: value1, prop2: value2 }
+     * @return {String} Ex. ?prop1=value1&prop2=value2
+     */
+    tools.buildQuery = function (parameters) {
+        var query = "";
+        var first = true;
+        _.each(parameters, function (value, key) {
+            if (!first) {
+                query += "&";
+            } else {
+                first = false;
+            }
+            query += key + "=" + value;
+        });
+
+        return query;
     };
 
     /**

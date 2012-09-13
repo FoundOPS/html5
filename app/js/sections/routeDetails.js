@@ -1,42 +1,41 @@
 // Copyright 2012 FoundOPS LLC. All Rights Reserved.
 
 /**
- * @fileoverview Class to hold route destinations list logic.
+ * @fileoverview Class to hold a route's route destinations list logic.
  */
 
 'use strict';
 
-define(["jquery", "db/services", "db/models", "db/saveHistory", "hasher", "tools", "lib/kendo.all"], function ($, dbServices, models, saveHistory, hasher, tools) {
+define(["sections/linkedEntitySection", "sections/routes", "tools", "db/services", "db/models"], function (createBase, routes, tools, dbServices) {
+    var vm, section = createBase("routeDestinationDetails", "routeDestinationId",
+        //on show
+        function () {
+            var routeDestinations = routes.vm.get("nextEntity.RouteDestinations");
+
+            if (!routeDestinations) {
+                section.onBack();
+                return;
+            }
+
+            vm.set("dataSource", new kendo.data.DataSource({
+                data: routeDestinations
+            }));
+
+            kendo.bind($("#routeDetails"), vm, kendo.mobile.ui);
+
+            //try to move forward
+            section._moveForward();
+        });
+
+    window.routeDetails = section;
+    vm = section.vm;
+
     /**
-     * routeDetails = wrapper for all routeDetails objects
-     * vm = viewModel
      * serviceDate = Date when service is being performed.
      * intervalId = used to start and stop a route
      * trackPointsToSend = stores the track points that will be sent to the API
-     * initialized = Detects whether the view is being loaded for the first time (useful for refreshing functionality).
      */
-    var routeDetails = {}, vm = kendo.observable(), serviceDate, intervalId = null, trackPointsToSend = [], initialized = false;
-    window.routeDetails = routeDetails;
-
-    routeDetails.vm = vm;
-
-    var onRefresh = function (params) {
-        setTimeout(function () {
-            var pageRefreshedOn = (main.history[0].slice(main.history[0].indexOf("/") + 1, main.history[0].indexOf(".")));
-            if (pageRefreshedOn !== "routes" && pageRefreshedOn !== "routeDetails" && main.history.length === 3) {
-                var source = vm.get("routeDestinationsSource")._data;
-                var destination;
-                for (destination = 0; destination < source.length; destination++) {
-                    if (params.routeDestinationId === source[destination].Id) {
-                        var e = {};
-                        e.dataItem = source[destination];
-                        vm.selectRouteDestination(e);
-                        break;
-                    }
-                }
-            }
-        }, 0);
-    };
+    var serviceDate, intervalId = null, trackPointsToSend = [];
 
 //region TrackPoint Collection & Management
     /**
@@ -95,18 +94,18 @@ define(["jquery", "db/services", "db/models", "db/saveHistory", "hasher", "tools
 
         var onError = function (error) {
             switch (error.code) {
-            case error.PERMISSION_DENIED:
-                alert("You must enable Geolocation to enable mobile tracking.");
-                break;
-            case error.POSITION_UNAVAILABLE:
-                alert("Location information is unavailable at this time.");
-                break;
-            case error.TIMEOUT:
-                alert("The Geolocation request has timed out. Please check your internet connectivity.");
-                break;
-            default:
-                alert("Geolocation information is not available at this time. Please check your Geolocation settings.");
-                break;
+                case error.PERMISSION_DENIED:
+                    alert("You must enable Geolocation to enable mobile tracking.");
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    alert("Location information is unavailable at this time.");
+                    break;
+                case error.TIMEOUT:
+                    alert("The Geolocation request has timed out. Please check your internet connectivity.");
+                    break;
+                default:
+                    alert("Geolocation information is not available at this time. Please check your Geolocation settings.");
+                    break;
             }
             vm.endRoute();
         };
@@ -116,70 +115,14 @@ define(["jquery", "db/services", "db/models", "db/saveHistory", "hasher", "tools
     };
 //endregion
 
-//region routeDetails Objects
-    routeDetails.initialize = function () {
-        main.route.matched.add(function (section, query) {
-            if (section !== "routeDetails") {
-                return;
-            }
-            vm.getDestinations(query);
-        });
-        onRefresh(tools.getParameters(main.history[0]));
-    };
-    routeDetails.show = function () {
-        main.parseHash();
+//public methods
 
-        saveHistory.close();
-
-        if (!initialized) {
-            // Routes has not been opened yet, so jump there
-            if (!vm.get("selectedRoute")) {
-                hasher.setHash("view/routes.html");
-                return;
-            }
-            initialized = true;
-        }
-        kendo.bind($("#routeDetails"), vm, kendo.mobile.ui);
+    section.onBack = function () {
+        main.setHash("routes", tools.getParameters());
     };
-    routeDetails.onBack = function () {
-        hasher.setHash("view/routes.html");
-    };
-//endregion
 
-//region VM Objects
-    /**
-     * Sets up the route destinations data source.
-     */
-    vm.getDestinations = function (query) {
-        var route;
-        var source = routes.vm.get("routesSource");
-        if (source) {
-            for (route in source._data) {
-                if (query.routeId === source._data[route].Id) {
-                    vm.set("selectedRoute", source._data[route]);
-                }
-            }
+//vm additions
 
-            /**
-             * A kendo data source for the current user's selected route.
-             * @type {kendo.data.DataSource}
-             */
-            vm.set("routeDestinationsSource",
-                new kendo.data.DataSource({
-                    data: vm.get("selectedRoute.RouteDestinations")
-                }));
-        }
-    };
-    /**
-     * Select a route destination
-     * @param e The event args from a list view click event (the selected Destination)
-     */
-    vm.selectRouteDestination = function (e) {
-        vm.set("selectedDestination", e.dataItem);
-
-        var params = {routeId: vm.get("selectedRoute.Id"), routeDestinationId: vm.get("selectedDestination.Id")};
-        main.setHash("routeDestinationDetails", params);
-    };
     //Dictate the visibility of the startRoute and endRoute buttons.
     vm.set("startVisible", true);
     vm.set("endVisible", false);
@@ -193,7 +136,7 @@ define(["jquery", "db/services", "db/models", "db/saveHistory", "hasher", "tools
 
         //store the intervalId
         intervalId = window.setInterval(function () {
-            addPushTrackPoints(routes.vm.get("selectedRoute").Id);
+            addPushTrackPoints(routes.vm.get("nextEntity").Id);
         }, TRACKPOINTCONFIG.TRACKPOINT_COLLECTION_FREQUENCY_SECONDS * 1000);
     };
     /**
@@ -207,5 +150,6 @@ define(["jquery", "db/services", "db/models", "db/saveHistory", "hasher", "tools
         clearInterval(intervalId);
         trackPointsToSend = [];
     };
-//endregion
+
+    return section;
 });

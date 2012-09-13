@@ -6,55 +6,32 @@
 
 "use strict";
 
-define(["jquery", "db/services", "db/saveHistory", "hasher", "tools", "lib/kendo.all"], function ($, dbServices, saveHistory, hasher, tools) {
-    /**
-     * routes = wrapper for all route list objects/logic
-     * vm = viewModel
-     */
-    var routes = {}, vm = kendo.observable();
-    window.routes = routes;
+define(["db/services", "sections/linkedEntitySection"], function (dbServices, createBase) {
+    var section = createBase("routeDetails", "routeId");
+    window.routes = section;
 
-    routes.vm = vm;
+    var vm = section.vm;
 
-    var onRefresh = function (params) {
-        var pageRefreshedOn = (main.history[0].slice(main.history[0].indexOf("/") + 1, main.history[0].indexOf(".")));
-        if (pageRefreshedOn !== "routes" && main.history.length === 2) {
-            var source = vm.get("routesSource")._data;
-            var route;
-            for (route = 0; route < source.length; route++) {
-                if (params.routeId === source[route].Id) {
-                    var e = {};
-                    e.dataItem = source[route];
-                    vm.selectRoute(e);
-                    break;
-                }
-            }
-        }
-    };
+//public methods
 
-//region routes Objects
-    routes.initialize = function () {
+    section.initialize = function () {
         kendo.bind($("#routes"), vm, kendo.mobile.ui);
     };
-    routes.show = function () {
-        main.parseHash();
 
-        saveHistory.close();
-    };
-    routes.onBack = function () {
+    section.onBack = function () {
         var r = confirm("Are you sure you would like to log out?");
         if (r) {
             hasher.setHash("view/logout.html");
         }
     };
-//endregion
 
-//region VM Objects
+//vm additions
+
     /**
      * A kendo data source for the current user's routes.
      * @type {kendo.data.DataSource}
      */
-    vm.set("routesSource", new kendo.data.DataSource({
+    vm.set("dataSource", new kendo.data.DataSource({
         transport: {
             read: {
                 url: dbServices.API_URL + "routes/GetRoutes",
@@ -63,23 +40,14 @@ define(["jquery", "db/services", "db/saveHistory", "hasher", "tools", "lib/kendo
                 contentType: "application/json; charset=utf-8"
             }
         },
-        change: function (e) {
-            onRefresh(tools.getParameters(main.history[0]));
-        },
-        serverPaging: true
+        change: function () {
+            section._moveForward();
+        }
     }));
-    vm.refreshRoutes = function () {
-        vm.routesSource.read();
-    };
-    /**
-     * Select a route
-     * @param e The event args from a list view click event (the selected Route)
-     */
-    vm.selectRoute = function (e) {
-        vm.set("selectedRoute", e.dataItem);
 
-        var params = {routeId: vm.get("selectedRoute.Id")};
-        main.setHash("routeDetails", params);
+    vm.refresh = function () {
+        vm.dataSource.read();
     };
-//endregion
+
+    return section;
 });

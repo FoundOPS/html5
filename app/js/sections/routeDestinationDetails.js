@@ -6,112 +6,56 @@
 
 'use strict';
 
-define(["jquery", "db/saveHistory", "hasher", "tools", "lib/kendo.all", "widgets/contacts"], function ($, saveHistory, hasher, tools) {
-    /**
-     * routeDestinationDetails = wrapper for all routeDestinationDetails objects
-     * vm = viewModel
-     * initialized = Detects whether the view is being loaded for the first time (useful for refreshing functionality).
-     */
-    var routeDestinationDetails = {}, vm = kendo.observable(), initialized = false;
-    window.routeDestinationDetails = routeDestinationDetails;
+define(["sections/linkedEntitySection", "sections/routeDetails", "tools", "widgets/contacts"], function (createBase, routeDetails, tools) {
+    var vm, section = createBase("routeTask", "routeTaskId",
+        //on show
+        function () {
+            var routeDestination = routeDetails.vm.get("nextEntity");
 
-    routeDestinationDetails.vm = vm;
-
-    var onRefresh = function (params) {
-        setTimeout(function () {
-            var pageRefreshedOn = (main.history[0].slice(main.history[0].indexOf("/") + 1, main.history[0].indexOf(".")));
-            if (pageRefreshedOn !== "routes" && pageRefreshedOn !== "routeDetails" && pageRefreshedOn !== "routeDestinationDetails" && main.history.length === 4) {
-                var source = vm.get("routeTasksSource")._data;
-                var task;
-                for (task = 0; task < source.length; task++) {
-                    if (params.routeTaskId === source[task].Id) {
-                        var e = {};
-                        e.dataItem = source[task];
-                        vm.selectTask(e);
-                        break;
-                    }
-                }
-            }
-        }, 0);
-    };
-
-//region routeDestinationDetails Objects
-    routeDestinationDetails.initialize = function () {
-        main.route.matched.add(function (section, query) {
-            if (section !== "routeDestinationDetails") {
+            if (!routeDestination || !routeDestination.RouteTasks) {
+                section.onBack();
                 return;
             }
-            vm.getDestinationDetails(query);
+
+            vm.set("selectedEntity", routeDestination);
+            vm.set("dataSource", new kendo.data.DataSource({
+                data: routeDestination.RouteTasks
+            }));
+
+            kendo.bind($("#routeDestinationDetails"), vm, kendo.mobile.ui);
+            kendo.bind($("#directionsButton"), vm);
+
+            //try to move forward
+            section._moveForward();
         });
-        onRefresh(tools.getParameters(main.history[0]));
-    };
-    routeDestinationDetails.show = function () {
-        main.parseHash();
 
-        saveHistory.close();
+    window.routeDestinationDetails = section;
+    vm = section.vm;
 
-        if (!initialized) {
-            // Routes has not been opened yet, so jump there
-            if (!vm.get("selectedDestination")) {
-                hasher.setHash("view/routes.html");
-                return;
-            }
-            initialized = true;
-        }
-        kendo.bind($("#routeDestinationDetails"), vm, kendo.mobile.ui);
-        kendo.bind($("#directionsButton"), vm);
-    };
-    routeDestinationDetails.onBack = function () {
-        var params = {routeId: routeDetails.vm.get("selectedRoute.Id")};
-        main.setHash("routeDetails", params);
-    };
-//endregion
+//public methods
 
-//region VM Objects
-    vm.getDestinationDetails = function (query) {
-        var destination;
-        var source = routeDetails.vm.get("routeDestinationsSource");
-        if (source) {
-            for (destination in source._data) {
-                if (query.routeDestinationId === source._data[destination].Id) {
-                    vm.set("selectedDestination", source._data[destination]);
-                }
-            }
-
-            /**
-             * A kendo data source for the current user's selected route destination.
-             * @type {kendo.data.DataSource}
-             */
-            vm.set("routeTasksSource",
-                new kendo.data.DataSource({
-                    data: vm.get("selectedDestination.RouteTasks")
-                }));
-        }
+    section.onBack = function () {
+        main.setHash("routeDetails", tools.getParameters());
     };
+
+//vm additions
+
     /**
-     * Creates dataSources for the contacts listview.
+     * Creates dataSources for the contacts listview
      * @return {*}
      */
     vm.contacts = function () {
-        return _.union(vm.get("selectedDestination.Client.ContactInfoSet").slice(0), vm.get("selectedDestination.Location.ContactInfoSet").slice(0));
+        return _.union(vm.get("selectedEntity.Client.ContactInfoSet").slice(0), vm.get("selectedEntity.Location.ContactInfoSet").slice(0));
     };
-    /**
-     * Select a task and create a dataSource for the task input fields.
-     * @param e The event args from a list view click event (the selected Task)
-     */
-    vm.selectTask = function (e) {
-        vm.set("selectedTask", e.dataItem);
 
-        var params = {routeId: routeDetails.vm.get("selectedRoute.Id"), routeDestinationId: vm.get("selectedDestination.Id"), routeTaskId: vm.get("selectedTask.Id")};
-        main.setHash("routeTask", params);
-    };
     vm.getDirections = function () {
         $("#directionsButton").toggleClass("buttonClicked");
         // This timeout makes the buttonClicked animation visible to the user (otherwise it happens too fast).
         setTimeout(function () {
-            window.location = "http://maps.google.com/maps?q=" + vm.get("selectedDestination.Location.Latitude") + "," + vm.get("selectedDestination.Location.Longitude");
+            window.location = "http://maps.google.com/maps?q=" + vm.get("selectedEntity.Location.Latitude") + "," + vm.get("selectedEntity.Location.Longitude");
             $("#directionsButton").toggleClass("buttonClicked");
         }, 500);
     };
-//endregion
+
+    return section;
 });

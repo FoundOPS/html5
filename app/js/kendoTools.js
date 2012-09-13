@@ -340,6 +340,14 @@ define(['tools', 'db/session', 'db/services'], function (tools, session, dbServi
         if (existing.filters) {
             existing = existing.filters;
         }
+
+        //order the fields the same so isEqual works properly
+        var orderFields = function (val) {
+            return val.field + val.operator + val.value;
+        };
+        filterSet = _.sortBy(filterSet, orderFields);
+        existing = _.sortBy(existing, orderFields);
+
         var same = _.isEqual(filterSet, existing);
 
         //then adjust the filters accordingly
