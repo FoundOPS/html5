@@ -1,8 +1,9 @@
 define(["../db/SaveHistory", "tools", "lib/kendo.all"], function (saveHistory, tools) {
     /**
      * Setup the base class for an entity section that acts like a linked list with url parameters.
-     * When it selects the entity, it adds that entity's Id to the url parameter and moves to the next section.
-     * It will also try to move forward if the nextIdParameter is available in the url parameters.
+     * When it selects an entity, it sets that on the vm as nextEntity.
+     * It adds that entity's Id to the url parameter and moves to the next section.
+     * When shown, it will try to move forward if the nextIdParameter is available in the url parameters.
      * @param nextSectionName The name of the next section. Ex. routeDestinationDetails
      * @param nextIdParameter The name of the next section's Id query parameter. Ex. routeDestinationId
      * @param onShow (Optional) A function to call when the view is shown
