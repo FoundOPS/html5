@@ -130,51 +130,60 @@ require(["widgets/navigator", "db/developer", "db/services", "db/session", "cont
 //endregion
 
     session.load(function (data) {
-        //setup the navigator
-        //check if disableNavigator param exists
         var query = tools.getParameters();
-        //if not, create navigator
+        //if the disableNavigator param is not set to true: setup the navigator
         if (!query.disableNavigator) {
+            var frame = developer.CURRENT_FRAME;
+
+            //if this is the mobile app, remove the silverlight sections from the session data
+            if (frame === developer.Frame.MOBILE_APP) {
+                //TODO Rod
+            } else if (frame === developer.Frame.SILVERLIGHT || frame === developer.Frame.SILVERLIGHT_PUBLISHED) {
+                //otherwise setup the silverlight div
+                var silverlightElement = '<div id="silverlightControlHost">' +
+                    '<object id="silverlightPlugin" data="data:application/x-silverlight-2," type="application/x-silverlight-2" style="height: 1px; width: 1px">' +
+                    '<param name="onSourceDownloadProgressChanged" value="onSourceDownloadProgressChanged"/>';
+                if (frame === developer.Frame.SILVERLIGHT) {
+                    silverlightElement += '<param name="splashscreensource" value="http://localhost:31820/ClientBin/SplashScreen.xaml"/>' +
+                        '<param name="source" value="http://localhost:31820/ClientBin/FoundOps.SLClient.Navigator.xap"/>';
+                } else if (frame === developer.Frame.SILVERLIGHT_PUBLISHED) {
+                    //TODO centralize blobUrl to developer or dbServices
+                    var blobUrl = "http://bp.foundops.com/";
+                    silverlightElement += '<param name="splashscreensource" value="' + blobUrl + 'xaps/SplashScreen.xap" />' +
+                        '<param name="source" value="' + blobUrl + 'xaps/FoundOps.SLClient.Navigator.xap?ignore=' + developer.SILVERLIGHT_VERSION + '/>';
+                }
+                silverlightElement +=
+                    '<param name="onError" value="onSilverlightError"/>' +
+                        '<param name="background" value="#ff333335"/>' +
+                        '<param name="windowless" value="true"/>' +
+                        '<param name="minRuntimeVersion" value="5.0.61118.0"/>' +
+                        '<param name="enableHtmlAccess" value="true"/>' +
+                        '<param name="autoUpgrade" value="true"/>' +
+                        '<a href="http://go.microsoft.com/fwlink/?LinkID=149156&v=5.0.61118.0" style="text-decoration: none">' +
+                        '<img src="http://go.microsoft.com/fwlink/?LinkId=161376" alt="Get Microsoft Silverlight" style="border-style: none"/>' +
+                        '</a>' +
+                        '</object>' +
+                        '<iframe id="_sl_historyFrame" style="visibility: hidden; height: 0; width: 0; z-index: -1; border: 0"></iframe>' +
+                        '</div>';
+
+                $(silverlightElement).insertAfter("#remoteContent");
+            }
+
+            //setup the navigator
             navigator = new Navigator(data);
             navigator.hideSearch();
-            //add silverlight
-            var silverlightElement = '<div id="silverlightControlHost">' +
-                '<object id="silverlightPlugin" data="data:application/x-silverlight-2," type="application/x-silverlight-2" style="height: 1px; width: 1px">' +
-                '<param name="onSourceDownloadProgressChanged" value="onSourceDownloadProgressChanged"/>';
-            if (developer.CURRENT_FRAME === developer.Frame.SILVERLIGHT) {
-                silverlightElement += '<param name="splashscreensource" value="http://localhost:31820/ClientBin/SplashScreen.xaml"/>' +
-                    '<param name="source" value="http://localhost:31820/ClientBin/FoundOps.SLClient.Navigator.xap"/>';
-            } else if (developer.CURRENT_FRAME === developer.Frame.SILVERLIGHT_PUBLISHED) {
-                //TODO centralize blobUrl to developer or dbServices
-                var blobUrl = "http://bp.foundops.com/";
-                silverlightElement += '<param name="splashscreensource" value="' + blobUrl + 'xaps/SplashScreen.xap" />' +
-                    '<param name="source" value="' + blobUrl + 'xaps/FoundOps.SLClient.Navigator.xap?ignore=' + developer.SILVERLIGHT_VERSION + '/>';
-            }
-            silverlightElement +=
-                '<param name="onError" value="onSilverlightError"/>' +
-                    '<param name="background" value="#ff333335"/>' +
-                    '<param name="windowless" value="true"/>' +
-                    '<param name="minRuntimeVersion" value="5.0.61118.0"/>' +
-                    '<param name="enableHtmlAccess" value="true"/>' +
-                    '<param name="autoUpgrade" value="true"/>' +
-                    '<a href="http://go.microsoft.com/fwlink/?LinkID=149156&v=5.0.61118.0" style="text-decoration: none">' +
-                    '<img src="http://go.microsoft.com/fwlink/?LinkId=161376" alt="Get Microsoft Silverlight" style="border-style: none"/>' +
-                    '</a>' +
-                    '</object>' +
-                    '<iframe id="_sl_historyFrame" style="visibility: hidden; height: 0; width: 0; z-index: -1; border: 0"></iframe>' +
-                    '</div>'
-            $(silverlightElement).insertAfter("#remoteContent");
+
+            //reset the images 1.5 seconds after loading to workaround a shared access key buy
+            _.delay(function () {
+                if (navigator) {
+                    navigator.changeAvatar(data.avatarUrl);
+                    navigator.changeBusinessLogo(session.get("role.businessLogoUrl"));
+                }
+            }, 1500);
         } else {
+            //clear the padding for the navigator if it is disabled
             $("#content").attr("style", "padding:0");
         }
-
-        //reset the images 1.5 seconds after loading to workaround a shared access key buy
-        _.delay(function () {
-            if (navigator) {
-                navigator.changeAvatar(data.avatarUrl);
-                navigator.changeBusinessLogo(session.get("role.businessLogoUrl"));
-            }
-        }, 1500);
     });
 
     //TODO make sectionSelected a navigator event
