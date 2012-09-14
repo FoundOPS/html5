@@ -189,6 +189,8 @@ define(["db/session", "db/services", "tools", "ui/leaflet", "ui/ui", "lib/leafle
         removeLayer(trackPointsGroup);
         //center the map the first time routes are loaded after setDate is changed
         center = true;
+        //get the depots
+        getDepots();
         //load the routes for the date
         getRoutes();
         //load the resources
