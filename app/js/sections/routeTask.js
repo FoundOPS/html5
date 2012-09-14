@@ -46,7 +46,10 @@ define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "to
         /* If user has already selected a status -> go back
          otherwise open the task status popup */
         if (force || vm.statusUpdated) {
-            main.setHash("routeDestinationDetails", tools.getParameters());
+            var query = tools.getParameters();
+            //remove the routeTaskId so it does not jump back here
+            delete query.routeTaskId;
+            main.setHash("routeDestinationDetails", query, true);
         } else {
             vm.openTaskStatuses("backButton");
         }
@@ -120,8 +123,7 @@ define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "to
         }, 400);
         // If popup was opened by clicking backButton go back if and only if user selects status.
         if (popupCaller === "backButton" && !e) {
-            var params = {routeId: routeDetails.vm.get("selectedRoute.Id"), routeDestinationId: routeDestinationDetails.vm.get("selectedDestination.Id")};
-            main.setHash("routeDestinationDetails", params);
+            section.onBack(true);
         }
     };
     vm.selectStatus = function (e) {

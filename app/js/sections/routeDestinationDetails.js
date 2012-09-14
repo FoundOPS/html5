@@ -32,7 +32,6 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "tools"], funct
     window.routeDestinationDetails = section;
     vm = section.vm;
 
-
 //vm additions
 
     /**
