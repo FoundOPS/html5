@@ -2,27 +2,46 @@
 
 'use strict';
 
-define(['db/services', "lib/kendo.all"], function (dbservices) {
+define(['db/services', 'tools', "hasher", "lib/kendo.all"], function (dbservices, tools, hasher) {
     var session = new kendo.data.ObservableObject({});
     window.session = session;
 
-    //window.main.route.matched.add(function (section, query) {
-//query.roleId !== session.get("role.id"
-//
-// if exists in _.find(sesson._data.roles, r=> r.id == query.roleId) then setRole
-// if not, change url back to current roleId
+    //sync the roleId parameter with the current role
+    //returns true if the role was set
+    var syncRoleId = function () {
+        var query = tools.getParameters();
+        //if it did not change
+        if (query.roleId === session.get("role.id")) {
+            return false;
+        }
 
-        //NOTE: only happens if it changed
-        //tools.setParameter("roleId", value)
-    //});
+        var role = _.find(session._data.roles, function (r) {
+            return r.id === query.roleId;
+        });
+        //if the role was found, set it
+        if (role) {
+            session.setRole(role);
+            return true;
+        }
+        //otherwise reset the parameter to the current roleId
+        else {
+            tools.setParameter("roleId", session.get("role.id"));
+            return false;
+        }
+    };
+
+    hasher.changed.add(function (hash) {
+        if (hash === "") {
+            return;
+        }
+        syncRoleId();
+    });
 
     session.setRole = function (role) {
         session.set("role", role);
 
         dbservices.setRoleId(role.id);
-
-        //change the url parameter roleId
-        //tools.getParameters().roleId = role.id;
+        tools.setParameter("roleId", role.id);
     };
 
     /**
@@ -39,7 +58,12 @@ define(['db/services', "lib/kendo.all"], function (dbservices) {
         //load the config
         dbservices.getSession(function (data) {
             session._data = data;
-            session.setRole(data.roles[0]);
+
+            //try to load the role from the query parameter
+            //otherwise set it to the first loaded role
+            if (!syncRoleId()) {
+                session.setRole(data.roles[0]);
+            }
 
             callback(session._data);
         });

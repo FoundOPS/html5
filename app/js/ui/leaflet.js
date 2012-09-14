@@ -139,10 +139,11 @@ define(['db/models', 'tools', 'ui/ui', 'lib/leaflet'], function (models, tools, 
         var rotateDegrees = resource.Heading;
         var color = routeColorSelector.getValue(resource.RouteId);
         var locationLatLng = new window.L.LatLng(resource.Latitude, resource.Longitude);
-        var iconUrl = ui.ImageUrls.TRUCK;
-        if (resource.Source === models.DevicePlatform.IPHONE) {
+        var iconUrl = ui.ImageUrls.PHONE;
+        var source = resource.Source.toLowerCase();
+        if (source === models.DevicePlatform.IPHONE) {
             iconUrl = ui.ImageUrls.APPLE;
-        } else if (resource.Source === models.DevicePlatform.ANDROID) {
+        } else if (source === models.DevicePlatform.ANDROID) {
             iconUrl = ui.ImageUrls.ANDROID;
         }
 
@@ -338,7 +339,11 @@ define(['db/models', 'tools', 'ui/ui', 'lib/leaflet'], function (models, tools, 
         }
 
         //setup marker popup
-        leaflet.addPopup_(numMarker, "<b>" + location.Name + "</b>");
+        var name = "";
+        if(destination.Client.Name){
+            name = destination.Client.Name;
+        }
+        leaflet.addPopup_(numMarker, "<b>" + name + "</b>");
 
         //add the markers to the map
         layer.addLayer(marker);

@@ -31,7 +31,7 @@ require.config({
 require(["widgets/navigator", "containers/silverlight", "db/session", "tools", "hasher", "crossroads", "db/models", "lib/kendo.all", "underscore",
     "lib/userVoice", "moment", "sections/personalSettings", "sections/businessSettings", "sections/usersSettings",
     "sections/dispatcherSettings", "sections/changePassword", "sections/services",
-    "sections/routes", "sections/routeDetails", "sections/routeDestinationDetails", "sections/routeTask",
+    "sections/routes", "sections/routeDetails", "sections/routeDestinationDetails", "sections/routeTask", "sections/mapView",
     "widgets/serviceDetails"], function (Navigator, silverlight, session, tools, hasher, crossroads) {
     /**
      * application = The app object.
@@ -137,12 +137,17 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "tools", "
         if (!query.disableNavigator) {
             navigator = new Navigator(data);
             navigator.hideSearch();
+            //TODO disable other sections, disable silverlight
+        }else{
+            $("#content").attr("style", "padding:0");
         }
 
         //reset the images 1.5 seconds after loading to workaround a shared access key buy
         _.delay(function () {
-            navigator.changeAvatar(data.avatarUrl);
-            navigator.changeBusinessLogo(session.get("role.businessLogoUrl"));
+            if (navigator) {
+                navigator.changeAvatar(data.avatarUrl);
+                navigator.changeBusinessLogo(session.get("role.businessLogoUrl"));
+            }
         }, 1500);
     });
 
@@ -180,16 +185,16 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "tools", "
             $(elem).remove();
         });
 
-        //reload the current page if it is not on silverlight
-        var hash = location.hash;
-        if (hash !== "#silverlight") {
-            location.hash = "";
-            _.delay(function () {
-                location.hash = hash;
-            }, 200);
-        }
-
         session.setRole(role);
+
+        //reload the current page if it is not on silverlight
+        if (hash !== "#silverlight") {
+            var hash = hasher.getHash();
+            hasher.setHash('');
+            _.delay(function () {
+                hasher.replaceHash(hash);
+            }, 100);
+        }
     });
 
     //when the silverlight plugin loads hook into the silverlight click events, and hide the navigator popup

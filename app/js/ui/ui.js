@@ -58,6 +58,7 @@ define(['db/developer'], function (developer) {
     ui.ImageUrls = {
         ANDROID: imageRootUrl + "android.png",
         APPLE: imageRootUrl + "apple.png",
+        PHONE: imageRootUrl + "phone.png",
         DEPOT: imageRootUrl + "depot.png",
         OUTER_CIRCLE: imageRootUrl + "outerCircle.png",
         TRUCK: imageRootUrl + "truck.png"
