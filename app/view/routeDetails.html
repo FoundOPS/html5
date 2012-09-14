@@ -13,5 +13,9 @@
     <footer></footer>
 </div>
 <script type="text/x-kendo-template" id="routeDestinationViewTemplate">
+    # if (data.Location) { #
     <a class="km-listview-link">#= Client.Name #<br/><label id="addressLabel">#= Location.AddressLineOne #</label></a>
+    # } else { #
+    <a class="km-listview-link">#= Client.Name #<br/><label id="addressLabel" style="color:red">No Location Available</label></a>
+    # } #
 </script>

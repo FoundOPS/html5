@@ -6,7 +6,7 @@
 
 'use strict';
 
-define(["sections/linkedEntitySection", "sections/routeDetails", "tools", "widgets/contacts"], function (createBase, routeDetails, tools) {
+define(["sections/linkedEntitySection", "sections/routeDetails", "tools"], function (createBase, routeDetails, tools) {
     var vm, section = createBase("routeTask", "routeTaskId",
         //on show
         function () {
@@ -39,7 +39,11 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "tools", "widge
      * @return {*}
      */
     vm.contacts = function () {
-        return _.union(vm.get("selectedEntity.Client.ContactInfoSet").slice(0), vm.get("selectedEntity.Location.ContactInfoSet").slice(0));
+        if (vm.get("selectedEntity.Location")) {
+            return _.union(vm.get("selectedEntity.Client.ContactInfoSet").slice(0), vm.get("selectedEntity.Location.ContactInfoSet").slice(0));
+        } else {
+            return vm.get("selectedEntity.Client.ContactInfoSet").slice(0);
+        }
     };
 
     vm.getDirections = function () {
