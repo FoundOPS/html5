@@ -128,6 +128,8 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "tools", "
             navigator = new Navigator(data);
             navigator.hideSearch();
             //TODO disable other sections, disable silverlight
+        }else{
+            $("#content").attr("style", "padding:0");
         }
 
         //reset the images 1.5 seconds after loading to workaround a shared access key buy
