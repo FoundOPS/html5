@@ -9,6 +9,10 @@ define(['db/services', 'tools', "hasher", "lib/kendo.all"], function (dbservices
     //sync the roleId parameter with the current role
     //returns true if the role was set
     var syncRoleId = function () {
+        if (!session._data) {
+            return false;
+        }
+
         var query = tools.getParameters();
         //if it did not change
         if (query.roleId === session.get("role.id")) {
@@ -25,7 +29,7 @@ define(['db/services', 'tools', "hasher", "lib/kendo.all"], function (dbservices
         }
         //otherwise reset the parameter to the current roleId
         else {
-            tools.setParameter("roleId", session.get("role.id"));
+            tools.setParameter("roleId", session.get("role.id"), true);
             return false;
         }
     };
