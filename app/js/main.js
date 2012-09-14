@@ -118,11 +118,8 @@ require(["widgets/navigator", "db/developer", "db/services", "db/session", "cont
         if (!query.disableNavigator) {
             var frame = developer.CURRENT_FRAME;
 
-            //if this is the mobile app, remove the silverlight sections from the session data
-            if (frame === developer.Frame.MOBILE_APP) {
-                //TODO Rod
-            } else if (frame === developer.Frame.SILVERLIGHT || frame === developer.Frame.SILVERLIGHT_PUBLISHED) {
-                //otherwise setup the silverlight div
+            //setup the silverlight div for the proper frames
+            if (frame === developer.Frame.SILVERLIGHT || frame === developer.Frame.SILVERLIGHT_PUBLISHED) {
                 var silverlightElement = '<div id="silverlightControlHost">' +
                     '<object id="silverlightPlugin" data="data:application/x-silverlight-2," type="application/x-silverlight-2" style="height: 1px; width: 1px">' +
                     '<param name="onSourceDownloadProgressChanged" value="onSourceDownloadProgressChanged"/>';
