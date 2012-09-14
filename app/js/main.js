@@ -84,7 +84,7 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "tools", "
      * @param parameters The parameters to set
      */
     main.setHash = function (section, parameters) {
-        if(section == null){
+        if (section == null) {
             section = tools.getCurrentSection();
         }
 
@@ -124,7 +124,7 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "tools", "
         //check if disableNavigator param exists
         var query = tools.getParameters();
         //if not, create navigator
-        if(!query.disableNavigator){
+        if (!query.disableNavigator) {
             navigator = new Navigator(data);
             navigator.hideSearch();
             //TODO disable other sections, disable silverlight
@@ -132,7 +132,7 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "tools", "
 
         //reset the images 1.5 seconds after loading to workaround a shared access key buy
         _.delay(function () {
-            if(navigator){
+            if (navigator) {
                 navigator.changeAvatar(data.avatarUrl);
                 navigator.changeBusinessLogo(session.get("role.businessLogoUrl"));
             }
@@ -173,16 +173,16 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "tools", "
             $(elem).remove();
         });
 
-        //reload the current page if it is not on silverlight
-        var hash = location.hash;
-        if (hash !== "#silverlight") {
-            location.hash = "";
-            _.delay(function () {
-                location.hash = hash;
-            }, 200);
-        }
-
         session.setRole(role);
+
+        //reload the current page if it is not on silverlight
+        if (hash !== "#silverlight") {
+            var hash = hasher.getHash();
+            hasher.setHash('');
+            _.delay(function () {
+                hasher.replaceHash(hash);
+            }, 100);
+        }
     });
 
     //when the silverlight plugin loads hook into the silverlight click events, and hide the navigator popup

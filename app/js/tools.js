@@ -92,12 +92,22 @@ define(['hasher', 'underscore.string'], function (hasher, _s) {
         return urlParams;
     };
 
+    //change the url parameter(key) with the given value
+    tools.setParameter = function (key, value) {
+        var query = tools.getParameters();
+        query[key] = value;
+        main.setHash(null, query);
+    };
+
     //gets the current section from the url
     tools.getCurrentSection = function () {
         var url = document.URL;
         //get the section name(what's between "view/" and ".html")
-        var section = url.match(/view\/(.*)\.html/)[1];
-        return section;
+        var matches = url.match(/view\/(.*)\.html/);
+        if (!matches) {
+            return null;
+        }
+        return matches[1];
     };
 
     /**
