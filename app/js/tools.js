@@ -94,6 +94,8 @@ define(['hasher', 'underscore.string'], function (hasher, _s) {
 
     //gets the current section from the url
     tools.getCurrentSection = function () {
+        //var currentView = hasher.getHash().slice(hash.indexOf("/"), hasher.getHash().indexOf("."));
+
         var url = document.URL;
         //get the section name(what's between "view/" and ".html")
         var section = url.match(/view\/(.*)\.html/)[1];

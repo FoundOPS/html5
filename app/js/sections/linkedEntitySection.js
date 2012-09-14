@@ -12,15 +12,19 @@ define(["../db/SaveHistory", "tools", "lib/kendo.all"], function (saveHistory, t
         var section = {}, vm = kendo.observable();
         section.vm = vm;
 
-        //setup a function on the vm to select an entity and
-        //move forward to the next section
-        vm.select = function (e) {
+        /**
+         * a function on the vm to select an entity and
+         * move forward to the next section
+         * @param e.dataItem should be the entity
+         * @param replace If it should replace the current hash instead of adding a new one to history.
+         */
+        vm.select = function (e, replace) {
             vm.set("nextEntity", e.dataItem);
 
             var query = tools.getParameters();
             query[nextIdParameter] = e.dataItem.Id;
 
-            main.setHash(nextSectionName, query);
+            main.setHash(nextSectionName, query, replace);
         };
 
         /**
@@ -37,7 +41,7 @@ define(["../db/SaveHistory", "tools", "lib/kendo.all"], function (saveHistory, t
                 return ne.Id === params[nextIdParameter];
             });
             if (nextEntity) {
-                vm.select({dataItem: nextEntity});
+                vm.select({dataItem: nextEntity}, true);
                 return true;
             }
             return false;

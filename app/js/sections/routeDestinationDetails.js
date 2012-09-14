@@ -13,7 +13,7 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "tools", "widge
             var routeDestination = routeDetails.vm.get("nextEntity");
 
             if (!routeDestination || !routeDestination.RouteTasks) {
-                section.onBack();
+                main.setHash("routeDetails", tools.getParameters());
                 return;
             }
 
@@ -31,12 +31,6 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "tools", "widge
 
     window.routeDestinationDetails = section;
     vm = section.vm;
-
-//public methods
-
-    section.onBack = function () {
-        main.setHash("routeDetails", tools.getParameters());
-    };
 
 //vm additions
 
