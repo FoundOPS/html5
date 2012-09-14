@@ -46,10 +46,11 @@ define(['db/developer'], function (developer) {
         0.30
     ];
 
-    var imageRootUrl = "../Content/";
-    if (developer.CURRENT_FRAME === developer.Frame.BROWSER) {
-        imageRootUrl = 'img/';
-    }
+    var imageRootUrl = 'img/';
+//TODO remove after publish if it works
+//    if (developer.CURRENT_FRAME === developer.Frame.SILVERLIGHT || developer.CURRENT_FRAME === developer.Frame.SILVERLIGHT_PUBLISHED) {
+//        imageRootUrl = "../Content/";
+//    }
 
     /**
      * Enum for image urls.

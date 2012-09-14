@@ -25,15 +25,18 @@ define(function () {
     };
 
     /**
-     * Enum for the map's frame.
-     * SILVERLIGHT: The map is loaded inside the silverlight app.
-     * BROWSER: The map is loaded directly from a browser.
+     * Enum for the application's frame.
+     * SILVERLIGHT: The application is loaded with the local SL app.
+     * SILVERLIGHT: The application is loaded with the live SL app.
+     * BROWSER: The application is loaded without the SL app.
+     * MOBILE_APP: The application is loaded for mobile phones.
      * @enum {number}
      */
     developer.Frame = {
         SILVERLIGHT: 0,
-        BROWSER: 1,
-        MOBILE_APP: 2
+        SILVERLIGHT_PUBLISHED: 1,
+        BROWSER: 2,
+        MOBILE_APP: 3
     };
 
     /**
@@ -46,7 +49,12 @@ define(function () {
      * This is for sections that are in the Silverlight application and is used for debugging.
      * @type {developer.Frame}
      */
-    developer.CURRENT_FRAME = developer.Frame.BROWSER;
+    developer.CURRENT_FRAME = developer.Frame.SILVERLIGHT;
+
+    /**
+     * The current silverlight version
+     */
+    developer.SILVERLIGHT_VERSION = 0.5;
 
     /**
      * The local server's RoleId for GotGrease.

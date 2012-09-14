@@ -92,11 +92,16 @@ define(['hasher', 'underscore.string'], function (hasher, _s) {
         return urlParams;
     };
 
-    //change the url parameter(key) with the given value
-    tools.setParameter = function (key, value) {
+    /**
+     * Change the url parameter(key) with the given value
+     * @param key The parameter to change
+     * @param value The value to set
+     * @param replace (Optional) If true, it will not add a new history item
+     */
+    tools.setParameter = function (key, value, replace) {
         var query = tools.getParameters();
         query[key] = value;
-        main.setHash(null, query);
+        main.setHash(null, query, replace);
     };
 
     //gets the current section from the url
