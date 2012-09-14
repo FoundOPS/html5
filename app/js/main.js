@@ -82,9 +82,10 @@ require(["widgets/navigator", "db/developer", "db/services", "db/session", "cont
      * Builds a hash for the URL and navigates to it
      * @param section (Optional) If null it will keep the current section
      * @param parameters The parameters to set
+     * @param replace (Optional) If set, it will replace the current hash (and not add it to history).
      */
-    main.setHash = function (section, parameters) {
-        if (section == null) {
+    main.setHash = function (section, parameters, replace) {
+        if (section === null) {
             section = tools.getCurrentSection();
         }
 
@@ -92,16 +93,25 @@ require(["widgets/navigator", "db/developer", "db/services", "db/session", "cont
         query += tools.buildQuery(parameters);
 
         crossroads.resetState();
-        hasher.setHash(query);
+        if (replace) {
+            hasher.replaceHash(query);
+        }
+        else {
+            hasher.setHash(query);
+        }
     };
 
     //Overrides phone's back button navigation - Phonegap
     main.onBack = function () {
-        var currentView = hasher.getHash().slice(hash.indexOf("/"), hasher.getHash().indexOf("."));
-        if (currentView === "routes" || currentView === "routeDetails" || currentView === "routeDestinationDetails" || currentView === "routeTask" || currentView === "changePassword") {
-            window[currentView].onBack();
+        var sectionName = tools.getCurrentSection();
+        var section = window[sectionName];
+
+        //if the section overrode the onBack function, trigger it
+        //otherwise use the standard history
+        if (section && section.onBack) {
+            section.onBack();
         } else {
-            hasher.setHash("view/routes.html");
+            history.go(-1);
         }
     };
 

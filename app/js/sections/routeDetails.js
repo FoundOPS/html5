@@ -13,7 +13,7 @@ define(["sections/linkedEntitySection", "sections/routes", "tools", "db/services
             var routeDestinations = routes.vm.get("nextEntity.RouteDestinations");
 
             if (!routeDestinations) {
-                section.onBack();
+                main.setHash("routes", tools.getParameters());
                 return;
             }
 
@@ -114,12 +114,6 @@ define(["sections/linkedEntitySection", "sections/routes", "tools", "db/services
         navigator.geolocation.getCurrentPosition(onSuccess, onError, {enableHighAccuracy: true});
     };
 //endregion
-
-//public methods
-
-    section.onBack = function () {
-        main.setHash("routes", tools.getParameters());
-    };
 
 //vm additions
 
