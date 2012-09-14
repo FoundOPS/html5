@@ -60,7 +60,7 @@ define(["db/services", "db/session", "widgets/settingsMenu"], function (dbServic
             session.followRole(function (role) {
                 intuit.ipp.anywhere.setup({
                     //menuProxy: 'http://example.com/myapp/BlueDotMenu',
-                    grantUrl: dbServices.API_URL + "QuickBooks/OAuthGrantLogin?roleId=" + role.id
+                    grantUrl: dbServices.ROOT_API_URL + "QuickBooks/OAuthGrantLogin?roleId=" + role.id
                 });
             });
         });
