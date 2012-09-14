@@ -8,7 +8,7 @@
 
 define(["sections/linkedEntitySection", "sections/routes", "tools", "db/services", "db/models"], function (createBase, routes, tools, dbServices, models) {
     var vm, section = createBase("routeDestinationDetails", "routeDestinationId",
-        //on show
+        //on init
         function () {
             var routeDestinations = routes.vm.get("nextEntity.RouteDestinations");
 

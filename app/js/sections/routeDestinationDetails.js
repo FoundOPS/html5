@@ -8,7 +8,7 @@
 
 define(["sections/linkedEntitySection", "sections/routeDetails", "tools"], function (createBase, routeDetails, tools) {
     var vm, section = createBase("routeTask", "routeTaskId",
-        //on show
+        //on init
         function () {
             var routeDestination = routeDetails.vm.get("nextEntity");
 
@@ -32,6 +32,7 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "tools"], funct
     window.routeDestinationDetails = section;
     vm = section.vm;
 
+
 //vm additions
 
     /**
@@ -47,12 +48,11 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "tools"], funct
     };
 
     vm.getDirections = function () {
-        $("#directionsButton").toggleClass("buttonClicked");
-        // This timeout makes the buttonClicked animation visible to the user (otherwise it happens too fast).
-        setTimeout(function () {
+        if (vm.get("selectedEntity.Location")) {
             window.location = "http://maps.google.com/maps?q=" + vm.get("selectedEntity.Location.Latitude") + "," + vm.get("selectedEntity.Location.Longitude");
-            $("#directionsButton").toggleClass("buttonClicked");
-        }, 500);
+        } else {
+            window.location = "http://maps.google.com/maps?q=" + vm.get("selectedEntity.Client.Name");
+        }
     };
 
     return section;

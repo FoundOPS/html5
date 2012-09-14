@@ -42,26 +42,9 @@ require(["widgets/navigator", "db/developer", "db/services", "db/session", "cont
     var application, navigator, main = {}, initialized = false;
     window.main = main;
 
-    // Array to keep track of the hash changes within the app.
-    main.history = [];
-
-//region History and navigation objects
-    if (!initialized) {
-        // App is just being loaded. Set starting location.
-        var hash = location.hash;
-        if (hash !== "") {
-            main.history.push(hash);
-        }
-        initialized = true;
-    }
-
     // Setup Hasher
     hasher.prependHash = '';
     hasher.init();
-    // Listens to changes in the URL's hash and adds them to the history.
-    hasher.changed.add(function () {
-        main.history.push(hasher.getHash());
-    });
 
     main.route = crossroads.addRoute("view/{section}.html:?query:");
     main.route.greedy = true;
@@ -111,7 +94,7 @@ require(["widgets/navigator", "db/developer", "db/services", "db/session", "cont
         if (section && section.onBack) {
             section.onBack();
         } else {
-            history.go(-1);
+            history.back();
         }
     };
 

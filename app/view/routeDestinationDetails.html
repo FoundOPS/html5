@@ -23,11 +23,12 @@
     <p>${selectedEntity.Location.AddressLineTwo}</p>
     <p>${selectedEntity.Location.City}, ${selectedEntity.Location.State}<br/>
         ${selectedEntity.Location.ZipCode}</p>
-    <span class="km-text"><a id="directionsButton" data-bind="click: getDirections">Directions</a></span>
     # } else { #
     <p style="color:red"> No<br/>Location<br/>Information<br/>Available</p>
-    <span class="km-text"><a id="directionsButton" onclick="alert('Location information is not available.');">Directions</a></span>
+    <label id="directionsWarning">Direction information may not be 100% accurate.</label>
     # } #
+    <span class="km-text"><a id="directionsButton" data-bind="click: getDirections">Directions</a></span>
+
 </script>
 <script type="text/x-kendo-template" id="contactsTemplate">
     # if (Type === "Phone Number") { #

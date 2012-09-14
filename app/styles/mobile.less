@@ -22,14 +22,6 @@ footer {
     font-size: x-small;
     margin: -50px 0px -15px 0px;
  }
-#locationInfo p {
-    margin-top: -5px;
-    font-size: 1.2em;
-}
-#locationInfo h1 {
-    font-size: 2em;
-    margin-top: 10px;
-}
 #directionsButton {
     float: right;
     position:relative;
@@ -56,6 +48,26 @@ footer {
     border-radius: 5pt;
     -moz-border-radius: 5pt;
     -webkit-border-radius: 5pt;
+}
+#directionsWarning {
+    text-align: right;
+    width: 30%;
+    color: red;
+    font-size: 8pt;
+    position:absolute;
+    margin: 0;
+    padding: 0;
+    left: 65%;
+    top: 80px;
+    right: 5%;
+}
+#locationInfo p {
+    margin-top: -5px;
+    font-size: 1.2em;
+}
+#locationInfo h1 {
+    font-size: 2em;
+    margin-top: 10px;
 }
 #routeDestinations-listview li {
     line-height: 1em;
@@ -187,13 +199,7 @@ footer {
 .backButtonClicked img {
     opacity: .5;
 }
-.buttonClicked {
-    background-color: #264e8c !important;
-    -webkit-box-shadow: inset 0 0 0 1px rgba(0,0,0,0.3),inset 0 0 0 1000px rgba(0,0,0,0.2) !important;
-    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.3),inset 0 0 0 1000px rgba(0,0,0,0.2) !important;
-}
-
-/* Fixes for double input bug on android */
+/* Fixes for double input bug on android - Don't really work*/
 #taskServiceDetails input {
     -webkit-transform: translate3d(0,0,0);
 }

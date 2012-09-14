@@ -51,10 +51,6 @@ define(["db/services", "tools", "db/saveHistory", "hasher", "widgets/settingsMen
         }).data("kendoValidator");
     };
 
-    changePassword.onBack = function () {
-        hasher.setHash("view/personalSettings.html");
-    };
-
     window.changePassword = changePassword;
 
     return changePassword;
