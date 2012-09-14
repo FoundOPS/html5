@@ -28,11 +28,11 @@ require.config({
     }
 });
 
-require(["widgets/navigator", "containers/silverlight", "db/session", "tools", "hasher", "crossroads", "db/models", "lib/kendo.all", "underscore",
+require(["widgets/navigator", "db/developer", "db/services", "db/session", "containers/silverlight", "tools", "hasher", "crossroads", "db/models", "lib/kendo.all", "underscore",
     "lib/userVoice", "moment", "sections/personalSettings", "sections/businessSettings", "sections/usersSettings",
     "sections/dispatcherSettings", "sections/changePassword", "sections/services",
     "sections/routes", "sections/routeDetails", "sections/routeDestinationDetails", "sections/routeTask", "sections/mapView",
-    "widgets/serviceDetails"], function (Navigator, silverlight, session, tools, hasher, crossroads) {
+    "widgets/serviceDetails"], function (Navigator, developer, dbServices, session, silverlight, tools, hasher, crossroads) {
     /**
      * application = The app object.
      * navigator = The navigator object.
@@ -127,8 +127,34 @@ require(["widgets/navigator", "containers/silverlight", "db/session", "tools", "
         if (!query.disableNavigator) {
             navigator = new Navigator(data);
             navigator.hideSearch();
-            //TODO disable other sections, disable silverlight
-        }else{
+            //add silverlight
+            var silverlightElement = '<div id="silverlightControlHost">' +
+                '<object id="silverlightPlugin" data="data:application/x-silverlight-2," type="application/x-silverlight-2" style="height: 1px; width: 1px">' +
+                '<param name="onSourceDownloadProgressChanged" value="onSourceDownloadProgressChanged"/>';
+            if (developer.CURRENT_FRAME === developer.Frame.SILVERLIGHT) {
+                silverlightElement += '<param name="splashscreensource" value="http://localhost:31820/ClientBin/SplashScreen.xaml"/>' +
+                    '<param name="source" value="http://localhost:31820/ClientBin/FoundOps.SLClient.Navigator.xap"/>';
+            } else if (developer.CURRENT_FRAME === developer.Frame.SILVERLIGHT_PUBLISHED) {
+                //TODO centralize blobUrl to developer or dbServices
+                var blobUrl = "http://bp.foundops.com/";
+                silverlightElement += '<param name="splashscreensource" value="' + blobUrl + 'xaps/SplashScreen.xap" />' +
+                    '<param name="source" value="' + blobUrl + 'xaps/FoundOps.SLClient.Navigator.xap?ignore=' + developer.SILVERLIGHT_VERSION + '/>';
+            }
+            silverlightElement +=
+                '<param name="onError" value="onSilverlightError"/>' +
+                    '<param name="background" value="#ff333335"/>' +
+                    '<param name="windowless" value="true"/>' +
+                    '<param name="minRuntimeVersion" value="5.0.61118.0"/>' +
+                    '<param name="enableHtmlAccess" value="true"/>' +
+                    '<param name="autoUpgrade" value="true"/>' +
+                    '<a href="http://go.microsoft.com/fwlink/?LinkID=149156&v=5.0.61118.0" style="text-decoration: none">' +
+                    '<img src="http://go.microsoft.com/fwlink/?LinkId=161376" alt="Get Microsoft Silverlight" style="border-style: none"/>' +
+                    '</a>' +
+                    '</object>' +
+                    '<iframe id="_sl_historyFrame" style="visibility: hidden; height: 0; width: 0; z-index: -1; border: 0"></iframe>' +
+                    '</div>'
+            $(silverlightElement).insertAfter("#remoteContent");
+        } else {
             $("#content").attr("style", "padding:0");
         }
 
