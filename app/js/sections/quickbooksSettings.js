@@ -9,55 +9,88 @@
 define(["db/services", "db/session", "widgets/settingsMenu"], function (dbServices, session) {
     var quickbooksSettings = {};
 
+    var getStatus = function () {
+        dbServices.getQuickbooksStatus(function (status) {
+            quickbooksSettings.enabled = status.IsEnabled;
+            quickbooksSettings.connected = status.IsConnected;
+            if (quickbooksSettings.enabled) {
+                //switch to "On"
+                $("#quickbooks .off").removeClass("active");
+                $("#quickbooks .on").addClass("active");
+                //show the status
+                $("#quickbooks #status").attr("style", "display:block");
+
+                if (quickbooksSettings.connected) {
+                    //hide the connect to quickbooks button
+                    $("#quickbooks #connect").attr("style", "display:none");
+                    //make the status text green
+                    $("#quickbooks #connect span").attr("style", "color:#00ff00");
+                    //change the status to "Active"
+                    $("#quickbooks #status span")[0].innerText = "Active";
+                } else {
+                    //show the connect to quickbooks button
+                    $("#quickbooks #connect").attr("style", "display:block");
+                    checkingStatus();
+                }
+            }
+        });
+    };
+
+    //display text to show checking of status
+    var checkingStatus = function () {
+        $("#checking")[0].innerText = "Checking...";
+        _.delay(function(){
+            if(!quickbooksSettings.connected){
+                getStatus();
+            }else{
+                $("#checking").innerText = "";
+            }
+        }, 5000);
+    };
+
     quickbooksSettings.initialize = function () {
         //setup menu
         var menu = $("#quickbooks .settingsMenu");
         kendo.bind(menu);
         menu.kendoSettingsMenu({selectedItem: "QuickBooks"});
 
-        dbServices.getQuickbooksStatus(function (status) {
-            quickbooksSettings.enabled = status.IsEnabled;
-            quickbooksSettings.connected = status.IsConnected;
-            if (quickbooksSettings.enabled) {
+        getStatus();
+
+        $("#quickbooks .on").on("click", function () {
+            //check if on is already active
+            if($("#quickbooks .off.active")[0]){
+                //switch to "Off"
                 $("#quickbooks .off").removeClass("active");
                 $("#quickbooks .on").addClass("active");
-
+                //show the status
                 $("#quickbooks #status").attr("style", "display:block");
+                //show the connect to quickbooks button
+                $("#quickbooks #connect").attr("style", "display:block");
+                //update the status
+                dbServices.updateQuickBooksStatus(true);
 
-                if (quickbooksSettings.connected) {
-                    $("#quickbooks #connect").attr("style", "display:none");
-                    $("#quickbooks #connect span").attr("style", "color:#00ff00");
-
-                    $("#quickbooks #status span")[0].innerText = "Active";
-                } else {
-                    $("#quickbooks #connect").attr("style", "display:block");
-                }
+                checkingStatus();
             }
         });
 
-        $("#quickbooks .on").on("click", function () {
-            $("#quickbooks .off").removeClass("active");
-            $("#quickbooks .on").addClass("active");
-
-            $("#quickbooks #status").attr("style", "display:block");
-
-            $("#quickbooks #connect").attr("style", "display:block");
-
-            dbServices.updateQuickBooksStatus(true);
-        });
-
         $("#quickbooks .off").on("click", function () {
-            $("#quickbooks .on").removeClass("active");
-            $("#quickbooks .off").addClass("active");
+            //check if off is already active
+            if($("#quickbooks .on.active")[0]){
+                //switch to "On"
+                $("#quickbooks .on").removeClass("active");
+                $("#quickbooks .off").addClass("active");
+                //hide the connect to quickbooks button, the status, and the "checking" text
+                $("#quickbooks #status, #quickbooks #connect, #quickbooks #checking").attr("style", "display:none");
 
-            $("#quickbooks #status, #quickbooks #connect").attr("style", "display:none");
-
-            dbServices.updateQuickBooksStatus(false);
+                dbServices.updateQuickBooksStatus(false);
+            }
         });
 
         //load the intuit javascript (after the page loads)
         $.getScript("https://appcenter.intuit.com/Content/IA/intuit.ipp.anywhere.js", function () {
+            //bind to role changed event
             session.followRole(function (role) {
+                //setup quickbooks
                 intuit.ipp.anywhere.setup({
                     //menuProxy: 'http://example.com/myapp/BlueDotMenu',
                     grantUrl: dbServices.ROOT_API_URL + "QuickBooks/OAuthGrantLogin?roleId=" + role.id
