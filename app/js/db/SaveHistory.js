@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(['underscore', 'lib/noty'], function (_) {
+define(['underscore', 'noty'], function (_) {
     var saveHistory = {}, successText = "Your Changes Have Been Saved.", errorText = "Error - Your Changes May Not Have Been Saved";
 
     //Stores the states of the current section
@@ -44,6 +44,8 @@ define(['underscore', 'lib/noty'], function (_) {
             } else {
                 text += "&nbsp;&nbsp;&nbsp;<a onclick='saveHistory.undo(true)'>Undo</a>";
             }
+
+            timeout = 5000;
         } else {
             timeout = 5000;
         }
@@ -73,9 +75,9 @@ define(['underscore', 'lib/noty'], function (_) {
             text = "File is Too Large! Maximum Allowed is 5MB.";
         } else if (code === "File Type") {
             text = "Only .JPG, .PNG, and .GIF Files Types Allowed!";
-        }else if (code === "No Client") {
+        } else if (code === "No Client") {
             text = "You Must Select a Client";
-        }else if (code === "No Location") {
+        } else if (code === "No Location") {
             text = "You Must Select a Location";
         }
         $.noty({

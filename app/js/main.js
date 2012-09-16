@@ -10,13 +10,18 @@ require.config({
     baseUrl: 'js/',
     paths: {
         lib: "../lib",
+        jquery: "../lib/jquery",
         underscore: "../lib/underscore",
         moment: "../lib/moment",
         signals: "../lib/signals",
         hasher: "../lib/hasher",
         crossroads: "../lib/crossroads",
         "underscore.string": "../lib/underscore.string",
-        cordova: "../cordova"
+        cordova: "../cordova",
+        mousewheel: "../lib/jquery.mousewheel",
+        jscrollpane: "../lib/jquery.jScrollPane",
+        noty: "../lib/noty",
+        colorpicker: "ui/colorPicker"
     },
     shim: {
         underscore: {
@@ -24,15 +29,19 @@ require.config({
         },
         moment: {},
         signals: {},
-        cordova: {}
+        cordova: {},
+        mousewheel: ['jquery'],
+        jscrollpane: ['jquery'],
+        noty: ['jquery'],
+        colorpicker: ['jquery']
     }
 });
 
-require(["widgets/navigator", "db/developer", "db/services", "db/session", "containers/silverlight", "tools", "hasher", "crossroads", "db/models", "lib/kendo.all", "underscore",
+require(["jquery", "widgets/navigator", "db/developer", "db/services", "db/session", "containers/silverlight", "tools", "hasher", "crossroads", "db/models", "lib/kendo.all", "underscore",
     "lib/userVoice", "moment", "sections/personalSettings", "sections/businessSettings", "sections/usersSettings",
     "sections/dispatcherSettings", "sections/changePassword", "sections/services",
     "sections/routes", "sections/routeDetails", "sections/routeDestinationDetails", "sections/routeTask", "sections/mapView",
-    "widgets/serviceDetails"], function (Navigator, developer, dbServices, session, silverlight, tools, hasher, crossroads) {
+    "widgets/serviceDetails"], function ($, Navigator, developer, dbServices, session, silverlight, tools, hasher, crossroads) {
     /**
      * application = The app object.
      * navigator = The navigator object.

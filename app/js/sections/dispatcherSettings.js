@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(["tools", "db/services", "db/session", "db/saveHistory", "widgets/settingsMenu", "ui/colorPicker",
+define(["tools", "db/services", "db/session", "db/saveHistory", "widgets/settingsMenu", "colorpicker",
     "ui/kendoChanges"], function (tools, dbServices, session, saveHistory) {
     var dispatcherSettings = {};
 

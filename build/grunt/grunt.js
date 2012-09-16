@@ -1,14 +1,14 @@
 /*global module:false*/
-module.exports = function(grunt) {
+module.exports = function (grunt) {
     // Project configuration.
     grunt.initConfig({
         meta: {
-          version: '0.1.0',
-          banner: '/*! PROJECT_NAME - v<%= meta.version %> - ' +
-            '<%= grunt.template.today("yyyy-mm-dd") %>\n' +
-            '* http://foundops.com \n' +
-            '* Copyright (c) <%= grunt.template.today("yyyy") %> ' +
-            'FoundOps LLC; Licensed MIT */'
+            version: '0.1.0',
+            banner: '/*! PROJECT_NAME - v<%= meta.version %> - ' +
+                '<%= grunt.template.today("yyyy-mm-dd") %>\n' +
+                '* http://foundops.com \n' +
+                '* Copyright (c) <%= grunt.template.today("yyyy") %> ' +
+                'FoundOps LLC; Licensed MIT */'
         },
         //https://github.com/jharding/grunt-less
         less: {
@@ -26,44 +26,48 @@ module.exports = function(grunt) {
                   noUniversalSelectors: false,
                   prefixWhitespace: false,
                   noIDs: false
-
                 }
             }
         },
         requirejs: {
-            dir: '../main',
-            appDir: "../../app",
-            baseUrl: "js",
+            almond: true,
+            baseUrl: "../../app/js",
             paths: {
-                lib: '../../lib',
-                jquery: 'empty:',
-                underscore: "../../lib/underscore",
-                moment: "../../lib/moment",
-                signals: "../../lib/signals",
-                hasher: "../../lib/hasher",
-                crossroads: "../../lib/crossroads"
+                lib: "../lib",
+                jquery: "../lib/jquery",
+                underscore: "../lib/underscore",
+                moment: "../lib/moment",
+                signals: "../lib/signals",
+                hasher: "../lib/hasher",
+                crossroads: "../lib/crossroads",
+                "underscore.string": "../lib/underscore.string",
+                cordova: "../cordova",
+                mousewheel: "../lib/jquery.mousewheel",
+                jscrollpane: "../lib/jquery.jScrollPane",
+                noty: "../lib/noty",
+                colorpicker: "ui/colorPicker"
             },
+            include: ["main"],
             shim: {
                 underscore: {
                     exports: '_'
                 },
                 moment: {},
-                signals: {}
+                signals: {},
+                cordova: {},
+                mousewheel: ['jquery'],
+                jscrollpane: ['jquery'],
+                noty: ['jquery'],
+                colorpicker: ['jquery']
             },
-            optimize: "uglify",
-            findNestedDependencies: true,
-            out: "../main/main-build.js",
-            modules: [
-                {
-                    name: "main"
-                }
-            ]
+            out: "../main/main-built.js"
         }
     });
 
-    // Default task.
-    //grunt.registerTask('default', 'less requirejs');
-    grunt.registerTask('default', 'requirejs');
-    //grunt.loadNpmTasks('grunt-less');
+    // Default task
+    grunt.registerTask('default', 'less requirejs');
+    //grunt.registerTask('default', 'less');
+    //grunt.registerTask('default', 'requirejs');
+    grunt.loadNpmTasks('grunt-less');
     grunt.loadNpmTasks('grunt-requirejs');
 };

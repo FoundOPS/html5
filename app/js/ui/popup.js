@@ -1,43 +1,45 @@
-//define(["lib/jquery.mousewheel", "lib/jquery.jScrollPane"], function () {
-/* Known bugs:
-        * showMenu button toggle on nav click.
- */
-    (function( $ ){
+define(["jquery", "mousewheel", "jscrollpane"], function ($) {
+    /* Known bugs:
+     * showMenu button toggle on nav click.
+     */
+    (function ($) {
         var popup = null;
         var methods = {
-            init : function( options ) {
+            init: function (options) {
                 popup = new Popup(this.selector);
                 popup.addMenu(options.id, options.title, options.contents);
             },
-            addMenu : function(menu) {
-                if(popup===null)return;
+            addMenu: function (menu) {
+                if (popup === null)return;
                 popup.addMenu(menu.id, menu.title, menu.contents);
             },
-            closePopup : function(){
+            closePopup: function () {
                 popup.closePopup();
             }
         };
 
-        $.fn.popup = function( method ) {
+        $.fn.popup = function (method) {
             // Create some defaults, extending them with any options that were provided
             //var settings = $.extend({}, options);
             // Method calling logic
-            if ( methods[method] ) {
-                return methods[ method ].apply( this, Array.prototype.slice.call( arguments, 1 ));
-            } else if ( typeof method === 'object' || ! method ) {
-                return methods.init.apply( this, arguments );
+            if (methods[method]) {
+                return methods[ method ].apply(this, Array.prototype.slice.call(arguments, 1));
+            } else if (typeof method === 'object' || !method) {
+                return methods.init.apply(this, arguments);
             } else {
-                $.error( 'Method ' +  method + ' does not exist on jQuery.popup' );
+                $.error('Method ' + method + ' does not exist on jQuery.popup');
             }
 
-            return this.each(function() {});
+            return this.each(function () {
+            });
         };
-    })( jQuery );
+    })(jQuery);
 
     //TODO: Refactor; Give a namespace.
     var menus = [];
     var lastElementClick = null;
     var currentTarget = null;
+
     /** Popup Constructor **/
     function Popup(popupListener) {
         //Note: Making history a global broke on Android 2.3
@@ -47,7 +49,7 @@
         var content = "";
         var object = null;
 
-        if((typeof(popupListener)==='undefined') || popupListener === null){
+        if ((typeof(popupListener) === 'undefined') || popupListener === null) {
             console.log("ERROR: No listener passed!");
             return;
         }
@@ -56,7 +58,7 @@
         //Class added to detect clicks on primary buttons triggering popups.
         listenerElements.addClass("popupListener");
 
-		listenerElements.css("cursor", "pointer");
+        listenerElements.css("cursor", "pointer");
         listenerElements.click(function (e) {
             thisPopup.toggleVisible(e, $(this));
         });
@@ -95,12 +97,13 @@
                 console.log("Clicked on different element!");
                 this.closePopup();
             }
-            $("#popup").promise().done(function(){});
+            $("#popup").promise().done(function () {
+            });
             var left = this.getLeft(clickedDiv, popupWrapperDiv);
             popupWrapperDiv.css("left", left);
 
-			//console.log("scroll top: "+$(window).scrollTop());
-            var top = clickedDiv.outerHeight() + clickedDiv.offset().top - $(window).scrollTop() + (-1*parseInt($("#popupArrow").css("margin-top"),10)); //popupArrow is offset over the border, so this gives easier measurements.
+            //console.log("scroll top: "+$(window).scrollTop());
+            var top = clickedDiv.outerHeight() + clickedDiv.offset().top - $(window).scrollTop() + (-1 * parseInt($("#popupArrow").css("margin-top"), 10)); //popupArrow is offset over the border, so this gives easier measurements.
             popupWrapperDiv.css("padding-top", top + "px");
             this.populate(id);
 
@@ -188,9 +191,9 @@
                     if ($("#popup").is(":visible")) {
                         var left = thisPopup.getLeft(currentTarget, popupWrapperDiv);
                         popupWrapperDiv.css("left", left);
-						//TODO: Move to getTop.
-						var top = $(currentTarget).outerHeight() + $(currentTarget).offset().top - $(window).scrollTop() + (-1*parseInt($("#popupArrow").css("margin-top"),10)); //popupArrow is offset over the border, so this gives easier measurements.
-						popupWrapperDiv.css("padding-top", top + "px");
+                        //TODO: Move to getTop.
+                        var top = $(currentTarget).outerHeight() + $(currentTarget).offset().top - $(window).scrollTop() + (-1 * parseInt($("#popupArrow").css("margin-top"), 10)); //popupArrow is offset over the border, so this gives easier measurements.
+                        popupWrapperDiv.css("padding-top", top + "px");
                     }
                 }
             );
@@ -224,12 +227,12 @@
                     var newId = $(this).attr('id');
 
                     //TODO: Refactor
-                    if($(this).hasClass("popupEvent")){
+                    if ($(this).hasClass("popupEvent")) {
                         $(this).trigger("popupEvent", $(this));
                     }
 
                     var keepOpen = thisPopup.populate(newId);
-                    if(!keepOpen) thisPopup.closePopup();
+                    if (!keepOpen) thisPopup.closePopup();
                 });
 
             //Sets global popup object, object, with the created div.
@@ -238,10 +241,10 @@
 
             var popupContentWrapperDiv = $("#popupContentWrapper");
             var throttleTimeout;
-            $(window).bind('resize', function(){
+            $(window).bind('resize', function () {
                 if ($.browser.msie) {
                     if (!throttleTimeout) {
-                        throttleTimeout = setTimeout(function(){
+                        throttleTimeout = setTimeout(function () {
                                 popupContentWrapperDiv.trigger("popup.resize");
                                 throttleTimeout = null;
                             }, 50
@@ -299,8 +302,8 @@
                 }
 
                 if (typeof(contArray[i].url) !== 'undefined') {
-                    menuUrl = " href='"+contArray[i].url+"'";
-                }else{
+                    menuUrl = " href='" + contArray[i].url + "'";
+                } else {
                     popupEvent = " popupEvent";
                 }
 
@@ -313,11 +316,11 @@
             this.setContent(c);
         };
 
-        this.getAction = function(){
+        this.getAction = function () {
             return $("#currentPopupAction").html();
         };
 
-        this.setAction = function(id){
+        this.setAction = function (id) {
             $("#currentPopupAction").html(id);
         };
 
@@ -361,5 +364,5 @@
         };
     }
 
-//    return Popup;
-//});
+    return Popup;
+});
