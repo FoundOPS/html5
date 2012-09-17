@@ -21,7 +21,7 @@ define(["db/services", "sections/linkedEntitySection"], function (dbServices, cr
     section.onBack = function () {
         var r = confirm("Are you sure you would like to log out?");
         if (r) {
-            hasher.setHash("view/logout.html");
+            window.location.hash = "view/logout.html";
         }
     };
 

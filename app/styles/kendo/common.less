@@ -1,5 +1,5 @@
 /*
-* Kendo UI Complete v2012.2.831 (http://kendoui.com)
+* Kendo UI Complete v2012.2.913 (http://kendoui.com)
 * Copyright 2012 Telerik AD. All rights reserved.
 *
 * Kendo UI Complete commercial licenses may be obtained at
@@ -182,7 +182,6 @@
     margin: .1rem;
     overflow: visible;
     .border-radius(5pt);
-    text-shadow: 0 -1px rgba(0,0,0,.3);
     text-decoration: none;
 }
 
@@ -580,7 +579,7 @@
 
 .km-tabstrip .km-button
 {
-    font: bold 1em Helvetica, sans-serif;
+    font-family: Arial, Helvetica, sans-serif;
     color: #a8a8a8;
     padding: .4em .8em;
     border-width: 0;
@@ -659,7 +658,6 @@
     vertical-align: middle;
     .box-sizing(border-box);
     padding: .5em .7em;
-    text-shadow: none;
 }
 
 .km-group-title
@@ -1387,4 +1385,55 @@
 
 .km-stretched-view > * {
     width: 100%;
+}
+
+/* Platform specific workarounds */
+
+.km-on-ios,
+.km-on-ios .km-view,
+.km-on-ios .km-header,
+.km-on-ios .km-footer,
+.km-on-ios .km-slider,
+.km-on-ios .km-switch,
+.km-on-ios .km-group-title,
+.km-on-ios .km-list > li,
+.km-on-ios .km-shim .k-animation-container,
+.km-on-ios .km-scroll-container,
+.km-on-blackberry .km-content,
+.km-on-blackberry .km-header,
+.km-on-blackberry .km-footer,
+.km-on-blackberry .km-icon,
+.km-on-blackberry .km-switch,
+.km-on-blackberry .km-popup .k-item,
+.km-on-blackberry .km-actionsheet-wrapper
+{
+    -webkit-transform: translatez(0);
+}
+
+.km-on-android.km-4,
+.km-on-android.km-2 .km-header,
+.km-on-android.km-2 .km-footer,
+.km-on-android .km-switch,
+.km-on-android.km-2 .km-list > li,
+.km-on-android.km-3 .km-listview-wrapper,
+.km-on-android.km-4 .km-listview-wrapper,
+.km-on-android.km-4 .km-content,
+.km-on-android .km-switch-handle,
+.km-on-android .km-switch-wrapper,
+.km-on-android .km-scroll-container,
+.km-on-meego .km-switch,
+.km-on-meego .km-icon,
+.km-on-meego .km-header,
+.km-on-meego .km-footer,
+.km-on-meego .km-content,
+.km-on-meego .km-switch-handle,
+.km-on-meego .km-switch-wrapper
+{
+    -webkit-transform: translatez(0);
+    -webkit-backface-visibility: hidden;
+}
+
+.km-on-android.km-4 // Fix for Galaxy S3 3D acceleration issue.
+{
+    -webkit-transition: -webkit-transform .0001ms;
 }

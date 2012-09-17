@@ -244,9 +244,9 @@ require(["jquery", "widgets/navigator", "db/developer", "db/services", "db/sessi
         });
     });
 
-    //TODO: Change initial view to routes.html if mobile session (need to look at object getSession returns).
     //Hookup remote loading into remoteContent, by using the kendo mobile application
-    window.application = application = new kendo.mobile.Application($("#remoteContent"), { initial: "view/updates.html", platform: "ios"});
+    var initialPage = developer.CURRENT_FRAME === developer.Frame.MOBILE_APP ? "routes.html" : "updates.html";
+    window.application = application = new kendo.mobile.Application($("#remoteContent"), { initial: "view/" + initialPage, platform: "ios"});
 
     //setup page tracking
     try {
