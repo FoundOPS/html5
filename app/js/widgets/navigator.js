@@ -1,6 +1,35 @@
 "use strict";
 
 define(["jquery", "ui/popup", "db/developer", "jmousewheel", "jscrollpane", "kendo"], function ($, Popup, developer) {
+    (function ($) {
+        var navigator = null;
+        var methods = {
+            init: function (conf, options) {
+                navigator = new Navigator(conf);
+            },
+            hideSearch: function(){
+                if(navigator===null)return; //TODO: Log error.
+                navigator.hideSearch();
+            }
+        };
+
+        $.fn.navigator = function (method) {
+            // Create some defaults, extending them with any options that were provided
+            //var settings = $.extend({}, options);
+            // Method calling logic
+            if (methods[method]) {
+                return methods[ method ].apply(this, Array.prototype.slice.call(arguments, 1));
+            } else if (typeof method === 'object' || !method) {
+                return methods.init.apply(this, arguments);
+            } else {
+                $.error('Method ' + method + ' does not exist on jQuery.navigator');
+            }
+
+            return this.each(function () {
+            });
+        };
+    })(jQuery);
+
     var backButtonTemplate = kendo.template('<div id="backButtonContainer"><a onclick="main.onBack()"><img id="backArrow" src="img/backArrow.png"/></a></div>');
     var navTemplate = kendo.template('<div id="navContainer">' +
         '<div id="navSearch" class="navElement">' +
