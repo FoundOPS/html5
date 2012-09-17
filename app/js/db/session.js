@@ -2,7 +2,7 @@
 
 'use strict';
 
-define(['db/services', 'tools', "hasher", "lib/kendo.all"], function (dbservices, tools, hasher) {
+define(['db/services', 'tools', "hasher", "kendo"], function (dbservices, tools, hasher) {
     var session = new kendo.data.ObservableObject({});
     window.session = session;
 

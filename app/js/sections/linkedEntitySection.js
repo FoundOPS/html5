@@ -1,4 +1,4 @@
-define(["../db/SaveHistory", "tools", "lib/kendo.all"], function (saveHistory, tools) {
+define(["../db/SaveHistory", "tools", "kendo"], function (saveHistory, tools) {
     /**
      * Setup the base class for an entity section that acts like a linked list with url parameters.
      * When it selects an entity, it sets that on the vm as nextEntity.

@@ -1,5 +1,5 @@
 'use strict';
-define(["jquery", "db/services", "db/session", "db/models", "lib/kendo.all", "lib/jquery.maskMoney", "lib/jquery.autosize", "lib/select2", "lib/jquery.tooltip.min"], function ($, dbServices, session, models) {
+define(["jquery", "db/services", "db/session", "db/models", "kendo", "jmaskmoney", "jautosize", "select2", "jtooltip"], function ($, dbServices, session, models) {
 
     var kendo = window.kendo,
         ui = kendo.ui,

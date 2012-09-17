@@ -2,7 +2,7 @@
 
 'use strict';
 
-require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "widgets/serviceDetails", "lib/jquery.form"], function ($, dbServices, tools, saveHistory, kendoTools) {
+require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "widgets/serviceDetails", "jform"], function ($, dbServices, tools, saveHistory, kendoTools) {
     var services = {}, serviceHoldersDataSource, grid, handleChange, serviceTypesDropDown, selectedServiceHolder, vm;
 
     //region Public
