@@ -140,11 +140,13 @@ define(['db/models', 'tools', 'ui/ui', 'lib/leaflet'], function (models, tools, 
         var color = routeColorSelector.getValue(resource.RouteId);
         var locationLatLng = new window.L.LatLng(resource.Latitude, resource.Longitude);
         var iconUrl = ui.ImageUrls.PHONE;
-        var source = resource.Source.toLowerCase();
+        var source = resource.Source ? resource.Source.toLowerCase() : "";
         if (source === models.DevicePlatform.IPHONE) {
             iconUrl = ui.ImageUrls.APPLE;
         } else if (source === models.DevicePlatform.ANDROID) {
             iconUrl = ui.ImageUrls.ANDROID;
+        } else {
+            iconUrl = ui.ImageUrls.PHONE;
         }
 
         //For each resource add
@@ -282,9 +284,9 @@ define(['db/models', 'tools', 'ui/ui', 'lib/leaflet'], function (models, tools, 
                 /** Next 4 lines were custom added */
                 var numdiv = document.createElement('div');
                 numdiv.setAttribute("class", "number");
-                if(destination.OrderInRoute > 9 && destination.OrderInRoute < 100){
+                if (destination.OrderInRoute > 9 && destination.OrderInRoute < 100) {
                     numdiv.style.left = "-5px";
-                }else if(destination.OrderInRoute >= 100){
+                } else if (destination.OrderInRoute >= 100) {
                     numdiv.style.top = "-4px";
                     numdiv.style.left = "-5px";
                     numdiv.style.fontSize = "6.4px";
@@ -340,7 +342,7 @@ define(['db/models', 'tools', 'ui/ui', 'lib/leaflet'], function (models, tools, 
 
         //setup marker popup
         var name = "";
-        if(destination.Client.Name){
+        if (destination.Client.Name) {
             name = destination.Client.Name;
         }
         leaflet.addPopup_(numMarker, "<b>" + name + "</b>");
