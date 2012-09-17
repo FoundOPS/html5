@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(['hasher', 'underscore.string'], function (hasher, _s) {
+define(['hasher', 'underscore.string', 'moment'], function (hasher, _s) {
     var tools = {};
 
     /**
@@ -199,14 +199,6 @@ define(['hasher', 'underscore.string'], function (hasher, _s) {
         });
 
         return newGuidString;
-    };
-
-    /**
-     * Converts the API date string to UTC
-     */
-    tools.toUtc = function (dateString) {
-        var result = moment.utc(dateString).toDate();
-        return result;
     };
 
     /**

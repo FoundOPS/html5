@@ -2,7 +2,7 @@
 
 'use strict';
 
-require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "widgets/serviceDetails", "jform"], function ($, dbServices, tools, saveHistory, kendoTools) {
+require(["jquery", "db/session", "db/services", "tools", "db/saveHistory", "kendoTools", "widgets/serviceDetails", "jform"], function ($, session, dbServices, tools, saveHistory, kendoTools) {
     var services = {}, serviceHoldersDataSource, grid, handleChange, serviceTypesDropDown, selectedServiceHolder, vm;
 
     //region Public
@@ -191,7 +191,7 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "widg
                 } else if (value.type === "number") {
                     convertedValue = parseFloat(originalValue);
                 } else if (value.detail === "date" || value.detail === "datetime" || value.detail === "time") {
-                    convertedValue = tools.toUtc(originalValue);
+                    convertedValue = moment(originalValue).toDate();
                 } else if (value.type === "string") {
                     if (originalValue) {
                         convertedValue = originalValue.toString();
@@ -501,9 +501,12 @@ require(["jquery", "db/services", "tools", "db/saveHistory", "kendoTools", "widg
             }
         }).data("kendoValidator");
 
+        var today = session.today().toDate();
+        var twoWeeks = session.today().add('weeks', 2).toDate();
+
         //set the initial start date to today and end date in two weeks
-        vm.set("startDate", moment().sod().toDate());
-        vm.set("endDate", moment().sod().add('weeks', 2).toDate());
+        vm.set("startDate", today);
+        vm.set("endDate", twoWeeks);
 
         vm.bind("change", _.debounce(vmChanged, 200));
 
