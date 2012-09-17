@@ -154,7 +154,7 @@ require(["jquery", "widgets/navigator", "db/developer", "db/services", "db/sessi
                 } else if (frame === developer.Frame.SILVERLIGHT_PUBLISHED) {
                     //TODO centralize blobUrl to developer or dbServices
                     var blobUrl = "http://bp.foundops.com/";
-                    silverlightElement += '<param name="splashscreensource" value="' + blobUrl + 'xaps/SplashScreen.xap" />' +
+                    silverlightElement += '<param name="splashscreensource" value="' + blobUrl + 'xaps/SplashScreen.xaml" />' +
                         '<param name="source" value="' + blobUrl + 'xaps/FoundOps.SLClient.Navigator.xap?ignore=' + developer.SILVERLIGHT_VERSION + '/>';
                 }
                 silverlightElement +=

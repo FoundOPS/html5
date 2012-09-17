@@ -16,7 +16,7 @@ module.exports = function (grunt) {
                 src: [
                     '../../app/styles/main.less'
                 ],
-                dest: '../main/main-build.css',
+                dest: '../main/main-built.css',
                 options: {
                   compile: true,
                   yuicompress: true,
