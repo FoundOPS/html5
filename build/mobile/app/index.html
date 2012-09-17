@@ -113,8 +113,8 @@ background-image: -webkit-gradient(linear,left bottom,left top,color-stop(0.31, 
             type: "GET",
             dataType: 'JSONP',
 //            url: 'http://localhost:9711/api/session/Login',    //LOCAL
-//            url: 'http://api.foundops.com/api/session/Login',    //LIVE
-            url: 'http://192.168.0.102:70/api/session/Login',   //REMOTE - Local IP of host computer (might change everyday).
+            url: 'http://api.foundops.com/api/session/Login',    //LIVE
+//            url: 'http://192.168.0.102:70/api/session/Login',   //REMOTE - Local IP of host computer (might change everyday).
             data: {email: email, pass: password},
             timeout: 5000,
             error: function (errorThrown, textStatus) {

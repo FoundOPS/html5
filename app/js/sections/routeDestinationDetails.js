@@ -45,7 +45,6 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "tools"], funct
             return vm.get("selectedEntity.Client.ContactInfoSet").slice(0);
         }
     };
-
     vm.getDirections = function () {
         if (vm.get("selectedEntity.Location")) {
             window.location = "http://maps.google.com/maps?q=" + vm.get("selectedEntity.Location.Latitude") + "," + vm.get("selectedEntity.Location.Longitude");

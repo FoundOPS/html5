@@ -13,6 +13,12 @@ define(['db/services', 'tools', "hasher", "kendo"], function (dbservices, tools,
             return false;
         }
 
+        //only sync if a section is loaded
+        var currentSection = tools.getCurrentSection();
+        if (!currentSection) {
+            return;
+        }
+
         var query = tools.getParameters();
         //if it did not change
         if (query.roleId === session.get("role.id")) {
@@ -45,6 +51,13 @@ define(['db/services', 'tools', "hasher", "kendo"], function (dbservices, tools,
         session.set("role", role);
 
         dbservices.setRoleId(role.id);
+
+        //only set the parameter if a section is loaded
+        var currentSection = tools.getCurrentSection();
+        if (!currentSection) {
+            return;
+        }
+
         tools.setParameter("roleId", role.id);
     };
 

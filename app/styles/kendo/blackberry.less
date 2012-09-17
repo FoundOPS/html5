@@ -1,5 +1,5 @@
 /*
-* Kendo UI Complete v2012.2.831 (http://kendoui.com)
+* Kendo UI Complete v2012.2.913 (http://kendoui.com)
 * Copyright 2012 Telerik AD. All rights reserved.
 *
 * Kendo UI Complete commercial licenses may be obtained at
@@ -10,13 +10,7 @@
 
 .km-blackberry
 {
-    font: 1.2em Arial, Helvetica, sans-serif;
-}
-
-.km-blackberry6,
-.km-blackberry7
-{
-    font-size: .9em;
+    font: .9em Arial, Helvetica, sans-serif;
 }
 
 .km-blackberry,
@@ -36,7 +30,6 @@
 {
     font-weight: normal;
     color: #000;
-    text-shadow: none;
     background-color: #cfd3d6;
     .linear-gradient-image(top, rgba(255,255,255,.95), rgba(255,255,255,.85) 50%, rgba(255,255,255,.5));
     .box-shadow(~"0 1px 0 1px rgba(0,0,0,.1)");
@@ -53,7 +46,7 @@
     text-align: center;
     color: #fff;
     font-size: 1.2em;
-    line-height: 2.44rem;
+    line-height: 1.8em;
     font-weight: bold;
 }
 
@@ -132,12 +125,6 @@
 
 .km-blackberry .km-content .km-button
 {
-    padding: .5rem 2rem;
-}
-
-.km-blackberry6 .km-content .km-button,
-.km-blackberry7 .km-content .km-button
-{
     padding: .4rem 1.6rem;
 }
 
@@ -164,15 +151,6 @@
 {
     font-weight: normal;
     font-family: HelveticaNeue, Arial, sans-serif;
-    height: 2.3em;
-    line-height: 2.3em;
-    width: 10em;
-    -webkit-transform: translatez(0);
-}
-
-.km-blackberry6 .km-switch,
-.km-blackberry7 .km-switch
-{
     height: 2em;
     line-height: 2em;
     width: 8em;
@@ -181,17 +159,9 @@
 .km-blackberry .km-switch-background,
 .km-blackberry .km-slider-background
 {
-    margin-left: -100%;
-    background: 10.5em 0 no-repeat #0074dc;
+    margin-left: -7em;
+    background: 8.5em 0 no-repeat #0074dc;
     .linear-gradient-image(top, rgb(219,219,219), rgb(238,238,238) 50%);
-}
-
-.km-blackberry6 .km-switch-background,
-.km-blackberry6 .km-slider-background,
-.km-blackberry7 .km-switch-background,
-.km-blackberry7 .km-slider-background
-{
-    background-position: 8.5em 0;
 }
 
 .km-blackberry .km-switch-background:after
@@ -215,7 +185,7 @@
 .km-blackberry .km-switch-handle
 {
     margin: 0;
-    width: 5em;
+    width: 4em;
     height: 100%;
     background: #cfd3d6;
     .linear-gradient-image(top, rgba(255,255,255,.95), rgba(255,255,255,.85) 50%, rgba(255,255,255,.5));
@@ -224,28 +194,17 @@
     margin-right: 2px;
 }
 
-.km-blackberry6 .km-switch-handle,
-.km-blackberry7 .km-switch-handle
-{
-    width: 4em;
-}
-
 .km-blackberry .km-switch-label-off
 {
     color: #000;
-    left: 4.6em;
+    left: 3.6em;
 }
 
 .km-blackberry .km-switch-label-on
 {
     color: #fff;
-    left: -4.6em;
+    left: -3.6em;
 }
-
-.km-blackberry6 .km-switch-label-off,
-.km-blackberry7 .km-switch-label-off { left: 3.6em; }
-.km-blackberry6 .km-switch-label-on,
-.km-blackberry7 .km-switch-label-on { left: -3.6em; }
 
 .km-blackberry .km-switch-label-on,
 .km-blackberry .km-switch-label-off
@@ -275,12 +234,6 @@
 
 .km-blackberry .km-content .km-buttongroup .km-button
 {
-    padding: .6rem 2rem;
-}
-
-.km-blackberry6 .km-content .km-buttongroup .km-button,
-.km-blackberry7 .km-content .km-buttongroup .km-button
-{
     padding: .6rem 1.6rem;
 }
 
@@ -292,7 +245,7 @@
 .km-blackberry .km-buttongroup > .km-button:not(.km-state-active)
 {
     border-color: transparent;
-    background: transparent !important;
+    background: transparent;
 }
 
 .km-blackberry .km-buttongroup > .km-button:last-child
@@ -482,15 +435,6 @@
 .km-blackberry .km-detail .km-icon
 {
     background-color: #fff;
-}
-
-.km-blackberry .km-content,
-.km-blackberry .km-header,
-.km-blackberry .km-footer,
-.km-blackberry .km-icon,
-.km-blackberry .km-popup .k-item
-{
-    -webkit-transform: translatez(0);
 }
 
 .km-blackberry7.km-m0 .km-icon
@@ -694,7 +638,7 @@
 .km-blackberry select:not([multiple]),
 .km-blackberry .k-dropdown-wrap
 {
-    background: 100% 50% no-repeat url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAADICAMAAAB28zu6AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAIVBMVEX////19fT19fX19fX19fT19fT19fX19fP19fT19fT19fRLB2KYAAAACnRSTlMA7xBQr5/PMN+AkwDcBAAAANFJREFUeF7t2LuVwzAAA0HKpPxh/wVfiFS+SPCbqQDBRhg/BAAAAAAAAAAAAAAAAACA13Nf93yNW3jvb7zHLezvGP1v5/7GOW7hcezrjse4h7mvm+Mu1r5qjSgIJHHcxSyKI1ZTHAmkJ46YRXHEaoojgfTEEbMojlhNcSSQnjhiFsURqymOBNITR8yiOGI1xZFAeuKIWRRHrKY4EkhPHDGL4ojVFkcCSRwdZlEcsZriSCCJo8dMHEXOPKRFPsc+PuO3AQAAAAAAAAAAAAAAAADwB5LFJn8OLOPPAAAAAElFTkSuQmCC"),
+    background: 100% 50% no-repeat url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAADICAMAAAB28zu6AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAIVBMVEX////19fT19fX19fX19fT19fT19fX19fP19fT19fT19fRLB2KYAAAACnRSTlMA7xBQr5/PMN+AkwDcBAAAANFJREFUeF7t2LuVwzAAA0HKpPxh/wVfiFS+SPCbqQDBRhg/BAAAAAAAAAAAAAAAAACA13Nf93yNW3jvb7zHLezvGP1v5/7GOW7hcezrjse4h7mvm+Mu1r5qjSgIJHHcxSyKI1ZTHAmkJ46YRXHEaoojgfTEEbMojlhNcSSQnjhiFsURqymOBNITR8yiOGI1xZFAeuKIWRRHrKY4EkhPHDGL4ojVFkcCSRwdZlEcsZriSCCJo8dMHEXOPKRFPsc+PuO3AQAAAAAAAAAAAAAAAADwB5LFJn8OLOPPAAAAAElFTkSuQmCC"), // Strange this one is...
                 100% 0 no-repeat -webkit-linear-gradient(left, rgba(0,0,0,.3), rgba(0,0,0,.3)), -webkit-linear-gradient(top, rgba(0,0,0,0), rgba(0,0,0,.2)) #eee;
     background-size: auto 100%, 1.8em 100%, auto;
     .box-shadow(~"inset 0 0 0 1px rgba(255,255,255,.5), 0 1px 0 rgba(0,0,0,.2)");
@@ -899,7 +843,6 @@
     top: 0;
     width: 100%;
     height: 100%;
-    -webkit-transform: translatez(0);
 }
 
 .km-blackberry .km-actionsheet
@@ -1133,6 +1076,42 @@
 }
 
 /* Tablet Styles */
+
+.km-tablet .km-blackberry
+{
+    font-size: 1.2em;
+}
+
+.km-tablet .km-blackberry .km-content .km-button
+{
+    padding: .5rem 2rem;
+}
+
+.km-tablet .km-blackberry .km-switch
+{
+    height: 2.3em;
+    line-height: 2.3em;
+    width: 10em;
+}
+
+.km-tablet .km-blackberry .km-switch-background,
+.km-tablet .km-blackberry .km-slider-background
+{
+    background-position: 10.5em 0;
+}
+
+.km-tablet .km-blackberry .km-switch-handle
+{
+    width: 5em;
+}
+
+.km-tablet .km-blackberry .km-switch-label-off { left: 4.6em; }
+.km-tablet .km-blackberry .km-switch-label-on { left: -4.6em; }
+
+.km-tablet .km-blackberry .km-content .km-buttongroup .km-button
+{
+    padding: .6rem 3rem;
+}
 
 .km-tablet .km-blackberry .km-tabstrip
 {

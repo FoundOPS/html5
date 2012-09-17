@@ -1,5 +1,5 @@
 /*
-* Kendo UI Complete v2012.2.831 (http://kendoui.com)
+* Kendo UI Complete v2012.2.913 (http://kendoui.com)
 * Copyright 2012 Telerik AD. All rights reserved.
 *
 * Kendo UI Complete commercial licenses may be obtained at
@@ -27,10 +27,8 @@
     visibility: visible;
     text-align: center;
     color: #fff;
-    font-size: 1.2em;
-    font-size: 1.4rem;
-    line-height: 1.5em;
-    line-height: 1.8rem;
+    font-size: 1.4em;
+    line-height: 1.4em;
     border: 1px solid transparent;
     font-weight: bold;
     text-shadow: 0 -1px rgba(0,0,0,.3);
@@ -69,7 +67,8 @@
     .box-shadow(inset 0 0 0 1px rgba(0,0,0,.3));
 }
 
-.km-ios .km-button:active
+.km-ios .km-button:active,
+.km-ios .km-button.km-state-active
 {
     background-color: #264e8c;
     -webkit-box-shadow: inset 0 0 0 1px rgba(0,0,0,.3), inset 0 0 0 1000px rgba(0,0,0,.2);
@@ -87,7 +86,7 @@
     overflow: hidden;
     margin-left: -1em;
     padding-left: 2.1em;
-    -webkit-mask-image: url("../images/icons.png");
+    -webkit-mask-image: url("images/icons.png");
     -webkit-mask-size: auto 100%;
     -webkit-mask-repeat: no-repeat;
     -webkit-mask-position-x: 1em;
@@ -104,13 +103,26 @@
     width: 12px;
     background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAABCCAYAAABAfGYuAAAC4ElEQVR4Xr3XT4jSQRQH8K2NvcQWHZZYomBhKzaCCmVbEwJRQQtZ8c9vV9xlRTZEiujQHjKIhaAI82BbxwiCTiooKoSglBklWBRGBRnizYsXvfuat8zAw87zhO/545uZ934zUwAwZTKZODIrEhB5IvKGA54RiYgUaXTDVybALZFzIkd0wl4CxkTmqaELXiPohsJ0wwZB/YhwwHR5VxHggO0EDSDAAS8RNIwAB3yYoFEEuOCYROMIcMGbpNo5LthB0MsIcMAnJ3uVC45L9AYCXPCGRO+LTHPBK2SJLyHAAR8i6DoCXPA27Vcu2E2qPcEFzxP0GgIcMG2dbQS4YHqTmOGCzxB0BQEu+I5ENxHggOkSP0CAC6ZLbGaDJ5eYCzYkuosAF7xIlniZE75N3jdTXHCAVHuAA0ZgYXJQcME3JRpBgBPelfA6K9xut8EwjN8Sv8gGAwCUy2VwuVyfBHCPE36IeDqd/s651whjXvV6PQiFQh2J27jgZRGo1Wrg8Xi+SvwoxwBB/C7iuVwOrFZrRQAxDljhe8PhEMLhcFe9i7jg4yLQarUgGAz+lPh5nTDFw4iXSiVwOp0fBbDDASv8kWyxL7LqKAes8Jeyxf5K/DoXbBaBer0OPp+vLfFFnTDFbyFeKBTAbrfX8bLAASv8KeLJZPKz2m8OWOGvu90u3e9VLtgiAo1GA/x+/w+JX9AJUzyOeLFYVJ9QxI/phCn+GPFMJqPmeZwDVviL0WhE53mUC54TgU6nQw+boROm+FXEm80mfkx+SdyuE6Z4BPFKpQJer/ebxE06YYon1GRzu91qwJzVDtPJhjcXh8PxQeKndMIU31NtZrPZ3kl8QStM22w8Hiv8vZpuHPBBxEUgm83S6ebUCdPKnyOez+fpad8SmdYFUzyFeLVaxSHzx2w2l2T1ayKnRWYVrAPfQbzf7+OJ338Y4qm3WCxv8Y8oWBe+JPJMBAaDAT4OIZVKQSKRgH+T7a9S/jnyXAAAAABJRU5ErkJggg==");
     -webkit-background-size: auto 100%;
+    background-size: auto 100%;
     background-repeat: no-repeat;
+}
+
+.km-ios :-moz-any(.km-back)
+{
+    margin-left: 0;
+    padding-left: 1.4em;
+    background-size: auto 100%;
+    clip-path: url("images/iconmasks.svg#backbutton");
+}
+
+.km-ios :-moz-any(.km-back):after
+{
+    left: 0;
 }
 
 .km-ios .km-switch
 {
     font-family: HelveticaNeue, Arial, sans-serif;
-    -webkit-transform: translatez(0);
 }
 
 .km-ios5 .km-switch-wrapper
@@ -177,7 +189,7 @@
 
 .km-ios .km-checkbox-checked:after
 {
-    background: transparent url("../images/ios-sprite.png") 2px -117px no-repeat;
+    background: transparent url("images/ios-sprite.png") 2px -117px no-repeat;
 }
 
 .km-ios .km-switch-handle
@@ -276,7 +288,8 @@
     background-color: #1F6DD8;
 }
 
-.km-ios .km-detail:active
+.km-ios .km-detail:active,
+.km-ios .km-detail.km-state-active
 {
     -webkit-box-shadow: 0 1px 3px rgba(0,0,0,.5), inset 0 0 0 1000px rgba(0,0,0,.2);
     box-shadow: 0 1px 3px rgba(0,0,0,.5), inset 0 0 0 1000px rgba(0,0,0,.2);
@@ -387,6 +400,7 @@
     background-color: #222;
     .linear-gradient-image(top, rgba(46, 46, 46, 0.8), rgba(21, 21, 21, 0.5) 50%, rgba(0, 0, 0, 0.8) 50%, rgba(0, 0, 0, 0.8));
     .box-shadow(0 -1px 0 0 #000);
+    text-shadow: none;
 }
 
 .km-ios .km-tabstrip .km-button
@@ -396,13 +410,10 @@
     background: transparent;
     border: 0;
     font-size: .7em;
-    font-size: .7rem;
     padding: 0 .3em;
-    padding: 0 .2rem;
-    min-width: 4.4em;
-    min-width: 3.2rem;
+    min-width: 5em;
     margin: 0 .5%;
-    text-shadow: none;
+    text-shadow: inherit;
     color: #777;
 }
 
@@ -421,19 +432,6 @@
 .km-ios .km-list
 {
     overflow: visible;
-}
-
-.km-ios,
-.km-ios .km-view,
-.km-ios .km-header,
-.km-ios .km-footer,
-.km-ios .km-slider,
-.km-ios .km-group-title,
-.km-ios .km-list > li,
-.km-ios .km-shim .k-animation-container,
-.km-ios .km-scroll-container
-{
-    -webkit-transform: translatez(0);
 }
 
 .km-ios .km-listinset > li:first-child,
@@ -560,14 +558,12 @@
 
 .km-ios .km-insetcontent
 {
-    background: #c4ccd5;
-    .linear-gradient-image(left, rgba(255,255,255,.2), rgba(255,255,255,.2) 14%, rgba(0,0,0,0) 14%, rgba(0,0,0,0));
-    background-size: 7px 100%;
+    background: #c4ccd5 url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAABCAYAAAASC7TOAAAAGklEQVR4Xm3DMREAAACCQKPYvySeO8MHML0BOrEVLMJmdzAAAAAASUVORK5CYII=");
 }
 
 .km-ios label.km-item-checked:after
 {
-    background: transparent url("../images/ios-sprite.png") 0 -10px no-repeat;
+    background: transparent url("images/ios-sprite.png") 0 -10px no-repeat;
 }
 
 .km-ios .km-button .km-icon,
