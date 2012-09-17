@@ -580,7 +580,7 @@ require(["jquery", "db/session", "db/services", "tools", "db/saveHistory", "kend
                 return;
             }
             //if it changed, update it
-            else if (serviceType === null || query.service !== serviceType.Name) {
+            else if (!serviceType || query.service !== serviceType.Name) {
                 serviceType = _.find(services.serviceTypes, function (st) {
                     return st.Name === query.service;
                 });
