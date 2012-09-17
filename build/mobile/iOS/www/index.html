@@ -1,0 +1,165 @@
+<!DOCTYPE HTML>
+<html style="height:100%;">
+<head>
+    <title>FoundOPS</title>
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+    <!-- Enabling user-scalable=no or calling $("#nav").toggleClass("androidFixedPositionFix"); fixes fixed position bug in android 2.3 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="img/Icon-96x96.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="img/Icon-72x72.png">
+    <link rel="apple-touch-icon-precomposed" href="img/Icon-36x36.png">
+    <link rel="shortcut icon" href="img/Icon-36x36.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <style>
+        @font-face {
+            font-family: PTSans;
+            src: url(styles/PTS55F.ttf); /* TTF file for CSS3 browsers */
+        }
+        input[type="submit"] {
+            -moz-border-radius: 5pt;
+            -moz-box-sizing: border-box;
+            -webkit-border-radius: 5pt;
+            -webkit-box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.3);
+            -webkit-box-sizing: border-box;
+            -webkit-tap-highlight-color: rgba(0,0,0,0);
+            -webkit-touch-callout: none;
+            background-color: #7185A2;
+            background-image: -moz-linear-gradient(top,rgba(255, 255, 255, 0.5),rgba(255, 255, 255, 0.45) 6%,rgba(255, 255, 255, 0.2) 50%,rgba(255, 255, 255, 0.15) 50%,rgba(100, 100, 100, 0));
+            background-image: -ms-linear-gradient(top,rgba(255, 255, 255, 0.5),rgba(255, 255, 255, 0.45) 6%,rgba(255, 255, 255, 0.2) 50%,rgba(255, 255, 255, 0.15) 50%,rgba(100, 100, 100, 0));
+            background-image: -o-linear-gradient(top,rgba(255, 255, 255, 0.5),rgba(255, 255, 255, 0.45) 6%,rgba(255, 255, 255, 0.2) 50%,rgba(255, 255, 255, 0.15) 50%,rgba(100, 100, 100, 0));
+            background-image: -webkit-gradient(linear,50% 0,50% 100%,color-stop(0,rgba(255, 255, 255, 0.5)),color-stop(0.06,rgba(255, 255, 255, 0.45)),color-stop(0.5,rgba(255, 255, 255, 0.2)),color-stop(0.5,rgba(255, 255, 255, 0.15)),color-stop(1,rgba(100, 100, 100, 0)));
+            border-radius: 5pt;
+            border: 1px solid #394D68;
+            box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.3);
+            box-sizing: border-box;
+            color: white;
+            cursor: pointer;
+            display: inline-block;
+            font: bold .9em HelveticaNeue,sans-serif;
+            line-height: 1.66em;
+            margin: 0;
+            overflow: visible;
+            padding: .4em .8em;
+            text-align: center;
+            text-decoration: none;
+            text-shadow: 0 -1px rgba(0, 0, 0, 0.3);
+            display: inline-block;
+        }
+        input[type="email"], input[type="password"] {
+            width: 190px;
+            height: 20px;
+            border: 1px inset #CCC;
+            font-size: 1em;
+            padding-left: 2px;
+        }
+        .buttonClicked {
+            background: linear-gradient(top, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.9));
+            background: -webkit-gradient(linear, 50% 0, 50% 100%, color-stop(0, rgba(255, 255, 255, 0.7)), color-stop(1, rgba(255, 255, 255, 0.9)));
+            background: -moz-linear-gradient(top, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.9));
+            background: -ms-linear-gradient(top, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.9));
+            background: -o-linear-gradient(top, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.9));
+            -webkit-box-shadow: inset 0 0 0 1px rgba(0,0,0,0.3),inset 0 0 0 1000px rgba(0,0,0,0.2) !important;
+            box-shadow: inset 0 0 0 1px rgba(0,0,0,0.3),inset 0 0 0 1000px rgba(0,0,0,0.2) !important;
+        }
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="application/javascript"></script>
+</head>
+<body onload="window.scrollTo(0, 1);" style="height:100%; margin: 0; font-family: PTSans;
+background-image: linear-gradient(bottom, rgb(34,34,36) 31%, rgb(85,85,86) 100%);
+background-image: -o-linear-gradient(bottom, rgb(34,34,36) 31%, rgb(85,85,86) 100%);
+background-image: -moz-linear-gradient(bottom, rgb(34,34,36) 31%, rgb(85,85,86) 100%);
+background-image: -webkit-linear-gradient(bottom, rgb(34,34,36) 31%, rgb(85,85,86) 100%);
+background-image: -ms-linear-gradient(bottom, rgb(34,34,36) 31%, rgb(85,85,86) 100%);
+background-image: -webkit-gradient(linear,left bottom,left top,color-stop(0.31, rgb(34,34,36)),color-stop(1, rgb(85,85,86)));
+}">
+<div style="display: table; height: 85%; width: 100%; #position: relative; overflow: hidden;">  <!--Used to-->
+    <div style=" #position: absolute; #top: 50%;display: table-cell; vertical-align: middle;">  <!--place content-->
+        <div style=" #position: relative; #top: -50%">                                          <!--in middle-->
+            <div style="text-align: center">                                                    <!--of page.-->
+                <img src="img/LogoWhiteText(TransparentBg).png" alt="FoundOPS" style="width:70%; max-width:1000px"/><br/>
+                <form id="loginForm" name="loginForm">
+                    <p style="margin-bottom: 7px; margin-top: 16px;"><input id="EmailAddress" name="EmailAddress" placeholder="E-mail Address" required="required" type="email"/></p>
+                    <p style="margin:1px"><input id="Password" name="Password" placeholder="Password" required="required" type="password"/></p><br/>
+                    <p style="margin:5px">
+                        <input id="submit" type="submit" style="margin-bottom: 5px; margin-top: 0px" value="Login"/><br/><br/>
+                        <input id="rememberMe" style="position: relative; top:1px" type="checkbox"/>
+                        <label style="font-size: 14px" >Remember Me</label>
+                        <!--<a id="submit" type="submit" onclick="login()">Login</a>-->
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $("#loginForm").submit( function(event) {
+        event.preventDefault();
+
+        var email = $("#EmailAddress").val();
+        var password = $("#Password").val();
+
+        if ($("#rememberMe").prop("checked") === true) {
+            localStorage.setItem("rememberMe", true);
+            localStorage.setItem("email", email);
+        } else {
+            localStorage.setItem("rememberMe", false);
+            localStorage.removeItem("email");
+        }
+
+        $.ajax({
+            //must use JSONP because the javascript may be hosted on a different url than the api
+            type: "GET",
+            dataType: 'JSONP',
+//            url: 'http://localhost:9711/api/session/Login',    //LOCAL
+//            url: 'http://api.foundops.com/api/session/Login',    //LIVE
+            url: 'http://192.168.0.102:70/api/session/Login',   //REMOTE - Local IP of host computer (might change everyday).
+            data: {email: email, pass: password},
+            timeout: 5000,
+            error: function (errorThrown, textStatus) {
+                alert("You login request has timed out. Please check your internet connection and your login information.")
+                console.log(textStatus);
+                console.log(errorThrown);
+            },
+            success: function (response) {
+                if (response) {
+                    //Save the application's login state.
+                    localStorage.setItem("loggedIn", true);
+                    window.location.href = "navigator.html";
+                } else {
+                    alert("Login information is incorrect.");
+                }
+            }
+        });
+    });
+
+    $("#submit").mousedown(function (e) {
+        $("#submit").toggleClass("buttonClicked");
+    });
+    $("#submit").mouseup(function (e) {
+        $("#submit").toggleClass("buttonClicked");
+    });
+
+    var checkLogin = function () {
+        //TODO: Check if session info is available and decide whether
+
+        //Wait until the application is initialized
+        setTimeout(function () {
+            if (localStorage.getItem("rememberMe") === "true") {
+                $("#EmailAddress").val(localStorage.getItem("email"));
+                $("#rememberMe").prop("checked", true);
+            }
+            if (localStorage.getItem("loggedIn") === "true") {
+                console.log("Logged In");
+//                location.href = "navigator.html";
+            }
+        }, 0);
+    };
+
+    $(document).ready(function() {
+        checkLogin();
+    });
+</script>
+</body>
+</html>
