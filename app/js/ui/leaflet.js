@@ -364,18 +364,15 @@ define(['underscore', 'db/models', 'tools', 'ui/ui', 'lib/leaflet'], function (_
         var destinationLatLngs = [];
         //track the route resources added to the map
         var routesGroup = new window.L.LayerGroup();
-        var r;
         //iterate through each route
-        for (r in routes) {
-            var route = routes[r];
-            var d;
+        _.each(routes, function(route){
             //add markers for each route destination
-            for (d in route.RouteDestinations) {
-                var destination = route.RouteDestinations[d];
+            _.each(route.RouteDestinations, function(destination){
                 var latLng = leaflet.drawDestination_(routesGroup, destination, route.Id, routeColorSelector, opt_routeSelected);
                 destinationLatLngs.push(latLng);
-            }
-        }
+            });
+        });
+
         map.addLayer(routesGroup);
 
         if (shouldCenter) {
