@@ -101,7 +101,7 @@ define(['db/models', 'tools', 'ui/ui', 'lib/leaflet'], function (models, tools, 
             icon: depotIcon
         });
         //setup marker popup
-        leaflet.addPopup_(marker, "<b>" + depot.Name + "</b>");
+        leaflet.addPopup_(marker, "<b>" + depot.AddressLineOne + "</b>");
         //add the depot layer to the group
         layer.addLayer(marker);
     };
