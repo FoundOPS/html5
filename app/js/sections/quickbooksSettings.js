@@ -7,7 +7,7 @@
 "use strict";
 
 define(["db/services", "db/session", "widgets/settingsMenu"], function (dbServices, session) {
-    var quickbooksSettings = {};
+    var quickbooksSettings = {}, countdownNum;
 
     var getStatus = function () {
         dbServices.getQuickbooksStatus(function (status) {
@@ -27,25 +27,33 @@ define(["db/services", "db/session", "widgets/settingsMenu"], function (dbServic
                     $("#quickbooks #connect span").attr("style", "color:#00ff00");
                     //change the status to "Active"
                     $("#quickbooks #status span")[0].innerText = "Active";
+                    //clear the status checking text
+                    $("#checking").innerText = "";
                 } else {
                     //show the connect to quickbooks button
                     $("#quickbooks #connect").attr("style", "display:block");
-                    checkingStatus();
+                    //reset the countdown
+                    countdownNum = 5;
+                    countdown();
                 }
             }
         });
     };
 
-    //display text to show checking of status
-    var checkingStatus = function () {
-        $("#checking")[0].innerText = "Checking...";
-        _.delay(function(){
-            if(!quickbooksSettings.connected){
-                getStatus();
+    //counts down from 5, then calls getStatus
+    var countdown = function () {
+        setTimeout(function(){
+            $("#checking")[0].innerText = "Checking in " + countdownNum;
+            //if countdown hasn't reached 0, keep couunting down
+            if (countdownNum > 0) {
+                countdown();
+                countdownNum--;
+                //if countdown reached 0, call getStatus
             }else{
-                $("#checking").innerText = "";
+                $("#checking")[0].innerText = "Checking...";
+                getStatus();
             }
-        }, 5000);
+        }, 1000);
     };
 
     quickbooksSettings.initialize = function () {
@@ -68,14 +76,17 @@ define(["db/services", "db/session", "widgets/settingsMenu"], function (dbServic
                 $("#quickbooks #connect").attr("style", "display:block");
                 //update the status
                 dbServices.updateQuickBooksStatus(true);
-
-                checkingStatus();
+                //show the countdown
+                $("#quickbooks #checking").attr("style", "display:block");
+                getStatus();
             }
         });
 
         $("#quickbooks .off").on("click", function () {
             //check if off is already active
             if($("#quickbooks .on.active")[0]){
+                //stop the countdown
+                countdownNum = 0;
                 //switch to "On"
                 $("#quickbooks .on").removeClass("active");
                 $("#quickbooks .off").addClass("active");
