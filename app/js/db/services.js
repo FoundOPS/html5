@@ -407,8 +407,13 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
     //endregion
 
     services.trackError = function (error, business, section) {
+        var sectionName = "";
+        if (section && section.name) {
+            sectionName = section.name;
+        }
+
         $.ajax({
-            url: services.API_URL + "Error/Track?business=" + business + "&section=" + section.name,
+            url: services.API_URL + "Error/Track?business=" + business + "&section=" + sectionName,
             type: "POST",
             dataType: "json",
             contentType: 'application/json',
