@@ -59,13 +59,12 @@ define(["db/session", "db/services", "tools", "ui/leaflet", "ui/ui", "hasher", "
         removeLayer(resourcesGroup);
         //an array to hold the latest trackpoints to be drawn if there is a route selected
         var newTrackPoints = [];
-        var r;
-        for (r in resources) {
-            var resource = resources[r];
+
+        _.each(resources, function (resource) {
             //find the loaded track points for the route, and add this
             var routeTrackPoints = routesTrackPoints[resource.RouteId];
-            if (routeTrackPoints && routeTrackPoints != dbServices.Status.LOADING) {
-                if (resource.EmployeeId != null) {
+            if (routeTrackPoints && routeTrackPoints !== dbServices.Status.LOADING) {
+                if (resource.EmployeeId !== null) {
                     resource.Id = resource.EmployeeId;
                 } else {
                     resource.Id = resource.VehicleId;
@@ -73,6 +72,7 @@ define(["db/session", "db/services", "tools", "ui/leaflet", "ui/ui", "hasher", "
 
                 //add current resource to the list of trackpoints
                 routeTrackPoints.push(resource);
+
                 //check if a route is currently selected
                 if (selectedRouteId) {
                     //the second to last trackpoint(used to know where to start the line)
@@ -81,20 +81,17 @@ define(["db/session", "db/services", "tools", "ui/leaflet", "ui/ui", "hasher", "
                     newTrackPoints.push(resource);
                 }
             }
-        }
+        });
+
         //draw the new track points if there is a selected route
         if (selectedRouteId) {
             //add the new trackpoints to the current trackpoints group
             trackPointsGroup.addLayer(leaflet.drawTrackPoints(map, newTrackPoints, resources, routeColorSelector, routeOpacitySelector, selectedRouteId));
         }
 
-        resourcesGroup = leaflet.drawResources(map, resources, routeColorSelector,
-            /**
-             * @param {Object} selectedRoute
-             */
-                function (selectedRoute) {
-                setSelectedRoute(selectedRoute);
-            });
+        resourcesGroup = leaflet.drawResources(map, resources, routeColorSelector, function (selectedRoute) {
+            setSelectedRoute(selectedRoute);
+        });
     };
 
     /**
@@ -226,13 +223,13 @@ define(["db/session", "db/services", "tools", "ui/leaflet", "ui/ui", "hasher", "
             removeLayer(trackPointsGroup);
         });
 
-        var setDateToUrlParameter = function(){
+        var setDateToUrlParameter = function () {
             //set the date to today if it is not set
             var query = tools.getParameters();
-            if(query.date){
+            if (query.date) {
                 var date = moment(query.date).toDate();
                 setDate(date);
-            }else{
+            } else {
                 setDate(new Date());
             }
         };

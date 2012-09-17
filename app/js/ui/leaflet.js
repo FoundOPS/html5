@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(['db/models', 'tools', 'ui/ui', 'lib/leaflet'], function (models, tools, ui) {
+define(['underscore', 'db/models', 'tools', 'ui/ui', 'lib/leaflet'], function (_, models, tools, ui) {
     var leaflet = {};
 
     /**
@@ -115,12 +115,10 @@ define(['db/models', 'tools', 'ui/ui', 'lib/leaflet'], function (models, tools, 
     leaflet.drawDepots = function (map, depots) {
         //track the depot resources added to the map
         var depotsGroup = new window.L.LayerGroup();
-        var d;
 
-        for (d in depots) {
-            var depot = depots[d];
+        _.each(depots, function(depot){
             leaflet.drawDepot_(depotsGroup, depot);
-        }
+        });
 
         map.addLayer(depotsGroup);
 
@@ -140,11 +138,13 @@ define(['db/models', 'tools', 'ui/ui', 'lib/leaflet'], function (models, tools, 
         var color = routeColorSelector.getValue(resource.RouteId);
         var locationLatLng = new window.L.LatLng(resource.Latitude, resource.Longitude);
         var iconUrl = ui.ImageUrls.PHONE;
-        var source = resource.Source.toLowerCase();
+        var source = resource.Source ? resource.Source.toLowerCase() : "";
         if (source === models.DevicePlatform.IPHONE) {
             iconUrl = ui.ImageUrls.APPLE;
         } else if (source === models.DevicePlatform.ANDROID) {
             iconUrl = ui.ImageUrls.ANDROID;
+        } else {
+            iconUrl = ui.ImageUrls.PHONE;
         }
 
         //For each resource add
@@ -238,13 +238,11 @@ define(['db/models', 'tools', 'ui/ui', 'lib/leaflet'], function (models, tools, 
      */
     leaflet.drawResources = function (map, resources, routeColorSelector, opt_routeSelected) {
         var resourcesGroup = new window.L.LayerGroup();
-        var r;
 
         //draw each resource on the map
-        for (r in resources) {
-            var resource = resources[r];
+        _.each(resources, function(resource){
             leaflet.drawResource_(resourcesGroup, resource, routeColorSelector, opt_routeSelected);
-        }
+        });
 
         //add the resources to the map
         map.addLayer(resourcesGroup);
@@ -282,9 +280,9 @@ define(['db/models', 'tools', 'ui/ui', 'lib/leaflet'], function (models, tools, 
                 /** Next 4 lines were custom added */
                 var numdiv = document.createElement('div');
                 numdiv.setAttribute("class", "number");
-                if(destination.OrderInRoute > 9 && destination.OrderInRoute < 100){
+                if (destination.OrderInRoute > 9 && destination.OrderInRoute < 100) {
                     numdiv.style.left = "-5px";
-                }else if(destination.OrderInRoute >= 100){
+                } else if (destination.OrderInRoute >= 100) {
                     numdiv.style.top = "-4px";
                     numdiv.style.left = "-5px";
                     numdiv.style.fontSize = "6.4px";
@@ -340,7 +338,7 @@ define(['db/models', 'tools', 'ui/ui', 'lib/leaflet'], function (models, tools, 
 
         //setup marker popup
         var name = "";
-        if(destination.Client.Name){
+        if (destination.Client.Name) {
             name = destination.Client.Name;
         }
         leaflet.addPopup_(numMarker, "<b>" + name + "</b>");
@@ -366,18 +364,15 @@ define(['db/models', 'tools', 'ui/ui', 'lib/leaflet'], function (models, tools, 
         var destinationLatLngs = [];
         //track the route resources added to the map
         var routesGroup = new window.L.LayerGroup();
-        var r;
         //iterate through each route
-        for (r in routes) {
-            var route = routes[r];
-            var d;
+        _.each(routes, function(route){
             //add markers for each route destination
-            for (d in route.RouteDestinations) {
-                var destination = route.RouteDestinations[d];
+            _.each(route.RouteDestinations, function(destination){
                 var latLng = leaflet.drawDestination_(routesGroup, destination, route.Id, routeColorSelector, opt_routeSelected);
                 destinationLatLngs.push(latLng);
-            }
-        }
+            });
+        });
+
         map.addLayer(routesGroup);
 
         if (shouldCenter) {
@@ -425,40 +420,43 @@ define(['db/models', 'tools', 'ui/ui', 'lib/leaflet'], function (models, tools, 
     leaflet.drawTrackPoints = function (map, trackpoints, resources, routeColorSelector, routeOpacitySelector, routeId) {
         var trackPointsGroup = new window.L.LayerGroup();
 
-        var r;
         //loop through all the resources
-        for (r in resources) {
+        _.each(resources, function (resource) {
             //Check if the resource is on the selected route
-            if (resources[r].RouteId === routeId) {
-                //get the Id of the resource
-                var resourceId;
-                if (resources[r].EmployeeId !== null) {
-                    resourceId = resources[r].EmployeeId;
-                } else {
-                    resourceId = resources[r].VehicleId;
-                }
-                //creates an empty array(necessary for the polyline to initiate)
-                var latlngs = [];
-                //create a polyline to connect the trackpoints
-                var polyline = new window.L.Polyline(latlngs, {
-                    color: routeColorSelector.getValue(routeId),
-                    weight: 2,
-                    opacity: routeOpacitySelector.getValue(resourceId),
-                    clickable: false
-                });
-
-                var t;
-                //loop through every trackpoint
-                for (t in trackpoints) {
-                    //check if trackpoint is for the current resource and route
-                    if ((trackpoints[t].Id === resourceId) && (trackpoints[t].RouteId === routeId)) {
-                        var trackPoint = trackpoints[t];
-                        leaflet.drawTrackPoint_(polyline, trackPoint);
-                    }
-                }
-                trackPointsGroup.addLayer(polyline);
+            if (resource.RouteId !== routeId) {
+                return;
             }
-        }
+
+            //get the Id of the resource
+            var resourceId;
+            if (resource.EmployeeId !== null) {
+                resourceId = resource.EmployeeId;
+            } else {
+                resourceId = resource.VehicleId;
+            }
+            //creates an empty array(necessary for the polyline to initiate)
+            var latlngs = [];
+            //create a polyline to connect the trackpoints
+            var polyline = new window.L.Polyline(latlngs, {
+                color: routeColorSelector.getValue(routeId),
+                weight: 2,
+                opacity: routeOpacitySelector.getValue(resourceId),
+                clickable: false
+            });
+
+            //loop through every trackpoint
+            _.each(trackpoints, function (trackPoint) {
+                //check if trackpoint is for the current resource and route
+                if (!trackPoint || trackPoint.Id !== resourceId || trackPoint.RouteId !== routeId) {
+                    return;
+                }
+
+                leaflet.drawTrackPoint_(polyline, trackPoint);
+            });
+
+            trackPointsGroup.addLayer(polyline);
+        });
+
         //add the resources to the map
         map.addLayer(trackPointsGroup);
 
