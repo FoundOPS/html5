@@ -1,6 +1,6 @@
 "use strict";
 
-define(["jquery", "ui/popup", "db/developer", "jmousewheel", "jscrollpane", "kendo"], function ($, Popup, developer) {
+define(["jquery", "ui/popup", "developer", "jmousewheel", "jscrollpane", "kendo"], function ($, Popup, developer) {
     var backButtonTemplate = kendo.template('<div id="backButtonContainer"><a onclick="main.onBack()"><img id="backArrow" src="img/backArrow.png"/></a></div>');
     var navTemplate = kendo.template('<div id="navContainer">' +
         '<div id="navSearch" class="navElement">' +

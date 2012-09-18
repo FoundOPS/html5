@@ -27,7 +27,7 @@ define(function () {
     /**
      * Enum for the application's frame.
      * SILVERLIGHT: The application is loaded with the local SL app.
-     * SILVERLIGHT: The application is loaded with the live SL app.
+     * SILVERLIGHT_PUBLISHED: The application is loaded with the live SL app.
      * BROWSER: The application is loaded without the SL app.
      * MOBILE_APP: The application is loaded for mobile phones.
      * @enum {number}
@@ -40,21 +40,35 @@ define(function () {
     };
 
     /**
+     * Enum for the application's parameter storage.
+     * URL: Store the parameters in the url (like it is supposed to be).
+     * DOM: Store the parameters using jQuery for workaround of android bug.
+     * NOTE: Back button will not work with parameters
+     * @enum {number}
+     */
+    developer.ParameterStorage = {
+        URL: 0,
+        JQUERY: 1
+    };
+
+    /**
      * The current web service source. Used when running local server for debugging.
      * @type {developer.DataSource}
      */
-    developer.CURRENT_DATA_SOURCE = developer.DataSource.LIVE;
+    developer.CURRENT_DATA_SOURCE = developer.DataSource.BROWSER_LOCALAPI;
 
     /**
      * This is for sections that are in the Silverlight application and is used for debugging.
      * @type {developer.Frame}
      */
-    developer.CURRENT_FRAME = developer.Frame.SILVERLIGHT_PUBLISHED;
+    developer.CURRENT_FRAME = developer.Frame.MOBILE_APP;
 
     /**
      * The current silverlight version
      */
-    developer.SILVERLIGHT_VERSION = 0.1041;
+    developer.CURRENT_SILVERLIGHT_VERSION = 0.1041;
+
+    developer.CURRENT_PARAMETER_STORAGE = developer.ParameterStorage.JQUERY;
 
     /**
      * The local server's RoleId for GotGrease.

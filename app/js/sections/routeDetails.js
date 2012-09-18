@@ -30,6 +30,13 @@ define(["sections/linkedEntitySection", "sections/routes", "parameters", "db/ser
     window.routeDetails = section;
     vm = section.vm;
 
+    section.onBack = function(){
+        var query = parameters.get();
+        //remove the routeId so it does not jump back here
+        delete query.routeId;
+        parameters.set(query, "routes", true);
+    };
+
     /**
      * serviceDate = Date when service is being performed.
      * intervalId = used to start and stop a route

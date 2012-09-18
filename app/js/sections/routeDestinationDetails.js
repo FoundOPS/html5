@@ -32,6 +32,13 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "parameters"], 
     window.routeDestinationDetails = section;
     vm = section.vm;
 
+    section.onBack = function(){
+        var query = parameters.get();
+        //remove the routeDestinationId so it does not jump back here
+        delete query.routeDestinationId;
+        parameters.set(query, "routeDetails", true);
+    };
+
 //vm additions
 
     /**

@@ -52,7 +52,7 @@ require.config({
     }
 });
 
-require(["jquery", "widgets/navigator", "db/developer", "db/services", "db/session", "parameters", "containers/silverlight", "tools", "hasher", "db/models", "kendo", "underscore",
+require(["jquery", "widgets/navigator", "developer", "db/services", "db/session", "parameters", "containers/silverlight", "tools", "hasher", "db/models", "kendo", "underscore",
     "lib/userVoice", "moment", "sections/personalSettings", "sections/businessSettings", "sections/usersSettings",
     "sections/dispatcherSettings", "sections/changePassword", "sections/services",
     "sections/routes", "sections/routeDetails", "sections/routeDestinationDetails", "sections/routeTask", "sections/mapView",
@@ -112,7 +112,7 @@ require(["jquery", "widgets/navigator", "db/developer", "db/services", "db/sessi
                     //TODO centralize blobUrl to developer or dbServices
                     var blobUrl = "http://bp.foundops.com/";
                     silverlightElement += '<param name="splashscreensource" value="' + blobUrl + 'xaps/SplashScreen.xaml" />' +
-                        '<param name="source" value="' + blobUrl + 'xaps/FoundOps.SLClient.Navigator.xap?ignore=' + developer.SILVERLIGHT_VERSION + '/>';
+                        '<param name="source" value="' + blobUrl + 'xaps/FoundOps.SLClient.Navigator.xap?ignore=' + developer.CURRENT_SILVERLIGHT_VERSION  + '/>';
                 }
                 silverlightElement +=
                     '<param name="onError" value="onSilverlightError"/>' +

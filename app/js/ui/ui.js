@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(['db/developer'], function (developer) {
+define(['developer'], function (developer) {
     var ui = {};
 
     /**

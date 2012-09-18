@@ -6,22 +6,50 @@
 
 "use strict";
 
-define(['hasher', 'underscore.string', 'signals'], function (hasher, _s, signals) {
+define(['jquery', 'developer', 'hasher', 'underscore.string', 'signals'], function ($, developer, hasher, _s, signals) {
     var parameters = {
         changed: new signals.Signal()
+    };
+
+    var getHash = function () {
+        if (developer.CURRENT_PARAMETER_STORAGE === developer.ParameterStorage.URL) {
+            return hasher.getHash();
+        }
+
+        var hash = $('body').data('hash');
+
+        if (!hash) {
+            hash = "";
+        }
+        //else: developer.CURRENT_PARAMETER_STORAGE === developer.ParameterStorage.JQUERY)
+        return hash;
+    };
+    var setHash = function (hash, replace) {
+        if (getHash() === hash) {
+            return;
+        }
+
+        if (developer.CURRENT_PARAMETER_STORAGE === developer.ParameterStorage.URL) {
+            if (replace) {
+                hasher.replaceHash(hash);
+            }
+            else {
+                hasher.setHash(hash);
+            }
+        }
+        else if (developer.CURRENT_PARAMETER_STORAGE === developer.ParameterStorage.JQUERY) {
+            $('body').data('hash', hash);
+            //update the parameters
+            parameters.parse();
+        }
     };
 
     /**
      * Gets the hash's query parameters
      */
-    parameters.get = function (urlHash) {
-        var hash,
-            urlParams = {};
-        if (urlHash) {
-            hash = urlHash;
-        } else {
-            hash = hasher.getHash();
-        }
+    parameters.get = function () {
+        var hash = getHash(), urlParams = {};
+
         var query = hash.substring(hash.indexOf('?') + 1);
         (function () {
             var match,
@@ -61,10 +89,15 @@ define(['hasher', 'underscore.string', 'signals'], function (hasher, _s, signals
     /**
      * Build a query string from a record object
      * @param parameters Ex. { prop1: value1, prop2: value2 }
+     * @param [section] (Optional) The section to set. If null it will keep the current section
      * @return {String} Ex. ?prop1=value1&prop2=value2
      */
-    var buildQuery = function (params) {
-        var query = "";
+    var buildQuery = function (params, section) {
+        if (section === null) {
+            section = parameters.getSection();
+        }
+
+        var query = section ? "view/" + section + ".html?" : "?";
         var first = true;
         _.each(params, function (value, key) {
             if (!first) {
@@ -79,25 +112,16 @@ define(['hasher', 'underscore.string', 'signals'], function (hasher, _s, signals
     };
 
     /**
-     * Set the parameters
+     * Set the parameters/section
      * @param {*} parameters The parameters to set
-     * @param {string} [section] (Optional) If null it will keep the current section
+     * @param {string} [section] (Optional) The section to set. If null it will keep the current section
      * @param {boolean} [replace] (Optional) If set, it will replace the current hash (and not add it to history).
      */
     parameters.set = function (params, section, replace) {
-        if (section === null) {
-            section = parameters.getSection();
-        }
-
-        var query = section ? "view/" + section + ".html?" : "?";
-        query += buildQuery(params);
-
-        //TODO
-        if (replace) {
-            hasher.replaceHash(query);
-        }
-        else {
-            hasher.setHash(query);
+        var query = buildQuery(params, section);
+        setHash(query, replace);
+        if (section) {
+            parameters.setSection(section);
         }
     };
 
@@ -118,7 +142,16 @@ define(['hasher', 'underscore.string', 'signals'], function (hasher, _s, signals
      * @param sectionName
      */
     parameters.setSection = function (sectionName) {
-        parameters.set(parameters.get(), sectionName);
+        if (!sectionName || parameters.getSection() === sectionName) {
+            return;
+        }
+
+        var hash = "view/" + sectionName + ".html";
+        if (developer.CURRENT_PARAMETER_STORAGE === developer.ParameterStorage.URL) {
+            hash = buildQuery(parameters.get(), sectionName);
+        }
+
+        hasher.setHash(hash);
     };
 
     /**
