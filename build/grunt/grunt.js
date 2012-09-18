@@ -90,8 +90,8 @@ module.exports = function (grunt) {
 					"C:/FoundOPS/html5/build/mobile/app/css": "C:/FoundOPS/html5/build/main/main-built.css",
 					"C:/FoundOPS/html5/build/mobile/app/img/": "C:/FoundOPS/html5/app/img/*",
 					"C:/FoundOPS/html5/build/mobile/app/view/": "C:/FoundOPS/html5/app/view/*",
-					"C:/FoundOPS/html5/build/mobile/app/css/images/": "C:/FoundOPS/html5/app/styles/images/*",
-					"C:/FoundOPS/html5/build/mobile/app/css/textures/": "C:/FoundOPS/html5/app/styles/textures/*",
+					"C:/FoundOPS/html5/build/mobile/app/css/images/": "C:/FoundOPS/html5/app/styles/kendo/images/*",
+					"C:/FoundOPS/html5/build/mobile/app/css/textures/": "C:/FoundOPS/html5/app/styles/kendo/textures/*",
 					"C:/FoundOPS/html5/build/mobile/app": ["C:/FoundOPS/html5/app/login.html", "C:/FoundOPS/html5/app/navigator-build.html"],
 					//Copy files to main.
 					"C:/FoundOPS/html5/build/main": "C:/FoundOPS/html5/app/navigator-build.html",					

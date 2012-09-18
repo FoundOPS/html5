@@ -32,16 +32,16 @@
 </script>
 <script type="text/x-kendo-template" id="contactsTemplate">
     # if (Type === "Phone Number") { #
-    <a data-rel="external" href="tel:${Data}">Call ${Label}<p class="contactData">${Data}</p></a>
-    # } #
-    # if (Type === "Email Address") { #
-    <a data-rel="external" href="mailto:${Data}">E-mail ${Label}<p class="contactData">${Data}</p></a>
-    # } #
-    # if (Type === "Website") { #
+    <a data-rel="external" href="tel:${Data}" target="_blank">Call ${Label}<p class="contactData">${Data}</p></a>
+    # } else if (Type === "Email Address") { #
+    <a data-rel="external" href="mailto:${Data}" target="_blank">E-mail ${Label}<p class="contactData">${Data}</p></a>
+    # } else if (Type === "Website") { #
     <a data-rel="external" href="http://${Data}" target="_blank">Visit Website<p class="contactData">${Data}</p></a>
+    # } else { #
+    <a>${Label} - ${Data}</a>
     # } #
 </script>
-<script type="text/x-kendo-template" id="routeTasksTemplate">
+    <script type="text/x-kendo-template" id="routeTasksTemplate">
     <a>${Name}</a>
 </script>
 <script>
