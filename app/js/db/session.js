@@ -6,6 +6,95 @@ define(['db/services', 'tools', "hasher", "kendo"], function (dbservices, tools,
     var session = new kendo.data.ObservableObject({});
     window.session = session;
 
+//region public
+    /**
+     * Gets the current session information
+     * @param {function({Object})} callback Invoked with the config when it is loaded
+     */
+    session.load = function (callback) {
+        //if the _config is already loaded return it
+        if (session._data) {
+            callback(session._data);
+            return;
+        }
+
+        //load the config
+        dbservices.getSession(function (data) {
+            session._data = data;
+
+            //try to load the role from the query parameter
+            //otherwise set it to the first loaded role
+            if (!syncRoleId()) {
+                session.setRole(data.roles[0]);
+            }
+
+            callback(session._data);
+        });
+    };
+
+    //set the role
+    session.setRole = function (role) {
+        session.set("role", role);
+
+        dbservices.setRoleId(role.id);
+
+        //only set the parameter if a section is loaded
+        var currentSection = tools.getCurrentSection();
+        if (!currentSection) {
+            return;
+        }
+
+        tools.setParameter("roleId", role.id);
+    };
+
+    var roleFunctions = [];
+    /**
+     * A method which will set the RoleId initially and whenever it changes.
+     * @param {function(roleId: string)} setProperty A function to set the value to the roleId
+     */
+    session.followRole = function (setProperty) {
+        roleFunctions.push(setProperty);
+        var role = session.get("role");
+        if (role) {
+            setProperty(role);
+        }
+    };
+
+    /**
+     * Extend moment with a function to adjust the timezone to the offset
+     * @param offset in minutes
+     * @return A moment offset by the TimeZone
+     */
+    moment.fn.timezoneOffset = function(offset) {
+        var diff = this.zone() + offset;
+        return this.clone().add('minutes', diff);
+    };
+
+    /**
+     * Get now adjusted for the users time zone.
+     * If there is no session data, it will return the computer's local date.
+     * @return {moment}
+     */
+    session.now = function () {
+        if (!session._data || !session._data.userTimeZone || !session._data.userTimeZoneOffsetMinutes) {
+            return moment();
+        }
+
+        var result = moment().timezoneOffset(session._data.userTimeZoneOffsetMinutes);
+        return result;
+    };
+
+    /**
+     * Get the start of today adjusted for the users time zone.
+     * If there is no session data, it will return the computer's local date.
+     * @return {moment}
+     */
+    session.today = function () {
+        return session.now().startOf('day');
+    };
+
+//endregion
+
     //sync the roleId parameter with the current role
     //returns true if the role was set
     var syncRoleId = function () {
@@ -47,57 +136,7 @@ define(['db/services', 'tools', "hasher", "kendo"], function (dbservices, tools,
         syncRoleId();
     });
 
-    session.setRole = function (role) {
-        session.set("role", role);
 
-        dbservices.setRoleId(role.id);
-
-        //only set the parameter if a section is loaded
-        var currentSection = tools.getCurrentSection();
-        if (!currentSection) {
-            return;
-        }
-
-        tools.setParameter("roleId", role.id);
-    };
-
-    /**
-     * Gets the current session information
-     * @param {function({Object})} callback Invoked with the config when it is loaded
-     */
-    session.load = function (callback) {
-        //if the _config is already loaded return it
-        if (session._data) {
-            callback(session._data);
-            return;
-        }
-
-        //load the config
-        dbservices.getSession(function (data) {
-            session._data = data;
-
-            //try to load the role from the query parameter
-            //otherwise set it to the first loaded role
-            if (!syncRoleId()) {
-                session.setRole(data.roles[0]);
-            }
-
-            callback(session._data);
-        });
-    };
-
-    var roleFunctions = [];
-    /**
-     * A method which will set the RoleId initially and whenever it changes.
-     * @param {function(roleId: string)} setProperty A function to set the value to the roleId
-     */
-    session.followRole = function (setProperty) {
-        roleFunctions.push(setProperty);
-        var role = session.get("role");
-        if (role) {
-            setProperty(role);
-        }
-    };
     session.bind("change", function (e) {
         if (e.field === "role") {
             var role = session.get("role");
