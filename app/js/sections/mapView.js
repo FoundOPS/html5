@@ -12,7 +12,7 @@
 
 'use strict';
 
-define(["db/session", "db/services", "tools", "ui/leaflet", "ui/ui", "hasher", "lib/leaflet"], function (session, dbServices, tools, leaflet, ui, hasher) {
+define(["db/session", "db/services", "tools", "parameters", "ui/leaflet", "ui/ui", "lib/leaflet"], function (session, dbServices, tools, parameters, leaflet, ui) {
     var mapView = {}, map, center, resources, resourcesGroup, routesGroup, depotsGroup, trackPointsGroup, selectedDate = session.today(), selectedRouteId;
     //region Locals
     /**
@@ -180,7 +180,7 @@ define(["db/session", "db/services", "tools", "ui/leaflet", "ui/ui", "hasher", "
      */
     var setDate = function (date) {
         selectedDate = date;
-        tools.setParameter("date", tools.stripDate(date));
+        parameters.setOne("date", tools.stripDate(date));
         //remove all objects from the map
         removeLayer(resourcesGroup);
         removeLayer(routesGroup);
@@ -226,7 +226,7 @@ define(["db/session", "db/services", "tools", "ui/leaflet", "ui/ui", "hasher", "
 
         var setDateToUrlParameter = function () {
             //set the date to today if it is not set
-            var query = tools.getParameters();
+            var query = parameters.get();
             if (query.date) {
                 var date = moment(query.date).toDate();
                 setDate(date);
@@ -238,7 +238,7 @@ define(["db/session", "db/services", "tools", "ui/leaflet", "ui/ui", "hasher", "
         //set the date whenever the role changes
         session.followRole(setDateToUrlParameter);
         //check if the date changed
-        hasher.changed.add(setDateToUrlParameter);
+        parameters.changed.add(setDateToUrlParameter);
     };
 
     //expose certain functionality to the browser window

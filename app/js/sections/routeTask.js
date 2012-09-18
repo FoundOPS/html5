@@ -6,7 +6,7 @@
 
 'use strict';
 
-define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "tools", "widgets/serviceDetails"], function (routeDestinationDetails, dbServices, saveHistory, tools) {
+define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "parameters", "widgets/serviceDetails"], function (routeDestinationDetails, dbServices, saveHistory, parameters) {
     /**
      * routeTask = wrapper for all service objects
      * vm = viewModel
@@ -46,10 +46,10 @@ define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "to
         /* If user has already selected a status -> go back
          otherwise open the task status popup */
         if (force || vm.statusUpdated) {
-            var query = tools.getParameters();
+            var query = parameters.get();
             //remove the routeTaskId so it does not jump back here
             delete query.routeTaskId;
-            main.setHash("routeDestinationDetails", query, true);
+            parameters.set(query, "routeDestinationDetails", true);
         } else {
             vm.openTaskStatuses("backButton");
         }

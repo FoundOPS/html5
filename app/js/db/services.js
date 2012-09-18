@@ -148,7 +148,7 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
      * @param {!function(Array.<Object>)} callback A callback to pass the loaded routes to.
      */
     services.getRoutes = function (serviceDateUtc, callback) {
-        return services._getHttp('routes/GetRoutes', {serviceDateUtc: serviceDateUtc}, false)(callback);
+        return services._getHttp('routes/GetRoutes', {serviceDateUtc: tools.stripDate(serviceDateUtc)}, false)(callback);
     };
 
     /**

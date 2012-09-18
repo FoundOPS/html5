@@ -1,4 +1,4 @@
-define(["../db/saveHistory", "tools", "kendo"], function (saveHistory, tools) {
+define(["../db/saveHistory", "parameters", "kendo"], function (saveHistory, parameters) {
     /**
      * Setup the base class for an entity section that acts like a linked list with url parameters.
      * When it selects an entity, it sets that on the vm as nextEntity.
@@ -21,17 +21,17 @@ define(["../db/saveHistory", "tools", "kendo"], function (saveHistory, tools) {
         vm.select = function (e, replace) {
             vm.set("nextEntity", e.dataItem);
 
-            var query = tools.getParameters();
+            var query = parameters.get();
             query[nextIdParameter] = e.dataItem.Id;
 
-            main.setHash(nextSectionName, query, replace);
+            parameters.set(query, nextSectionName, replace);
         };
 
         /**
          * Try to select the next entity if it is part of the query parameters
          */
         section._moveForward = function () {
-            var params = tools.getParameters();
+            var params = parameters.get();
             var dataSource = vm.get("dataSource");
             if (!params[nextIdParameter] || !dataSource) {
                 return;

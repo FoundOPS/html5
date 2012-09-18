@@ -2,7 +2,7 @@
 
 'use strict';
 
-define(['db/services', 'tools', "hasher", "kendo"], function (dbservices, tools, hasher) {
+define(['db/services', 'tools', "parameters", "kendo"], function (dbservices, tools, parameters) {
     var session = new kendo.data.ObservableObject({});
     window.session = session;
 
@@ -39,12 +39,12 @@ define(['db/services', 'tools', "hasher", "kendo"], function (dbservices, tools,
         dbservices.setRoleId(role.id);
 
         //only set the parameter if a section is loaded
-        var currentSection = tools.getCurrentSection();
+        var currentSection = parameters.getSection();
         if (!currentSection) {
             return;
         }
 
-        tools.setParameter("roleId", role.id);
+        parameters.setOne("roleId", role.id);
     };
 
     var roleFunctions = [];
@@ -103,12 +103,12 @@ define(['db/services', 'tools', "hasher", "kendo"], function (dbservices, tools,
         }
 
         //only sync if a section is loaded
-        var currentSection = tools.getCurrentSection();
+        var currentSection = parameters.getSection();
         if (!currentSection) {
             return;
         }
 
-        var query = tools.getParameters();
+        var query = parameters.get();
         //if it did not change
         if (query.roleId === session.get("role.id")) {
             return false;
@@ -124,12 +124,12 @@ define(['db/services', 'tools', "hasher", "kendo"], function (dbservices, tools,
         }
         //otherwise reset the parameter to the current roleId
         else {
-            tools.setParameter("roleId", session.get("role.id"), true);
+            parameters.setOne("roleId", session.get("role.id"), true);
             return false;
         }
     };
 
-    hasher.changed.add(function (hash) {
+    parameters.changed.add(function (hash) {
         if (hash === "") {
             return;
         }

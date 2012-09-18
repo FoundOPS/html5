@@ -2,7 +2,7 @@
 
 'use strict';
 
-require(["jquery", "db/session", "db/services", "tools", "db/saveHistory", "kendoTools", "widgets/serviceDetails", "jform"], function ($, session, dbServices, tools, saveHistory, kendoTools) {
+require(["jquery", "db/session", "db/services", "parameters", "tools", "db/saveHistory", "kendoTools", "widgets/serviceDetails", "jform"], function ($, session, dbServices, parameters, tools, saveHistory, kendoTools) {
     var services = {}, serviceHoldersDataSource, grid, handleChange, serviceTypesDropDown, selectedServiceHolder, vm;
 
     //region Public
@@ -327,7 +327,7 @@ require(["jquery", "db/session", "db/services", "tools", "db/saveHistory", "kend
             });
 
             //force reparse, to fix start/end date filters
-            main.parseHash();
+            parameters.parse();
         });
     };
 //endregion
@@ -471,10 +471,10 @@ require(["jquery", "db/session", "db/services", "tools", "db/saveHistory", "kend
         else if (e.field === "serviceType") {
             var serviceName = vm.get("serviceType.Name");
 
-            var currentParams = tools.getParameters();
+            var currentParams = parameters.get();
             if (currentParams.service !== serviceName) {
                 currentParams.service = serviceName;
-                main.setHash("services", currentParams);
+                parameters.set(currentParams, "services");
             }
 
             createDataSourceAndGrid();
@@ -530,7 +530,7 @@ require(["jquery", "db/session", "db/services", "tools", "db/saveHistory", "kend
 
             //now that the service types are loaded,
             //setup the grid by reparsing the hash
-            main.parseHash();
+            parameters.parse();
         });
 
         $("#serviceDetails").kendoServiceDetails();
@@ -552,7 +552,7 @@ require(["jquery", "db/session", "db/services", "tools", "db/saveHistory", "kend
         //whenever the url parameters change:
         //1) update the service type (if it changed)
         //2) update the grid's filters (if they changed)
-        main.route.matched.add(function (section, query) {
+        parameters.changed.add(function (section, query) {
             if (section !== "services" || !services.serviceTypes) {
                 return;
             }
@@ -575,7 +575,7 @@ require(["jquery", "db/session", "db/services", "tools", "db/saveHistory", "kend
                 query.service = serviceType.Name;
 
                 //update the query parameters
-                main.setHash("services", query);
+                parameters.set(query, "services");
                 return;
             }
             //if it changed, update it
@@ -592,7 +592,7 @@ require(["jquery", "db/session", "db/services", "tools", "db/saveHistory", "kend
     };
 
     services.show = function () {
-        main.parseHash();
+        parameters.parse();
         saveHistory.setCurrentSection({
             page: "Services",
             save: services.save,

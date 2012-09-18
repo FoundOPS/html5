@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(['hasher', 'underscore.string', 'moment'], function (hasher, _s) {
+define(['moment'], function () {
     var tools = {};
 
     /**
@@ -71,85 +71,6 @@ define(['hasher', 'underscore.string', 'moment'], function (hasher, _s) {
             year = date.getFullYear();
         }
         return month + "-" + day + "-" + year;
-    };
-
-    /**
-     * Gets the hash's query parameters
-     */
-    tools.getParameters = function (urlHash) {
-        var hash,
-            urlParams = {};
-        if (urlHash) {
-            hash = urlHash;
-        } else {
-            hash = hasher.getHash();
-        }
-        var query = hash.substring(hash.indexOf('?') + 1);
-        (function () {
-            var match,
-                pl = /\+/g, // Regex for replacing addition symbol with a space
-                search = /([^&=]+)=?([^&]*)/g,
-                decode = function (s) {
-                    return decodeURIComponent(s.replace(pl, " "));
-                };
-            while (match = search.exec(query))
-                urlParams[decode(match[1])] = decode(match[2]);
-        })();
-
-        //remove the view parameter
-        var viewParameter = _.find(_.keys(urlParams), function (key) {
-            return _s.startsWith(key, "view");
-        });
-        if (viewParameter) {
-            delete urlParams[viewParameter];
-        }
-
-        return urlParams;
-    };
-
-    /**
-     * Change the url parameter(key) with the given value
-     * @param key The parameter to change
-     * @param value The value to set
-     * @param {replace} (Optional) If true, it will not add a new history item
-     */
-    tools.setParameter = function (key, value, replace) {
-        var query = tools.getParameters();
-        query[key] = value;
-        main.setHash(null, query, replace);
-    };
-
-    //gets the current section from the url
-    tools.getCurrentSection = function () {
-        //var currentView = hasher.getHash().slice(hash.indexOf("/"), hasher.getHash().indexOf("."));
-
-        var url = document.URL;
-        //get the section name(what's between "view/" and ".html")
-        var matches = url.match(/view\/(.*)\.html/);
-        if (!matches) {
-            return null;
-        }
-        return matches[1];
-    };
-
-    /**
-     * Build a query string from a record object
-     * @param parameters Ex. { prop1: value1, prop2: value2 }
-     * @return {String} Ex. ?prop1=value1&prop2=value2
-     */
-    tools.buildQuery = function (parameters) {
-        var query = "";
-        var first = true;
-        _.each(parameters, function (value, key) {
-            if (!first) {
-                query += "&";
-            } else {
-                first = false;
-            }
-            query += key + "=" + value;
-        });
-
-        return query;
     };
 
     /**

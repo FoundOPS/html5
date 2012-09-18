@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(["db/services", "tools", "db/saveHistory", "hasher", "widgets/settingsMenu"], function (services, tools, saveHistory, hasher) {
+define(["db/services", "tools", "widgets/settingsMenu"], function (services, tools) {
     var changePassword = {};
 
     changePassword.save = function () {

@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(['tools', 'db/session', 'db/services'], function (tools, session, dbServices) {
+define(['tools', 'db/session', 'db/services', 'parameters'], function (tools, session, dbServices, parameters) {
     var kendoTools = {};
 
     //region Column Configuration
@@ -253,7 +253,7 @@ define(['tools', 'db/session', 'db/services'], function (tools, session, dbServi
     kendoTools.updateHashToFilters = function (section, dataSource) {
         var filterSet = dataSource.filter().filters;
 
-        var currentParams = tools.getParameters();
+        var currentParams = parameters.get();
 
         //add the parameters that are not filter parameters to the query
         var otherKeys = _.filter(_.keys(currentParams), function (name) {
@@ -284,14 +284,14 @@ define(['tools', 'db/session', 'db/services'], function (tools, session, dbServi
             query[key] = val + "$" + type;
         });
 
-        main.setHash(section, query);
+        parameters.set(query, section);
     };
 
     /*
      * Set the dataSource's filters to the url parameters (if they are different)
-     * @dataSource The dataSource to adjust
+     * @param dataSource The dataSource to adjust
      * @param parameters The parameters to build filters from
-     * @processFilters (Optional) Process and adjust the filters before setting them. This is for forcing validation
+     * @param [processFilters] (Optional) Process and adjust the filters before setting them. This is for forcing validation
      */
     kendoTools.updateFiltersToHash = function (dataSource, parameters, processFilters) {
         if (!dataSource) {

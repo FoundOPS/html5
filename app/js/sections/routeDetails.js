@@ -6,14 +6,14 @@
 
 'use strict';
 
-define(["sections/linkedEntitySection", "sections/routes", "tools", "db/services", "db/models"], function (createBase, routes, tools, dbServices, models) {
+define(["sections/linkedEntitySection", "sections/routes", "parameters", "db/services", "db/models"], function (createBase, routes, parameters, dbServices, models) {
     var vm, section = createBase("routeDestinationDetails", "routeDestinationId",
         //on init
         function () {
             var routeDestinations = routes.vm.get("nextEntity.RouteDestinations");
 
             if (!routeDestinations) {
-                main.setHash("routes", tools.getParameters());
+                parameters.setSection("routes");
                 return;
             }
 

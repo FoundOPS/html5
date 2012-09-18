@@ -16,7 +16,6 @@ require.config({
         kendo: "../lib/kendo.all",
         signals: "../lib/signals",
         hasher: "../lib/hasher",
-        crossroads: "../lib/crossroads",
         "underscore.string": "../lib/underscore.string",
         cordova: "../cordova",
         jautosize: "../lib/jquery.autosize",
@@ -37,7 +36,7 @@ require.config({
         },
         moment: {},
         kendo: ['jquery'],
-        signals: {},
+        hasher: ['signals'],
         cordova: {},
         jautosize: ['jquery'],
         jmousewheel: ['jquery'],
@@ -53,11 +52,11 @@ require.config({
     }
 });
 
-require(["jquery", "widgets/navigator", "db/developer", "db/services", "db/session", "containers/silverlight", "tools", "hasher", "crossroads", "db/models", "kendo", "underscore",
+require(["jquery", "widgets/navigator", "db/developer", "db/services", "db/session", "parameters", "containers/silverlight", "tools", "hasher", "db/models", "kendo", "underscore",
     "lib/userVoice", "moment", "sections/personalSettings", "sections/businessSettings", "sections/usersSettings",
     "sections/dispatcherSettings", "sections/changePassword", "sections/services",
     "sections/routes", "sections/routeDetails", "sections/routeDestinationDetails", "sections/routeTask", "sections/mapView",
-    "widgets/serviceDetails"], function ($, Navigator, developer, dbServices, session, silverlight, tools, hasher, crossroads) {
+    "widgets/serviceDetails"], function ($, Navigator, developer, dbServices, session, parameters, silverlight, tools, hasher) {
     /**
      * application = The app object.
      * navigator = The navigator object.
@@ -67,51 +66,9 @@ require(["jquery", "widgets/navigator", "db/developer", "db/services", "db/sessi
     var application, navigator, main = {}, initialized = false;
     window.main = main;
 
-    // Setup Hasher
-    hasher.prependHash = '';
-    hasher.init();
-
-    main.route = crossroads.addRoute("view/{section}.html:?query:");
-    main.route.greedy = true;
-
-    /**
-     * Call this to force calling the parser.\
-     */
-    main.parseHash = function () {
-        //resetting the state forces crossroads to trigger route.matched again on parse
-        crossroads.resetState();
-        crossroads.parse(hasher.getHash());
-    };
-
-    //whenever the hash is changed, parse it with cross roads
-    hasher.changed.add(main.parseHash);
-
-    /**
-     * Builds a hash for the URL and navigates to it
-     * @param section (Optional) If null it will keep the current section
-     * @param parameters The parameters to set
-     * @param replace (Optional) If set, it will replace the current hash (and not add it to history).
-     */
-    main.setHash = function (section, parameters, replace) {
-        if (section === null) {
-            section = tools.getCurrentSection();
-        }
-
-        var query = section ? "view/" + section + ".html?" : "?";
-        query += tools.buildQuery(parameters);
-
-        crossroads.resetState();
-        if (replace) {
-            hasher.replaceHash(query);
-        }
-        else {
-            hasher.setHash(query);
-        }
-    };
-
     //Overrides phone's back button navigation - Phonegap
     main.onBack = function () {
-        var sectionName = tools.getCurrentSection();
+        var sectionName = parameters.getSection();
         var section = window[sectionName];
 
         //if the section overrode the onBack function, trigger it
@@ -138,7 +95,7 @@ require(["jquery", "widgets/navigator", "db/developer", "db/services", "db/sessi
 //endregion
 
     session.load(function (data) {
-        var query = tools.getParameters();
+        var query = parameters.get();
         //if the disableNavigator param is not set to true: setup the navigator
         if (!query.disableNavigator) {
             var frame = developer.CURRENT_FRAME;
@@ -227,6 +184,7 @@ require(["jquery", "widgets/navigator", "db/developer", "db/services", "db/sessi
 
         session.setRole(role);
 
+        //TODO fix
         //reload the current page if it is not on silverlight
         if (hash !== "#silverlight") {
             var hash = hasher.getHash();
