@@ -113,7 +113,7 @@ define(['underscore', 'db/models', 'tools', 'ui/ui', 'lib/leaflet'], function (_
             icon: depotIcon
         });
         //setup marker popup
-        leaflet.addPopup_(marker, "<b>" + depot.AddressLineOne + "</b>");
+        leaflet.addPopup_(marker, "<b>" + depot.Name + "</b>");
         //add the depot layer to the group
         layer.addLayer(marker);
     };
@@ -191,11 +191,16 @@ define(['underscore', 'db/models', 'tools', 'ui/ui', 'lib/leaflet'], function (_
             popupAnchor: new window.L.Point(0, -7),
             routeId: resource.RouteId
         });
+        //convert speed from m/s to mph and round it to whole number
+        var speed = Math.round(resource.Speed * 2.23693629);
+        var speedDirString = "";
+        //only show speed and direction if there is a speed(i.e., if on mobile)
+        if(speed){
+            speedDirString = "<br />Speed: " + speed + " mph " + tools.getDirection(rotateDegrees);
+        }
 
         //set the text for the popup
-        //speed is converted from m/s to mph
-        var popupContent = "<p class='speed'><b>" + resource.EntityName + "</b><br />Speed: "
-            + Math.round(resource.Speed * 2.23693629) + " mph " + tools.getDirection(rotateDegrees) + "</p>";
+        var popupContent = "<p class='speed'><b>" + resource.EntityName + "</b>" + speedDirString + "</p>";
 
         var iconMarker = new window.L.Marker(locationLatLng, {
             icon: resourceIcon
@@ -361,8 +366,8 @@ define(['underscore', 'db/models', 'tools', 'ui/ui', 'lib/leaflet'], function (_
 
         //setup marker popup
         var name = "";
-        if (destination.Client.Name) {
-            name = destination.Client.Name;
+        if (location.Name) {
+            name = location.Name;
         }
         leaflet.addPopup_(numMarker, "<b>" + name + "</b>");
 

@@ -81,6 +81,10 @@ define(['moment'], function () {
      * @return {string} The direction.
      */
     tools.getDirection = function (deg) {
+        if(deg == ""){
+            return "";
+        }
+
         // account for negative degrees, make the deg absolute
         deg = Math.abs(deg);
 
