@@ -116,7 +116,7 @@ define(['underscore', 'db/models', 'tools', 'ui/ui', 'lib/leaflet'], function (_
         //track the depot resources added to the map
         var depotsGroup = new window.L.LayerGroup();
 
-        _.each(depots, function(depot){
+        _.each(depots, function (depot) {
             leaflet.drawDepot_(depotsGroup, depot);
         });
 
@@ -134,6 +134,10 @@ define(['underscore', 'db/models', 'tools', 'ui/ui', 'lib/leaflet'], function (_
      * @private
      */
     leaflet.drawResource_ = function (layer, resource, routeColorSelector, opt_routeSelected) {
+        if (!resource || !resource.Latitude || !resource.Longitude) {
+            return;
+        }
+
         var rotateDegrees = resource.Heading;
         var color = routeColorSelector.getValue(resource.RouteId);
         var locationLatLng = new window.L.LatLng(resource.Latitude, resource.Longitude);
@@ -240,7 +244,7 @@ define(['underscore', 'db/models', 'tools', 'ui/ui', 'lib/leaflet'], function (_
         var resourcesGroup = new window.L.LayerGroup();
 
         //draw each resource on the map
-        _.each(resources, function(resource){
+        _.each(resources, function (resource) {
             leaflet.drawResource_(resourcesGroup, resource, routeColorSelector, opt_routeSelected);
         });
 
@@ -365,9 +369,9 @@ define(['underscore', 'db/models', 'tools', 'ui/ui', 'lib/leaflet'], function (_
         //track the route resources added to the map
         var routesGroup = new window.L.LayerGroup();
         //iterate through each route
-        _.each(routes, function(route){
+        _.each(routes, function (route) {
             //add markers for each route destination
-            _.each(route.RouteDestinations, function(destination){
+            _.each(route.RouteDestinations, function (destination) {
                 var latLng = leaflet.drawDestination_(routesGroup, destination, route.Id, routeColorSelector, opt_routeSelected);
                 destinationLatLngs.push(latLng);
             });
@@ -391,6 +395,11 @@ define(['underscore', 'db/models', 'tools', 'ui/ui', 'lib/leaflet'], function (_
     leaflet.drawTrackPoint_ = function (polyline, trackPoint) {
         var lat = trackPoint.Latitude;
         var lng = trackPoint.Longitude;
+
+        if (!lat || !lng) {
+            return;
+        }
+
         //get the location of the destination
         var location = new window.L.LatLng(lat, lng);
         //create a point at the current location
