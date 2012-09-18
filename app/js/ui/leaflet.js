@@ -34,6 +34,10 @@ define(['underscore', 'db/models', 'tools', 'ui/ui', 'lib/leaflet'], function (_
      * @param {Array.<window.L.LatLng>} resources An array of latitude and longitudes to center on.
      */
     leaflet.center = function (map, locations) {
+        if (!locations) {
+            return;
+        }
+
         // get the total area used
         var bounds = new window.L.LatLngBounds(locations);
         //Sets the best view(position and zoom level) to fit all the locations(This only works perfectly in IE)
@@ -67,6 +71,10 @@ define(['underscore', 'db/models', 'tools', 'ui/ui', 'lib/leaflet'], function (_
      * @return {window.L.LatLng}
      */
     leaflet.getLatLng = function (location) {
+        if (!location || !location.Latitude || !location.Longitude) {
+            return null;
+        }
+
         return new window.L.LatLng(location.Latitude, location.Longitude);
     };
 
@@ -88,6 +96,10 @@ define(['underscore', 'db/models', 'tools', 'ui/ui', 'lib/leaflet'], function (_
      */
     leaflet.drawDepot_ = function (layer, depot) {
         var location = leaflet.getLatLng(depot);
+        if (!location) {
+            return;
+        }
+
         var Icon = window.L.Icon.extend({
             iconUrl: ui.ImageUrls.DEPOT,
             shadowUrl: null,
@@ -265,8 +277,15 @@ define(['underscore', 'db/models', 'tools', 'ui/ui', 'lib/leaflet'], function (_
      * @private
      */
     leaflet.drawDestination_ = function (layer, destination, routeId, routeColorSelector, opt_routeSelected) {
+        if (!destination) {
+            return null;
+        }
+
         var location = destination.Location;
         var locationLatLng = leaflet.getLatLng(location);
+        if (!locationLatLng) {
+            return null;
+        }
 
         //an icon for the destination
         var destinationIcon = new window.L.Icon();
@@ -373,6 +392,9 @@ define(['underscore', 'db/models', 'tools', 'ui/ui', 'lib/leaflet'], function (_
             //add markers for each route destination
             _.each(route.RouteDestinations, function (destination) {
                 var latLng = leaflet.drawDestination_(routesGroup, destination, route.Id, routeColorSelector, opt_routeSelected);
+                if (!latLng) {
+                    return;
+                }
                 destinationLatLngs.push(latLng);
             });
         });

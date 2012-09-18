@@ -35,6 +35,12 @@ define(['hasher', 'underscore.string', 'moment'], function (hasher, _s) {
      * @return {Boolean}
      */
     tools.dateEqual = function (a, b, ignoreUtc) {
+        if (!a && !b) {
+            return true;
+        } else if ((!a && b) || (a && !b)) {
+            return false;
+        }
+
         if (ignoreUtc) {
             return a.getDate() === b.getDate() && a.getMonth() === b.getMonth() && a.getFullYear() === b.getFullYear();
         }
@@ -43,18 +49,27 @@ define(['hasher', 'underscore.string', 'moment'], function (hasher, _s) {
     };
 
     /**
-     * This will return the date's UTC date without the time,
+     * This will return the date without the time
      * in a format consumable for the web api.
      * @param {Date} The date to format.
+     * @param {toUtc} (Optional) If true, convert to UTC. Defaults to false.
      * @return {string} The date formatted in "m-dd-yyyy".
      */
-    tools.formatDate = function (date) {
+    tools.stripDate = function (date, toUtc) {
         if (typeof date === "string") {
             date = moment(date).toDate();
         }
-        var month = date.getUTCMonth() + 1,
-            day = date.getUTCDate(),
+        var month, day, year;
+        if (toUtc) {
+            month = date.getUTCMonth() + 1;
+            day = date.getUTCDate();
             year = date.getUTCFullYear();
+        }
+        else {
+            month = date.getMonth() + 1;
+            day = date.getDate();
+            year = date.getFullYear();
+        }
         return month + "-" + day + "-" + year;
     };
 
@@ -96,7 +111,7 @@ define(['hasher', 'underscore.string', 'moment'], function (hasher, _s) {
      * Change the url parameter(key) with the given value
      * @param key The parameter to change
      * @param value The value to set
-     * @param replace (Optional) If true, it will not add a new history item
+     * @param {replace} (Optional) If true, it will not add a new history item
      */
     tools.setParameter = function (key, value, replace) {
         var query = tools.getParameters();

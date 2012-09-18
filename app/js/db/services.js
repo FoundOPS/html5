@@ -157,9 +157,9 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
      * @param {string} routeId The Id of the route to retrieve TrackPoints for.
      * @param {!function(Array.<Object>)} callback The callback to pass the TrackPoints to after they are loaded.
      */
-    services.getTrackPoints = function (serviceDateUtc, routeId, callback) {
+    services.getTrackPoints = function (routeId, callback) {
         return services._getHttp('trackPoint/GetTrackPoints',
-            {routeId: routeId, serviceDateUtc: serviceDateUtc}, false)(callback);
+            {routeId: routeId}, false)(callback);
     };
 
     /**
@@ -218,7 +218,7 @@ define(["db/developer", "tools", "db/saveHistory"], function (developer, tools, 
     services.getServiceDetails = function (serviceId, serviceDate, recurringServiceId, serviceTemplateId, callback) {
         var data = {
             serviceId: serviceId,
-            serviceDate: tools.formatDate(serviceDate),
+            serviceDate: tools.stripDate(serviceDate),
             recurringServiceId: recurringServiceId,
             serviceTemplateId: serviceTemplateId
         };

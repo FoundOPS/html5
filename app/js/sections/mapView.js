@@ -13,7 +13,7 @@
 'use strict';
 
 define(["db/session", "db/services", "tools", "ui/leaflet", "ui/ui", "hasher", "lib/leaflet"], function (session, dbServices, tools, leaflet, ui, hasher) {
-    var mapView = {}, map, center, resources, resourcesGroup, routesGroup, depotsGroup, trackPointsGroup, selectedDate, selectedRouteId;
+    var mapView = {}, map, center, resources, resourcesGroup, routesGroup, depotsGroup, trackPointsGroup, selectedDate = session.today(), selectedRouteId;
     //region Locals
     /**
      * Rate of refreshing resources on the map (in milliseconds)
@@ -84,7 +84,7 @@ define(["db/session", "db/services", "tools", "ui/leaflet", "ui/ui", "hasher", "
         });
 
         //draw the new track points if there is a selected route
-        if (selectedRouteId) {
+        if (selectedRouteId && trackPointsGroup) {
             //add the new trackpoints to the current trackpoints group
             trackPointsGroup.addLayer(leaflet.drawTrackPoints(map, newTrackPoints, resources, routeColorSelector, routeOpacitySelector, selectedRouteId));
         }
@@ -113,7 +113,8 @@ define(["db/session", "db/services", "tools", "ui/leaflet", "ui/ui", "hasher", "
         } else {
             //if they are not loaded: load them then draw them
             routesTrackPoints[routeId] = dbServices.Status.LOADING;
-            dbServices.getTrackPoints(tools.formatDate(selectedDate), routeId, function (loadedTrackPoints) {
+
+            dbServices.getTrackPoints(routeId, function (loadedTrackPoints) {
                 //if the selected route is the loaded track points, draw them
                 if (selectedRouteId === routeId) {
                     removeLayer(trackPointsGroup);
@@ -155,7 +156,7 @@ define(["db/session", "db/services", "tools", "ui/leaflet", "ui/ui", "hasher", "
     //load/draw the routes for the date
     var getRoutes = function () {
         //check if there is a roleId set
-        dbServices.getRoutes(tools.formatDate(selectedDate), function (loadedRoutes) {
+        dbServices.getRoutes(selectedDate, function (loadedRoutes) {
             removeLayer(routesGroup);
             //draw the routes
             routesGroup = leaflet.drawRoutes(map, loadedRoutes, routeColorSelector, center,
@@ -179,7 +180,7 @@ define(["db/session", "db/services", "tools", "ui/leaflet", "ui/ui", "hasher", "
      */
     var setDate = function (date) {
         selectedDate = date;
-        tools.setParameter("date", tools.formatDate(date));
+        tools.setParameter("date", tools.stripDate(date));
         //remove all objects from the map
         removeLayer(resourcesGroup);
         removeLayer(routesGroup);

@@ -122,8 +122,8 @@ require(["jquery", "db/session", "db/services", "tools", "db/saveHistory", "kend
         form.find("input[name=roleId]").val(session.get("role.id"));
         form.find("input[name=serviceType]").val(vm.get("serviceType.Name"));
 
-        form.find("input[name=startDate]").val(tools.formatDate(vm.get("startDate")));
-        form.find("input[name=endDate]").val(tools.formatDate(vm.get("endDate")));
+        form.find("input[name=startDate]").val(tools.stripDate(vm.get("startDate")));
+        form.find("input[name=endDate]").val(tools.stripDate(vm.get("endDate")));
 
         form[0].action = dbServices.ROOT_API_URL + "Service/GetServicesHoldersWithFieldsCsv";
         form.submit();
@@ -287,8 +287,8 @@ require(["jquery", "db/session", "db/services", "tools", "db/saveHistory", "kend
 
         var readAction = "service/GetServicesHoldersWithFields";
         var params = {
-            startDate: tools.formatDate(vm.get("startDate")),
-            endDate: tools.formatDate(vm.get("startDate")), //for single it will be changed before used in the datasource
+            startDate: tools.stripDate(vm.get("startDate")),
+            endDate: tools.stripDate(vm.get("endDate")),
             serviceType: serviceType
         };
 
@@ -297,7 +297,6 @@ require(["jquery", "db/session", "db/services", "tools", "db/saveHistory", "kend
         //then create the grid
         dbServices._getHttp(readAction + "?single=true", params)(function (data) {
             var fields = getFields(data);
-            params.endDate = tools.formatDate(vm.get("endDate"));
             serviceHoldersDataSource = new kendo.data.DataSource({
                 schema: {
                     model: {
