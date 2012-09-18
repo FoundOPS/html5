@@ -72,7 +72,6 @@ define(["sections/linkedEntitySection", "sections/routes", "parameters", "db/ser
      */
     var addPushTrackPoints = function (routeId) {
         var onSuccess = function (position) {
-            console.log("In onSuccess");
             //Add a trackpoint for now in UTC
             var collectedTime = moment.utc().toDate();
 
@@ -86,9 +85,14 @@ define(["sections/linkedEntitySection", "sections/routes", "parameters", "db/ser
                 kendo.support.detectOS(navigator.userAgent).device,
                 position.coords.speed
             );
+            // Prevent trackPoint values from being null or undefined.
+            if (newTrackPoint.Source && !newTrackPoint.Speed) {
+                newTrackPoint.Speed = 0;
+            }
+            if (!newTrackPoint.Heading) {
+                newTrackPoint.Heading = "";
+            }
             trackPointsToSend.push(newTrackPoint);
-
-            console.log(newTrackPoint);
 
             dbServices.postTrackPoints(trackPointsToSend, function (data) {
                 if (data) {
@@ -133,6 +137,11 @@ define(["sections/linkedEntitySection", "sections/routes", "parameters", "db/ser
     vm.startRoute = function () {
         vm.set("startVisible", false);
         vm.set("endVisible", true);
+
+        console.log("Notify");
+        window.plugins.statusBarNotification.notify("Tracking...", "FoundOPS is tracking your location.");
+        console.log("Notify Done");
+
         serviceDate = new Date();
 
         //store the intervalId

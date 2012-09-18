@@ -17,7 +17,6 @@ require.config({
         signals: "../lib/signals",
         hasher: "../lib/hasher",
         "underscore.string": "../lib/underscore.string",
-        cordova: "../cordova",
         jautosize: "../lib/jquery.autosize",
         jmousewheel: "../lib/jquery.mousewheel",
         jform: "../lib/jquery.form",
@@ -37,7 +36,6 @@ require.config({
         moment: {},
         kendo: ['jquery'],
         hasher: ['signals'],
-        cordova: {},
         jautosize: ['jquery'],
         jmousewheel: ['jquery'],
         jfilereader: ['jquery'],
@@ -85,7 +83,6 @@ require(["jquery", "widgets/navigator", "developer", "db/services", "db/session"
 //region Cordova Objects
     // Fires when Cordova is ready
     function onDeviceReady() {
-        main.DevicePlatform = device.platform;
         //Listens for back button being pressed on a mobile device.
         document.addEventListener("backbutton", main.onBack, false);
     }
