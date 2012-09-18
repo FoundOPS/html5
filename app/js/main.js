@@ -28,7 +28,8 @@ require.config({
         jui: "../lib/jquery-ui-1.8.21.core.min",
         noty: "../lib/noty",
         select2: "../lib/select2",
-        colorpicker: "ui/colorPicker"
+        colorpicker: "ui/colorPicker",
+        uservoice: "../lib/userVoice"
     },
     shim: {
         underscore: {
@@ -48,12 +49,13 @@ require.config({
         jui: ['jquery'],
         noty: ['jquery'],
         select2: ['jquery'],
-        colorpicker: ['jquery']
+        colorpicker: ['jquery'],
+        uservoice: {}
     }
 });
 
 require(["jquery", "widgets/navigator", "developer", "db/services", "db/session", "parameters", "containers/silverlight", "tools", "hasher", "db/models", "kendo", "underscore",
-    "lib/userVoice", "moment", "sections/personalSettings", "sections/businessSettings", "sections/usersSettings",
+    "uservoice", "moment", "sections/personalSettings", "sections/businessSettings", "sections/usersSettings",
     "sections/dispatcherSettings", "sections/changePassword", "sections/services",
     "sections/routes", "sections/routeDetails", "sections/routeDestinationDetails", "sections/routeTask", "sections/mapView",
     "widgets/serviceDetails"], function ($, Navigator, developer, dbServices, session, parameters, silverlight, tools, hasher) {
