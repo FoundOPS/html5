@@ -68,7 +68,7 @@ define(function () {
      */
     developer.CURRENT_SILVERLIGHT_VERSION = 0.1041;
 
-    developer.CURRENT_PARAMETER_STORAGE = developer.ParameterStorage.JQUERY;
+    developer.CURRENT_PARAMETER_STORAGE = developer.ParameterStorage.URL;
 
     /**
      * The local server's RoleId for GotGrease.
