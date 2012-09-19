@@ -72,6 +72,12 @@ table{border-collapse: collapse;border-spacing: 0;}
     box-sizing: border-box;
     display: block;
 }
+//firefox workaround(otherwise settings pages don't show up)
+@-moz-document url-prefix() {
+    .km-view{
+        display: -moz-box;
+    }
+}
 input[type="button"], button{
     color:#111;
 }
@@ -317,6 +323,8 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
 /*endregion*/
 /*region Settings - Personal */
 #personal .wrap, #business .wrap, #changePassword .wrap, #createPassword .wrap{
+    //display:block causes .wrap to bee too wide in Firefox
+    display: table;
     width: 500px;
     padding: 15px;
 }

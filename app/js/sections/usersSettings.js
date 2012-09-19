@@ -298,7 +298,7 @@ define(["db/services", "db/session", "db/saveHistory", "tools", "widgets/setting
                 },
                 {
                     command: ["edit", "destroy"],
-                    width: "81px"
+                    width: "87px"
                 }
             ]
         });

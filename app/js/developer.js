@@ -61,7 +61,7 @@ define(function () {
      * This is for sections that are in the Silverlight application and is used for debugging.
      * @type {developer.Frame}
      */
-    developer.CURRENT_FRAME = developer.Frame.MOBILE_APP;
+    developer.CURRENT_FRAME = developer.Frame.BROWSER;
 
     /**
      * The current silverlight version
