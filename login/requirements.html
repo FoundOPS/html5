@@ -1,0 +1,98 @@
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    <title>FoundOPS System Requirements</title> 
+	<meta name="viewport" content="width=device-width, initial-scale=1"> 
+	<link rel="stylesheet" href="http://code.jquery.com/mobile/1.1.0/jquery.mobile-1.1.0.min.css" />
+    <link rel="stylesheet/less" type="text/css" href="styles.less"/>
+	<script src="jquery.js"></script>
+    <script type="text/javascript" src="functions.js"></script>
+    <script type="text/javascript" src="less.min.js"></script>
+</head>
+<body style="background-color: #ffffff">
+<div data-role="page" style="background-color:#ffffff">
+	<div data-role="content">
+    	<img src="img/LogoCharcoalText.png" alt="FoundOPS" style="margin-bottom:0" />
+        <div id="requirements">
+        <script type="text/javascript">
+			var name = getBrowser();
+			var version = getBrowserVersion();
+			var mobileVersion = getMobileVersion();
+			var platform = getPlatform();
+			version = ' version ' + version.toString();
+			document.write('<h3>You are using ' + name + version + ' on ' + platform + '</h3>');
+        </script>
+            <table cellpadding="0" cellspacing="0" class="table-container">
+                <thead>
+                    <tr>
+                        <th class="table-header wide">Operating 
+                        System</th>
+                        <th class="table-header normal" style="width: 110px">
+                        Internet Explorer</th>
+                        <th class="table-header normal" style="width: 67px">
+                        <a href="http://www.mozilla.org/en-US/firefox/new/">Firefox 3.6+</a></th>
+                        <th class="table-header normal" style="width: 67px">
+                        Safari 4+</th>
+                        <th class="table-header normal" style="width: 67px">
+                        <a href="https://www.google.com/intl/en/chrome/browser/">Chrome</a></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="table-text">Windows Server 2003, 2008</td>
+                        <td style="width: 110px">-</td>
+                        <td class="table-checked" style="width: 67px">
+                        </td>
+                        <td style="width: 67px">-</td>
+                        <td class="table-checked" style="width: 67px">
+                        </td>
+                    </tr>
+                    <tr class="alt">
+                        <td class="table-text">Windows XP SP2, SP3</td>
+                        <td style="width: 110px">
+                        -</td>
+                        <td class="table-checked" style="width: 67px">
+                        </td>
+                        <td style="width: 67px">-</td>
+                        <td style="width: 67px">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="table-text">Windows Vista</td>
+                        <td style="width: 110px">-</td>
+                        <td class="table-checked" style="width: 67px">
+                        </td>
+                        <td style="width: 67px">-</td>
+                        <td class="table-checked" style="width: 67px">
+                        </td>
+                    </tr>
+                    <tr class="alt">
+                        <td class="table-text">Windows 7</td>
+                        <td style="width: 110px">-</td>
+                        <td class="table-checked" style="width: 67px">
+                        </td>
+                        <td style="width: 67px">-</td>
+                        <td class="table-checked" style="width: 67px">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="table-text">Macintosh OS 10.5.7+ 
+                        (intel-based)</td>
+                        <td style="width: 110px">-</td>
+                        <td class="table-checked" style="width: 67px">&nbsp;
+                        </td>
+                        <td class="table-checked" style="width: 67px">&nbsp;
+                        </td>
+                        <td style="width: 110px">-</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="footer">
+        	<p style="color:#333335">© 2012 FoundOPS LLC</p>
+        </div>
+	</div><!-- /content -->
+</div><!-- /page -->
+</body>
+</html>
