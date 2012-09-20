@@ -15,79 +15,83 @@
 	<div data-role="content">
     	<img src="img/LogoCharcoalText.png" alt="FoundOPS" style="margin-bottom:0" />
         <div id="requirements">
-        <script type="text/javascript">
-			var name = getBrowser();
-			var version = getBrowserVersion();
-			var mobileVersion = getMobileVersion();
-			var platform = getPlatform();
-			version = ' version ' + version.toString();
-			document.write('<h3>You are using ' + name + version + ' on ' + platform + '</h3>');
-        </script>
+            <script type="text/javascript">
+                // position of the tooltip relative to the mouse in pixels //
+                var platform = getPlatform();
+                var name = getBrowser();
+                var version = getBrowserVersion();
+                var mobileVersion = getMobileVersion();
+                version = ' version ' + version.toString();
+
+                document.write('<h3>You are using ' + name + version + ' on ' + platform + '</h3>');
+            </script>
             <table cellpadding="0" cellspacing="0" class="table-container">
                 <thead>
-                    <tr>
-                        <th class="table-header wide">Operating 
-                        System</th>
-                        <th class="table-header normal" style="width: 110px">
-                        Internet Explorer</th>
-                        <th class="table-header normal" style="width: 67px">
-                        <a href="http://www.mozilla.org/en-US/firefox/new/">Firefox 3.6+</a></th>
-                        <th class="table-header normal" style="width: 67px">
-                        Safari 4+</th>
-                        <th class="table-header normal" style="width: 67px">
-                        <a href="https://www.google.com/intl/en/chrome/browser/">Chrome</a></th>
-                    </tr>
+                <tr>
+                    <th class="table-header wide">Browser</th>
+                    <th class="table-header normal">Windows XP SP2, SP3</th>
+                    <th class="table-header normal">Windows 7</th>
+                    <th class="table-header normal">Mac OS 10.5.7+</th>
+                </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td class="table-text">Windows Server 2003, 2008</td>
-                        <td style="width: 110px">-</td>
-                        <td class="table-checked" style="width: 67px">
-                        </td>
-                        <td style="width: 67px">-</td>
-                        <td class="table-checked" style="width: 67px">
-                        </td>
-                    </tr>
-                    <tr class="alt">
-                        <td class="table-text">Windows XP SP2, SP3</td>
-                        <td style="width: 110px">
-                        -</td>
-                        <td class="table-checked" style="width: 67px">
-                        </td>
-                        <td style="width: 67px">-</td>
-                        <td style="width: 67px">
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="table-text">Windows Vista</td>
-                        <td style="width: 110px">-</td>
-                        <td class="table-checked" style="width: 67px">
-                        </td>
-                        <td style="width: 67px">-</td>
-                        <td class="table-checked" style="width: 67px">
-                        </td>
-                    </tr>
-                    <tr class="alt">
-                        <td class="table-text">Windows 7</td>
-                        <td style="width: 110px">-</td>
-                        <td class="table-checked" style="width: 67px">
-                        </td>
-                        <td style="width: 67px">-</td>
-                        <td class="table-checked" style="width: 67px">
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="table-text">Macintosh OS 10.5.7+ 
-                        (intel-based)</td>
-                        <td style="width: 110px">-</td>
-                        <td class="table-checked" style="width: 67px">&nbsp;
-                        </td>
-                        <td class="table-checked" style="width: 67px">&nbsp;
-                        </td>
-                        <td style="width: 110px">-</td>
-                    </tr>
+                <tr>
+                    <td class="bold"><a href="https://www.google.com/intl/en/chrome/browser/">Chrome</a></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>All Versions</td>
+                    <td class="checked"></td>
+                    <td class="checked"></td>
+                    <td>-</td>
+                </tr>
+                <tr class="alt">
+                    <td class="bold"><a href="http://www.mozilla.org/en-US/firefox/new/">Firefox</a></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr class="alt">
+                    <td>v 8.0.1</td>
+                    <td></td>
+                    <td class="checked"></td>
+                    <td>-</td>
+                </tr>
+                <tr class="alt">
+                    <td>v 9 - v 15</td>
+                    <td class="checked"></td>
+                    <td class="checked"></td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td class="bold">Safari</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>v 6</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td class="checked"></td>
+                </tr>
+                <tr class="alt">
+                    <td class="bold">Internet Explorer</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr class="alt">
+                    <td>All Versions</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                </tr>
                 </tbody>
             </table>
+            <a id="continueToLogin" href="login.html">Continue to login Anyway</a>
         </div>
         <div class="footer">
         	<p style="color:#333335">© 2012 FoundOPS LLC</p>

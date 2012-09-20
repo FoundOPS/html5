@@ -35,12 +35,23 @@ img {
     font-family: "PTSans";
 }
 #requirements table tbody td, #requirements table thead th {
-    text-align: center;
     border-right: 1px solid #CCC;
 }
-#requirements table thead th a{
-    color: #fff;
-    font-weight:normal;
+#requirements table thead th {
+    text-align: center;
+}
+#requirements a{
+    color: #448fcd;
+}
+#continueToLogin{
+    position:relative;
+    top:20px;
+    display:block;
+    width:225px;
+    margin:0 auto;
+    font-family: "PTSans";
+    font-size: 18px;
+    font-weight: bold;
 }
 #forgotPassword{
     position: relative;
@@ -49,9 +60,6 @@ img {
 }
 #forgotPassword:hover, #forgotPassword:focus{
     color: #488FCD;
-}
-#requirements table.table-container td {
-    padding: 15px 0px;
 }
 #requirements table tr.alt {
     background-color:#efefef;
@@ -73,9 +81,28 @@ img {
     font-weight: normal;
 }
 #requirements table th.table-header.wide {
-    width: 248px;
+    width: 150px;
 }
-#requirements table td.table-checked {
+#requirements table th.table-header.normal {
+    width: 100px;
+}
+#requirements table td{
+    padding: 8px 0 8px 10px;
+    font-weight:normal;
+    border-bottom:1px solid #ccc;
+}
+#requirements table td:first-child{
+    text-align:left;
+    padding-left:25px;
+}
+#requirements table td.bold{
+    font-weight:bold;
+    padding-left:10px;
+}
+#requirements table tr:last-child td{
+    border-bottom:none;
+}
+#requirements table td.checked {
     background-image: url("img/check.png");
     background-repeat: no-repeat;
     background-position: center;

@@ -96,6 +96,7 @@ module.exports = function (grunt) {
                     "C:/FoundOPS/html5/build/mobile/app": ["C:/FoundOPS/html5/app/login.html", "C:/FoundOPS/html5/app/navigator-build.html"],
                     //Copy files to main.
                     "C:/FoundOPS/html5/build/main": "C:/FoundOPS/html5/app/navigator-build.html",
+                    "C:/FoundOPS/html5/build/main/login": "C:/FoundOPS/html5/login"
                 },
                 options: {
                     processName: function (filename) {
