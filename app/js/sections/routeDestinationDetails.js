@@ -8,7 +8,7 @@
 
 define(["sections/linkedEntitySection", "sections/routeDetails", "parameters"], function (createBase, routeDetails, parameters) {
     var vm, section = createBase("routeTask", "routeTaskId",
-        //on init
+        //on show
         function () {
             var routeDestination = routeDetails.vm.get("nextEntity");
 
