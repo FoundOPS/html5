@@ -2,7 +2,7 @@
 
 'use strict';
 
-require(["jquery", "db/session", "db/services", "parameters", "tools", "db/saveHistory", "kendoTools", "widgets/serviceDetails", "jform"], function ($, session, dbServices, parameters, tools, saveHistory, kendoTools) {
+require(["jquery", "db/session", "db/services", "parameters", "tools", "db/saveHistory", "kendoTools", "widgets/serviceDetails", "widgets/repeat", "jform"], function ($, session, dbServices, parameters, tools, saveHistory, kendoTools) {
     var services = {}, serviceHoldersDataSource, grid, handleChange, serviceTypesDropDown, selectedServiceHolder, vm;
 
     //region Public
@@ -36,6 +36,8 @@ require(["jquery", "db/session", "db/services", "parameters", "tools", "db/saveH
             if (service) {
                 //show the service details
                 $("#serviceDetails").attr("style", "display:block");
+                //show repeat widget
+                $("#repeat").attr("style", "display:block");
             }
         },
         deleteSelectedService: function () {
@@ -44,6 +46,7 @@ require(["jquery", "db/session", "db/services", "parameters", "tools", "db/saveH
                 grid.dataSource.remove(selectedServiceHolder);
                 dbServices.deleteService(this.get("selectedService"));
                 $("#serviceDetails").attr("style", "display:none");
+                $("#repeat").attr("style", "display:none");
             }
         },
         /**
@@ -525,6 +528,7 @@ require(["jquery", "db/session", "db/services", "parameters", "tools", "db/saveH
                     //disable the delete button and hide the service details
                     $('#services .k-grid-delete').attr("disabled", "disabled");
                     $("#serviceDetails").attr("style", "display:none");
+                    $("#repeat").attr("style", "display:none");
                 }
             }).data("kendoDropDownList");
 
@@ -534,6 +538,7 @@ require(["jquery", "db/session", "db/services", "parameters", "tools", "db/saveH
         });
 
         $("#serviceDetails").kendoServiceDetails();
+        $("#repeat").kendoRepeat();
 
         //hookup the add & delete buttons
         $("#services .k-grid-add").on("click", function () {
