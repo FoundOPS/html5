@@ -863,7 +863,7 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
 #serviceDetails {
     display:none;
     position: absolute;
-    top:400px;
+    top:530px;
     right: 30px;
     background-color:#fff;
     padding:10px 20px;
@@ -898,6 +898,16 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
     padding: 15px 15px 0 15px;
     margin: 0 auto;
 }
+.bgGradient(@top, @bottom){
+    background-color: @top;
+    background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0, @bottom), color-stop(0.5, @top));
+    background-image: -webkit-linear-gradient(center bottom, @bottom 0%, @top 50%);
+    background-image: -moz-linear-gradient(center bottom, @bottom 0%, @top 50%);
+    background-image: -o-linear-gradient(bottom, @bottom 0%, @top 50%);
+    background-image: -ms-linear-gradient(top, @bottom 0%, @top 50%);
+    filter: progid:dximagetransform.microsoft.gradient(startColorstr=@bottom, endColorstr=@top, GradientType=0);
+    background-image: linear-gradient(top, @bottom 0%, @top 50%);
+}
 #repeat{
     display: none;
     position: absolute;
@@ -914,21 +924,78 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
         font-size: 20px;
         margin: 0 0 5px 0;
     }
-    div{
-        margin-bottom: 5px;
+    #weeklyRepeatOn{
+        display: none;
+        position: relative;
+        top:5px;
+        label{
+            float: left;
+        }
+    }
+    #monthlyRepeatOn {
+        display:none;
+        label{
+            vertical-align: middle;
+        }
+    }
+    .weekday{
+        float: left;
+        width: 28px;
+        height: 23px;
+        padding-top: 3px;
+        vertical-align: middle;
+        text-align: center;
+        color:#aaaaaa;
+        border-top: 1px solid #c5c5c5;
+        border-bottom: 1px solid #c5c5c5;
+        .bgGradient(#ffffff, #eeeeee);
+    }
+    .weekday:hover{
+        cursor: pointer;
+        .bgGradient(#eeeeee, #cccccc);
+    }
+    .weekday:active{
+        cursor: pointer;
+        .bgGradient(#aaaaaa, #888888);
+    }
+    .weekday#Sunday{
+        border-left: 1px solid #c5c5c5;
+        border-bottom-left-radius: 5px;
+        border-top-left-radius: 5px;
+    }
+    .weekday#Saturday{
+        border-right: 1px solid #c5c5c5;
+        border-bottom-right-radius: 5px;
+        border-top-right-radius: 5px;
     }
     #repeatLabel{
         position: relative;
         top: 2px;
         left: 2px;
     }
-    .k-datepicker{
-        width: 175px;
-        margin-left: 8px;
+    #startDate .k-datepicker, .k-dropdown, #repeatEvery .k-numerictextbox{
+        width: 100%;
+        font-size: 1em;
     }
-    #frequency select{
-        width: 175px;
-        margin-left: 5px;
+    .k-dropdown{
+        margin-bottom: 5px;
+        .k-input{
+            padding-top: 5px;
+        }
+    }
+    #endDate{
+        label{
+            padding-left: 2px;
+            vertical-align: text-bottom;
+        }
+        .k-numerictextbox{
+            width: 190px;
+            margin: 3px 0 3px 5px;
+        }
+        .k-datepicker{
+            width: 204px;
+            margin: 3px 0 3px 5px;
+        }
     }
 }
 /*Tooltip*/

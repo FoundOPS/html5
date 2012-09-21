@@ -460,8 +460,8 @@ require(["jquery", "db/session", "db/services", "parameters", "tools", "db/saveH
 //endregion
 
     var reloadServices = _.debounce(function () {
-        serviceHoldersDataSource.options.transport.read.data.startDate = tools.formatDate(vm.get("startDate"));
-        serviceHoldersDataSource.options.transport.read.data.endDate = tools.formatDate(vm.get("endDate"));
+        serviceHoldersDataSource.options.transport.read.data.startDate = tools.stripDate(vm.get("startDate"));
+        serviceHoldersDataSource.options.transport.read.data.endDate = tools.stripDate(vm.get("endDate"));
         serviceHoldersDataSource.read();
     }, 250);
 
