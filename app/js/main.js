@@ -134,8 +134,10 @@ require(["jquery", "widgets/navigator", "developer", "db/services", "db/session"
             }
 
             //setup the navigator
-            navigator = new Navigator(data);
-            navigator.hideSearch();
+            //navigator = new Navigator(data);
+            //navigator.hideSearch();
+            $(document).navigator(data);
+            $(document).navigator('hideSearch');
 
             //reset the images 1.5 seconds after loading to workaround a shared access key buy
             _.delay(function () {
