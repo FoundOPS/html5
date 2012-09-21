@@ -7,9 +7,29 @@ define(["jquery", "ui/popup", "db/developer", "jmousewheel", "jscrollpane", "ken
             init: function (conf, options) {
                 navigator = new Navigator(conf);
             },
+            coverWindow: function(){
+                navigator.coverWindow();
+            },
+            closeCoverWindow: function(){
+                navigator.closeCoverWindow();
+            },
+            changeBusiness: function(clicked, config){
+                navigator.changeBusiness(clicked, config);
+            },
+            changeAvatar: function(imgLoc){
+                navigator.changeAvatar(imgLoc);
+            },
+            changeBusinessLogo: function(businessLogoUrl){
+                navigator.changeBusinessLogo(businessLogoUrl);
+            },
+            closePopup: function(){
+                navigator.closePopup();
+            },
             hideSearch: function(){
-                if(navigator===null)return; //TODO: Log error.
                 navigator.hideSearch();
+            },
+            showSearch: function(){
+                navigator.showSearch();
             }
         };
 
@@ -17,7 +37,12 @@ define(["jquery", "ui/popup", "db/developer", "jmousewheel", "jscrollpane", "ken
             // Create some defaults, extending them with any options that were provided
             //var settings = $.extend({}, options);
             // Method calling logic
+
             if (methods[method]) {
+                if(method!=='init'&&navigator===null){
+                    $.error('Navigator not initialized!');
+                    return;
+                }
                 return methods[ method ].apply(this, Array.prototype.slice.call(arguments, 1));
             } else if (typeof method === 'object' || !method) {
                 return methods.init.apply(this, arguments);
@@ -63,13 +88,11 @@ define(["jquery", "ui/popup", "db/developer", "jmousewheel", "jscrollpane", "ken
      * };
      * @constructor
      */
-    var config = null;
-
     function Navigator(conf) {
-        config = conf;
+        var config = conf;
+        var thisNavigator = this;
         this.sideBarElementCount = 0;
         this.isCoverWindowButtonEnabled = false;
-        var thisNavigator = this;
 
         /** Initializes top navigation **/
         var initTopNav = function (config) {
@@ -229,18 +252,22 @@ define(["jquery", "ui/popup", "db/developer", "jmousewheel", "jscrollpane", "ken
                     $(this).find(".icon").css('background-image', 'url(' + image + ')');
                 },
                 "touchend mouseup": function() {
-                    //reset hover
+                    //Reset hover
                     //$(".sideBarElement.clicked").removeClass($(this).attr('data-color'));
 
                     //Reset the last clicked element
+                    var currentClicked = this;
                     $(".sideBarElement.clicked").each(function(index){
+                        //Skip the current clicked element.
+                        if(currentClicked===this){return true;}
+
                         $(this).removeClass($(this).attr('data-color'));
                         var image = $(this).attr("data-iconUrl");
                         $(this).find(".icon").css('background-image', 'url(' + image + ')');
                         $(this).removeClass("clicked");
                     });
 
-                    //add the clicked class so mouseleave doesn't reset highlight.
+                    //Add the clicked class so mouseleave doesn't reset highlight.
                     $(this).addClass("clicked");
                 },
                 "click": function () {
@@ -249,7 +276,7 @@ define(["jquery", "ui/popup", "db/developer", "jmousewheel", "jscrollpane", "ken
                     var section = getSection(config.sections, name);
                     $(this).trigger("sectionSelected", section);
                     if ($("#sideBar").hasClass("cover")) {
-                        closeCoverWindow();
+                        thisNavigator.closeCoverWindow();
                     }
                 }
             });
@@ -271,29 +298,6 @@ define(["jquery", "ui/popup", "db/developer", "jmousewheel", "jscrollpane", "ken
             $(".iconExpand").removeClass("flip");
 
         };
-
-        var coverWindow = function () {
-            var sideBarDiv = $("#sideBar");
-            sideBarDiv.removeClass("hover");
-            sideBarDiv.removeClass("expand");
-            $("#sideBarWrapper")
-                .stop(false, true)
-                .animate({width: '100%'}, 'fast');
-            $("#sideBarInnerWrapper, #sideBarWrapper .jspContainer, #sideBar")
-                .stop(false, true)
-                .animate({width: "200px"}, 'fast');
-            sideBarDiv.addClass("cover");
-            $(".iconExpand").addClass("flip");
-        };
-
-        var closeCoverWindow = function () {
-            slideMenuClosed();
-            $("#sideBar").removeClass("cover");
-            $(".iconExpand").removeClass("flip");
-        };
-
-        Navigator.prototype.coverWindow = coverWindow;
-        Navigator.prototype.closeCoverWindow = closeCoverWindow;
 
         /** Initializes sidebar navigation **/
         var initSideBar = function (config) {
@@ -471,9 +475,9 @@ define(["jquery", "ui/popup", "db/developer", "jmousewheel", "jscrollpane", "ken
             $("#coverWindowButton").stop().click(
                 function () {
                     if (sideBarDiv.hasClass("cover")) {
-                        closeCoverWindow();
+                        thisNavigator.closeCoverWindow();
                     } else {
-                        coverWindow();
+                        thisNavigator.coverWindow();
                     }
                 }
             );
@@ -556,46 +560,6 @@ define(["jquery", "ui/popup", "db/developer", "jmousewheel", "jscrollpane", "ken
             return null;
         };
 
-        var changeBusiness = function (clicked, config) {
-            //var businessId = clicked.attr("id");
-            var name = clicked.text();
-            var business = getBusiness(name, config);
-            if (business === null) {
-                console.log("Business not found!");
-                return;
-            }
-            thisNavigator.changeBusinessLogo(business.businessLogoUrl);
-            setSideBarSections(config, business.sections);
-            $("#sideBarInnerWrapper").data('jsp').reinitialise();
-        };
-        Navigator.prototype.changeBusiness = changeBusiness;
-
-        this.changeAvatar = function (imgLoc) {
-            $(".profile").attr('src', imgLoc);
-        };
-
-        this.changeBusinessLogo = function (businessLogoUrl) {
-            var businessLogoEnabled = true;
-
-            if (typeof (businessLogoUrl) === 'undefined') {
-                businessLogoEnabled = false;
-                businessLogoUrl = "";
-            }
-            var clientLogoDiv = $("#clientLogo");
-            clientLogoDiv.attr('src', businessLogoUrl);
-
-            //Hide business logo if undefined.
-            var navClientIconDiv = $("#navClient .navIcon");
-            if (!businessLogoEnabled) {
-                navClientIconDiv.css("border", "0");
-                clientLogoDiv.css("display", "none");
-            } else {
-                navClientIconDiv.css("border", "");
-                clientLogoDiv.css("display", "");
-            }
-            // console.log("Logo: " + businessLogoUrl);
-        };
-
         var initPopup = function (config) {
             //var popup = new Popup(config, ".navElement");
 
@@ -661,14 +625,51 @@ define(["jquery", "ui/popup", "db/developer", "jmousewheel", "jscrollpane", "ken
 
                 //TODO: Make a getAction method for popup which does the same thing?
                 if ($("#popup").children("#currentPopupAction").text() === "changeBusiness") {
-                    changeBusiness($(e.target), config);
+                    thisNavigator.changeBusiness($(e.target), config);
                 }
             });
         };
 
-        initTopNav(config);
-        initSideBar(config);
-        initPopup(config);
+        /* Public Functions */
+        this.changeBusiness = function (clicked, config) {
+            //var businessId = clicked.attr("id");
+            var name = clicked.text();
+            var business = getBusiness(name, config);
+            if (business === null) {
+                console.log("Business not found!");
+                return;
+            }
+            thisNavigator.changeBusinessLogo(business.businessLogoUrl);
+            setSideBarSections(config, business.sections);
+            $("#sideBarInnerWrapper").data('jsp').reinitialise();
+        };
+
+        this.changeAvatar = function (imgLoc) {
+            $(".profile").attr('src', imgLoc);
+        };
+
+        this.changeBusinessLogo = function (businessLogoUrl) {
+            var businessLogoEnabled = true;
+
+            if (typeof (businessLogoUrl) === 'undefined') {
+                businessLogoEnabled = false;
+                businessLogoUrl = "";
+            }
+            var clientLogoDiv = $("#clientLogo");
+            clientLogoDiv.attr('src', businessLogoUrl);
+
+            //Hide business logo if undefined.
+            var navClientIconDiv = $("#navClient .navIcon");
+            if (!businessLogoEnabled) {
+                navClientIconDiv.css("border", "0");
+                clientLogoDiv.css("display", "none");
+            } else {
+                navClientIconDiv.css("border", "");
+                clientLogoDiv.css("display", "");
+            }
+            // console.log("Logo: " + businessLogoUrl);
+        };
+
         this.closePopup = function () {
             $("#navClient").popup('closePopup');
         };
@@ -680,6 +681,31 @@ define(["jquery", "ui/popup", "db/developer", "jmousewheel", "jscrollpane", "ken
         this.showSearch = function () {
             $("#navSearch").show();
         };
+
+        this.coverWindow = function () {
+            var sideBarDiv = $("#sideBar");
+            sideBarDiv.removeClass("hover");
+            sideBarDiv.removeClass("expand");
+            $("#sideBarWrapper")
+                .stop(false, true)
+                .animate({width: '100%'}, 'fast');
+            $("#sideBarInnerWrapper, #sideBarWrapper .jspContainer, #sideBar")
+                .stop(false, true)
+                .animate({width: "200px"}, 'fast');
+            sideBarDiv.addClass("cover");
+            $(".iconExpand").addClass("flip");
+        };
+
+        this.closeCoverWindow = function () {
+            slideMenuClosed();
+            $("#sideBar").removeClass("cover");
+            $(".iconExpand").removeClass("flip");
+        };
+
+        /* Initialization */
+        initTopNav(config);
+        initSideBar(config);
+        initPopup(config);
     }
 
     return Navigator;
