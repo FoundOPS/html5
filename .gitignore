@@ -15,3 +15,4 @@ PhoneGap Build Package/
 *.xcuserstate
 
 iOS/FoundOPS.xcodeproj/project.xcworkspace/xcuserdata/Oren.xcuserdatad/UserInterfaceState.xcuserstate
+build/mobile/Android/assets/www
