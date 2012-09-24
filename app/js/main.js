@@ -201,7 +201,7 @@ require(["jquery", "widgets/navigator", "developer", "db/services", "db/session"
 
     //Hookup remote loading into remoteContent, by using the kendo mobile application
     var initialPage = developer.CURRENT_FRAME === developer.Frame.MOBILE_APP ? "routes.html" : "updates.html";
-    window.application = application = new kendo.mobile.Application($("#remoteContent"), { initial: "view/" + initialPage, transition: "slide", platform: "ios"});
+    window.application = application = new kendo.mobile.Application($("#remoteContent"), { initial: "view/" + initialPage, platform: "ios"});
 
     //setup page tracking
     try {

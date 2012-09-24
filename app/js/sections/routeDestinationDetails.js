@@ -61,16 +61,14 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "parameters"], 
         }
     };
     vm.contactClick = function (e) {
-        console.log(e.dataItem);
         if (e.dataItem.Type === "Phone Number") {
             window.location.href = "tel:" + e.dataItem.Data;
         } else if (e.dataItem.Type === "Email Address") {
             window.location.href = "mailto:" + e.dataItem.Data;
         } else if (e.dataItem.Type === "Website") {
             window.plugins.childBrowser.showWebPage("http://" + e.dataItem.Data);
-        } else {
         }
-    }
+    };
 
     return section;
 });
