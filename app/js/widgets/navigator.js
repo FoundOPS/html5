@@ -13,8 +13,8 @@ define(["jquery", "ui/popup", "doT", "jmousewheel", "jscrollpane"], function ($,
             closeCoverWindow: function(){
                 navigator.closeCoverWindow();
             },
-            changeBusiness: function(clicked, config){
-                navigator.changeBusiness(clicked, config);
+            changeBusiness: function(clicked){
+                navigator.changeBusiness(clicked);
             },
             changeAvatar: function(imgLoc){
                 navigator.changeAvatar(imgLoc);
@@ -54,7 +54,7 @@ define(["jquery", "ui/popup", "doT", "jmousewheel", "jscrollpane"], function ($,
         };
     })(jQuery);
 
-    var backButtonTemplate = doT.template('<div id="backButtonContainer"><a onclick="main.onBack()"><img id="backArrow" src="img/backArrow.png"/></a></div>');
+
     var navTemplate = doT.template('<div id="navContainer">' +
         '<div id="navSearch" class="navElement">' +
         ' <input name="search" type="text" placeholder="Search..."/>' +
@@ -63,8 +63,9 @@ define(["jquery", "ui/popup", "doT", "jmousewheel", "jscrollpane"], function ($,
         '<a><img class="navIcon profile" src="{{= it.profileImgUrl }}"/><img id="clientLogo" src="{{= it.clientLogoUrl }}"/></a></div>' +
         '</div>' +
         '<img id="logo" src="./img/Logo.png" alt="FoundOPS"/>');
-    var expandTemplate = doT.template('<a id="expandMenuButton"><div id="slideMenu"><img class="iconExpand" src="img/Expand.png"/></div>');
+    var backButtonTemplate = doT.template('<div id="backButtonContainer"><a onclick="main.onBack()"><img id="backArrow" src="img/backArrow.png"/></a></div>');
     var showMenuTemplate = doT.template('<div id="showMenu"><a><img class="iconShow" src="img/Expand.png"/></a></div>');
+    var expandTemplate = doT.template('<a id="expandMenuButton"><div id="slideMenu"><img class="iconExpand" src="img/Expand.png"/></div>');
     var sideBarElementTemplate = doT.template(
         '<a {{= it.href }} class="sideBarElement" data-color="{{= it.color }}" data-iconUrl="{{= it.iconUrl }}" data-hoverIconUrl="{{= it.hoverIconUrl }}">' +
         '   <span class="icon" style="background: url(\'{{= it.iconUrl }}\') {{= it.bgX }} {{= it.bgY }} no-repeat"></span>' +
@@ -87,24 +88,8 @@ define(["jquery", "ui/popup", "doT", "jmousewheel", "jscrollpane"], function ($,
      * };
      * @constructor
      */
-    function Navigator(conf) {
-        var config = conf;
-
-        var sections = conf.sections;
-        var roles = conf.roles;
-
-        var thisNavigator = this;
-        this.sideBarElementCount = 0;
-
-        this.isCoverWindowButtonEnabled = false;
-        //TODO: Add coverWindowEnabled option to conf object.
-
-        this.isBackButtonEnabled = false;
-        if(typeof(conf.enableBackButton)!=='undefined'){
-            this.isBackButtonEnabled = conf.enableBackButton;
-        }
-
-        /** DEFAULT STATIC VARIABLES **/
+    function Navigator(config) {
+        /** STATIC FINAL VARIABLES **/
         //Logic values
         var MOBILE_WIDTH = "800";
         //Animation values
@@ -113,36 +98,60 @@ define(["jquery", "ui/popup", "doT", "jmousewheel", "jscrollpane"], function ($,
         var ANIMATION_SPEED = 'fast';
         //////////////////////////////////
 
+        //Read in config values to local variables; set defaults.
+        //TODO: Finish adding error checking.
+        var thisNavigator = this;
+        var name = config.name;
+        var settingsUrl = config.settingsUrl;
+        var logOutUrl = config.logOutUrl;
+        var allSections = config.sections;
+        var initialAvailableSections = config.roles[0].sections;
+        var roles = config.roles;
+        this.sideBarElementCount = 0;
+
+        this.isCoverWindowButtonEnabled = false;
+        if(typeof(config.enableCoverWindowButton)!=='undefined'){
+            this.isCoverWindowButtonEnabled = config.enableCoverWindowButton;
+        }
+
+        this.isBackButtonEnabled = false;
+        if(typeof(config.enableBackButton)!=='undefined'){
+            this.isBackButtonEnabled = config.enableBackButton;
+        }
+
+        var businessLogoUrl = "";
+        var businessLogoEnabled = false;
+        if(typeof (config.roles[0].businessLogoUrl)!=='undefined'){
+            businessLogoUrl = config.roles[0].businessLogoUrl;
+            businessLogoEnabled = true;
+        }
+
+        var avatarUrl = ""; //TODO: Set default missing avatar image.
+        if(typeof (config.avatarUrl)!=='undefined'){
+            avatarUrl = config.avatarUrl;
+        }
+
         /** Initializes top navigation **/
-        var initTopNav = function (config) {
+        var initTopNav = function () {
             var topNav = $(document.createElement('div'));
             topNav.attr('id', 'nav');
 
-            var businessLogoEnabled = true;
-            var businessLogoUrl = config.roles[0].businessLogoUrl;
-
-            //TODO: Check if avatarUrl is undefined.
-            if (typeof (businessLogoUrl) === 'undefined') {
-                businessLogoEnabled = false;
-                businessLogoUrl = "";
-            }
-
-            var params = {
-                profileImgUrl: config.avatarUrl,
+            var templateData = {
+                profileImgUrl: avatarUrl,
                 clientLogoUrl: businessLogoUrl
             };
-            topNav.html(navTemplate(params));
+            topNav.html(navTemplate(templateData));
 
+            //TODO: Simplify into function.
             //Hide business logo if undefined.
             if (!businessLogoEnabled) {
                 topNav.find("#navClient .navIcon").css("border", "0");
                 topNav.find("#clientLogo").css("display", "none");
             }
-            /////////
 
             $('body').prepend(topNav);
 
-            //refresh the page when the user double clicks on the corner logo
+            //Refresh the page when the user double clicks on the corner logo
             $('#logo').dblclick(function () {
                 var url = window.location.href;
                 //remove the hash
@@ -192,29 +201,25 @@ define(["jquery", "ui/popup", "doT", "jmousewheel", "jscrollpane"], function ($,
         //        return imgLoc.substring(0, extIndex) + "Color" + imgLoc.substring(extIndex);
         //    }
 
-        var getSection = function (sections, name) {
-            var section;
-            for (section in sections) {
+        var getFromArrayByName = function (array, name) {
+            for (var item in array) {
                 //console.log("Sections: " + sections[section]);
-                if (sections[section].name === name) {
-                    return sections[section];
+                if (array[item].name === name) {
+                    return array[item];
                 }
             }
             return null;
         };
 
-        var getRole = function (roles, name) {
-            var role;
-            for (role in roles) {
-                //console.log("Roles: " + roles[role].name);
-                if (roles[role].name === name) {
-                    return roles[role];
-                }
-            }
-            return null;
+        var getSection = function (name) {
+            return getFromArrayByName(allSections, name);
         };
 
-        var setSideBarSections = function (config, availableSections) {
+        var getRole = function (name) {
+            return getFromArrayByName(roles, name);
+        };
+
+        var setSideBarSections = function (allSections, availableSections) {
             $(".sideBarElement").off();
 
             var section;
@@ -227,7 +232,7 @@ define(["jquery", "ui/popup", "doT", "jmousewheel", "jscrollpane"], function ($,
             //TODO: Take a look at this again.
             for (section in availableSections) {
                 //console.log(availableSections[section]);
-                var currentSection = getSection(config.sections, availableSections[section]), //config.sections[section];
+                var currentSection = getSection(availableSections[section]), //config.sections[section];
                     href = "";
                 if (typeof (currentSection.url) !== "undefined") {
                     href = "href='" + currentSection.url + "'";
@@ -295,7 +300,7 @@ define(["jquery", "ui/popup", "doT", "jmousewheel", "jscrollpane"], function ($,
                 "click": function () {
                     var name = $(this).find(".sectionName:first").text();
                     //TODO: Will this work every time?
-                    var section = getSection(config.sections, name);
+                    var section = getSection(name);
                     $(this).trigger("sectionSelected", section);
                     if ($("#sideBar").hasClass("cover")) {
                         thisNavigator.closeCoverWindow();
@@ -322,10 +327,8 @@ define(["jquery", "ui/popup", "doT", "jmousewheel", "jscrollpane"], function ($,
         };
 
         /** Initializes sidebar navigation **/
-        var initSideBar = function (config) {
-            //TODO: Error checking?
-            var slideMenuTimeout = null;
-            var sections = config.sections;
+        var initSideBar = function () {
+            //var slideMenuTimeout = null;
 
             //TODO: Remove duplicate naming.
             //setup the sidebar wrapper (for the scrollbar)
@@ -345,15 +348,14 @@ define(["jquery", "ui/popup", "doT", "jmousewheel", "jscrollpane"], function ($,
             sBarInnerWrapper.append(sBar);
             sBarWrapper.append(sBarInnerWrapper);
 
-            if (typeof (config.coverWindow) !== 'undefined' && config.coverWindow === true) {
+            if (thisNavigator.isCoverWindowButtonEnabled) {
                 $(sBarInnerWrapper).after("<div id='coverWindowButton'>Cover Window</div>");
-                thisNavigator.isCoverWindowButtonEnabled = true;
-                console.log("It's enabled");
+                //console.log("It's enabled");
             }
 
             $('#nav').after(sBarWrapper);
 
-            setSideBarSections(config, config.roles[0].sections);
+            setSideBarSections(allSections, initialAvailableSections);
 
             $(document).ready(function () {
                 if ($(window).width() <= MOBILE_WIDTH) {
@@ -570,11 +572,9 @@ define(["jquery", "ui/popup", "doT", "jmousewheel", "jscrollpane"], function ($,
             );
         };
 
-        var getBusiness = function (name, config) {
+        var getBusiness = function (name) {
             //console.log("name: "+name);
-            var roles = config.roles;
             var role;
-
             for (role in roles) {
                 //console.log(roles[role]);
                 if (roles[role].name === name) { return roles[role]; }
@@ -582,23 +582,23 @@ define(["jquery", "ui/popup", "doT", "jmousewheel", "jscrollpane"], function ($,
             return null;
         };
 
-        var initPopup = function (config) {
+        var initPopup = function () {
             //var popup = new Popup(config, ".navElement");
 
             $("#navClient").popup({
                 id: "navClient",
-                title: config.name,
+                title: name,
                 contents: [
-                    {"name": "Settings", url: config.settingsUrl},
+                    {"name": "Settings", url: settingsUrl},
                     {"name": "Change Business", id: "changeBusiness"},
-                    {"name": "Log Out", url: config.logOutUrl}
+                    {"name": "Log Out", url: logOutUrl}
                 ]
             });
 
             var changeBusinessMenu = {
                 id: "changeBusiness",
                 title: "Businesses",
-                contents: config.roles
+                contents: roles
             };
             $("#navClient").popup('addMenu', changeBusinessMenu);
 
@@ -636,33 +636,33 @@ define(["jquery", "ui/popup", "doT", "jmousewheel", "jscrollpane"], function ($,
 
             $(document).on("popupEvent", function (e, data) {
                 //console.log(data);
-                if (($(data).attr("id") === "navClient") && config.roles.length <= 1) {
+                if (($(data).attr("id") === "navClient") && roles.length <= 1) {
                     $("#changeBusiness").css("display", "none");
                 }
                 var name = $(data).text();
-                var role = getRole(config.roles, name);
+                var role = getRole(name);
                 if (role !== null) {
                     $(e.target).trigger("roleSelected", role);
                 }
 
                 //TODO: Make a getAction method for popup which does the same thing?
                 if ($("#popup").children("#currentPopupAction").text() === "changeBusiness") {
-                    thisNavigator.changeBusiness($(e.target), config);
+                    thisNavigator.changeBusiness($(e.target));
                 }
             });
         };
 
         /* Public Functions */
-        this.changeBusiness = function (clicked, config) {
+        this.changeBusiness = function (clicked) {
             //var businessId = clicked.attr("id");
             var name = clicked.text();
-            var business = getBusiness(name, config);
+            var business = getBusiness(name);
             if (business === null) {
                 console.log("Business not found!");
                 return;
             }
             thisNavigator.changeBusinessLogo(business.businessLogoUrl);
-            setSideBarSections(config, business.sections);
+            setSideBarSections(allSections, business.sections);
             $("#sideBarInnerWrapper").data('jsp').reinitialise();
         };
 
@@ -671,6 +671,7 @@ define(["jquery", "ui/popup", "doT", "jmousewheel", "jscrollpane"], function ($,
         };
 
         this.changeBusinessLogo = function (businessLogoUrl) {
+            //TODO: Remove
             var businessLogoEnabled = true;
 
             if (typeof (businessLogoUrl) === 'undefined') {
@@ -682,6 +683,8 @@ define(["jquery", "ui/popup", "doT", "jmousewheel", "jscrollpane"], function ($,
 
             //Hide business logo if undefined.
             var navClientIconDiv = $("#navClient .navIcon");
+
+            //TODO: Simplify into function.
             if (!businessLogoEnabled) {
                 navClientIconDiv.css("border", "0");
                 clientLogoDiv.css("display", "none");
@@ -725,9 +728,9 @@ define(["jquery", "ui/popup", "doT", "jmousewheel", "jscrollpane"], function ($,
         };
 
         /* Initialization */
-        initTopNav(config);
-        initSideBar(config);
-        initPopup(config);
+        initTopNav();
+        initSideBar();
+        initPopup();
     }
 
     return Navigator;
