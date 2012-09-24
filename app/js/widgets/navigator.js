@@ -1,6 +1,6 @@
 "use strict";
 
-define(["jquery", "ui/popup", "developer", "jmousewheel", "jscrollpane", "kendo"], function ($, Popup, developer) {
+define(["jquery", "ui/popup", "doT", "jmousewheel", "jscrollpane"], function ($, Popup, doT) {
     (function ($) {
         var navigator = null;
         var methods = {
@@ -50,26 +50,25 @@ define(["jquery", "ui/popup", "developer", "jmousewheel", "jscrollpane", "kendo"
                 $.error('Method ' + method + ' does not exist on jQuery.navigator');
             }
 
-            return this.each(function () {
-            });
+            return this.each(function () {});
         };
     })(jQuery);
 
-    var backButtonTemplate = kendo.template('<div id="backButtonContainer"><a onclick="main.onBack()"><img id="backArrow" src="img/backArrow.png"/></a></div>');
-    var navTemplate = kendo.template('<div id="navContainer">' +
+    var backButtonTemplate = doT.template('<div id="backButtonContainer"><a onclick="main.onBack()"><img id="backArrow" src="img/backArrow.png"/></a></div>');
+    var navTemplate = doT.template('<div id="navContainer">' +
         '<div id="navSearch" class="navElement">' +
         ' <input name="search" type="text" placeholder="Search..."/>' +
         '<a><img src="img/Search.png"/></a></div>' +
         '<div id="navClient" class="navElement last">' +
-        '<a><img class="navIcon profile" src="#= data[0] #"/><img id="clientLogo" src="#= data[1] #"/></a></div>' +
+        '<a><img class="navIcon profile" src="{{= it.profileImgUrl }}"/><img id="clientLogo" src="{{= it.clientLogoUrl }}"/></a></div>' +
         '</div>' +
         '<img id="logo" src="./img/Logo.png" alt="FoundOPS"/>');
-    var expandTemplate = kendo.template('<a id="expandMenuButton"><div id="slideMenu"><img class="iconExpand" src="img/Expand.png"/></div>');
-    var showMenuTemplate = kendo.template('<div id="showMenu"><a><img class="iconShow" src="img/Expand.png"/></a></div>');
-    var sideBarElementTemplate = kendo.template(
-        '<a #= href # class="sideBarElement" data-color="#= color #" data-iconUrl="#= iconUrl #" data-hoverIconUrl="#=hoverIconUrl #">' +
-        '   <span class="icon" style="background: url(\'#= iconUrl #\') #= bgX # #= bgY # no-repeat"></span>' +
-        '   <span class="sectionName">#= name #</span></a>');
+    var expandTemplate = doT.template('<a id="expandMenuButton"><div id="slideMenu"><img class="iconExpand" src="img/Expand.png"/></div>');
+    var showMenuTemplate = doT.template('<div id="showMenu"><a><img class="iconShow" src="img/Expand.png"/></a></div>');
+    var sideBarElementTemplate = doT.template(
+        '<a {{= it.href }} class="sideBarElement" data-color="{{= it.color }}" data-iconUrl="{{= it.iconUrl }}" data-hoverIconUrl="{{= it.hoverIconUrl }}">' +
+        '   <span class="icon" style="background: url(\'{{= it.iconUrl }}\') {{= it.bgX }} {{= it.bgY }} no-repeat"></span>' +
+        '   <span class="sectionName">{{= it.name }}</span></a>');
 
     /**
      * Initializes the navigator
@@ -90,9 +89,29 @@ define(["jquery", "ui/popup", "developer", "jmousewheel", "jscrollpane", "kendo"
      */
     function Navigator(conf) {
         var config = conf;
+
+        var sections = conf.sections;
+        var roles = conf.roles;
+
         var thisNavigator = this;
         this.sideBarElementCount = 0;
+
         this.isCoverWindowButtonEnabled = false;
+        //TODO: Add coverWindowEnabled option to conf object.
+
+        this.isBackButtonEnabled = false;
+        if(typeof(conf.enableBackButton)!=='undefined'){
+            this.isBackButtonEnabled = conf.enableBackButton;
+        }
+
+        /** DEFAULT STATIC VARIABLES **/
+        //Logic values
+        var MOBILE_WIDTH = "800";
+        //Animation values
+        var SIDEBAR_WIDTH_EXPANDED = "200px";
+        var SIDEBAR_WIDTH = "55px";
+        var ANIMATION_SPEED = 'fast';
+        //////////////////////////////////
 
         /** Initializes top navigation **/
         var initTopNav = function (config) {
@@ -108,7 +127,10 @@ define(["jquery", "ui/popup", "developer", "jmousewheel", "jscrollpane", "kendo"
                 businessLogoUrl = "";
             }
 
-            var params = [config.avatarUrl, businessLogoUrl];
+            var params = {
+                profileImgUrl: config.avatarUrl,
+                clientLogoUrl: businessLogoUrl
+            };
             topNav.html(navTemplate(params));
 
             //Hide business logo if undefined.
@@ -286,7 +308,7 @@ define(["jquery", "ui/popup", "developer", "jmousewheel", "jscrollpane", "kendo"
         var slideMenuOpen = function () {
             $("#sideBarWrapper, #sideBarInnerWrapper, #sideBarWrapper .jspContainer, #sideBar")
                 .stop(true, false)
-                .animate({width: '200px'}, 'fast');
+                .animate({width: SIDEBAR_WIDTH_EXPANDED}, ANIMATION_SPEED);
             $(".iconExpand").addClass("flip");
         };
 
@@ -294,7 +316,7 @@ define(["jquery", "ui/popup", "developer", "jmousewheel", "jscrollpane", "kendo"
             //clearTimeout(slideMenuTimeout);
             $("#sideBarWrapper, #sideBarInnerWrapper, #sideBarWrapper .jspContainer, #sideBar")
                 .stop(true, false)
-                .animate({width: '55px'}, 'fast');
+                .animate({width: SIDEBAR_WIDTH}, ANIMATION_SPEED);
             $(".iconExpand").removeClass("flip");
 
         };
@@ -334,7 +356,7 @@ define(["jquery", "ui/popup", "developer", "jmousewheel", "jscrollpane", "kendo"
             setSideBarSections(config, config.roles[0].sections);
 
             $(document).ready(function () {
-                if ($(window).width() <= 800) {
+                if ($(window).width() <= MOBILE_WIDTH) {
                     //TODO: Condense into another function?
                     sBar.addClass("hidden");
                     var offset = -1 * (sBar.offset().top + sBar.outerHeight());
@@ -348,7 +370,7 @@ define(["jquery", "ui/popup", "developer", "jmousewheel", "jscrollpane", "kendo"
             $('#navContainer').after(showMenuTemplate);
 
             //Add backButton to topNav.
-            if (developer.CURRENT_FRAME === developer.Frame.MOBILE_APP) {
+            if (thisNavigator.isBackButtonEnabled) {
                 $('#navContainer').before(backButtonTemplate);
                 $('#navContainer').addClass("mobileMode");
                 $("#backButtonContainer").mousedown(function (e) {
@@ -373,21 +395,21 @@ define(["jquery", "ui/popup", "developer", "jmousewheel", "jscrollpane", "kendo"
                 var showMenuLen = clicked.parents("#showMenu").length + clicked.is("#showMenu") ? 1 : 0;
 
                 //Detects clicks outside of the sideBar when shown.
-                if (sideBarLen === 0 && showMenuLen === 0 && !$("#sideBar").hasClass("hidden") && $(document).width() <= 800) {
+                if (sideBarLen === 0 && showMenuLen === 0 && !$("#sideBar").hasClass("hidden") && $(document).width() <= MOBILE_WIDTH) {
                     toggleMenu();
                 }
 
                 var sideBarWrapperLen = clicked.parents("#sideBarWrapper").length + clicked.is("#sideBarWrapper") ? 1 : 0;
                 //Detects clicks outside of the sideBar when expanded.
                 var slideMenuLen = clicked.parents("#slideMenu").length + clicked.is("#slideMenu") ? 1 : 0;
-                if (sideBarWrapperLen === 0 && slideMenuLen === 0 && $("#sideBar").hasClass("expand") && $(document).width() > 800) {
+                if (sideBarWrapperLen === 0 && slideMenuLen === 0 && $("#sideBar").hasClass("expand") && $(document).width() > MOBILE_WIDTH) {
                     slideMenuClosed();
                 }
             });
 
             //Listener for window resize to reset sideBar styles.
             $(window).resize(function () {
-                if ($(window).width() <= 800) {
+                if ($(window).width() <= MOBILE_WIDTH) {
                     sideBarDiv.css("width", "");
                     sideBarDiv.removeClass("hover");
                     $(".iconExpand").removeClass("flip");
@@ -420,7 +442,7 @@ define(["jquery", "ui/popup", "developer", "jmousewheel", "jscrollpane", "kendo"
                         sideBarDiv.attr("style", "");
                         $("#sideBarInnerWrapper").attr("style", "");
                     }
-                } else if ($(window).width() > 800) {
+                } else if ($(window).width() > MOBILE_WIDTH) {
                     if (sideBarDiv.hasClass("hidden") || sideBarDiv.hasClass("shown")) {
                         sideBarDiv.removeClass("hidden");
                         sideBarDiv.removeClass("shown");
@@ -486,7 +508,7 @@ define(["jquery", "ui/popup", "developer", "jmousewheel", "jscrollpane", "kendo"
             $("#sideBarWrapper").hover(
                 //Hover In
                 function () {
-                    if ($(document).width() > 800 && !sideBarDiv.hasClass("expand") && !sideBarDiv.hasClass("cover")) {
+                    if ($(document).width() > MOBILE_WIDTH && !sideBarDiv.hasClass("expand") && !sideBarDiv.hasClass("cover")) {
                         //slideMenuTimeout = setTimeout(function(){
                         sideBarDiv.addClass("hover");
                         slideMenuOpen();
@@ -495,7 +517,7 @@ define(["jquery", "ui/popup", "developer", "jmousewheel", "jscrollpane", "kendo"
                 },
                 //Hover Out
                 function () {
-                    if ($(document).width() <= 800) { return; }
+                    if ($(document).width() <= MOBILE_WIDTH) { return; }
                     if (sideBarDiv.hasClass("expand")) {
                         slideMenuClosed();
                         sideBarDiv.removeClass("expand");
@@ -519,7 +541,7 @@ define(["jquery", "ui/popup", "developer", "jmousewheel", "jscrollpane", "kendo"
                         {
                             top: 0
                         },
-                        'fast'
+                        ANIMATION_SPEED
                     );
                     $("#sideBarInnerWrapper").data('jsp').reinitialise();
                     sideBarDiv.removeClass("hidden");
@@ -530,7 +552,7 @@ define(["jquery", "ui/popup", "developer", "jmousewheel", "jscrollpane", "kendo"
                         {
                             top: offset
                         },
-                        'fast',
+                        ANIMATION_SPEED,
                         function () {
                             $("#sideBarWrapper").css('visibility', 'hidden');
                         }
@@ -688,10 +710,10 @@ define(["jquery", "ui/popup", "developer", "jmousewheel", "jscrollpane", "kendo"
             sideBarDiv.removeClass("expand");
             $("#sideBarWrapper")
                 .stop(false, true)
-                .animate({width: '100%'}, 'fast');
+                .animate({width: '100%'}, ANIMATION_SPEED);
             $("#sideBarInnerWrapper, #sideBarWrapper .jspContainer, #sideBar")
                 .stop(false, true)
-                .animate({width: "200px"}, 'fast');
+                .animate({width: SIDEBAR_WIDTH_EXPANDED}, ANIMATION_SPEED);
             sideBarDiv.addClass("cover");
             $(".iconExpand").addClass("flip");
         };

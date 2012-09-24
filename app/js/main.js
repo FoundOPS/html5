@@ -29,7 +29,8 @@ require.config({
         noty: "../lib/noty",
         select2: "../lib/select2",
         colorpicker: "ui/colorPicker",
-        uservoice: "../lib/userVoice"
+        uservoice: "../lib/userVoice",
+        doT: "../lib/doT.min"
     },
     shim: {
         underscore: {
@@ -136,6 +137,8 @@ require(["jquery", "widgets/navigator", "developer", "db/services", "db/session"
             //setup the navigator
             //navigator = new Navigator(data);
             //navigator.hideSearch();
+            data.enableBackButton = false;
+            if(developer.CURRENT_FRAME === developer.Frame.MOBILE_APP)data.enableBackButton = true;
             $(document).navigator(data);
             $(document).navigator('hideSearch');
 
