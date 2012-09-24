@@ -54,11 +54,23 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "parameters"], 
     };
     vm.getDirections = function () {
         if (vm.get("selectedEntity.Location")) {
-            window.location = "http://maps.google.com/maps?q=" + vm.get("selectedEntity.Location.Latitude") + "," + vm.get("selectedEntity.Location.Longitude");
+            var url = "http://maps.google.com/maps?q=" + vm.get("selectedEntity.Location.Latitude") + "," + vm.get("selectedEntity.Location.Longitude");
+            window.plugins.childBrowser.showWebPage(url);
         } else {
-            window.location = "http://maps.google.com/maps?q=" + vm.get("selectedEntity.Client.Name");
+            window.plugins.childBrowser.openExternal("http://maps.google.com/maps?q=" + vm.get("selectedEntity.Client.Name"));
         }
     };
+    vm.contactClick = function (e) {
+        console.log(e.dataItem);
+        if (e.dataItem.Type === "Phone Number") {
+            window.location.href = "tel:" + e.dataItem.Data;
+        } else if (e.dataItem.Type === "Email Address") {
+            window.location.href = "mailto:" + e.dataItem.Data;
+        } else if (e.dataItem.Type === "Website") {
+            window.plugins.childBrowser.showWebPage("http://" + e.dataItem.Data);
+        } else {
+        }
+    }
 
     return section;
 });

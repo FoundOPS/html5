@@ -38,11 +38,10 @@ define(["sections/linkedEntitySection", "sections/routes", "parameters", "db/ser
     };
 
     /**
-     * serviceDate = Date when service is being performed.
      * intervalId = used to start and stop a route
      * trackPointsToSend = stores the track points that will be sent to the API
      */
-    var serviceDate, intervalId = null, trackPointsToSend = [];
+    var intervalId = null, trackPointsToSend = [], watchId;
 
 //region TrackPoint Collection & Management
     /**
@@ -122,7 +121,7 @@ define(["sections/linkedEntitySection", "sections/routes", "parameters", "db/ser
         };
 
         //Phonegap geolocation function
-        navigator.geolocation.getCurrentPosition(onSuccess, onError, {enableHighAccuracy: true});
+        watchId = navigator.geolocation.watchPosition(onSuccess, onError, {timeout: 10000, enableHighAccuracy: true});
     };
 //endregion
 
@@ -138,16 +137,12 @@ define(["sections/linkedEntitySection", "sections/routes", "parameters", "db/ser
         vm.set("startVisible", false);
         vm.set("endVisible", true);
 
-        console.log("Notify");
         window.plugins.statusBarNotification.notify("Tracking...", "FoundOPS is tracking your location.");
-        console.log("Notify Done");
-
-        serviceDate = new Date();
 
         //store the intervalId
-        intervalId = window.setInterval(function () {
+//        intervalId = window.setInterval(function () {
             addPushTrackPoints(routes.vm.get("nextEntity").Id);
-        }, TRACKPOINTCONFIG.TRACKPOINT_COLLECTION_FREQUENCY_SECONDS * 1000);
+//        }, TRACKPOINTCONFIG.TRACKPOINT_COLLECTION_FREQUENCY_SECONDS * 1000);
     };
     /**
      * Ends the collection of trackpoints for the selected route.
@@ -157,7 +152,8 @@ define(["sections/linkedEntitySection", "sections/routes", "parameters", "db/ser
         vm.set("endVisible", false);
 
         //stop calling addPushTrackPoints
-        clearInterval(intervalId);
+        navigator.geolocation.clearWatch(watchId);
+//        clearInterval(intervalId);
         trackPointsToSend = [];
     };
 
