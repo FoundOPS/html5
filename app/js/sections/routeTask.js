@@ -122,7 +122,7 @@ define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "pa
             $("#taskStatuses").css("visibility", "hidden");
         }, 400);
         // If popup was opened by clicking backButton go back if and only if user selects status.
-        if (popupCaller === "backButton" && !e) {
+        if (popupCaller === "backButton" /*&& !e*/) { // Comment forces user to select status before going back.
             section.onBack(true);
         }
     };

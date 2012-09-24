@@ -1,0 +1,13 @@
+## Building the Mobile App ##
+
+**First Time**
+
+Make sure symbolic links are setup
+
+`run C:\FoundOPS\html5\build\mobile\setupwwwfolderlinks.bat as an administrator`
+
+## Organization ##
+
+Cordova and it's javascript plugins are kept in `C:\FoundOPS\html5\build\mobile\cordova`
+
+The platform specific plugin code is kept in it's respective platform project (Eclipse, xCode)

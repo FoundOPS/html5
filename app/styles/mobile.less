@@ -199,18 +199,19 @@ footer {
 .backButtonClicked img {
     opacity: .5;
 }
-/* Fixes for double input bug on android - Don't really work*/
-#taskServiceDetails input {
-    -webkit-transform: translate3d(0,0,0);
-}
-.km-android4 input
+/* Fixes for double input bug on android*/
+.km-on-android.km-4
 {
-    -webkit-user-modify: read-write;
-}
-.km-android2 .km-list > li,
-.km-android3 .km-list > li
-{
-    bottom: auto;
     -webkit-transform: none;
-    -moz-transform: none;
+}
+.km-on-android.km-4 input
+{
+    -webkit-user-modify: read-write-plaintext-only;
+}
+
+.km-on-android.km-2 .km-list > li,
+.km-on-android.km-3 .km-list > li
+{
+    bottom: 10000px;
+    .transform(translatey(10000px));
 }

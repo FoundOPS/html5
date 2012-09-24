@@ -6,7 +6,7 @@
     <p style="top:10px; margin-bottom: -5px;">Contacts</p>
     <hr style="width:90%;"/>
     </div>
-    <ul id="contacts-listview" data-bind="source:contacts" data-role="listview" data-style="inset" data-template="contactsTemplate"></ul>
+    <ul id="contacts-listview" data-bind="source:contacts, click: contactClick" data-role="listview" data-style="inset" data-template="contactsTemplate"></ul>
 
     <p style="top:10px; margin-bottom: -5px;">Tasks</p>
     <hr style="width:90%;"/>
@@ -32,13 +32,13 @@
 </script>
 <script type="text/x-kendo-template" id="contactsTemplate">
     # if (Type === "Phone Number") { #
-    <a data-rel="external" href="tel:${Data}" target="_blank">Call ${Label}<p class="contactData">${Data}</p></a>
+        <a>Call ${Label}<p class="contactData">${Data}</p></a>
     # } else if (Type === "Email Address") { #
-    <a data-rel="external" href="mailto:${Data}" target="_blank">E-mail ${Label}<p class="contactData">${Data}</p></a>
+        <a>E-mail ${Label}<p class="contactData">${Data}</p></a>
     # } else if (Type === "Website") { #
-    <a data-rel="external" href="http://${Data}" target="_blank">Visit Website<p class="contactData">${Data}</p></a>
+        <a>Visit Website<p class="contactData">${Data}</p></a>
     # } else { #
-    <a>${Label} - ${Data}</a>
+        <a>${Label} - ${Data}</a>
     # } #
 </script>
     <script type="text/x-kendo-template" id="routeTasksTemplate">
