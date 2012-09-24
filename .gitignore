@@ -13,3 +13,5 @@ buildsmobile/
 PhoneGap Build Package/
 
 *.xcuserstate
+build/mobile/Android/assets/www
+build/mobile/iOS/www
