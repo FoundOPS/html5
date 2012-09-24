@@ -77,10 +77,10 @@ module.exports = function (grunt) {
                 noty: ['jquery'],
                 select2: ['jquery'],
                 colorpicker: ['jquery'],
-                uservoice: {}
+                uservoice: []
             },
             include: ["main"],
-            wrap: true,
+            wrap: false,
             out: "../main/main-built.js"
         },
         copy: {
@@ -119,7 +119,7 @@ module.exports = function (grunt) {
                     blobRoot: "",
                     CSSblobRoot: "css/",
                     JSblobRoot: "js/",
-                    version: ".1"
+                    version: "0.105"
                 }
             },
             dist: {
@@ -129,17 +129,18 @@ module.exports = function (grunt) {
                     mobileOptimization: mobileOptimizationTags,
                     blobRoot: '@Model["BlobRoot"]../',
                     CSSblobRoot: '@Model["BlobRoot"]',
-                    JSblobRoot: '@Model["BlobRoot"]'
+                    JSblobRoot: '@Model["BlobRoot"]',
+                    version: "0.105"
                 }
             }
         }
     });
 
     // Default task
-    //grunt.registerTask('default', 'less requirejs');
-    grunt.registerTask('default', 'copy replace');
+    grunt.registerTask('default', 'less requirejs');
+    //grunt.registerTask('default', 'copy replace');
     grunt.loadNpmTasks('grunt-less');
     grunt.loadNpmTasks('grunt-requirejs');
-    grunt.loadNpmTasks('grunt-contrib');
-    grunt.loadNpmTasks('grunt-replace');
+    //grunt.loadNpmTasks('grunt-contrib');
+    //grunt.loadNpmTasks('grunt-replace');
 };
