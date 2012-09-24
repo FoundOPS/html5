@@ -863,7 +863,7 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
 #serviceDetails {
     display:none;
     position: absolute;
-    top:530px;
+    top:500px;
     right: 30px;
     background-color:#fff;
     padding:10px 20px;
@@ -924,6 +924,9 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
         font-size: 20px;
         margin: 0 0 5px 0;
     }
+    label:not(#weeklyRepeatOn label){
+        line-height: 1.4em;
+    }
     #weeklyRepeatOn{
         display: none;
         position: relative;
@@ -938,16 +941,20 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
             vertical-align: middle;
         }
     }
+    #weekdayWrapper{
+        width: 225px;
+        margin: 0 auto;
+    }
     .weekday{
         float: left;
-        width: 28px;
-        height: 23px;
+        width: 26px;
+        height: 24px;
         padding-top: 3px;
         vertical-align: middle;
         text-align: center;
-        color:#aaaaaa;
-        border-top: 1px solid #c5c5c5;
-        border-bottom: 1px solid #c5c5c5;
+        color:#000000;
+        border: 1px solid #c5c5c5;
+        border-left: none;
         .bgGradient(#ffffff, #eeeeee);
     }
     .weekday:hover{
@@ -958,15 +965,24 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
         cursor: pointer;
         .bgGradient(#aaaaaa, #888888);
     }
-    .weekday#Sunday{
+    .weekday.left{
+        width: 16px;
         border-left: 1px solid #c5c5c5;
-        border-bottom-left-radius: 5px;
-        border-top-left-radius: 5px;
+        border-bottom-left-radius: 16px;
+        border-top-left-radius: 16px;
     }
-    .weekday#Saturday{
+    .weekday.right{
+        width: 16px;
         border-right: 1px solid #c5c5c5;
-        border-bottom-right-radius: 5px;
-        border-top-right-radius: 5px;
+        border-bottom-right-radius: 16px;
+        border-top-right-radius: 16px;
+    }
+    .weekday.selected:not(.left):not(.right){
+        color: #ffffff;
+        .bgGradient(#36C3E3, #488FCD);
+    }
+    .weekday.selected:hover:not(.left):not(.right){
+        .bgGradient(#44AFE4, #0067A0);
     }
     #repeatLabel{
         position: relative;
