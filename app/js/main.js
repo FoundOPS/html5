@@ -142,8 +142,8 @@ require(["jquery", "widgets/navigator", "developer", "db/services", "db/session"
             //reset the images 1.5 seconds after loading to workaround a shared access key buy
             _.delay(function () {
                 if (navigator) {
-                    navigator.changeAvatar(data.avatarUrl);
-                    navigator.changeBusinessLogo(session.get("role.businessLogoUrl"));
+                    $(document).navigator('changeAvatar', data.avatarUrl);
+                    $(document).navigator('changeBusinessLogo', session.get("role.businessLogoUrl"));
                 }
             }, 1500);
         } else {
@@ -202,7 +202,7 @@ require(["jquery", "widgets/navigator", "developer", "db/services", "db/session"
     //when the silverlight plugin loads hook into the silverlight click events, and hide the navigator popup
     $(silverlight).bind('loaded', function () {
         silverlight.plugin.mainPage.addEventListener("Clicked", function () {
-            navigator.closePopup();
+            $(document).navigator('closePopup');
         });
     });
 

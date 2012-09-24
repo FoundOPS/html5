@@ -61,12 +61,12 @@ define(function () {
      * This is for sections that are in the Silverlight application and is used for debugging.
      * @type {developer.Frame}
      */
-    developer.CURRENT_FRAME = developer.Frame.BROWSER;
+    developer.CURRENT_FRAME = developer.Frame.SILVERLIGHT;
 
     /**
      * The current silverlight version
      */
-    developer.CURRENT_SILVERLIGHT_VERSION = 0.1041;
+    developer.CURRENT_SILVERLIGHT_VERSION = 0.105;
 
     developer.CURRENT_PARAMETER_STORAGE = developer.ParameterStorage.URL;
 
