@@ -96,7 +96,10 @@ define(['db/services', 'db/session'], function (dbServices, session) {
             errMsg += "MethodName: " + args.methodName + "     \n";
         }
 
-        dbServices.trackError(errMsg, session.get("role.name"), currentSection);
+        dbServices.trackError({
+            Business: session.get("role.name"),
+            Message: errMsg
+        });
 
         //for chrome
         console.log(errMsg);
