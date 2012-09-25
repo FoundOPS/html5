@@ -15,3 +15,4 @@ PhoneGap Build Package/
 *.xcuserstate
 build/mobile/Android/assets/www
 build/mobile/iOS/www
+build/mobile/iOS/.DS_Store
