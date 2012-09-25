@@ -63,7 +63,7 @@ define(["tools", "db/services", "db/session", "db/saveHistory", "widgets/setting
                             type: "string",
                             defaultValue: "#FFFFFF"
                         },
-                        RouteRequired: {
+                        RemoveFromRoute: {
                             type: "boolean"
                         },
                         DefaultTypeInt: {
@@ -105,9 +105,9 @@ define(["tools", "db/services", "db/session", "db/saveHistory", "widgets/setting
                     template: "<div class='gridColor' style='background-color: #=Color#'></div>"
                 },
                 {
-                    field: "RouteRequired",
+                    field: "RemoveFromRoute",
                     title: "Remove from Route on Selection",
-                    template: "#= dispatcherSettings.getChecked(RouteRequired)#"
+                    template: "#= dispatcherSettings.getChecked(RemoveFromRoute)#"
                 },
                 {
                     field: "DefaultTypeInt",
@@ -173,8 +173,8 @@ define(["tools", "db/services", "db/session", "db/saveHistory", "widgets/setting
 
     //update the selected checkbox with the new value
     dispatcherSettings.updateCheckbox = function (checked) {
-        //update the model with the new RouteRequired value
-        selectedItem.set('RouteRequired', checked);
+        //update the model with the new RemoveFromRoute value
+        selectedItem.set("RemoveFromRoute", checked);
         saveHistory.save();
     };
     //endregion
