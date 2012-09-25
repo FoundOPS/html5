@@ -87,6 +87,7 @@ require(["jquery", "widgets/navigator", "developer", "db/services", "db/session"
     function onDeviceReady() {
         //Listens for back button being pressed on a mobile device and overrides it.
         document.addEventListener("backbutton", main.onBack, false);
+        window.plugins.childBrowser.install();
     }
 
     // Listens for Cordova to load
