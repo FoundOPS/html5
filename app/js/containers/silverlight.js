@@ -1,7 +1,7 @@
 'use strict';
 
 define(['db/services', 'db/session'], function (dbServices, session) {
-    var silverlight = {}, currentSection;
+    var silverlight = {}, lastSection, currentSection;
 
     window.silverlight = silverlight;
 
@@ -21,8 +21,7 @@ define(['db/services', 'db/session'], function (dbServices, session) {
         $("#remoteContent").width(width);
     };
 
-    //hide the silverlight plugin
-    var hide = function () {
+    var cssHide = _.debounce(function () {
         $("#silverlightControlHost").css("height", "0px");
         $("#silverlightControlHost").css("width", "0px");
 
@@ -31,6 +30,16 @@ define(['db/services', 'db/session'], function (dbServices, session) {
         $("#silverlightPlugin").css("width", "1px");
 
         $("#remoteContent").css("display", "");
+    }, 200);
+
+    //hide the silverlight plugin
+    var hide = function () {
+        //prevents crashing bug from the silverlight clients section
+        if (silverlight.plugin && silverlight.plugin.navigationVM) {
+            silverlight.plugin.navigationVM.BeforeHide();
+        }
+
+        cssHide();
     };
 
     //show the silverlight plugin
@@ -41,18 +50,6 @@ define(['db/services', 'db/session'], function (dbServices, session) {
 
         $("#remoteContent").css("display", "none");
         _.delay(resizeContainers, 150);
-    };
-
-    //if the section isn't silverlight, hide the silverlight control
-    window.onhashchange = function () {
-        if (!location || !location.hash) {
-            return;
-        }
-        if (location.hash.indexOf("silverlight") === -1) {
-            hide();
-            //todo set current section based off hash
-            currentSection = null;
-        }
     };
 
     //a workaround for opening the importer
@@ -162,6 +159,7 @@ define(['db/services', 'db/session'], function (dbServices, session) {
      * @param {{name: string, isSilverlight: boolean}} section
      */
     silverlight.setSection = function (section) {
+        lastSection = currentSection;
         currentSection = section;
 
         if (!section.isSilverlight) {
