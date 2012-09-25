@@ -403,21 +403,16 @@ define(["developer", "tools", "db/saveHistory"], function (developer, tools, sav
 
     //endregion
 
-    services.trackError = function (error, business, section) {
-        var sectionName = "";
-        if (section && section.name) {
-            sectionName = section.name;
-        }
+    services.trackError = function (error) {
+        error.Url = document.URL;
 
         $.ajax({
-            url: services.API_URL + "Error/Track?business=" + business + "&section=" + sectionName,
+            url: services.API_URL + "Error/Track",
             type: "POST",
             dataType: "json",
             contentType: 'application/json',
-            data: error
-        }).success(function (response) {
-                callback(response);
-            });
+            data: JSON.stringify(error)
+        });
     };
 
     /**
