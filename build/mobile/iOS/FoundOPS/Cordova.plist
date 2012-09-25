@@ -24,11 +24,12 @@
 	<true/>
 	<key>ExternalHosts</key>
 	<array>
-		<string>*.*</string>
-		<string>*.foundops.com</string>
+		<string>*</string>
 	</array>
 	<key>Plugins</key>
 	<dict>
+		<key>StatusBarNotifier</key>
+		<string>StatusBarNotifier</string>
 		<key>ChildBrowserCommand</key>
 		<string>ChildBrowserCommand</string>
 		<key>Device</key>
@@ -47,6 +48,8 @@
 		<string>CDVContacts</string>
 		<key>Debug Console</key>
 		<string>CDVDebugConsole</string>
+		<key>Echo</key>
+		<string>CDVEcho</string>
 		<key>File</key>
 		<string>CDVFile</string>
 		<key>FileTransfer</key>
