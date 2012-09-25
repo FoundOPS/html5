@@ -781,7 +781,8 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
     }
     li{
         margin-bottom: 5px;
-        padding: 1px 0 1px 0;
+        padding: 3px 0 1px 0;
+        line-height: 1.5em;
         .percentSign{
             position: absolute;
             margin-top: 5px;
@@ -799,6 +800,7 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
     }
     li.textarea{
         vertical-align: top;
+        margin-bottom: 0;
     }
     .k-timepicker, .k-datepicker, .k-combobox, input[type="text"], input[type="number"], .select2-container, .k-numerictextbox{
         width: 100%;
@@ -859,11 +861,15 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
         font-size: 14px;
         padding-left: 15px;
     }
+    .k-dropdown{
+        font-size: 1em;
+        width: 100%;
+    }
 }
 #serviceDetails {
     display:none;
     position: absolute;
-    top:500px;
+    top:450px;
     right: 30px;
     background-color:#fff;
     padding:10px 20px;
@@ -871,6 +877,9 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
     -moz-box-shadow: 0 5px 8px #aaa;
     -webkit-box-shadow: 0 5px 8px #aaa;
     box-shadow: 0 5px 8px #aaa;
+    label.client, label.location{
+        line-height: 1.5em;
+    }
     .km-ios .km-listinset > li:first-child:last-child, .km-ios .km-listgroupinset .km-list > li:first-child:last-child {
         border-color: #aaa;
         border-radius: 4px;
@@ -925,7 +934,7 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
         margin: 0 0 5px 0;
     }
     label:not(#weeklyRepeatOn label){
-        line-height: 1.4em;
+        line-height: 1.5em;
     }
     #weeklyRepeatOn{
         display: none;
@@ -994,7 +1003,6 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
         font-size: 1em;
     }
     .k-dropdown{
-        margin-bottom: 5px;
         .k-input{
             padding-top: 5px;
         }
@@ -1004,14 +1012,20 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
             padding-left: 2px;
             vertical-align: text-bottom;
         }
-        .k-numerictextbox{
-            width: 190px;
-            margin: 3px 0 3px 5px;
+        .k-dropdown{
+            width: 80px;
         }
-        .k-datepicker{
-            width: 204px;
-            margin: 3px 0 3px 5px;
+        .k-numerictextbox,.k-datepicker{
+            display: none !important;
+            width: 160px;
+            margin: -5px 0 3px 10px;
         }
+        .k-numerictextbox.showInput,.k-datepicker.showInput{
+             display: inline-block !important;
+         }
+    }
+    .k-dropdown, #startDate, #repeatEvery, #weeklyRepeatOn, #monthlyRepeatOn{
+        margin-bottom: 10px;
     }
 }
 /*Tooltip*/

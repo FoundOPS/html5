@@ -6,13 +6,13 @@ define(["jquery", "db/services", "kendo"], function ($, dbServices) {
     var kendo = window.kendo,
         ui = kendo.ui,
         Widget = ui.Widget,
-        serviceA = {Frequency: 1, StartDate: new Date(), RepeatEvery: 3, RepeatOn: "M,W", EndDate: 4},
+        serviceA = {Frequency: 1, StartDate: new Date(), RepeatEvery: 3, RepeatOn: "Monday,Wednesday", EndDate: 4},
         serviceB = {Frequency: 2, StartDate: new Date(), RepeatEvery: 1, RepeatOn: 1, EndDate: new Date()};
-    var service = serviceA;
+    var service = serviceB;
 
     var Repeat = Widget.extend({
         init: function (element, options) {
-            var _repeat, that = this, endAfterValue, endOnValue, endAfterFormat, enableEndAfter = false, enableEndOn = false;
+            var _repeat, that = this, repeatFormat, endSelection, endAfterValue, endOnValue, endAfterFormat, enableEndAfter = false, enableEndOn = false;
 
             Widget.fn.init.call(that, element, options);
 
@@ -45,9 +45,9 @@ define(["jquery", "db/services", "kendo"], function ($, dbServices) {
                 '</div>' +
                 '<div id="endDate">' +
                     '<label>End Date</label><br />' +
-                    '<input id="endNever" type="radio" name="end" /><label for="endNever">Never</label><br />' +
-                    '<input id="endAfter" type="radio" name="end" /><label for="endAfter">After</label><input id="endAfterNum" type="number" /><br />' +
-                    '<input id="endOn" type="radio" name="end" /><label for="endOn">On</label><input id="endDatePicker" />' +
+                    '<input id="endDropdown" />' +
+                    '<input id="endAfterNum" type="number" />' +
+                    '<input id="endDatePicker" />' +
                 '</div>');
 
             this.element.append(_repeat);
@@ -57,32 +57,46 @@ define(["jquery", "db/services", "kendo"], function ($, dbServices) {
                 format:"dddd, MMMM dd, yyyy"
             });
 
+            var frequencyName;
+            if(service.Frequency == "0"){
+                frequencyName = "Day";
+            }else if(service.Frequency == "1") {
+                frequencyName = "Week";
+            }else if(service.Frequency == "2") {
+                frequencyName = "Month";
+            }else if(service.Frequency == "3") {
+                frequencyName = "Year";
+            }
+            if(service.RepeatEvery > 1){
+                frequencyName += "s";
+            }
+            repeatFormat = "# " + frequencyName;
+
             $(_repeat).find('#repeatEveryNum').kendoNumericTextBox({
                 step: 1,
                 min: 1,
                 max: 1000,
                 value: service.RepeatEvery,
                 decimals: 0,
-                format: '#'
+                format: repeatFormat,
+                change: this.repeatEveryChanged
             });
 
             $($(_repeat).find("#option" + service.RepeatOn.toString())).attr("checked", "checked");
 
             if(!isNaN(parseFloat(service.EndDate)) && isFinite(service.EndDate) && !service.getMonth){
-                $(_repeat).find('#endAfter').attr("checked", "checked");
+                endSelection = 1;
                 endAfterValue = service.EndDate;
                 if(service.EndDate > 1){
                     endAfterFormat = "# Occurrences";
                 }else{
                     endAfterFormat = "# Occurrence";
                 }
-                enableEndAfter = true;
             }else if(service.EndDate.getMonth){
-                $(_repeat).find('#endOn').attr("checked", "checked");
+                endSelection = 2;
                 endOnValue = service.EndDate;
-                enableEndOn = true;
             }else{
-                $(_repeat).find('#endNever').attr("checked", "checked");
+                endSelection = 0;
             }
             var endAfter = $(_repeat).find('#endAfterNum').kendoNumericTextBox({
                 step: 1,
@@ -92,20 +106,26 @@ define(["jquery", "db/services", "kendo"], function ($, dbServices) {
                 decimals: 0,
                 format: endAfterFormat,
                 change: function (e) {
-                    if(e.sender.value > 1){
-                        e.sender.options.format = "# Occurrences";
+                    if(e.sender._value > 1){
+                        endAfter.options.format = "# Occurrences";
                     }else{
-                        e.sender.options.format = "# Occurrence";
+                        endAfter.options.format = "# Occurrence";
                     }
+                    //reset focus to refresh the input, in order to get the correct format
+                    endAfter.focus();
+                    $("#endDate label").focus();
                 }
             }).data("kendoNumericTextBox");
 
-            var endOn = $(_repeat).find('#endDatePicker').kendoDatePicker({
+            $(_repeat).find('#endDatePicker').kendoDatePicker({
                 value: endOnValue
-            }).data("kendoDatePicker");
+            });
 
-            endAfter.enable(enableEndAfter);
-            endOn.enable(enableEndOn);
+            if(!isNaN(parseFloat(service.EndDate)) && isFinite(service.EndDate) && !service.getMonth){
+                $("#endDate .k-numerictextbox").addClass("showInput");
+            }else if(service.EndDate.getMonth){
+                $("#endDate .k-datepicker").addClass("showInput");
+            }
 
             $($(_repeat)[3]).kendoDropDownList({
                 change: this.frequencyChanged,
@@ -115,17 +135,23 @@ define(["jquery", "db/services", "kendo"], function ($, dbServices) {
                 index: service.Frequency
             });
 
-            $('#endDate input').on("click", function (e) {
-                if(e.target.id == "endNever"){
-                    endAfter.enable(false);
-                    endOn.enable(false);
-                }else if(e.target.id == "endAfter"){
-                    endAfter.enable(true);
-                    endOn.enable(false);
-                }else if(e.target.id == "endOn"){
-                    endAfter.enable(false);
-                    endOn.enable(true);
-                }
+            $(_repeat).find('#endDropdown').kendoDropDownList({
+                change: function (e) {
+                    if(e.sender.value() == 0){
+                        $("#endDate .k-numerictextbox").removeClass("showInput");
+                        $("#endDate .k-datepicker").removeClass("showInput");
+                    }else if(e.sender.value() == 1){
+                        $("#endDate .k-numerictextbox").addClass("showInput");
+                        $("#endDate .k-datepicker").removeClass("showInput");
+                    }else if(e.sender.value() == 2){
+                        $("#endDate .k-numerictextbox").removeClass("showInput");
+                        $("#endDate .k-datepicker").addClass("showInput");
+                    }
+                },
+                dataTextField: "Name",
+                dataValueField: "value",
+                dataSource: [ { value: 0, Name: "Never" }, { value: 1, Name: "After" }, { value: 2, Name: "On" } ],
+                index: endSelection
             });
 
             //event for clicking on a day of the week
@@ -150,12 +176,32 @@ define(["jquery", "db/services", "kendo"], function ($, dbServices) {
                 $(".workday").addClass("selected");
             });
 
-            this.frequencyChanged();
+            this.frequencyChanged(service.Frequency, true);
+
+            if(service.Frequency == 1){
+                this.setRepeatDays(_repeat);
+            }
         },
 
-        frequencyChanged: function () {
-            var that = this;
-            var frequency = $("#frequency").val();
+        setRepeatDays: function (repeat) {
+            var containsDay;
+            var days = $(repeat).find('.weekday:not(.left):not(.right)');
+            var daysToSelect = service.RepeatOn.split(",");
+            for(var d in daysToSelect){
+                containsDay = _.find(days, function(day){
+                    return day.id === daysToSelect[d];
+                });
+                if(containsDay){
+                    $("#" + daysToSelect[d]).addClass("selected");
+                }
+            }
+        },
+
+        frequencyChanged: function (frequency, skipSetRepeat) {
+            if(!frequency || (isNaN(parseFloat(frequency)) && !isFinite(frequency))){
+                frequency = $("#frequency").val();
+            }
+            var repeat = $("#repeatEveryNum").val();
             var repeatEvery = $('#repeatEveryNum').data("kendoNumericTextBox");
             var frequencyName;
             if(frequency == "0"){
@@ -175,10 +221,39 @@ define(["jquery", "db/services", "kendo"], function ($, dbServices) {
                 $("#monthlyRepeatOn").attr("style", "display:none");
                 frequencyName = "Year";
             }
-            if(service.RepeatEvery > 1){
+            if(!skipSetRepeat){
+                if(repeat > 1){
+                    frequencyName += "s";
+                }
+                repeatEvery.options.format = "# " + frequencyName;
+                //reset focus to refresh the input, in order to get the correct format
+                repeatEvery.focus();
+                $("#endDate label").focus();
+            }
+
+        },
+
+        repeatEveryChanged: function () {
+            var repeat = $("#repeatEveryNum").val();
+            var frequency = $("#frequency").val();
+            var repeatEvery = $('#repeatEveryNum').data("kendoNumericTextBox");
+            var frequencyName;
+            if(frequency == "0"){
+                frequencyName = "Day";
+            }else if(frequency == "1") {
+                frequencyName = "Week";
+            }else if(frequency == "2") {
+                frequencyName = "Month";
+            }else if(frequency == "3") {
+                frequencyName = "Year";
+            }
+            if(repeat > 1){
                 frequencyName += "s";
             }
             repeatEvery.options.format = "# " + frequencyName;
+            //reset focus to refresh the input, in order to get the correct format
+            repeatEvery.focus();
+            $("#endDate label").focus();
         },
 
         //returns an input and a label for each available option
