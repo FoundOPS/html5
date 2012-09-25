@@ -152,14 +152,20 @@ require(["jquery", "db/session", "db/services", "parameters", "tools", "db/saveH
         //Setup the data source fields info
         var fields = {};
         _.each(types, function (type, name) {
-            var fieldInfo = fieldTypes[type];
+            //deep copy the proper field type
+            var fieldInfo = JSON.parse(JSON.stringify(fieldTypes[type]));
             if (type === "guid") {
                 fieldInfo.hidden = true;
             }
 
+            fieldInfo.key = name;
+
+            //replace spaces with underscores to make it friendly to kendo grid
+            var adjustedName = name.replace(/ /g, "_");
+
             //Add the type to fields
             //Example ShipCity: { type: "string" }
-            fields[name] = fieldInfo;
+            fields[adjustedName] = fieldInfo;
         });
 
         return fields;
@@ -183,8 +189,8 @@ require(["jquery", "db/session", "db/services", "parameters", "tools", "db/saveH
         _.each(_.rest(data), function (row) {
             var formattedRow = {};
             //go through each field type, and convert the data to the proper type
-            _.each(fields, function (value, key) {
-                var originalValue = row[key];
+            _.each(fields, function (value, name) {
+                var originalValue = row[value.key];
                 var convertedValue;
                 if (originalValue === null) {
                     convertedValue = "";
@@ -203,7 +209,7 @@ require(["jquery", "db/session", "db/services", "parameters", "tools", "db/saveH
                     convertedValue = originalValue;
                 }
 
-                formattedRow[key] = convertedValue;
+                formattedRow[name] = convertedValue;
             });
 
             formattedData.push(formattedRow);
