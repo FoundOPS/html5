@@ -8,11 +8,11 @@ define(["jquery", "db/services", "kendo"], function ($, dbServices) {
         Widget = ui.Widget,
         serviceA = {Frequency: 1, StartDate: new Date(), RepeatEvery: 3, RepeatOn: "Monday,Wednesday", EndDate: 4},
         serviceB = {Frequency: 2, StartDate: new Date(), RepeatEvery: 1, RepeatOn: 1, EndDate: new Date()};
-    var service = serviceB;
+    var service = serviceA;
 
     var Repeat = Widget.extend({
         init: function (element, options) {
-            var _repeat, that = this, repeatFormat, endSelection, endAfterValue, endOnValue, endAfterFormat, enableEndAfter = false, enableEndOn = false;
+            var _repeat, that = this, repeatFormat, endSelection, endAfterValue, endOnValue, endAfterFormat;
 
             Widget.fn.init.call(that, element, options);
 
@@ -52,19 +52,22 @@ define(["jquery", "db/services", "kendo"], function ($, dbServices) {
 
             this.element.append(_repeat);
 
+            //region SetupFields
+            //setup the startdate datepicker
             $(_repeat).find('#startDatePicker').kendoDatePicker({
                 value: new Date(),
                 format:"dddd, MMMM dd, yyyy"
             });
 
+            //set the format of the Repeat Every text based on the frequency
             var frequencyName;
-            if(service.Frequency == "0"){
+            if(service.Frequency == 0){
                 frequencyName = "Day";
-            }else if(service.Frequency == "1") {
+            }else if(service.Frequency == 1) {
                 frequencyName = "Week";
-            }else if(service.Frequency == "2") {
+            }else if(service.Frequency == 2) {
                 frequencyName = "Month";
-            }else if(service.Frequency == "3") {
+            }else if(service.Frequency == 3) {
                 frequencyName = "Year";
             }
             if(service.RepeatEvery > 1){
@@ -72,6 +75,7 @@ define(["jquery", "db/services", "kendo"], function ($, dbServices) {
             }
             repeatFormat = "# " + frequencyName;
 
+            //setup the Repeat Every numeric textbox
             $(_repeat).find('#repeatEveryNum').kendoNumericTextBox({
                 step: 1,
                 min: 1,
@@ -82,8 +86,14 @@ define(["jquery", "db/services", "kendo"], function ($, dbServices) {
                 change: this.repeatEveryChanged
             });
 
-            $($(_repeat).find("#option" + service.RepeatOn.toString())).attr("checked", "checked");
+            //if frequency is monthly
+            if(service.Frequency == 2){
+                //set the correct monthly repeat option
+                $($(_repeat).find("#option" + service.RepeatOn.toString())).attr("checked", "checked");
+            }
 
+            //set the endDate value only for the correct endDate field and
+            //determine which item in the endDate dropdown should be selected
             if(!isNaN(parseFloat(service.EndDate)) && isFinite(service.EndDate) && !service.getMonth){
                 endSelection = 1;
                 endAfterValue = service.EndDate;
@@ -98,6 +108,8 @@ define(["jquery", "db/services", "kendo"], function ($, dbServices) {
             }else{
                 endSelection = 0;
             }
+
+            //setup the endAfter numeric textbox
             var endAfter = $(_repeat).find('#endAfterNum').kendoNumericTextBox({
                 step: 1,
                 min: 1,
@@ -106,27 +118,33 @@ define(["jquery", "db/services", "kendo"], function ($, dbServices) {
                 decimals: 0,
                 format: endAfterFormat,
                 change: function (e) {
+                    //set the text based on the value
                     if(e.sender._value > 1){
                         endAfter.options.format = "# Occurrences";
                     }else{
                         endAfter.options.format = "# Occurrence";
                     }
-                    //reset focus to refresh the input, in order to get the correct format
+                    //reset focus to refresh the input, in order to get the new format
                     endAfter.focus();
-                    $("#endDate label").focus();
+                    $("#startDate label").focus();
                 }
             }).data("kendoNumericTextBox");
 
+            //setup the endDate datepicker
             $(_repeat).find('#endDatePicker').kendoDatePicker({
                 value: endOnValue
             });
 
+            //initially show the correct endDate field based on the format of service.EndDate
+            //if number
             if(!isNaN(parseFloat(service.EndDate)) && isFinite(service.EndDate) && !service.getMonth){
                 $("#endDate .k-numerictextbox").addClass("showInput");
+            //if date
             }else if(service.EndDate.getMonth){
                 $("#endDate .k-datepicker").addClass("showInput");
             }
 
+            //setup the frequency dropdownlist
             $($(_repeat)[3]).kendoDropDownList({
                 change: this.frequencyChanged,
                 dataTextField: "Name",
@@ -135,8 +153,14 @@ define(["jquery", "db/services", "kendo"], function ($, dbServices) {
                 index: service.Frequency
             });
 
+            //setup the endDate dropdownlist
             $(_repeat).find('#endDropdown').kendoDropDownList({
+                dataTextField: "Name",
+                dataValueField: "value",
+                dataSource: [ { value: 0, Name: "Never" }, { value: 1, Name: "After" }, { value: 2, Name: "On" } ],
+                index: endSelection,
                 change: function (e) {
+                    //show the correct field based on the end date option
                     if(e.sender.value() == 0){
                         $("#endDate .k-numerictextbox").removeClass("showInput");
                         $("#endDate .k-datepicker").removeClass("showInput");
@@ -147,12 +171,9 @@ define(["jquery", "db/services", "kendo"], function ($, dbServices) {
                         $("#endDate .k-numerictextbox").removeClass("showInput");
                         $("#endDate .k-datepicker").addClass("showInput");
                     }
-                },
-                dataTextField: "Name",
-                dataValueField: "value",
-                dataSource: [ { value: 0, Name: "Never" }, { value: 1, Name: "After" }, { value: 2, Name: "On" } ],
-                index: endSelection
+                }
             });
+            //endregion
 
             //event for clicking on a day of the week
             $(".weekday").on("click", function (e) {
@@ -178,32 +199,44 @@ define(["jquery", "db/services", "kendo"], function ($, dbServices) {
 
             this.frequencyChanged(service.Frequency, true);
 
+            //check if weekly
             if(service.Frequency == 1){
-                this.setRepeatDays(_repeat);
+                //set the repeatOn days
+                this.setRepeatDays();
             }
         },
 
-        setRepeatDays: function (repeat) {
-            var containsDay;
-            var days = $(repeat).find('.weekday:not(.left):not(.right)');
+        //region Functions
+        /**
+         * Sets the initial selected days for a weekly repeat
+         * @param {string} repeat The repeat widget html
+         */
+        setRepeatDays: function () {
+            //makes an array of the selected days from the service RepeatOn string
             var daysToSelect = service.RepeatOn.split(",");
             for(var d in daysToSelect){
-                containsDay = _.find(days, function(day){
-                    return day.id === daysToSelect[d];
-                });
-                if(containsDay){
-                    $("#" + daysToSelect[d]).addClass("selected");
-                }
+                //select the button with the id that matches the current day
+                $("#" + daysToSelect[d]).addClass("selected");
             }
         },
 
+        /**
+         * Shows and hides the correct fields based on the frequency and sets the text in Repeat Every
+         * @param {string} frequency ex. "Weekly"
+         * @param {boolean} skipSetRepeat If it should not set RepeatEvery(only true on initial load)
+         */
         frequencyChanged: function (frequency, skipSetRepeat) {
+            //check if frequency is null or not a number
             if(!frequency || (isNaN(parseFloat(frequency)) && !isFinite(frequency))){
+                //set frequency to the selected frequency
                 frequency = $("#frequency").val();
             }
+            //get the value of the Repeat Every field
             var repeat = $("#repeatEveryNum").val();
+            //get a reference to the Repeat Every field
             var repeatEvery = $('#repeatEveryNum').data("kendoNumericTextBox");
             var frequencyName;
+            //show/hide the correct Repeat On field
             if(frequency == "0"){
                 $("#weeklyRepeatOn").attr("style", "display:none");
                 $("#monthlyRepeatOn").attr("style", "display:none");
@@ -222,20 +255,25 @@ define(["jquery", "db/services", "kendo"], function ($, dbServices) {
                 frequencyName = "Year";
             }
             if(!skipSetRepeat){
+                //add "s" to the frequency name if repeat number is mmore than one
                 if(repeat > 1){
                     frequencyName += "s";
                 }
+                //set the format. ex. "# Weeks"
                 repeatEvery.options.format = "# " + frequencyName;
-                //reset focus to refresh the input, in order to get the correct format
+                //reset focus to refresh the input, in order to get the new format
                 repeatEvery.focus();
-                $("#endDate label").focus();
+                $("#startDate label").focus();
             }
 
         },
 
+        //updates the Repeat Every text when the value changes
         repeatEveryChanged: function () {
-            var repeat = $("#repeatEveryNum").val();
             var frequency = $("#frequency").val();
+            //get the value of the Repeat Every field
+            var repeat = $("#repeatEveryNum").val();
+            //get a reference to the Repeat Every field
             var repeatEvery = $('#repeatEveryNum').data("kendoNumericTextBox");
             var frequencyName;
             if(frequency == "0"){
@@ -247,27 +285,27 @@ define(["jquery", "db/services", "kendo"], function ($, dbServices) {
             }else if(frequency == "3") {
                 frequencyName = "Year";
             }
+            //add "s" to the frequency name if repeat number is mmore than one
             if(repeat > 1){
                 frequencyName += "s";
             }
             repeatEvery.options.format = "# " + frequencyName;
-            //reset focus to refresh the input, in order to get the correct format
+            //reset focus to refresh the input, in order to get the new format
             repeatEvery.focus();
-            $("#endDate label").focus();
+            $("#startDate label").focus();
         },
 
         //returns an input and a label for each available option
-        //ex. label text: "The third Friday of the month" and "The 21st of the month"
+        //ex. label text: "The 3rd Friday of the month" and "The 21st of the month"
         getMonthlyRepeatOptions: function (startDate) {
-            var dayOfMonth, nthDay, dateWithSuffix, htmlString, lastDay = false;
-            dayOfMonth = startDate.getDate();
-            nthDay = this.weekAndDay(startDate);
-            dateWithSuffix = this.getDateWithSuffix(dayOfMonth);
-            htmlString = '<input type="radio" name="repeatOnGroup" id="option0" /><label for="option0">The ' + dateWithSuffix + ' of the month</label><br />' +
-                '<input type="radio" name="repeatOnGroup" id="option1" /><label for="option1">The ' + nthDay + ' of the month</label><br />';
+            var dayOfMonth = startDate.getDate();
+            //add the first two options
+            var htmlString = '<input type="radio" name="repeatOnGroup" id="option0" /><label for="option0">The ' + this.getDateWithSuffix(dayOfMonth) + ' of the month</label><br />' +
+                '<input type="radio" name="repeatOnGroup" id="option1" /><label for="option1">The ' + this.weekAndDay(startDate) + ' of the month</label><br />';
 
             //check if startDate is the last day of the month
-            lastDay = new Date(startDate.getTime() + 86400000).getDate() === 1;
+            var lastDay = new Date(startDate.getTime() + 86400000).getDate() === 1;
+            //if it is the last day of the month
             if(lastDay){
                 //add option for the last day of the month
                 htmlString += '<input type="radio" name="repeatOnGroup" id="option2" /><label for="option2">The last day of the month</label>';
@@ -278,7 +316,7 @@ define(["jquery", "db/services", "kendo"], function ($, dbServices) {
         //get day of the week and the nth occurrence of that day. ex. "Third Friday"
         weekAndDay: function (date) {
             var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-            var prefixes = ['first', 'second', 'third', 'fourth', 'fifth'];
+            var prefixes = ['1st', '2nd', '3rd', '4th', '5th'];
             return prefixes[0 | (date.getDate() - 1) / 7] + ' ' + days[date.getDay()];
         },
 
@@ -299,6 +337,7 @@ define(["jquery", "db/services", "kendo"], function ($, dbServices) {
             }
             return dayOfMonth + suffix;
         },
+        //endregion
 
         options: new kendo.data.ObservableObject({
             name: "Repeat"

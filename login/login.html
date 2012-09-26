@@ -16,7 +16,7 @@
     <script src="jquery.js" type="application/javascript"></script>
     <script type="text/javascript" src="less.min.js"></script>
 </head>
-<body onload="window.scrollTo(0, 1);" style="height:100%; margin: 0; font-family: PTSans;
+<body onload="window.scrollTo(0, 1);" style="height:100%; margin: 0;
 background-image: linear-gradient(bottom, rgb(34,34,36) 31%, rgb(85,85,86) 100%);
 background-image: -o-linear-gradient(bottom, rgb(34,34,36) 31%, rgb(85,85,86) 100%);
 background-image: -moz-linear-gradient(bottom, rgb(34,34,36) 31%, rgb(85,85,86) 100%);
@@ -68,7 +68,7 @@ background-image: -webkit-gradient(linear,left bottom,left top,color-stop(0.31, 
             data: {email: email, pass: password},
             timeout: 5000,
             error: function (errorThrown, textStatus) {
-                alert("Your login request has timed out. Please check your internet connection and your login information.")
+                alert("Your login request has timed out. Please check your internet connection and your login information.");
                 console.log(textStatus);
                 console.log(errorThrown);
             },
