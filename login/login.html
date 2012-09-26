@@ -7,7 +7,7 @@
     <script type="text/javascript" src="lib/jquery.min.js"></script>
     <script type="text/javascript" src="lib/less.min.js"></script>
 </head>
-<body>
+<body onload="window.scrollTo(0, 1);" style="height:100%; margin: 0;
 <div id="vertCenterUpper" style="#position: relative;">                     <!--Used to-->
     <div id="vertCenterMiddle" style=" #position: absolute; #top: 50%;">    <!--place content-->
         <div id="vertCenterLower" style=" #position: relative; #top: -50%"> <!--in middle of page-->
@@ -65,6 +65,7 @@
                 tryCount:0,
                 retryLimit:2,
                 timeout:1667, // 5/3 of a second so total time will be 5 seconds because of automatic retry.
+                alert("Your login request has timed out. Please check your internet connection and your login information.");
                 success:function (response) {
                     if (response) {
                         //Save the application's login state.

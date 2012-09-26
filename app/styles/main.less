@@ -978,33 +978,36 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
         border: 1px solid #c5c5c5;
         border-left: none;
         .bgGradient(#ffffff, #eeeeee);
-    }
-    .weekday:hover{
-        cursor: pointer;
-        .bgGradient(#eeeeee, #cccccc);
-    }
-    .weekday:active{
-        cursor: pointer;
-        .bgGradient(#aaaaaa, #888888);
-    }
-    .weekday.left{
-        width: 16px;
-        border-left: 1px solid #c5c5c5;
-        border-bottom-left-radius: 16px;
-        border-top-left-radius: 16px;
-    }
-    .weekday.right{
-        width: 16px;
-        border-right: 1px solid #c5c5c5;
-        border-bottom-right-radius: 16px;
-        border-top-right-radius: 16px;
-    }
-    .weekday.selected:not(.left):not(.right){
-        color: #ffffff;
-        .bgGradient(#36C3E3, #488FCD);
-    }
-    .weekday.selected:hover:not(.left):not(.right){
-        .bgGradient(#44AFE4, #0067A0);
+        &:hover{
+            cursor: pointer;
+            .bgGradient(#eeeeee, #cccccc);
+        }
+        &:active{
+            cursor: pointer;
+            .bgGradient(#aaaaaa, #888888);
+        }
+        //rounded left piece of weekday selectors
+        &.left{
+            width: 16px;
+            border-left: 1px solid #c5c5c5;
+            border-bottom-left-radius: 16px;
+            border-top-left-radius: 16px;
+        }
+        //rounded right piece of weekday selectors
+        &.right{
+            width: 16px;
+            border-right: 1px solid #c5c5c5;
+            border-bottom-right-radius: 16px;
+            border-top-right-radius: 16px;
+        }
+        //don't make the ends blue when they're selected
+        &.selected:not(.left):not(.right){
+            color: #ffffff;
+            .bgGradient(#36C3E3, #488FCD);
+        }
+        &.selected:hover:not(.left):not(.right){
+            .bgGradient(#44AFE4, #0067A0);
+        }
     }
     #repeatLabel{
         position: relative;
@@ -1016,6 +1019,7 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
         font-size: 1em;
     }
     .k-dropdown{
+        height: 29px;
         .k-input{
             padding-top: 5px;
         }
