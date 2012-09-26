@@ -53,12 +53,23 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "parameters"], 
         }
     };
     vm.getDirections = function () {
-        if (vm.get("selectedEntity.Location")) {
-            var url = "http://maps.google.com/maps?q=" + vm.get("selectedEntity.Location.Latitude") + "," + vm.get("selectedEntity.Location.Longitude");
-            window.plugins.childBrowser.showWebPage(url);
-        } else {
-            window.plugins.childBrowser.openExternal("http://maps.google.com/maps?q=" + vm.get("selectedEntity.Client.Name"));
-        }
+        var currentPosition;
+        navigator.geolocation.getCurrentPosition(function (position) {
+            if (vm.get("selectedEntity.Location")) {
+                currentPosition = position.coords.latitude + "," + position.coords.longitude;
+                var url = "http://maps.google.com/maps?saddr=" + currentPosition + "&daddr=" + vm.get("selectedEntity.Location.Latitude") + "," + vm.get("selectedEntity.Location.Longitude");
+                window.plugins.childBrowser.showWebPage(url);
+            } else {
+                window.plugins.childBrowser.showWebPage("http://maps.google.com/maps?q=" + vm.get("selectedEntity.Client.Name"));
+            }
+        }, function () {
+            if (vm.get("selectedEntity.Location")) {
+                var url = "http://maps.google.com/maps?q=" + vm.get("selectedEntity.Location.Latitude") + "," + vm.get("selectedEntity.Location.Longitude");
+                window.plugins.childBrowser.showWebPage(url);
+            } else {
+                window.plugins.childBrowser.showWebPage("http://maps.google.com/maps?q=" + vm.get("selectedEntity.Client.Name"));
+            }
+        }, {timeout: 10000, enableHighAccuracy: true});
     };
     vm.contactClick = function (e) {
         if (e.dataItem.Type === "Phone Number") {

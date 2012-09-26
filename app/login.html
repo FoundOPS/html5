@@ -86,7 +86,6 @@ background-image: -webkit-gradient(linear,left bottom,left top,color-stop(0.31, 
                         <input id="submit" type="submit" style="margin-bottom: 5px; margin-top: 0px" value="Login"/><br/><br/>
                         <input id="rememberMe" style="position: relative; top:1px" type="checkbox"/>
                         <label style="font-size: 14px" >Remember Me</label>
-                        <!--<a id="submit" type="submit" onclick="login()">Login</a>-->
                     </p>
                 </form>
             </div>
@@ -94,6 +93,43 @@ background-image: -webkit-gradient(linear,left bottom,left top,color-stop(0.31, 
     </div>
 </div>
 <script>
+    $(document).ready(function() {
+        login("Get", {isMobile: true});
+    });
+    var login = function(url, data) {
+        if (localStorage.getItem("rememberMe") === "true") {
+            $("#EmailAddress").val(localStorage.getItem("email"));
+            $("#rememberMe").prop("checked", true);
+        }
+        if (localStorage.getItem("loggedIn") === "true" || url === "Login") {
+            $.ajax({
+                //must use JSONP because the javascript may be hosted on a different url than the api
+                type: "GET",
+                dataType: 'JSONP',
+//            url: 'http://localhost:9711/api/session/' + url,    //LOCAL
+                url: 'http://api.foundops.com/api/session/' + url,    //LIVE
+//            url: 'http://192.168.0.102:70/api/session/' + url,   //REMOTE - Local IP of host computer (might change everyday).
+                data: data,
+                timeout: 5000,
+                success: function (response) {
+                    if (response) {
+                        //Save the application's login state.
+                        localStorage.setItem("loggedIn", true);
+                        window.location.href = "navigator.html";
+                    } else {
+                        alert("Login information is incorrect.");
+                    }
+                },
+                error: function (errorThrown, textStatus) {
+                    if (url !== "Get") {
+                        alert("Your login request has timed out. Please check your internet connection and your login information.")
+                        console.log(textStatus);
+                        console.log(errorThrown);
+                    }
+                }
+            });
+        }
+    };
     $("#loginForm").submit( function(event) {
         event.preventDefault();
 
@@ -107,58 +143,13 @@ background-image: -webkit-gradient(linear,left bottom,left top,color-stop(0.31, 
             localStorage.setItem("rememberMe", false);
             localStorage.removeItem("email");
         }
-
-        $.ajax({
-            //must use JSONP because the javascript may be hosted on a different url than the api
-            type: "GET",
-            dataType: 'JSONP',
-//            url: 'http://localhost:9711/api/session/Login',    //LOCAL
-            url: 'http://api.foundops.com/api/session/Login',    //LIVE
-//            url: 'http://192.168.0.102:70/api/session/Login',   //REMOTE - Local IP of host computer (might change everyday).
-            data: {email: email, pass: password},
-            timeout: 5000,
-            error: function (errorThrown, textStatus) {
-                alert("You login request has timed out. Please check your internet connection and your login information.")
-                console.log(textStatus);
-                console.log(errorThrown);
-            },
-            success: function (response) {
-                if (response) {
-                    //Save the application's login state.
-                    localStorage.setItem("loggedIn", true);
-                    window.location.href = "navigator.html";
-                } else {
-                    alert("Login information is incorrect.");
-                }
-            }
-        });
+        login("Login", {email: email, pass: password});
     });
-
     $("#submit").mousedown(function (e) {
         $("#submit").toggleClass("buttonClicked");
     });
     $("#submit").mouseup(function (e) {
         $("#submit").toggleClass("buttonClicked");
-    });
-
-    var checkLogin = function () {
-        //TODO: Check if session info is available and decide whether
-
-        //Wait until the application is initialized
-        setTimeout(function () {
-            if (localStorage.getItem("rememberMe") === "true") {
-                $("#EmailAddress").val(localStorage.getItem("email"));
-                $("#rememberMe").prop("checked", true);
-            }
-            if (localStorage.getItem("loggedIn") === "true") {
-                console.log("Logged In");
-//                location.href = "navigator.html";
-            }
-        }, 0);
-    };
-
-    $(document).ready(function() {
-        checkLogin();
     });
 </script>
 </body>
