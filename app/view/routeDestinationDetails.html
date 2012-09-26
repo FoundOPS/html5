@@ -45,10 +45,19 @@
     <a>${Name}</a>
 </script>
 <script>
-    $("#directionsButton").mousedown(function (e) {
-        $("#directionsButton").toggleClass("buttonClicked");
-    });
-    $("#directionsButton").mouseup(function (e) {
-        $("#directionsButton").toggleClass("buttonClicked");
-    });
+    if (kendo.support.detectOS(navigator.userAgent).device) {
+        document.getElementById("directionsButton").addEventListener('touchstart', function (e) {
+            $("#directionsButton").toggleClass("buttonClicked");
+        });
+        document.getElementById("directionsButton").addEventListener('touchend', function (e) {
+            $("#directionsButton").toggleClass("buttonClicked");
+        });
+    } else {
+        $("#directionsButton").mousedown(function (e) {
+            $("#directionsButton").toggleClass("buttonClicked");
+        });
+        $("#directionsButton").mouseup(function (e) {
+            $("#directionsButton").toggleClass("buttonClicked");
+        });
+    }
 </script>

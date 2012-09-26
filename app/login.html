@@ -145,10 +145,10 @@ background-image: -webkit-gradient(linear,left bottom,left top,color-stop(0.31, 
         }
         login("Login", {email: email, pass: password});
     });
-    $("#submit").mousedown(function (e) {
+    document.getElementById("submit").addEventListener('touchstart', function (e) {
         $("#submit").toggleClass("buttonClicked");
     });
-    $("#submit").mouseup(function (e) {
+    document.getElementById("submit").addEventListener('touchend', function (e) {
         $("#submit").toggleClass("buttonClicked");
     });
 </script>
