@@ -6,7 +6,7 @@
 
 'use strict';
 
-define(["sections/linkedEntitySection", "sections/routeDetails", "parameters"], function (createBase, routeDetails, parameters) {
+define(["sections/linkedEntitySection", "sections/routeDetails", "parameters", "developer"], function (createBase, routeDetails, parameters, developer) {
     var vm, section = createBase("routeTask", "routeTaskId",
         //on show
         function () {
@@ -54,20 +54,27 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "parameters"], 
     };
     vm.getDirections = function () {
         var currentPosition;
-        navigator.geolocation.getCurrentPosition(function (position) {
-            if (vm.get("selectedEntity.Location")) {
-                currentPosition = position.coords.latitude + "," + position.coords.longitude;
-                var url = "http://maps.google.com/maps?saddr=" + currentPosition + "&daddr=" + vm.get("selectedEntity.Location.Latitude") + "," + vm.get("selectedEntity.Location.Longitude");
+        var navigateTo = function (url) {
+            if (developer.CURRENT_FRAME === developer.Frame.MOBILE_APP) {
                 window.plugins.childBrowser.showWebPage(url);
             } else {
-                window.plugins.childBrowser.showWebPage("http://maps.google.com/maps?q=" + vm.get("selectedEntity.Client.Name"));
+                window.open(url);
+            }
+        };
+        navigator.geolocation.getCurrentPosition(function (position) {
+            // If geolocation is successful get directions.
+            currentPosition = position.coords.latitude + "," + position.coords.longitude;
+            if (vm.get("selectedEntity.Location")) {
+                navigateTo("http://maps.google.com/maps?saddr=" + currentPosition + "&daddr=" + vm.get("selectedEntity.Location.Latitude") + "," + vm.get("selectedEntity.Location.Longitude"));
+            } else {
+                navigateTo("http://maps.google.com/maps?saddr=" + currentPosition + "&daddr=" + vm.get("selectedEntity.Client.Name"));
             }
         }, function () {
+            // If geolocation is NOT successful find business location.
             if (vm.get("selectedEntity.Location")) {
-                var url = "http://maps.google.com/maps?q=" + vm.get("selectedEntity.Location.Latitude") + "," + vm.get("selectedEntity.Location.Longitude");
-                window.plugins.childBrowser.showWebPage(url);
+                navigateTo("http://maps.google.com/maps?q=" + vm.get("selectedEntity.Location.Latitude") + "," + vm.get("selectedEntity.Location.Longitude"));
             } else {
-                window.plugins.childBrowser.showWebPage("http://maps.google.com/maps?q=" + vm.get("selectedEntity.Client.Name"));
+                navigateTo("http://maps.google.com/maps?q=" + vm.get("selectedEntity.Client.Name"));
             }
         }, {timeout: 10000, enableHighAccuracy: true});
     };
