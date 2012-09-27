@@ -1,0 +1,58 @@
+<style>
+    .km-ios .km-listinset > li:first-child:last-child, .km-ios .km-listgroupinset .km-list > li:first-child:last-child {
+    border-color: #aaa;
+    border-radius: 4px;
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    }
+    .km-ios .km-listinset > li:first-child, .km-ios .km-listgroupinset .km-list > li:first-child, .km-ios .km-listinset
+    li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > .km-listview-link, .km-ios
+    .km-listinset li:first-child > .km-listview-label, .km-ios .km-listgroupinset li:first-child > .km-listview-label {
+    border-color: #aaa;
+    -webkit-border-top-left-radius: 4px;
+    -webkit-border-top-right-radius: 4px;
+    border-radius: 4px 4px 0 0;
+    -moz-border-radius: 4px 4px 0 0;
+    -webkit-border-radius: 4px 4px 0 0;
+    }
+    .km-ios .km-listinset > li:last-child, .km-ios .km-listgroupinset .km-list > li:last-child {
+    border-color: #aaa;
+    border-radius: 0 0 4px 4px;
+    -moz-border-radius: 0 0 4px 4px;
+    -webkit-border-radius: 0 0 4px 4px;
+    }
+    .km-ios .km-listinset li:first-child:last-child > .km-listview-link,
+    .km-ios .km-listgroupinset li:first-child:last-child > .km-listview-link,
+    .km-ios .km-listinset li:first-child:last-child > .km-listview-label,
+    .km-ios .km-listgroupinset li:first-child:last-child > .km-listview-label {
+    border-radius: 4px;
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    }
+</style>
+<div data-init="services.initialize" data-show="services.show" data-role="view" data-title="Services" data-model="services.vm" id="services" data-stretch="true">
+    <div id="top">
+        <label for="serviceTypes">Services:</label>
+        <input id="serviceTypes" class="k-dropdown"/>
+        <form id="csvForm" enctype="multipart/form-data" method="POST" target="csvFrame">
+            <input type="hidden" name="roleId"/>
+            <input type="hidden" name="serviceType"/>
+            <input type="hidden" name="clientContext"/>
+            <input type="hidden" name="recurringServiceContext"/>
+            <input type="hidden" name="startDate"/>
+            <input type="hidden" name="endDate"/>
+        </form>
+        <iframe id="csvFrame" style="display:none;">
+        </iframe>
+    </div>
+    <div class="addDeleteBtns">
+        <button class="k-button k-button-icontext k-grid-edit csvBtn" type="export" onclick="services.exportToCSV()"></button>
+        <button class='k-button k-button-icontext k-grid-add'></button>
+        <button class='k-button k-button-icontext k-grid-delete' disabled></button>
+    </div>
+    <div id="left">
+        <div id="grid"></div>
+    </div>
+    <div id="serviceDetails" data-role="kendoServiceDetails" data-bind="service: selectedService">
+    </div>
+</div>
