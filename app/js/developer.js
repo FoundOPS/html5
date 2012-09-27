@@ -40,18 +40,6 @@ define(function () {
     };
 
     /**
-     * Enum for the application's parameter storage.
-     * URL: Store the parameters in the url (like it is supposed to be).
-     * DOM: Store the parameters using jQuery for workaround of android bug.
-     * NOTE: Back button will not work with parameters
-     * @enum {number}
-     */
-    developer.ParameterStorage = {
-        URL: 0,
-        JQUERY: 1
-    };
-
-    /**
      * The current web service source. Used when running local server for debugging.
      * @type {developer.DataSource}
      */
@@ -67,8 +55,6 @@ define(function () {
      * The current silverlight version
      */
     developer.CURRENT_SILVERLIGHT_VERSION = 0.1041;
-
-    developer.CURRENT_PARAMETER_STORAGE = developer.ParameterStorage.URL;
 
     /**
      * The local server's RoleId for GotGrease.

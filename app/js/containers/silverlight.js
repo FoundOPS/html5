@@ -1,7 +1,7 @@
 'use strict';
 
-define(['db/services', 'db/session'], function (dbServices, session) {
-    var silverlight = {}, lastSection, currentSection;
+define(['db/services', 'db/session', 'hasher', 'parameters'], function (dbServices, session, hasher, parameters) {
+    var silverlight = {}, currentSection;
 
     window.silverlight = silverlight;
 
@@ -55,7 +55,7 @@ define(['db/services', 'db/session'], function (dbServices, session) {
     //a workaround for opening the importer
     //this is called when the importer view is shown
     window.openImporter = function () {
-        silverlight.setSection({name: "Importer", isSilverlight: true});
+        parameters.setSection({name: "Importer", isSilverlight: true});
     };
 
     //endregion
@@ -128,9 +128,12 @@ define(['db/services', 'db/session'], function (dbServices, session) {
             }
         });
 
-        //if there is a current section, navigate to it
-        if (currentSection) {
-            silverlight.setSection(currentSection);
+        //if there is a current section and it is silverlight, navigate to it
+        if (currentSection && currentSection.isSilverlight) {
+            try {
+                silverlight.plugin.navigationVM.NavigateToView(currentSection.name);
+            } catch (err) {
+            }
         }
 
         $(silverlight).trigger('loaded');
@@ -152,14 +155,9 @@ define(['db/services', 'db/session'], function (dbServices, session) {
     //endregion
 
 //region Public
-
-    /**
-     * Sets the section.
-     * If it is a silverlight section this will navigate the silverlight control to that section.
-     * @param {{name: string, isSilverlight: boolean}} section
-     */
-    silverlight.setSection = function (section) {
-        lastSection = currentSection;
+    //if the section isn't silverlight, hide the silverlight control
+    hasher.changed.add(function () {
+        var section = parameters.getSection();
         currentSection = section;
 
         if (!section.isSilverlight) {
@@ -172,7 +170,8 @@ define(['db/services', 'db/session'], function (dbServices, session) {
             silverlight.plugin.navigationVM.NavigateToView(section.name);
         } catch (err) {
         }
-    };
+    });
+
 
 //#endregion
 

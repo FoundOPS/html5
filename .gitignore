@@ -1,18 +1,3 @@
-**/.DS_Store
-nbproject
-manifest.mf
-build.xml
-
 .idea/
-Android/assets/
-Android/bin/
-Android - Built/assets/
-Android - Built/bin/
-buildsmap/
-buildsmobile/
-PhoneGap Build Package/
-*.DS_Store
 *.xcuserstate
-build/mobile/Android/assets/www
-build/mobile/iOS/www
-build/mobile/iOS/.DS_Store
+*/.DS_Store

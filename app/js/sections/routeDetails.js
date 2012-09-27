@@ -13,7 +13,7 @@ define(["sections/linkedEntitySection", "sections/routes", "parameters", "db/ser
             var routeDestinations = routes.vm.get("nextEntity.RouteDestinations");
 
             if (!routeDestinations) {
-                parameters.setSection("routes");
+                parameters.setSection({name: "routes"});
                 return;
             }
 
@@ -30,11 +30,11 @@ define(["sections/linkedEntitySection", "sections/routes", "parameters", "db/ser
     window.routeDetails = section;
     vm = section.vm;
 
-    section.onBack = function(){
+    section.onBack = function () {
         var query = parameters.get();
         //remove the routeId so it does not jump back here
         delete query.routeId;
-        parameters.set(query, "routes", true);
+        parameters.set(query, true, {name: "routes"});
     };
 
     /**
@@ -137,11 +137,13 @@ define(["sections/linkedEntitySection", "sections/routes", "parameters", "db/ser
         vm.set("startVisible", false);
         vm.set("endVisible", true);
 
-        window.plugins.statusBarNotification.notify("Tracking...", "FoundOPS is tracking your location.");
+        if (kendo.support.detectOS(navigator.userAgent).device === "android") {
+            window.plugins.statusBarNotification.notify("Tracking...", "FoundOPS is tracking your location.");
+        }
 
         //store the intervalId
 //        intervalId = window.setInterval(function () {
-            addPushTrackPoints(routes.vm.get("nextEntity").Id);
+        addPushTrackPoints(routes.vm.get("nextEntity").Id);
 //        }, TRACKPOINTCONFIG.TRACKPOINT_COLLECTION_FREQUENCY_SECONDS * 1000);
     };
     /**

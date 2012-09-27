@@ -44,12 +44,6 @@
 		BA5585F71612421500D20553 /* icon.png in Resources */ = {isa = PBXBuildFile; fileRef = BA5585F31612421500D20553 /* icon.png */; };
 		BA5585F81612421500D20553 /* Icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = BA5585F41612421500D20553 /* Icon@2x.png */; };
 		BA5585FA1612426400D20553 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = BA5585F91612426400D20553 /* Default-568h@2x.png */; };
-		BA5585FC1612475F00D20553 /* ChildBrowser.bundle in Resources */ = {isa = PBXBuildFile; fileRef = BA5585FB1612475F00D20553 /* ChildBrowser.bundle */; };
-		BA5586021612476A00D20553 /* ChildBrowserCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = BA5585FE1612476A00D20553 /* ChildBrowserCommand.m */; };
-		BA5586031612476A00D20553 /* ChildBrowserViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BA5586001612476A00D20553 /* ChildBrowserViewController.m */; };
-		BA5586041612476A00D20553 /* ChildBrowserViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = BA5586011612476A00D20553 /* ChildBrowserViewController.xib */; };
-		BA5586091612479A00D20553 /* FDStatusBarNotifierView.m in Sources */ = {isa = PBXBuildFile; fileRef = BA5586061612479A00D20553 /* FDStatusBarNotifierView.m */; };
-		BA55860A1612479A00D20553 /* StatusBarNotifier.m in Sources */ = {isa = PBXBuildFile; fileRef = BA5586081612479A00D20553 /* StatusBarNotifier.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -113,16 +107,6 @@
 		BA5585F31612421500D20553 /* icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon.png; sourceTree = "<group>"; };
 		BA5585F41612421500D20553 /* Icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon@2x.png"; sourceTree = "<group>"; };
 		BA5585F91612426400D20553 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
-		BA5585FB1612475F00D20553 /* ChildBrowser.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = ChildBrowser.bundle; sourceTree = "<group>"; };
-		BA5585FD1612476A00D20553 /* ChildBrowserCommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChildBrowserCommand.h; sourceTree = "<group>"; };
-		BA5585FE1612476A00D20553 /* ChildBrowserCommand.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChildBrowserCommand.m; sourceTree = "<group>"; };
-		BA5585FF1612476A00D20553 /* ChildBrowserViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChildBrowserViewController.h; sourceTree = "<group>"; };
-		BA5586001612476A00D20553 /* ChildBrowserViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChildBrowserViewController.m; sourceTree = "<group>"; };
-		BA5586011612476A00D20553 /* ChildBrowserViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ChildBrowserViewController.xib; sourceTree = "<group>"; };
-		BA5586051612479A00D20553 /* FDStatusBarNotifierView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FDStatusBarNotifierView.h; sourceTree = "<group>"; };
-		BA5586061612479A00D20553 /* FDStatusBarNotifierView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FDStatusBarNotifierView.m; sourceTree = "<group>"; };
-		BA5586071612479A00D20553 /* StatusBarNotifier.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StatusBarNotifier.h; sourceTree = "<group>"; };
-		BA5586081612479A00D20553 /* StatusBarNotifier.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StatusBarNotifier.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -216,7 +200,6 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				BA5585FB1612475F00D20553 /* ChildBrowser.bundle */,
 				30A0434214DC770100060A13 /* de.lproj */,
 				30A0434514DC770100060A13 /* se.lproj */,
 				1F766FDB13BBADB100FB74C0 /* en.lproj */,
@@ -264,15 +247,6 @@
 		307C750510C5A3420062BCA9 /* Plugins */ = {
 			isa = PBXGroup;
 			children = (
-				BA5586051612479A00D20553 /* FDStatusBarNotifierView.h */,
-				BA5586061612479A00D20553 /* FDStatusBarNotifierView.m */,
-				BA5586071612479A00D20553 /* StatusBarNotifier.h */,
-				BA5586081612479A00D20553 /* StatusBarNotifier.m */,
-				BA5585FD1612476A00D20553 /* ChildBrowserCommand.h */,
-				BA5585FE1612476A00D20553 /* ChildBrowserCommand.m */,
-				BA5585FF1612476A00D20553 /* ChildBrowserViewController.h */,
-				BA5586001612476A00D20553 /* ChildBrowserViewController.m */,
-				BA5586011612476A00D20553 /* ChildBrowserViewController.xib */,
 			);
 			name = Plugins;
 			path = FoundOPS/Plugins;
@@ -412,8 +386,6 @@
 				BA5585F71612421500D20553 /* icon.png in Resources */,
 				BA5585F81612421500D20553 /* Icon@2x.png in Resources */,
 				BA5585FA1612426400D20553 /* Default-568h@2x.png in Resources */,
-				BA5585FC1612475F00D20553 /* ChildBrowser.bundle in Resources */,
-				BA5586041612476A00D20553 /* ChildBrowserViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -444,10 +416,6 @@
 				1D60589B0D05DD56006BFB54 /* main.m in Sources */,
 				1D3623260D0F684500981E51 /* AppDelegate.m in Sources */,
 				302D95F114D2391D003F00A1 /* MainViewController.m in Sources */,
-				BA5586021612476A00D20553 /* ChildBrowserCommand.m in Sources */,
-				BA5586031612476A00D20553 /* ChildBrowserViewController.m in Sources */,
-				BA5586091612479A00D20553 /* FDStatusBarNotifierView.m in Sources */,
-				BA55860A1612479A00D20553 /* StatusBarNotifier.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

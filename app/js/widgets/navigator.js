@@ -351,11 +351,11 @@ define(["jquery", "ui/popup", "developer", "jmousewheel", "jscrollpane", "kendo"
             if (developer.CURRENT_FRAME === developer.Frame.MOBILE_APP) {
                 $('#navContainer').before(backButtonTemplate);
                 $('#navContainer').addClass("mobileMode");
-                $("#backButtonContainer").mousedown(function (e) {
-                    $('#backButtonContainer').toggleClass("backButtonClicked");
+                document.getElementById("backButtonContainer").addEventListener('touchstart', function (e) {
+                    $("#backButtonContainer").toggleClass("backButtonClicked");
                 });
-                $("#backButtonContainer").mouseup(function (e) {
-                    $('#backButtonContainer').toggleClass("backButtonClicked");
+                document.getElementById("backButtonContainer").addEventListener('touchend', function (e) {
+                    $("#backButtonContainer").toggleClass("backButtonClicked");
                 });
             }
 

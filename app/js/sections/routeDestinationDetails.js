@@ -6,14 +6,14 @@
 
 'use strict';
 
-define(["sections/linkedEntitySection", "sections/routeDetails", "parameters"], function (createBase, routeDetails, parameters) {
+define(["sections/linkedEntitySection", "sections/routeDetails", "parameters", "developer"], function (createBase, routeDetails, parameters, developer) {
     var vm, section = createBase("routeTask", "routeTaskId",
         //on show
         function () {
             var routeDestination = routeDetails.vm.get("nextEntity");
 
             if (!routeDestination || !routeDestination.RouteTasks) {
-                parameters.setSection("routeDetails");
+                parameters.setSection({name: "routeDetails"});
                 return;
             }
 
@@ -32,11 +32,11 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "parameters"], 
     window.routeDestinationDetails = section;
     vm = section.vm;
 
-    section.onBack = function(){
+    section.onBack = function () {
         var query = parameters.get();
         //remove the routeDestinationId so it does not jump back here
         delete query.routeDestinationId;
-        parameters.set(query, "routeDetails", true);
+        parameters.set(query, true, {name: "routeDetails"});
     };
 
 //vm additions
@@ -53,12 +53,30 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "parameters"], 
         }
     };
     vm.getDirections = function () {
-        if (vm.get("selectedEntity.Location")) {
-            var url = "http://maps.google.com/maps?q=" + vm.get("selectedEntity.Location.Latitude") + "," + vm.get("selectedEntity.Location.Longitude");
-            window.plugins.childBrowser.showWebPage(url);
-        } else {
-            window.plugins.childBrowser.openExternal("http://maps.google.com/maps?q=" + vm.get("selectedEntity.Client.Name"));
-        }
+        var currentPosition;
+        var navigateTo = function (url) {
+            if (developer.CURRENT_FRAME === developer.Frame.MOBILE_APP && kendo.support.detectOS(navigator.userAgent).device === "android") {
+                window.plugins.childBrowser.showWebPage(url);
+            } else {
+                window.open(url);
+            }
+        };
+        navigator.geolocation.getCurrentPosition(function (position) {
+            // If geolocation is successful get directions.
+            currentPosition = position.coords.latitude + "," + position.coords.longitude;
+            if (vm.get("selectedEntity.Location")) {
+                navigateTo("http://maps.google.com/maps?saddr=" + currentPosition + "&daddr=" + vm.get("selectedEntity.Location.Latitude") + "," + vm.get("selectedEntity.Location.Longitude"));
+            } else {
+                navigateTo("http://maps.google.com/maps?saddr=" + currentPosition + "&daddr=" + vm.get("selectedEntity.Client.Name"));
+            }
+        }, function () {
+            // If geolocation is NOT successful find business location.
+            if (vm.get("selectedEntity.Location")) {
+                navigateTo("http://maps.google.com/maps?q=" + vm.get("selectedEntity.Location.Latitude") + "," + vm.get("selectedEntity.Location.Longitude"));
+            } else {
+                navigateTo("http://maps.google.com/maps?q=" + vm.get("selectedEntity.Client.Name"));
+            }
+        }, {timeout: 10000, enableHighAccuracy: true});
     };
     vm.contactClick = function (e) {
         if (e.dataItem.Type === "Phone Number") {
@@ -66,7 +84,11 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "parameters"], 
         } else if (e.dataItem.Type === "Email Address") {
             window.location.href = "mailto:" + e.dataItem.Data;
         } else if (e.dataItem.Type === "Website") {
-            window.plugins.childBrowser.showWebPage("http://" + e.dataItem.Data);
+            if (developer.CURRENT_FRAME === developer.Frame.MOBILE_APP && kendo.support.detectOS(navigator.userAgent).device === "android") {
+                window.plugins.childBrowser.showWebPage("http://" + e.dataItem.Data);
+            } else {
+                window.open("http://" + e.dataItem.Data);
+            }
         }
     };
 
