@@ -6,51 +6,43 @@
 
 "use strict";
 
-define(['jquery', 'developer', 'hasher', 'underscore.string', 'signals'], function ($, developer, hasher, _s, signals) {
+define(['jquery', 'hasher', 'underscore.string', 'signals', 'developer'], function ($, hasher, _s, signals, developer) {
     var parameters = {
         changed: new signals.Signal()
     };
 
-    var getHash = function () {
-        if (developer.CURRENT_PARAMETER_STORAGE === developer.ParameterStorage.URL) {
-            return hasher.getHash();
-        }
-
-        var hash = $('body').data('hash');
-
-        if (!hash) {
-            hash = "";
-        }
-        //else: developer.CURRENT_PARAMETER_STORAGE === developer.ParameterStorage.JQUERY)
-        return hash;
-    };
     var setHash = function (hash, replace) {
-        if (getHash() === hash) {
+        var currentHash = hasher.getHash();
+
+        if (currentHash === hash) {
             return;
         }
 
-        if (developer.CURRENT_PARAMETER_STORAGE === developer.ParameterStorage.URL) {
-            if (replace) {
-                hasher.replaceHash(hash);
-            }
-            else {
-                hasher.setHash(hash);
-            }
+        if (replace) {
+            hasher.replaceHash(hash);
         }
-        else if (developer.CURRENT_PARAMETER_STORAGE === developer.ParameterStorage.JQUERY) {
-            $('body').data('hash', hash);
-            //update the parameters
-            parameters.parse();
+        else {
+            hasher.setHash(hash);
         }
     };
 
     /**
      * Gets the hash's query parameters
+     * @param [hash] (Optional) The hash to get the section from
      */
-    parameters.get = function () {
-        var hash = getHash(), urlParams = {};
+    parameters.get = function (hash) {
+        var urlParams = {};
+        if (!hash) {
+            hash = hasher.getHash();
+        }
 
-        var query = hash.substring(hash.indexOf('?') + 1);
+        var from = hash.indexOf('?');
+        if (from === -1) {
+            return urlParams;
+        }
+
+        var query = hash.substring(from + 1);
+
         (function () {
             var match,
                 pl = /\+/g, // Regex for replacing addition symbol with a space
@@ -62,42 +54,63 @@ define(['jquery', 'developer', 'hasher', 'underscore.string', 'signals'], functi
                 urlParams[decode(match[1])] = decode(match[2]);
         })();
 
-        //remove the view parameter
-        var viewParameter = _.find(_.keys(urlParams), function (key) {
-            return _s.startsWith(key, "view");
-        });
-        if (viewParameter) {
-            delete urlParams[viewParameter];
-        }
-
         return urlParams;
     };
 
-    //gets the current section from the url
-    parameters.getSection = function () {
+    /**
+     * Gets the current section from the url
+     * @param [hash] (Optional) The hash to get the section from
+     * @return {{name: string, isSilverlight: boolean}} section
+     */
+    parameters.getSection = function (hash) {
         //var currentView = hasher.getHash().slice(hash.indexOf("/"), hasher.getHash().indexOf("."));
-
-        var url = document.URL;
-        //get the section name(what's between "view/" and ".html")
-        var matches = url.match(/view\/(.*)\.html/);
-        if (!matches) {
-            return null;
+        if (!hash) {
+            hash = hasher.getHash();
         }
-        return matches[1];
+
+        if (_s.include(hash, "view")) {
+            var from = hash.indexOf("view") + 5;
+            var to = hash.indexOf(".html", from);
+            return {
+                name: hash.substring(from, to)
+            };
+        }
+        //ex #silverlight?section=sectionName
+        else {
+            var params = parameters.get(hash);
+            if (!params || !params.section) {
+                return null;
+            }
+            return {
+                name: params.section,
+                isSilverlight: true
+            };
+        }
+
+        return null;
     };
 
     /**
      * Build a query string from a record object
-     * @param parameters Ex. { prop1: value1, prop2: value2 }
+     * @param params Ex. { prop1: value1, prop2: value2 }
      * @param [section] (Optional) The section to set. If null it will keep the current section
      * @return {String} Ex. ?prop1=value1&prop2=value2
      */
     var buildQuery = function (params, section) {
-        if (section === null) {
+        if (!section) {
             section = parameters.getSection();
         }
+        var query = "?";
 
-        var query = section ? "view/" + section + ".html?" : "?";
+        if (section) {
+            if (section.isSilverlight) {
+                query = "silverlight?";
+                params.section = section.name;
+            } else {
+                query = "view/" + section.name + ".html?";
+            }
+        }
+
         var first = true;
         _.each(params, function (value, key) {
             if (!first) {
@@ -113,11 +126,11 @@ define(['jquery', 'developer', 'hasher', 'underscore.string', 'signals'], functi
 
     /**
      * Set the parameters/section
-     * @param {*} parameters The parameters to set
-     * @param {string} [section] (Optional) The section to set. If null it will keep the current section
+     * @param {*} params The parameters to set
      * @param {boolean} [replace] (Optional) If set, it will replace the current hash (and not add it to history).
+     * @param {{name: string, isSilverlight: boolean}} [section] (Optional) The section to set. If null it will keep the current section
      */
-    parameters.set = function (params, section, replace) {
+    parameters.set = function (params, replace, section) {
         var query = buildQuery(params, section);
         setHash(query, replace);
         if (section) {
@@ -126,7 +139,7 @@ define(['jquery', 'developer', 'hasher', 'underscore.string', 'signals'], functi
     };
 
     /**
-     * Change the url parameter(key) with the given value
+     * Change the url parameter (key) with the given value
      * @param key The parameter to change
      * @param value The value to set
      * @param {boolean} [replace] (Optional) If true, it will not add a new history item
@@ -134,24 +147,21 @@ define(['jquery', 'developer', 'hasher', 'underscore.string', 'signals'], functi
     parameters.setOne = function (key, value, replace) {
         var query = parameters.get();
         query[key] = value;
-        parameters.set(query, null, replace);
+        parameters.set(query, replace);
     };
 
     /**
      * Sets the section, using the existing url parameters
-     * @param sectionName
+     * @param section
      */
-    parameters.setSection = function (sectionName) {
-        if (!sectionName || parameters.getSection() === sectionName) {
+    parameters.setSection = function (section) {
+        if (!section || parameters.getSection().name === section.name) {
             return;
         }
 
-        var hash = "view/" + sectionName + ".html";
-        if (developer.CURRENT_PARAMETER_STORAGE === developer.ParameterStorage.URL) {
-            hash = buildQuery(parameters.get(), sectionName);
-        }
+        var hash = buildQuery(parameters.get(), section);
 
-        hasher.setHash(hash);
+        setHash(hash);
     };
 
     /**

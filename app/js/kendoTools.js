@@ -284,7 +284,7 @@ define(['tools', 'db/session', 'db/services', 'parameters'], function (tools, se
             query[key] = val + "$" + type;
         });
 
-        parameters.set(query, section);
+        parameters.set(query, true, section);
     };
 
     /*

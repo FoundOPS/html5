@@ -65,7 +65,7 @@ define(['db/services', 'tools', "parameters", "kendo"], function (dbservices, to
      * @param offset in minutes
      * @return A moment offset by the TimeZone
      */
-    moment.fn.timezoneOffset = function(offset) {
+    moment.fn.timezoneOffset = function (offset) {
         var diff = this.zone() + offset;
         return this.clone().add('minutes', diff);
     };
@@ -129,10 +129,7 @@ define(['db/services', 'tools', "parameters", "kendo"], function (dbservices, to
         }
     };
 
-    parameters.changed.add(function (hash) {
-        if (hash === "") {
-            return;
-        }
+    parameters.changed.add(function () {
         syncRoleId();
     });
 
