@@ -24,7 +24,7 @@ define(["../db/saveHistory", "parameters", "kendo"], function (saveHistory, para
             var query = parameters.get();
             query[nextIdParameter] = e.dataItem.Id;
 
-            parameters.set(query, nextSectionName, replace);
+            parameters.set(query, replace, nextSectionName);
         };
 
         /**

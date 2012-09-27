@@ -112,7 +112,7 @@ require(["jquery", "widgets/navigator", "developer", "db/services", "db/session"
                     //TODO centralize blobUrl to developer or dbServices
                     var blobUrl = "http://bp.foundops.com/";
                     silverlightElement += '<param name="splashscreensource" value="' + blobUrl + 'xaps/SplashScreen.xaml" />' +
-                        '<param name="source" value="' + blobUrl + 'xaps/FoundOps.SLClient.Navigator.xap?ignore=' + developer.CURRENT_SILVERLIGHT_VERSION  + '/>';
+                        '<param name="source" value="' + blobUrl + 'xaps/FoundOps.SLClient.Navigator.xap?ignore=' + developer.CURRENT_SILVERLIGHT_VERSION + '/>';
                 }
                 silverlightElement +=
                     '<param name="onError" value="onSilverlightError"/>' +
@@ -158,11 +158,10 @@ require(["jquery", "widgets/navigator", "developer", "db/services", "db/session"
                 UserVoice.showPopupWidget();
             }
         } else {
-            //navigate to silverlight to clear the url
-            application.navigate("#silverlight");
+            //TODO: Change the way session data is so SL sections have URL, will need to publish mobile app at same time
+            //for now, manually set url for SL section
+            parameters.setSection(section);
         }
-
-        silverlight.setSection(section);
     });
 
     //fix problems with console not on IE
@@ -186,9 +185,9 @@ require(["jquery", "widgets/navigator", "developer", "db/services", "db/session"
 
         session.setRole(role);
 
-        //TODO fix
         //reload the current page if it is not on silverlight
-        if (hash !== "#silverlight") {
+        var currentSection = parameters.getSection();
+        if (!currentSection || !currentSection.isSilverlight) {
             var hash = hasher.getHash();
             hasher.setHash('');
             _.delay(function () {

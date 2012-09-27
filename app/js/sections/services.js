@@ -329,7 +329,7 @@ require(["jquery", "db/session", "db/services", "parameters", "tools", "db/saveH
             //whenever the grid is filtered, update the URL parameters
             kendoTools.addFilterEvent(serviceHoldersDataSource);
             serviceHoldersDataSource.bind("filtered", function () {
-                kendoTools.updateHashToFilters("services", serviceHoldersDataSource);
+                kendoTools.updateHashToFilters({name: "services"}, serviceHoldersDataSource);
             });
 
             //force reparse, to fix start/end date filters
@@ -480,7 +480,7 @@ require(["jquery", "db/session", "db/services", "parameters", "tools", "db/saveH
             var currentParams = parameters.get();
             if (currentParams.service !== serviceName) {
                 currentParams.service = serviceName;
-                parameters.set(currentParams, "services");
+                parameters.set(currentParams, true);
             }
 
             createDataSourceAndGrid();
@@ -559,7 +559,7 @@ require(["jquery", "db/session", "db/services", "parameters", "tools", "db/saveH
         //1) update the service type (if it changed)
         //2) update the grid's filters (if they changed)
         parameters.changed.add(function (section, query) {
-            if (section !== "services" || !services.serviceTypes) {
+            if (section.name !== "services" || !services.serviceTypes) {
                 return;
             }
 
@@ -581,7 +581,7 @@ require(["jquery", "db/session", "db/services", "parameters", "tools", "db/saveH
                 query.service = serviceType.Name;
 
                 //update the query parameters
-                parameters.set(query, "services");
+                parameters.set(query, true);
                 return;
             }
             //if it changed, update it
