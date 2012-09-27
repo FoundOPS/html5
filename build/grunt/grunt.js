@@ -16,11 +16,12 @@ module.exports = function (grunt) {
     if (buildType === buildTypes.iOS || buildType === buildTypes.android) {
         files = {
             "C:/FoundOPS/html5/build/mobile/app/js": "C:/FoundOPS/html5/build/main/main-built.js",
-            "C:/FoundOPS/html5/build/mobile/app/css": "C:/FoundOPS/html5/build/main/main-built.css",
+            "C:/FoundOPS/html5/build/mobile/app/styles": "C:/FoundOPS/html5/build/main/main-built.css",
+            "C:/FoundOPS/html5/build/mobile/app/styles/": "C:/FoundOPS/html5/app/styles/PTS55F.ttf",
             "C:/FoundOPS/html5/build/mobile/app/img/": "C:/FoundOPS/html5/app/img/*",
             "C:/FoundOPS/html5/build/mobile/app/view/": "C:/FoundOPS/html5/app/view/*",
-            "C:/FoundOPS/html5/build/mobile/app/css/images/": "C:/FoundOPS/html5/app/styles/kendo/images/*",
-            "C:/FoundOPS/html5/build/mobile/app/css/textures/": "C:/FoundOPS/html5/app/styles/kendo/textures/*"
+            "C:/FoundOPS/html5/build/mobile/app/styles/images/": "C:/FoundOPS/html5/app/styles/kendo/images/*",
+            "C:/FoundOPS/html5/build/mobile/app/styles/textures/": "C:/FoundOPS/html5/app/styles/kendo/textures/*"
         };
         if (buildType === buildTypes.android) {
             files["C:/FoundOPS/html5/build/mobile/app"] = ["C:/FoundOPS/html5/app/login.html", "C:/FoundOPS/html5/app/navigator-build.html"];
@@ -40,7 +41,7 @@ module.exports = function (grunt) {
             variables: {
                 mobileOptimization: mobileOptimizationTags,
                 blobRoot: "",
-                CSSblobRoot: "css/main-built.css",
+                CSSblobRoot: "styles/main-built.css",
                 JSblobRoot: "js/main-built.js",
 
                 cordova: cordovaIncludes
