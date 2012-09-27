@@ -49,7 +49,7 @@ define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "pa
             var query = parameters.get();
             //remove the routeTaskId so it does not jump back here
             delete query.routeTaskId;
-            parameters.set(query,true, {name:"routeDestinationDetails" });
+            parameters.set(query, true, {name: "routeDestinationDetails"});
         } else {
             vm.openTaskStatuses("backButton");
         }

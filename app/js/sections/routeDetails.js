@@ -13,7 +13,7 @@ define(["sections/linkedEntitySection", "sections/routes", "parameters", "db/ser
             var routeDestinations = routes.vm.get("nextEntity.RouteDestinations");
 
             if (!routeDestinations) {
-                parameters.setSection("routes");
+                parameters.setSection({name: "routes"});
                 return;
             }
 
