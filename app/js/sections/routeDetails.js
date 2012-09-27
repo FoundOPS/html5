@@ -139,8 +139,6 @@ define(["sections/linkedEntitySection", "sections/routes", "parameters", "db/ser
 
         if (kendo.support.detectOS(navigator.userAgent).device === "android") {
             window.plugins.statusBarNotification.notify("Tracking...", "FoundOPS is tracking your location.");
-        } else if (kendo.support.detectOS(navigator.userAgent).device === "iphone" || kendo.support.detectOS(navigator.userAgent).device === "ipad") {
-            window.plugins.statusBarNotifier.show("Tracking...", "FoundOPS is tracking your location.");
         }
 
         //store the intervalId

@@ -12,7 +12,7 @@ module.exports = function (grunt) {
     var buildType = buildTypes.iOS;
     var version = "0.01";
 
-    var files, replace;
+    var files, replace, cordovaIncludes;
     if (buildType === buildTypes.iOS || buildType === buildTypes.android) {
         files = {
             "C:/FoundOPS/html5/build/mobile/app/js": "C:/FoundOPS/html5/build/main/main-built.js",
@@ -26,9 +26,13 @@ module.exports = function (grunt) {
             files["C:/FoundOPS/html5/build/mobile/app"] = ["C:/FoundOPS/html5/app/login.html", "C:/FoundOPS/html5/app/navigator-build.html"];
             files["C:/FoundOPS/html5/build/mobile/app/"] = ["C:/FoundOPS/html5/build/mobile/cordova/android/*"];
             files["C:/FoundOPS/html5/build/mobile/app/childbrowser/"] = ["C:/FoundOPS/html5/build/mobile/cordova/android/childbrowser/*"];
+            cordovaIncludes = '<script type="text/javascript" charset="utf-8" src="cordova-2.1.0.js"></script>\n' +
+                                '<script type="text/javascript" charset="utf-8" src="statusbarnotification.js"></script>\n' +
+                                '<script type="text/javascript" charset="utf-8" src="childbrowser.js"></script>';
         } else if (buildType === buildTypes.iOS) {
             files["C:/FoundOPS/html5/build/mobile/app"] = ["C:/FoundOPS/html5/app/login.html", "C:/FoundOPS/html5/app/navigator-build.html"];
-            files["C:/FoundOPS/html5/build/mobile/app/"] = ["C:/FoundOPS/html5/build/mobile/cordova/ios/*"];
+            files["C:/FoundOPS/html5/build/mobile/app/"] = ["C:/FoundOPS/html5/build/mobile/cordova/iOS/cordova-2.1.0.js"];
+            cordovaIncludes = '<script type="text/javascript" charset="utf-8" src="cordova-2.1.0.js"></script>';
         }
         replace = {
             src: ["C:/FoundOPS/html5/build/mobile/app/navigator.html"],
@@ -38,10 +42,8 @@ module.exports = function (grunt) {
                 blobRoot: "",
                 CSSblobRoot: "css/main-built.css",
                 JSblobRoot: "js/main-built.js",
-                version: version,
-                cordova: '<script type="text/javascript" charset="utf-8" src="cordova-2.1.0.js"></script>\n' +
-                            '<script type="text/javascript" charset="utf-8" src="statusbarnotification.js"></script>\n' +
-                            '<script type="text/javascript" charset="utf-8" src="childbrowser.js"></script>'
+
+                cordova: cordovaIncludes
             }
         };
     } else {
@@ -49,7 +51,6 @@ module.exports = function (grunt) {
             "C:/FoundOPS/html5/build/main": "C:/FoundOPS/html5/app/navigator-build.html",
             "C:/FoundOPS/html5/build/main/login": "C:/FoundOPS/html5/login"
         };
-
         replace = {
             src: ["C:/FoundOPS/html5/build/main/navigator.html"],
             dest: "C:/FoundOPS/html5/build/main",

@@ -55,7 +55,7 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "parameters", "
     vm.getDirections = function () {
         var currentPosition;
         var navigateTo = function (url) {
-            if (developer.CURRENT_FRAME === developer.Frame.MOBILE_APP) {
+            if (developer.CURRENT_FRAME === developer.Frame.MOBILE_APP && kendo.support.detectOS(navigator.userAgent).device === "android") {
                 window.plugins.childBrowser.showWebPage(url);
             } else {
                 window.open(url);
@@ -84,7 +84,11 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "parameters", "
         } else if (e.dataItem.Type === "Email Address") {
             window.location.href = "mailto:" + e.dataItem.Data;
         } else if (e.dataItem.Type === "Website") {
-            window.plugins.childBrowser.showWebPage("http://" + e.dataItem.Data);
+            if (developer.CURRENT_FRAME === developer.Frame.MOBILE_APP && kendo.support.detectOS(navigator.userAgent).device === "android") {
+                window.plugins.childBrowser.showWebPage("http://" + e.dataItem.Data);
+            } else {
+                window.open("http://" + e.dataItem.Data);
+            }
         }
     };
 

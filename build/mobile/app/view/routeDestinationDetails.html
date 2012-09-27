@@ -46,6 +46,7 @@
 </script>
 <script>
     if (kendo.support.detectOS(navigator.userAgent).device) {
+        console.log(kendo.support.detectOS(navigator.userAgent).device);
         document.getElementById("directionsButton").addEventListener('touchstart', function (e) {
             $("#directionsButton").toggleClass("buttonClicked");
         });
