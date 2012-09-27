@@ -6,25 +6,24 @@
 
 "use strict";
 
-define(['developer'], function (developer) {
+define(function () {
     var ui = {};
 
     /**
-     * An array of item colors to iterate for multiple items.
-     * @type {Array.<string>}
-     * @const
+     * An array of objects with the class and color to iterate for multiple items.
+     * @type {Array.<object>}
      */
     ui.ITEM_COLORS = [
-        "#194A91", //dark blue
-        "#ff0000", //red
-        "#03EA03", //lime green
-        "#663300", //brown
-        "#660099", //purple
-        "#FF9900", //orange
-        "#0099ff", //light blue
-        "#006600", //dark green
-        "#990000", //dark red
-        "#FF00CC"  //pink
+        {name: "darkblue", color: "#194A91"},
+        {name: "red", color: "#ff0000"},
+        {name: "limegreen", color: "#03EA03"},
+        {name: "brown", color: "#663300"},
+        {name: "purple", color: "#660099"},
+        {name: "orange", color: "#FF9900"},
+        {name: "lightblue", color: "#0099ff"},
+        {name: "darkgreen", color: "#006600"},
+        {name: "darkred", color: "#990000"},
+        {name: "pink", color: "#FF00CC"}
     ];
 
     /**
