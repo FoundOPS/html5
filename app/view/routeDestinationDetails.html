@@ -45,20 +45,23 @@
     <a>${Name}</a>
 </script>
 <script>
-    if (kendo.support.detectOS(navigator.userAgent).device) {
-        console.log(kendo.support.detectOS(navigator.userAgent).device);
-        document.getElementById("directionsButton").addEventListener('touchstart', function (e) {
-            $("#directionsButton").toggleClass("buttonClicked");
-        });
-        document.getElementById("directionsButton").addEventListener('touchend', function (e) {
-            $("#directionsButton").toggleClass("buttonClicked");
-        });
-    } else {
-        $("#directionsButton").mousedown(function (e) {
-            $("#directionsButton").toggleClass("buttonClicked");
-        });
-        $("#directionsButton").mouseup(function (e) {
-            $("#directionsButton").toggleClass("buttonClicked");
-        });
-    }
+    //Wait until directionsButton is loaded
+    setTimeout( function () {
+        if (kendo.support.detectOS(navigator.userAgent).device) {
+            console.log(kendo.support.detectOS(navigator.userAgent).device);
+            document.getElementById("directionsButton").addEventListener('touchstart', function (e) {
+                $("#directionsButton").toggleClass("buttonClicked");
+            });
+            document.getElementById("directionsButton").addEventListener('touchend', function (e) {
+                $("#directionsButton").toggleClass("buttonClicked");
+            });
+        } else {
+            $("#directionsButton").mousedown(function (e) {
+                $("#directionsButton").toggleClass("buttonClicked");
+            });
+            $("#directionsButton").mouseup(function (e) {
+                $("#directionsButton").toggleClass("buttonClicked");
+            });
+        }
+    }, 0);
 </script>

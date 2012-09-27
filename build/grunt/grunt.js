@@ -143,6 +143,7 @@ module.exports = function (grunt) {
             wrap: true,
             out: "../main/main-built.js"
         },
+        clean: ["C:/FoundOPS/html5/build/mobile/app"],
         copy: {
             dist: {
                 files: files,
@@ -169,7 +170,7 @@ module.exports = function (grunt) {
 //    grunt.loadNpmTasks('grunt-requirejs');
 
     //Then run this with the above three lines commented out
-    grunt.registerTask('default', 'copy replace');
+    grunt.registerTask('default', 'clean copy replace');
     grunt.loadNpmTasks('grunt-contrib');
     grunt.loadNpmTasks('grunt-replace');
 };
