@@ -28,10 +28,6 @@
 	</array>
 	<key>Plugins</key>
 	<dict>
-		<key>StatusBarNotifier</key>
-		<string>StatusBarNotifier</string>
-		<key>ChildBrowserCommand</key>
-		<string>ChildBrowserCommand</string>
 		<key>Device</key>
 		<string>CDVDevice</string>
 		<key>Logger</key>

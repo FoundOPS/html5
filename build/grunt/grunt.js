@@ -1,68 +1,8 @@
 /*global module:false*/
 module.exports = function (grunt) {
-    var buildTypes = {
-        iOS: 0,
-        android: 1,
-        browser: 2
-    };
 
-    // String to be used in replace function.
-    var mobileOptimizationTags = '<meta name="HandheldFriendly" content="True">\n\t<meta name="MobileOptimized" content="320">\n\t<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>\n\t<link rel="apple-touch-icon-precomposed" sizes="114x114" href="@@blobRootimg/Icon-96x96.png">\n\t<link rel="apple-touch-icon-precomposed" sizes="72x72" href="@@blobRootimg/Icon-72x72.png">\n\t<link rel="apple-touch-icon-precomposed" href="@@blobRootimg/Icon-36x36.png">\n\t<link rel="shortcut icon" href="@@blobRootimg/Icon-36x36.png">\n\t<meta name="apple-mobile-web-app-capable" content="yes">\n\t<meta name="apple-mobile-web-app-status-bar-style" content="black">\n\t<script>(function(a,b,c){if(c in b&&b[c]){var d,e=a.location,f=/^(a|html)$/i;a.addEventListener("click",function(a){d=a.target;while(!f.test(d.nodeName))d=d.parentNode;"href"in d&&(d.href.indexOf("http")||~d.href.indexOf(e.host))&&(a.preventDefault(),e.href=d.href)},!1)}})(document,window.navigator,"standalone")</script>';
-
-    var buildType = buildTypes.android;
-    var version = "0.01";
-
-    var files, replace;
-    if (buildType === buildTypes.iOS || buildType === buildTypes.android) {
-        files = {
-            "C:/FoundOPS/html5/build/mobile/app/js": "C:/FoundOPS/html5/build/main/main-built.js",
-            "C:/FoundOPS/html5/build/mobile/app/css": "C:/FoundOPS/html5/build/main/main-built.css",
-            "C:/FoundOPS/html5/build/mobile/app/img/": "C:/FoundOPS/html5/app/img/*",
-            "C:/FoundOPS/html5/build/mobile/app/view/": "C:/FoundOPS/html5/app/view/*",
-            "C:/FoundOPS/html5/build/mobile/app/css/images/": "C:/FoundOPS/html5/app/styles/kendo/images/*",
-            "C:/FoundOPS/html5/build/mobile/app/css/textures/": "C:/FoundOPS/html5/app/styles/kendo/textures/*"
-        };
-        if (buildType === buildTypes.android) {
-            files["C:/FoundOPS/html5/build/mobile/app"] = ["C:/FoundOPS/html5/app/login.html", "C:/FoundOPS/html5/app/navigator-build.html"];
-            files["C:/FoundOPS/html5/build/mobile/app/"] = ["C:/FoundOPS/html5/build/mobile/cordova/android/*"];
-            files["C:/FoundOPS/html5/build/mobile/app/childbrowser/"] = ["C:/FoundOPS/html5/build/mobile/cordova/android/childbrowser/*"];
-        } else if (buildType === buildTypes.iOS) {
-            files["C:/FoundOPS/html5/build/mobile/app"] = ["C:/FoundOPS/html5/app/login.html", "C:/FoundOPS/html5/app/navigator-build.html"];
-            files["C:/FoundOPS/html5/build/mobile/app/"] = ["C:/FoundOPS/html5/build/mobile/cordova/ios/*"];
-        }
-        replace = {
-            src: ["C:/FoundOPS/html5/build/mobile/app/navigator.html"],
-            dest: "C:/FoundOPS/html5/build/mobile/app",
-            variables: {
-                mobileOptimization: mobileOptimizationTags,
-                blobRoot: "",
-                CSSblobRoot: "css/main-built.css",
-                JSblobRoot: "js/main-built.js",
-                version: version,
-                cordova: '<script type="text/javascript" charset="utf-8" src="cordova-2.1.0.js"></script>\n' +
-                            '<script type="text/javascript" charset="utf-8" src="statusbarnotification.js"></script>\n' +
-                            '<script type="text/javascript" charset="utf-8" src="childbrowser.js"></script>'
-            }
-        };
-    } else {
-        files = {
-            "C:/FoundOPS/html5/build/main": "C:/FoundOPS/html5/app/navigator-build.html",
-            "C:/FoundOPS/html5/build/main/login": "C:/FoundOPS/html5/login"
-        };
-
-        replace = {
-            src: ["C:/FoundOPS/html5/build/main/navigator.html"],
-            dest: "C:/FoundOPS/html5/build/main",
-            variables: {
-                mobileOptimization: mobileOptimizationTags,
-                blobRoot: '@Model["BlobRoot"]../',
-                CSSblobRoot: '@Model["BlobRoot"]main-built.css?cb=' + version,
-                JSblobRoot: '@Model["BlobRoot"]main-built.js?cb=' + version,
-                cordova: ''
-            }
-        };
-    }
-
+    var version = "0.01",
+        mobileOptimizationTags = '<meta name="HandheldFriendly" content="True">\n\t<meta name="MobileOptimized" content="320">\n\t<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>\n\t<link rel="apple-touch-icon-precomposed" sizes="114x114" href="@@blobRootimg/Icon-96x96.png">\n\t<link rel="apple-touch-icon-precomposed" sizes="72x72" href="@@blobRootimg/Icon-72x72.png">\n\t<link rel="apple-touch-icon-precomposed" href="@@blobRootimg/Icon-36x36.png">\n\t<link rel="shortcut icon" href="@@blobRootimg/Icon-36x36.png">\n\t<meta name="apple-mobile-web-app-capable" content="yes">\n\t<meta name="apple-mobile-web-app-status-bar-style" content="black">\n\t<script>(function(a,b,c){if(c in b&&b[c]){var d,e=a.location,f=/^(a|html)$/i;a.addEventListener("click",function(a){d=a.target;while(!f.test(d.nodeName))d=d.parentNode;"href"in d&&(d.href.indexOf("http")||~d.href.indexOf(e.host))&&(a.preventDefault(),e.href=d.href)},!1)}})(document,window.navigator,"standalone")</script>';
 
     // Project configuration.
     grunt.initConfig({
@@ -142,9 +82,36 @@ module.exports = function (grunt) {
             wrap: true,
             out: "../main/main-built.js"
         },
+        clean: ["C:/FoundOPS/html5/build/mobile/Android/assets/www", "C:/FoundOPS/html5/build/mobile/iOS/www"],
         copy: {
             dist: {
-                files: files,
+                files: {
+                    // Browser files
+                    "C:/FoundOPS/html5/build/main": "C:/FoundOPS/html5/app/navigator-build.html",
+                    "C:/FoundOPS/html5/build/main/login": "C:/FoundOPS/html5/login/*",
+                    "C:/FoundOPS/html5/build/main/img/": "C:/FoundOPS/html5/app/img/*",
+                    // Android files
+                    "C:/FoundOPS/html5/build/mobile/Android/assets/www/js": "C:/FoundOPS/html5/build/main/main-built.js",
+                    "C:/FoundOPS/html5/build/mobile/Android/assets/www/styles": "C:/FoundOPS/html5/build/main/main-built.css",
+                    "C:/FoundOPS/html5/build/mobile/Android/assets/www/styles/": "C:/FoundOPS/html5/app/styles/PTS55F.ttf",
+                    "C:/FoundOPS/html5/build/mobile/Android/assets/www/img/": "C:/FoundOPS/html5/app/img/*",
+                    "C:/FoundOPS/html5/build/mobile/Android/assets/www/view/": "C:/FoundOPS/html5/app/view/*",
+                    "C:/FoundOPS/html5/build/mobile/Android/assets/www/styles/images/": "C:/FoundOPS/html5/app/styles/kendo/images/*",
+                    "C:/FoundOPS/html5/build/mobile/Android/assets/www/styles/textures/": "C:/FoundOPS/html5/app/styles/kendo/textures/*",
+                    "C:/FoundOPS/html5/build/mobile/Android/assets/www": ["C:/FoundOPS/html5/app/login.html", "C:/FoundOPS/html5/app/navigator-build.html"],
+                    "C:/FoundOPS/html5/build/mobile/Android/assets/www/": "C:/FoundOPS/html5/build/mobile/cordova/android/*",
+                    "C:/FoundOPS/html5/build/mobile/Android/assets/www/childbrowser/": ["C:/FoundOPS/html5/build/mobile/cordova/android/childbrowser/*"],
+                    // iOS Files
+                    "C:/FoundOPS/html5/build/mobile/iOS/www/js": "C:/FoundOPS/html5/build/main/main-built.js",
+                    "C:/FoundOPS/html5/build/mobile/iOS/www/styles": "C:/FoundOPS/html5/build/main/main-built.css",
+                    "C:/FoundOPS/html5/build/mobile/iOS/www/styles/": "C:/FoundOPS/html5/app/styles/PTS55F.ttf",
+                    "C:/FoundOPS/html5/build/mobile/iOS/www/img/": "C:/FoundOPS/html5/app/img/*",
+                    "C:/FoundOPS/html5/build/mobile/iOS/www/view/": "C:/FoundOPS/html5/app/view/*",
+                    "C:/FoundOPS/html5/build/mobile/iOS/www/styles/images/": "C:/FoundOPS/html5/app/styles/kendo/images/*",
+                    "C:/FoundOPS/html5/build/mobile/iOS/www/styles/textures/": "C:/FoundOPS/html5/app/styles/kendo/textures/*",
+                    "C:/FoundOPS/html5/build/mobile/iOS/www": ["C:/FoundOPS/html5/app/login.html", "C:/FoundOPS/html5/app/navigator-build.html"],
+                    "C:/FoundOPS/html5/build/mobile/iOS/www/": "C:/FoundOPS/html5/build/mobile/cordova/iOS/*"
+                },
                 options: {
                     processName: function (filename) {
                         if (filename === "login.html") {
@@ -158,7 +125,41 @@ module.exports = function (grunt) {
             }
         },
         replace: {
-            dist: replace
+            browser: {
+                src: ["C:/FoundOPS/html5/build/main/navigator.html"],
+                dest: "C:/FoundOPS/html5/build/main",
+                variables: {
+                    mobileOptimization: mobileOptimizationTags,
+                    blobRoot: '@Model["BlobRoot"]../',
+                    CSSblobRoot: '@Model["BlobRoot"]main-built.css?cb=' + version,
+                    JSblobRoot: '@Model["BlobRoot"]main-built.js?cb=' + version,
+                    cordova: ''
+                }
+            },
+            android: {
+                src: ["C:/FoundOPS/html5/build/mobile/Android/assets/www/navigator.html"],
+                dest: "C:/FoundOPS/html5/build/mobile/Android/assets/www",
+                variables: {
+                    mobileOptimization: mobileOptimizationTags,
+                    blobRoot: "",
+                    CSSblobRoot: "styles/main-built.css",
+                    JSblobRoot: "js/main-built.js",
+                    cordova: '<script type="text/javascript" charset="utf-8" src="cordova-2.1.0.js"></script>\n' +
+                        '<script type="text/javascript" charset="utf-8" src="statusbarnotification.js"></script>\n' +
+                        '<script type="text/javascript" charset="utf-8" src="childbrowser.js"></script>'
+                }
+            },
+            iOS: {
+                src: ["C:/FoundOPS/html5/build/mobile/iOS/www/navigator.html"],
+                dest: "C:/FoundOPS/html5/build/mobile/iOS/www",
+                variables: {
+                    mobileOptimization: mobileOptimizationTags,
+                    blobRoot: "",
+                    CSSblobRoot: "styles/main-built.css",
+                    JSblobRoot: "js/main-built.js",
+                    cordova: '<script type="text/javascript" charset="utf-8" src="cordova-2.1.0.js"></script>'
+                }
+            }
         }
     });
 
@@ -168,7 +169,7 @@ module.exports = function (grunt) {
 //    grunt.loadNpmTasks('grunt-requirejs');
 
     //Then run this with the above three lines commented out
-    grunt.registerTask('default', 'copy replace');
+    grunt.registerTask('default', 'clean copy replace');
     grunt.loadNpmTasks('grunt-contrib');
     grunt.loadNpmTasks('grunt-replace');
 };
