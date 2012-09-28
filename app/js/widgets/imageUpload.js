@@ -1,5 +1,5 @@
-define(["tools/generalTools", "db/saveHistory", "db/services", "jquery", "kendo", "jui",
-    "jfilereader", "lib/swfobject", "jform"], function (generalTools, saveHistory, dbServices, $) {
+define(["tools/generalTools", "db/saveHistory", "db/services", "jquery" ,"tools/analytics", "kendo", "jui",
+    "jfilereader", "lib/swfobject", "jform"], function (generalTools, saveHistory, dbServices, $, analytics) {
     // shorten references to variables. this is better for uglification
     var kendo = window.kendo,
         ui = kendo.ui,
@@ -65,6 +65,9 @@ define(["tools/generalTools", "db/saveHistory", "db/services", "jquery", "kendo"
                 that.newImage = true;
                 generalTools.resizeImage(that.cropBox, that.options.imageWidth, that.options.containerWidth);
                 that.submitForm();
+
+                //track event
+                analytics.track("Upload Image");
             };
 
             var file = evt.target.files[0];

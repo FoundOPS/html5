@@ -21,6 +21,7 @@ define(['db/services', "tools/parameters", "kendo"], function (dbservices, param
         //load the config
         dbservices.getSession(function (data) {
             session._data = data;
+            session.set("user", data.name);
 
             //try to load the role from the query parameter
             //otherwise set it to the first loaded role

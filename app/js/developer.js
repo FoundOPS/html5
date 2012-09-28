@@ -51,6 +51,14 @@ define(function () {
      */
     developer.CURRENT_FRAME = developer.Frame.BROWSER;
 
+    developer.TRACK_ANALYTICS_OPTION = {
+        OFF: 0,
+        DEBUG: 1,
+        LIVE: 2
+    };
+
+    developer.TRACK_ANALYTICS = developer.TRACK_ANALYTICS_OPTION.DEBUG;
+
     /**
      * The current silverlight version
      */

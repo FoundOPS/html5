@@ -56,7 +56,7 @@ require(["jquery", "widgets/navigator", "developer", "db/services", "db/session"
     "uservoice", "moment", "sections/personalSettings", "sections/businessSettings", "sections/usersSettings",
     "sections/dispatcherSettings", "sections/changePassword", "sections/services",
     "sections/routes", "sections/routeDetails", "sections/routeDestinationDetails", "sections/routeTask", "sections/mapView",
-    "widgets/serviceDetails"], function ($, Navigator, developer, dbServices, session, parameters, silverlight, generalTools, hasher) {
+    "widgets/serviceDetails", "tools/analytics"], function ($, Navigator, developer, dbServices, session, parameters, silverlight, generalTools, hasher) {
     /**
      * application = The app object.
      * navigator = The navigator object.
