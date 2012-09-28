@@ -68,7 +68,7 @@ require(["jquery", "widgets/navigator", "developer", "db/services", "db/session"
 
     //Overrides phone's back button navigation - Phonegap
     main.onBack = function () {
-        var sectionName = parameters.getSection();
+        var sectionName = parameters.getSection().name;
         var section = window[sectionName];
 
         //if the section overrode the onBack function, trigger it

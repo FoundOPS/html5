@@ -84,13 +84,25 @@ module.exports = function (grunt) {
         },
         clean: ["C:/FoundOPS/html5/build/mobile/Android/assets/www", "C:/FoundOPS/html5/build/mobile/iOS/www"],
         copy: {
-            dist: {
+            browser: {
+                options: {
+                    basePath: "",
+                    processName: function (filename) {
+                        if (filename === "navigator-build.html") {
+                            filename = "navigator.html";
+                        }
+                        return filename;
+                    }
+                },
                 files: {
                     // Browser files
-                    "C:/FoundOPS/html5/build/main": "C:/FoundOPS/html5/app/navigator-build.html",
-                    "C:/FoundOPS/html5/build/main/login": "C:/FoundOPS/html5/login/*",
-                    "C:/FoundOPS/html5/build/main/img/": "C:/FoundOPS/html5/app/img/*",
-                    "C:/FoundOPS/html5/build/main": "C:/FoundOPS/html5/app/styles/map.css",
+                    "C:/FoundOPS/html5/build/main/": "../../login/**",
+                    "C:/FoundOPS/html5/build/main": ["../../app/styles/map.css", "../../app/navigator-build.html"],
+                    "C:/FoundOPS/html5/build/main/img/": "../../app/img/*"
+                }
+            },
+            mobile: {
+                files: {
                     // Android files
                     "C:/FoundOPS/html5/build/mobile/Android/assets/www/js": "C:/FoundOPS/html5/build/main/main-built.js",
                     "C:/FoundOPS/html5/build/mobile/Android/assets/www/styles": "C:/FoundOPS/html5/build/main/main-built.css",
@@ -101,7 +113,7 @@ module.exports = function (grunt) {
                     "C:/FoundOPS/html5/build/mobile/Android/assets/www/styles/textures/": "C:/FoundOPS/html5/app/styles/kendo/textures/*",
                     "C:/FoundOPS/html5/build/mobile/Android/assets/www": ["C:/FoundOPS/html5/app/login.html", "C:/FoundOPS/html5/app/navigator-build.html"],
                     "C:/FoundOPS/html5/build/mobile/Android/assets/www/": "C:/FoundOPS/html5/build/mobile/cordova/android/*",
-                    "C:/FoundOPS/html5/build/mobile/Android/assets/www/childbrowser/": ["C:/FoundOPS/html5/build/mobile/cordova/android/childbrowser/*"],
+                    "C:/FoundOPS/html5/build/mobile/Android/assets/www/childbrowser/": "C:/FoundOPS/html5/build/mobile/cordova/android/childbrowser/*",
                     // iOS Files
                     "C:/FoundOPS/html5/build/mobile/iOS/www/js": "C:/FoundOPS/html5/build/main/main-built.js",
                     "C:/FoundOPS/html5/build/mobile/iOS/www/styles": "C:/FoundOPS/html5/build/main/main-built.css",

@@ -55,11 +55,11 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "parameters", "
     vm.getDirections = function () {
         var currentPosition;
         var navigateTo = function (url) {
-            if (developer.CURRENT_FRAME === developer.Frame.MOBILE_APP && kendo.support.detectOS(navigator.userAgent).device === "android") {
-                window.plugins.childBrowser.showWebPage(url);
-            } else {
+//            if (developer.CURRENT_FRAME === developer.Frame.MOBILE_APP && kendo.support.detectOS(navigator.userAgent).device === "android") {
+//                window.plugins.childBrowser.showWebPage(url);
+//            } else {
                 window.open(url);
-            }
+//            }
         };
         navigator.geolocation.getCurrentPosition(function (position) {
             // If geolocation is successful get directions.
