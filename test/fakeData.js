@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(['tools', 'ui/ui'], function (tools, ui) {
+define(['tools/generalTools', 'ui/ui'], function (generalTools, ui) {
     var fakeData = {};
     fakeData.depots = [
         {"AddressLineOne": "1305 Cumberland Ave", "AddressLineTwo": "", "City": "West Lafayette", "ContactInfoSet": [], "Latitude": "40.46033500", "Longitude": "-86.92984000", "Name": "Depot", "State": "IN", "ZipCode": "47906"}
@@ -78,8 +78,8 @@ define(['tools', 'ui/ui'], function (tools, ui) {
         }
     ];
 
-    fakeData.routeColorSelector = new tools.ValueSelector(ui.ITEM_COLORS);
-    fakeData.routeOpacitySelector = new tools.ValueSelector(ui.ITEM_OPACITIES);
+    fakeData.routeColorSelector = new generalTools.ValueSelector(ui.ITEM_COLORS);
+    fakeData.routeOpacitySelector = new generalTools.ValueSelector(ui.ITEM_OPACITIES);
 
     return fakeData;
 });

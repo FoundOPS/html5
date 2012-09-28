@@ -1,5 +1,5 @@
-define(["tools", "db/saveHistory", "db/services", "jquery", "kendo", "jui",
-    "jfilereader", "lib/swfobject", "jform"], function (tools, saveHistory, dbServices, $) {
+define(["tools/generalTools", "db/saveHistory", "db/services", "jquery", "kendo", "jui",
+    "jfilereader", "lib/swfobject", "jform"], function (generalTools, saveHistory, dbServices, $) {
     // shorten references to variables. this is better for uglification
     var kendo = window.kendo,
         ui = kendo.ui,
@@ -29,7 +29,7 @@ define(["tools", "db/saveHistory", "db/services", "jquery", "kendo", "jui",
             that.newImage = false;
 
             that.cropBox.on("load", function () {
-                tools.resizeImage(that.cropBox, that.options.imageWidth, that.options.containerWidth);
+                generalTools.resizeImage(that.cropBox, that.options.imageWidth, that.options.containerWidth);
             });
 
             //setup the FileReader on the imageUpload button
@@ -63,7 +63,7 @@ define(["tools", "db/saveHistory", "db/services", "jquery", "kendo", "jui",
                 that.cropBox.css("visibility", "visible").css("width", "auto").css("height", "auto");
 
                 that.newImage = true;
-                tools.resizeImage(that.cropBox, that.options.imageWidth, that.options.containerWidth);
+                generalTools.resizeImage(that.cropBox, that.options.imageWidth, that.options.containerWidth);
                 that.submitForm();
             };
 
@@ -84,7 +84,7 @@ define(["tools", "db/saveHistory", "db/services", "jquery", "kendo", "jui",
 
             //set the form value
             that.imageFileNameField.val(file.name);
-            tools.resizeImage(that.cropBox, that.options.imageWidth, that.options.containerWidth);
+            generalTools.resizeImage(that.cropBox, that.options.imageWidth, that.options.containerWidth);
         },
 
         events: ["uploaded"],
@@ -103,7 +103,7 @@ define(["tools", "db/saveHistory", "db/services", "jquery", "kendo", "jui",
                 that.setImageUrl(data);
             }
 
-            tools.resizeImage(that.cropBox, that.options.imageWidth, that.options.containerWidth);
+            generalTools.resizeImage(that.cropBox, that.options.imageWidth, that.options.containerWidth);
         },
 
         submitForm: function () {

@@ -6,7 +6,7 @@
 
 'use strict';
 
-define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "parameters", "widgets/serviceDetails"], function (routeDestinationDetails, dbServices, saveHistory, parameters) {
+define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "tools/parameters", "widgets/serviceDetails"], function (routeDestinationDetails, dbServices, saveHistory, parameters) {
     /**
      * routeTask = wrapper for all service objects
      * vm = viewModel

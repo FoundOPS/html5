@@ -52,11 +52,11 @@ require.config({
     }
 });
 
-require(["jquery", "widgets/navigator", "developer", "db/services", "db/session", "parameters", "containers/silverlight", "tools", "hasher", "db/models", "kendo", "underscore",
+require(["jquery", "widgets/navigator", "developer", "db/services", "db/session", "tools/parameters", "containers/silverlight", "tools/generalTools", "hasher", "db/models", "kendo", "underscore",
     "uservoice", "moment", "sections/personalSettings", "sections/businessSettings", "sections/usersSettings",
     "sections/dispatcherSettings", "sections/changePassword", "sections/services",
     "sections/routes", "sections/routeDetails", "sections/routeDestinationDetails", "sections/routeTask", "sections/mapView",
-    "widgets/serviceDetails"], function ($, Navigator, developer, dbServices, session, parameters, silverlight, tools, hasher) {
+    "widgets/serviceDetails"], function ($, Navigator, developer, dbServices, session, parameters, silverlight, generalTools, hasher) {
     /**
      * application = The app object.
      * navigator = The navigator object.

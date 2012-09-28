@@ -2,7 +2,7 @@
 
 'use strict';
 
-define(['db/services', 'tools', "parameters", "kendo"], function (dbservices, tools, parameters) {
+define(['db/services', "tools/parameters", "kendo"], function (dbservices, parameters) {
     var session = new kendo.data.ObservableObject({});
     window.session = session;
 

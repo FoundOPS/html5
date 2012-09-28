@@ -2,7 +2,7 @@
 
 'use strict';
 
-require(["jquery", "db/session", "db/services", "parameters", "tools", "db/saveHistory", "kendoTools", "widgets/serviceDetails", "jform"], function ($, session, dbServices, parameters, tools, saveHistory, kendoTools) {
+require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateTools", "db/saveHistory", "tools/kendoTools", "widgets/serviceDetails", "jform"], function ($, session, dbServices, parameters, dateTools, saveHistory, kendoTools) {
     var services = {}, serviceHoldersDataSource, grid, handleChange, serviceTypesDropDown, selectedServiceHolder, vm;
 
     //region Public
@@ -122,8 +122,8 @@ require(["jquery", "db/session", "db/services", "parameters", "tools", "db/saveH
         form.find("input[name=roleId]").val(session.get("role.id"));
         form.find("input[name=serviceType]").val(vm.get("serviceType.Name"));
 
-        form.find("input[name=startDate]").val(tools.stripDate(vm.get("startDate")));
-        form.find("input[name=endDate]").val(tools.stripDate(vm.get("endDate")));
+        form.find("input[name=startDate]").val(dateTools.stripDate(vm.get("startDate")));
+        form.find("input[name=endDate]").val(dateTools.stripDate(vm.get("endDate")));
 
         form[0].action = dbServices.ROOT_API_URL + "Service/GetServicesHoldersWithFieldsCsv";
         form.submit();
@@ -293,8 +293,8 @@ require(["jquery", "db/session", "db/services", "parameters", "tools", "db/saveH
 
         var readAction = "service/GetServicesHoldersWithFields";
         var params = {
-            startDate: tools.stripDate(vm.get("startDate")),
-            endDate: tools.stripDate(vm.get("endDate")),
+            startDate: dateTools.stripDate(vm.get("startDate")),
+            endDate: dateTools.stripDate(vm.get("endDate")),
             serviceType: serviceType
         };
 
@@ -463,8 +463,8 @@ require(["jquery", "db/session", "db/services", "parameters", "tools", "db/saveH
 //endregion
 
     var reloadServices = _.debounce(function () {
-        serviceHoldersDataSource.options.transport.read.data.startDate = tools.formatDate(vm.get("startDate"));
-        serviceHoldersDataSource.options.transport.read.data.endDate = tools.formatDate(vm.get("endDate"));
+        serviceHoldersDataSource.options.transport.read.data.startDate = dateTools.stripDate(vm.get("startDate"));
+        serviceHoldersDataSource.options.transport.read.data.endDate = dateTools.stripDate(vm.get("endDate"));
         serviceHoldersDataSource.read();
     }, 250);
 

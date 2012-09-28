@@ -1,6 +1,6 @@
 'use strict';
 
-define(['db/services', 'db/session', 'hasher', 'parameters'], function (dbServices, session, hasher, parameters) {
+define(['db/services', 'db/session', 'hasher', 'tools/parameters'], function (dbServices, session, hasher, parameters) {
     var silverlight = {}, currentSection;
 
     window.silverlight = silverlight;

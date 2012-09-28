@@ -6,7 +6,7 @@
 
 'use strict';
 
-define(["developer", "tools", "db/saveHistory"], function (developer, tools, saveHistory) {
+define(["developer", "tools/dateTools", "db/saveHistory"], function (developer, dateTools, saveHistory) {
     var services = {};
 
     $.support.cors = true;
@@ -98,7 +98,12 @@ define(["developer", "tools", "db/saveHistory"], function (developer, tools, sav
 
                         //if there is a converter, convert the data
                         if (opt_convertItem) {
-                            convertedData = tools.convertArray(response, opt_convertItem);
+                            convertedData = [];
+
+                            var i;
+                            for (i in response) {
+                                convertedData.push(opt_convertItem(items[i]));
+                            }
                         }
 
                         //perform the callback function by passing the response data
@@ -148,7 +153,7 @@ define(["developer", "tools", "db/saveHistory"], function (developer, tools, sav
      * @param {!function(Array.<Object>)} callback A callback to pass the loaded routes to.
      */
     services.getRoutes = function (serviceDateUtc, callback) {
-        return services._getHttp('routes/GetRoutes', {serviceDateUtc: tools.stripDate(serviceDateUtc)}, false)(callback);
+        return services._getHttp('routes/GetRoutes', {serviceDateUtc: dateTools.stripDate(serviceDateUtc)}, false)(callback);
     };
 
     /**
@@ -215,7 +220,7 @@ define(["developer", "tools", "db/saveHistory"], function (developer, tools, sav
     services.getServiceDetails = function (serviceId, serviceDate, recurringServiceId, serviceTemplateId, callback) {
         var data = {
             serviceId: serviceId,
-            serviceDate: tools.stripDate(serviceDate),
+            serviceDate: dateTools.stripDate(serviceDate),
             recurringServiceId: recurringServiceId,
             serviceTemplateId: serviceTemplateId
         };

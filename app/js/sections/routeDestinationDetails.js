@@ -6,7 +6,7 @@
 
 'use strict';
 
-define(["sections/linkedEntitySection", "sections/routeDetails", "parameters", "developer"], function (createBase, routeDetails, parameters, developer) {
+define(["sections/linkedEntitySection", "sections/routeDetails", "tools/parameters", "developer"], function (createBase, routeDetails, parameters, developer) {
     var vm, section = createBase("routeTask", "routeTaskId",
         //on show
         function () {

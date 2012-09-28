@@ -12,7 +12,7 @@
 
 'use strict';
 
-define(["db/session", "db/services", "tools", "parameters", "ui/leaflet", "ui/ui", "lib/leaflet"], function (session, dbServices, tools, parameters, leaflet, ui) {
+define(["db/session", "db/services", "tools/generalTools", "tools/dateTools", "tools/parameters", "ui/leaflet", "ui/ui", "lib/leaflet"], function (session, dbServices, generalTools, dateTools, parameters, leaflet, ui) {
     var mapView = {}, map, center, resources, resourcesGroup, routesGroup, depotsGroup, trackPointsGroup, selectedDate = session.today(), selectedRouteId;
     //region Locals
     /**
@@ -33,13 +33,13 @@ define(["db/session", "db/services", "tools", "parameters", "ui/leaflet", "ui/ui
      * Associates routes with colors.
      * @type {tools.ValueSelector}
      */
-    var routeColorSelector = new tools.ValueSelector(ui.ITEM_COLORS);
+    var routeColorSelector = new generalTools.ValueSelector(ui.ITEM_COLORS);
 
     /**
      * Associates routes with opacities.
      * @type {tools.ValueSelector}
      */
-    var routeOpacitySelector = new tools.ValueSelector(ui.ITEM_OPACITIES);
+    var routeOpacitySelector = new generalTools.ValueSelector(ui.ITEM_OPACITIES);
     //endregion
 
     //region Methods
@@ -141,7 +141,7 @@ define(["db/session", "db/services", "tools", "parameters", "ui/leaflet", "ui/ui
     var getResources = function () {
         //check if there is a roleId set
         //if the date is today: load the resources with latest points
-        if (tools.dateEqual(selectedDate, new Date(), true)) {
+        if (dateTools.dateEqual(selectedDate, new Date(), true)) {
             dbServices.getResourcesWithLatestPoints(function (resourcesWithLatestPoints) {
                 resources = resourcesWithLatestPoints;
                 drawResources();
@@ -180,7 +180,7 @@ define(["db/session", "db/services", "tools", "parameters", "ui/leaflet", "ui/ui
      */
     var setDate = function (date) {
         selectedDate = date;
-        parameters.setOne("date", tools.stripDate(date));
+        parameters.setOne("date", dateTools.stripDate(date));
         //remove all objects from the map
         removeLayer(resourcesGroup);
         removeLayer(routesGroup);

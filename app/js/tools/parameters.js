@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(['jquery', 'hasher', 'underscore.string', 'signals', 'developer'], function ($, hasher, _s, signals, developer) {
+define(['jquery', 'hasher', 'underscore.string', 'signals'], function ($, hasher, _s, signals) {
     var parameters = {
         changed: new signals.Signal()
     };

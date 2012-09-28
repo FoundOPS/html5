@@ -6,8 +6,8 @@
 
 "use strict";
 
-define(["tools", "db/services", "db/session", "db/saveHistory", "widgets/settingsMenu", "colorpicker",
-    "ui/kendoChanges"], function (tools, dbServices, session, saveHistory) {
+define(["tools/generalTools", "db/services", "db/session", "db/saveHistory", "widgets/settingsMenu", "colorpicker",
+    "ui/kendoChanges"], function (generalTools, dbServices, session, saveHistory) {
     var dispatcherSettings = {};
 
     //region Locals
@@ -276,7 +276,7 @@ define(["tools", "db/services", "db/session", "db/saveHistory", "widgets/setting
             }
             //set the Id if it is empty
             if (!e.model.Id) {
-                e.model.Id = tools.newGuid();
+                e.model.Id = generalTools.newGuid();
             }
         });
     };

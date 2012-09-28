@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(["db/services", "db/session", "db/saveHistory", "tools", "widgets/settingsMenu"], function (dbServices, session, saveHistory, tools) {
+define(["db/services", "db/session", "db/saveHistory", "tools/dateTools", "widgets/settingsMenu"], function (dbServices, session, saveHistory, dateTools) {
     var usersSettings = {}, usersDataSource, linkedEmployees;
 
     //on add and edit, select a linked employee if the name matches the name in the form
@@ -204,7 +204,7 @@ define(["db/services", "db/session", "db/saveHistory", "tools", "widgets/setting
                         usersDataSource._data[0].Employee = {FirstName: name[0], Id: " ", LastName: name[1], LinkedUserAccountId: " "};
                     }
                     //add timezone to new user
-                    usersDataSource._data[0].TimeZoneInfo = tools.getLocalTimeZone();
+                    usersDataSource._data[0].TimeZoneInfo = dateTools.getLocalTimeZone();
                     usersDataSource.sync(); //sync changes
                     var grid = $("#usersGrid").data("kendoGrid");
                     $("#usersGrid")[0].childNodes[0].childNodes[2].childNodes[0].childNodes[4].innerText = employee;

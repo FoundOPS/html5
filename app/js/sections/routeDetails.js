@@ -6,7 +6,7 @@
 
 'use strict';
 
-define(["sections/linkedEntitySection", "sections/routes", "parameters", "db/services", "db/models"], function (createBase, routes, parameters, dbServices, models) {
+define(["sections/linkedEntitySection", "sections/routes", "tools/parameters", "db/services", "db/models"], function (createBase, routes, parameters, dbServices, models) {
     var vm, section = createBase("routeDestinationDetails", "routeDestinationId",
         //on show
         function () {
