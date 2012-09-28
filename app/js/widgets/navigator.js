@@ -109,7 +109,7 @@ define(["jquery", "ui/popup", "doT", "jmousewheel", "jscrollpane"], function ($,
         var roles = config.roles;
         var initialAvailableSections = config.roles[0].sections;
 
-        //TODO: Find out if this has a use....
+        //TODO: Fix dependency in jasmine tests.
         this.sideBarElementCount = 0;
 
         this.isCoverWindowButtonEnabled = false;
@@ -129,7 +129,7 @@ define(["jquery", "ui/popup", "doT", "jmousewheel", "jscrollpane"], function ($,
             businessLogoEnabled = true;
         }
 
-        var avatarUrl = ""; //TODO: Set default missing avatar image.
+        var avatarUrl = "img/emptyPerson.png"; //Default missing avatar image.
         if(typeof (config.avatarUrl)!=='undefined'){
             avatarUrl = config.avatarUrl;
         }
@@ -332,39 +332,37 @@ define(["jquery", "ui/popup", "doT", "jmousewheel", "jscrollpane"], function ($,
         var initSideBar = function () {
             //var slideMenuTimeout = null;
 
-            //TODO: Remove duplicate naming.
             //setup the sidebar wrapper (for the scrollbar)
-            var sBarWrapper = $(document.createElement('div'));
-            sBarWrapper.attr('id', 'sideBarWrapper');
+            var sideBarWrapperDiv = $(document.createElement('div'));
+            sideBarWrapperDiv.attr('id', 'sideBarWrapper');
 
-            var sBarInnerWrapper = $(document.createElement('div'));
-            sBarInnerWrapper.attr('id', 'sideBarInnerWrapper');
+            var sideBarInnerWrapperDiv = $(document.createElement('div'));
+            sideBarInnerWrapperDiv.attr('id', 'sideBarInnerWrapper');
 
             //setup the sidebar (the place for buttons)
-            var sBar = $(document.createElement('div'));
-            sBar.attr('id', 'sideBar');
+            var sideBarDiv = $(document.createElement('div'));
+            sideBarDiv.attr('id', 'sideBar');
 
             //extract the template from the html
-            sBar.html(expandTemplate);
-            sBar.append("<div id='sideBarSections'></div>");
-            sBarInnerWrapper.append(sBar);
-            sBarWrapper.append(sBarInnerWrapper);
+            sideBarDiv.html(expandTemplate);
+            sideBarDiv.append("<div id='sideBarSections'></div>");
+            sideBarInnerWrapperDiv.append(sideBarDiv);
+            sideBarWrapperDiv.append(sideBarInnerWrapperDiv);
 
             if (thisNavigator.isCoverWindowButtonEnabled) {
-                $(sBarInnerWrapper).after("<div id='coverWindowButton'>Cover Window</div>");
-                //console.log("It's enabled");
+                $(sideBarInnerWrapperDiv).after("<div id='coverWindowButton'>Cover Window</div>");
             }
 
-            $('#nav').after(sBarWrapper);
+            $('#nav').after(sideBarWrapperDiv);
 
             setSideBarSections(allSections, initialAvailableSections);
 
             $(document).ready(function () {
                 if ($(window).width() <= MOBILE_WIDTH) {
                     //TODO: Condense into another function?
-                    sBar.addClass("hidden");
-                    var offset = -1 * (sBar.offset().top + sBar.outerHeight());
-                    sBar.css("top", offset);
+                    sideBarDiv.addClass("hidden");
+                    var offset = -1 * (sideBarDiv.offset().top + sideBarDiv.outerHeight());
+                    sideBarDiv.css("top", offset);
                 } /* else {
                     $(".iconShow").addClass("rotateIcon");
                 } */
@@ -389,8 +387,6 @@ define(["jquery", "ui/popup", "doT", "jmousewheel", "jscrollpane"], function ($,
             initSideBarScrollBar();
 
             /** Sidebar event listeners **/
-            var sideBarDiv = $("#sideBar");
-            var sideBarWrapperDiv = $("#sideBarWrapper");
             //Listens for clicks outside of elements
             $(document).on('click touchend', function (e) {
                 var clicked = $(e.target);
@@ -421,38 +417,36 @@ define(["jquery", "ui/popup", "doT", "jmousewheel", "jscrollpane"], function ($,
                     if (sideBarDiv.hasClass("cover")) {
                         sideBarDiv.removeClass("cover");
                         sideBarDiv.attr("style", "");
-                        $("#sideBarWrapper").attr("style", "");
-                        $("#sideBarInnerWrapper").attr("style", "");
+                        sideBarWrapperDiv.attr("style", "");
+                        sideBarInnerWrapperDiv.attr("style", "");
                     }
 
                     if (!sideBarDiv.hasClass("shown")) {
-                        $("#sideBarWrapper").css("width", "");
+                        sideBarWrapperDiv.css("width", "");
 
                         //TODO: Condense.
                         sideBarDiv.addClass("hidden");
-                        //console.log("sBar.offset().top: " + sBar.offset().top);
-                        if (sBar.offset().top >= 0) {
-                            var offset = -1 * (sBar.offset().top + sBar.outerHeight());
-                            //console.log("Offset: "+ offset);
-                            sBar.css("top", offset);
+                        if (sideBarDiv.offset().top >= 0) {
+                            var offset = -1 * (sideBarDiv.offset().top + sideBarDiv.outerHeight());
+                            sideBarDiv.css("top", offset);
                         }
 
-                        $("#sideBarWrapper").css('visibility', 'hidden');
+                        sideBarWrapperDiv.css('visibility', 'hidden');
                         $(".iconShow").removeClass('rotateIcon');
                     }
 
                     if (sideBarDiv.hasClass("expand")) {
                         sideBarDiv.removeClass("expand");
                         sideBarDiv.attr("style", "");
-                        $("#sideBarInnerWrapper").attr("style", "");
+                        sideBarInnerWrapperDiv.attr("style", "");
                     }
                 } else if ($(window).width() > MOBILE_WIDTH) {
                     if (sideBarDiv.hasClass("hidden") || sideBarDiv.hasClass("shown")) {
                         sideBarDiv.removeClass("hidden");
                         sideBarDiv.removeClass("shown");
                         sideBarDiv.attr("style", "");
-                        $("#sideBarWrapper").attr("style", "");
-                        $("#sideBarInnerWrapper").attr("style", "");
+                        sideBarWrapperDiv.attr("style", "");
+                        sideBarInnerWrapperDiv.attr("style", "");
                         $(".iconShow").removeClass('rotateIcon');
                     }
                     if (sideBarDiv.hasClass("hover")) {
@@ -536,7 +530,6 @@ define(["jquery", "ui/popup", "doT", "jmousewheel", "jscrollpane"], function ($,
             );
 
             //General function that toggles menu up, out of view.
-            //TODO: Get rotation to work on default android 2.3 browser http://jsfiddle.net/KrRsy/
             var toggleMenu = function () {
                 $(".iconShow").toggleClass("rotateIcon");
                 if (sideBarDiv.hasClass("hidden")) {
@@ -603,26 +596,6 @@ define(["jquery", "ui/popup", "doT", "jmousewheel", "jscrollpane"], function ($,
                 contents: roles
             };
             $("#navClient").popup('addMenu', changeBusinessMenu);
-
-            /*$("#logo").popup({
-             id: "logo",
-             title: "Test Menu",
-             contents: [
-             {"name": "Testing long menu names..............", url: config.settingsUrl},
-             {"name": "Test 1", id: "test1"},
-             {"name": "Log Out", url: ""}
-             ]
-             });
-             $("#logo").popup('addMenu',{
-             id:"test1",
-             title: "Testing 1",
-             contents:
-             [
-             {"name": "Test a"},
-             {"name": "Test b"},
-             {"name": "Test c"}
-             ]
-             });*/
 
             $(document).on("popup.created", function () {
                 $("#popupContentWrapper").jScrollPane({
