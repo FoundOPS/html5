@@ -102,11 +102,14 @@ define(["jquery", "ui/popup", "doT", "jmousewheel", "jscrollpane"], function ($,
         //TODO: Finish adding error checking.
         var thisNavigator = this;
         var name = config.name;
+
         var settingsUrl = config.settingsUrl;
         var logOutUrl = config.logOutUrl;
         var allSections = config.sections;
-        var initialAvailableSections = config.roles[0].sections;
         var roles = config.roles;
+        var initialAvailableSections = config.roles[0].sections;
+
+        //TODO: Find out if this has a use....
         this.sideBarElementCount = 0;
 
         this.isCoverWindowButtonEnabled = false;
@@ -309,7 +312,6 @@ define(["jquery", "ui/popup", "doT", "jmousewheel", "jscrollpane"], function ($,
             });
         };
 
-        //TODO: Set max and min values at top of function.
         var slideMenuOpen = function () {
             $("#sideBarWrapper, #sideBarInnerWrapper, #sideBarWrapper .jspContainer, #sideBar")
                 .stop(true, false)
