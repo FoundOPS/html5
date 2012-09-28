@@ -153,13 +153,29 @@ define(['jquery', 'hasher', 'underscore.string', 'signals', 'developer'], functi
     /**
      * Sets the section, using the existing url parameters
      * @param section
+     * @param [clearParams] (Optional) Defaults to false. Clear all parameters except roleId
      */
-    parameters.setSection = function (section) {
-        if (!section || parameters.getSection().name === section.name) {
+    parameters.setSection = function (section, clearParams) {
+        if (!section || !section.name) {
             return;
         }
 
-        var hash = buildQuery(parameters.get(), section);
+        //do not change sections if this is already the section
+        var currentSection = parameters.getSection();
+        if (currentSection && currentSection.name === section.name) {
+            return;
+        }
+
+        var params = parameters.get();
+        if (clearParams) {
+            _.each(_.keys(params), function (key) {
+                if (key !== "roleId") {
+                    delete params[key];
+                }
+            });
+        }
+
+        var hash = buildQuery(params, section);
 
         setHash(hash);
     };

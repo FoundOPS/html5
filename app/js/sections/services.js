@@ -559,7 +559,7 @@ require(["jquery", "db/session", "db/services", "parameters", "tools", "db/saveH
         //1) update the service type (if it changed)
         //2) update the grid's filters (if they changed)
         parameters.changed.add(function (section, query) {
-            if (section.name !== "services" || !services.serviceTypes) {
+            if (!section || section.name !== "services" || !services.serviceTypes) {
                 return;
             }
 
