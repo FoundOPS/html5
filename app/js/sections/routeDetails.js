@@ -13,7 +13,7 @@ define(["sections/linkedEntitySection", "sections/routes", "tools/parameters", "
             var routeDestinations = routes.vm.get("nextEntity.RouteDestinations");
 
             if (!routeDestinations) {
-                parameters.setSection({name: "routes"});
+                parameters.set({section: {name: "routes"}});
                 return;
             }
 
@@ -34,7 +34,7 @@ define(["sections/linkedEntitySection", "sections/routes", "tools/parameters", "
         var query = parameters.get();
         //remove the routeId so it does not jump back here
         delete query.routeId;
-        parameters.set(query, true, {name: "routes"});
+        parameters.set({params: query, replace: true, section: {name: "routes"}});
     };
 
     /**

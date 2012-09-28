@@ -55,7 +55,7 @@ define(['db/services', 'db/session', 'hasher', 'tools/parameters'], function (db
     //a workaround for opening the importer
     //this is called when the importer view is shown
     window.openImporter = function () {
-        parameters.setSection({name: "Importer", isSilverlight: true});
+        parameters.set({section: {name: "Importer", isSilverlight: true}});
     };
 
     //endregion

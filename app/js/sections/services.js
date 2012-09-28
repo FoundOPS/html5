@@ -480,7 +480,7 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
             var currentParams = parameters.get();
             if (currentParams.service !== serviceName) {
                 currentParams.service = serviceName;
-                parameters.set(currentParams, true);
+                parameters.set({params: currentParams, replace: true});
             }
 
             createDataSourceAndGrid();
@@ -581,7 +581,7 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
                 query.service = serviceType.Name;
 
                 //update the query parameters
-                parameters.set(query, true);
+                parameters.set({params: query, replace: true});
                 return;
             }
             //if it changed, update it

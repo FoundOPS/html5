@@ -8,7 +8,10 @@
 
 define(['jquery', 'hasher', 'underscore.string', 'signals'], function ($, hasher, _s, signals) {
     var parameters = {
-        changed: new signals.Signal()
+        changed: new signals.Signal(),
+        section: {
+            changed: new signals.Signal()
+        }
     };
 
     var setHash = function (hash, replace) {
@@ -126,16 +129,40 @@ define(['jquery', 'hasher', 'underscore.string', 'signals'], function ($, hasher
 
     /**
      * Set the parameters/section
-     * @param {*} params The parameters to set
-     * @param {boolean} [replace] (Optional) If set, it will replace the current hash (and not add it to history).
-     * @param {{name: string, isSilverlight: boolean}} [section] (Optional) The section to set. If null it will keep the current section
+     * @param {*} config
+     * [params] (Optional) If not set it will use the current parameters
+     * {boolean} [replace] (Optional) If set and true it will replace the current hash (and not add it to history)
+     * {{name: string, isSilverlight: boolean}} [section] (Optional) The section to set. If null it will keep the current section
      */
-    parameters.set = function (params, replace, section) {
+    parameters.set = function (config) {
+        var params = config.params, replace = config.replace, section = config.section;
+
+        if (!params) {
+            params = parameters.get();
+        }
+
+        //always set the role id
+        if (!params.roleId) {
+            var roleId = session.get("role.id");
+            if (roleId) {
+                params.roleId = roleId;
+            }
+        }
+
+        var lastSection = parameters.getSection();
+
+        //if there is no section set, choose the current section
+        if (!section) {
+            section = lastSection;
+            if (!lastSection) {
+                //there must be a section set to set parameters, so return
+                return;
+            }
+        }
+
+        //set the hash
         var query = buildQuery(params, section);
         setHash(query, replace);
-        if (section) {
-            parameters.setSection(section);
-        }
     };
 
     /**
@@ -147,37 +174,7 @@ define(['jquery', 'hasher', 'underscore.string', 'signals'], function ($, hasher
     parameters.setOne = function (key, value, replace) {
         var query = parameters.get();
         query[key] = value;
-        parameters.set(query, replace);
-    };
-
-    /**
-     * Sets the section, using the existing url parameters
-     * @param section
-     * @param [clearParams] (Optional) Defaults to false. Clear all parameters except roleId
-     */
-    parameters.setSection = function (section, clearParams) {
-        if (!section || !section.name) {
-            return;
-        }
-
-        //do not change sections if this is already the section
-        var currentSection = parameters.getSection();
-        if (currentSection && currentSection.name === section.name) {
-            return;
-        }
-
-        var params = parameters.get();
-        if (clearParams) {
-            _.each(_.keys(params), function (key) {
-                if (key !== "roleId") {
-                    delete params[key];
-                }
-            });
-        }
-
-        var hash = buildQuery(params, section);
-
-        setHash(hash);
+        parameters.set({params: query, replace: replace});
     };
 
     /**
@@ -187,11 +184,24 @@ define(['jquery', 'hasher', 'underscore.string', 'signals'], function ($, hasher
         parameters.changed.dispatch(parameters.getSection(), parameters.get());
     };
 
+    //only dispatch section changes when they have stabilized for 1/5th second
+    var sectionChanged = _.debounce(function (section) {
+        parameters.section.changed.dispatch(section);
+    }, 200);
+
     // Setup Hasher
     hasher.prependHash = '';
     hasher.init();
-    hasher.changed.add(function () {
+    hasher.changed.add(function (newHash, oldHash) {
         parameters.parse();
+
+        var lastSection = oldHash ? parameters.getSection(oldHash) : null;
+        var newSection = newHash ? parameters.getSection(newHash) : null;
+
+        //if the section changed, dispatch a section changed event
+        if (!lastSection || !newSection || lastSection.name !== newSection.name) {
+            sectionChanged(newSection);
+        }
     });
 
     return parameters;

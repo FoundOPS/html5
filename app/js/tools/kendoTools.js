@@ -284,7 +284,7 @@ define(['db/session', 'db/services', 'tools/parameters'], function (session, dbS
             query[key] = val + "$" + type;
         });
 
-        parameters.set(query, true, section);
+        parameters.set({params: query, replace: true, section: section});
     };
 
     /*

@@ -159,7 +159,7 @@ require(["jquery", "widgets/navigator", "developer", "db/services", "db/session"
         } else {
             //TODO: Change the way session data is so SL sections have URL, will need to publish mobile app at same time
             //for now, manually set url for SL section
-            parameters.setSection(section, true);
+            parameters.set({section: section});
         }
     });
 
