@@ -199,11 +199,18 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
             $('html')
                 .on('click touchend', function (e) {
                     var clicked = $(e.target);
+                    //console.log(clicked[0].outerHTML);
+                    //console.log(clicked.parents("#popupContentWrapper"));
+                    //console.log(clicked.attr("id"));
                     //TODO: Return if not visible.
                     //TODO: Also add arrow click detection?
                     var popupHeaderLen = clicked.parents("#popupHeader").length + clicked.is("#popupHeader") ? 1 : 0;
-                    var popupContentLen = clicked.parents("#popupContent").length + clicked.is("#popupContent") ? 1 : 0;
+                    //console.log("pHeaderLen: " + popupHeaderLen);
+                    //TODO: Find better listener for this.
+                    var popupContentLen = (clicked.parents("#popupContentWrapper").length && !clicked.parent().is("#popupContentWrapper")) ? 1 : 0;
+                    //console.log("pHeaderLen: " + popupContentLen);
                     var isListener = clicked.parents(".popupListener").length + clicked.is(".popupListener") ? 1 : 0;
+                    //console.log("pHeaderLen: " + isListener);
                     if (popupHeaderLen === 0 && popupContentLen === 0 && isListener === 0) {
                         thisPopup.closePopup();
                     }

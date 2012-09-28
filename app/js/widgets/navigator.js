@@ -54,23 +54,6 @@ define(["jquery", "ui/popup", "doT", "jmousewheel", "jscrollpane"], function ($,
         };
     })(jQuery);
 
-
-    var navTemplate = doT.template('<div id="navContainer">' +
-        '<div id="navSearch" class="navElement">' +
-        ' <input name="search" type="text" placeholder="Search..."/>' +
-        '<a><img src="img/Search.png"/></a></div>' +
-        '<div id="navClient" class="navElement last">' +
-        '<a><img class="navIcon profile" src="{{= it.profileImgUrl }}"/><img id="clientLogo" src="{{= it.clientLogoUrl }}"/></a></div>' +
-        '</div>' +
-        '<img id="logo" src="./img/Logo.png" alt="FoundOPS"/>');
-    var backButtonTemplate = doT.template('<div id="backButtonContainer"><a onclick="main.onBack()"><img id="backArrow" src="img/backArrow.png"/></a></div>');
-    var showMenuTemplate = doT.template('<div id="showMenu"><a><img class="iconShow" src="img/Expand.png"/></a></div>');
-    var expandTemplate = doT.template('<a id="expandMenuButton"><div id="slideMenu"><img class="iconExpand" src="img/Expand.png"/></div>');
-    var sideBarElementTemplate = doT.template(
-        '<a {{= it.href }} class="sideBarElement" data-color="{{= it.color }}" data-iconUrl="{{= it.iconUrl }}" data-hoverIconUrl="{{= it.hoverIconUrl }}">' +
-        '   <span class="icon" style="background: url(\'{{= it.iconUrl }}\') {{= it.bgX }} {{= it.bgY }} no-repeat"></span>' +
-        '   <span class="sectionName">{{= it.name }}</span></a>');
-
     /**
      * Initializes the navigator
      * @param config Example below
@@ -97,6 +80,24 @@ define(["jquery", "ui/popup", "doT", "jmousewheel", "jscrollpane"], function ($,
         var SIDEBAR_WIDTH = "55px";
         var ANIMATION_SPEED = 'fast';
         //////////////////////////////////
+
+        //Templates
+        var navTemplate = doT.template('<div id="navContainer">' +
+            '<div id="navSearch" class="navElement">' +
+            ' <input name="search" type="text" placeholder="Search..."/>' +
+            '<a><img src="img/Search.png"/></a></div>' +
+            '<div id="navClient" class="navElement last">' +
+            '<a><img class="navIcon profile" src="{{= it.profileImgUrl }}"/><img id="clientLogo" src="{{= it.clientLogoUrl }}"/></a></div>' +
+            '</div>' +
+            '<img id="logo" src="./img/Logo.png" alt="FoundOPS"/>');
+        var backButtonTemplate = doT.template('<div id="backButtonContainer"><a onclick="main.onBack()"><img id="backArrow" src="img/backArrow.png"/></a></div>');
+        var showMenuTemplate = doT.template('<div id="showMenu"><a><img class="iconShow" src="img/Expand.png"/></a></div>');
+        var expandTemplate = doT.template('<a id="expandMenuButton"><div id="slideMenu"><img class="iconExpand" src="img/Expand.png"/></div>');
+        var sideBarElementTemplate = doT.template(
+            '<a {{= it.href }} class="sideBarElement" data-color="{{= it.color }}" data-iconUrl="{{= it.iconUrl }}" data-hoverIconUrl="{{= it.hoverIconUrl }}">' +
+                '   <span class="icon" style="background: url(\'{{= it.iconUrl }}\') {{= it.bgX }} {{= it.bgY }} no-repeat"></span>' +
+                '   <span class="sectionName">{{= it.name }}</span></a>');
+
 
         //Read in config values to local variables; set defaults.
         //TODO: Finish adding error checking.
@@ -224,9 +225,7 @@ define(["jquery", "ui/popup", "doT", "jmousewheel", "jscrollpane"], function ($,
 
         var setSideBarSections = function (allSections, availableSections) {
             $(".sideBarElement").off();
-
             var section;
-            var sBar = $("#sideBar");
             var sBarElement = "";
 
             thisNavigator.sideBarElementCount = 0;
@@ -676,6 +675,10 @@ define(["jquery", "ui/popup", "doT", "jmousewheel", "jscrollpane"], function ($,
 
         this.hideSearch = function () {
             $("#navSearch").hide();
+        };
+
+        this.hideBusinessLogo = function() {
+
         };
 
         this.showSearch = function () {
