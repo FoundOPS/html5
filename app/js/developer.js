@@ -43,18 +43,18 @@ define(function () {
      * The current web service source. Used when running local server for debugging.
      * @type {developer.DataSource}
      */
-    developer.CURRENT_DATA_SOURCE = developer.DataSource.BROWSER_LOCALAPI;
+    developer.CURRENT_DATA_SOURCE = developer.DataSource.LIVE;
 
     /**
      * This is for sections that are in the Silverlight application and is used for debugging.
      * @type {developer.Frame}
      */
-    developer.CURRENT_FRAME = developer.Frame.BROWSER;
+    developer.CURRENT_FRAME = developer.Frame.SILVERLIGHT_PUBLISHED;
 
     /**
      * The current silverlight version
      */
-    developer.CURRENT_SILVERLIGHT_VERSION = 0.1041;
+    developer.CURRENT_SILVERLIGHT_VERSION = 0.1051;
 
     /**
      * The local server's RoleId for GotGrease.
