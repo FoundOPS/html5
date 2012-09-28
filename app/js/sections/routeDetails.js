@@ -72,7 +72,7 @@ define(["sections/linkedEntitySection", "sections/routes", "parameters", "db/ser
     var addPushTrackPoints = function (routeId) {
         var onSuccess = function (position) {
             //Add a trackpoint for now in UTC
-            var collectedTime = moment.utc().toDate();
+            var collectedTime = moment.utc();
 
             var newTrackPoint = new models.TrackPoint(
                 position.coords.accuracy,
