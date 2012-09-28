@@ -160,7 +160,7 @@ define(['db/services', 'db/session', 'hasher', 'parameters'], function (dbServic
         var section = parameters.getSection();
         currentSection = section;
 
-        if (!section.isSilverlight) {
+        if (!section || !section.isSilverlight) {
             hide();
             return;
         }
