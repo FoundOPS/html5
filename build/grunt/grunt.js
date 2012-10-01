@@ -85,92 +85,103 @@ module.exports = function (grunt) {
         clean: ["C:/FoundOPS/html5/build/mobile/Android/assets/www", "C:/FoundOPS/html5/build/mobile/iOS/www"],
         copy: {
             browser: {
-                options: {
-                    basePath: "",
-                    processName: function (filename) {
-                        if (filename === "navigator-build.html") {
-                            filename = "navigator.html";
-                        }
-                        return filename;
-                    }
-                },
                 files: {
                     // Browser files
-                    "C:/FoundOPS/html5/build/main/": "../../login/**",
-                    "C:/FoundOPS/html5/build/main": ["../../app/styles/map.css", "../../app/navigator-build.html"],
-                    "C:/FoundOPS/html5/build/main/img/": "../../app/img/*"
+                    "C:/FoundOPS/html5/build/main/login/": "../../login/**",
+                    "C:/FoundOPS/html5/build/main/img/": "C:/FoundOPS/html5/app/img/*",
+                    "C:/FoundOPS/html5/build/main/navigator.html": "../../app/navigator-build.html",
+                    "C:/FoundOPS/html5/build/main/map.css": "../../app/styles/map.css"
+                }
+            },
+            login: {
+                files: {
+                    // Android
+                    "C:/FoundOPS/html5/build/mobile/Android/assets/www/img/": "C:/FoundOPS/html5/login/img/*",
+                    // iOS
+                    "C:/FoundOPS/html5/build/mobile/iOS/www/img/": "C:/FoundOPS/html5/login/img/*"
                 }
             },
             mobile: {
                 files: {
                     // Android files
-                    "C:/FoundOPS/html5/build/mobile/Android/assets/www/js": "C:/FoundOPS/html5/build/main/main-built.js",
-                    "C:/FoundOPS/html5/build/mobile/Android/assets/www/styles": "C:/FoundOPS/html5/build/main/main-built.css",
-                    "C:/FoundOPS/html5/build/mobile/Android/assets/www/styles/": "C:/FoundOPS/html5/app/styles/PTS55F.ttf",
+                    "C:/FoundOPS/html5/build/mobile/Android/assets/www/js/main-built.js": "C:/FoundOPS/html5/build/main/main-built.js",
+                    "C:/FoundOPS/html5/build/mobile/Android/assets/www/styles/main-built.css": "C:/FoundOPS/html5/build/main/main-built.css",
+                    "C:/FoundOPS/html5/build/mobile/Android/assets/www/styles/PTS55F.ttf": "C:/FoundOPS/html5/app/styles/PTS55F.ttf",
+                    "C:/FoundOPS/html5/build/mobile/Android/assets/www/styles/styles.less": "C:/FoundOPS/html5/login/styles/styles.less", // Login page files
+                    "C:/FoundOPS/html5/build/mobile/Android/assets/www/lib/": "C:/FoundOPS/html5/login/lib/*", // Login page files
                     "C:/FoundOPS/html5/build/mobile/Android/assets/www/img/": "C:/FoundOPS/html5/app/img/*",
                     "C:/FoundOPS/html5/build/mobile/Android/assets/www/view/": "C:/FoundOPS/html5/app/view/*",
                     "C:/FoundOPS/html5/build/mobile/Android/assets/www/styles/images/": "C:/FoundOPS/html5/app/styles/kendo/images/*",
                     "C:/FoundOPS/html5/build/mobile/Android/assets/www/styles/textures/": "C:/FoundOPS/html5/app/styles/kendo/textures/*",
-                    "C:/FoundOPS/html5/build/mobile/Android/assets/www": ["C:/FoundOPS/html5/app/login.html", "C:/FoundOPS/html5/app/navigator-build.html"],
+                    "C:/FoundOPS/html5/build/mobile/Android/assets/www/navigator.html": "C:/FoundOPS/html5/app/navigator-build.html",
+                    "C:/FoundOPS/html5/build/mobile/Android/assets/www/index.html": "C:/FoundOPS/html5/login/login.html",
                     "C:/FoundOPS/html5/build/mobile/Android/assets/www/": "C:/FoundOPS/html5/build/mobile/cordova/android/*",
                     "C:/FoundOPS/html5/build/mobile/Android/assets/www/childbrowser/": "C:/FoundOPS/html5/build/mobile/cordova/android/childbrowser/*",
                     // iOS Files
-                    "C:/FoundOPS/html5/build/mobile/iOS/www/js": "C:/FoundOPS/html5/build/main/main-built.js",
-                    "C:/FoundOPS/html5/build/mobile/iOS/www/styles": "C:/FoundOPS/html5/build/main/main-built.css",
-                    "C:/FoundOPS/html5/build/mobile/iOS/www/styles/": "C:/FoundOPS/html5/app/styles/PTS55F.ttf",
+                    "C:/FoundOPS/html5/build/mobile/iOS/www/js/main-built.js": "C:/FoundOPS/html5/build/main/main-built.js",
+                    "C:/FoundOPS/html5/build/mobile/iOS/www/styles/main-built.css": "C:/FoundOPS/html5/build/main/main-built.css",
+                    "C:/FoundOPS/html5/build/mobile/iOS/www/styles/PTS55F.ttf": "C:/FoundOPS/html5/app/styles/PTS55F.ttf",
+                    "C:/FoundOPS/html5/build/mobile/iOS/www/styles/styles.less": "C:/FoundOPS/html5/login/styles/styles.less", // Login page files
+                    "C:/FoundOPS/html5/build/mobile/iOS/www/lib/": "C:/FoundOPS/html5/login/lib/*", // Login page files
                     "C:/FoundOPS/html5/build/mobile/iOS/www/img/": "C:/FoundOPS/html5/app/img/*",
                     "C:/FoundOPS/html5/build/mobile/iOS/www/view/": "C:/FoundOPS/html5/app/view/*",
                     "C:/FoundOPS/html5/build/mobile/iOS/www/styles/images/": "C:/FoundOPS/html5/app/styles/kendo/images/*",
                     "C:/FoundOPS/html5/build/mobile/iOS/www/styles/textures/": "C:/FoundOPS/html5/app/styles/kendo/textures/*",
-                    "C:/FoundOPS/html5/build/mobile/iOS/www": ["C:/FoundOPS/html5/app/login.html", "C:/FoundOPS/html5/app/navigator-build.html"],
+                    "C:/FoundOPS/html5/build/mobile/iOS/www/navigator.html": "C:/FoundOPS/html5/app/navigator-build.html",
+                    "C:/FoundOPS/html5/build/mobile/iOS/www/index.html": "C:/FoundOPS/html5/login/login.html",
                     "C:/FoundOPS/html5/build/mobile/iOS/www/": "C:/FoundOPS/html5/build/mobile/cordova/iOS/*"
-                },
-                options: {
-                    processName: function (filename) {
-                        if (filename === "login.html") {
-                            filename = "index.html";
-                        } else if (filename === "navigator-build.html") {
-                            filename = "navigator.html";
-                        }
-                        return filename;
-                    }
                 }
             }
         },
         replace: {
             browser: {
-                src: ["C:/FoundOPS/html5/build/main/navigator.html"],
-                dest: "C:/FoundOPS/html5/build/main",
-                variables: {
-                    mobileOptimization: mobileOptimizationTags,
-                    blobRoot: '@Model["BlobRoot"]../',
-                    CSSblobRoot: '@Model["BlobRoot"]main-built.css?cb=' + version,
-                    JSblobRoot: '@Model["BlobRoot"]main-built.js?cb=' + version,
-                    cordova: ''
+                files: {
+                    "C:/FoundOPS/html5/build/main/navigator.html": "C:/FoundOPS/html5/build/main/navigator.html",
+                    "C:/FoundOPS/html5/build/main/login/login.html": "C:/FoundOPS/html5/build/main/login/login.html"
+                },
+                options: {
+                    variables: {
+                        mobileOptimization: mobileOptimizationTags,
+                        blobRoot: '@Model["BlobRoot"]../',
+                        CSSblobRoot: '@Model["BlobRoot"]main-built.css?cb=' + version,
+                        JSblobRoot: '@Model["BlobRoot"]main-built.js?cb=' + version,
+                        cordova: '',
+                        appLocation: '"http://app.foundops.com"'
+                    }
                 }
             },
             android: {
-                src: ["C:/FoundOPS/html5/build/mobile/Android/assets/www/navigator.html"],
-                dest: "C:/FoundOPS/html5/build/mobile/Android/assets/www",
-                variables: {
-                    mobileOptimization: mobileOptimizationTags,
-                    blobRoot: "",
-                    CSSblobRoot: "styles/main-built.css",
-                    JSblobRoot: "js/main-built.js",
-                    cordova: '<script type="text/javascript" charset="utf-8" src="cordova-2.1.0.js"></script>\n' +
-                        '<script type="text/javascript" charset="utf-8" src="statusbarnotification.js"></script>\n' +
-                        '<script type="text/javascript" charset="utf-8" src="childbrowser.js"></script>'
+                files: {
+                    "C:/FoundOPS/html5/build/mobile/Android/assets/www/navigator.html": "C:/FoundOPS/html5/build/mobile/Android/assets/www/navigator.html",
+                    "C:/FoundOPS/html5/build/mobile/Android/assets/www/index.html": "C:/FoundOPS/html5/build/mobile/Android/assets/www/index.html"
+                },
+                options: {
+                    variables: {
+                        mobileOptimization: mobileOptimizationTags,
+                        blobRoot: "",
+                        CSSblobRoot: "styles/main-built.css",
+                        JSblobRoot: "js/main-built.js",
+                        cordova: '<script type="text/javascript" charset="utf-8" src="cordova-2.1.0.js"></script>\n' +
+                            '<script type="text/javascript" charset="utf-8" src="statusbarnotification.js"></script>\n' +
+                            '<script type="text/javascript" charset="utf-8" src="childbrowser.js"></script>',
+                        appLocation: '"navigator.html"'
+                    }
                 }
             },
             iOS: {
-                src: ["C:/FoundOPS/html5/build/mobile/iOS/www/navigator.html"],
-                dest: "C:/FoundOPS/html5/build/mobile/iOS/www",
-                variables: {
-                    mobileOptimization: mobileOptimizationTags,
-                    blobRoot: "",
-                    CSSblobRoot: "styles/main-built.css",
-                    JSblobRoot: "js/main-built.js",
-                    cordova: '<script type="text/javascript" charset="utf-8" src="cordova-2.1.0.js"></script>'
+                files: {
+                    "C:/FoundOPS/html5/build/mobile/iOS/www/navigator.html": "C:/FoundOPS/html5/build/mobile/iOS/www/navigator.html",
+                    "C:/FoundOPS/html5/build/mobile/iOS/www/index.html": "C:/FoundOPS/html5/build/mobile/iOS/www/index.html"
+                },
+                options: {
+                    variables: {
+                        mobileOptimization: mobileOptimizationTags,
+                        blobRoot: "",
+                        CSSblobRoot: "styles/main-built.css",
+                        JSblobRoot: "js/main-built.js",
+                        cordova: '<script type="text/javascript" charset="utf-8" src="cordova-2.1.0.js"></script>',
+                        appLocation: '"navigator.html"'
+                    }
                 }
             }
         }

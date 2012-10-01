@@ -74,8 +74,7 @@ background-image: -webkit-gradient(linear,left bottom,left top,color-stop(0.31, 
                     if (response) {
                         //Save the application's login state.
                         localStorage.setItem("loggedIn", true);
-                        window.location.href = "../app/navigator.html";     // Mobile
-//                        window.location.href = "http://app.foundops.com"; // Browser
+                        window.location.href = "http://app.foundops.com"; // Grunt replaces appLocation on build.
                     } else {
                         alert("Login information is incorrect.\nPlease try again.");
                     }

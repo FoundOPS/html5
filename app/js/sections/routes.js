@@ -34,7 +34,6 @@ define(["db/services", "sections/linkedEntitySection"], function (dbServices, cr
     vm.set("dataSource", new kendo.data.DataSource({
         transport: {
             read: {
-                url: dbServices.API_URL + "routes/GetRoutes",
                 type: "GET",
                 dataType: "jsonp",
                 contentType: "application/json; charset=utf-8"
@@ -44,6 +43,12 @@ define(["db/services", "sections/linkedEntitySection"], function (dbServices, cr
             section._moveForward();
         }
     }));
+
+    session.followRole(function (role) {
+        vm.dataSource.transport.options.read.url = dbServices.API_URL + "routes/GetRoutes?deep=true&roleId=" + role.id;
+
+
+    });
 
     vm.refresh = function () {
         vm.dataSource.read();

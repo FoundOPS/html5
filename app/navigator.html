@@ -7,13 +7,19 @@
     <meta charset="utf-8">
     <title>FoundOPS</title>
     <meta name="description" content="">
-    @@mobileOptimization
-    <!--[if IE]>
-    <style type="text/css">.leaflet-marker-icon .number{top: -5.3px;left: -2.5px;}</style>
-    <![endif]-->
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+    <!-- Enabling user-scalable=no or calling $("#nav").toggleClass("androidFixedPositionFix"); fixes fixed position bug in android 2.3 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../login/img/Icon-96x96.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../login/img/Icon-72x72.png">
+    <link rel="apple-touch-icon-precomposed" href="../login/img/Icon-36x36.png">
+    <link rel="shortcut icon" href="../login/img/Icon-36x36.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <script>(function(a,b,c){if(c in b&&b[c]){var d,e=a.location,f=/^(a|html)$/i;a.addEventListener("click",function(a){d=a.target;while(!f.test(d.nodeName))d=d.parentNode;"href"in d&&(d.href.indexOf("http")||~d.href.indexOf(e.host))&&(a.preventDefault(),e.href=d.href)},!1)}})(document,window.navigator,"standalone")</script>
     <meta http-equiv="cleartype" content="on">
     <!-- more tags for your 'head' to consider h5bp.com/d/head-Tips -->
-    <!-- Enabling user-scalable=no or calling $("#nav").toggleClass("androidFixedPositionFix"); fixes fixed position bug in android 2.3 -->
 </head>
 
 <body ontouchstart="">
@@ -26,11 +32,10 @@
 </div>
 <!--Setup an empty silverlight view, so there is something to navigate to-->
 </body>
-<script type="text/javascript">
-    var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-    document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-</script>
-@@cordova
-<link rel="stylesheet" type="text/css" href="@@CSSblobRoot">
-<script src="@@JSblobRoot"></script>
+<link rel="stylesheet/less" type="text/less" href="styles/main.less">
+<!--[if IE]>
+<link rel="stylesheet/less" type="text/less" href="styles/mapIE.less">
+<![endif]-->
+<script type="text/javascript" src="lib/less.min.js"></script>
+<script data-main="js/main.js" src="lib/require.js"></script>
 </html>
