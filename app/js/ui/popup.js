@@ -1,4 +1,4 @@
-define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
+define(["jquery", "tools/analytics", "jmousewheel", "jscrollpane"], function ($, analytics) {
     /* Known bugs:
      * showMenu button toggle on nav click.
      */

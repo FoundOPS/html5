@@ -8,7 +8,9 @@
 
 define(['jquery', 'hasher', 'underscore.string', 'signals'], function ($, hasher, _s, signals) {
     var parameters = {
+        //whenever the parameters change, trigger parameters.changed
         changed: new signals.Signal(),
+        //whenever the section changes, trigger parameters.section.changed
         section: {
             changed: new signals.Signal()
         }

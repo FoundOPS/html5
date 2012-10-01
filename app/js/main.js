@@ -9,46 +9,50 @@
 require.config({
     baseUrl: 'js/',
     paths: {
+        //root paths
         lib: "../lib",
-        jquery: "../lib/jquery",
-        underscore: "../lib/underscore",
-        moment: "../lib/moment",
-        kendo: "../lib/kendo.all",
-        signals: "../lib/signals",
+        //libraries
+        colorpicker: "ui/colorPicker",
         hasher: "../lib/hasher",
-        "underscore.string": "../lib/underscore.string",
+        kendo: "../lib/kendo.all",
         jautosize: "../lib/jquery.autosize",
-        jmousewheel: "../lib/jquery.mousewheel",
-        jform: "../lib/jquery.form",
         jfilereader: "../lib/jquery.FileReader",
+        jform: "../lib/jquery.form",
         jmaskmoney: "../lib/jquery.maskMoney",
+        jmousewheel: "../lib/jquery.mousewheel",
+        jquery: "../lib/jquery",
         jscrollpane: "../lib/jquery.jScrollPane",
         jtooltip: "../lib/jquery.tooltip.min",
         jui: "../lib/jquery-ui-1.8.21.core.min",
+        moment: "../lib/moment",
         noty: "../lib/noty",
         select2: "../lib/select2",
-        colorpicker: "ui/colorPicker",
+        signals: "../lib/signals",
+        totango: "../lib/totango",
+        underscore: "../lib/underscore",
+        "underscore.string": "../lib/underscore.string",
         uservoice: "../lib/userVoice"
     },
     shim: {
         underscore: {
             exports: '_'
         },
-        moment: {},
-        kendo: ['jquery'],
+        colorpicker: ['jquery'],
         hasher: ['signals'],
         jautosize: ['jquery'],
-        jmousewheel: ['jquery'],
         jfilereader: ['jquery'],
         jform: ['jquery'],
         jmaskmoney: ['jquery'],
+        jmousewheel: ['jquery'],
         jscrollpane: ['jquery'],
         jtooltip: ['jquery'],
         jui: ['jquery'],
+        kendo: ['jquery'],
+        moment: {},
         noty: ['jquery'],
         select2: ['jquery'],
-        colorpicker: ['jquery'],
-        uservoice: {}
+        uservoice: {},
+        totango: {}
     }
 });
 

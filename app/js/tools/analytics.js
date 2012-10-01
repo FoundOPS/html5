@@ -6,8 +6,8 @@
 
 "use strict";
 
-define(['jquery', 'containers/silverlight', 'developer', 'db/session'], function ($, silverlight, developer, session) {
-    var analytics = {}, totangoServiceId;
+define(['jquery', 'containers/silverlight', 'developer', 'tools/parameters', 'db/session', 'underscore.string', 'totango'], function ($, silverlight, developer, parameters, session, _s) {
+    var analytics = {}, totango, totangoServiceId;
 
     if (developer.TRACK_ANALYTICS === developer.TRACK_ANALYTICS_OPTION.DEBUG) {
         totangoServiceId = "SP-12680-01";
@@ -15,16 +15,36 @@ define(['jquery', 'containers/silverlight', 'developer', 'db/session'], function
         totangoServiceId = "SP-1268-01";
     }
 
-    analytics.track = function (event) {
+    try {
+        totango = new __totango(totangoServiceId);
+    } catch (err) {
+        // uncomment the alert below for debugging only
+        console.log("Totango code load failure, tracking will be ignored");
+        var quite = function () {
+        };
+        totango = {
+            track: quite,
+            identify: quite,
+            setAccountAttributes: quite
+        };
+    }
+
+    analytics.track = function (activity, section) {
         var user = session.get("user");
         var organization = session.get("role.name");
 
-        var section = window.location.href.match(/view\/(.*)\.html/)[1];
+        if (!section) {
+            section = _s.capitalize(parameters.getSection().name);
+        }
 
-        var url = "http://sdr.totango.com/pixel.gif/?sdr_s=" + totangoServiceId + "&sdr_o=" + organization + "&sdr_u=" + user + "&sdr_a=" + event + "&sdr_m=" + section;
-
-        silverlight.httpGetImage(url);
+        totango.track(activity, section, organization, user);
     };
+
+    //
+    parameters.section.changed.add(function (section) {
+        //section.name
+        analytics.track(_s.capitalize(section.name), "navigator");
+    });
 
     return analytics;
 });
