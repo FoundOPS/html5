@@ -6,7 +6,7 @@
 
 'use strict';
 
-define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "parameters", "widgets/serviceDetails"], function (routeDestinationDetails, dbServices, saveHistory, parameters) {
+define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "tools/parameters", "widgets/serviceDetails"], function (routeDestinationDetails, dbServices, saveHistory, parameters) {
     /**
      * routeTask = wrapper for all service objects
      * vm = viewModel
@@ -49,7 +49,7 @@ define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "pa
             var query = parameters.get();
             //remove the routeTaskId so it does not jump back here
             delete query.routeTaskId;
-            parameters.set(query, true, {name: "routeDestinationDetails"});
+            parameters.set({params: query, replace: true, section: {name: "routeDestinationDetails"}});
         } else {
             vm.openTaskStatuses("backButton");
         }

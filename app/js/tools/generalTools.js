@@ -7,71 +7,7 @@
 "use strict";
 
 define(['moment'], function () {
-    var tools = {};
-
-    /**
-     * Converts an array based on the convert function.
-     * @param {Array.<Object>) items
-        * @param {function(Object): Object} converter A function that converts an item.
-     * @return {Array.<*>} The converted array.
-     */
-    tools.convertArray = function (items, converter) {
-        var convertedData = [];
-
-        var i;
-        for (i in items) {
-            convertedData.push(converter(items[i]));
-        }
-
-        return convertedData;
-    };
-
-    /**
-     * Checks whether the date (without the time) are equal.
-     * Ignores UTC.  this is useful for choosing the client's
-     * @param {Date} a
-     * @param {Date} b
-     * @param {Boolean} ignoreUtc If true it will compare the straight date and ignore utc
-     * @return {Boolean}
-     */
-    tools.dateEqual = function (a, b, ignoreUtc) {
-        if (!a && !b) {
-            return true;
-        } else if ((!a && b) || (a && !b)) {
-            return false;
-        }
-
-        if (ignoreUtc) {
-            return a.getDate() === b.getDate() && a.getMonth() === b.getMonth() && a.getFullYear() === b.getFullYear();
-        }
-
-        return a.getUTCDate() === b.getUTCDate() && a.getUTCMonth() === b.getUTCMonth() && a.getUTCFullYear() === b.getUTCFullYear();
-    };
-
-    /**
-     * This will return the date without the time
-     * in a format consumable for the web api.
-     * @param {Date} The date to format.
-     * @param {toUtc} (Optional) If true, convert to UTC. Defaults to false.
-     * @return {string} The date formatted in "m-dd-yyyy".
-     */
-    tools.stripDate = function (date, toUtc) {
-        if (typeof date === "string") {
-            date = moment(date).toDate();
-        }
-        var month, day, year;
-        if (toUtc) {
-            month = date.getUTCMonth() + 1;
-            day = date.getUTCDate();
-            year = date.getUTCFullYear();
-        }
-        else {
-            month = date.getMonth() + 1;
-            day = date.getDate();
-            year = date.getFullYear();
-        }
-        return month + "-" + day + "-" + year;
-    };
+    var generalTools = {};
 
     /**
      * Generates a compass direction from rotation degrees.
@@ -80,7 +16,7 @@ define(['moment'], function () {
      * @param {number} deg The degree.
      * @return {string} The direction.
      */
-    tools.getDirection = function (deg) {
+    generalTools.getDirection = function (deg) {
         if(deg == ""){
             return "";
         }
@@ -132,7 +68,7 @@ define(['moment'], function () {
      * Create a new unique Guid.
      * @return {string}
      */
-    tools.newGuid = function () {
+    generalTools.newGuid = function () {
         var newGuidString = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
             var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
             return v.toString(16);
@@ -148,7 +84,7 @@ define(['moment'], function () {
      * @param {Array.<Object>} values The values to associate with keys.
      * @constructor
      */
-    tools.ValueSelector = function ValueSelector(values) {
+    generalTools.ValueSelector = function ValueSelector(values) {
         /**
          * The values to retrieve for keys.
          * @private
@@ -163,7 +99,7 @@ define(['moment'], function () {
      * @param {Object} key The key to retrieve.
      * @return {Object} The value for a value.
      */
-    tools.ValueSelector.prototype.getValue = function (key) {
+    generalTools.ValueSelector.prototype.getValue = function (key) {
         //find the index of the key
         var index = _.indexOf(this.keysCache, key);
 
@@ -185,7 +121,7 @@ define(['moment'], function () {
      * @param {number} maxSize
      * @param {number} containerWidth
      */
-    tools.resizeImage = function (element, maxSize, containerWidth) {
+    generalTools.resizeImage = function (element, maxSize, containerWidth) {
         //get the original dimensions of the image
         var width = element[0].width;
         var height = element[0].height;
@@ -207,13 +143,13 @@ define(['moment'], function () {
     };
 
     //enable the save and cancel buttons
-    tools.enableButtons = function (page) {
+    generalTools.enableButtons = function (page) {
         $(page + " .cancelBtn").removeAttr("disabled");
         $(page + " .saveBtn").removeAttr("disabled");
     };
 
     //disable the save and cancel buttons
-    tools.disableButtons = function (page) {
+    generalTools.disableButtons = function (page) {
         $(page + " .cancelBtn").attr("disabled", "disabled");
         $(page + " .saveBtn").attr("disabled", "disabled");
     };
@@ -222,7 +158,7 @@ define(['moment'], function () {
      * watches all input elements on page for value change
      * param {string} pageDiv the id of the view. ex: "#personal"
      */
-    tools.observeInput = function (pageDiv) {
+    generalTools.observeInput = function (pageDiv) {
         $(pageDiv + ' input').each(function () {
             // Save current value of element
             $(this).data('oldVal', $(this).val());
@@ -233,38 +169,11 @@ define(['moment'], function () {
                     // Updated stored value
                     $(this).data('oldVal', $(this).val());
                     //enable save and cancel buttons
-                    tools.enableButtons(pageDiv);
+                    generalTools.enableButtons(pageDiv);
                 }
             });
         });
     };
 
-    tools.getLocalTimeZone = function () {
-        var today = new Date().toString();
-
-        var timezone, id;
-        if (today.match(/Eastern/)) {
-            timezone = "(UTC-05:00) Eastern Time (US & Canada)";
-            id = "Eastern Standard Time";
-        } else if (today.match(/Central/)) {
-            timezone = "(UTC-06:00) Central Time (US & Canada)";
-            id = "Central Standard Time";
-        } else if (today.match(/Mountain/)) {
-            timezone = "(UTC-07:00) Mountain Time (US & Canada)";
-            id = "Mountain Standard Time";
-        } else if (today.match(/Pacific/)) {
-            timezone = "(UTC-08:00) Pacific Time (US & Canada)";
-            id = "Pacific Standard Time";
-        } else if (today.match(/Alaska/)) {
-            timezone = "(UTC-09:00) Alaska";
-            id = "Alaskan Standard Time";
-        } else if (today.match(/Hawaii/)) {
-            timezone = "(UTC-10:00) Hawaii";
-            id = "Hawaiian Standard Time";
-        }
-
-        return {DisplayName: timezone, TimeZoneId: id};
-    };
-
-    return tools;
+    return generalTools;
 });

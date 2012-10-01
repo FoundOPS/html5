@@ -6,14 +6,14 @@
 
 'use strict';
 
-define(["sections/linkedEntitySection", "sections/routes", "parameters", "db/services", "db/models"], function (createBase, routes, parameters, dbServices, models) {
+define(["sections/linkedEntitySection", "sections/routes", "tools/parameters", "db/services", "db/models"], function (createBase, routes, parameters, dbServices, models) {
     var vm, section = createBase("routeDestinationDetails", "routeDestinationId",
         //on show
         function () {
             var routeDestinations = routes.vm.get("nextEntity.RouteDestinations");
 
             if (!routeDestinations) {
-                parameters.setSection({name: "routes"});
+                parameters.set({section: {name: "routes"}});
                 return;
             }
 
@@ -34,7 +34,7 @@ define(["sections/linkedEntitySection", "sections/routes", "parameters", "db/ser
         var query = parameters.get();
         //remove the routeId so it does not jump back here
         delete query.routeId;
-        parameters.set(query, true, {name: "routes"});
+        parameters.set({params: query, replace: true, section: {name: "routes"}});
     };
 
     /**

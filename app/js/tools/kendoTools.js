@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(['tools', 'db/session', 'db/services', 'parameters'], function (tools, session, dbServices, parameters) {
+define(['db/session', 'db/services', 'tools/parameters'], function (session, dbServices, parameters) {
     var kendoTools = {};
 
     //region Column Configuration
@@ -284,7 +284,7 @@ define(['tools', 'db/session', 'db/services', 'parameters'], function (tools, se
             query[key] = val + "$" + type;
         });
 
-        parameters.set(query, true, section);
+        parameters.set({params: query, replace: true, section: section});
     };
 
     /*

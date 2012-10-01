@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(["db/services", "tools", "widgets/settingsMenu"], function (services, tools) {
+define(["db/services", "tools/generalTools", "widgets/settingsMenu"], function (services, generalTools) {
     var changePassword = {};
 
     changePassword.save = function () {
@@ -18,7 +18,7 @@ define(["db/services", "tools", "widgets/settingsMenu"], function (services, too
             $("#old")[0].value = "";
             $("#new")[0].value = "";
             $("#confirm")[0].value = "";
-            tools.disableButtons("#changePassword");
+            generalTools.disableButtons("#changePassword");
             application.navigate("view/personalSettings.html");
         }
     };
@@ -27,7 +27,7 @@ define(["db/services", "tools", "widgets/settingsMenu"], function (services, too
         $("#old")[0].value = "";
         $("#new")[0].value = "";
         $("#confirm")[0].value = "";
-        tools.disableButtons("#changePassword");
+        generalTools.disableButtons("#changePassword");
         application.navigate("view/personalSettings.html");
     };
 
@@ -37,7 +37,7 @@ define(["db/services", "tools", "widgets/settingsMenu"], function (services, too
         kendo.bind(menu);
         menu.kendoSettingsMenu();
 
-        tools.observeInput("#changePassword");
+        generalTools.observeInput("#changePassword");
 
         changePassword.validator = $("#changePasswordForm").kendoValidator({
             rules: {

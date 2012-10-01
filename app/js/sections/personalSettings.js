@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(["db/services", "db/saveHistory", "tools", "widgets/imageUpload"], function (dbServices, saveHistory, tools) {
+define(["db/services", "db/saveHistory", "tools/dateTools", "widgets/imageUpload"], function (dbServices, saveHistory, dateTools) {
     var personalSettings = {}, imageUpload, vm = kendo.observable();
 
     personalSettings.vm = vm;
@@ -54,7 +54,7 @@ define(["db/services", "db/saveHistory", "tools", "widgets/imageUpload"], functi
                 });
 
                 if (!vm.get("settings.TimeZoneInfo")) {
-                    var timezone = tools.getLocalTimeZone();
+                    var timezone = dateTools.getLocalTimeZone();
 
                     var dropDownList = $("#TimeZone").data("kendoDropDownList");
                     dropDownList.select(function (dataItem) {

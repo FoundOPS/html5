@@ -1,4 +1,4 @@
-define(["../db/saveHistory", "parameters", "kendo"], function (saveHistory, parameters) {
+define(["../db/saveHistory", "tools/parameters", "kendo"], function (saveHistory, parameters) {
     /**
      * Setup the base class for an entity section that acts like a linked list with url parameters.
      * When it selects an entity, it sets that on the vm as nextEntity.
@@ -24,7 +24,7 @@ define(["../db/saveHistory", "parameters", "kendo"], function (saveHistory, para
             var query = parameters.get();
             query[nextIdParameter] = e.dataItem.Id;
 
-            parameters.set(query, replace, {name: nextSectionName});
+            parameters.set({params: query, replace: replace, section: {name: nextSectionName}});
         };
 
         /**

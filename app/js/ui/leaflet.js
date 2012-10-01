@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(['underscore', 'db/models', 'tools', 'ui/ui', 'lib/leaflet'], function (_, models, tools, ui) {
+define(['underscore', 'db/models', 'tools/generalTools', 'ui/ui', 'lib/leaflet'], function (_, models, generalTools, ui) {
     var leaflet = {};
 
     /**
@@ -185,7 +185,7 @@ define(['underscore', 'db/models', 'tools', 'ui/ui', 'lib/leaflet'], function (_
         var speedDirString = "";
         //only show speed and direction if there is a speed(i.e., if on mobile)
         if(speed){
-            speedDirString = "<br />Speed: " + speed + " mph " + tools.getDirection(rotateDegrees);
+            speedDirString = "<br />Speed: " + speed + " mph " + generalTools.getDirection(rotateDegrees);
         }
 
         //set the text for the popup

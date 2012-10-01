@@ -9,54 +9,58 @@
 require.config({
     baseUrl: 'js/',
     paths: {
+        //root paths
         lib: "../lib",
-        jquery: "../lib/jquery",
-        underscore: "../lib/underscore",
-        moment: "../lib/moment",
-        kendo: "../lib/kendo.all",
-        signals: "../lib/signals",
+        //libraries
+        colorpicker: "ui/colorPicker",
         hasher: "../lib/hasher",
-        "underscore.string": "../lib/underscore.string",
+        kendo: "../lib/kendo.all",
         jautosize: "../lib/jquery.autosize",
-        jmousewheel: "../lib/jquery.mousewheel",
-        jform: "../lib/jquery.form",
         jfilereader: "../lib/jquery.FileReader",
+        jform: "../lib/jquery.form",
         jmaskmoney: "../lib/jquery.maskMoney",
+        jmousewheel: "../lib/jquery.mousewheel",
+        jquery: "../lib/jquery",
         jscrollpane: "../lib/jquery.jScrollPane",
         jtooltip: "../lib/jquery.tooltip.min",
         jui: "../lib/jquery-ui-1.8.21.core.min",
+        moment: "../lib/moment",
         noty: "../lib/noty",
         select2: "../lib/select2",
-        colorpicker: "ui/colorPicker",
+        signals: "../lib/signals",
+        totango: "../lib/totango",
+        underscore: "../lib/underscore",
+        "underscore.string": "../lib/underscore.string",
         uservoice: "../lib/userVoice"
     },
     shim: {
         underscore: {
             exports: '_'
         },
-        moment: {},
-        kendo: ['jquery'],
+        colorpicker: ['jquery'],
         hasher: ['signals'],
         jautosize: ['jquery'],
-        jmousewheel: ['jquery'],
         jfilereader: ['jquery'],
         jform: ['jquery'],
         jmaskmoney: ['jquery'],
+        jmousewheel: ['jquery'],
         jscrollpane: ['jquery'],
         jtooltip: ['jquery'],
         jui: ['jquery'],
+        kendo: ['jquery'],
+        moment: {},
         noty: ['jquery'],
         select2: ['jquery'],
-        colorpicker: ['jquery'],
-        uservoice: {}
+        uservoice: {},
+        totango: {}
     }
 });
 
-require(["jquery", "widgets/navigator", "developer", "db/services", "db/session", "parameters", "containers/silverlight", "tools", "hasher", "db/models", "kendo", "underscore",
+require(["jquery", "widgets/navigator", "developer", "db/services", "db/session", "tools/parameters", "containers/silverlight", "tools/generalTools", "hasher", "db/models", "kendo", "underscore",
     "uservoice", "moment", "sections/personalSettings", "sections/businessSettings", "sections/usersSettings",
     "sections/dispatcherSettings", "sections/changePassword", "sections/services",
     "sections/routes", "sections/routeDetails", "sections/routeDestinationDetails", "sections/routeTask", "sections/mapView",
-    "widgets/serviceDetails"], function ($, Navigator, developer, dbServices, session, parameters, silverlight, tools, hasher) {
+    "widgets/serviceDetails", "tools/analytics"], function ($, Navigator, developer, dbServices, session, parameters, silverlight, generalTools, hasher) {
     /**
      * application = The app object.
      * navigator = The navigator object.
@@ -159,7 +163,7 @@ require(["jquery", "widgets/navigator", "developer", "db/services", "db/session"
         } else {
             //TODO: Change the way session data is so SL sections have URL, will need to publish mobile app at same time
             //for now, manually set url for SL section
-            parameters.setSection(section);
+            parameters.set({section: section});
         }
     });
 
