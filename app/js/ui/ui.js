@@ -61,7 +61,10 @@ define(function () {
         PHONE: imageRootUrl + "phone.png",
         DEPOT: imageRootUrl + "depot.png",
         OUTER_CIRCLE: imageRootUrl + "outerCircle.png",
-        TRUCK: imageRootUrl + "truck.png"
+        TRUCK: imageRootUrl + "truck.png",
+        MARKER: imageRootUrl + "marker.png",
+        MARKER_UNSAVED: imageRootUrl + "marker-unsaved.png",
+        MARKER_SHADOW: imageRootUrl + "marker-shadow.png"
     };
 
     return ui;

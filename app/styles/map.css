@@ -400,6 +400,9 @@
     padding: 0;
     text-align: center;
 }
+.leaflet-popup-content-wrapper{
+    border-radius: 0;
+}
 .doubleDigit .number{
     top:-4px;
     left:1px;

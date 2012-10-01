@@ -74,9 +74,9 @@ table{border-collapse: collapse;border-spacing: 0;}
 }
 //firefox workaround(otherwise settings pages don't show up)
 @-moz-document url-prefix() {
-    .km-view{
-        display: -moz-box;
-    }
+.km-view{
+    display: -moz-box;
+}
 }
 input[type="button"], button{
     color:#111;
@@ -138,7 +138,7 @@ span.k-tooltip {
         height: 100%;
     }
     .km-content{
-        //BUG FIX: Required to fix content size in firefox.
+    //BUG FIX: Required to fix content size in firefox.
         overflow: visible !important;
     //padding-bottom: 18px;  //BUG FIX: This fixes Kendo scrollbar bug! (disabled for second bugfix)
     }
@@ -323,7 +323,7 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
 /*endregion*/
 /*region Settings - Personal */
 #personal .wrap, #business .wrap, #changePassword .wrap, #createPassword .wrap{
-    //display:block causes .wrap to bee too wide in Firefox
+//display:block causes .wrap to bee too wide in Firefox
     display: table;
     width: 500px;
     padding: 15px;
@@ -781,7 +781,8 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
     }
     li{
         margin-bottom: 5px;
-        padding: 1px 0 1px 0;
+        padding: 3px 0 1px 0;
+        line-height: 1.5em;
         .percentSign{
             position: absolute;
             margin-top: 5px;
@@ -799,6 +800,7 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
     }
     li.textarea{
         vertical-align: top;
+        margin-bottom: 0;
     }
     .k-timepicker, .k-datepicker, .k-combobox, input[type="text"], input[type="number"], .select2-container, .k-numerictextbox{
         width: 100%;
@@ -810,7 +812,7 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
         padding-left: 2px;
         font-family: "PTSans";
     }
-    //this fixes a large border bug in IE
+//this fixes a large border bug in IE
     input[type="checkbox"]{
         border: none;
         outline: none;
@@ -831,7 +833,7 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
     .k-picker-wrap{
         padding: 1px 22px 1px 1px;
     }
-    //exclude dropdown and timepicker
+//exclude dropdown and timepicker
     input[type="number"], input[type="text"]:not(.k-input), textarea{
         border: 1px solid #aaa;
         border-radius: 4px;
@@ -859,11 +861,15 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
         font-size: 14px;
         padding-left: 15px;
     }
+    .k-dropdown{
+        font-size: 1em;
+        width: 100%;
+    }
 }
 #serviceDetails {
     display:none;
     position: absolute;
-    top:54px;
+    top:450px;
     right: 30px;
     background-color:#fff;
     padding:10px 20px;
@@ -871,6 +877,9 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
     -moz-box-shadow: 0 5px 8px #aaa;
     -webkit-box-shadow: 0 5px 8px #aaa;
     box-shadow: 0 5px 8px #aaa;
+    label.client, label.location{
+        line-height: 1.5em;
+    }
     .km-ios .km-listinset > li:first-child:last-child, .km-ios .km-listgroupinset .km-list > li:first-child:last-child {
         border-color: #aaa;
         border-radius: 4px;
@@ -897,6 +906,156 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
 #taskServiceDetails{
     padding: 15px 15px 0 15px;
     margin: 0 auto;
+}
+.bgGradient(@top, @bottom){
+    background-color: @top;
+    background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0, @bottom), color-stop(0.5, @top));
+    background-image: -webkit-linear-gradient(center bottom, @bottom 0%, @top 50%);
+    background-image: -moz-linear-gradient(center bottom, @bottom 0%, @top 50%);
+    background-image: -o-linear-gradient(bottom, @bottom 0%, @top 50%);
+    background-image: -ms-linear-gradient(top, @bottom 0%, @top 50%);
+    filter: progid:dximagetransform.microsoft.gradient(startColorstr=@bottom, endColorstr=@top, GradientType=0);
+    background-image: linear-gradient(top, @bottom 0%, @top 50%);
+}
+#repeat{
+    display: none;
+    position: absolute;
+    top: 54px;
+    right: 30px;
+    width: 250px;
+    padding: 10px 20px;
+    font-size: 15px;
+    background-color:#fff;
+    -moz-box-shadow: 0 5px 8px #aaa;
+    -webkit-box-shadow: 0 5px 8px #AAA;
+    box-shadow: 0 5px 8px #AAA;
+    h3{
+        font-size: 20px;
+        margin: 0 0 5px 0;
+    }
+    label:not(#weeklyRepeatOn label){
+        line-height: 1.5em;
+    }
+    #weeklyRepeatOn{
+        display: none;
+        position: relative;
+        top:5px;
+        label{
+            float: left;
+        }
+    }
+    #monthlyRepeatOn {
+        display:none;
+        label{
+            vertical-align: middle;
+        }
+    }
+    #weekdayWrapper{
+        width: 225px;
+        margin: 0 auto;
+    }
+    .weekday{
+        float: left;
+        width: 26px;
+        height: 24px;
+        padding-top: 3px;
+        vertical-align: middle;
+        text-align: center;
+        color:#000000;
+        border: 1px solid #c5c5c5;
+        border-left: none;
+        .bgGradient(#ffffff, #eeeeee);
+        &:hover{
+            cursor: pointer;
+            .bgGradient(#eeeeee, #cccccc);
+        }
+        &:active{
+            cursor: pointer;
+            .bgGradient(#aaaaaa, #888888);
+        }
+    //rounded left piece of weekday selectors
+        &.left{
+            width: 16px;
+            border-left: 1px solid #c5c5c5;
+            border-bottom-left-radius: 16px;
+            border-top-left-radius: 16px;
+        }
+    //rounded right piece of weekday selectors
+        &.right{
+            width: 16px;
+            border-right: 1px solid #c5c5c5;
+            border-bottom-right-radius: 16px;
+            border-top-right-radius: 16px;
+        }
+    //don't make the ends blue when they're selected
+        &.selected:not(.left):not(.right){
+            color: #ffffff;
+            .bgGradient(#36C3E3, #488FCD);
+        }
+        &.selected:hover:not(.left):not(.right){
+            .bgGradient(#44AFE4, #0067A0);
+        }
+    }
+    #repeatLabel{
+        position: relative;
+        top: 2px;
+        left: 2px;
+    }
+    #startDate .k-datepicker, .k-dropdown, #repeatEvery .k-numerictextbox{
+        width: 100%;
+        font-size: 1em;
+    }
+    .k-dropdown{
+        height: 29px;
+        .k-input{
+            padding-top: 5px;
+        }
+    }
+    #endDate{
+        label{
+            padding-left: 2px;
+            vertical-align: text-bottom;
+        }
+        .k-dropdown{
+            width: 80px;
+        }
+        .k-numerictextbox,.k-datepicker{
+            display: none !important;
+            width: 160px;
+            margin: -5px 0 3px 10px;
+        }
+        .k-numerictextbox.showInput,.k-datepicker.showInput{
+            display: inline-block !important;
+        }
+    }
+    .k-dropdown, #startDate, #repeatEvery, #weeklyRepeatOn, #monthlyRepeatOn{
+        margin-bottom: 10px;
+    }
+}
+#locationWidget{
+    display: none;
+    position: absolute;
+    top: 54px;
+    right: 30px;
+    width: 250px;
+    padding: 15px 20px;
+    font-size: 15px;
+    background-color:#fff;
+    -moz-box-shadow: 0 5px 8px #aaa;
+    -webkit-box-shadow: 0 5px 8px #AAA;
+    box-shadow: 0 5px 8px #AAA;
+    h3{
+        font-size: 20px;
+        margin: 0 0 5px 0;
+    }
+    label{
+        line-height: 1.5em;
+    }
+    #locationWidgetMap{
+        position: relative;
+        width: 100%;
+        height: 250px;
+    }
 }
 /*Tooltip*/
 #tooltip {
