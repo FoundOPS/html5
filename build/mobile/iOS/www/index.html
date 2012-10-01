@@ -35,14 +35,14 @@ background-image: -webkit-gradient(linear,left bottom,left top,color-stop(0.31, 
                     <p style="margin:5px">
                         <input id="submit" type="submit" value="Login"/><br/>
                     </p>
-                </form><br />
+                </form><br/>
                 <div id="toggleWrapper">
-                    <span id="toggleLabel">Remember Me</span>
+                    <p id="toggleLabel">Remember Me</p>
                     <div class="switch">
                         <a class="on" href="javascript:toggle('on')"><span>On</span></a>
                         <a class="off active" href="javascript:toggle('off')"><span>Off</span></a>
                     </div>
-                </div><br />
+                </div><br/>
                 <a id="forgotPassword" href="http://app.foundops.com/Account/ForgotPassword">Forgot Password?</a>
             </div>
         </div>
@@ -64,8 +64,8 @@ background-image: -webkit-gradient(linear,left bottom,left top,color-stop(0.31, 
                 type: "GET",
                 dataType: 'JSONP',
 //                url: 'http://localhost:9711/api/session/' + url,    //LOCAL
-                url: 'http://api.foundops.com/api/session/' + url,    //LIVE
-//                url: 'http://192.168.0.102:70/api/session/' + url,   //REMOTE - Local IP of host computer (might change everyday).
+//                url: 'http://api.foundops.com/api/session/' + url,    //LIVE
+                url: 'http://192.168.0.115:70/api/session/' + url,   //REMOTE - Local IP of host computer (might change everyday).
                 data: data,
                 tryCount: 0,
                 retryLimit: 2,

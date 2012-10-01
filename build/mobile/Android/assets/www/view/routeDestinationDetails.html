@@ -27,8 +27,9 @@
     <p style="color:red"> No<br/>Location<br/>Information<br/>Available</p>
     <label id="directionsWarning">Direction information may not be 100% accurate.</label>
     # } #
-    <span class="km-text"><a id="directionsButton" data-bind="click: getDirections">Directions</a></span>
-
+    <a id="directionsButton" data-bind="click: getDirections">Directions</a>
+    <!--<a id="directionsButton" data-rel="external"-->
+       <!--href="geo:0,0?saddr=Current%20Location&daddr=${selectedEntity.Location.Latitude},${selectedEntity.Location.Longitude}">Directions</a>-->
 </script>
 <script type="text/x-kendo-template" id="contactsTemplate">
     # if (Type === "Phone Number") { #

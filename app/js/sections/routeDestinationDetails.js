@@ -13,7 +13,7 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "tools/paramete
             var routeDestination = routeDetails.vm.get("nextEntity");
 
             if (!routeDestination || !routeDestination.RouteTasks) {
-                parameters.set({section: {name: "routeDetails"}});
+                parameters.setSection({name: "routeDetails"});
                 return;
             }
 
@@ -36,7 +36,7 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "tools/paramete
         var query = parameters.get();
         //remove the routeDestinationId so it does not jump back here
         delete query.routeDestinationId;
-        parameters.set({params: query, replace: true, section: {name: "routeDetails"}});
+        parameters.set(query, true, {name: "routeDetails"});
     };
 
 //vm additions
@@ -56,25 +56,25 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "tools/paramete
         var currentPosition;
         var navigateTo = function (url) {
             if (developer.CURRENT_FRAME === developer.Frame.MOBILE_APP && kendo.support.detectOS(navigator.userAgent).device === "android") {
-                window.plugins.childBrowser.showWebPage(url);
+                window.location.href = "geo:0,0?q=" + vm.get("selectedEntity.Location.Latitude") + "," + vm.get("selectedEntity.Location.Longitude");
             } else {
-                window.open(url);
+                window.open("http://maps.google.com/maps?" + url);
             }
         };
         navigator.geolocation.getCurrentPosition(function (position) {
             // If geolocation is successful get directions.
             currentPosition = position.coords.latitude + "," + position.coords.longitude;
             if (vm.get("selectedEntity.Location")) {
-                navigateTo("http://maps.google.com/maps?saddr=" + currentPosition + "&daddr=" + vm.get("selectedEntity.Location.Latitude") + "," + vm.get("selectedEntity.Location.Longitude"));
+                navigateTo("saddr=" + currentPosition + "&daddr=" + vm.get("selectedEntity.Location.Latitude") + "," + vm.get("selectedEntity.Location.Longitude"));
             } else {
-                navigateTo("http://maps.google.com/maps?saddr=" + currentPosition + "&daddr=" + vm.get("selectedEntity.Client.Name"));
+                navigateTo("saddr=" + currentPosition + "&daddr=" + vm.get("selectedEntity.Client.Name"));
             }
         }, function () {
             // If geolocation is NOT successful find business location.
             if (vm.get("selectedEntity.Location")) {
-                navigateTo("http://maps.google.com/maps?q=" + vm.get("selectedEntity.Location.Latitude") + "," + vm.get("selectedEntity.Location.Longitude"));
+                navigateTo("q=" + vm.get("selectedEntity.Location.Latitude") + "," + vm.get("selectedEntity.Location.Longitude"));
             } else {
-                navigateTo("http://maps.google.com/maps?q=" + vm.get("selectedEntity.Client.Name"));
+                navigateTo("q=" + vm.get("selectedEntity.Client.Name"));
             }
         }, {timeout: 10000, enableHighAccuracy: true});
     };

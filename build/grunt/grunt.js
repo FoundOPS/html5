@@ -56,7 +56,8 @@ module.exports = function (grunt) {
                 noty: "../lib/noty",
                 select2: "../lib/select2",
                 colorpicker: "ui/colorPicker",
-                uservoice: "../lib/userVoice"
+                uservoice: "../lib/userVoice",
+                totango: "../lib/totango"
             },
             shim: {
                 underscore: {
@@ -76,7 +77,8 @@ module.exports = function (grunt) {
                 noty: ['jquery'],
                 select2: ['jquery'],
                 colorpicker: ['jquery'],
-                uservoice: {}
+                uservoice: {},
+                totango: {}
             },
             include: ["main"],
             wrap: true,
