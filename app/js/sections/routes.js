@@ -46,12 +46,14 @@ define(["db/services", "sections/linkedEntitySection"], function (dbServices, cr
 
     session.followRole(function (role) {
         vm.dataSource.transport.options.read.url = dbServices.API_URL + "routes/GetRoutes?";//deep=true&roleId=" + role.id;
-
-        // Code for getting task statuses goes here.
+        vm.refresh();
     });
 
     vm.refresh = function () {
-        vm.dataSource.read();
+        dbServices.getTaskStatuses(function (response) {
+            var taskStatuses = new kendo.data.DataSource({data: response});
+            vm.set("taskStatusesSource", taskStatuses);
+        });
     };
 
     return section;

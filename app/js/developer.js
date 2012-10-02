@@ -64,11 +64,5 @@ define(function () {
      */
     developer.CURRENT_SILVERLIGHT_VERSION = 0.1051;
 
-    /**
-     * The local server's RoleId for GotGrease.
-     * @type {string}
-     */
-    developer.GOTGREASE_ROLE_ID = '7E31F602-C6AA-4F7A-AF46-E8FC1642DAB2';
-
     return developer;
 });

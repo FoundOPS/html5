@@ -13,7 +13,7 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "tools/paramete
             var routeDestination = routeDetails.vm.get("nextEntity");
 
             if (!routeDestination || !routeDestination.RouteTasks) {
-                parameters.setSection({name: "routeDetails"});
+                parameters.set({section: {name: "routeDetails"}});
                 return;
             }
 

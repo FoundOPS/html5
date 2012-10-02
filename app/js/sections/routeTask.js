@@ -62,16 +62,13 @@ define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "to
             return;
         }
 
+        vm.set("taskStatusesSource", routes.vm.get("taskStatusesSource"));
+
         vm.set("selectedTask", routeTask);
 
         //clear statusUpdated
         vm.statusUpdated = false;
 
-        dbServices.getTaskStatuses(function (response) {
-            var taskStatuses = new kendo.data.DataSource({data: response});
-            vm.set("taskStatusesSource", taskStatuses);
-            updateSelectedStatus();
-        });
         dbServices.getServiceDetails(vm.get("selectedTask.ServiceId"), vm.get("selectedTask.Date"), vm.get("selectedTask.RecurringServiceId"), vm.get("selectedTask.ServiceTemplateId"),
             function (service) {
                 vm.set("selectedService", service);
