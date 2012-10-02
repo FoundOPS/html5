@@ -1,7 +1,7 @@
 /*global module:false*/
 module.exports = function (grunt) {
 
-    var version = "0.02",
+    var version = "0.021",
         mobileOptimizationTags = '<meta name="HandheldFriendly" content="True">\n\t<meta name="MobileOptimized" content="320">\n\t<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>\n\t<link rel="apple-touch-icon-precomposed" sizes="114x114" href="@@blobRootimg/Icon-96x96.png">\n\t<link rel="apple-touch-icon-precomposed" sizes="72x72" href="@@blobRootimg/Icon-72x72.png">\n\t<link rel="apple-touch-icon-precomposed" href="@@blobRootimg/Icon-36x36.png">\n\t<link rel="shortcut icon" href="@@blobRootimg/Icon-36x36.png">\n\t<meta name="apple-mobile-web-app-capable" content="yes">\n\t<meta name="apple-mobile-web-app-status-bar-style" content="black">\n\t<script>(function(a,b,c){if(c in b&&b[c]){var d,e=a.location,f=/^(a|html)$/i;a.addEventListener("click",function(a){d=a.target;while(!f.test(d.nodeName))d=d.parentNode;"href"in d&&(d.href.indexOf("http")||~d.href.indexOf(e.host))&&(a.preventDefault(),e.href=d.href)},!1)}})(document,window.navigator,"standalone")</script>';
 
     // Project configuration.
@@ -37,46 +37,48 @@ module.exports = function (grunt) {
             almond: true,
             baseUrl: "../../app/js",
             paths: {
+                //root paths
                 lib: "../lib",
-                jquery: "../lib/jquery",
-                underscore: "../lib/underscore",
-                moment: "../lib/moment",
-                kendo: "../lib/kendo.all",
-                signals: "../lib/signals",
+                //libraries
+                colorpicker: "ui/colorPicker",
                 hasher: "../lib/hasher",
-                "underscore.string": "../lib/underscore.string",
+                kendo: "../lib/kendo.all",
                 jautosize: "../lib/jquery.autosize",
-                jmousewheel: "../lib/jquery.mousewheel",
-                jform: "../lib/jquery.form",
                 jfilereader: "../lib/jquery.FileReader",
+                jform: "../lib/jquery.form",
                 jmaskmoney: "../lib/jquery.maskMoney",
+                jmousewheel: "../lib/jquery.mousewheel",
+                jquery: "../lib/jquery",
                 jscrollpane: "../lib/jquery.jScrollPane",
                 jtooltip: "../lib/jquery.tooltip.min",
                 jui: "../lib/jquery-ui-1.8.21.core.min",
+                moment: "../lib/moment",
                 noty: "../lib/noty",
                 select2: "../lib/select2",
-                colorpicker: "ui/colorPicker",
-                uservoice: "../lib/userVoice",
-                totango: "../lib/totango"
+                signals: "../lib/signals",
+                totango: "../lib/totango",
+                underscore: "../lib/underscore",
+                "underscore.string": "../lib/underscore.string",
+                uservoice: "../lib/userVoice"
             },
             shim: {
                 underscore: {
                     exports: '_'
                 },
-                moment: {},
-                kendo: ['jquery'],
+                colorpicker: ['jquery'],
                 hasher: ['signals'],
                 jautosize: ['jquery'],
-                jmousewheel: ['jquery'],
                 jfilereader: ['jquery'],
                 jform: ['jquery'],
                 jmaskmoney: ['jquery'],
+                jmousewheel: ['jquery'],
                 jscrollpane: ['jquery'],
                 jtooltip: ['jquery'],
                 jui: ['jquery'],
+                kendo: ['jquery'],
+                moment: {},
                 noty: ['jquery'],
                 select2: ['jquery'],
-                colorpicker: ['jquery'],
                 uservoice: {},
                 totango: {}
             },
@@ -191,8 +193,8 @@ module.exports = function (grunt) {
 
     //Must run this first with the bottom three lines commented out
 //    grunt.registerTask('default', 'less requirejs');
-//    grunt.loadNpmTasks('grunt-less');
-//    grunt.loadNpmTasks('grunt-requirejs');
+    //grunt.loadNpmTasks('grunt-less');
+    //grunt.loadNpmTasks('grunt-requirejs');
 
     //Then run this with the above three lines commented out
     grunt.registerTask('default', 'clean copy replace');

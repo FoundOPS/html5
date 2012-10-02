@@ -109,6 +109,8 @@ require(["jquery", "widgets/navigator", "developer", "db/services", "db/session"
                     '<object id="silverlightPlugin" data="data:application/x-silverlight-2," type="application/x-silverlight-2" style="height: 1px; width: 1px">' +
                     '<param name="onSourceDownloadProgressChanged" value="onSourceDownloadProgressChanged"/>';
                 if (frame === developer.Frame.SILVERLIGHT) {
+                    //if debugging update version to random
+                    developer.CURRENT_SILVERLIGHT_VERSION = Math.floor((Math.random() * 1000) + 1);
                     silverlightElement += '<param name="splashscreensource" value="http://localhost:31820/ClientBin/SplashScreen.xaml"/>' +
                         '<param name="source" value="http://localhost:31820/ClientBin/FoundOps.SLClient.Navigator.xap"/>';
                 } else if (frame === developer.Frame.SILVERLIGHT_PUBLISHED) {
