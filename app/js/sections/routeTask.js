@@ -62,10 +62,10 @@ define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "to
             return;
         }
 
+        vm.set("selectedTask", routeTask);
+
         vm.set("taskStatusesSource", routes.vm.get("taskStatusesSource"));
         updateSelectedStatus();
-
-        vm.set("selectedTask", routeTask);
 
         //clear statusUpdated
         vm.statusUpdated = false;
