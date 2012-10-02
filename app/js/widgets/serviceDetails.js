@@ -102,11 +102,11 @@ define(["jquery", "db/services", "db/session", "db/models", "kendo", "jmaskmoney
                 formatResult: formatClientName,
                 dropdownCssClass: "bigdrop"
             }).on("change", function () {
-                var client = clientSelector.select2("data");
-                service.set("Client", client);
-                service.set("ClientId", client.Id);
-                updateLocations(client);
-            });
+                    var client = clientSelector.select2("data");
+                    service.set("Client", client);
+                    service.set("ClientId", client.Id);
+                    updateLocations(client);
+                });
 
             if (service.Client) {
                 //set the initial selection
@@ -135,150 +135,141 @@ define(["jquery", "db/services", "db/session", "db/models", "kendo", "jmaskmoney
                 formatResult: formatLocationName,
                 dropdownCssClass: "bigdrop"
             }).on("change", function () {
-                var location = locationSelector.select2("data");
-                var destinationField = models.getDestinationField(service);
-                //Used for updating the grid
-                destinationField.Value = location;
-                destinationField.set("LocationId", location.Id);
-            });
-        },
-
-        _createTextBoxField: function (field, fieldIndex, listView) {
-            var fieldElement;
-            if (field.IsMultiLine) {
-                fieldElement = $(multiLineTextTemplate);
-                fieldElement.appendTo(listView).wrap("<li class='textarea'>" + field.Name + "</li>");
-            } else {
-                fieldElement = $(inputTemplate).attr("type", "text");
-                fieldElement.appendTo(listView).wrap("<li>" + field.Name + "</li>");
-            }
-
-            return fieldElement;
-        },
-
-        _createNumericField: function (field, fieldIndex, listView) {
-            var fieldElement = $(inputTemplate).attr("type", "number");
-
-            var step = 1 / Math.pow(10, field.DecimalPlaces);
-            fieldElement.appendTo(listView).wrap("<li>" + field.Name + "</li>");
-
-            var format = "#";
-            if (field.Mask === "c") {
-                format = "c";
-            } else if (field.Mask === "p") {
-                //percentage
-                format = "# \\%";
-            }
-
-            fieldElement.kendoNumericTextBox({
-                step: step,
-                min: field.Minimum,
-                max: field.Maximum,
-                format: format,
-                value: field.Value
-            });
-
-            return fieldElement;
-        },
-
-        _createDateTimeField: function (field, fieldIndex, listView) {
-            //TODO: implement time zones, and fixup below
-            return;
-
-            var fieldElement = $(inputTemplate).appendTo(listView).wrap("<li>" + field.Name + "</li>");
-
-            var options = {
-                change: function (e) {
-                    //manually handle change event so the format is correct
-                    var newValue = e.sender.value();
-                    if (newValue) {
-                        e.sender.fieldParent.set("Value", newValue);
-                    }
-                },
-                min: field.Earliest,
-                max: field.Latest
-            };
-
-            var picker;
-
-            if (field.TypeInt === 0) {
-                //DateTime
-                options.value = moment(field.Value).format("LLL");
-                picker = fieldElement.kendoDateTimePicker(options).data("kendoDateTimePicker");
-            } else if (field.TypeInt === 1) {
-                //TimeOnly
-                options.value = moment(field.Value).format("LT");
-                picker = fieldElement.kendoTimePicker(options).data("kendoTimePicker");
-            } else if (field.TypeInt === 2) {
-                //DateOnly
-                options.value = moment(field.Value).format("LL");
-                picker = fieldElement.kendoDatePicker(options).data("kendoDatePicker");
-            }
-            //store a reference to the field for access by the change function
-            picker.fieldParent = field;
-
-            return fieldElement;
-        },
-
-        _createOptionsField: function (field, fieldIndex, elementToAppendTo) {
-            var fieldElement;
-            if (field.TypeInt === 0) {
-                //DropDownList
-                fieldElement = $(inputTemplate).appendTo(elementToAppendTo).wrap("<li><label>" + field.Name + "</label></li>");
-                fieldElement.kendoDropDownList({
-                    change: function (e) {
-                        var index = this.selectedIndex;
-                        var field = this.fieldParent;
-                        var i;
-                        //clear the other checked items
-                        for (i = 0; i < field.Options.length; i++) {
-                            field.Options[i].IsChecked = false;
-                        }
-                        if (index >= 0) {
-                            //check this item
-                            field.set('Options[' + index + '].IsChecked', true);
-                        }
-                    },
-                    dataTextField: "Name",
-                    dataValueField: "Id",
-                    dataSource: field.Options
+                    var location = locationSelector.select2("data");
+                    var destinationField = models.getDestinationField(service);
+                    //Used for updating the grid
+                    destinationField.Value = location;
+                    destinationField.set("LocationId", location.Id);
                 });
-                var dropDownList = fieldElement.data("kendoDropDownList");
-                //store a reference to the field for access by the change function
-                dropDownList.fieldParent = field;
+        },
 
-                //select the first checked option
-                dropDownList.select(function (dataItem) {
-                    return dataItem.get("IsChecked");
-                });
-            } else {
-                //Checkbox (1) or checklist (2)
-                fieldElement = $('<ul data-role="listview" data-style="inset">' + field.Name + '</ul>').appendTo(elementToAppendTo);
+        //region Field Factories
 
-                var optionIndex;
-                for (optionIndex = 0; optionIndex < field.Options.length; optionIndex++) {
-                    var optionElement = $(inputTemplate).attr("type", "checkbox");
-
-                    var option = field.Options[optionIndex];
-
-                    //store a reference to the option for access by the change function
-                    optionElement[0].optionParent = option;
-
-                    //manually bind to avoid issues
-                    if (option.IsChecked) {
-                        optionElement.attr("checked", "checked");
-                    }
-                    optionElement.change(function () {
-                        var checked = $(this).is(':checked');
-                        $(this)[0].optionParent.set("IsChecked", checked);
-                    });
-
-                    optionElement.appendTo(fieldElement).wrap("<li><label>" + option.Name + "</label></li>");
+        _fieldFactories: {
+            "TextBoxField": function (field, fieldIndex, listView) {
+                var fieldElement;
+                if (field.IsMultiLine) {
+                    fieldElement = $(multiLineTextTemplate);
+                    fieldElement.appendTo(listView).wrap("<li class='textarea'>" + field.Name + "</li>");
+                } else {
+                    fieldElement = $(inputTemplate).attr("type", "text");
+                    fieldElement.appendTo(listView).wrap("<li>" + field.Name + "</li>");
                 }
-            }
 
-            return fieldElement;
+                return fieldElement;
+            },
+            "NumericField": function (field, fieldIndex, listView) {
+                var fieldElement = $(inputTemplate).attr("type", "number");
+
+                var step = 1 / Math.pow(10, field.DecimalPlaces);
+                fieldElement.appendTo(listView).wrap("<li>" + field.Name + "</li>");
+
+                var format = "#";
+
+                var min = field.Minimum;
+                var max = field.Maximum;
+
+                var initialValue = field.Value;
+
+                if (field.Mask === "c") {
+                    format = "c";
+                } else if (field.Mask === "p") {
+                    //percentage
+                    format = "# \\%";
+                    step = step * 100;
+                    min = min * 100;
+                    max = max * 100;
+                    initialValue = initialValue * 100;
+                }
+
+
+                fieldElement.kendoNumericTextBox({
+                    step: step,
+                    min: min,
+                    max: max,
+                    format: format,
+                    value: initialValue,
+                    spinners: false,
+                    change: function (e) {
+                        var newValue = e.sender.value();
+                        var field = this.fieldParent;
+
+                        if (field.Mask === "p") {
+                            field.set("Value", newValue / 100);
+                        } else {
+                            field.set("Value", newValue);
+                        }
+                    }
+                });
+
+                //store a reference to the field for access by the change function
+                fieldElement.data("kendoNumericTextBox").fieldParent = field;
+
+                return fieldElement;
+            },
+            "OptionsField": function (field, fieldIndex, elementToAppendTo) {
+                var fieldElement;
+                if (field.TypeInt === 0) {
+                    //DropDownList
+                    fieldElement = $(inputTemplate).appendTo(elementToAppendTo).wrap("<li><label>" + field.Name + "</label></li>");
+                    fieldElement.kendoDropDownList({
+                        change: function (e) {
+                            var index = this.selectedIndex;
+                            var field = this.fieldParent;
+                            var i;
+                            //clear the other checked items
+                            for (i = 0; i < field.Options.length; i++) {
+                                field.Options[i].IsChecked = false;
+                            }
+                            if (index >= 0) {
+                                //check this item
+                                field.set('Options[' + index + '].IsChecked', true);
+                            }
+                        },
+                        dataTextField: "Name",
+                        dataValueField: "Id",
+                        dataSource: field.Options
+                    });
+                    var dropDownList = fieldElement.data("kendoDropDownList");
+                    //store a reference to the field for access by the change function
+                    dropDownList.fieldParent = field;
+
+                    //select the first checked option
+                    dropDownList.select(function (dataItem) {
+                        return dataItem.get("IsChecked");
+                    });
+                } else {
+                    //Checkbox (1) or checklist (2)
+                    fieldElement = $('<ul data-role="listview" data-style="inset">' + field.Name + '</ul>').appendTo(elementToAppendTo);
+
+                    var optionIndex;
+                    for (optionIndex = 0; optionIndex < field.Options.length; optionIndex++) {
+                        var optionElement = $(inputTemplate).attr("type", "checkbox");
+
+                        var option = field.Options[optionIndex];
+
+                        //store a reference to the option for access by the change function
+                        optionElement[0].optionParent = option;
+
+                        //manually bind to avoid issues
+                        if (option.IsChecked) {
+                            optionElement.attr("checked", "checked");
+                        }
+                        optionElement.change(function () {
+                            var checked = $(this).is(':checked');
+                            $(this)[0].optionParent.set("IsChecked", checked);
+                        });
+
+                        optionElement.appendTo(fieldElement).wrap("<li><label>" + option.Name + "</label></li>");
+                    }
+                }
+
+                return fieldElement;
+            }
         },
+
+        //endregion
+
         render: function (service) {
             var that = this;
 
@@ -295,13 +286,6 @@ define(["jquery", "db/services", "db/session", "db/models", "kendo", "jmaskmoney
             }
 
             //Add all the fields
-            var fieldCreationFunctions = {
-                "TextBoxField": that._createTextBoxField,
-                "NumericField": that._createNumericField,
-                "DateTimeField": that._createDateTimeField,
-                "OptionsField": that._createOptionsField
-            };
-
             var fieldsListView = $('<ul id="fields"></ul>').appendTo(that.element);
             var checkLists = $('<ul id="checkLists"></ul>').appendTo(that.element);
 
@@ -319,36 +303,41 @@ define(["jquery", "db/services", "db/session", "db/models", "kendo", "jmaskmoney
 
                 var elementToAppendTo = checkField ? checkLists : fieldsListView;
 
-                var fieldElement = fieldCreationFunctions[field.Type](field, fieldIndex, elementToAppendTo);
+                var factory = that._fieldFactories[field.Type];
 
-                if (fieldElement) {
-                    //setup the tooltip
-                    if (field.ToolTip) {
-                        fieldElement.attr("title", field.ToolTip);
-                        //use jquery tooltip plugin http://docs.jquery.com/Plugins/Tooltip
-                        //this removes the title attribute and adds a custom tooltip
-                        //important because having a title messes up the validation messages
-                        fieldElement.tooltip({
-                            left: -65
-                        });
-                    }
+                if (!factory) {
+                    continue;
+                }
 
-                    //add "required" to the element if it's required
-                    if (field.Required) {
-                        fieldElement.attr("required", "required");
-                    }
+                var fieldElement = factory(field, fieldIndex, elementToAppendTo);
 
-                    if (field.Name) {
-                        var name = field.Name.replace(/\s/g, "");
-                        name.toLowerCase();
-                        fieldElement.attr("name", name);
-                    }
+                //setup the tooltip
+                if (field.ToolTip) {
+                    fieldElement.attr("title", field.ToolTip);
+                    //use jquery tooltip plugin http://docs.jquery.com/Plugins/Tooltip
+                    //this removes the title attribute and adds a custom tooltip
+                    //important because having a title messes up the validation messages
+                    fieldElement.tooltip({
+                        left: -65
+                    });
+                }
 
-                    if (field.Type !== "OptionsField" && field.Type !== "DateTimeField") {
-                        //setup the value binding
-                        var dataBindAttr = "value: Fields[" + fieldIndex + "].Value";
-                        fieldElement.attr("data-bind", dataBindAttr);
-                    }
+                //add "required" to the element if it's required
+                if (field.Required) {
+                    fieldElement.attr("required", "required");
+                }
+
+                if (field.Name) {
+                    var name = field.Name.replace(/\s/g, "");
+                    name.toLowerCase();
+                    fieldElement.attr("name", name);
+                }
+
+                //setup the value binding for TextBoxField
+                //the others are handled manually
+                if (field.Type === "TextBoxField") {
+                    var dataBindAttr = "value: Fields[" + fieldIndex + "].Value";
+                    fieldElement.attr("data-bind", dataBindAttr);
                 }
             }
 
