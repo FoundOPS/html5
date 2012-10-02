@@ -54,6 +54,8 @@ define(["db/services", "sections/linkedEntitySection"], function (dbServices, cr
             var taskStatuses = new kendo.data.DataSource({data: response});
             vm.set("taskStatusesSource", taskStatuses);
         });
+
+        vm.get("dataSource").read();
     };
 
     return section;
