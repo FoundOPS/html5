@@ -63,6 +63,7 @@ define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "to
         }
 
         vm.set("taskStatusesSource", routes.vm.get("taskStatusesSource"));
+        updateSelectedStatus();
 
         vm.set("selectedTask", routeTask);
 

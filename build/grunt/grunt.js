@@ -192,7 +192,7 @@ module.exports = function (grunt) {
     });
 
     //Must run this first with the bottom three lines commented out
-//    grunt.registerTask('default', 'less requirejs');
+    //grunt.registerTask('default', 'less requirejs');
     //grunt.loadNpmTasks('grunt-less');
     //grunt.loadNpmTasks('grunt-requirejs');
 

@@ -45,7 +45,7 @@ define(["db/services", "sections/linkedEntitySection"], function (dbServices, cr
     }));
 
     session.followRole(function (role) {
-        vm.dataSource.transport.options.read.url = dbServices.API_URL + "routes/GetRoutes?";//deep=true&roleId=" + role.id;
+        vm.dataSource.transport.options.read.url = dbServices.API_URL + "routes/GetRoutes?deep=true&roleId=" + role.id;
         vm.refresh();
     });
 
