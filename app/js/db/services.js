@@ -53,7 +53,7 @@ define(["developer", "tools/dateTools", "db/saveHistory"], function (developer, 
     var roleIdFunctionQueue = [];
     /**
      * Set the current RoleId.
-     * @param {string} The roleId.
+     * @param {string} roleId
      */
     services.setRoleId = function (roleId) {
         services.RoleId = roleId;
@@ -71,7 +71,7 @@ define(["developer", "tools/dateTools", "db/saveHistory"], function (developer, 
      * @param {String} queryString The query string to use. Ex. "routes/GetDepots"
      * @param {Object.<string|Object>=}  opt_params The parameters to use (optional).
      * @param {boolean=} opt_excludeRoleId Do not include the roleId in the params (optional).
-     * @param {?function(Object):Object} The converter function for a loaded item (optional).
+     * @param {?function(Object):Object} opt_convertItem The converter function for a loaded item (optional).
      * @return {function(!function(Object))} A function to perform the get and invoke the callback.
      * @private
      */
@@ -158,7 +158,6 @@ define(["developer", "tools/dateTools", "db/saveHistory"], function (developer, 
 
     /**
      * Get the service provider's TrackPoints.
-     * @param {string} serviceDate The service date to retrieve TrackPoints for (in Utc).
      * @param {string} routeId The Id of the route to retrieve TrackPoints for.
      * @param {!function(Array.<Object>)} callback The callback to pass the TrackPoints to after they are loaded.
      */
@@ -170,7 +169,6 @@ define(["developer", "tools/dateTools", "db/saveHistory"], function (developer, 
     /**
      * Send trackPoint array to server and return success or failure to the callback
      * @param {Array.<models.TrackPoint>} trackPoints
-     * @param routeId
      * @param callback
      */
     services.postTrackPoints = function (trackPoints, callback) {
@@ -192,7 +190,7 @@ define(["developer", "tools/dateTools", "db/saveHistory"], function (developer, 
 
     //endregion
 
-    //region
+    //region ClientLocations
 
     services.getClientLocations = function (clientId, callback) {
         return services._getHttp("Locations/Get", {clientId: clientId})(callback);
@@ -282,6 +280,11 @@ define(["developer", "tools/dateTools", "db/saveHistory"], function (developer, 
             contentType: 'application/json',
             data: JSON.stringify(columnConfigurations)
         });
+    };
+
+    services.getLocationMatches = function (locationString, callback) {
+//        return services._getHttp('service/GetLocations',
+//            {locationString: locationString}, false)(callback);
     };
 
     //endregion

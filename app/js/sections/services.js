@@ -2,8 +2,10 @@
 
 'use strict';
 
-require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateTools", "db/saveHistory", "tools/kendoTools", "widgets/serviceDetails", "widgets/location", "jform"], function ($, session, dbServices, parameters, dateTools, saveHistory, kendoTools) {
-    var services = {}, serviceHoldersDataSource, grid, handleChange, serviceTypesDropDown, selectedServiceHolder, vm;
+require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateTools", "db/saveHistory", "tools/kendoTools", "widgets/serviceDetails",
+    "widgets/location", "jform"], function ($, session, dbServices, parameters, dateTools, saveHistory, kendoTools) {
+    var services = {}, serviceHoldersDataSource, grid, handleChange, serviceTypesDropDown, selectedServiceHolder, vm, locationWidget;
+    var location = null;//{AddressLineOne: "200 N Salisbury St", AddressLineTwo: null, City: "West Lafayette", State: "IN", ZipCode: "47906", Latitude: 40.419034, Longitude: -86.894708};
 
     //region Public
     services.vm = vm = kendo.observable({
@@ -36,8 +38,21 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
             if (service) {
                 //show the service details
                 $("#serviceDetails").attr("style", "display:block");
+                if(locationWidget){
+                    locationWidget.removeMap();
+                }
                 //show location widget
                 $("#locationWidget").attr("style", "display:block");
+
+                if(!location){
+                    dbServices.getDepots(function (loadedDepots) {
+                        if(loadedDepots.length >= 1){
+                            locationWidget.renderMap(loadedDepots[0], false);
+                        }
+                    });
+                }else{
+                    locationWidget.renderMap(location, true);
+                }
             }
         },
         deleteSelectedService: function () {
@@ -46,6 +61,7 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
                 grid.dataSource.remove(selectedServiceHolder);
                 dbServices.deleteService(this.get("selectedService"));
                 $("#serviceDetails").attr("style", "display:none");
+                locationWidget.removeMap();
                 $("#locationWidget").attr("style", "display:none");
             }
         },
@@ -351,7 +367,7 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
         var contentHeight = windowHeight - topHeight - extraMargin;
         $('#grid').css("height", contentHeight + 24 + 'px');
         $('#grid .k-grid-content').css("height", contentHeight - 41 + 'px');
-        $("#serviceDetails").css("max-height", contentHeight + 5 + 'px');
+        $("#serviceDetails").css("max-height", contentHeight + 5 - 345 + 'px');
     };
 
     var setupGrid = function (fields) {
@@ -535,6 +551,7 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
                     $('#services .k-grid-delete').attr("disabled", "disabled");
                     $("#serviceDetails").attr("style", "display:none");
                     $("#locationWidget").attr("style", "display:none");
+                    locationWidget.removeMap();
                 }
             }).data("kendoDropDownList");
 
@@ -544,7 +561,7 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
         });
 
         $("#serviceDetails").kendoServiceDetails();
-        $("#locationWidget").kendoLocation();
+        locationWidget = $("#locationWidget").kendoLocation().data("kendoLocation");
 
         //hookup the add & delete buttons
         $("#services .k-grid-add").on("click", function () {

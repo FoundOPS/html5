@@ -22,6 +22,7 @@ table{border-collapse: collapse;border-spacing: 0;}
 @red:#991A36;
 @orange:#D9591E;
 @charcoal:#333335;
+@white:#ffffff;
 @darkBlue:#36C3E3;
 @buttonLight:#a7ff6c;
 @buttonDark:#8dd85b;
@@ -869,7 +870,7 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
 #serviceDetails {
     display:none;
     position: absolute;
-    top:450px;
+    top:400px;
     right: 30px;
     background-color:#fff;
     padding:10px 20px;
@@ -964,7 +965,7 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
         color:#000000;
         border: 1px solid #c5c5c5;
         border-left: none;
-        .bgGradient(#ffffff, #eeeeee);
+        .bgGradient(@white, #eeeeee);
         &:hover{
             cursor: pointer;
             .bgGradient(#eeeeee, #cccccc);
@@ -989,7 +990,7 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
         }
     //don't make the ends blue when they're selected
         &.selected:not(.left):not(.right){
-            color: #ffffff;
+            color: @white;
             .bgGradient(#36C3E3, #488FCD);
         }
         &.selected:hover:not(.left):not(.right){
@@ -1038,9 +1039,11 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
     top: 54px;
     right: 30px;
     width: 250px;
+    height: 285px;
+    overflow: hidden;
     padding: 15px 20px;
     font-size: 15px;
-    background-color:#fff;
+    background-color:@white;
     -moz-box-shadow: 0 5px 8px #aaa;
     -webkit-box-shadow: 0 5px 8px #AAA;
     box-shadow: 0 5px 8px #AAA;
@@ -1052,9 +1055,96 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
         line-height: 1.5em;
     }
     #locationWidgetMap{
-        position: relative;
-        width: 100%;
+        width: 250px;
         height: 250px;
+        .leaflet-popup-content {
+            margin: 10px;
+        }
+    }
+    #buttonPane{
+        position: relative;
+        top: -250px;
+        left: 0;
+        width: 250px;
+        background:none;
+        #navigateBtn{
+          display: none;
+            position: absolute;
+            top:5px;
+            right: 5px;
+            width: 22px;
+            height: 22px;
+            background: url("../img/navigateBtn.png") no-repeat;
+        }
+        .k-grid-edit{
+            position: absolute;
+            top:5px;
+            left: 5px;
+            background-position: 0 -66px;
+            &:hover{
+                background-position: 0 -44px;
+            }
+        }
+    }
+    #editPane{
+        position: relative;
+        top: -250px;
+        left: -300px;
+        width: 250px;
+        min-height: 35px;
+        border: 1px solid #aaaaaa;
+        background-color: @white;
+        input{
+            width: 234px;
+            margin: 3px 0 3px 3px;
+            padding: 2px 4px;
+            border: 1px solid #AAA;
+            border-radius: 4px;
+        }
+        #search{
+            position: absolute;
+            top:6px;
+            right: 5px;
+            width: 22px;
+            height: 22px;
+            background: url("../img/smallSearch.png") no-repeat;
+        }
+        ul{
+            max-height: 215px;
+            border-top: 1px solid #aaaaaa;
+            overflow-y: auto;
+        }
+        li{
+            height: 36px;
+            padding: 5px 4px 5px 4px;
+            font-size: 14px;
+            cursor: pointer;
+            &:hover{
+                background-color: #efefef;
+            }
+            &:not(:last-child){
+                border-bottom: 1px solid #aaaaaa;
+            }
+            span{
+                display: table-cell;
+            }
+            span:not(.name){
+              display: table-cell;
+            }
+            #previousLocation, #currentLocation, #manuallyDropPin{
+              width: 20px;
+              height: 20px;
+              vertical-align: middle;
+              padding-right: 4px;
+              background: url("../img/previousLocation.png") no-repeat;
+            }
+            #currentLocation{
+              background: url("../img/currentLocation.png") no-repeat;
+            }
+            #manuallyDropPin{
+              background: url("../img/markerIcon.png") no-repeat;
+            }
+        }
     }
 }
 /*Tooltip*/
@@ -1062,7 +1152,7 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
     position: absolute;
     margin-right: 60px;
     z-index: 3000;
-    color: #fff;
+    color: @white;
     border-radius:4px;
     background-color: #000;
     padding: 4px 8px;
@@ -1337,7 +1427,7 @@ ul.noty_cont.noty_layout_topRight li {float:right}
 
 /* noty_notification */
 .noty_bar.noty_theme_default.noty_notification {
-    background-color: #fff;
+    background-color: @white;
     border-color: #ccc;
     color: #555;
 }
@@ -1363,7 +1453,7 @@ ul.noty_cont.noty_layout_topRight li {float:right}
 
 /* noty_alert */
 .noty_bar.noty_theme_default.noty_alert {
-    background-color: #fff;
+    background-color: @white;
     border-color: #ccc;
 }
 .noty_bar.noty_theme_default.noty_alert.noty_layout_topLeft .noty_message .noty_buttons,
@@ -1376,7 +1466,7 @@ ul.noty_cont.noty_layout_topRight li {float:right}
 /* noty_error */
 .noty_bar.noty_theme_default.noty_error {
     background-color: #ff0000;
-    color: #fff;
+    color: @white;
     border-color: darkred;
 }
 .noty_bar.noty_theme_default.noty_error .noty_message {
@@ -1406,7 +1496,7 @@ ul.noty_cont.noty_layout_topRight li {float:right}
 .noty_bar.noty_theme_default.noty_information {
     background-color: #57B7E2;
     border-color: #0B90C4;
-    color: #fff;
+    color: @white;
 }
 .noty_bar.noty_theme_default.noty_information.noty_layout_topLeft .noty_message .noty_buttons,
 .noty_bar.noty_theme_default.noty_information.noty_layout_topRight .noty_message .noty_buttons,
@@ -1431,19 +1521,19 @@ ul.noty_cont.noty_layout_topRight li {float:right}
 }
 /* noty_success */
 .noty_bar.noty_theme_default.noty_success {
-    background-color: #fff;
+    background-color: @white;
     color: @green;
 }
 .noty_bar.noty_theme_default.noty_layout_topCenter.noty_success{
-    border-color: #fff;
+    border-color: @white;
 }
 /* noty_error */
 .noty_bar.noty_theme_default.noty_error {
-    background-color: #fff;
+    background-color: @white;
     color: @red;
 }
 .noty_bar.noty_theme_default.noty_layout_topCenter.noty_error{
-    border-color: #fff;
+    border-color: @white;
 }
 .noty_bar a{
     color: @blue;
