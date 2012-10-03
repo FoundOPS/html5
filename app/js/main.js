@@ -205,7 +205,8 @@ require(["jquery", "widgets/navigator", "developer", "db/services", "db/session"
     //when the silverlight plugin loads hook into the silverlight click events, and hide the navigator popup
     $(silverlight).bind('loaded', function () {
         silverlight.plugin.mainPage.addEventListener("Clicked", function () {
-            navigator.closePopup();
+            //navigator.closePopup();
+            $(document).navigator("closePopup");
         });
     });
 

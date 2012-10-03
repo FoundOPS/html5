@@ -107,6 +107,9 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
             clickedDiv.trigger("popupEvent", clickedDiv);
 
             $("#popup").stop(false, true).fadeIn('fast');
+            //TODO: Remove fix below in future builds. Fixes the popup z-index bug.
+            $('#popupWrapper').hide().show();
+
             //TODO: Change namespace.
             popupWrapperDiv.trigger("popup.visible");
             lastElementClick = clickedDiv.attr("id");
