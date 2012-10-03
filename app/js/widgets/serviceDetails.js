@@ -182,7 +182,6 @@ define(["jquery", "db/services", "db/session", "db/models", "kendo", "jmaskmoney
                     initialValue = initialValue * 100;
                 }
 
-
                 fieldElement.kendoNumericTextBox({
                     step: step,
                     min: min,
