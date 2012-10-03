@@ -1,7 +1,4 @@
-define(["jquery", "tools/analytics", "jmousewheel", "jscrollpane"], function ($, analytics) {
-    /* Known bugs:
-     * showMenu button toggle on nav click.
-     */
+define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
     (function ($) {
         var popup = null;
         var methods = {
@@ -110,6 +107,9 @@ define(["jquery", "tools/analytics", "jmousewheel", "jscrollpane"], function ($,
             clickedDiv.trigger("popupEvent", clickedDiv);
 
             $("#popup").stop(false, true).fadeIn('fast');
+            //TODO: Remove fix below in future builds. Fixes the popup z-index bug.
+            $('#popupWrapper').hide().show();
+
             //TODO: Change namespace.
             popupWrapperDiv.trigger("popup.visible");
             lastElementClick = clickedDiv.attr("id");
@@ -202,11 +202,18 @@ define(["jquery", "tools/analytics", "jmousewheel", "jscrollpane"], function ($,
             $('html')
                 .on('click touchend', function (e) {
                     var clicked = $(e.target);
+                    //console.log(clicked[0].outerHTML);
+                    //console.log(clicked.parents("#popupContentWrapper"));
+                    //console.log(clicked.attr("id"));
                     //TODO: Return if not visible.
                     //TODO: Also add arrow click detection?
                     var popupHeaderLen = clicked.parents("#popupHeader").length + clicked.is("#popupHeader") ? 1 : 0;
-                    var popupContentLen = clicked.parents("#popupContent").length + clicked.is("#popupContent") ? 1 : 0;
+                    //console.log("pHeaderLen: " + popupHeaderLen);
+                    //TODO: Find better listener for this.
+                    var popupContentLen = (clicked.parents("#popupContentWrapper").length && !clicked.parent().is("#popupContentWrapper")) ? 1 : 0;
+                    //console.log("pHeaderLen: " + popupContentLen);
                     var isListener = clicked.parents(".popupListener").length + clicked.is(".popupListener") ? 1 : 0;
+                    //console.log("pHeaderLen: " + isListener);
                     if (popupHeaderLen === 0 && popupContentLen === 0 && isListener === 0) {
                         thisPopup.closePopup();
                     }

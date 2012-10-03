@@ -13,6 +13,7 @@ require.config({
         lib: "../lib",
         //libraries
         colorpicker: "ui/colorPicker",
+        doT: "../lib/doT.min",
         hasher: "../lib/hasher",
         kendo: "../lib/kendo.all",
         jautosize: "../lib/jquery.autosize",
@@ -139,14 +140,18 @@ require(["jquery", "widgets/navigator", "developer", "db/services", "db/session"
             //setup the navigator
             //navigator = new Navigator(data);
             //navigator.hideSearch();
+            data.enableBackButton = false;
+            if(developer.CURRENT_FRAME === developer.Frame.MOBILE_APP) {
+               data.enableBackButton = true;
+            }
             $(document).navigator(data);
             $(document).navigator('hideSearch');
 
             //reset the images 1.5 seconds after loading to workaround a shared access key buy
             _.delay(function () {
                 if (navigator) {
-                    $(document).navigator('changeAvatar', data.avatarUrl);
-                    $(document).navigator('changeBusinessLogo', session.get("role.businessLogoUrl"));
+                    navigator.changeAvatar(data.avatarUrl);
+                    navigator.changeBusinessLogo(session.get("role.businessLogoUrl"));
                 }
             }, 1500);
         } else {
@@ -204,7 +209,8 @@ require(["jquery", "widgets/navigator", "developer", "db/services", "db/session"
     //when the silverlight plugin loads hook into the silverlight click events, and hide the navigator popup
     $(silverlight).bind('loaded', function () {
         silverlight.plugin.mainPage.addEventListener("Clicked", function () {
-            $(document).navigator('closePopup');
+            //navigator.closePopup();
+            $(document).navigator("closePopup");
         });
     });
 

@@ -288,7 +288,7 @@ define(['db/services', "tools/parameters", "kendo"], function (dbservices, param
 //            }
 //        ]
 //    };
-//session._role = session._data.roles[0];
+//    session._role = session._data.roles[0];
 
     return session;
 });
