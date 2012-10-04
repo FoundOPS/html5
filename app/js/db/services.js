@@ -282,9 +282,9 @@ define(["developer", "tools/dateTools", "db/saveHistory"], function (developer, 
         });
     };
 
-    services.getLocationMatches = function (locationString, callback) {
-//        return services._getHttp('service/GetLocations',
-//            {locationString: locationString}, false)(callback);
+    services.locationSearch = function (searchString, callback) {
+        return services._getHttp('Locations/GetAllLocations?search=' + searchString,
+            {}, false)(callback);
     };
 
     //endregion

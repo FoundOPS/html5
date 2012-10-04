@@ -1100,6 +1100,7 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
             padding: 2px 4px;
             border: 1px solid #AAA;
             border-radius: 4px;
+            font-family: PTSans;
         }
         #search{
             position: absolute;
@@ -1118,9 +1119,11 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
             height: 36px;
             padding: 5px 4px 5px 4px;
             font-size: 14px;
+            background-color: #efefef;
             cursor: pointer;
             &:hover{
-                background-color: #efefef;
+              .rowGradient;
+              color: @white;
             }
             &:not(:last-child){
                 border-bottom: 1px solid #aaaaaa;
@@ -1129,9 +1132,9 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
                 display: table-cell;
             }
             span:not(.name){
-              display: table-cell;
+                display: table-cell;
             }
-            #previousLocation, #currentLocation, #manuallyDropPin{
+            #fromWeb, #previousLocation, #currentLocation, #manuallyDropPin{
               width: 20px;
               height: 20px;
               vertical-align: middle;
@@ -1143,6 +1146,9 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
             }
             #manuallyDropPin{
               background: url("../img/markerIcon.png") no-repeat;
+            }
+            #fromWeb{
+              background: url("../img/webIcon.png") no-repeat;
             }
         }
     }

@@ -3,20 +3,11 @@
 'use strict';
 
 define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/leaflet"], function ($, dbServices, fui, generalTools) {
-    var kendo = window.kendo,
-        ui = kendo.ui,
-        Widget = ui.Widget,
-        map, cloudmade, marker, icon, currentLocation, locationList, allowMapClick;
-        //locationA = {AddressLineOne: "200 N Salisbury St", AddressLineTwo: null, AdminDistrictTwo: "West Lafayette", AdminDistrictOne: "IN", PostalCode: "47906", Latitude: 40.419034, Longitude: -86.894708},
-        //locationB = {AddressLineOne: "1305 Cumberland Ave", AddressLineTwo: "Suite 205", AdminDistrictTwo: "West Lafayette", AdminDistrictOne: "IN", PostalCode: "47906", Latitude: 40.459989, Longitude: -86.930867};
-
-    var Location = Widget.extend({
-        init: function (element, options) {
+    $.Widget("location", {
+        _create: function() {
             var that = this;
-
-            Widget.fn.init.call(that, element, options);
-
-            options = that.options;
+            that._map = {}, that._cloudmade = {}, that._marker = {}, that._icon = {},
+                that._currentLocation = "", that._locationList = [], that._allowMapClick = false;
         },
 
         renderMap: function (location, shouldAddMarker) {
@@ -49,17 +40,17 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
             that.element.append(_location);
 
             //initialize the map on the "locationWidgetMap" div with a given center and zoom
-            map = L.map('locationWidgetMap', {
+            that._map = L.map('locationWidgetMap', {
                 center: [location.Latitude, location.Longitude],
                 zoom: 15,
                 attributionControl: false,
                 zoomControl: false
             });
             //create a CloudMade tile layer and add it to the map
-            cloudmade = L.tileLayer('http://{s}.tile.cloudmade.com/57cbb6ca8cac418dbb1a402586df4528/997/256/{z}/{x}/{y}.png', {
+            that._cloudmade = L.tileLayer('http://{s}.tile.cloudmade.com/57cbb6ca8cac418dbb1a402586df4528/997/256/{z}/{x}/{y}.png', {
                 maxZoom: 18
             });
-            map.addLayer(cloudmade);
+            that._map.addLayer(that._cloudmade);
 
             if(shouldAddMarker){
                 that._addMarker(location.Latitude, location.Longitude, false);
@@ -73,7 +64,7 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
             //animate back to map from edit screen on when a location is selected from the list
             $("#locationWidget #editPane li").on("click", function (e) {
                 //match the index of the selected item to the index of locationList
-                var selectedLocation = locationList[0];
+                var selectedLocation = that._locationList[0];
 
                 that._changeLocation(selectedLocation);
                 $("#locationWidget #buttonPane").animate({
@@ -88,13 +79,13 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
             });
 
             map.on('click', function(e) {
-                if(allowMapClick){
+                if(that._allowMapClick){
                     that._addMarker(e.latlng.lat, e.latlng.lng, true);
                 }
             });
 
             $("#manuallyDropPin").on("click", function () {
-                allowMapClick = true;
+                that._allowMapClick = true;
             });
 
             //TODO: set allowMapClick to false on save
@@ -114,26 +105,26 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
 
         _addMarker: function (lat, lng, addPopup) {
             var that = this;
-            if(marker){
-                map.removeLayer(marker);
+            if(that._marker){
+                that._map.removeLayer(that._marker);
             }
 
-            icon = L.icon({
+            that._icon = L.icon({
                 iconUrl: fui.ImageUrls.MARKER,
                 iconAnchor: [13,40],
                 popupAnchor: [0,-40],
                 shadowUrl: fui.ImageUrls.MARKER_SHADOW
             });
 
-            marker = L.marker([lat, lng],{
-                icon: icon
+            that._marker = L.marker([lat, lng],{
+                icon: that._icon
             });
             if(addPopup){
-                marker.bindPopup('<button id="saveLocation" class="k-button k-button-icontext"><span class="k-icon k-update"></span>Save</button>',{
+                that._marker.bindPopup('<button id="saveLocation" class="k-button k-button-icontext"><span class="k-icon k-update"></span>Save</button>',{
                     closeButton: false
                 });
             }
-            map.addLayer(marker);
+            that._map.addLayer(that._marker);
         },
 
         _showEditScreen: function () {
@@ -151,18 +142,19 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
         },
 
         removeMap: function () {
-            if(map){
-                map.closePopup();
-                map.removeLayer(cloudmade);
-                map = null;
+            var that = this;
+            if(that._map){
+                that._map.closePopup();
+                that._map.removeLayer(that._cloudmade);
+                that._map = null;
             }
             $("#locationWidget")[0].innerHTML = "";
         },
 
         _changeLocation: function (location) {
             var that = this;
-            if(marker){
-                map.removeLayer(marker);
+            if(that._marker){
+                that._map.removeLayer(that._marker);
             }
 
             //add a marker at the location, with a popup containing the location name
@@ -188,20 +180,14 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
             }
 
             //TODO: set current location somewhere
-            if(currentLocation){
-                list += '<li><span id="previousLocation"></span><span class="name">' + that._getLocationString(currentLocation) + '</span></li>';
+            if(that._currentLocation){
+                list += '<li><span id="previousLocation"></span><span class="name">' + that._getLocationString(that._currentLocation) + '</span></li>';
             }
 
             list += '<li><span id="currentLocation"></span><span class="name">Use Current Location</span></li>' +
                 '<li><span id="manuallyDropPin"></span><span class="name">Manually Drop Pin</span></li>';
 
             $(list).appendTo($("#locationWidget #locationList"));
-        },
-
-        options: new kendo.data.ObservableObject({
-            name: "Location"
-        })
+        }
     });
-
-    ui.plugin(Location);
 });

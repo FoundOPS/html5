@@ -186,7 +186,7 @@ define(['jquery', 'moment'], function ($) {
                     if (callback)
                         callback(e.val());
                 }
-            }, 500);
+            }, 1000);
         });
     };
 
