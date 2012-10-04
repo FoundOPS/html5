@@ -46,10 +46,7 @@ define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "to
         /* If user has already selected a status -> go back
          otherwise open the task status popup */
         if (force || vm.statusUpdated) {
-            var query = parameters.get();
-            //remove the routeTaskId so it does not jump back here
-            delete query.routeTaskId;
-            parameters.set({params: query, replace: true, section: {name: "routeDestinationDetails"}});
+            history.back();
         } else {
             vm.openTaskStatuses("backButton");
         }

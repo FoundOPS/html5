@@ -1,6 +1,6 @@
 "use strict";
 
-define(["jquery", "ui/popup", "doT", "jmousewheel", "jscrollpane"], function ($, Popup, doT) {
+define(["jquery", "ui/popup", "lib/doT.min", "jmousewheel", "jscrollpane"], function ($, Popup, doT) {
     (function ($) {
         var navigator = null;
         var methods = {

@@ -27,6 +27,24 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "tools/paramete
 
             //try to move forward
             section._moveForward();
+
+            //region Set touch/click animation for Direction's button.
+            document.getElementById("directionsButton").addEventListener('touchstart', function (e) {
+                $("#directionsButton").toggleClass("buttonClicked");
+            });
+            document.getElementById("directionsButton").addEventListener('touchend', function (e) {
+                $("#directionsButton").toggleClass("buttonClicked");
+            });
+            document.getElementById("directionsButton").addEventListener('touchcancel', function (e) {
+                $("#directionsButton").toggleClass("buttonClicked");
+            });
+            document.getElementById("directionsButton").addEventListener('mousedown', function (e) {
+                $("#directionsButton").toggleClass("buttonClicked");
+            });
+            document.getElementById("directionsButton").addEventListener('mouseup', function (e) {
+                $("#directionsButton").toggleClass("buttonClicked");
+            });
+            //endregion
         });
 
         //Boolean that states whether user is on Android device or not.
@@ -34,34 +52,6 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "tools/paramete
 
     window.routeDestinationDetails = section;
     vm = section.vm;
-
-    section.onBack = function () {
-        var query = parameters.get();
-        //remove the routeDestinationId so it does not jump back here
-        delete query.routeDestinationId;
-        parameters.set(query, true, {name: "routeDetails"});
-    };
-
-    //region Set touch/click animation for Direction's button depending on user device.
-    if (kendo.support.detectOS(navigator.userAgent).device) {
-        document.getElementById("directionsButton").addEventListener('touchstart', function (e) {
-            $("#directionsButton").toggleClass("buttonClicked");
-        });
-        document.getElementById("directionsButton").addEventListener('touchend', function (e) {
-            $("#directionsButton").toggleClass("buttonClicked");
-        });
-        document.getElementById("directionsButton").addEventListener('touchcancel', function (e) {
-            $("#directionsButton").toggleClass("buttonClicked");
-        });
-    } else {
-        $("#directionsButton").mousedown(function (e) {
-            $("#directionsButton").toggleClass("buttonClicked");
-        });
-        $("#directionsButton").mouseup(function (e) {
-            $("#directionsButton").toggleClass("buttonClicked");
-        });
-    }
-    //endregion
 
 //vm additions
 
