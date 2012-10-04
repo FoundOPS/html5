@@ -35,7 +35,7 @@ define(["developer", "tools/dateTools", "db/saveHistory"], function (developer, 
     } else if (mode === developer.DataSource.LIVE) {
         apiUrl = 'http://api.foundops.com/api/';
     } else if (mode === developer.DataSource.REMOTE_API) {
-        apiUrl = "http://192.168.0.115:70/api/"; // Local IP of host computer (might change everyday).
+        apiUrl = "http://192.168.0.114:70/api/"; // Local IP of host computer (might change everyday).
     } else if (mode === developer.DataSource.TESTAPI) {
         apiUrl = 'http://testapi.foundops.com/api/';
     }

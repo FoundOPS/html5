@@ -6,7 +6,7 @@
 
 'use strict';
 
-define(["sections/linkedEntitySection", "sections/routeDetails", "tools/parameters", "developer"], function (createBase, routeDetails, parameters, developer) {
+define(["sections/linkedEntitySection", "sections/routeDetails", "tools/parameters", "developer", "tools/analytics"], function (createBase, routeDetails, parameters, developer, analytics) {
     var vm, section = createBase("routeTask", "routeTaskId",
         //on show
         function () {
@@ -29,6 +29,9 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "tools/paramete
             section._moveForward();
         });
 
+        //Boolean that states whether user is on Android device or not.
+    var androidDevice = developer.CURRENT_FRAME === developer.Frame.MOBILE_APP && kendo.support.detectOS(navigator.userAgent).device === "android";
+
     window.routeDestinationDetails = section;
     vm = section.vm;
 
@@ -38,6 +41,27 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "tools/paramete
         delete query.routeDestinationId;
         parameters.set(query, true, {name: "routeDetails"});
     };
+
+    //region Set touch/click animation for Direction's button depending on user device.
+    if (kendo.support.detectOS(navigator.userAgent).device) {
+        document.getElementById("directionsButton").addEventListener('touchstart', function (e) {
+            $("#directionsButton").toggleClass("buttonClicked");
+        });
+        document.getElementById("directionsButton").addEventListener('touchend', function (e) {
+            $("#directionsButton").toggleClass("buttonClicked");
+        });
+        document.getElementById("directionsButton").addEventListener('touchcancel', function (e) {
+            $("#directionsButton").toggleClass("buttonClicked");
+        });
+    } else {
+        $("#directionsButton").mousedown(function (e) {
+            $("#directionsButton").toggleClass("buttonClicked");
+        });
+        $("#directionsButton").mouseup(function (e) {
+            $("#directionsButton").toggleClass("buttonClicked");
+        });
+    }
+    //endregion
 
 //vm additions
 
@@ -53,38 +77,40 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "tools/paramete
         }
     };
     vm.getDirections = function () {
-        var currentPosition;
-        var navigateTo = function (url) {
-            if (developer.CURRENT_FRAME === developer.Frame.MOBILE_APP && kendo.support.detectOS(navigator.userAgent).device === "android") {
-                window.location.href = "geo:0,0?q=" + vm.get("selectedEntity.Location.Latitude") + "," + vm.get("selectedEntity.Location.Longitude");
+        var currentPosition,
+            destination = vm.get("selectedEntity.Location.Latitude") + "," + vm.get("selectedEntity.Location.Longitude");
+
+        var navigateTo = function (destination, currentPosition) {
+            if (androidDevice) {
+                window.location.href = "geo:0,0?q=" + destination; //Opens google navigation on Android phones.
+            } else if (currentPosition) {
+                window.open("http://maps.google.com/maps?saddr=" + currentPosition + "&daddr=" + destination);
             } else {
-                window.open("http://maps.google.com/maps?" + url);
+                window.open("http://maps.google.com/maps?q=" + destination);
             }
         };
-        navigator.geolocation.getCurrentPosition(function (position) {
-            // If geolocation is successful get directions.
-            currentPosition = position.coords.latitude + "," + position.coords.longitude;
-            if (vm.get("selectedEntity.Location")) {
-                navigateTo("saddr=" + currentPosition + "&daddr=" + vm.get("selectedEntity.Location.Latitude") + "," + vm.get("selectedEntity.Location.Longitude"));
-            } else {
-                navigateTo("saddr=" + currentPosition + "&daddr=" + vm.get("selectedEntity.Client.Name"));
-            }
-        }, function () {
-            // If geolocation is NOT successful find business location.
-            if (vm.get("selectedEntity.Location")) {
-                navigateTo("q=" + vm.get("selectedEntity.Location.Latitude") + "," + vm.get("selectedEntity.Location.Longitude"));
-            } else {
-                navigateTo("q=" + vm.get("selectedEntity.Client.Name"));
-            }
-        }, {timeout: 10000, enableHighAccuracy: true});
+        //Attempt to get the user's current location.
+        navigator.geolocation.getCurrentPosition(
+            function (position) { // If geolocation is successful get directions. This is success function of geolocation API.
+                currentPosition = position.coords.latitude + "," + position.coords.longitude;
+                navigateTo(destination, currentPosition);
+            },
+            function () { // If geolocation is NOT successful find business location. This is error function of geolocation API.
+                navigateTo(destination, false);
+            },
+            {timeout: 10000, enableHighAccuracy: true} //Options for geolocation API.
+        );
     };
     vm.contactClick = function (e) {
         if (e.dataItem.Type === "Phone Number") {
+            analytics.track("Phone Contact Click");
             window.location.href = "tel:" + e.dataItem.Data;
         } else if (e.dataItem.Type === "Email Address") {
+            analytics.track("Email Contact Click");
             window.location.href = "mailto:" + e.dataItem.Data;
         } else if (e.dataItem.Type === "Website") {
-            if (developer.CURRENT_FRAME === developer.Frame.MOBILE_APP && kendo.support.detectOS(navigator.userAgent).device === "android") {
+            analytics.track("Website Contact Click");
+            if (androidDevice) {
                 window.plugins.childBrowser.showWebPage("http://" + e.dataItem.Data);
             } else {
                 window.open("http://" + e.dataItem.Data);

@@ -6,7 +6,9 @@
     <p style="top:10px; margin-bottom: -5px;">Contacts</p>
     <hr style="width:90%;"/>
     </div>
-    <ul id="contacts-listview" data-bind="source:contacts, click: contactClick" data-role="listview" data-style="inset" data-template="contactsTemplate"></ul>
+    <ul id="contacts-listview" data-bind="source:contacts, click: contactClick"
+        data-role="listview" data-style="inset" data-template="contactsTemplate">
+    </ul>
 
     <p style="top:10px; margin-bottom: -5px;">Tasks</p>
     <hr style="width:90%;"/>
@@ -23,13 +25,10 @@
     <p>${selectedEntity.Location.AddressLineTwo}</p>
     <p>${selectedEntity.Location.City}, ${selectedEntity.Location.State}<br/>
         ${selectedEntity.Location.ZipCode}</p>
+    <a id="directionsButton" data-bind="click: getDirections">Directions</a>
     # } else { #
     <p style="color:red"> No<br/>Location<br/>Information<br/>Available</p>
-    <label id="directionsWarning">Direction information may not be 100% accurate.</label>
     # } #
-    <a id="directionsButton" data-bind="click: getDirections">Directions</a>
-    <!--<a id="directionsButton" data-rel="external"-->
-       <!--href="geo:0,0?saddr=Current%20Location&daddr=${selectedEntity.Location.Latitude},${selectedEntity.Location.Longitude}">Directions</a>-->
 </script>
 <script type="text/x-kendo-template" id="contactsTemplate">
     # if (Type === "Phone Number") { #
@@ -42,29 +41,6 @@
         <a>${Label} - ${Data}</a>
     # } #
 </script>
-    <script type="text/x-kendo-template" id="routeTasksTemplate">
+<script type="text/x-kendo-template" id="routeTasksTemplate">
     <a>${Name}</a>
-</script>
-<script>
-    //Wait until directionsButton is loaded
-    setTimeout( function () {
-        if (kendo.support.detectOS(navigator.userAgent).device) {
-            document.getElementById("directionsButton").addEventListener('touchstart', function (e) {
-                $("#directionsButton").toggleClass("buttonClicked");
-            });
-            document.getElementById("directionsButton").addEventListener('touchend', function (e) {
-                $("#directionsButton").toggleClass("buttonClicked");
-            });
-            document.getElementById("directionsButton").addEventListener('touchcancel', function (e) {
-                $("#directionsButton").toggleClass("buttonClicked");
-            });
-        } else {
-            $("#directionsButton").mousedown(function (e) {
-                $("#directionsButton").toggleClass("buttonClicked");
-            });
-            $("#directionsButton").mouseup(function (e) {
-                $("#directionsButton").toggleClass("buttonClicked");
-            });
-        }
-    }, 0);
 </script>

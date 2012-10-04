@@ -1,8 +1,38 @@
 /*global module:false*/
 module.exports = function (grunt) {
+    var _ = require('underscore');
 
     var version = "0.021",
         mobileOptimizationTags = '<meta name="HandheldFriendly" content="True">\n\t<meta name="MobileOptimized" content="320">\n\t<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>\n\t<link rel="apple-touch-icon-precomposed" sizes="114x114" href="@@blobRootimg/Icon-96x96.png">\n\t<link rel="apple-touch-icon-precomposed" sizes="72x72" href="@@blobRootimg/Icon-72x72.png">\n\t<link rel="apple-touch-icon-precomposed" href="@@blobRootimg/Icon-36x36.png">\n\t<link rel="shortcut icon" href="@@blobRootimg/Icon-36x36.png">\n\t<meta name="apple-mobile-web-app-capable" content="yes">\n\t<meta name="apple-mobile-web-app-status-bar-style" content="black">\n\t<script>(function(a,b,c){if(c in b&&b[c]){var d,e=a.location,f=/^(a|html)$/i;a.addEventListener("click",function(a){d=a.target;while(!f.test(d.nodeName))d=d.parentNode;"href"in d&&(d.href.indexOf("http")||~d.href.indexOf(e.host))&&(a.preventDefault(),e.href=d.href)},!1)}})(document,window.navigator,"standalone")</script>';
+
+//region setup the copy paths
+    var mobileCopyPaths = {},
+        loginCopyPaths = {},
+        mainPath = "C:/FoundOPS/html5/",
+        androidPath = mainPath + "build/mobile/Android/assets/www/",
+        iOSPath = mainPath + "build/mobile/iOS/www/",
+    // Length 11
+        destinationPaths = ["js/main-built.js", "styles/main-built.css", "styles/PTS55F.ttf", "styles/styles.less", "lib/",
+            "img/", "view/", "styles/images/", "styles/textures/", "navigator.html", "index.html"],
+    // Length 11
+        sourcePaths = ["build/main/main-built.js", "build/main/main-built.css",
+            "app/styles/PTS55F.ttf", "login/styles/styles.less", "login/lib/*",
+            "app/img/*", "app/view/*", "app/styles/kendo/images/*",
+            "app/styles/kendo/textures/*", "app/navigator-build.html",
+            "login/login.html"],
+        i = 0;
+    _.each(destinationPaths, function (destinationPath) {
+        mobileCopyPaths[androidPath + destinationPath] = mainPath + sourcePaths[i];
+        mobileCopyPaths[iOSPath + destinationPath] = mainPath + sourcePaths[i];
+        i++;
+    });
+    mobileCopyPaths[androidPath] = mainPath + "build/mobile/cordova/android/*";
+    mobileCopyPaths[androidPath + "childbrowser/"] = mainPath + "build/mobile/cordova/android/childbrowser/*";
+    mobileCopyPaths[iOSPath] = mainPath + "build/mobile/cordova/iOS/*";
+    loginCopyPaths[androidPath + "img/"] = mainPath + "login/img/*";
+    loginCopyPaths[iOSPath + "img/"] = mainPath + "login/img/*";
+//endregion
+
 
     // Project configuration.
     grunt.initConfig({
@@ -98,43 +128,10 @@ module.exports = function (grunt) {
                 }
             },
             login: {
-                files: {
-                    // Android
-                    "C:/FoundOPS/html5/build/mobile/Android/assets/www/img/": "C:/FoundOPS/html5/login/img/*",
-                    // iOS
-                    "C:/FoundOPS/html5/build/mobile/iOS/www/img/": "C:/FoundOPS/html5/login/img/*"
-                }
+                files: loginCopyPaths
             },
             mobile: {
-                files: {
-                    // Android files
-                    "C:/FoundOPS/html5/build/mobile/Android/assets/www/js/main-built.js": "C:/FoundOPS/html5/build/main/main-built.js",
-                    "C:/FoundOPS/html5/build/mobile/Android/assets/www/styles/main-built.css": "C:/FoundOPS/html5/build/main/main-built.css",
-                    "C:/FoundOPS/html5/build/mobile/Android/assets/www/styles/PTS55F.ttf": "C:/FoundOPS/html5/app/styles/PTS55F.ttf",
-                    "C:/FoundOPS/html5/build/mobile/Android/assets/www/styles/styles.less": "C:/FoundOPS/html5/login/styles/styles.less", // Login page files
-                    "C:/FoundOPS/html5/build/mobile/Android/assets/www/lib/": "C:/FoundOPS/html5/login/lib/*", // Login page files
-                    "C:/FoundOPS/html5/build/mobile/Android/assets/www/img/": "C:/FoundOPS/html5/app/img/*",
-                    "C:/FoundOPS/html5/build/mobile/Android/assets/www/view/": "C:/FoundOPS/html5/app/view/*",
-                    "C:/FoundOPS/html5/build/mobile/Android/assets/www/styles/images/": "C:/FoundOPS/html5/app/styles/kendo/images/*",
-                    "C:/FoundOPS/html5/build/mobile/Android/assets/www/styles/textures/": "C:/FoundOPS/html5/app/styles/kendo/textures/*",
-                    "C:/FoundOPS/html5/build/mobile/Android/assets/www/navigator.html": "C:/FoundOPS/html5/app/navigator-build.html",
-                    "C:/FoundOPS/html5/build/mobile/Android/assets/www/index.html": "C:/FoundOPS/html5/login/login.html",
-                    "C:/FoundOPS/html5/build/mobile/Android/assets/www/": "C:/FoundOPS/html5/build/mobile/cordova/android/*",
-                    "C:/FoundOPS/html5/build/mobile/Android/assets/www/childbrowser/": "C:/FoundOPS/html5/build/mobile/cordova/android/childbrowser/*",
-                    // iOS Files
-                    "C:/FoundOPS/html5/build/mobile/iOS/www/js/main-built.js": "C:/FoundOPS/html5/build/main/main-built.js",
-                    "C:/FoundOPS/html5/build/mobile/iOS/www/styles/main-built.css": "C:/FoundOPS/html5/build/main/main-built.css",
-                    "C:/FoundOPS/html5/build/mobile/iOS/www/styles/PTS55F.ttf": "C:/FoundOPS/html5/app/styles/PTS55F.ttf",
-                    "C:/FoundOPS/html5/build/mobile/iOS/www/styles/styles.less": "C:/FoundOPS/html5/login/styles/styles.less", // Login page files
-                    "C:/FoundOPS/html5/build/mobile/iOS/www/lib/": "C:/FoundOPS/html5/login/lib/*", // Login page files
-                    "C:/FoundOPS/html5/build/mobile/iOS/www/img/": "C:/FoundOPS/html5/app/img/*",
-                    "C:/FoundOPS/html5/build/mobile/iOS/www/view/": "C:/FoundOPS/html5/app/view/*",
-                    "C:/FoundOPS/html5/build/mobile/iOS/www/styles/images/": "C:/FoundOPS/html5/app/styles/kendo/images/*",
-                    "C:/FoundOPS/html5/build/mobile/iOS/www/styles/textures/": "C:/FoundOPS/html5/app/styles/kendo/textures/*",
-                    "C:/FoundOPS/html5/build/mobile/iOS/www/navigator.html": "C:/FoundOPS/html5/app/navigator-build.html",
-                    "C:/FoundOPS/html5/build/mobile/iOS/www/index.html": "C:/FoundOPS/html5/login/login.html",
-                    "C:/FoundOPS/html5/build/mobile/iOS/www/": "C:/FoundOPS/html5/build/mobile/cordova/iOS/*"
-                }
+                files: mobileCopyPaths
             }
         },
         replace: {

@@ -6,7 +6,7 @@
 
 'use strict';
 
-define(["sections/linkedEntitySection", "sections/routes", "tools/parameters", "db/services", "db/models"], function (createBase, routes, parameters, dbServices, models) {
+define(["sections/linkedEntitySection", "sections/routes", "tools/parameters", "db/services", "db/models", "tools/analytics"], function (createBase, routes, parameters, dbServices, models, analytics) {
     var vm, section = createBase("routeDestinationDetails", "routeDestinationId",
         //on show
         function () {
@@ -101,21 +101,20 @@ define(["sections/linkedEntitySection", "sections/routes", "tools/parameters", "
             });
 
         };
-
         var onError = function (error) {
             switch (error.code) {
-                case error.PERMISSION_DENIED:
-                    alert("You must enable Geolocation to enable mobile tracking.");
-                    break;
-                case error.POSITION_UNAVAILABLE:
-                    alert("Location information is unavailable at this time.");
-                    break;
-                case error.TIMEOUT:
-                    alert("The Geolocation request has timed out. Please check your internet connectivity.");
-                    break;
-                default:
-                    alert("Geolocation information is not available at this time. Please check your Geolocation settings.");
-                    break;
+            case error.PERMISSION_DENIED:
+                alert("You must enable Geolocation to enable mobile tracking.");
+                break;
+            case error.POSITION_UNAVAILABLE:
+                alert("Location information is unavailable at this time.");
+                break;
+            case error.TIMEOUT:
+                alert("The Geolocation request has timed out. Please check your internet connectivity.");
+                break;
+            default:
+                alert("Geolocation information is not available at this time. Please check your Geolocation settings.");
+                break;
             }
             vm.endRoute();
         };
@@ -141,10 +140,9 @@ define(["sections/linkedEntitySection", "sections/routes", "tools/parameters", "
             window.plugins.statusBarNotification.notify("Tracking...", "FoundOPS is tracking your location.");
         }
 
-        //store the intervalId
-//        intervalId = window.setInterval(function () {
         addPushTrackPoints(routes.vm.get("nextEntity").Id);
-//        }, TRACKPOINTCONFIG.TRACKPOINT_COLLECTION_FREQUENCY_SECONDS * 1000);
+
+        analytics.track("Start Route");
     };
     /**
      * Ends the collection of trackpoints for the selected route.
@@ -155,8 +153,9 @@ define(["sections/linkedEntitySection", "sections/routes", "tools/parameters", "
 
         //stop calling addPushTrackPoints
         navigator.geolocation.clearWatch(watchId);
-//        clearInterval(intervalId);
         trackPointsToSend = [];
+
+        analytics.track("End Route");
     };
 
     return section;
