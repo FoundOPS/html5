@@ -122,7 +122,6 @@ define(["db/services", "db/session", "db/saveHistory", "tools/dateTools", "widge
         usersDataSource.transport.options.update.url = dbServices.API_URL + "settings/UpdateUserSettings?roleId=" + roleId;
         usersDataSource.transport.options.destroy.url = dbServices.API_URL + "settings/DeleteUserSettings?roleId=" + roleId;
         usersDataSource.transport.options.create.url = dbServices.API_URL + "settings/InsertUserSettings?roleId=" + roleId;
-        usersDataSource.read();
     });
 
     //endregion
@@ -323,6 +322,7 @@ define(["db/services", "db/session", "db/saveHistory", "tools/dateTools", "widge
 
     usersSettings.show = function () {
         usersSettings.setupSaveHistory();
+        usersDataSource.read();
     };
 
     window.usersSettings = usersSettings;

@@ -2,7 +2,7 @@
 
 'use strict';
 
-define(['db/services', "tools/parameters", "kendo"], function (dbservices, parameters) {
+define(['developer', 'db/services', "tools/parameters", "kendo"], function (developer, dbServices, parameters) {
     var session = new kendo.data.ObservableObject({});
     window.session = session;
 
@@ -18,8 +18,9 @@ define(['db/services', "tools/parameters", "kendo"], function (dbservices, param
             return;
         }
 
-        //load the config
-        dbservices.getSession(function (data) {
+        //load the session data
+
+        dbServices.load.session().done(function (data) {
             session._data = data;
             session.set("user", data.name);
 
@@ -37,7 +38,7 @@ define(['db/services', "tools/parameters", "kendo"], function (dbservices, param
     session.setRole = function (role) {
         session.set("role", role);
 
-        dbservices.setRoleId(role.id);
+        dbServices.setRoleId(role.id);
 
         //only set the parameter if a section is loaded
         var currentSection = parameters.getSection();
@@ -74,7 +75,7 @@ define(['db/services', "tools/parameters", "kendo"], function (dbservices, param
     /**
      * Get now adjusted for the users time zone.
      * If there is no session data, it will return the computer's local date.
-     * @return {moment}
+     * @return {A}
      */
     session.now = function () {
         if (!session._data || !session._data.userTimeZone || !session._data.userTimeZoneOffsetMinutes) {

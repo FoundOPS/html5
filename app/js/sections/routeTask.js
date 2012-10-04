@@ -70,7 +70,7 @@ define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "to
         //clear statusUpdated
         vm.statusUpdated = false;
 
-        dbServices.getServiceDetails(vm.get("selectedTask.ServiceId"), vm.get("selectedTask.Date"), vm.get("selectedTask.RecurringServiceId"), vm.get("selectedTask.ServiceTemplateId"),
+        dbServices.load.service(vm.get("selectedTask.ServiceId"), vm.get("selectedTask.Date"), vm.get("selectedTask.RecurringServiceId"), vm.get("selectedTask.ServiceTemplateId"),
             function (service) {
                 vm.set("selectedService", service);
 

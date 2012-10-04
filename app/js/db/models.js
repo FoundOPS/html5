@@ -78,6 +78,12 @@ define(function () {
         });
     };
 
+    //constructor
+    (function () {
+
+
+    })();
+
     return models;
 });
 
