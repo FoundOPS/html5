@@ -3,11 +3,9 @@
 'use strict';
 
 define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/leaflet"], function ($, dbServices, fui, generalTools) {
-    $.Widget("location", {
+    $.widget("ui.location", {
         _create: function() {
-            var that = this;
-            that._map = {}, that._cloudmade = {}, that._marker = {}, that._icon = {},
-                that._currentLocation = "", that._locationList = [], that._allowMapClick = false;
+            this.map = {}, this.cloudmade = {}, this.marker = {}, this.icon = {}, this.currentLocation = "", this.locationList = [], this.allowMapClick = false;
         },
 
         renderMap: function (location, shouldAddMarker) {
@@ -53,7 +51,7 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
             that._map.addLayer(that._cloudmade);
 
             if(shouldAddMarker){
-                that._addMarker(location.Latitude, location.Longitude, false);
+                that._changeLocation(location, false);
             }
 
             //animate to edit screen
@@ -62,11 +60,20 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
             });
 
             //animate back to map from edit screen on when a location is selected from the list
-            $("#locationWidget #editPane li").on("click", function (e) {
+            $("#locationWidget #editPane li").live("click", function (e) {
                 //match the index of the selected item to the index of locationList
-                var selectedLocation = that._locationList[0];
+                var id = e.currentTarget.id;
+                if(id == "previous"){
+                    that._changeLocation(that.currentLocation, false);
+                }else if(id == "current"){
 
-                that._changeLocation(selectedLocation);
+                }else if(id == "manual"){
+                    that._changeLocation(null, false);
+                    that._allowMapClick = true;
+                }else{
+                    that._changeLocation(that._locationList[id], false);
+                }
+
                 $("#locationWidget #buttonPane").animate({
                     left: "0px"
                 },500);
@@ -78,14 +85,10 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
                 },500);
             });
 
-            map.on('click', function(e) {
+            that._map.on('click', function(e) {
                 if(that._allowMapClick){
-                    that._addMarker(e.latlng.lat, e.latlng.lng, true);
+                    that._changeLocation({Latitude: e.latlng.lat, Longitude: e.latlng.lng}, true);
                 }
-            });
-
-            $("#manuallyDropPin").on("click", function () {
-                that._allowMapClick = true;
             });
 
             //TODO: set allowMapClick to false on save
@@ -101,30 +104,6 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
             }else{
                 $("#navigateBtn").css("display", "block");
             }
-        },
-
-        _addMarker: function (lat, lng, addPopup) {
-            var that = this;
-            if(that._marker){
-                that._map.removeLayer(that._marker);
-            }
-
-            that._icon = L.icon({
-                iconUrl: fui.ImageUrls.MARKER,
-                iconAnchor: [13,40],
-                popupAnchor: [0,-40],
-                shadowUrl: fui.ImageUrls.MARKER_SHADOW
-            });
-
-            that._marker = L.marker([lat, lng],{
-                icon: that._icon
-            });
-            if(addPopup){
-                that._marker.bindPopup('<button id="saveLocation" class="k-button k-button-icontext"><span class="k-icon k-update"></span>Save</button>',{
-                    closeButton: false
-                });
-            }
-            that._map.addLayer(that._marker);
         },
 
         _showEditScreen: function () {
@@ -151,14 +130,36 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
             $("#locationWidget")[0].innerHTML = "";
         },
 
-        _changeLocation: function (location) {
+        _changeLocation: function (location, addPopup) {
             var that = this;
             if(that._marker){
                 that._map.removeLayer(that._marker);
             }
+            if(location){
+                //add a marker at the location, with a popup containing the location name
+                that._icon = L.icon({
+                    iconUrl: fui.ImageUrls.MARKER,
+                    iconAnchor: [13,40],
+                    popupAnchor: [0,-40],
+                    shadowUrl: fui.ImageUrls.MARKER_SHADOW
+                });
 
-            //add a marker at the location, with a popup containing the location name
-            that._addMarker(location.Latitude, location.Longitude, false);
+                that._marker = L.marker([location.Latitude, location.Longitude],{
+                    icon: that._icon
+                });
+                if(addPopup){
+                    that._marker.bindPopup('<button id="saveLocation" class="k-button k-button-icontext"><span class="k-icon k-update"></span>Save</button>',{
+                        closeButton: false
+                    });
+                }
+                that._map.addLayer(that._marker);
+
+                that._map.setView([location.Latitude, location.Longitude], 15);
+
+                that._updateNavigateLink();
+            }else{
+                $("#navigateBtn").css("display", "none");
+            }
         },
 
         _getLocationString: function (location) {
@@ -171,23 +172,30 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
         },
 
         _updateLocationList: function (locations) {
-            var that = this, locationList = locations;
+            var that = this;
+            that._locationList = locations;
             var list = "", thisLocation;
             $("#locationWidget #locationList")[0].innerHTML = "";
             for(var i in locations){
                 thisLocation = locations[i];
-                list += '<li><span id="fromWeb"></span><span class="name">' + that._getLocationString(locations[i]) + '</span></li>';
+                list += '<li id="' + i + '"><span class="fromWeb"></span><span class="name">' + that._getLocationString(locations[i]) + '</span></li>';
             }
 
             //TODO: set current location somewhere
             if(that._currentLocation){
-                list += '<li><span id="previousLocation"></span><span class="name">' + that._getLocationString(that._currentLocation) + '</span></li>';
+                list += '<li id="previous"><span id="previousLocation"></span><span class="name">' + that._getLocationString(that._currentLocation) + '</span></li>';
             }
 
-            list += '<li><span id="currentLocation"></span><span class="name">Use Current Location</span></li>' +
-                '<li><span id="manuallyDropPin"></span><span class="name">Manually Drop Pin</span></li>';
+            list += '<li id="current"><span id="currentLocation"></span><span class="name">Use Current Location</span></li>' +
+                '<li id="manual"><span id="manuallyDropPin"></span><span class="name">Manually Drop Pin</span></li>';
 
             $(list).appendTo($("#locationWidget #locationList"));
+        },
+
+        _updateNavigateLink: function () {
+
+            var link = "";
+            $("#navigateBtn").attr("style", "display:block").attr("href", link);
         }
     });
 });

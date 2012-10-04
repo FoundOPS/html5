@@ -3,9 +3,9 @@
 'use strict';
 
 require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateTools", "db/saveHistory", "tools/kendoTools", "widgets/serviceDetails",
-    "widgets/location", "jform"], function ($, session, dbServices, parameters, dateTools, saveHistory, kendoTools) {
+    "widgets/locationWidget", "jform"], function ($, session, dbServices, parameters, dateTools, saveHistory, kendoTools) {
     var services = {}, serviceHoldersDataSource, grid, handleChange, serviceTypesDropDown, selectedServiceHolder, vm, locationWidget;
-    var location = {AddressLineOne: "200 N Salisbury St", AddressLineTwo: null, AdminDistrictTwo: "West Lafayette", AdminDistrictOne: "IN", PostalCode: "47906", Latitude: 40.419034, Longitude: -86.894708};
+    var location = null;//{AddressLineOne: "200 N Salisbury St", AddressLineTwo: null, AdminDistrictTwo: "West Lafayette", AdminDistrictOne: "IN", PostalCode: "47906", Latitude: 40.419034, Longitude: -86.894708};
 
     //region Public
     services.vm = vm = kendo.observable({
@@ -561,7 +561,8 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
         });
 
         $("#serviceDetails").kendoServiceDetails();
-        locationWidget = $("#locationWidget").kendoLocation().data("kendoLocation");
+        $("#locationWidget").location();
+        locationWidget = $("#locationWidget").data("location");
 
         //hookup the add & delete buttons
         $("#services .k-grid-add").on("click", function () {
