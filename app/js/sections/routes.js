@@ -50,7 +50,7 @@ define(["db/services", "sections/linkedEntitySection", "db/session"], function (
     });
 
     vm.refresh = function () {
-        dbServices.load.taskStatuses().done(function (response) {
+        dbServices.taskStatuses.read().done(function (response) {
             var taskStatuses = new kendo.data.DataSource({data: response});
             vm.set("taskStatusesSource", taskStatuses);
         });

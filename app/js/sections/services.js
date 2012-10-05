@@ -97,7 +97,7 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
 
     services.undo = function (state) {
         //fixes a problem when the state is stored bc it is converted to json and back
-        dbServices.convertServiceDates(state);
+        dbServices.services.parse(state);
         vm.set("selectedService", state);
         services.save();
     };

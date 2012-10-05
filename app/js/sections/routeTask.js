@@ -18,8 +18,13 @@ define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "to
     section.vm = vm;
 
     var updateSelectedStatus = function () {
+        var taskStatusSource = vm.get("taskStatusesSource");
+        if (!taskStatusSource) {
+            return;
+        }
+
         var selectedStatusId = vm.get("selectedTask.TaskStatusId");
-        var selectedStatus = _.find(vm.get("taskStatusesSource").data(), function (status) {
+        var selectedStatus = _.find(taskStatusSource.data(), function (status) {
             return status.Id === selectedStatusId;
         });
         vm.set("selectedTaskStatus", selectedStatus);
@@ -38,6 +43,7 @@ define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "to
             }
         });
     };
+
     /**
      * Move back to routeDestinationDetails
      * @param force Do not require task status selection
@@ -70,13 +76,21 @@ define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "to
         //clear statusUpdated
         vm.statusUpdated = false;
 
-        dbServices.load.service(vm.get("selectedTask.ServiceId"), vm.get("selectedTask.Date"), vm.get("selectedTask.RecurringServiceId"), vm.get("selectedTask.ServiceTemplateId"),
-            function (service) {
-                vm.set("selectedService", service);
+        var params = {
+            serviceId: vm.get("selectedTask.ServiceId"),
+            serviceDate: vm.get("selectedTask.Date"),
+            recurringServiceId: vm.get("selectedTask.RecurringServiceId"),
+            serviceTemplateId: vm.get("selectedTask.ServiceTemplateId")
+        };
 
-                saveHistory.close();
-                saveHistory.resetHistory();
-            });
+        dbServices.services.read(params).done(function (services) {
+            if (services && services[0]) {
+                vm.set("selectedService", services[0]);
+            }
+
+            saveHistory.close();
+            saveHistory.resetHistory();
+        });
 
         saveHistory.setCurrentSection({
             page: "Route Task",
@@ -89,12 +103,12 @@ define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "to
     };
 
     section.save = function () {
-        dbServices.updateService(vm.get("selectedService"));
+        dbServices.services.update(null, vm.get("selectedService"));
         vm.statusUpdated = false;
     };
     section.undo = function (state) {
         //fixes a problem when the state is stored bc it is converted to json and back
-        dbServices.convertServiceDates(state);
+        dbServices.services.parse(state);
         vm.set("selectedService", state);
         section.save();
     };
@@ -130,7 +144,7 @@ define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "to
         var task = vm.get("selectedTask");
         task.TaskStatusId = statusId;
 
-        dbServices.updateRouteTask(task);
+        dbServices.routeTasks.update(null, task);
         updateSelectedStatus();
 
         vm.statusUpdated = true;

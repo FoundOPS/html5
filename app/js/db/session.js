@@ -20,7 +20,7 @@ define(['developer', 'db/services', "tools/parameters", "kendo"], function (deve
 
         //load the session data
 
-        dbServices.load.session().done(function (data) {
+        dbServices.sessions.read().done(function (data) {
             session._data = data;
             session.set("user", data.name);
 
@@ -38,15 +38,17 @@ define(['developer', 'db/services', "tools/parameters", "kendo"], function (deve
     session.setRole = function (role) {
         session.set("role", role);
 
-        dbServices.setRoleId(role.id);
-
         //only set the parameter if a section is loaded
         var currentSection = parameters.getSection();
-        if (!currentSection) {
-            return;
+        if (currentSection) {
+            parameters.setOne("roleId", role.id);
         }
 
-        parameters.setOne("roleId", role.id);
+        if (role) {
+            for (var i = 0; i < roleFunctions.length; i++) {
+                roleFunctions[i](role);
+            }
+        }
     };
 
     var roleFunctions = [];
@@ -133,18 +135,6 @@ define(['developer', 'db/services', "tools/parameters", "kendo"], function (deve
 
     parameters.changed.add(function () {
         syncRoleId();
-    });
-
-
-    session.bind("change", function (e) {
-        if (e.field === "role") {
-            var role = session.get("role");
-            if (role) {
-                for (var i = 0; i < roleFunctions.length; i++) {
-                    roleFunctions[i](role);
-                }
-            }
-        }
     });
 
 //    for debugging when the API is turned off

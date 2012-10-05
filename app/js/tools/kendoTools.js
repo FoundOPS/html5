@@ -108,7 +108,7 @@ define(['db/session', 'db/services', 'tools/parameters'], function (session, dbS
 
     //load the users column configurations whenever the role changes
     session.followRole(function () {
-        dbServices.load.columnConfigurations().done(function (configurations) {
+        dbServices.columnConfigurations.read().done(function (configurations) {
             kendoTools._columnConfigurations = configurations;
         });
     });

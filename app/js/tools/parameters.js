@@ -8,10 +8,12 @@
 
 define(['jquery', 'hasher', 'underscore.string', 'signals'], function ($, hasher, _s, signals) {
     var parameters = {
-        //whenever the parameters change, trigger parameters.changed
+        //whenever the parameters, section, or roleId changes trigger changed
         changed: new signals.Signal(),
-        //whenever the section changes, trigger parameters.section.changed
         section: {
+            changed: new signals.Signal()
+        },
+        roleId: {
             changed: new signals.Signal()
         }
     };
@@ -96,25 +98,12 @@ define(['jquery', 'hasher', 'underscore.string', 'signals'], function ($, hasher
     };
 
     /**
-     * Build a query string from a record object
-     * @param params Ex. { prop1: value1, prop2: value2 }
-     * @param [section] (Optional) The section to set. If null it will keep the current section
-     * @return {String} Ex. ?prop1=value1&prop2=value2
+     * Add parameters to a query
+     * @param {string} query
+     * @param {*} params
      */
-    var buildQuery = function (params, section) {
-        if (!section) {
-            section = parameters.getSection();
-        }
-        var query = "?";
-
-        if (section) {
-            if (section.isSilverlight) {
-                query = "silverlight?";
-                params.section = section.name;
-            } else {
-                query = "view/" + section.name + ".html?";
-            }
-        }
+    parameters.addParameters = function (query, params) {
+        query += "?";
 
         var first = true;
         _.each(params, function (value, key) {
@@ -125,6 +114,32 @@ define(['jquery', 'hasher', 'underscore.string', 'signals'], function ($, hasher
             }
             query += key + "=" + value;
         });
+
+        return query;
+    };
+
+    /**
+     * Build a query string from a record object
+     * @param params Ex. { prop1: value1, prop2: value2 }
+     * @param [section] (Optional) The section to set. If null it will keep the current section
+     * @return {String} Ex. ?prop1=value1&prop2=value2
+     */
+    var buildQuery = function (params, section) {
+        if (!section) {
+            section = parameters.getSection();
+        }
+        var query = "";
+
+        if (section) {
+            if (section.isSilverlight) {
+                query = "silverlight";
+                params.section = section.name;
+            } else {
+                query = "view/" + section.name + ".html";
+            }
+        }
+
+        query = parameters.addParameters(query, params);
 
         return query;
     };
@@ -186,23 +201,35 @@ define(['jquery', 'hasher', 'underscore.string', 'signals'], function ($, hasher
         parameters.changed.dispatch(parameters.getSection(), parameters.get());
     };
 
-    //only dispatch section changes when they have stabilized for 1/5th second
+    //only dispatch changes when they have stabilized for 1/5th second
     var sectionChanged = _.debounce(function (section) {
         parameters.section.changed.dispatch(section);
+    }, 200);
+    var roleIdChanged = _.debounce(function (roleId) {
+        parameters.roleId.changed.dispatch(roleId);
     }, 200);
 
     // Setup Hasher
     hasher.prependHash = '';
     hasher.init();
+
     hasher.changed.add(function (newHash, oldHash) {
+        //update the parameters whenever the hash has changed
         parameters.parse();
 
+        //track changes to section and roleId
         var lastSection = oldHash ? parameters.getSection(oldHash) : null;
         var newSection = newHash ? parameters.getSection(newHash) : null;
 
-        //if the section changed, dispatch a section changed event
+        var lastRoleId = oldHash ? parameters.get(oldHash).roleId : null;
+        var newRoleId = newHash ? parameters.get(newHash).roleId : null;
+
+        //if the section or role changed: dispatch a changed event
         if (!lastSection || !newSection || lastSection.name !== newSection.name) {
             sectionChanged(newSection);
+        }
+        if (!lastRoleId || !newRoleId || lastRoleId !== newRoleId) {
+            roleIdChanged(newRoleId);
         }
     });
 
