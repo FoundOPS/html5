@@ -1,5 +1,5 @@
 /*
-* Kendo UI Complete v2012.2.913 (http://kendoui.com)
+* Kendo UI Complete v2012.2.1002 (http://kendoui.com)
 * Copyright 2012 Telerik AD. All rights reserved.
 *
 * Kendo UI Complete commercial licenses may be obtained at
@@ -425,6 +425,12 @@
     top: -1em;
 }
 
+.km-buttongroup
+{
+    -webkit-margin-collapse: separate;
+    margin: .5em auto;
+}
+
 .km-root .km-buttongroup
 {
     padding: 0;
@@ -446,6 +452,39 @@
     margin: 0;
     border-width: 1px 0 1px 1px;
     .border-radius(0);
+    padding: .48em .9em .44em;
+}
+
+.km-tablet .km-buttongroup .km-button
+{
+    padding: .4em .8em .34em;
+}
+
+.km-root .km-navbar .km-buttongroup
+{
+    font-size: .95rem;
+    line-height: 1em;
+    margin: 0 0 .2em;
+    display: inline-block;
+    height: 1.5em;
+    top: -2px;
+}
+
+.km-tablet .km-navbar .km-buttongroup
+{
+    top: -1px;
+}
+
+.km-root .km-navbar .km-buttongroup > .km-button
+{
+    font-size: 1em;
+    min-width: 4rem;
+    text-align: center;
+}
+
+.km-tablet .km-navbar .km-buttongroup > .km-button
+{
+    min-width: 6rem;
 }
 
 .km-root .km-view .km-buttongroup .km-button:first-child
@@ -538,7 +577,6 @@
 
 @media screen and (-webkit-min-device-pixel-ratio:0) {
     .km-tabstrip { word-spacing: normal; width: 100%; }
-    .km-buttongroup > .km-button { display: inline-block; }
 }
 
 .km-toolbar,
@@ -575,6 +613,12 @@
     margin-top: .3rem;
     margin-bottom: .3em;
     margin-bottom: .3rem;
+}
+
+.km-root .km-navbar .km-no-title
+{
+    visibility: visible;
+    line-height: 0;
 }
 
 .km-tabstrip .km-button
@@ -1410,7 +1454,7 @@
     -webkit-transform: translatez(0);
 }
 
-.km-on-android.km-4,
+//.km-on-android.km-4, /* Causes changing views to not refresh the screen in 4.0 */
 .km-on-android.km-2 .km-header,
 .km-on-android.km-2 .km-footer,
 .km-on-android .km-switch,
@@ -1437,3 +1481,17 @@
 {
     -webkit-transition: -webkit-transform .0001ms;
 }
+
+// Fix for the Android input duplication issue
+.km-on-android.km-4 input
+{
+    -webkit-user-modify: read-write-plaintext-only;
+}
+
+.km-on-android.km-2 .km-list > li,
+.km-on-android.km-3 .km-list > li
+{
+    bottom: 10000px;
+    .transform(translatey(10000px));
+}
+
