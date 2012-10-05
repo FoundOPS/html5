@@ -58,8 +58,8 @@ require.config({
 });
 
 require(["jquery", "widgets/navigator", "developer", "db/services", "db/session", "tools/parameters", "containers/silverlight", "tools/generalTools", "hasher", "db/models", "kendo", "underscore",
-    "uservoice", "moment", "sections/personalSettings", "sections/businessSettings", "sections/usersSettings",
-    "sections/dispatcherSettings", "sections/changePassword", "sections/services",
+    "uservoice", "moment", "sections/settings/personalSettings", "sections/settings/businessSettings", "sections/settings/usersSettings",
+    "sections/settings/dispatcherSettings", "sections/settings/changePassword", "sections/services",
     "sections/routes", "sections/routeDetails", "sections/routeDestinationDetails", "sections/routeTask", "sections/mapView",
     "widgets/serviceDetails", "tools/analytics"], function ($, Navigator, developer, dbServices, session, parameters, silverlight, generalTools, hasher) {
     /**

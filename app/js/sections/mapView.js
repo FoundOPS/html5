@@ -131,8 +131,8 @@ define(["db/session", "db/services", "tools/generalTools", "tools/dateTools", "t
     var getDepots = function () {
         //remove old depot from map
         removeLayer(depotsGroup);
-        //check if there is a roleId set
-        dbServices.getDepots(function (loadedDepots) {
+
+        dbServices.load.depots().complete(function (loadedDepots) {
             depotsGroup = leaflet.drawDepots(map, loadedDepots);
         });
     };

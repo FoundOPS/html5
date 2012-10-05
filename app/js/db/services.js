@@ -1,4 +1,4 @@
-//region Copyright 2012 FoundOPS LLC. All Rights Reserved.
+//Copyright 2012 FoundOPS LLC. All Rights Reserved.
 
 /**
  * @fileoverview Class to hold data services.
@@ -6,419 +6,32 @@
 
 'use strict';
 
-define(["developer", "tools/dateTools", "db/saveHistory"], function (developer, dateTools, saveHistory) {
-    var services = {};
+define(["developer", "tools/dateTools", "db/saveHistory", "tools/parameters"], function (developer, dateTools, saveHistory, parameters) {
+    var apiUrl, dbServices;
 
-    $.support.cors = true;
-    $.ajaxSetup({
-        xhrFields: {
-            withCredentials: true
-        }
-    });
+    //constructor
+    (function () {
+        $.support.cors = true;
+        $.ajaxSetup({
+            xhrFields: {
+                withCredentials: true
+            }
+        });
 
-    /**
-     * Enum for loading statuses.
-     * @enum {number}
-     */
-    services.Status = {
-        LOADING: 0,
-        LOADED: 1
-    };
-
-    var apiUrl;
-    //setup the api url depending on the mode
-    var mode = developer.CURRENT_DATA_SOURCE;
-    if (mode === developer.DataSource.BROWSER_LOCALAPI) {
-        apiUrl = 'http://localhost:9711/api/';
-    } else if (mode === developer.DataSource.ANDROID_LOCALAPI) {
-        apiUrl = 'http://10.0.2.2:9711/api/';
-    } else if (mode === developer.DataSource.LIVE) {
-        apiUrl = 'http://api.foundops.com/api/';
-    } else if (mode === developer.DataSource.REMOTE_API) {
+        //setup the api url depending on the mode
+        var mode = developer.CURRENT_DATA_SOURCE;
+        if (mode === developer.DataSource.BROWSER_LOCALAPI) {
+            apiUrl = 'http://localhost:9711/api/';
+        } else if (mode === developer.DataSource.ANDROID_LOCALAPI) {
+            apiUrl = 'http://10.0.2.2:9711/api/';
+        } else if (mode === developer.DataSource.LIVE) {
+            apiUrl = 'http://api.foundops.com/api/';
+        } else if (mode === developer.DataSource.REMOTE_API) {
         apiUrl = "http://192.168.0.108:70/api/"; // Local IP of host computer (might change everyday).
-    } else if (mode === developer.DataSource.TESTAPI) {
-        apiUrl = 'http://testapi.foundops.com/api/';
-    }
-
-    /**
-     * The url for the API.
-     * @type {string}
-     * @const
-     */
-    services.API_URL = apiUrl;
-
-    services.ROOT_API_URL = apiUrl.replace("api/", "");
-
-    //functions to queue until after the role id is initially set
-    var roleIdFunctionQueue = [];
-    /**
-     * Set the current RoleId.
-     * @param {string} The roleId.
-     */
-    services.setRoleId = function (roleId) {
-        services.RoleId = roleId;
-
-        //invoke any function in the queue
-        var i;
-        for (i in roleIdFunctionQueue) {
-            roleIdFunctionQueue[i]();
+        } else if (mode === developer.DataSource.TESTAPI) {
+            apiUrl = 'http://testapi.foundops.com/api/';
         }
-        roleIdFunctionQueue.length = 0;
-    };
-
-    /**
-     * Returns a standard http get.
-     * @param {String} queryString The query string to use. Ex. "routes/GetDepots"
-     * @param {Object.<string|Object>=}  opt_params The parameters to use (optional).
-     * @param {boolean=} opt_excludeRoleId Do not include the roleId in the params (optional).
-     * @param {?function(Object):Object} The converter function for a loaded item (optional).
-     * @return {function(!function(Object))} A function to perform the get and invoke the callback.
-     * @private
-     */
-    services._getHttp = function (queryString, opt_params, opt_excludeRoleId, opt_convertItem) {
-        /**
-         * A function to perform the get operation on the api (defined by the parameters above)
-         * and invoke the callback with the loaded data.
-         * @param {?function(Object)} callback A callback to pass the loaded data to.
-         */
-        var getThenInvokeCallback = function (callback) {
-            var params = opt_params || {};
-
-            var invokeAjax = function (params) {
-                var url = services.API_URL + queryString;
-
-                $.ajax({
-                    //must use JSONP because the javascript may be hosted on a different url than the api
-                    type: "GET",
-                    dataType: 'JSONP',
-                    url: url,
-                    data: params
-                }).success(function (response) {
-                        var convertedData = response;
-
-                        //if there is a converter, convert the data
-                        if (opt_convertItem) {
-                            convertedData = [];
-
-                            var i;
-                            for (i in response) {
-                                convertedData.push(opt_convertItem(items[i]));
-                            }
-                        }
-
-                        //perform the callback function by passing the response data
-                        if (callback !== null) {
-                            callback(convertedData);
-                        }
-                    });
-            };
-
-            //if opt_excludeRoleId was not set add it as a parameter
-            if (!opt_excludeRoleId) {
-                //if the roleId is not loaded yet, add it to the roleId function queue
-                if (!services.RoleId) {
-                    roleIdFunctionQueue.push(function () {
-                        params.roleId = services.RoleId.toString();
-                        invokeAjax(params);
-                    });
-                    return;
-                }
-
-                params.roleId = services.RoleId.toString();
-            }
-
-            invokeAjax(params);
-        };
-
-        return getThenInvokeCallback;
-    };
-
-    //region Depots, Routes, TrackPoints
-
-    /**
-     * Get the service provider's depots.
-     * @param {!function(Array.<Object>)} callback A callback to pass the loaded depots.
-     */
-    services.getDepots = services._getHttp('routes/GetDepots', {}, false);
-
-    /**
-     * Get resources (Employees/Vehicles) and their last recorded location.
-     * @param {!function(Array.<Object>)} callback The callback to pass the resources with latest points after they are loaded.
-     */
-    services.getResourcesWithLatestPoints = services._getHttp('trackpoint/GetResourcesWithLatestPoints', {}, false);
-
-    /**
-     * Get the current service provider's Routes.
-     * @param {string} serviceDateUtc The service date to get routes for (in Utc).
-     * @param {!function(Array.<Object>)} callback A callback to pass the loaded routes to.
-     */
-    services.getRoutes = function (serviceDateUtc, callback) {
-        return services._getHttp('routes/GetRoutes', {serviceDateUtc: dateTools.stripDate(serviceDateUtc)}, false)(callback);
-    };
-
-    /**
-     * Get the service provider's TrackPoints.
-     * @param {string} serviceDate The service date to retrieve TrackPoints for (in Utc).
-     * @param {string} routeId The Id of the route to retrieve TrackPoints for.
-     * @param {!function(Array.<Object>)} callback The callback to pass the TrackPoints to after they are loaded.
-     */
-    services.getTrackPoints = function (routeId, callback) {
-        return services._getHttp('trackPoint/GetTrackPoints',
-            {routeId: routeId}, false)(callback);
-    };
-
-    /**
-     * Send trackPoint array to server and return success or failure to the callback
-     * @param {Array.<models.TrackPoint>} trackPoints
-     * @param routeId
-     * @param callback
-     */
-    services.postTrackPoints = function (trackPoints, callback) {
-        $.ajax({
-            url: services.API_URL + "trackpoint/PostEmployeeTrackPoint",
-            type: "POST",
-            dataType: "json",
-            contentType: 'application/json',
-            data: JSON.stringify(trackPoints),
-            success: function (response) {
-                callback(response);
-            },
-            error: function (response) {
-                console.log("Ajax Error");
-                console.log(response);
-            }
-        });
-    };
-
-    //endregion
-
-    //region
-
-    services.getClientLocations = function (clientId, callback) {
-        return services._getHttp("Locations/Get", {clientId: clientId})(callback);
-    };
-
-    //endregion
-
-    //region Services
-
-    /**
-     * Get the list of services
-     * @param roleId The role to get the services for
-     */
-    services.getServiceTypes = services._getHttp('service/GetServiceTypes', {}, false);
-
-    /**
-     * Get the service and its fields.
-     * Need to pass either the serviceId, or the occurDate and the recurringServiceId, or the service provider's serviceTemplateId
-     * @param {?string} serviceId
-     * @param {?Date} serviceDate
-     * @param {?string} recurringServiceId
-     * @param {?string} serviceTemplateId
-     * @param {!function(Object)} callback The callback to pass the Service it is loaded.
-     */
-    services.getServiceDetails = function (serviceId, serviceDate, recurringServiceId, serviceTemplateId, callback) {
-        var data = {
-            serviceId: serviceId,
-            serviceDate: dateTools.stripDate(serviceDate),
-            recurringServiceId: recurringServiceId,
-            serviceTemplateId: serviceTemplateId
-        };
-
-        return services._getHttp('service/GetServiceDetails', data, false)(function (data) {
-            //It will only have one item
-            var service = data[0];
-            services.convertServiceDates(service);
-            callback(service);
-        });
-    };
-
-    /**
-     * Converts the service's Field's DateTime values to dates
-     * @param service
-     */
-    services.convertServiceDates = function (service) {
-        service.ServiceDate = moment(service.ServiceDate).toDate();
-    };
-
-    services.updateService = function (service) {
-        services.convertServiceDates(service);
-        return saveHistory.linkNotification(
-            $.ajax({
-                url: services.API_URL + "service/UpdateService",
-                type: "POST",
-                dataType: "json",
-                contentType: 'application/json',
-                data: JSON.stringify(service)
-            })
-        );
-    };
-
-    services.deleteService = function (service) {
-        $.ajax({
-            url: services.API_URL + "service/DeleteService",
-            type: "POST",
-            dataType: "json",
-            contentType: 'application/json',
-            data: JSON.stringify(service)
-        });
-    };
-
-    /**
-     * Get the column config
-     * @param roleId The role to get the columns for
-     */
-    services.getColumnConfigurations = services._getHttp('session/GetColumnConfigurations', {}, false);
-
-    /**
-     * Updates the column configurations for the current role (for the current user)
-     * @param columnConfigurations
-     */
-    services.updateColumnConfigurations = function (columnConfigurations) {
-        $.ajax({
-            url: services.API_URL + "session/UpdateColumnConfigurations?roleId=" + services.RoleId,
-            type: "POST",
-            dataType: "json",
-            contentType: 'application/json',
-            data: JSON.stringify(columnConfigurations)
-        });
-    };
-
-    //endregion
-
-    //region Settings
-
-    // Get Employees.
-    services.getAllEmployeesForBusiness = services._getHttp('settings/GetAllEmployeesForBusiness', {}, false);
-
-    /**
-     * Get business settings
-     * @param roleId The role to get the business settings for
-     */
-    services.getBusinessSettings = services._getHttp('settings/GetBusinessSettings', {}, false);
-
-    /**
-     * Get personal user settings.
-     * @param {!function(Array.<Object>)} callback A callback to pass the loaded settings.
-     */
-    services.getPersonalSettings = services._getHttp('settings/GetPersonalSettings', {}, false);
-
-    /**
-     * Updates personal password.
-     * @param {string} oldPass.
-     * @param {string} newPass.
-     * @param {string} confirmPass.
-     */
-    services.updatePassword = function (oldPass, newPass, confirmPass) {
-        return saveHistory.linkNotification(
-            $.ajax({
-                url: services.API_URL + "settings/UpdatePassword?oldPass=" + oldPass + "&newPass=" + newPass + "&confirmPass=" + confirmPass,
-                type: "POST"
-            })
-        );
-    };
-
-    /**
-     * Get business settings
-     * @param roleId The role to get the business settings for
-     */
-    services.getBusinessSettings = services._getHttp('settings/GetBusinessSettings', {}, false);
-
-    /**
-     * Updates businesssettings.
-     * @param {(Array.<Object>)} settings The updated settings.
-     */
-    services.updateBusinessSettings = function (settings) {
-        return saveHistory.linkNotification(
-            $.ajax({
-                url: services.API_URL + "settings/UpdateBusinessSettings?roleId=" + services.RoleId,
-                type: "POST",
-                dataType: "json",
-                contentType: 'application/json',
-                data: JSON.stringify(settings)
-            })
-        );
-    };
-
-    /**
-     * Updates personal user settings.
-     * @param {!function(Array.<Object>)} settings The loaded settings.
-     */
-    services.updatePersonalSettings = function (settings) {
-        return saveHistory.linkNotification(
-            $.ajax({
-                url: services.API_URL + "settings/UpdatePersonalSettings?roleId=" + services.RoleId,
-                type: "POST",
-                dataType: "json",
-                contentType: 'application/json',
-                data: JSON.stringify(settings)
-            })
-        );
-    };
-
-    services.getTimeZones = services._getHttp('settings/GetTimeZones', {}, false);
-
-    //endregion
-
-    //region Tasks
-
-    /**
-     * Get the statuses assigned to a route's task.
-     * @param callback
-     */
-    services.getTaskStatuses = services._getHttp("TaskStatuses/GetStatuses");
-
-    services.updateRouteTask = function (task) {
-        return saveHistory.linkNotification(
-            $.ajax({
-                url: services.API_URL + "routes/UpdateRouteTask",
-                type: "POST",
-                dataType: "json",
-                contentType: 'application/json',
-                data: JSON.stringify(task)
-            })
-        );
-    };
-
-    //endregion
-
-    //region User
-
-    /**
-     * Authenticate the user.
-     * @param {!string} email
-     * @param {!string} password
-     * @param {!function(boolean)} callback The callback to pass true (success) or false (failed) to after attempting to authenticate the credentials.
-     */
-    services.authenticate = function (email, password, callback) {
-        return services._getHttp('session/Login', {email: email, pass: password}, true, null)(callback);
-    };
-
-    /**
-     * Get the current session for the user
-     */
-    services.getSession = function (callback) {
-        var isMobile = developer.CURRENT_FRAME === developer.Frame.MOBILE_APP;
-        return services._getHttp('session/Get', {isMobile: isMobile}, true)(callback);
-    };
-
-    services.logout = function (callback) {
-        return services._getHttp('session/LogOut')(callback);
-    };
-
-    //endregion
-
-    services.trackError = function (error) {
-        error.Url = document.URL;
-
-        $.ajax({
-            url: services.API_URL + "Error/Track",
-            type: "POST",
-            dataType: "json",
-            contentType: 'application/json',
-            data: JSON.stringify(error)
-        });
-    };
+    })();
 
     /**
      * Hookup to DataSources Create, Update, Delete complete functions:
@@ -426,7 +39,7 @@ define(["developer", "tools/dateTools", "db/saveHistory"], function (developer, 
      * 2) reload the data
      * @param dataSource
      */
-    services.hookupDefaultComplete = function (dataSource) {
+    var hookupDefaultComplete = function (dataSource) {
         var onComplete = function (jqXHR, textStatus) {
             if (textStatus === "success") {
                 saveHistory.success();
@@ -441,5 +54,179 @@ define(["developer", "tools/dateTools", "db/saveHistory"], function (developer, 
         dataSource.transport.options.destroy.complete = onComplete;
     };
 
-    return services;
+    /**
+     * Return a function to perform a modified ajax request
+     * @private
+     * @param {{query: string, data: object=, excludeRoleId: boolean=, type: string=, headers: *}} config
+     * query The query string to use. Ex. "routes/GetDepots"
+     * params The parameters to use
+     * excludeRoleId Do not include the roleId in the params.
+     * If this is not set, the query will wait until a role is set to run
+     * type Defaults to GET
+     * @return {function(*)|ajax} see below
+     */
+    var requestFactory = function (config) {
+        /**
+         * Performs a modified ajax request and returns the promise
+         * @param {*}= params Additional parameters for the url
+         * @param {*}= body Data for the body. It will be serialized as JSON
+         * Optional config object, which will overwrite the default config's properties individually where set
+         */
+        return function (params, body) {
+            config.params = config.params || {};
+            //add any additional parameters
+            if (params) {
+                config.params = _.extend(config.params, params);
+            }
+
+            var deferredRequest = new $.Deferred();
+
+            //when the deferred request is resolved, execute the ajax (through the pipe)
+            var promise = deferredRequest.pipe(function (input) {
+                var url = apiUrl + input.query;
+
+                //add the parameters to the url
+                if (input.params) {
+                    url = parameters.addParameters(url, input.params);
+                }
+
+                var options = {
+                    type: input.type || "GET",
+                    url: url,
+                    dataType: "json",
+                    contentType: 'application/json'
+                };
+
+                //if there is a body, stringify and add it
+                if (body) {
+                    options.data = JSON.stringify(body);
+                }
+
+                if (input.headers) {
+                    options.headers = input.headers;
+                }
+
+                var ajax = $.ajax(options);
+
+                //link up save notifications (on everything except GET)
+                if (options.type === "GET") {
+                    return ajax;
+                }
+
+                return saveHistory.linkNotification(ajax);
+            });
+
+            //if opt_excludeRoleId was not set add it as a parameter
+            if (!config.excludeRoleId) {
+                //if the roleId is not loaded yet, add it to the roleId function queue
+                var roleId = parameters.get().roleId;
+
+                if (!roleId) {
+                    parameters.roleId.changed.add(function () {
+                        deferredRequest.resolve(config);
+                    });
+
+                    return promise;
+                }
+
+                config.params.roleId = roleId.toString();
+            }
+
+            deferredRequest.resolve(config);
+
+            return promise;
+        };
+    };
+
+    //the entity's read, insert, update and destroy ajax configurations
+    var entityConfig = {
+        errors: {
+            insert: {}
+        },
+        columnConfigurations: {},
+        depots: {params: {depots: true}},
+        routes: {},
+        routeTasks: {
+            update: {}
+        },
+        services: {
+            parse: function (service) {
+                //converts the service's Field's DateTime values to dates (there is only one right now)
+                service.ServiceDate = moment(service.ServiceDate).toDate();
+            },
+            read: {},
+            update: {}
+        },
+        sessions: {
+            params: {isMobile: developer.CURRENT_FRAME === developer.Frame.MOBILE_APP},
+            excludeRoleId: true,
+            headers: {"ops-details": "true"}
+        },
+        taskStatuses: {}
+    };
+
+    //region public properties
+
+    dbServices = {
+        /**
+         * The url for the API.
+         * @type {string}
+         * @const
+         */
+        API_URL: apiUrl,
+        ROOT_API_URL: apiUrl.replace("api/", ""),
+
+        /**
+         * Enum for loading statuses.
+         * @enum {number}
+         */
+        Status: {
+            LOADING: 0,
+            LOADED: 1
+        },
+
+        hookupDefaultComplete: hookupDefaultComplete
+    };
+    //construct public entity objects with functions for read/insert/update/destroy from entityConfig
+    _.each(entityConfig, function (value, key) {
+        var functions = {};
+
+        //before creating the request factories, set the query to the name of the entity
+        if (value.read || value.insert || value.update || value.destroy) {
+            if (value.parse) {
+                functions.parse = value.parse;
+            }
+
+            if (value.read) {
+                value.read.query = key;
+                functions.read = requestFactory(value.read);
+            }
+            if (value.insert) {
+                value.insert.query = key;
+                value.insert.type = "POST";
+                functions.insert = requestFactory(value.insert);
+            }
+            if (value.update) {
+                value.update.query = key;
+                value.update.type = "PUT";
+                functions.update = requestFactory(value.update);
+            }
+            if (value.destroy) {
+                value.destroy.query = key;
+                value.destroy.type = "DELETE";
+                functions.destroy = requestFactory(value.destroy);
+            }
+        }
+        //if no config was specified, just setup for read
+        else {
+            value.query = key;
+            functions.read = requestFactory(value);
+        }
+
+        dbServices[key] = functions;
+    });
+
+    //endregion
+
+    return dbServices;
 });

@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(["db/services", "sections/linkedEntitySection"], function (dbServices, createBase) {
+define(["db/services", "sections/linkedEntitySection", "db/session"], function (dbServices, createBase, session) {
     var section = createBase("routeDetails", "routeId");
     window.routes = section;
 
@@ -50,7 +50,7 @@ define(["db/services", "sections/linkedEntitySection"], function (dbServices, cr
     });
 
     vm.refresh = function () {
-        dbServices.getTaskStatuses(function (response) {
+        dbServices.taskStatuses.read().done(function (response) {
             var taskStatuses = new kendo.data.DataSource({data: response});
             vm.set("taskStatusesSource", taskStatuses);
         });

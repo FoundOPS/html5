@@ -2,7 +2,7 @@
 
 'use strict';
 
-define(['db/services', "tools/parameters", "kendo"], function (dbservices, parameters) {
+define(['developer', 'db/services', "tools/parameters", "kendo"], function (developer, dbServices, parameters) {
     var session = new kendo.data.ObservableObject({});
     window.session = session;
 
@@ -18,8 +18,9 @@ define(['db/services', "tools/parameters", "kendo"], function (dbservices, param
             return;
         }
 
-        //load the config
-        dbservices.getSession(function (data) {
+        //load the session data
+
+        dbServices.sessions.read().done(function (data) {
             session._data = data;
             session.set("user", data.name);
 
@@ -37,15 +38,17 @@ define(['db/services', "tools/parameters", "kendo"], function (dbservices, param
     session.setRole = function (role) {
         session.set("role", role);
 
-        dbservices.setRoleId(role.id);
-
         //only set the parameter if a section is loaded
         var currentSection = parameters.getSection();
-        if (!currentSection) {
-            return;
+        if (currentSection) {
+            parameters.setOne("roleId", role.id);
         }
 
-        parameters.setOne("roleId", role.id);
+        if (role) {
+            for (var i = 0; i < roleFunctions.length; i++) {
+                roleFunctions[i](role);
+            }
+        }
     };
 
     var roleFunctions = [];
@@ -74,7 +77,7 @@ define(['db/services', "tools/parameters", "kendo"], function (dbservices, param
     /**
      * Get now adjusted for the users time zone.
      * If there is no session data, it will return the computer's local date.
-     * @return {moment}
+     * @return {A}
      */
     session.now = function () {
         if (!session._data || !session._data.userTimeZone || !session._data.userTimeZoneOffsetMinutes) {
@@ -132,18 +135,6 @@ define(['db/services', "tools/parameters", "kendo"], function (dbservices, param
 
     parameters.changed.add(function () {
         syncRoleId();
-    });
-
-
-    session.bind("change", function (e) {
-        if (e.field === "role") {
-            var role = session.get("role");
-            if (role) {
-                for (var i = 0; i < roleFunctions.length; i++) {
-                    roleFunctions[i](role);
-                }
-            }
-        }
     });
 
 //    for debugging when the API is turned off
