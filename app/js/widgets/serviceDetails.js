@@ -208,35 +208,26 @@ define(["jquery", "db/services", "db/session", "db/models", "kendo", "jmaskmoney
                 return fieldElement;
             },
             "OptionsField": function (field, fieldIndex, elementToAppendTo) {
-                var fieldElement;
+                var fieldElement, options = [], i;
                 if (field.TypeInt === 0) {
-                    //DropDownList
-                    fieldElement = $(inputTemplate).appendTo(elementToAppendTo).wrap("<li><label>" + field.Name + "</label></li>");
-                    fieldElement.kendoDropDownList({
-                        change: function (e) {
-                            var index = this.selectedIndex;
-                            var field = this.fieldParent;
-                            var i;
-                            //clear the other checked items
-                            for (i = 0; i < field.Options.length; i++) {
-                                field.Options[i].IsChecked = false;
-                            }
-                            if (index >= 0) {
-                                //check this item
-                                field.set('Options[' + index + '].IsChecked', true);
-                            }
-                        },
-                        dataTextField: "Name",
-                        dataValueField: "Id",
-                        dataSource: field.Options
-                    });
-                    var dropDownList = fieldElement.data("kendoDropDownList");
-                    //store a reference to the field for access by the change function
-                    dropDownList.fieldParent = field;
+                    
+                    //Select Dropdown
+                    fieldElement = $('<select id="select" ></select>').appendTo(elementToAppendTo).wrap("<li><label>" + field.Name + "<br/></label></li>");
 
-                    //select the first checked option
-                    dropDownList.select(function (dataItem) {
-                        return dataItem.get("IsChecked");
+                    for (i = 0; i < field.Options.length; i++) {
+                        options[i] = "<option>" + field.Options[i].Name + "</option>\n";
+                        if (field.Options[i].IsChecked === true) {
+                            options[i] = "<option selected='selected'>" + field.Options[i].Name + "</option>\n";
+                        }
+                    }
+
+                    fieldElement[0].innerHTML = options;
+
+                    $("#select").change(function (e) {
+                        for (i = 0; i < field.Options.length; i++) {
+                            field.Options[i].IsChecked = false;
+                        }
+                        field.set('Options[' + e.target.selectedIndex + '].IsChecked', true);
                     });
                 } else {
                     //Checkbox (1) or checklist (2)
