@@ -11,10 +11,10 @@ module.exports = function (grunt) {
         mainPath = "C:/FoundOPS/html5/",
         androidPath = mainPath + "build/mobile/Android/assets/www/",
         iOSPath = mainPath + "build/mobile/iOS/www/",
-    // Length 11
+    //11 common destinations (iOS & android)
         destinationPaths = ["js/main-built.js", "styles/main-built.css", "styles/PTS55F.ttf", "styles/styles.less", "lib/",
             "img/", "view/", "styles/images/", "styles/textures/", "navigator.html", "index.html"],
-    // Length 11
+    //11 common sources (iOS & android)
         sourcePaths = ["build/main/main-built.js", "build/main/main-built.css",
             "app/styles/PTS55F.ttf", "login/styles/styles.less", "login/lib/*",
             "app/img/*", "app/view/*", "app/styles/kendo/images/*",
@@ -26,23 +26,28 @@ module.exports = function (grunt) {
         mobileCopyPaths[iOSPath + destinationPath] = mainPath + sourcePaths[i];
         i++;
     });
-    mobileCopyPaths[androidPath] = mainPath + "build/mobile/cordova/android/*";
-    mobileCopyPaths[androidPath + "childbrowser/"] = mainPath + "build/mobile/cordova/android/childbrowser/*";
-    mobileCopyPaths[iOSPath] = mainPath + "build/mobile/cordova/iOS/*";
+    //login paths
     loginCopyPaths[androidPath + "img/"] = mainPath + "login/img/*";
     loginCopyPaths[iOSPath + "img/"] = mainPath + "login/img/*";
-//endregion
+
+    //android specific
+    mobileCopyPaths[androidPath] = mainPath + "build/mobile/cordova/android/*";
+    mobileCopyPaths[androidPath + "childbrowser/"] = mainPath + "build/mobile/cordova/android/childbrowser/*";
+
+    //iOS specific
+    mobileCopyPaths[iOSPath] = mainPath + "build/mobile/cordova/iOS/*";
+ //endregion
 
 
     // Project configuration.
     grunt.initConfig({
         meta: {
-            version: '0.1.0',
+            version: version,
             banner: '/*! PROJECT_NAME - v<%= meta.version %> - ' +
                 '<%= grunt.template.today("yyyy-mm-dd") %>\n' +
                 '* http://foundops.com \n' +
                 '* Copyright (c) <%= grunt.template.today("yyyy") %> ' +
-                'FoundOps LLC; Licensed MIT */'
+                'FoundOps LLC; Copyright */'
         },
         //https://github.com/jharding/grunt-less
         less: {
@@ -116,6 +121,7 @@ module.exports = function (grunt) {
             wrap: true,
             out: "../main/main-built.js"
         },
+        //delete the directories before recreating them
         clean: ["C:/FoundOPS/html5/build/mobile/Android/assets/www", "C:/FoundOPS/html5/build/mobile/iOS/www"],
         copy: {
             browser: {

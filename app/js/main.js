@@ -22,7 +22,6 @@ require.config({
         jmaskmoney: "../lib/jquery.maskMoney",
         jmousewheel: "../lib/jquery.mousewheel",
         jquery: "../lib/jquery",
-        jqueryMobile: "../lib/jquery.mobile-1.2.0",
         jscrollpane: "../lib/jquery.jScrollPane",
         jtooltip: "../lib/jquery.tooltip.min",
         jui: "../lib/jquery-ui-1.8.21.core.min",
