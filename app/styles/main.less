@@ -1061,6 +1061,12 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
             margin: 10px;
         }
     }
+    #locationWidgetMap.shown {
+      opacity: 1;
+    }
+    #locationWidgetMap.hidden {
+      opacity: .3;
+    }
     #buttonPane{
         position: relative;
         top: -250px;
@@ -1086,6 +1092,12 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
             }
         }
     }
+    #buttonPane.shown{
+      left: 0;
+    }
+    #buttonPane.hidden{
+      left: 300px;
+    }
     #editPane{
         position: relative;
         top: -250px;
@@ -1095,20 +1107,13 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
         border: 1px solid #aaaaaa;
         background-color: @white;
         input{
-            width: 234px;
+            width: 213px;
             margin: 3px 0 3px 3px;
-            padding: 2px 4px;
+            padding: 2px 25px 2px 4px;
             border: 1px solid #AAA;
             border-radius: 4px;
             font-family: PTSans;
-        }
-        #search{
-            position: absolute;
-            top:6px;
-            right: 5px;
-            width: 22px;
-            height: 22px;
-            background: url("../img/smallSearch.png") no-repeat;
+            background: url("../img/smallSearch.png") no-repeat right center;
         }
         ul{
             max-height: 215px;
@@ -1129,28 +1134,41 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
                 border-bottom: 1px solid #aaaaaa;
             }
             span{
-                display: table-cell;
+              display: table-cell;
             }
-            span:not(.name){
-                display: table-cell;
+            span.name{
+              height: 36px;
+              vertical-align: middle;
             }
             .fromWeb, #previousLocation, #currentLocation, #manuallyDropPin{
               width: 20px;
-              height: 20px;
+              height: 36px;
               vertical-align: middle;
               padding-right: 4px;
-              background: url("../img/previousLocation.png") no-repeat;
+              background: url("../img/previousLocation.png") no-repeat left center;
             }
             #currentLocation{
-              background: url("../img/currentLocation.png") no-repeat;
+              background: url("../img/currentLocation.png") no-repeat left center;
             }
             #manuallyDropPin{
-              background: url("../img/markerIcon.png") no-repeat;
+              background: url("../img/markerIcon.png") no-repeat left center;
             }
             .fromWeb{
-              background: url("../img/webIcon.png") no-repeat;
+              background: url("../img/webIcon.png") no-repeat left center;
             }
         }
+        li.singleLine .name{
+          padding-top: 9px;
+        }
+        li.tripleLine .name{
+          font-size: 11px;
+        }
+    }
+    #editPane.shown{
+      left: 0px;
+    }
+    #editPane.hidden{
+      left: -300px;
     }
 }
 /*Tooltip*/

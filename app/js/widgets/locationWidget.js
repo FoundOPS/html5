@@ -5,32 +5,22 @@
 define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/leaflet"], function ($, dbServices, fui, generalTools) {
     $.widget("ui.location", {
         _create: function() {
-            this.map = {}, this.cloudmade = {}, this.marker = {}, this.icon = {}, this.currentLocation = "", this.locationList = [], this.allowMapClick = false;
         },
 
         renderMap: function (location, shouldAddMarker) {
-            var _location, that = this, lineOneFormatted;
+            var _location, that = this;
 
-            if(location.AddressLineOne){
-                lineOneFormatted = location.AddressLineOne.replace(/\s/g, "+");
-            }else{
-                lineOneFormatted = "";
-            }
-
-            var adminDistrictTwoFormatted = location.AdminDistrictTwo.replace(/\s/g, "+");
-            var adminDistrictOneFormatted = location.AdminDistrictOne.replace(/\s/g, "+");
-            var navigateLink = 'https://maps.google.com/maps?q=' + lineOneFormatted + ',+' + adminDistrictTwoFormatted + ',+' + adminDistrictOneFormatted + '&z=17';
+            that._updateNavigateLink(location, true);
 
             _location = $('<h3>Location</h3>' +
                 '<div id="locationWidgetMap">' +
                 '</div>' +
-                '<div id="buttonPane">' +
+                '<div id="buttonPane" class="shown">' +
                 '<a class="k-button k-button-icontext k-grid-edit" href="javascript:void(0)"></a>' +
-                '<a id="navigateBtn" href=' + navigateLink + '></a>' +
+                '<a id="navigateBtn" href=' + that._navigateLink + '></a>' +
                 '</div>' +
-                '<div id="editPane">' +
+                '<div id="editPane" class="hidden">' +
                 '<input type="text" />' +
-                '<div id="search"></div>' +
                 '<ul id="locationList"></ul>' +
                 '</div>'
             );
@@ -51,7 +41,8 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
             that._map.addLayer(that._cloudmade);
 
             if(shouldAddMarker){
-                that._changeLocation(location, false);
+                that._changeMarkerLocation(location, false);
+                that._updateCurrentLocation(location, false);
             }
 
             //animate to edit screen
@@ -64,34 +55,33 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
                 //match the index of the selected item to the index of locationList
                 var id = e.currentTarget.id;
                 if(id == "previous"){
-                    that._changeLocation(that.currentLocation, false);
-                }else if(id == "current"){
-
+                    that._changeMarkerLocation(that._currentLocation, false);
                 }else if(id == "manual"){
-                    that._changeLocation(null, false);
+                    that._changeMarkerLocation(null, false);
                     that._allowMapClick = true;
                 }else{
-                    that._changeLocation(that._locationList[id], false);
+                    that._changeMarkerLocation(that._locationList[id], false);
+                    that._updateCurrentLocation(that._locationList[id], true);
                 }
 
-                $("#locationWidget #buttonPane").animate({
-                    left: "0px"
-                },500);
-                $("#locationWidget #editPane").animate({
-                    left: "-300px"
-                },500);
-                $("#locationWidgetMap").animate({
-                    opacity: "1"
-                },500);
+                $("#locationWidget #buttonPane").switchClass("hidden", "shown", 500, 'swing');
+                $("#locationWidget #editPane").switchClass("shown", "hidden", 500, 'swing');
+                $("#locationWidgetMap").switchClass("hidden", "shown", 500);
             });
 
             that._map.on('click', function(e) {
                 if(that._allowMapClick){
-                    that._changeLocation({Latitude: e.latlng.lat, Longitude: e.latlng.lng}, true);
+                    that._changeMarkerLocation({Latitude: e.latlng.lat, Longitude: e.latlng.lng}, true)
+                    that._marker.openPopup();
+
+                    $("#locationWidget #saveLocation").on("click", function (e) {
+                        var markerPosition = that._marker.getLatLng();
+                        that._updateCurrentLocation({Latitude: markerPosition.lat, Longitude: markerPosition.lng}, true);
+                    });
                 }
             });
 
-            //TODO: set allowMapClick to false on save
+            //TODO: set allowMapClick to false on save button click. And that._updateCurrentLocation(location, true);
 
             generalTools.observeInput("#locationWidget #editPane", function (string) {
                 dbServices.locationSearch(string, function (locations) {
@@ -107,17 +97,14 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
         },
 
         _showEditScreen: function () {
-            $('#locationWidget #buttonPane').css('width', '250px');
-            $('#locationWidget #editPane').css('width', '250px');
-            $("#locationWidget #buttonPane").animate({
-                left: "300px"
-            },500);
-            $("#locationWidget #editPane").animate({
-                left: "0px"
-            },500);
-            $("#locationWidgetMap").animate({
-                opacity: ".3"
-            },500);
+            var that = this;
+            if(that._currentLocation){
+                that._updateLocationList(that._locationList);
+            }
+
+            $("#locationWidget #buttonPane").switchClass("shown", "hidden", 500, 'swing');
+            $("#locationWidget #editPane").switchClass("hidden", "shown", 500, 'swing');
+            $("#locationWidgetMap").switchClass("shown", "hidden", 500);
         },
 
         removeMap: function () {
@@ -130,7 +117,7 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
             $("#locationWidget")[0].innerHTML = "";
         },
 
-        _changeLocation: function (location, addPopup) {
+        _changeMarkerLocation: function (location, addPopup) {
             var that = this;
             if(that._marker){
                 that._map.removeLayer(that._marker);
@@ -154,9 +141,11 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
                 }
                 that._map.addLayer(that._marker);
 
-                that._map.setView([location.Latitude, location.Longitude], 15);
+                if(!addPopup){
+                    that._map.setView([location.Latitude, location.Longitude], 15);
+                }
 
-                that._updateNavigateLink();
+                that._updateNavigateLink(location, false);
             }else{
                 $("#navigateBtn").css("display", "none");
             }
@@ -168,7 +157,12 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
             var adminDistrictTwo = location.AdminDistrictTwo ? location.AdminDistrictTwo + ", "  : "";
             var adminDistrictOne = location.AdminDistrictOne ? location.AdminDistrictOne + " "  : "";
             var postalCode = location.PostalCode ? location.PostalCode  : "";
-            return lineOne + lineTwo  + adminDistrictTwo + adminDistrictOne + postalCode;
+            var returnString = lineOne + lineTwo  + adminDistrictTwo + adminDistrictOne + postalCode;
+            if(returnString){
+                return returnString;
+            }else{
+                return location.Latitude + "," + location.Longitude;
+            }
         },
 
         _updateLocationList: function (locations) {
@@ -181,21 +175,50 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
                 list += '<li id="' + i + '"><span class="fromWeb"></span><span class="name">' + that._getLocationString(locations[i]) + '</span></li>';
             }
 
-            //TODO: set current location somewhere
             if(that._currentLocation){
                 list += '<li id="previous"><span id="previousLocation"></span><span class="name">' + that._getLocationString(that._currentLocation) + '</span></li>';
             }
 
-            list += '<li id="current"><span id="currentLocation"></span><span class="name">Use Current Location</span></li>' +
+            list += //'<li id="current"><span id="currentLocation"></span><span class="name">Use Current Location</span></li>' +
                 '<li id="manual"><span id="manuallyDropPin"></span><span class="name">Manually Drop Pin</span></li>';
 
             $(list).appendTo($("#locationWidget #locationList"));
+
+            $("#locationWidget #locationList li").each(function () {
+                if($(this)[0].childNodes[1].clientHeight < 25){
+                    $(this).addClass("singleLine");
+                }else if($(this)[0].childNodes[1].clientHeight > 50){
+                    $(this).addClass("tripleLine");
+                }
+            });
         },
 
-        _updateNavigateLink: function () {
+        _updateCurrentLocation: function (location, shouldSave) {
+            var that = this;
 
-            var link = "";
-            $("#navigateBtn").attr("style", "display:block").attr("href", link);
+            that._currentLocation = location;
+
+            if(shouldSave){
+                //TODO: save here
+            }
+        },
+
+        _updateNavigateLink: function (location, initial) {
+            var that = this;
+
+            if(location.AddressLineOne && location.AdminDistrictOne && location.AdminDistrictTwo){
+                //replace spaces with "+" to format for search query
+                var lineOneFormatted = location.AddressLineOne.replace(/\s/g, "+");
+                var adminDistrictTwoFormatted = location.AdminDistrictTwo.replace(/\s/g, "+");
+                var adminDistrictOneFormatted = location.AdminDistrictOne.replace(/\s/g, "+");
+                that._navigateLink = 'https://maps.google.com/maps?q=' + lineOneFormatted + ',+' + adminDistrictTwoFormatted + ',+' + adminDistrictOneFormatted + '&z=15';
+            }else{
+                that._navigateLink = 'https://maps.google.com/maps?q=' + location.Latitude + ',+' + location.Longitude + '&z=15';
+            }
+
+            if(!initial){
+                $("#navigateBtn").attr("style", "display:block").attr("href", that._navigateLink);
+            }
         }
     });
 });
