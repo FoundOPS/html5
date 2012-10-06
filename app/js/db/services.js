@@ -27,7 +27,7 @@ define(["developer", "tools/dateTools", "db/saveHistory", "tools/parameters"], f
         } else if (mode === developer.DataSource.LIVE) {
             apiUrl = 'http://api.foundops.com/api/';
         } else if (mode === developer.DataSource.REMOTE_API) {
-        apiUrl = "http://192.168.0.108:70/api/"; // Local IP of host computer (might change everyday).
+            apiUrl = "http://192.168.0.108:70/api/"; // Local IP of host computer (might change everyday).
         } else if (mode === developer.DataSource.TESTAPI) {
             apiUrl = 'http://testapi.foundops.com/api/';
         }
@@ -122,14 +122,15 @@ define(["developer", "tools/dateTools", "db/saveHistory", "tools/parameters"], f
                 var roleId = parameters.get().roleId;
 
                 if (!roleId) {
-                    parameters.roleId.changed.add(function () {
+                    parameters.roleId.changed.add(function (roleId) {
+                        config.params.roleId = roleId;
                         deferredRequest.resolve(config);
                     });
 
                     return promise;
                 }
 
-                config.params.roleId = roleId.toString();
+                config.params.roleId = roleId;
             }
 
             deferredRequest.resolve(config);
@@ -162,7 +163,14 @@ define(["developer", "tools/dateTools", "db/saveHistory", "tools/parameters"], f
             excludeRoleId: true,
             headers: {"ops-details": "true"}
         },
-        taskStatuses: {}
+        taskStatuses: {},
+        timeZones: {},
+        userAccounts: {
+            read: {},
+            insert: {},
+            update: {},
+            delete: {}
+        }
     };
 
     //region public properties

@@ -18,7 +18,7 @@ define(["db/services", "db/saveHistory", "tools/dateTools", "widgets/imageUpload
 
     personalSettings.save = function () {
         if (personalSettings.validator.validate() && personalSettings.validator2.validate()) {
-            dbServices.updatePersonalSettings(vm.get("settings"));
+            dbServices.userAccounts.update(null, vm.get("settings"));
         }
     };
 
@@ -34,21 +34,22 @@ define(["db/services", "db/saveHistory", "tools/dateTools", "widgets/imageUpload
         saveHistory.saveInputChanges("#personal");
 
         //retrieve the settings and bind them to the form
-        dbServices.getPersonalSettings(function (settings) {
-            //set this so cancelChanges has a reference to the original settings
-            personalSettings.settings = settings;
-            vm.set("settings", settings);
+        dbServices.userAccounts.read({onlyCurrentUser: true}).done(function (userAccounts) {
+            if (!userAccounts || !userAccounts[0])
+                return;
+
+            var currentUserAccount = userAccounts[0];
+
+            vm.set("settings", currentUserAccount);
             kendo.bind($("#personal"), vm);
 
             //set the image url after it was initially loaded
             imageUpload.setImageUrl(vm.get("settings.ImageUrl"));
 
             //get the list of timezones
-            dbServices.getTimeZones(function (timeZones) {
-                personalSettings.timeZones = timeZones;
-
+            dbServices.timeZones.read().done(function (timeZones) {
                 $("#TimeZone").kendoDropDownList({
-                    dataSource: personalSettings.timeZones,
+                    dataSource: timeZones,
                     dataTextField: "DisplayName",
                     dataValueField: "TimeZoneId"
                 });

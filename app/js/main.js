@@ -101,62 +101,66 @@ require(["jquery", "widgets/navigator", "developer", "db/services", "db/session"
     session.load(function (data) {
         var query = parameters.get();
         //if the disableNavigator param is not set to true: setup the navigator
-        if (!query.disableNavigator) {
-            var frame = developer.CURRENT_FRAME;
-
-            //setup the silverlight div for the proper frames
-            if (frame === developer.Frame.SILVERLIGHT || frame === developer.Frame.SILVERLIGHT_PUBLISHED) {
-                var silverlightElement = '<div id="silverlightControlHost">' +
-                    '<object id="silverlightPlugin" data="data:application/x-silverlight-2," type="application/x-silverlight-2" style="height: 1px; width: 1px">' +
-                    '<param name="onSourceDownloadProgressChanged" value="onSourceDownloadProgressChanged"/>';
-                if (frame === developer.Frame.SILVERLIGHT) {
-                    //if debugging update version to random
-                    developer.CURRENT_SILVERLIGHT_VERSION = Math.floor((Math.random() * 1000) + 1);
-                    silverlightElement += '<param name="splashscreensource" value="http://localhost:31820/ClientBin/SplashScreen.xaml"/>' +
-                        '<param name="source" value="http://localhost:31820/ClientBin/FoundOps.SLClient.Navigator.xap"/>';
-                } else if (frame === developer.Frame.SILVERLIGHT_PUBLISHED) {
-                    //TODO centralize blobUrl to developer or dbServices
-                    var blobUrl = "http://bp.foundops.com/";
-                    silverlightElement += '<param name="splashscreensource" value="' + blobUrl + 'xaps/SplashScreen.xaml" />' +
-                        '<param name="source" value="' + blobUrl + 'xaps/FoundOps.SLClient.Navigator.xap?ignore=' + developer.CURRENT_SILVERLIGHT_VERSION + '/>';
-                }
-                silverlightElement +=
-                    '<param name="onError" value="onSilverlightError"/>' +
-                        '<param name="background" value="#ff333335"/>' +
-                        '<param name="windowless" value="true"/>' +
-                        '<param name="minRuntimeVersion" value="5.0.61118.0"/>' +
-                        '<param name="enableHtmlAccess" value="true"/>' +
-                        '<param name="autoUpgrade" value="true"/>' +
-                        '<a href="http://go.microsoft.com/fwlink/?LinkID=149156&v=5.0.61118.0" style="text-decoration: none">' +
-                        '<img src="http://go.microsoft.com/fwlink/?LinkId=161376" alt="Get Microsoft Silverlight" style="border-style: none"/>' +
-                        '</a>' +
-                        '</object>' +
-                        '<iframe id="_sl_historyFrame" style="visibility: hidden; height: 0; width: 0; z-index: -1; border: 0"></iframe>' +
-                        '</div>';
-
-                $(silverlightElement).insertAfter("#remoteContent");
-            }
-
-            //setup the navigator
-            //navigator = new Navigator(data);
-            //navigator.hideSearch();
-            data.enableBackButton = false;
-            if(developer.CURRENT_FRAME === developer.Frame.MOBILE_APP) {
-               data.enableBackButton = true;
-            }
-            $(document).navigator(data);
-            $(document).navigator('hideSearch');
-
-            //reset the images 1.5 seconds after loading to workaround a shared access key buy
-            _.delay(function () {
-                if (navigator) {
-                    navigator.changeAvatar(data.avatarUrl);
-                    navigator.changeBusinessLogo(session.get("role.businessLogoUrl"));
-                }
-            }, 1500);
-        } else {
+        if (query.disableNavigator) {
             //clear the padding for the navigator if it is disabled
             $("#content").attr("style", "padding:0");
+            return;
+        }
+
+        var frame = developer.CURRENT_FRAME;
+
+        //setup the silverlight div for the proper frames
+        if (frame === developer.Frame.SILVERLIGHT || frame === developer.Frame.SILVERLIGHT_PUBLISHED) {
+            var silverlightElement = '<div id="silverlightControlHost">' +
+                '<object id="silverlightPlugin" data="data:application/x-silverlight-2," type="application/x-silverlight-2" style="height: 1px; width: 1px">' +
+                '<param name="onSourceDownloadProgressChanged" value="onSourceDownloadProgressChanged"/>';
+            if (frame === developer.Frame.SILVERLIGHT) {
+                //if debugging update version to random
+                developer.CURRENT_SILVERLIGHT_VERSION = Math.floor((Math.random() * 1000) + 1);
+                silverlightElement += '<param name="splashscreensource" value="http://localhost:31820/ClientBin/SplashScreen.xaml"/>' +
+                    '<param name="source" value="http://localhost:31820/ClientBin/FoundOps.SLClient.Navigator.xap"/>';
+            } else if (frame === developer.Frame.SILVERLIGHT_PUBLISHED) {
+                //TODO centralize blobUrl to developer or dbServices
+                var blobUrl = "http://bp.foundops.com/";
+                silverlightElement += '<param name="splashscreensource" value="' + blobUrl + 'xaps/SplashScreen.xaml" />' +
+                    '<param name="source" value="' + blobUrl + 'xaps/FoundOps.SLClient.Navigator.xap?ignore=' + developer.CURRENT_SILVERLIGHT_VERSION + '/>';
+            }
+            silverlightElement +=
+                '<param name="onError" value="onSilverlightError"/>' +
+                    '<param name="background" value="#ff333335"/>' +
+                    '<param name="windowless" value="true"/>' +
+                    '<param name="minRuntimeVersion" value="5.0.61118.0"/>' +
+                    '<param name="enableHtmlAccess" value="true"/>' +
+                    '<param name="autoUpgrade" value="true"/>' +
+                    '<a href="http://go.microsoft.com/fwlink/?LinkID=149156&v=5.0.61118.0" style="text-decoration: none">' +
+                    '<img src="http://go.microsoft.com/fwlink/?LinkId=161376" alt="Get Microsoft Silverlight" style="border-style: none"/>' +
+                    '</a>' +
+                    '</object>' +
+                    '<iframe id="_sl_historyFrame" style="visibility: hidden; height: 0; width: 0; z-index: -1; border: 0"></iframe>' +
+                    '</div>';
+
+            $(silverlightElement).insertAfter("#remoteContent");
+        }
+
+        //setup the navigator
+        //navigator = new Navigator(data);
+        //navigator.hideSearch();
+        data.enableBackButton = developer.CURRENT_FRAME === developer.Frame.MOBILE_APP;
+
+        $(document).navigator(data);
+        $(document).navigator('hideSearch');
+
+        //reset the images 1.5 seconds after loading to workaround a shared access key buy
+        _.delay(function () {
+            if (navigator) {
+                navigator.changeAvatar(data.avatarUrl);
+                navigator.changeBusinessLogo(session.get("role.businessLogoUrl"));
+            }
+        }, 1500);
+
+        if (!parameters.getSection()) {
+            var initialSection = {name: developer.CURRENT_FRAME === developer.Frame.MOBILE_APP ? "routes" : "updates"};
+            parameters.set({section: initialSection, replace: true});
         }
     });
 
@@ -168,8 +172,6 @@ require(["jquery", "widgets/navigator", "developer", "db/services", "db/session"
                 UserVoice.showPopupWidget();
             }
         } else {
-            //TODO: Change the way session data is so SL sections have URL, will need to publish mobile app at same time
-            //for now, manually set url for SL section
             parameters.set({section: section});
         }
     });
@@ -183,21 +185,29 @@ require(["jquery", "widgets/navigator", "developer", "db/services", "db/session"
     }
 
     //TODO make roleSelected a navigator event
+    //set the the roleId parameter whenever the navigator chooses one
+    $(document).on("roleSelected", function (e, role) {
+        parameters.setOne("roleId", role.id);
+    });
+
+    var firstLoad = true;
     //whenever a role is changed
     //1) clear the previous views
     //2) reload the view (if it is not silverlight)
-    //3) set the session's role
-    $(document).on("roleSelected", function (e, role) {
+    parameters.roleId.changed.add(function () {
+        //do not clear and reload for the first views
+        if (firstLoad) {
+            firstLoad = false;
+            return;
+        }
         //clear previous views
         $('div[data-role=view]').each(function (i, elem) {
             $(elem).remove();
         });
 
-        session.setRole(role);
-
-        //reload the current page if it is not on silverlight
         var currentSection = parameters.getSection();
-        if (!currentSection || !currentSection.isSilverlight) {
+        //reload the current page: if there is a section (not silverlight)
+        if (currentSection && !currentSection.isSilverlight) {
             var hash = hasher.getHash();
             hasher.setHash('');
             _.delay(function () {
@@ -215,8 +225,7 @@ require(["jquery", "widgets/navigator", "developer", "db/services", "db/session"
     });
 
     //Hookup remote loading into remoteContent, by using the kendo mobile application
-    var initialPage = developer.CURRENT_FRAME === developer.Frame.MOBILE_APP ? "routes.html" : "updates.html";
-    window.application = application = new kendo.mobile.Application($("#remoteContent"), { initial: "view/" + initialPage, platform: "ios"});
+    window.application = application = new kendo.mobile.Application($("#remoteContent"), { platform: "ios"});
 
     //setup page tracking
     try {

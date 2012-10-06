@@ -146,10 +146,10 @@ define(['jquery', 'hasher', 'underscore.string', 'signals'], function ($, hasher
 
     /**
      * Set the parameters/section
-     * @param {*} config
+     * @param {{params, replace, section: {name: string, isSilverlight: boolean}}} config
      * [params] (Optional) If not set it will use the current parameters
      * {boolean} [replace] (Optional) If set and true it will replace the current hash (and not add it to history)
-     * {{name: string, isSilverlight: boolean}} [section] (Optional) The section to set. If null it will keep the current section
+     * [section] (Optional) The section to set. If null it will keep the current section
      */
     parameters.set = function (config) {
         var params = config.params, replace = config.replace, section = config.section;
@@ -161,9 +161,11 @@ define(['jquery', 'hasher', 'underscore.string', 'signals'], function ($, hasher
         //always set the role id
         if (!params.roleId) {
             var roleId = session.get("role.id");
-            if (roleId) {
-                params.roleId = roleId;
+            if (!roleId) {
+                throw "Cannot set parameters without a role";
             }
+
+            params.roleId = roleId;
         }
 
         var lastSection = parameters.getSection();
@@ -171,10 +173,6 @@ define(['jquery', 'hasher', 'underscore.string', 'signals'], function ($, hasher
         //if there is no section set, choose the current section
         if (!section) {
             section = lastSection;
-            if (!lastSection) {
-                //there must be a section set to set parameters, so return
-                return;
-            }
         }
 
         //set the hash
@@ -201,11 +199,24 @@ define(['jquery', 'hasher', 'underscore.string', 'signals'], function ($, hasher
         parameters.changed.dispatch(parameters.getSection(), parameters.get());
     };
 
+    var lastSection;
     //only dispatch changes when they have stabilized for 1/5th second
     var sectionChanged = _.debounce(function (section) {
+        if (!section) {
+            return;
+        }
+
+        lastSection = section;
         parameters.section.changed.dispatch(section);
     }, 200);
+
+    var lastRoleId;
     var roleIdChanged = _.debounce(function (roleId) {
+        if (!roleId) {
+            return;
+        }
+
+        lastRoleId = roleId;
         parameters.roleId.changed.dispatch(roleId);
     }, 200);
 
@@ -214,14 +225,25 @@ define(['jquery', 'hasher', 'underscore.string', 'signals'], function ($, hasher
     hasher.init();
 
     hasher.changed.add(function (newHash, oldHash) {
+        //ignore empty hashes (this happens when main is reloading the view)
+        if (oldHash === '' || newHash === '') {
+            return;
+        }
+
+        //if there is no roleId set (a section was chosen without adding the parameter)
+        //set the roleId
+        if (!parameters.get(newHash).roleId && lastRoleId) {
+            parameters.setOne("roleId", lastRoleId, true);
+            return;
+        }
+
+        //TODO include old parameters
         //update the parameters whenever the hash has changed
         parameters.parse();
 
+        //TODO generalize this w the above todo
         //track changes to section and roleId
-        var lastSection = oldHash ? parameters.getSection(oldHash) : null;
         var newSection = newHash ? parameters.getSection(newHash) : null;
-
-        var lastRoleId = oldHash ? parameters.get(oldHash).roleId : null;
         var newRoleId = newHash ? parameters.get(newHash).roleId : null;
 
         //if the section or role changed: dispatch a changed event

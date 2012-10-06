@@ -6,6 +6,35 @@ define(['developer', 'db/services', "tools/parameters", "kendo"], function (deve
     var session = new kendo.data.ObservableObject({});
     window.session = session;
 
+    //region private
+
+    /**
+     * Sets the role on the session observable and calls and waiting roleFunctions
+     * @param role
+     */
+    var setRole = function (role) {
+        session.set("role", role);
+
+        for (var i = 0; i < roleFunctions.length; i++) {
+            roleFunctions[i](role);
+        }
+    };
+
+    //sync the role with the roleId parameter
+    parameters.roleId.changed.add(function (roleId) {
+        var role = _.find(session._data.roles, function (r) {
+            return r.id === roleId;
+        });
+
+        if (!role || session.get("role.id") === role.id) {
+            return;
+        }
+
+        setRole(role);
+    });
+
+    //endregion
+
 //region public
     /**
      * Gets the current session information
@@ -19,36 +48,27 @@ define(['developer', 'db/services', "tools/parameters", "kendo"], function (deve
         }
 
         //load the session data
-
         dbServices.sessions.read().done(function (data) {
             session._data = data;
             session.set("user", data.name);
 
             //try to load the role from the query parameter
-            //otherwise set it to the first loaded role
-            if (!syncRoleId()) {
-                session.setRole(data.roles[0]);
+            var roleId = parameters.get().roleId;
+            var role = _.find(session._data.roles, function (r) {
+                return r.id === roleId;
+            });
+
+            //if the role cannot be found from the parameter, set it to the first loaded role
+            if (!role) {
+                role = data.roles[0];
+                //setRole will be called due to parameters.roleId.changed
+                parameters.setOne("roleId", role.id, true);
+            } else {
+                setRole(role);
             }
 
             callback(session._data);
         });
-    };
-
-    //set the role
-    session.setRole = function (role) {
-        session.set("role", role);
-
-        //only set the parameter if a section is loaded
-        var currentSection = parameters.getSection();
-        if (currentSection) {
-            parameters.setOne("roleId", role.id);
-        }
-
-        if (role) {
-            for (var i = 0; i < roleFunctions.length; i++) {
-                roleFunctions[i](role);
-            }
-        }
     };
 
     var roleFunctions = [];
@@ -98,44 +118,6 @@ define(['developer', 'db/services', "tools/parameters", "kendo"], function (deve
     };
 
 //endregion
-
-    //sync the roleId parameter with the current role
-    //returns true if the role was set
-    var syncRoleId = function () {
-        if (!session._data) {
-            return false;
-        }
-
-        //only sync if a section is loaded
-        var currentSection = parameters.getSection();
-        if (!currentSection) {
-            return;
-        }
-
-        var query = parameters.get();
-        //if it did not change
-        if (query.roleId === session.get("role.id")) {
-            return false;
-        }
-
-        var role = _.find(session._data.roles, function (r) {
-            return r.id === query.roleId;
-        });
-        //if the role was found, set it
-        if (role) {
-            session.setRole(role);
-            return true;
-        }
-        //otherwise reset the parameter to the current roleId
-        else {
-            parameters.setOne("roleId", session.get("role.id"), true);
-            return false;
-        }
-    };
-
-    parameters.changed.add(function () {
-        syncRoleId();
-    });
 
 //    for debugging when the API is turned off
 //    set static values set for config & selected role
