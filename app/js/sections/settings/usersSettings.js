@@ -1,13 +1,9 @@
 // Copyright 2012 FoundOPS LLC. All Rights Reserved.
 
-/**
- * @fileoverview Class to hold users settings logic.
- */
-
 "use strict";
 
 define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tools/dateTools", "widgets/settingsMenu"], function (dbServices, session, saveHistory, parameters, dateTools) {
-    var usersSettings = {}, usersDataSource, linkedEmployees;
+    var usersSettings = {}, usersDataSource, availableEmployees;
 
     //on add and edit, select a linked employee if the name matches the name in the form
     usersSettings.matchEmployee = function () {
@@ -28,126 +24,105 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
         });
     };
 
-    //the datasource for the Linked Employee dropdown on the edit user popup
-    usersSettings.availableEmployeesDataSource = new kendo.data.DataSource({});
+    var setupDataSource = function () {
+        var fields = {
+            Id: {
+                type: "hidden",
+                defaultValue: ""
+            },
+            FirstName: {
+                type: "string",
+                validation: { required: true },
+                defaultValue: ""
+            },
+            LastName: {
+                type: "string",
+                validation: { required: true },
+                defaultValue: ""
+            },
+            EmailAddress: {
+                type: "string",
+                validation: { required: true },
+                defaultValue: ""
+            },
+            Role: {
+                type: "string",
+                validation: { required: true },
+                defaultValue: ""
+            },
+            EmployeeId: {
+                defaultValue: ""
+            }
+//            TimeZone: {
+//                defaultValue: ""
+//            }
+        };
 
-    //region Setup users dataSource
-
-    var fields = {
-        Id: {
-            type: "hidden",
-            defaultValue: ""
-        },
-        FirstName: {
-            type: "string",
-            validation: { required: true },
-            defaultValue: ""
-        },
-        LastName: {
-            type: "string",
-            validation: { required: true },
-            defaultValue: ""
-        },
-        EmailAddress: {
-            type: "string",
-            validation: { required: true },
-            defaultValue: ""
-        },
-        Role: {
-            type: "string",
-            validation: { required: true },
-            defaultValue: ""
-        },
-        Employee: {
-            defaultValue: ""
-        },
-        TimeZoneInfo: {
-            defaultValue: ""
-        }
-    };
-
-    usersDataSource = new kendo.data.DataSource({
-        transport: {
-            read: {
-                type: "GET",
-                dataType: "json",
-                contentType: "application/json; charset=utf-8",
-                //TODO: set a timeout and notify if it is reached('complete' doesn't register a timeout error)
-                complete: function (jqXHR, textStatus) {
-                    if (textStatus == "error") {
-                        saveHistory.error("Get");
+        var getBaseUrl = function () {
+            return  dbServices.API_URL + "userAccounts?roleId=" + session.get("role.id");
+        };
+        usersDataSource = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    type: "GET",
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    //TODO: set a timeout and notify if it is reached('complete' doesn't register a timeout error)
+                    complete: function (jqXHR, textStatus) {
+                        if (textStatus == "error") {
+                            saveHistory.error("Get");
+                        }
+                    },
+                    url: getBaseUrl
+                },
+                create: {
+                    type: "POST",
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    url: getBaseUrl
+                },
+                update: {
+                    type: "PUT",
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    url: getBaseUrl
+                },
+                destroy: {
+                    type: "DELETE",
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    url: function (userAccount) {
+                        return getBaseUrl() + "&id=" + userAccount.Id;
                     }
                 }
             },
-            create: {
-                type: "POST",
-                dataType: "json",
-                contentType: "application/json; charset=utf-8"
-            },
-            update: {
-                type: "PUT",
-                dataType: "json",
-                contentType: "application/json; charset=utf-8"
-            },
-            destroy: {
-                type: "DELETE"
-            }
-        },
-        schema: {
-            model: {
-                // Necessary for inline editing to work
-                id: "Id",
-                fields: fields
-            }
-        },
-        change: function (e) {
-            linkedEmployees = {};
-
-            _.each(e.items, function (obj) {
-                if (obj.Employee) {
-                    linkedEmployees[obj.Employee.LinkedUserAccountId] = obj;
+            schema: {
+                model: {
+                    // Necessary for inline editing to work
+                    id: "Id",
+                    fields: fields
                 }
-            });
-        }
-    });
-    dbServices.hookupDefaultComplete(usersDataSource);
+            }
+        });
+        dbServices.hookupDefaultComplete(usersDataSource);
 
-    //set the dataSource urls initially, and when the role is changed
-    session.followRole(function (role) {
-        var roleId = session.get("role.id");
-        if (!roleId) {
-            return;
-        }
-        if (role.type !== "Administrator") {
-            return;
-        }
+        //set the dataSource urls initially, and when the role is changed
+        session.followRole(function (role) {
+            var roleId = session.get("role.id");
+            if (!roleId || role.type !== "Administrator") {
+                return;
+            }
 
-        var url = dbServices.API_URL + "userAccounts?roleId=" + roleId;
-
-        usersDataSource.transport.options.read.url = url;
-        usersDataSource.transport.options.update.url = url;
-        usersDataSource.transport.options.destroy.url = url;
-        usersDataSource.transport.options.create.url = url;
-
-        var section = parameters.getSection();
-        if (section && section.name === "usersSettings") {
-            usersDataSource.read();
-        }
-    });
-
-    //endregion
+            var section = parameters.getSection();
+            if (section && section.name === "usersSettings") {
+                usersDataSource.read();
+            }
+        });
+    };
 
     //sets up the add new user popup
     var setupAddNewUser = function () {
         $("#addUser").on("click", function () {
-            //choose the non-linked employees
-            var availableEmployees = usersSettings.employees.filter(function (employee) {
-                return !(employee.Id in linkedEmployees);
-            });
-
-            var createNew = {DisplayName: "Create New", FirstName: "", Id: "1", LastName: "", LinkedUserAccountId: ""};
-            availableEmployees.push(createNew);
-
             var object = $("<div id='popupEditor'>")
                 .appendTo($("body"))
                 .kendoWindow({
@@ -161,82 +136,70 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
                 .data("kendoWindow")
                 .center();
 
-            //determines at what position to insert the record (needed for pageable grids)
-            var index = usersDataSource.indexOf((usersDataSource.view() || [])[0]);
-
-            if (index < 0) {
-                index = 0;
-            }
-            //inserts a new model in the dataSource
-            var model = usersDataSource.insert(index, {});
-            //binds the editing window to the form
+            //add a new userAccount to the dataSource
+            var model = usersDataSource.insert(0, {EmployeeId: null, Role: "Administrator"});
+            //bind the editing window to the form
             kendo.bind(object.element, model);
-            //set the default role
-            model.Role = "Administrator";
+
             //initialize the validator
             var validator = $(object.element).kendoValidator().data("kendoValidator");
             $("#Employee").kendoDropDownList({
                 dataSource: availableEmployees,
                 dataTextField: "DisplayName",
-                dataValueField: "DisplayName"
-            });
-
-            //whenever the Role Type changes, select the default employee
-            var selectDefaultEmployee = function () {
-                var dropDownList = $("#Employee").data("kendoDropDownList");
-
-                if ($("#Role")[0].value === "Mobile") {
-                    //if the role is mobile, set the default linked employee to "None"
-                    dropDownList.select(function (dataItem) {
-                        return dataItem.DisplayName === "None ";
+                change: function () {
+                    //clear other UserAccounts with this EmployeeId
+                    _.each(usersDataSource.data(), function (ua) {
+                        if (ua.EmployeeId === employee.Id) {
+                            ua.EmployeeId = null;
+                        }
                     });
-                } else {
-                    //if the role is admin or regular, set the default linked employee to "Create New"
-                    dropDownList.select(function (dataItem) {
-                        return dataItem.DisplayName === "Create New";
-                    });
+
+                    //update the employee id to the selected one
+                    var employee = this.dataItem();
+                    model.EmployeeId = employee.Id;
                 }
-            };
-            selectDefaultEmployee();
-            $("#Role").on("change", function () {
-                selectDefaultEmployee();
             });
 
             $("#btnAdd").on("click", function () {
                 if (validator.validate()) {
-                    var employee = $("#Employee")[0].value;
-                    if (employee === "None") {
-                        usersDataSource._data[0].Employee = {FirstName: "None", Id: " ", LastName: " ", LinkedUserAccountId: " "};
-                    } else if (employee === "Create New") {
-                        usersDataSource._data[0].Employee = {FirstName: "Create", Id: " ", LastName: " ", LinkedUserAccountId: " "};
-                    } else {
-                        var name = employee.split(" ");
-                        usersDataSource._data[0].Employee = {FirstName: name[0], Id: " ", LastName: name[1], LinkedUserAccountId: " "};
-                    }
+                    //TODO
+
+//                    var employee = $("#Employee")[0].value;
+//                    if (employee === "None") {
+//                        usersDataSource._data[0].Employee = {FirstName: "None", Id: " ", LastName: " ", LinkedUserAccountId: " "};
+//                    } else if (employee === "Create New") {
+//                        usersDataSource._data[0].Employee = {FirstName: "Create", Id: " ", LastName: " ", LinkedUserAccountId: " "};
+//                    } else {
+//                        var name = employee.split(" ");
+//                        usersDataSource._data[0].EmployeeId = {FirstName: name[0], Id: " ", LastName: name[1], LinkedUserAccountId: " "};
+//                    }
                     //add timezone to new user
-                    usersDataSource._data[0].TimeZoneInfo = dateTools.getLocalTimeZone();
+//                    usersDataSource._data[0].TimeZoneInfo = dateTools.getLocalTimeZone();
+
                     usersDataSource.sync(); //sync changes
-                    var grid = $("#usersGrid").data("kendoGrid");
-                    $("#usersGrid")[0].childNodes[0].childNodes[2].childNodes[0].childNodes[4].innerText = employee;
-                    grid._data[0].Employee.DisplayName = employee;
+
+                    //TODO
+//                    var grid = $("#usersGrid").data("kendoGrid");
+//                    $("#usersGrid")[0].childNodes[0].childNodes[2].childNodes[0].childNodes[4].innerText = employee;
+//                    grid._data[0].Employee.DisplayName = employee;
                     object.close();
                     object.element.remove();
                 }
             });
 
             $("#btnCancel").on("click", function () {
-                usersDataSource.cancelChanges(model); //cancel changes
+                //cancel changes
+                usersDataSource.cancelChanges(model);
                 object.close();
                 object.element.remove();
             });
 
             $(".k-i-close").on("click", function () {
+                //cancel changes
                 usersDataSource.cancelChanges(model);
             });
         });
     };
-
-    //region Users Grid
 
     var setupUsersGrid = function () {
         //add a grid to the #usersGrid div element
@@ -257,17 +220,6 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
                 confirmation: "Are you sure you want to delete this user?"
             },
             edit: function (e) {
-                //choose the non-linked employees
-                var availableEmployees = usersSettings.employees.filter(function (employee) {
-                    return !(employee.LinkedUserAccountId in linkedEmployees);
-                });
-                //if there is a linked employee, add it to the list
-                if (e.model.Employee) {
-                    availableEmployees.push(e.model.Employee);
-                }
-                //update the dataSource
-                usersSettings.availableEmployeesDataSource.data(availableEmployees);
-
                 //cancel the changes on cancel button click
                 $(".k-grid-cancel").on("click", function () {
                     e.sender.cancelChanges();
@@ -276,6 +228,18 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
                 $(".k-i-close").on("click", function () {
                     e.sender.cancelChanges();
                 });
+
+                //choose the non-linked employees
+//                var availableEmployees = usersSettings.employees.filter(function (employee) {
+//                    return !(employee.LinkedUserAccountId in linkedEmployees);
+//                });
+//                //if there is a linked employee, add it to the list
+//                if (e.model.Employee) {
+//                    availableEmployees.push(e.model.Employee);
+//                }
+//                //update the dataSource
+//                usersSettings.availableEmployeesDataSource.data(availableEmployees);
+
             },
             saveChanges: function () {
                 saveHistory.success();
@@ -302,8 +266,8 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
                 {
                     field: "Employee",
                     title: "Employee Record",
-                    template: "# if (Employee && Employee.DisplayName) {#" +
-                        "#= Employee.DisplayName #" +
+                    template: "# if (EmployeeId) {#" +
+                        "#= usersSettings.getEmployeeName(EmployeeId) #" +
                         "# } #"
                 },
                 {
@@ -314,26 +278,33 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
         });
     };
 
-    //endregion
-
     usersSettings.initialize = function () {
-        //get the list of employees
-//        dbServices.getAllEmployeesForBusiness(function (employees) {
-//            usersSettings.employees = employees;
-//        });
-
         //setup menu
         var menu = $("#users .settingsMenu");
         kendo.bind(menu);
         menu.kendoSettingsMenu({selectedItem: "Users"});
 
+        setupDataSource();
         setupAddNewUser();
         setupUsersGrid();
     };
 
     usersSettings.show = function () {
         usersSettings.setupSaveHistory();
-        usersDataSource.read();
+        dbServices.employees.read().done(function (data) {
+            availableEmployees = data;
+            //add a create new option
+            var createNew = {Id: "", DisplayName: "Create New", FirstName: "", LastName: "", LinkedUserAccountId: ""};
+            availableEmployees.splice(0, 0, createNew);
+
+            usersDataSource.read();
+        });
+    };
+
+    usersSettings.getEmployeeName = function (employeeId) {
+        return _.find(availableEmployees,function (e) {
+            return e.Id === employeeId;
+        }).DisplayName;
     };
 
     window.usersSettings = usersSettings;
