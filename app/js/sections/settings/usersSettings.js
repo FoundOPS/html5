@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(["db/services", "db/session", "db/saveHistory", "tools/dateTools", "widgets/settingsMenu"], function (dbServices, session, saveHistory, dateTools) {
+define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tools/dateTools", "widgets/settingsMenu"], function (dbServices, session, saveHistory, parameters, dateTools) {
     var usersSettings = {}, usersDataSource, linkedEmployees;
 
     //on add and edit, select a linked employee if the name matches the name in the form
@@ -70,7 +70,7 @@ define(["db/services", "db/session", "db/saveHistory", "tools/dateTools", "widge
         transport: {
             read: {
                 type: "GET",
-                dataType: "jsonp",
+                dataType: "json",
                 contentType: "application/json; charset=utf-8",
                 //TODO: set a timeout and notify if it is reached('complete' doesn't register a timeout error)
                 complete: function (jqXHR, textStatus) {
@@ -80,13 +80,17 @@ define(["db/services", "db/session", "db/saveHistory", "tools/dateTools", "widge
                 }
             },
             create: {
-                type: "POST"
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8"
             },
             update: {
-                type: "POST"
+                type: "PUT",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8"
             },
             destroy: {
-                type: "POST"
+                type: "DELETE"
             }
         },
         schema: {
@@ -118,10 +122,17 @@ define(["db/services", "db/session", "db/saveHistory", "tools/dateTools", "widge
             return;
         }
 
-        usersDataSource.transport.options.read.url = dbServices.API_URL + "settings/GetAllUserSettings?roleId=" + roleId;
-        usersDataSource.transport.options.update.url = dbServices.API_URL + "settings/UpdateUserSettings?roleId=" + roleId;
-        usersDataSource.transport.options.destroy.url = dbServices.API_URL + "settings/DeleteUserSettings?roleId=" + roleId;
-        usersDataSource.transport.options.create.url = dbServices.API_URL + "settings/InsertUserSettings?roleId=" + roleId;
+        var url = dbServices.API_URL + "userAccounts?roleId=" + roleId;
+
+        usersDataSource.transport.options.read.url = url;
+        usersDataSource.transport.options.update.url = url;
+        usersDataSource.transport.options.destroy.url = url;
+        usersDataSource.transport.options.create.url = url;
+
+        var section = parameters.getSection();
+        if (section && section.name === "usersSettings") {
+            usersDataSource.read();
+        }
     });
 
     //endregion
@@ -307,9 +318,9 @@ define(["db/services", "db/session", "db/saveHistory", "tools/dateTools", "widge
 
     usersSettings.initialize = function () {
         //get the list of employees
-        dbServices.getAllEmployeesForBusiness(function (employees) {
-            usersSettings.employees = employees;
-        });
+//        dbServices.getAllEmployeesForBusiness(function (employees) {
+//            usersSettings.employees = employees;
+//        });
 
         //setup menu
         var menu = $("#users .settingsMenu");

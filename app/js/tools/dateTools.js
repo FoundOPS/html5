@@ -80,7 +80,7 @@ define(['moment'], function () {
             id = "Hawaiian Standard Time";
         }
 
-        return {DisplayName: timezone, TimeZoneId: id};
+        return {Id: id, DisplayName: timezone};
     };
 
     return dateTools;

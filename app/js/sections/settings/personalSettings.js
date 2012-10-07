@@ -12,13 +12,14 @@ define(["db/services", "db/saveHistory", "tools/dateTools", "widgets/imageUpload
     personalSettings.vm = vm;
 
     personalSettings.undo = function (state) {
-        vm.set("settings", state);
+        vm.set("userAccount", state);
         personalSettings.save();
     };
 
     personalSettings.save = function () {
         if (personalSettings.validator.validate() && personalSettings.validator2.validate()) {
-            dbServices.userAccounts.update(null, vm.get("settings"));
+            //need to exclude the roleId to update the current user account
+            dbServices.userAccounts.update({excludeRoleId: true, data: vm.get("userAccount")});
         }
     };
 
@@ -40,21 +41,21 @@ define(["db/services", "db/saveHistory", "tools/dateTools", "widgets/imageUpload
 
             var currentUserAccount = userAccounts[0];
 
-            vm.set("settings", currentUserAccount);
+            vm.set("userAccount", currentUserAccount);
             kendo.bind($("#personal"), vm);
 
             //set the image url after it was initially loaded
-            imageUpload.setImageUrl(vm.get("settings.ImageUrl"));
+            imageUpload.setImageUrl(vm.get("userAccount.ImageUrl"));
 
             //get the list of timezones
             dbServices.timeZones.read().done(function (timeZones) {
                 $("#TimeZone").kendoDropDownList({
                     dataSource: timeZones,
                     dataTextField: "DisplayName",
-                    dataValueField: "TimeZoneId"
+                    dataValueField: "Id"
                 });
 
-                if (!vm.get("settings.TimeZoneInfo")) {
+                if (!vm.get("userAccount.TimeZone")) {
                     var timezone = dateTools.getLocalTimeZone();
 
                     var dropDownList = $("#TimeZone").data("kendoDropDownList");
@@ -69,7 +70,7 @@ define(["db/services", "db/saveHistory", "tools/dateTools", "widgets/imageUpload
 
         //setup image upload
         imageUpload = $("#personalImageUpload").kendoImageUpload({
-            uploadUrl: dbServices.API_URL + "settings/UpdateUserImage",
+            uploadUrl: dbServices.API_URL + "userAccount/UpdateUserImage",
             imageWidth: 200,
             containerWidth: 500
         }).data("kendoImageUpload");
@@ -81,7 +82,7 @@ define(["db/services", "db/saveHistory", "tools/dateTools", "widgets/imageUpload
             save: personalSettings.save,
             undo: personalSettings.undo,
             state: function () {
-                return vm.get("settings");
+                return vm.get("userAccount");
             }
         });
     };

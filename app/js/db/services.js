@@ -54,6 +54,15 @@ define(["developer", "tools/dateTools", "db/saveHistory", "tools/parameters"], f
         dataSource.transport.options.destroy.complete = onComplete;
     };
 
+
+    /**
+     * Create a Kendo data source for an entity
+     * @param entityName
+     */
+    var createDataSource = function (entityName) {
+        //TODO if becomes useful
+    };
+
     /**
      * Return a function to perform a modified ajax request
      * @private
@@ -68,15 +77,24 @@ define(["developer", "tools/dateTools", "db/saveHistory", "tools/parameters"], f
     var requestFactory = function (config) {
         /**
          * Performs a modified ajax request and returns the promise
-         * @param {*}= params Additional parameters for the url
-         * @param {*}= body Data for the body. It will be serialized as JSON
-         * Optional config object, which will overwrite the default config's properties individually where set
+         * @param {{params, body, excludeRoleId}} optional Overwrite config properties, except params will be added to default params
+         * params Additional parameters
+         * body Data for the body. It will be serialized as JSON
+         * excludeRoleId For overwriting the default property
          */
-        return function (params, body) {
+        return function (optional) {
             config.params = config.params || {};
             //add any additional parameters
-            if (params) {
-                config.params = _.extend(config.params, params);
+            if (optional) {
+                if (optional.params) {
+                    config.params = _.extend(config.params, optional.params);
+                }
+                if (optional.excludeRoleId) {
+                    config.excludeRoleId = optional.excludeRoleId
+                }
+                if(optional.body){
+                    config.body = optional.body;
+                }
             }
 
             var deferredRequest = new $.Deferred();
@@ -98,8 +116,8 @@ define(["developer", "tools/dateTools", "db/saveHistory", "tools/parameters"], f
                 };
 
                 //if there is a body, stringify and add it
-                if (body) {
-                    options.data = JSON.stringify(body);
+                if (input.body) {
+                    options.data = JSON.stringify(input.body);
                 }
 
                 if (input.headers) {
@@ -169,7 +187,7 @@ define(["developer", "tools/dateTools", "db/saveHistory", "tools/parameters"], f
             read: {},
             insert: {},
             update: {},
-            delete: {}
+            destroy: {}
         }
     };
 
@@ -193,6 +211,7 @@ define(["developer", "tools/dateTools", "db/saveHistory", "tools/parameters"], f
             LOADED: 1
         },
 
+        createDataSource: createDataSource,
         hookupDefaultComplete: hookupDefaultComplete
     };
     //construct public entity objects with functions for read/insert/update/destroy from entityConfig

@@ -80,7 +80,7 @@ define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "to
             serviceTemplateId: vm.get("selectedTask.ServiceTemplateId")
         };
 
-        dbServices.services.read(params).done(function (services) {
+        dbServices.services.read({params: params}).done(function (services) {
             if (services && services[0]) {
                 vm.set("selectedService", services[0]);
             }
@@ -100,7 +100,7 @@ define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "to
     };
 
     section.save = function () {
-        dbServices.services.update(null, vm.get("selectedService"));
+        dbServices.services.update({body: vm.get("selectedService")});
         vm.statusUpdated = false;
     };
     section.undo = function (state) {
@@ -141,7 +141,7 @@ define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "to
         var task = vm.get("selectedTask");
         task.TaskStatusId = statusId;
 
-        dbServices.routeTasks.update(null, task);
+        dbServices.routeTasks.update({body: task});
         updateSelectedStatus();
 
         vm.statusUpdated = true;
