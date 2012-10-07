@@ -14,8 +14,10 @@
         <div id="usersGrid"></div>
     </div>
 </div>
-<script type="text/x-kendo-template" id="createTemplate">
+<script type="text/x-kendo-template" id="userPopupTemplate">
     <div class="k-edit-form-container">
+        # if (usersSettings.editorType === 'add') {#
+
         <div class="k-edit-label">
             <label for="FirstName">First Name</label>
         </div>
@@ -39,35 +41,7 @@
             <input type="email" id="EmailAddress" name="EmailAddress" required data-type="text"
                    data-bind="value:EmailAddress">
         </div>
-        <div class="k-edit-label">
-            <label for="Role">Role</label>
-        </div>
-        <div data-container-for="Role" class="k-edit-field">
-            <select id="Role" name="Role" data-type="text" required data-bind="value:Role">
-                <option>Administrator</option>
-                <option>Regular</option>
-                <option>Mobile</option>
-            </select>
-        </div>
-        <div class="k-edit-label">
-            <label for="Employee">Linked Employee</label>
-        </div>
-        <div data-container-for="Employee" class="k-edit-field">
-            <input id="Employee" name="Employee" />
-        </div>
-        <br/><br/>
-        <a class="k-button k-button-icontext" id="btnAdd">
-            <span class="k-icon k-update"></span>
-            Send Invite Email
-        </a>
-        <a class="k-button k-button-icontext" id="btnCancel">
-            <span class="k-icon k-cancel"></span>
-            Cancel
-        </a>
-    </div>
-</script>
-<script type="text/x-kendo-template" id="editTemplate">
-    <div class="k-edit-form-container">
+        # } else { #
         <div class="k-edit-label">
             <label for="First">First Name</label>
         </div>
@@ -86,6 +60,8 @@
         <div data-container-for="EmailAddress" class="k-edit-field">
             <label id="Email" data-bind="text:EmailAddress"></label>
         </div>
+        # } #
+
         <div class="k-edit-label">
             <label for="RoleEdit">Role</label>
         </div>
@@ -103,6 +79,20 @@
             <input id="linkedEmployee" name="linkedEmployee" data-autoBind="false" data-bind="value:EmployeeId"
                    data-role="dropdownlist"/>
         </div>
+
         <br/><br/>
+
+        # if (usersSettings.editorType === 'add') {#
+
+        <a class="k-button k-button-icontext k-grid-update" id="btnAdd">
+            <span class="k-icon k-update"></span>
+            Send Invite Email
+        </a>
+        <a class="k-button k-button-icontext k-grid-cancel" id="btnCancel">
+            <span class="k-icon k-cancel"></span>
+            Cancel
+        </a>
+
+        # } #
     </div>
 </script>

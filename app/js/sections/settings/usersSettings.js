@@ -59,7 +59,7 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
         };
 
         var getBaseUrl = function () {
-            return  dbServices.API_URL + "userAccounts?roleId=" + session.get("role.id");
+            return dbServices.API_URL + "userAccounts?roleId=" + session.get("role.id");
         };
         usersDataSource = new kendo.data.DataSource({
             transport: {
@@ -105,22 +105,8 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
             }
         });
         dbServices.hookupDefaultComplete(usersDataSource);
-
-        //set the dataSource urls initially, and when the role is changed
-        session.followRole(function (role) {
-            var roleId = session.get("role.id");
-            if (!roleId || role.type !== "Administrator") {
-                return;
-            }
-
-            var section = parameters.getSection();
-            if (section && section.name === "usersSettings") {
-                usersDataSource.read();
-            }
-        });
     };
 
-    //sets up the add new user popup
     var setupAddNewUser = function () {
         $("#addUser").on("click", function () {
             var object = $("<div id='popupEditor'>")
@@ -187,23 +173,22 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
                 }
             });
 
-            $("#btnCancel").on("click", function () {
-                //cancel changes
-                usersDataSource.cancelChanges(model);
+            //setup cancel changes when close button is clicked
+            $(".k-i-close").on("click", function () {
+                usersDataSource.cancelChanges();
                 object.close();
                 object.element.remove();
             });
 
-            $(".k-i-close").on("click", function () {
-                //cancel changes
-                usersDataSource.cancelChanges(model);
+            //link the cancel button to the close button
+            $("#btnCancel").on("click", function () {
+                $(".k-i-close").click();
             });
         });
     };
-
     var setupUsersGrid = function () {
         //add a grid to the #usersGrid div element
-        $("#usersGrid").kendoGrid({
+        return $("#usersGrid").kendoGrid({
             dataSource: usersDataSource,
             dataBound: function () {
                 //after the data is loaded, add tooltips to the edit and delete buttons
@@ -213,19 +198,28 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
                 $(".k-grid-delete").each(function () {
                     $(this).attr("title", "Delete");
                 });
+                $('.k-grid-edit').on('click', function () {
+                    usersSettings.editorType = 'edit';
+                });
             },
             editable: {
                 mode: "popup",
-                template: $("#editTemplate").html(),
+                template: $("#userPopupTemplate").html(),
                 confirmation: "Are you sure you want to delete this user?"
             },
             edit: function (e) {
+                var win = $('.k-window');
+                if (usersSettings.editorType === 'add') {
+                    //win.find('.k-window-title').html("add new");
+                    //alert("add");
+                }
+                else {
+                    //win.find('.k-window-title').html("edit");
+                    //alert("edit");
+                }
+
                 //cancel the changes on cancel button click
-                $(".k-grid-cancel").on("click", function () {
-                    e.sender.cancelChanges();
-                });
-                //cancel the changes on 'X' button click
-                $(".k-i-close").on("click", function () {
+                $(".k-grid-cancel .k-i-close").on("click", function () {
                     e.sender.cancelChanges();
                 });
 
@@ -275,7 +269,7 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
                     width: "87px"
                 }
             ]
-        });
+        }).data("kendoGrid");
     };
 
     usersSettings.initialize = function () {
@@ -285,8 +279,15 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
         menu.kendoSettingsMenu({selectedItem: "Users"});
 
         setupDataSource();
-        setupAddNewUser();
-        setupUsersGrid();
+        var grid = setupUsersGrid();
+        //setup add button
+        $("#addUser").on("click", function () {
+            //workaround for lacking add/edit templates
+            usersSettings.editorType = 'add';
+
+            //open add new user popup
+            grid.addRow();
+        });
     };
 
     usersSettings.show = function () {
