@@ -107,85 +107,6 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
         dbServices.hookupDefaultComplete(usersDataSource);
     };
 
-    var setupAddNewUser = function () {
-        $("#addUser").on("click", function () {
-            var object = $("<div id='popupEditor'>")
-                .appendTo($("body"))
-                .kendoWindow({
-                    title: "Add New User",
-                    modal: true,
-                    content: {
-                        //sets window template
-                        template: kendo.template($("#createTemplate").html())
-                    }
-                })
-                .data("kendoWindow")
-                .center();
-
-            //add a new userAccount to the dataSource
-            var model = usersDataSource.insert(0, {EmployeeId: null, Role: "Administrator"});
-            //bind the editing window to the form
-            kendo.bind(object.element, model);
-
-            //initialize the validator
-            var validator = $(object.element).kendoValidator().data("kendoValidator");
-            $("#Employee").kendoDropDownList({
-                dataSource: availableEmployees,
-                dataTextField: "DisplayName",
-                change: function () {
-                    //clear other UserAccounts with this EmployeeId
-                    _.each(usersDataSource.data(), function (ua) {
-                        if (ua.EmployeeId === employee.Id) {
-                            ua.EmployeeId = null;
-                        }
-                    });
-
-                    //update the employee id to the selected one
-                    var employee = this.dataItem();
-                    model.EmployeeId = employee.Id;
-                }
-            });
-
-            $("#btnAdd").on("click", function () {
-                if (validator.validate()) {
-                    //TODO
-
-//                    var employee = $("#Employee")[0].value;
-//                    if (employee === "None") {
-//                        usersDataSource._data[0].Employee = {FirstName: "None", Id: " ", LastName: " ", LinkedUserAccountId: " "};
-//                    } else if (employee === "Create New") {
-//                        usersDataSource._data[0].Employee = {FirstName: "Create", Id: " ", LastName: " ", LinkedUserAccountId: " "};
-//                    } else {
-//                        var name = employee.split(" ");
-//                        usersDataSource._data[0].EmployeeId = {FirstName: name[0], Id: " ", LastName: name[1], LinkedUserAccountId: " "};
-//                    }
-                    //add timezone to new user
-//                    usersDataSource._data[0].TimeZoneInfo = dateTools.getLocalTimeZone();
-
-                    usersDataSource.sync(); //sync changes
-
-                    //TODO
-//                    var grid = $("#usersGrid").data("kendoGrid");
-//                    $("#usersGrid")[0].childNodes[0].childNodes[2].childNodes[0].childNodes[4].innerText = employee;
-//                    grid._data[0].Employee.DisplayName = employee;
-                    object.close();
-                    object.element.remove();
-                }
-            });
-
-            //setup cancel changes when close button is clicked
-            $(".k-i-close").on("click", function () {
-                usersDataSource.cancelChanges();
-                object.close();
-                object.element.remove();
-            });
-
-            //link the cancel button to the close button
-            $("#btnCancel").on("click", function () {
-                $(".k-i-close").click();
-            });
-        });
-    };
     var setupUsersGrid = function () {
         //add a grid to the #usersGrid div element
         return $("#usersGrid").kendoGrid({
@@ -210,20 +131,34 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
             edit: function (e) {
                 var win = $('.k-window');
                 if (usersSettings.editorType === 'add') {
-                    //win.find('.k-window-title').html("add new");
-                    //alert("add");
+                    //remove extra add/cancel buttons
+                    win.find('.k-button').not('#btnAdd, #btnCancel').remove();
+                    win.find('.k-window-title').html("Add New User");
                 }
                 else {
-                    //win.find('.k-window-title').html("edit");
-                    //alert("edit");
+                    win.find('.k-window-title').html("Edit User");
                 }
 
-                //cancel the changes on cancel button click
-                $(".k-grid-cancel .k-i-close").on("click", function () {
-                    e.sender.cancelChanges();
-                });
+                //TODO setup employee link
 
-                //choose the non-linked employees
+                //    $("#Employee").kendoDropDownList({
+//        dataSource: availableEmployees,
+//        dataTextField: "DisplayName",
+//        change: function () {
+//            //clear other UserAccounts with this EmployeeId
+//            _.each(usersDataSource.data(), function (ua) {
+//                if (ua.EmployeeId === employee.Id) {
+//                    ua.EmployeeId = null;
+//                }
+//            });
+//
+//            //update the employee id to the selected one
+//            var employee = this.dataItem();
+//            model.EmployeeId = employee.Id;
+//        }
+//    });
+
+                //                choose the non-linked employees
 //                var availableEmployees = usersSettings.employees.filter(function (employee) {
 //                    return !(employee.LinkedUserAccountId in linkedEmployees);
 //                });
@@ -233,7 +168,6 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
 //                }
 //                //update the dataSource
 //                usersSettings.availableEmployeesDataSource.data(availableEmployees);
-
             },
             saveChanges: function () {
                 saveHistory.success();
