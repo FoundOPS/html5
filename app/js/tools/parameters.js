@@ -18,6 +18,13 @@ define(['jquery', 'hasher', 'underscore.string', 'signals'], function ($, hasher
         }
     };
 
+    //constructor
+    (function () {
+        // Setup hasher
+        hasher.prependHash = '';
+        hasher.init();
+    })();
+
     var setHash = function (hash, replace) {
         var currentHash = hasher.getHash();
 
@@ -210,7 +217,8 @@ define(['jquery', 'hasher', 'underscore.string', 'signals'], function ($, hasher
         parameters.section.changed.dispatch(section);
     }, 200);
 
-    var lastRoleId;
+    //initialize the roleId to the current url parameter (if it exists)
+    var lastRoleId = parameters.get().roleId;
     var roleIdChanged = _.debounce(function (roleId) {
         if (!roleId) {
             return;
@@ -219,10 +227,6 @@ define(['jquery', 'hasher', 'underscore.string', 'signals'], function ($, hasher
         lastRoleId = roleId;
         parameters.roleId.changed.dispatch(roleId);
     }, 200);
-
-    // Setup Hasher
-    hasher.prependHash = '';
-    hasher.init();
 
     hasher.changed.add(function (newHash, oldHash) {
         //ignore empty hashes (this happens when main is reloading the view)
@@ -254,6 +258,7 @@ define(['jquery', 'hasher', 'underscore.string', 'signals'], function ($, hasher
             roleIdChanged(newRoleId);
         }
     });
+
 
     return parameters;
 });

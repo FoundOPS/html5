@@ -24,6 +24,9 @@ define(["db/services", "db/saveHistory", "tools/dateTools", "widgets/imageUpload
     };
 
     personalSettings.initialize = function () {
+        //need to reset every time for when the role is changed, and the view is reloaded
+        initializeTimeZones = true;
+
         personalSettings.validator = $("#personalForm").kendoValidator().data("kendoValidator");
         personalSettings.validator2 = $("#timeZoneForm").kendoValidator().data("kendoValidator");
 
@@ -42,7 +45,7 @@ define(["db/services", "db/saveHistory", "tools/dateTools", "widgets/imageUpload
         }).data("kendoImageUpload");
     };
 
-    var timeZonesLoaded;
+    var initializeTimeZones = true;
 
     personalSettings.show = function () {
         saveHistory.setCurrentSection({
@@ -70,11 +73,10 @@ define(["db/services", "db/saveHistory", "tools/dateTools", "widgets/imageUpload
             saveHistory.resetHistory();
         });
 
-        //load the time zones (only once)
-        if(!timeZonesLoaded){
+        if (initializeTimeZones) {
             //get the list of timezones
             dbServices.timeZones.read().done(function (timeZones) {
-                timeZonesLoaded = true;
+                initializeTimeZones = false;
 
                 $("#TimeZone").kendoDropDownList({
                     dataSource: timeZones,
