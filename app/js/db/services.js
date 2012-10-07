@@ -92,7 +92,7 @@ define(["developer", "tools/dateTools", "db/saveHistory", "tools/parameters"], f
                 if (optional.excludeRoleId) {
                     config.excludeRoleId = optional.excludeRoleId
                 }
-                if(optional.body){
+                if (optional.body) {
                     config.body = optional.body;
                 }
             }
@@ -159,6 +159,7 @@ define(["developer", "tools/dateTools", "db/saveHistory", "tools/parameters"], f
 
     //the entity's read, insert, update and destroy ajax configurations
     var entityConfig = {
+        employees: {},
         errors: {
             insert: {}
         },
@@ -182,7 +183,7 @@ define(["developer", "tools/dateTools", "db/saveHistory", "tools/parameters"], f
             headers: {"ops-details": "true"}
         },
         taskStatuses: {},
-        timeZones: {},
+        timeZones: {excludeRoleId: true},
         userAccounts: {
             read: {},
             insert: {},

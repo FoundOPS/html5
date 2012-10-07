@@ -19,7 +19,7 @@ define(["db/services", "db/saveHistory", "tools/dateTools", "widgets/imageUpload
     personalSettings.save = function () {
         if (personalSettings.validator.validate() && personalSettings.validator2.validate()) {
             //need to exclude the roleId to update the current user account
-            dbServices.userAccounts.update({excludeRoleId: true, data: vm.get("userAccount")});
+            dbServices.userAccounts.update({excludeRoleId: true, body: vm.get("userAccount")});
         }
     };
 
@@ -34,8 +34,28 @@ define(["db/services", "db/saveHistory", "tools/dateTools", "widgets/imageUpload
 
         saveHistory.saveInputChanges("#personal");
 
+        //setup image upload
+        imageUpload = $("#personalImageUpload").kendoImageUpload({
+            uploadUrl: dbServices.API_URL + "userAccount/UpdateUserImage",
+            imageWidth: 200,
+            containerWidth: 500
+        }).data("kendoImageUpload");
+    };
+
+    var timeZonesLoaded;
+
+    personalSettings.show = function () {
+        saveHistory.setCurrentSection({
+            page: "Personal Settings",
+            save: personalSettings.save,
+            undo: personalSettings.undo,
+            state: function () {
+                return vm.get("userAccount");
+            }
+        });
+
         //retrieve the settings and bind them to the form
-        dbServices.userAccounts.read({onlyCurrentUser: true}).done(function (userAccounts) {
+        dbServices.userAccounts.read({excludeRoleId: true}).done(function (userAccounts) {
             if (!userAccounts || !userAccounts[0])
                 return;
 
@@ -47,8 +67,15 @@ define(["db/services", "db/saveHistory", "tools/dateTools", "widgets/imageUpload
             //set the image url after it was initially loaded
             imageUpload.setImageUrl(vm.get("userAccount.ImageUrl"));
 
+            saveHistory.resetHistory();
+        });
+
+        //load the time zones (only once)
+        if(!timeZonesLoaded){
             //get the list of timezones
             dbServices.timeZones.read().done(function (timeZones) {
+                timeZonesLoaded = true;
+
                 $("#TimeZone").kendoDropDownList({
                     dataSource: timeZones,
                     dataTextField: "DisplayName",
@@ -63,28 +90,8 @@ define(["db/services", "db/saveHistory", "tools/dateTools", "widgets/imageUpload
                         return dataItem.DisplayName === timezone.DisplayName;
                     });
                 }
-
-                saveHistory.resetHistory();
             });
-        });
-
-        //setup image upload
-        imageUpload = $("#personalImageUpload").kendoImageUpload({
-            uploadUrl: dbServices.API_URL + "userAccount/UpdateUserImage",
-            imageWidth: 200,
-            containerWidth: 500
-        }).data("kendoImageUpload");
-    };
-
-    personalSettings.show = function () {
-        saveHistory.setCurrentSection({
-            page: "Personal Settings",
-            save: personalSettings.save,
-            undo: personalSettings.undo,
-            state: function () {
-                return vm.get("userAccount");
-            }
-        });
+        }
     };
 
     //set personalSettings to a global function, so the functions are accessible from the HTML element
