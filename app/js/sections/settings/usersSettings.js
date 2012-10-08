@@ -49,7 +49,7 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
             Role: {
                 type: "string",
                 validation: { required: true },
-                defaultValue: ""
+                defaultValue: "Administrator"
             },
             EmployeeId: {
                 defaultValue: ""
@@ -140,6 +140,7 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
                 $(".k-grid-delete").each(function () {
                     $(this).attr("title", "Delete");
                 });
+                //set the editor type
                 $('.k-grid-edit').on('click', function () {
                     usersSettings.editorType = 'edit';
                 });
@@ -152,9 +153,9 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
             edit: function (e) {
                 var win = $('.k-window');
                 if (usersSettings.editorType === 'add') {
-                    //remove extra add/cancel buttons
-                    win.find('.k-button').not('#btnAdd, #btnCancel').remove();
                     win.find('.k-window-title').html("Add New User");
+                    //change update to Send Invite Email
+                    win.find('.k-grid-update').html("Send Invite Email")
                 }
                 else {
                     win.find('.k-window-title').html("Edit User");
