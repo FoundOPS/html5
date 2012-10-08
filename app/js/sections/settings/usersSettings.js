@@ -7,6 +7,7 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
 
     //on add and edit, select a linked employee if the name matches the name in the form
     usersSettings.matchEmployee = function () {
+        return;
         var dropDownList = $("#Employee").data("kendoDropDownList");
 
         //get the user's name from the form fields
@@ -77,23 +78,28 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
                 },
                 create: {
                     type: "POST",
-                    dataType: "json",
                     contentType: "application/json; charset=utf-8",
                     url: getBaseUrl
                 },
                 update: {
                     type: "PUT",
-                    dataType: "json",
                     contentType: "application/json; charset=utf-8",
                     url: getBaseUrl
                 },
                 destroy: {
                     type: "DELETE",
-                    dataType: "json",
-                    contentType: "application/json; charset=utf-8",
+                    data: function () {
+                        return {};
+                    },
                     url: function (userAccount) {
                         return getBaseUrl() + "&id=" + userAccount.Id;
                     }
+                },
+                parameterMap: function (options) {
+                    if (_.any(_.keys(options))) {
+                        return JSON.stringify(options);
+                    }
+                    return "";
                 }
             },
             schema: {
@@ -110,6 +116,7 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
     var setupUsersGrid = function () {
         //add a grid to the #usersGrid div element
         return $("#usersGrid").kendoGrid({
+            autoBind: false,
             dataSource: usersDataSource,
             dataBound: function () {
                 //after the data is loaded, add tooltips to the edit and delete buttons
