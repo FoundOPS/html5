@@ -38,20 +38,44 @@ define(["developer", "tools/dateTools", "db/saveHistory", "tools/parameters"], f
      * 1) provide notifications for failure and success
      * 2) reload the data
      * @param dataSource
+     * @param {{create, insert, update, delete}=} options
+     * Each property has an optional record {{done, fail}=} for functions to be triggered
      */
-    var hookupDefaultComplete = function (dataSource) {
-        var onComplete = function (jqXHR, textStatus) {
-            if (textStatus === "success") {
-                saveHistory.success();
-            } else {
-                dataSource.cancelChanges();
-                saveHistory.error(jqXHR.statusText);
+    var hookupDefaultComplete = function (dataSource, options) {
+        /**
+         * @param {{done, fail}=} completeOptions
+         * @return {Function} A function to trigger on complete
+         */
+        var onComplete = function (completeOptions) {
+            if (!completeOptions) {
+                completeOptions = {};
             }
+
+            return function (jqXHR, textStatus) {
+                if (textStatus === "success") {
+                    saveHistory.success();
+
+                    if (completeOptions.done) {
+                        completeOptions.done();
+                    }
+                } else {
+                    dataSource.cancelChanges();
+                    saveHistory.error(jqXHR.statusText);
+
+                    if (completeOptions.fail) {
+                        completeOptions.fail();
+                    }
+                }
+            };
         };
 
-        dataSource.transport.options.create.complete = onComplete;
-        dataSource.transport.options.update.complete = onComplete;
-        dataSource.transport.options.destroy.complete = onComplete;
+        if (!options) {
+            options = {};
+        }
+
+        dataSource.transport.options.create.complete = onComplete(options.create);
+        dataSource.transport.options.update.complete = onComplete(options.update);
+        dataSource.transport.options.destroy.complete = onComplete(options.destroy);
     };
 
 

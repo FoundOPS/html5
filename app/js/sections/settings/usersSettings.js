@@ -3,7 +3,7 @@
 "use strict";
 
 define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tools/dateTools", "widgets/settingsMenu"], function (dbServices, session, saveHistory, parameters, dateTools) {
-    var usersSettings = {}, usersDataSource, availableEmployees, grid;
+    var usersSettings = {}, usersDataSource, grid;
 
     //on add and edit, select a linked employee if the name matches the name in the form
     usersSettings.matchEmployee = function () {
@@ -110,7 +110,21 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
                 }
             }
         });
-        dbServices.hookupDefaultComplete(usersDataSource);
+
+        dbServices.hookupDefaultComplete(usersDataSource, {
+            //after insert or update, reload employees and user accounts
+            //delay to let popup close
+            insert: {
+                done: function () {
+                    _.delay(load, 200);
+                }
+            },
+            update: {
+                done: function () {
+                    _.delay(load, 200);
+                }
+            }
+        });
     };
 
     var setupUsersGrid = function () {
@@ -145,40 +159,6 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
                 else {
                     win.find('.k-window-title').html("Edit User");
                 }
-
-                //TODO setup employee link
-
-                $("#linkedEmployee").kendoDropDownList({
-                    dataSource: availableEmployees,
-                    dataTextField: "DisplayName",
-                    select: function () {
-                        var employee = this.dataItem();
-                        //clear other UserAccounts with this EmployeeId
-                        _.each(usersDataSource.data(), function (ua) {
-                            if (ua.EmployeeId === employee.Id) {
-                                ua.set("EmployeeId", null);
-                            }
-                        });
-
-                        //update the employee id to the selected one
-                        //model.EmployeeId = employee.Id;
-                        //ua.set("EmployeeId", null);
-                    }
-                });
-
-//                choose the non-linked employees
-//                var availableEmployees = usersSettings.employees.filter(function (employee) {
-//                    return !(employee.LinkedUserAccountId in linkedEmployees);
-//                });
-//                //if there is a linked employee, add it to the list
-//                if (e.model.Employee) {
-//                    availableEmployees.push(e.model.Employee);
-//                }
-//                //update the dataSource
-//                usersSettings.availableEmployeesDataSource.data(availableEmployees);
-            },
-            saveChanges: function () {
-                saveHistory.success();
             },
             scrollable: false,
             sortable: true,
@@ -232,22 +212,34 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
         });
     };
 
-    usersSettings.show = function () {
-        usersSettings.setupSaveHistory();
+    var load = function () {
         dbServices.employees.read().done(function (data) {
-            availableEmployees = data;
+            var employees = data;
             //add a create new option
             var createNew = {Id: "", DisplayName: "Create New", FirstName: "", LastName: "", LinkedUserAccountId: ""};
-            availableEmployees.splice(0, 0, createNew);
+            employees.splice(0, 0, createNew);
 
+            usersSettings.availableEmployees = employees;
             usersDataSource.read();
         });
     };
 
+    usersSettings.show = function () {
+        usersSettings.setupSaveHistory();
+        //ensures role id gets set
+        _.delay(load, 250);
+    };
+
     usersSettings.getEmployeeName = function (employeeId) {
-        return _.find(availableEmployees,function (e) {
+        var employee = _.find(usersSettings.availableEmployees, function (e) {
             return e.Id === employeeId;
-        }).DisplayName;
+        });
+
+        if (employee) {
+            return employee.DisplayName;
+        }
+
+        return "";
     };
 
     window.usersSettings = usersSettings;

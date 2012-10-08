@@ -76,7 +76,8 @@
             <label for="linkedEmployee">Linked Employee</label>
         </div>
         <div data-container-for="Employee" class="k-edit-field">
-            <input id="linkedEmployee"/>
+            <input id="linkedEmployee" data-source="usersSettings.availableEmployees" data-text-field="DisplayName"
+                   data-value-field="Id" data-bind="value:EmployeeId" data-role="dropdownlist"/>
         </div>
 
         <br/><br/>
