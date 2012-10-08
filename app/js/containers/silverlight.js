@@ -93,9 +93,11 @@ define(['db/services', 'db/session', 'hasher', 'tools/parameters'], function (db
             errMsg += "MethodName: " + args.methodName + "     \n";
         }
 
-        dbServices.trackError({
-            Business: session.get("role.name"),
-            Message: errMsg
+        dbServices.errors.insert({
+            body: {
+                Business: session.get("role.name"),
+                Message: errMsg
+            }
         });
 
         //for chrome
@@ -155,8 +157,7 @@ define(['db/services', 'db/session', 'hasher', 'tools/parameters'], function (db
     //endregion
 
 //region Public
-    //if the section isn't silverlight, hide the silverlight control
-    hasher.changed.add(function () {
+    var drawSilverlight = function () {
         var section = parameters.getSection();
         currentSection = section;
 
@@ -170,14 +171,23 @@ define(['db/services', 'db/session', 'hasher', 'tools/parameters'], function (db
             silverlight.plugin.navigationVM.NavigateToView(section.name);
         } catch (err) {
         }
-    });
+    };
 
+    //if the section isn't silverlight, hide the silverlight control
+    hasher.changed.add(function () {
+        drawSilverlight();
+    });
 
 //#endregion
 
-    hide();
     $(window).resize(resizeContainers);
-    resizeContainers();
+
+    //setup initial page
+    //delay to let the navigator load
+    _.delay(function () {
+        drawSilverlight();
+        resizeContainers();
+    }, 500);
 
     return silverlight;
 });

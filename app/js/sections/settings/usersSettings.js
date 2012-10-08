@@ -3,7 +3,7 @@
 "use strict";
 
 define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tools/dateTools", "widgets/settingsMenu"], function (dbServices, session, saveHistory, parameters, dateTools) {
-    var usersSettings = {}, usersDataSource, availableEmployees;
+    var usersSettings = {}, usersDataSource, availableEmployees, grid;
 
     //on add and edit, select a linked employee if the name matches the name in the form
     usersSettings.matchEmployee = function () {
@@ -115,7 +115,7 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
 
     var setupUsersGrid = function () {
         //add a grid to the #usersGrid div element
-        return $("#usersGrid").kendoGrid({
+        grid = $("#usersGrid").kendoGrid({
             autoBind: false,
             dataSource: usersDataSource,
             dataBound: function () {
@@ -148,24 +148,25 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
 
                 //TODO setup employee link
 
-                //    $("#Employee").kendoDropDownList({
-//        dataSource: availableEmployees,
-//        dataTextField: "DisplayName",
-//        change: function () {
-//            //clear other UserAccounts with this EmployeeId
-//            _.each(usersDataSource.data(), function (ua) {
-//                if (ua.EmployeeId === employee.Id) {
-//                    ua.EmployeeId = null;
-//                }
-//            });
-//
-//            //update the employee id to the selected one
-//            var employee = this.dataItem();
-//            model.EmployeeId = employee.Id;
-//        }
-//    });
+                $("#linkedEmployee").kendoDropDownList({
+                    dataSource: availableEmployees,
+                    dataTextField: "DisplayName",
+                    select: function () {
+                        var employee = this.dataItem();
+                        //clear other UserAccounts with this EmployeeId
+                        _.each(usersDataSource.data(), function (ua) {
+                            if (ua.EmployeeId === employee.Id) {
+                                ua.set("EmployeeId", null);
+                            }
+                        });
 
-                //                choose the non-linked employees
+                        //update the employee id to the selected one
+                        //model.EmployeeId = employee.Id;
+                        //ua.set("EmployeeId", null);
+                    }
+                });
+
+//                choose the non-linked employees
 //                var availableEmployees = usersSettings.employees.filter(function (employee) {
 //                    return !(employee.LinkedUserAccountId in linkedEmployees);
 //                });
@@ -199,7 +200,7 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
                 },
                 //TODO: V2 add an employee records link
                 {
-                    field: "Employee",
+                    field: "EmployeeId",
                     title: "Employee Record",
                     template: "# if (EmployeeId) {#" +
                         "#= usersSettings.getEmployeeName(EmployeeId) #" +
@@ -220,7 +221,7 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
         menu.kendoSettingsMenu({selectedItem: "Users"});
 
         setupDataSource();
-        var grid = setupUsersGrid();
+        setupUsersGrid();
         //setup add button
         $("#addUser").on("click", function () {
             //workaround for lacking add/edit templates
