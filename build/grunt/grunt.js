@@ -122,7 +122,7 @@ module.exports = function (grunt) {
             out: "../main/main-built.js"
         },
         //delete the directories before recreating them
-        clean: ["C:/FoundOPS/html5/build/mobile/Android/assets/www", "C:/FoundOPS/html5/build/mobile/iOS/www"],
+        clean: ["/FoundOPS/html5/build/main", "/FoundOPS/html5/build/mobile/Android/assets/www", "/FoundOPS/html5/build/mobile/iOS/www"],
         copy: {
             browser: {
                 files: {
@@ -191,16 +191,29 @@ module.exports = function (grunt) {
                     }
                 }
             }
+        },
+        jasmine: {
+            src: '/FoundOPS/html5/build/main/main-built.js',
+            specs: 'spec/navTests.js',
+            server: {
+                port: 8888
+            },
+            timeout: 10000,
+            junit : {
+                output: 'junit/'
+            },
+            phantomjs: { }
+        },
+        'jasmine-server': {
+            browser: true
         }
     });
 
-    //Must run this first with the bottom three lines commented out
-//    grunt.registerTask('default', 'less requirejs');
-//    grunt.loadNpmTasks('grunt-less');
-//    grunt.loadNpmTasks('grunt-requirejs');
-
-    //Then run this with the above three lines commented out
-    grunt.registerTask('default', 'clean copy replace');
+    //Order of loadNpmTasks is important.
+    grunt.registerTask('default', 'clean less requirejs copy replace jasmine');
     grunt.loadNpmTasks('grunt-contrib');
+    grunt.loadNpmTasks('grunt-less');
+    grunt.loadNpmTasks('grunt-requirejs');
     grunt.loadNpmTasks('grunt-replace');
+    grunt.loadNpmTasks('grunt-jasmine-runner');
 };
