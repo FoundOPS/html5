@@ -52,7 +52,8 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
                 defaultValue: "Administrator"
             },
             EmployeeId: {
-                defaultValue: ""
+                //for new entities, default to creating a new employee
+                defaultValue: "10000000-0000-0000-0000-000000000000"
             }
 //            TimeZone: {
 //                defaultValue: ""
@@ -216,9 +217,14 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
     var load = function () {
         dbServices.employees.read().done(function (data) {
             var employees = data;
+
             //add a create new option
-            var createNew = {Id: "", DisplayName: "Create New", FirstName: "", LastName: "", LinkedUserAccountId: ""};
+            var createNew = {Id: "10000000-0000-0000-0000-000000000000", DisplayName: "Create New", FirstName: "", LastName: "", LinkedUserAccountId: ""};
             employees.splice(0, 0, createNew);
+
+            //add a none option above create new
+            var none = {Id: "00000000-0000-0000-0000-000000000000", DisplayName: "None", FirstName: "", LastName: "", LinkedUserAccountId: ""};
+            employees.splice(0, 0, none);
 
             usersSettings.availableEmployees = employees;
             usersDataSource.read();
