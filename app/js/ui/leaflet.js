@@ -81,7 +81,7 @@ define(['underscore', 'db/models', 'tools/generalTools', 'ui/ui', 'lib/leaflet']
     /**
      * Add a click function the the marker
      * @param {L.marker} marker
-     * @param {function(Object)=} selected A function to perform when a route is selected (optional).
+     * @param {function(Object)=} opt_selected A function to perform when a route is selected (optional).
      */
     leaflet.addMarkerClick = function (marker, opt_selected) {
         marker.on('click', function (e) {
@@ -165,8 +165,9 @@ define(['underscore', 'db/models', 'tools/generalTools', 'ui/ui', 'lib/leaflet']
             options:{
                 routeId: resource.RouteId,
                 iconUrl: null,
+                iconAnchor: [11, 12],
                 shadowUrl: null,
-                popupAnchor: [11, 0],
+                popupAnchor: [0, -12],
                 className: color + " resource",
                 html: "<img class='directionIcon' src='" + ui.ImageUrls.OUTER_CIRCLE + "'/><img class='sourceIcon' src='" + iconUrl + "' />"},
             createIcon:function(){
@@ -348,21 +349,8 @@ define(['underscore', 'db/models', 'tools/generalTools', 'ui/ui', 'lib/leaflet']
         if (!lat || !lng) {
             return;
         }
-
-        //get the location of the destination
-        var location = [lat, lng];
-        //create a point at the current location
-        /*var marker = L.circleMarker(location, {
-         clickable: false,
-         radius: 3,
-         stroke: 0,
-         fillOpacity: routeOpacitySelector.getValue(mapTrackPoints[t].Id),
-         fillColor: routeColorSelector.getValue(mapTrackPoints[t].RouteId).color
-         });*/
-        //add current marker to the map
-        //marker.addTo(trackPointsGroup);
         //add current location to the polyline
-        polyline.addLatLng(location);
+        polyline.addLatLng([lat, lng]);
     };
 
     /**
