@@ -7,7 +7,7 @@
 'use strict';
 
 define(["developer", "tools/dateTools", "db/saveHistory", "tools/parameters"], function (developer, dateTools, saveHistory, parameters) {
-    var apiUrl, dbServices;
+    var rootApiUrl, apiUrl, dbServices;
 
     //constructor
     (function () {
@@ -21,16 +21,17 @@ define(["developer", "tools/dateTools", "db/saveHistory", "tools/parameters"], f
         //setup the api url depending on the mode
         var mode = developer.CURRENT_DATA_SOURCE;
         if (mode === developer.DataSource.BROWSER_LOCALAPI) {
-            apiUrl = 'http://localhost:9711/api/';
+            rootApiUrl = 'http://localhost:9711/';
         } else if (mode === developer.DataSource.ANDROID_LOCALAPI) {
-            apiUrl = 'http://10.0.2.2:9711/api/';
+            rootApiUrl = 'http://10.0.2.2:9711/';
         } else if (mode === developer.DataSource.LIVE) {
-            apiUrl = 'http://api.foundops.com/api/';
+            rootApiUrl = 'http://api.foundops.com/';
         } else if (mode === developer.DataSource.REMOTE_API) {
-            apiUrl = "http://192.168.0.108:70/api/"; // Local IP of host computer (might change everyday).
+            rootApiUrl = "http://192.168.0.108:70/"; // Local IP of host computer (might change everyday).
         } else if (mode === developer.DataSource.TESTAPI) {
-            apiUrl = 'http://testapi.foundops.com/api/';
+            rootApiUrl = 'http://testapi.foundops.com/';
         }
+        apiUrl = rootApiUrl + "api/";
     })();
 
     /**
@@ -38,7 +39,7 @@ define(["developer", "tools/dateTools", "db/saveHistory", "tools/parameters"], f
      * 1) provide notifications for failure and success
      * 2) reload the data
      * @param dataSource
-     * @param {{create, insert, update, delete}=} options
+     * @param {{create, create, update, delete}=} options
      * Each property has an optional record {{done, fail}=} for functions to be triggered
      */
     var hookupDefaultComplete = function (dataSource, options) {
@@ -155,6 +156,9 @@ define(["developer", "tools/dateTools", "db/saveHistory", "tools/parameters"], f
                     return ajax;
                 }
 
+                if (options.disableNotifications) {
+                    return ajax;
+                }
                 return saveHistory.linkNotification(ajax);
             });
 
@@ -181,14 +185,18 @@ define(["developer", "tools/dateTools", "db/saveHistory", "tools/parameters"], f
         };
     };
 
-    //the entity's read, insert, update and destroy ajax configurations
+    //the entity's read, create, update and destroy ajax configurations
     var entityConfig = {
         employees: {},
         errors: {
-            insert: {}
+            create: {}
         },
-        columnConfigurations: {},
+        columnConfigurations: {
+            read: {},
+            update: {disableNotifications: true}
+        },
         depots: {params: {depots: true}},
+        locations: {},
         routes: {},
         routeTasks: {
             update: {}
@@ -199,8 +207,11 @@ define(["developer", "tools/dateTools", "db/saveHistory", "tools/parameters"], f
                 service.ServiceDate = moment(service.ServiceDate).toDate();
             },
             read: {},
-            update: {}
+            update: {},
+            destroy: {}
         },
+        serviceHolders: {},
+        serviceTemplates: {},
         sessions: {
             params: {isMobile: developer.CURRENT_FRAME === developer.Frame.MOBILE_APP},
             excludeRoleId: true,
@@ -209,10 +220,11 @@ define(["developer", "tools/dateTools", "db/saveHistory", "tools/parameters"], f
         taskStatuses: {},
         timeZones: {excludeRoleId: true},
         userAccounts: {
+            //used in personal settings
             read: {},
-            insert: {},
-            update: {},
-            destroy: {}
+            update: {}
+            //used in users settings with datasource
+            //insert, destroy (and read, update)
         }
     };
 
@@ -225,7 +237,7 @@ define(["developer", "tools/dateTools", "db/saveHistory", "tools/parameters"], f
          * @const
          */
         API_URL: apiUrl,
-        ROOT_API_URL: apiUrl.replace("api/", ""),
+        ROOT_API_URL: rootApiUrl,
 
         /**
          * Enum for loading statuses.
@@ -239,12 +251,12 @@ define(["developer", "tools/dateTools", "db/saveHistory", "tools/parameters"], f
         createDataSource: createDataSource,
         hookupDefaultComplete: hookupDefaultComplete
     };
-    //construct public entity objects with functions for read/insert/update/destroy from entityConfig
+    //construct public entity objects with functions for read/create/update/destroy from entityConfig
     _.each(entityConfig, function (value, key) {
         var functions = {};
 
         //before creating the request factories, set the query to the name of the entity
-        if (value.read || value.insert || value.update || value.destroy) {
+        if (value.read || value.create || value.update || value.destroy) {
             if (value.parse) {
                 functions.parse = value.parse;
             }
@@ -253,10 +265,10 @@ define(["developer", "tools/dateTools", "db/saveHistory", "tools/parameters"], f
                 value.read.query = key;
                 functions.read = requestFactory(value.read);
             }
-            if (value.insert) {
-                value.insert.query = key;
-                value.insert.type = "POST";
-                functions.insert = requestFactory(value.insert);
+            if (value.create) {
+                value.create.query = key;
+                value.create.type = "POST";
+                functions.create = requestFactory(value.create);
             }
             if (value.update) {
                 value.update.query = key;

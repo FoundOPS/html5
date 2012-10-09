@@ -12,20 +12,25 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
          */
         serviceType: null,
         addNewService: function () {
-            dbServices.getServiceDetails(null, vm.get("startDate"), null, vm.get("serviceType.Id"), function (service) {
-                //add a new service holder
-                selectedServiceHolder = serviceHoldersDataSource.add();
-                handleChange = true;  //prevent loading service details after the row is selected (this is a new service)
-                //select the new service holder it in the grid
-                grid.select(grid.table.find('tr[data-uid="' + selectedServiceHolder.uid + '"]'));
+            dbServices.services.read({
+                params: {
+                    serviceTemplateId: vm.get("serviceType.Id"),
+                    serviceDate: dateTools.stripDate(vm.get("startDate"))
+                }}).done(function (services) {
+                    var service = services[0];
+                    //add a new service holder
+                    selectedServiceHolder = serviceHoldersDataSource.add();
+                    handleChange = true;  //prevent loading service details after the row is selected (this is a new service)
+                    //select the new service holder it in the grid
+                    grid.select(grid.table.find('tr[data-uid="' + selectedServiceHolder.uid + '"]'));
 
-                //update the selected service
-                vm.setSelectedService(service);
-                vm.syncServiceHolder();
+                    //update the selected service
+                    vm.setSelectedService(service);
+                    vm.syncServiceHolder();
 
-                //this will trigger validation
-                saveHistory.save();
-            });
+                    //this will trigger validation
+                    saveHistory.save();
+                });
         },
         setSelectedService: function (service) {
             vm.set("selectedService", service);
@@ -42,7 +47,7 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
             var answer = confirm("Are you sure you want to delete the selected service?");
             if (answer) {
                 grid.dataSource.remove(selectedServiceHolder);
-                dbServices.deleteService(this.get("selectedService"));
+                dbServices.services.destroy({body: this.get("selectedService")});
                 $("#serviceDetails").attr("style", "display:none");
             }
         },
@@ -106,7 +111,7 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
         var service = vm.get("selectedService");
 
         if (services.validator.validate()) {
-            dbServices.updateService(service).success(function () {
+            dbServices.services.update({body: service}).done(function () {
                 vm.syncServiceHolder();
             });
         } else {
@@ -125,7 +130,7 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
         form.find("input[name=startDate]").val(dateTools.stripDate(vm.get("startDate")));
         form.find("input[name=endDate]").val(dateTools.stripDate(vm.get("endDate")));
 
-        form[0].action = dbServices.ROOT_API_URL + "Service/GetServicesHoldersWithFieldsCsv";
+        form[0].action = dbServices.ROOT_API_URL + "serviceHolders/GetCsv";
         form.submit();
     };
 //endregion
@@ -291,17 +296,22 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
     var createDataSourceAndGrid = function () {
         var serviceType = vm.get("serviceType.Name");
 
-        var readAction = "service/GetServicesHoldersWithFields";
-        var params = {
+        var baseParams = {
             startDate: dateTools.stripDate(vm.get("startDate")),
             endDate: dateTools.stripDate(vm.get("endDate")),
             serviceType: serviceType
         };
 
+        //for loading the field types
+        var singleParams = _.extend({single: true}, baseParams);
+
+        //for loading set of service holders
+        var setParams = _.extend({roleId: parameters.get().roleId}, baseParams);
+
         //load the fields types
         //then create the datasource
         //then create the grid
-        dbServices._getHttp(readAction + "?single=true", params)(function (data) {
+        dbServices.serviceHolders.read({params: singleParams}).done(function (data) {
             var fields = getFields(data);
             serviceHoldersDataSource = new kendo.data.DataSource({
                 schema: {
@@ -316,8 +326,8 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
                 sort: { field: "OccurDate", dir: "asc" },
                 transport: {
                     read: {
-                        url: dbServices.API_URL + readAction,
-                        data: params
+                        url: dbServices.API_URL + "serviceHolders/Get",
+                        data: setParams
                     }
                 },
                 pageSize: 50
@@ -436,9 +446,13 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
                     return;
                 }
                 //load the service details, then update the selected service
-                dbServices.getServiceDetails(selectedServiceHolder.get("ServiceId"), selectedServiceHolder.get("OccurDate"), selectedServiceHolder.get("RecurringServiceId"), null, function (service) {
-                    vm.setSelectedService(service);
-                });
+                dbServices.services.read({params: {
+                    serviceId: selectedServiceHolder.get("ServiceId"),
+                    serviceDate: dateTools.stripDate(selectedServiceHolder.get("OccurDate")),
+                    recurringServiceId: selectedServiceHolder.get("RecurringServiceId")
+                }}).done(function (services) {
+                        vm.setSelectedService(services[0]);
+                    });
             },
             columns: columns,
             columnMenu: true,
@@ -518,7 +532,7 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
         //load the current business account's service types then
         //1) setup the service types drop down
         //2) choose the first service+ type
-        dbServices.getServiceTypes(function (serviceTypes) {
+        dbServices.serviceTemplates.read().done(function (serviceTypes) {
             services.serviceTypes = serviceTypes;
 
             serviceTypesDropDown = $("#serviceTypes").kendoDropDownList({

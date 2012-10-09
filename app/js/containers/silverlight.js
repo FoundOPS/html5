@@ -93,7 +93,7 @@ define(['db/services', 'db/session', 'hasher', 'tools/parameters'], function (db
             errMsg += "MethodName: " + args.methodName + "     \n";
         }
 
-        dbServices.errors.insert({
+        dbServices.errors.create({
             body: {
                 Business: session.get("role.name"),
                 Message: errMsg
