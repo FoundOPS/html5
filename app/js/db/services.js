@@ -157,12 +157,8 @@ define(["developer", "tools/dateTools", "db/saveHistory", "tools/parameters"], f
 
                 var ajax = $.ajax(options);
 
-                //link up save notifications (on everything except GET)
-                if (options.type === "GET") {
-                    return ajax;
-                }
-
-                if (options.disableNotifications) {
+                //link up save notifications on everything except GET and where they are disabled
+                if (options.type === "GET" || input.disableNotifications) {
                     return ajax;
                 }
                 return saveHistory.linkNotification(ajax);
@@ -229,7 +225,10 @@ define(["developer", "tools/dateTools", "db/saveHistory", "tools/parameters"], f
             headers: {"ops-details": "true"}
         },
         taskStatuses: {},
-        trackPoints: {},
+        trackPoints: {
+            read: {},
+            create: {disableNotifications: true}
+        },
         timeZones: {excludeRoleId: true},
         userAccounts: {
             //used in personal settings
