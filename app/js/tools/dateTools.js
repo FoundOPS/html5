@@ -34,7 +34,7 @@ define(['moment'], function () {
     /**
      * This will return the date without the time
      * in a format consumable for the web api.
-     * @param {Date} date The date to format.
+     * @param {Date, moment} date The date to format.
      * @param {toUtc=} toUtc (Optional) If true, convert to UTC. Defaults to false.
      * @return {string} The date formatted in "m-dd-yyyy".
      */

@@ -206,9 +206,7 @@ define(["developer", "tools/dateTools", "db/saveHistory", "tools/parameters"], f
             read: {},
             update: {disableNotifications: true}
         },
-        depots: {params: {depots: true}},
         locations: {},
-        routes: {},
         routeTasks: {
             update: {}
         },
@@ -221,6 +219,8 @@ define(["developer", "tools/dateTools", "db/saveHistory", "tools/parameters"], f
             update: {},
             destroy: {}
         },
+        resourceWithLastPoints: {},
+        routes: {},
         serviceHolders: {},
         serviceTemplates: {},
         sessions: {
@@ -229,6 +229,7 @@ define(["developer", "tools/dateTools", "db/saveHistory", "tools/parameters"], f
             headers: {"ops-details": "true"}
         },
         taskStatuses: {},
+        trackPoints: {},
         timeZones: {excludeRoleId: true},
         userAccounts: {
             //used in personal settings
