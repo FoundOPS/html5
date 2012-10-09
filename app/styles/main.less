@@ -1072,7 +1072,9 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
         top: -250px;
         left: 0;
         width: 250px;
+        height: 2px;
         background:none;
+        border: 1px solid transparent;
         #navigateBtn{
           display: none;
             position: absolute;
@@ -1086,6 +1088,8 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
             position: absolute;
             top:5px;
             left: 5px;
+            width: 22px;
+            height: 22px;
             background-position: 0 -66px;
             &:hover{
                 background-position: 0 -44px;
@@ -1116,6 +1120,7 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
             background: url("../img/smallSearch.png") no-repeat right center;
         }
         ul{
+            width: 250px;
             max-height: 215px;
             border-top: 1px solid #aaaaaa;
             overflow-y: auto;
@@ -1158,17 +1163,17 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
             }
         }
         li.singleLine .name{
-          padding-top: 9px;
+            padding-top: 9px;
         }
         li.tripleLine .name{
-          font-size: 11px;
+            font-size: 11px;
         }
     }
     #editPane.shown{
-      left: 0px;
+        left: 0px;
     }
     #editPane.hidden{
-      left: -300px;
+       left: -300px;
     }
 }
 /*Tooltip*/
