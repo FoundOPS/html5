@@ -76,7 +76,8 @@ define(["db/session", "db/services", "tools/generalTools", "tools/dateTools", "t
                 //check if a route is currently selected
                 if (selectedRouteId) {
                     //the second to last trackpoint(used to know where to start the line)
-                    newTrackPoints.push(routeTrackPoints[routeTrackPoints.length - 2]);
+                    var lastLocation = routeTrackPoints[routeTrackPoints.length - 2];
+                    newTrackPoints.push(lastLocation);
                     //the latest trackpoint
                     newTrackPoints.push(resource);
                 }
