@@ -29,57 +29,68 @@ background-image: -webkit-gradient(linear,left bottom,left top,color-stop(0.31, 
         <div style=" #position: relative; #top: -50%">                                          <!--in middle-->
             <div style="text-align: center">                                                    <!--of page.-->
                 <img src="img/LogoWhiteText.png" alt="FoundOPS" style="width:70%; max-width:600px"/><br/>
+
                 <form id="loginForm" name="loginForm">
-                    <p style="margin-bottom: 7px; margin-top: 16px;"><input id="EmailAddress" name="EmailAddress" placeholder="E-mail Address" required="required" type="email" onblur="rememberMe()"/></p>
-                    <p style="margin:1px"><input id="Password" name="Password" placeholder="Password" required="required" type="password"/></p><br/>
+                    <p style="margin-bottom: 7px; margin-top: 16px;"><input id="EmailAddress" name="EmailAddress"
+                                                                            placeholder="E-mail Address"
+                                                                            required="required" type="email"
+                                                                            onblur="rememberMe()"/></p>
+
+                    <p style="margin:1px"><input id="Password" name="Password" placeholder="Password"
+                                                 required="required" type="password"/></p><br/>
+
                     <p style="margin:5px">
                         <input id="submit" type="submit" value="Login"/><br/>
                     </p>
-                </form><br/>
+                </form>
+                <br/>
+
                 <div id="toggleWrapper">
                     <p id="toggleLabel">Remember Me</p>
+
                     <div class="switch">
                         <a class="on" href="javascript:toggle('on')"><span>On</span></a>
                         <a class="off active" href="javascript:toggle('off')"><span>Off</span></a>
                     </div>
-                </div><br/>
-                <a id="forgotPassword" href="http://app.foundops.com/Account/ForgotPassword">Forgot Password?</a>
+                </div>
+                <br/>
+                <a id="forgotPassword" rel="external" href="http://app.foundops.com/Account/ForgotPassword">Forgot Password?</a>
             </div>
         </div>
     </div>
 </div>
 <script>
-    $(document).ready(function() {
-        login("Get", {isMobile: true});
+    $.support.cors = true;
+    $(document).ready(function () {
+        login("", "GET");
     });
-    var login = function(url, data) {
+    var login = function (url, type) {
         if (localStorage.getItem("rememberMe") === "true") {
             $("#EmailAddress").val(localStorage.getItem("email"));
             $(".on").addClass("active");
             $(".off").removeClass("active");
         }
-        if (localStorage.getItem("loggedIn") === "true" || url === "Login") {
+        if (localStorage.getItem("loggedIn") === "true" || url !== "") {
             $.ajax({
                 //must use JSONP because the javascript may be hosted on a different url than the api
-                type: "GET",
-                dataType: 'JSONP',
+                type:type,
+                dataType:'JSON',
 //                url: 'http://localhost:9711/api/session/' + url,    //LOCAL
-//                url: 'http://api.foundops.com/api/session/' + url,    //LIVE
-                url: 'http://192.168.0.108:70/api/session/' + url,   //REMOTE - Local IP of host computer (might change everyday).
-                data: data,
-                tryCount: 0,
-                retryLimit: 2,
-                timeout: 5000,
-                success: function (response) {
+                url:'http://api.foundops.com/api/sessions' + url, //LIVE
+//                url: 'http://192.168.0.108:70/api/session/' + url,   //REMOTE - Local IP of host computer (might change everyday).
+                tryCount:0,
+                retryLimit:2,
+                timeout:5000,
+                success:function (response) {
                     if (response) {
                         //Save the application's login state.
                         localStorage.setItem("loggedIn", true);
                         window.location.href = "http://app.foundops.com"; // Grunt replaces appLocation on build.
-                    } else {
+                    } else if (url !== "") {
                         alert("Login information is incorrect.\nPlease try again.");
                     }
                 },
-                error: function (errorThrown, textStatus) {
+                error:function (errorThrown, textStatus) {
                     if (textStatus === 'timeout') {
                         this.tryCount++;
                         if (this.tryCount <= this.retryLimit) {
@@ -89,7 +100,6 @@ background-image: -webkit-gradient(linear,left bottom,left top,color-stop(0.31, 
                         }
                         return;
                     } else {
-                        console.log(xhr.status);
                         console.log(errorThrown);
                         console.log(textStatus);
                     }
@@ -109,12 +119,12 @@ background-image: -webkit-gradient(linear,left bottom,left top,color-stop(0.31, 
 
         return email;
     };
-    $("#loginForm").submit( function(event) {
+    $("#loginForm").submit(function (event) {
         event.preventDefault();
 
         var password = $("#Password").val();
 
-        login("Login", {email: rememberMe(), pass: password});
+        login('?' + 'email=' + rememberMe() + '&pass=' + password, "PUT");
     });
     $("#submit").mousedown(function (e) {
         $("#submit").toggleClass("buttonClicked");
