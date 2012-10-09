@@ -123,7 +123,7 @@ module.exports = function (grunt) {
             out: "../main/main-built.js"
         },
         //delete the directories before recreating them
-        clean: ["C:/FoundOPS/html5/build/mobile/Android/assets/www", "C:/FoundOPS/html5/build/mobile/iOS/www"],
+        clean: ["C:/FoundOPS/html5/build/main", "C:/FoundOPS/html5/build/mobile/Android/assets/www", "C:/FoundOPS/html5/build/mobile/iOS/www"],
         copy: {
             browser: {
                 files: {
