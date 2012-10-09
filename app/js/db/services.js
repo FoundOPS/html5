@@ -81,11 +81,17 @@ define(["developer", "tools/dateTools", "db/saveHistory", "tools/parameters"], f
 
 
     /**
-     * Create a Kendo data source for an entity
+     * Creates the default parameter map  for a datasource
      * @param entityName
+     * @return {Function}
      */
-    var createDataSource = function (entityName) {
-        //TODO if becomes useful
+    var parameterMap = function () {
+        return function (options) {
+            if (_.any(_.keys(options))) {
+                return JSON.stringify(options);
+            }
+            return "";
+        };
     };
 
     /**
@@ -253,8 +259,8 @@ define(["developer", "tools/dateTools", "db/saveHistory", "tools/parameters"], f
             LOADED: 1
         },
 
-        createDataSource: createDataSource,
-        hookupDefaultComplete: hookupDefaultComplete
+        hookupDefaultComplete: hookupDefaultComplete,
+        parameterMap: parameterMap
     };
     //construct public entity objects with functions for read/create/update/destroy from entityConfig
     _.each(entityConfig, function (value, key) {

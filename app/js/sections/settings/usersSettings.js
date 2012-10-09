@@ -61,7 +61,7 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
         };
 
         var getBaseUrl = function () {
-            return dbServices.API_URL + "userAccounts?roleId=" + session.get("role.id");
+            return dbServices.API_URL + "userAccounts?roleId=" + parameters.get().roleId;
         };
         usersDataSource = new kendo.data.DataSource({
             transport: {
@@ -96,12 +96,7 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
                         return getBaseUrl() + "&id=" + userAccount.Id;
                     }
                 },
-                parameterMap: function (options) {
-                    if (_.any(_.keys(options))) {
-                        return JSON.stringify(options);
-                    }
-                    return "";
-                }
+                parameterMap: dbServices.parameterMap()
             },
             schema: {
                 model: {
