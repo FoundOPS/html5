@@ -187,6 +187,11 @@ define(["developer", "tools/dateTools", "db/saveHistory", "tools/parameters"], f
 
     //the entity's read, create, update and destroy ajax configurations
     var entityConfig = {
+        businessAccounts: {
+            //used in business settings
+            read: {},
+            update: {}
+        },
         employees: {},
         errors: {
             create: {}

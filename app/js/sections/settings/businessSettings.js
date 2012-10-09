@@ -18,7 +18,7 @@ define(["db/services", "db/saveHistory", "db/session", "widgets/imageUpload", "w
 
     businessSettings.save = function () {
         if (businessSettings.validator.validate()) {
-            dbServices.updateBusinessSettings(vm.get("settings"));
+            dbServices.businessAccounts.update({body: vm.get("settings")});
         }
     };
 
@@ -33,7 +33,8 @@ define(["db/services", "db/saveHistory", "db/session", "widgets/imageUpload", "w
         saveHistory.saveInputChanges("#business");
 
         //retrieve the settings and bind them to the form
-        dbServices.getBusinessSettings(function (settings) {
+        dbServices.businessAccounts.read().done(function (settings) {
+            settings = settings[0];
             //set this so cancelChanges has a reference to the original settings
             businessSettings.settings = settings;
             vm.set("settings", settings);
@@ -53,7 +54,7 @@ define(["db/services", "db/saveHistory", "db/session", "widgets/imageUpload", "w
         }).data("kendoImageUpload");
 
         session.followRole(function (role) {
-            imageUpload.setUploadUrl(dbServices.API_URL + "settings/UpdateBusinessImage?roleId=" + role.get("id"));
+            imageUpload.setUploadUrl(dbServices.API_URL + "settings/UpdateBusinessImage?roleId=" + role.id);
         });
     };
 
