@@ -49,7 +49,7 @@ define(function () {
      * This is for sections that are in the Silverlight application and is used for debugging.
      * @type {developer.Frame}
      */
-    developer.CURRENT_FRAME = developer.Frame.BROWSER;
+    developer.CURRENT_FRAME = developer.Frame.SILVERLIGHT_PUBLISHED;
 
     developer.TRACK_ANALYTICS_OPTION = {
         OFF: 0,
@@ -57,12 +57,12 @@ define(function () {
         LIVE: 2
     };
 
-    developer.TRACK_ANALYTICS = developer.TRACK_ANALYTICS_OPTION.DEBUG;
+    developer.TRACK_ANALYTICS = developer.TRACK_ANALYTICS_OPTION.LIVE;
 
     /**
      * The current silverlight version
      */
-    developer.CURRENT_SILVERLIGHT_VERSION = 0.2;
+    developer.CURRENT_SILVERLIGHT_VERSION = 0.21;
 
     return developer;
 });

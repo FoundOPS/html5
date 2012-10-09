@@ -120,17 +120,18 @@ define(['db/services', 'db/session', 'hasher', 'tools/parameters'], function (db
     silverlight.onLoaded = function () {
         silverlight.plugin = document.getElementById('silverlightPlugin').Content;
 
-        //Update the silverlight app's role to the session's selected role
-        session.followRole(function (role) {
-            try {
-                if (role) {
-                    silverlight.plugin.navigationVM.ChangeRole(role.get("id"));
-                }
-            } catch (err) {
+        parameters.roleId.changed.add(function (roleId) {
+            if (!roleId) {
+                return;
             }
+
+            //Update the silverlight app's role to the selected role
+            silverlight.plugin.navigationVM.ChangeRole(roleId);
         });
 
-        //if there is a current section and it is silverlight, navigate to it
+        //Update the silverlight app's role to the selected role
+        silverlight.plugin.navigationVM.ChangeRole(parameters.get().roleId);
+
         if (currentSection && currentSection.isSilverlight) {
             try {
                 silverlight.plugin.navigationVM.NavigateToView(currentSection.name);
