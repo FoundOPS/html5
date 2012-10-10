@@ -69,7 +69,7 @@ define(function () {
 
     /**
      * Returns the first element in a collection if it's id matches
-     * @param arrayElements
+     * @param elements
      * @param id
      */
     models.firstFromId = function (elements, id) {

@@ -119,7 +119,8 @@ module.exports = function (grunt) {
                 totango: {}
             },
             include: ["main"],
-            wrap: true,
+            //cannot wrap or else there will be bugs with external libraries (AKA UserVoice closing bug)
+            wrap: false,
             out: "../main/main-built.js"
         },
         //delete the directories before recreating them

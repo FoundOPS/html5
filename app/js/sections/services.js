@@ -133,7 +133,7 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
         form[0].action = dbServices.ROOT_API_URL + "serviceHolders/GetCsv";
         form.submit();
     };
-//endregion
+    //endregion
 
     //region DataSource
 
@@ -350,7 +350,7 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
 
     //region Grid
 
-//resize the grid based on the current window's height
+    //resize the grid based on the current window's height
     var resizeGrid = function () {
         var extraMargin = 85;
         var windowHeight = $(window).height();
@@ -452,6 +452,7 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
                     recurringServiceId: selectedServiceHolder.get("RecurringServiceId")
                 }}).done(function (services) {
                         vm.setSelectedService(services[0]);
+                        resizeGrid();
                     });
             },
             columns: columns,
@@ -474,7 +475,7 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
         grid.refresh();
     };
 
-//endregion
+    //endregion
 
     var reloadServices = _.debounce(function () {
         serviceHoldersDataSource.options.transport.read.data.startDate = dateTools.stripDate(vm.get("startDate"));
@@ -623,6 +624,6 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
         });
     };
 
-//set services to a global function, so the functions are accessible from the HTML element
+    //set services to a global function, so the functions are accessible from the HTML element
     window.services = services;
 });

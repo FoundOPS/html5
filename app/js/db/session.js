@@ -51,6 +51,7 @@ define(['developer', 'db/services', "tools/parameters", "kendo"], function (deve
         dbServices.sessions.read().done(function (data) {
             session._data = data;
             session.set("user", data.name);
+            session.set("email", data.email);
 
             //try to load the role from the query parameter
             var roleId = parameters.get().roleId;
