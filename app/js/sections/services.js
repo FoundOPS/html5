@@ -5,7 +5,7 @@
 require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateTools", "db/saveHistory", "tools/kendoTools", "widgets/serviceDetails",
     "widgets/locationWidget", "jform"], function ($, session, dbServices, parameters, dateTools, saveHistory, kendoTools) {
     var services = {}, serviceHoldersDataSource, grid, handleChange, serviceTypesDropDown, selectedServiceHolder, vm, locationWidget;
-    var location = null;//{AddressLineOne: "200 N Salisbury St", AddressLineTwo: null, AdminDistrictTwo: "West Lafayette", AdminDistrictOne: "IN", PostalCode: "47906", Latitude: 40.419034, Longitude: -86.894708};
+    var location = null;
 
     //region Public
     services.vm = vm = kendo.observable({
@@ -38,13 +38,16 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
             if (service) {
                 //show the service details
                 $("#serviceDetails").attr("style", "display:block");
+                //remove old location widget if it exists
                 if(locationWidget){
                     locationWidget.removeMap();
                 }
                 //show location widget
                 $("#locationWidget").attr("style", "display:block");
 
+                //TODO: use service.Location
                 if(!location){
+                    //if there's no location, set the map to the location of the depot
                     dbServices.getDepots(function (loadedDepots) {
                         if(loadedDepots.length >= 1){
                             locationWidget.renderMap(loadedDepots[0], false);
