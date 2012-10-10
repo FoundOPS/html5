@@ -31,13 +31,14 @@ background-image: -webkit-gradient(linear,left bottom,left top,color-stop(0.31, 
                 <img src="img/LogoWhiteText.png" alt="FoundOPS" style="width:70%; max-width:600px"/><br/>
 
                 <form id="loginForm" name="loginForm">
-                    <p style="margin-bottom: 7px; margin-top: 16px;"><input id="EmailAddress" name="EmailAddress"
-                                                                            placeholder="E-mail Address"
-                                                                            required="required" type="email"
-                                                                            onblur="rememberMe()"/></p>
+                    <p style="margin-bottom: 7px; margin-top: 16px;">
+                        <input id="EmailAddress" name="EmailAddress" placeholder="E-mail Address"
+                               required="required" type="email" onblur="rememberMe()"/>
+                    </p>
 
-                    <p style="margin:1px"><input id="Password" name="Password" placeholder="Password"
-                                                 required="required" type="password"/></p><br/>
+                    <p style="margin:1px">
+                        <input id="Password" name="Password" placeholder="Password" required="required" type="password"/></p>
+                    <br/>
 
                     <p style="margin:5px">
                         <input id="submit" type="submit" value="Login"/><br/>
@@ -61,23 +62,30 @@ background-image: -webkit-gradient(linear,left bottom,left top,color-stop(0.31, 
 </div>
 <script>
     $.support.cors = true;
+    //Checks if the user is remembered and/or logged in.
     $(document).ready(function () {
-        login("", "GET");
-    });
-    var login = function (url, type) {
         if (localStorage.getItem("rememberMe") === "true") {
             $("#EmailAddress").val(localStorage.getItem("email"));
-            $(".on").addClass("active");
-            $(".off").removeClass("active");
+            toggle("on");
         }
+        login("", "GET");
+    });
+    //Overrides the submit event of the login form.
+    $("#loginForm").submit(function (event) {
+        event.preventDefault();
+        var password = $("#Password").val();
+        login('?' + 'email=' + rememberMe() + '&pass=' + password, "PUT");
+    });
+    //Serves as a dual purpose ajax call that either checks whether a user is logged in and acts accordingly or logs a user in.
+    var login = function (url, type) {
         if (localStorage.getItem("loggedIn") === "true" || url !== "") {
             $.ajax({
-                //must use JSONP because the javascript may be hosted on a different url than the api
                 type:type,
                 dataType:'JSON',
-//                url: 'http://localhost:9711/api/session/' + url,    //LOCAL
-                url:'http://api.foundops.com/api/sessions' + url, //LIVE
-//                url: 'http://192.168.0.108:70/api/session/' + url,   //REMOTE - Local IP of host computer (might change everyday).
+//                url: 'http://localhost:9711/api/session/' + url,    //LOCAL - For testing and debugging purposes.
+//                url: 'http://192.168.0.108:70/api/session/' + url,   //REMOTE - For testing LOCAL on a remote device.
+                                                                       // Local IP of host computer (might change everyday).
+                url:'http://api.foundops.com/api/sessions' + url, //LIVE - For publishing.
                 tryCount:0,
                 retryLimit:2,
                 timeout:5000,
@@ -91,14 +99,13 @@ background-image: -webkit-gradient(linear,left bottom,left top,color-stop(0.31, 
                     }
                 },
                 error:function (errorThrown, textStatus) {
+                    // In case of timeout, retry call up to the amount of times specified by the retryLimit.
                     if (textStatus === 'timeout') {
                         this.tryCount++;
                         if (this.tryCount <= this.retryLimit) {
                             //Try again
                             $.ajax(this);
-                            return;
                         }
-                        return;
                     } else {
                         console.log(errorThrown);
                         console.log(textStatus);
@@ -107,6 +114,8 @@ background-image: -webkit-gradient(linear,left bottom,left top,color-stop(0.31, 
             });
         }
     };
+    // Stores a user's email address in local storage if he or she has selected turned on the Remember Me option.
+    // Forgets him/her otherwise.
     var rememberMe = function () {
         var email = $("#EmailAddress").val();
         if ($(".on").hasClass("active")) {
@@ -116,34 +125,36 @@ background-image: -webkit-gradient(linear,left bottom,left top,color-stop(0.31, 
             localStorage.setItem("rememberMe", false);
             localStorage.removeItem("email");
         }
-
         return email;
     };
-    $("#loginForm").submit(function (event) {
-        event.preventDefault();
-
-        var password = $("#Password").val();
-
-        login('?' + 'email=' + rememberMe() + '&pass=' + password, "PUT");
-    });
-    $("#submit").mousedown(function (e) {
-        $("#submit").toggleClass("buttonClicked");
-    });
-    $("#submit").mouseup(function (e) {
-        $("#submit").toggleClass("buttonClicked");
-    });
+    // Changes the styles of the Remember Me buttons to reflect the user's selection.
     var toggle = function (state) {
         if (state === "on") {
             $(".on").addClass("active");
             $(".off").removeClass("active");
             rememberMe();
         } else {
-            localStorage.setItem("rememberMe", false);
-            localStorage.removeItem("email");
             $(".on").removeClass("active");
             $(".off").addClass("active");
+            rememberMe();
         }
     }
+    // Listeners that change styles to show Login button press animation.
+    $("#submit").mousedown(function (e) {
+        $("#submit").toggleClass("buttonClicked");
+    });
+    $("#submit").mouseup(function (e) {
+        $("#submit").toggleClass("buttonClicked");
+    });
+    document.getElementById("submit").addEventListener('touchstart', function (e) {
+        $("#submit").toggleClass("buttonClicked");
+    });
+    document.getElementById("submit").addEventListener('touchend', function (e) {
+        $("#submit").toggleClass("buttonClicked");
+    });
+    document.getElementById("submit").addEventListener('touchcancel', function (e) {
+        $("#submit").toggleClass("buttonClicked");
+    });
 </script>
 </body>
 </html>

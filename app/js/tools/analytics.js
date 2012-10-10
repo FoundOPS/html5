@@ -31,7 +31,14 @@ define(['jquery', 'containers/silverlight', 'developer', 'tools/parameters', 'db
 
     analytics.track = function (activity, section) {
         var user = session.get("user");
+
         var organization = session.get("role.name");
+
+        var email = session.get("email");
+        //don't include foundops emails
+        if(email && _s.includes(email, "foundops.com")){
+            return;
+        }
 
         if (!section) {
             section = _s.capitalize(parameters.getSection().name);
@@ -40,7 +47,7 @@ define(['jquery', 'containers/silverlight', 'developer', 'tools/parameters', 'db
         totango.track(activity, section, organization, user);
     };
 
-    //
+    //track whenever the section changes
     parameters.section.changed.add(function (section) {
         //section.name
         analytics.track(_s.capitalize(section.name), "navigator");
