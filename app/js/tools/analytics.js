@@ -36,7 +36,7 @@ define(['jquery', 'containers/silverlight', 'developer', 'tools/parameters', 'db
 
         var email = session.get("email");
         //don't include foundops emails
-        if(email && _s.includes(email, "foundops.com")){
+        if(email && _s.include(email, "foundops.com")){
             return;
         }
 
