@@ -5,19 +5,6 @@
 define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tools/dateTools", "widgets/settingsMenu"], function (dbServices, session, saveHistory, parameters, dateTools) {
     var usersSettings = {}, usersDataSource, grid;
 
-    //on add and edit, select a linked employee if the name matches the name in the form
-    usersSettings.matchEmployee = function () {
-        return;
-        var dropDownList = $("#Employee").data("kendoDropDownList");
-
-        //get the user's name from the form fields
-        var name = $("#FirstName")[0].value + " " + $("#LastName")[0].value;
-        //select it in the dropDownList
-        dropDownList.select(function (dataItem) {
-            return dataItem.DisplayName === name;
-        });
-    };
-
     usersSettings.setupSaveHistory = function () {
         saveHistory.setCurrentSection({
             page: "Users Settings",
@@ -110,7 +97,7 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
         dbServices.hookupDefaultComplete(usersDataSource, {
             //after insert or update, reload employees and user accounts
             //delay to let popup close
-            insert: {
+            create: {
                 done: function () {
                     _.delay(load, 200);
                 }
@@ -155,7 +142,7 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
 
                     $(".k-grid-cancel").on("click", function () {
                         //check if the Send Invite button is disabled
-                        if($(".k-window-content .k-grid-update").attr("disabled") == "disabled"){
+                        if ($(".k-window-content .k-grid-update").attr("disabled") == "disabled") {
                             //prevent cancel
                             return false;
                         }
@@ -167,12 +154,12 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
             },
             save: function (e) {
                 //check if the Send Invite button is disabled
-                if($(".k-window-content .k-grid-update").attr("disabled") == "disabled"){
+                if ($(".k-window-content .k-grid-update").attr("disabled") == "disabled") {
                     //if so, don't save again
                     e.preventDefault();
                 }
                 //disable the save and cancel buttons, and hide the exit button
-                if(e.container[0].innerText.match(/Invite/)){
+                if (e.container[0].innerText.match(/Invite/)) {
                     $(".k-window-content .k-grid-update, .k-window-content .k-grid-cancel").attr("disabled", "true");
                     $(".k-window-action").attr("style", "visibility: hidden");
                 }
