@@ -18,7 +18,7 @@ define(function () {
      */
     developer.DataSource = {
         BROWSER_LOCALAPI: 0,
-        ANDROID_LOCALAPI: 1,
+        ANDROID_EMULATOR_LOCALAPI: 1,
         LIVE: 2,
         REMOTE_API: 3,
         TESTAPI: 4
@@ -43,13 +43,13 @@ define(function () {
      * The current web service source. Used when running local server for debugging.
      * @type {developer.DataSource}
      */
-    developer.CURRENT_DATA_SOURCE = developer.DataSource.LIVE;
+    developer.CURRENT_DATA_SOURCE = developer.DataSource.BROWSER_LOCALAPI;
 
     /**
      * This is for sections that are in the Silverlight application and is used for debugging.
      * @type {developer.Frame}
      */
-    developer.CURRENT_FRAME = developer.Frame.MOBILE_APP;
+    developer.CURRENT_FRAME = developer.Frame.BROWSER;
 
     developer.TRACK_ANALYTICS_OPTION = {
         OFF: 0,
@@ -57,7 +57,7 @@ define(function () {
         LIVE: 2
     };
 
-    developer.TRACK_ANALYTICS = developer.TRACK_ANALYTICS_OPTION.LIVE;
+    developer.TRACK_ANALYTICS = developer.TRACK_ANALYTICS_OPTION.DEBUG;
 
     /**
      * The current silverlight version
