@@ -280,24 +280,24 @@ hr{
 .saveBtn:hover{
     .buttonGradientHover;
 }
-button[disabled]{
+button[disabled], .k-grid-update[disabled], .k-grid-cancel[disabled]{
     color: #999;
     cursor: default;
 }
 button[disabled] .k-icon, button[disabled] .k-icon:hover{
     opacity: .5;
 }
-.saveBtn[disabled]{
+.saveBtn[disabled], .k-grid-update[disabled]{
     border-color: #c5c5c5;
     .buttonGradient;
 }
-.saveBtn[disabled]:hover{
+.saveBtn[disabled]:hover, .k-grid-update[disabled]:hover{
     color: #999;
 }
 .cancelBtn{
     margin-left: 4px;
 }
-.cancelBtn[disabled]:hover{
+.cancelBtn[disabled]:hover, .k-grid-cancel[disabled]:hover{
     background-color: #e3e3e3;
     border-color: #c5c5c5;
     color: #999;

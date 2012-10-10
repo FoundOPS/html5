@@ -146,15 +146,35 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
                 template: $("#userPopupTemplate").html(),
                 confirmation: "Are you sure you want to delete this user?"
             },
-            edit: function (e) {
+            edit: function () {
                 var win = $('.k-window');
                 if (usersSettings.editorType === 'add') {
                     win.find('.k-window-title').html("Add New User");
                     //change update to Send Invite Email
-                    win.find('.k-grid-update').html("Send Invite Email")
+                    win.find('.k-grid-update').html("Send Invite Email");
+
+                    $(".k-grid-cancel").on("click", function () {
+                        //check if the Send Invite button is disabled
+                        if($(".k-window-content .k-grid-update").attr("disabled") == "disabled"){
+                            //prevent cancel
+                            return false;
+                        }
+                    });
                 }
                 else {
                     win.find('.k-window-title').html("Edit User");
+                }
+            },
+            save: function (e) {
+                //check if the Send Invite button is disabled
+                if($(".k-window-content .k-grid-update").attr("disabled") == "disabled"){
+                    //if so, don't save again
+                    e.preventDefault();
+                }
+                //disable the save and cancel buttons, and hide the exit button
+                if(e.container[0].innerText.match(/Invite/)){
+                    $(".k-window-content .k-grid-update, .k-window-content .k-grid-cancel").attr("disabled", "true");
+                    $(".k-window-action").attr("style", "visibility: hidden");
                 }
             },
             scrollable: false,
