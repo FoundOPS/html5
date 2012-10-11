@@ -194,7 +194,7 @@ module.exports = function (grunt) {
         },
         jasmine: {
             src: '/FoundOPS/html5/build/main/main-built.js',
-            specs: 'spec/navTests.js',
+            specs: '/FoundOPS/html5/test/navigator/spec/navTests.js',
             server: {
                 port: 8888
             },
@@ -202,10 +202,12 @@ module.exports = function (grunt) {
             junit : {
                 output: 'junit/'
             },
-            phantomjs: { }
+            phantomjs: {
+                'ignore-ssl-errors' : true
+            }
         },
         'jasmine-server': {
-            browser: true
+            browser: false
         }
     });
 

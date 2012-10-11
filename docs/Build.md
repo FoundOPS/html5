@@ -1,12 +1,19 @@
 ## Setup ##
 
-Install Node
-
-Install Grunt globally 
-
-`npm install -g grunt`
-
-[Install PhantomJS](https://github.com/gruntjs/grunt/blob/master/docs/faq.md#why-does-grunt-complain-that-phantomjs-isnt-installed)
+1. Install [Node](http://nodejs.org/)
+2. Install Grunt globally 
+- npm install -g grunt
+3. Install Grunt Modules (in grunt folder).
+- npm install grunt-requirejs
+- npm install grunt-less
+- npm install grunt-contrib
+- npm install grunt-replace
+4. Install underscore (in grunt folder).
+- npm install underscore
+5. Install PhantomJS - [Troubleshooting](https://github.com/gruntjs/grunt/blob/master/docs/faq.md#why-does-grunt-complain-that-phantomjs-isnt-installed)
+- Download from [here](http://phantomjs.org/download.html).
+- Place files anywhere locally.
+- Add phantomjs to system Path.
 
 ## Building
 
@@ -15,7 +22,7 @@ Install Grunt globally
 
 Run test cases
 
-`grunt.cmd jasmine`
+	`grunt.cmd jasmine`
 
 ## Organization
 
