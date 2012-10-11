@@ -1,6 +1,6 @@
 "use strict";
 
-define(["widgets/navigator", "lib/kendo.all","lib/userVoice"], function (Navigator) {
+//define(["widgets/navigator", "lib/kendo.all","lib/userVoice"], function (Navigator) {
     var config = {
         "name": "Jonathan Perl",
         "settingsUrl": "#view/personalSettings.html",
@@ -127,8 +127,8 @@ define(["widgets/navigator", "lib/kendo.all","lib/userVoice"], function (Navigat
         ]
     };
 
-    var navigator = new Navigator(config);
-    navigator.hideSearch();
+//    var navigator = new Navigator(config);
+//    navigator.hideSearch();
     //navigator.changeAvatar("test.jpg");
     describe("Navigator initialization: ", function () {
         describe("The top navigation initialised and", function() {
@@ -250,4 +250,4 @@ define(["widgets/navigator", "lib/kendo.all","lib/userVoice"], function (Navigat
             $('html').trigger("click");
         });
     });
-});
+//});

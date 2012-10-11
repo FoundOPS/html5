@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites>
+<testsuite name="Navigator initialization: " errors="0" tests="0" failures="0" time="0" timestamp="[object Object]">
+</testsuite>
+<testsuite name="Navigator initialization: .The top navigation initialised and" errors="0" tests="1" failures="1" time="0.017" timestamp="[object Object]">
+  <testcase classname="Navigator initialization: .The top navigation initialised and" name="has the nav div initialised" time="0.015"><failure>1: Expected 0 not to equal 0.</failure></testcase>
+</testsuite>
+<testsuite name="Navigator initialization: .The sidebar is initialised and" errors="0" tests="2" failures="1" time="0.007" timestamp="[object Object]">
+  <testcase classname="Navigator initialization: .The sidebar is initialised and" name="has sidebar icons visible" time="0.002"><failure>1: Expected 0 to equal undefined. 2: TypeError: &apos;undefined&apos; is not a function (evaluating &apos;navigator.changeBusiness(popupContentChild, config)&apos;) in c:/FoundOPS/html5/test/navigator/spec/navTests.js (line 161)</failure></testcase>
+  <testcase classname="Navigator initialization: .The sidebar is initialised and" name="has the expandMenuButton visible on large view / hidden on small view" time="0.002"></testcase>
+</testsuite>
+<testsuite name="Navigator initialization: .The sidebar is initialised and.on event:" errors="0" tests="1" failures="1" time="0.002" timestamp="[object Object]">
+  <testcase classname="Navigator initialization: .The sidebar is initialised and.on event:" name="shown, sidebar has shown class on small view only (also tests hidden)" time="0.002"><failure>1: Expected false to be truthy. 2: Expected false to be truthy.</failure></testcase>
+</testsuite>
+</testsuites>

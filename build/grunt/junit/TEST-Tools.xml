@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites>
+<testsuite name="Tools" errors="0" tests="0" failures="0" time="0" timestamp="[object Object]">
+</testsuite>
+<testsuite name="Tools.getDirection" errors="0" tests="1" failures="1" time="0.015" timestamp="[object Object]">
+  <testcase classname="Tools.getDirection" name="should convert degrees to a compass direction" time="0.013"><failure>1: ReferenceError: Can&apos;t find variable: generalTools in c:/FoundOPS/html5/test/mobileTests.js (line 4)</failure></testcase>
+</testsuite>
+</testsuites>

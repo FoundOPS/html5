@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites>
+<testsuite name="Popup initialised:" errors="0" tests="2" failures="2" time="0.004" timestamp="[object Object]">
+  <testcase classname="Popup initialised:" name="has the popupWrapper div created" time="0.001"><failure>1: Expected 0 to be 1.</failure></testcase>
+  <testcase classname="Popup initialised:" name="has the content correctly initialised and behaves correctly on menu item click" time="0.003"><failure>1: Expected &apos;AB Couriers&apos; to be &apos;&apos;. 2: Expected &apos;FoundOPS&apos; to be &apos;&apos;. 3: Expected &apos;Generic Oil Collector&apos; to be &apos;&apos;. 4: Expected &apos;GotGrease?&apos; to be &apos;&apos;.</failure></testcase>
+</testsuite>
+</testsuites>

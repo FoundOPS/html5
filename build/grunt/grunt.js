@@ -194,7 +194,7 @@ module.exports = function (grunt) {
         },
         jasmine: {
             src: '/FoundOPS/html5/build/main/main-built.js',
-            specs: '/FoundOPS/html5/test/navigator/spec/navTests.js',
+            specs: '/FoundOPS/html5/test/mobileTests.js',
             server: {
                 port: 8888
             },
@@ -207,7 +207,7 @@ module.exports = function (grunt) {
             }
         },
         'jasmine-server': {
-            browser: false
+            browser: true
         }
     });
 
