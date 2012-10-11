@@ -2,7 +2,7 @@
 
 'use strict';
 
-define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/leaflet"], function ($, dbServices, fui, generalTools) {
+define(["jquery", "db/services", "ui/ui", "tools/generalTools", "developer", "kendo", "lib/leaflet"], function ($, dbServices, fui, generalTools, developer) {
     $.widget("ui.location", {
         /**
          * Initialize the map
@@ -19,7 +19,7 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
                 '</div>' +
                 '<div id="buttonPane" class="shown">' +
                 '<a class="k-button k-button-icontext k-grid-edit" href="javascript:void(0)"></a>' +
-                '<a id="navigateBtn" href=' + that._navigateLink + '></a>' +
+                '<a id="navigateBtn" href="javascript:void(0)"></a>' +
                 '</div>' +
                 '<div id="editPane" class="hidden">' +
                 '<input type="text" />' +
@@ -96,6 +96,10 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
                         that._marker.unbindPopup();
                     });
                 }
+            });
+
+            $("#locationWidget #navigateBtn").on("click", function () {
+                that._navigateToLink();
             });
 
             //update search after 1 second of input edit
@@ -260,7 +264,7 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
         },
 
         /**
-         * Update the navigate button link
+         * Update the query that will be used for the navigate link
          * @param location
          * @param {boolean} initial If this is the initial load
          * @private
@@ -274,16 +278,37 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
                 var lineOneFormatted = location.AddressLineOne.replace(/\s/g, "+");
                 var adminDistrictTwoFormatted = location.AdminDistrictTwo.replace(/\s/g, "+");
                 var adminDistrictOneFormatted = location.AdminDistrictOne.replace(/\s/g, "+");
-                that._navigateLink = 'https://maps.google.com/maps?q=' + lineOneFormatted + ',+' + adminDistrictTwoFormatted + ',+' + adminDistrictOneFormatted + '&z=15';
+                that._navigateQuery = lineOneFormatted + ',+' + adminDistrictTwoFormatted + ',+' + adminDistrictOneFormatted + '&z=13&ll=' + location.Latitude + ',' + location.Longitude;
             //if not, use the latitude and longitude
             }else{
-                that._navigateLink = 'https://maps.google.com/maps?q=' + location.Latitude + ',+' + location.Longitude + '&z=15';
+                that._navigateQuery = location.Latitude + ',+' + location.Longitude + '&z=13&ll=' + location.Latitude + ',' + location.Longitude;
             }
 
-            //show the navigate button if this is the initial load
+            //show the navigate button if this is not the initial load
             if(!initial){
-                $("#navigateBtn").attr("style", "display:block").attr("href", that._navigateLink);
+                $("#navigateBtn").attr("style", "display:block");
             }
+        },
+
+        //open a new window with google maps directions to the current location
+        _navigateToLink: function () {
+            var currentPosition, that = this;
+            var navigateTo = function (url) {
+                if (developer.CURRENT_FRAME === developer.Frame.MOBILE_APP && kendo.support.detectOS(navigator.userAgent).device === "android") {
+                    window.plugins.childBrowser.showWebPage(url);
+                } else {
+                    window.open(url);
+                }
+            };
+            //get the users location
+            navigator.geolocation.getCurrentPosition(function (position) {
+                // If geolocation is successful get directions to the location from current position.
+                currentPosition = position.coords.latitude + "," + position.coords.longitude;
+                navigateTo("http://maps.google.com/maps?saddr=" + currentPosition + "&daddr=" + that._navigateQuery);
+            }, function () {
+                // If geolocation is NOT successful just show the location.
+                navigateTo("http://maps.google.com/maps?q=" + that._navigateQuery);
+            }, {timeout: 10000, enableHighAccuracy: true});
         }
     });
 });
