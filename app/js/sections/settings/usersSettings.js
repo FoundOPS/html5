@@ -138,7 +138,7 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
                 if (usersSettings.editorType === 'add') {
                     win.find('.k-window-title').html("Add New User");
                     //change update to Send Invite Email
-                    win.find('.k-grid-update').html("Send Invite Email");
+                    win.find('.k-grid-update').html("Send Invite Email").attr("style", "margin-left:91px");
 
                     $(".k-grid-cancel").on("click", function () {
                         //check if the Send Invite button is disabled

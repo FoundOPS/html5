@@ -583,7 +583,7 @@ define(["jquery", "ui/popup", "lib/doT.min", "jmousewheel", "jscrollpane"], func
                 id: "navClient",
                 title: name,
                 contents: [
-                    {"name": "Settings", url: settingsUrl},
+                    {"name": "Settings", id: "settings", url: settingsUrl},
                     {"name": "Change Business", id: "changeBusiness"},
                     {"name": "Log Out", url: logOutUrl}
                 ]
@@ -623,6 +623,10 @@ define(["jquery", "ui/popup", "lib/doT.min", "jmousewheel", "jscrollpane"], func
                 if ($("#popup").children("#currentPopupAction").text() === "changeBusiness") {
                     thisNavigator.changeBusiness($(e.target));
                 }
+                $("#settings").on("click", function () {
+                    var image = $(".sideBarElement.clicked").attr("data-iconUrl");
+                    $(".sideBarElement.clicked").find(".icon").css('background-image', 'url(' + image + ')');
+                });
             });
         };
 
