@@ -1,6 +1,6 @@
 "use strict";
 
-//define(["widgets/navigator", "lib/kendo.all","lib/userVoice"], function (Navigator) {
+define(["widgets/navigator", "lib/kendo.all","lib/userVoice"], function (Navigator) {
     var config = {
         "name": "Jonathan Perl",
         "settingsUrl": "#view/personalSettings.html",
@@ -250,4 +250,4 @@
             $('html').trigger("click");
         });
     });
-//});
+});

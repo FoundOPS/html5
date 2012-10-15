@@ -192,18 +192,16 @@ module.exports = function (grunt) {
                 }
             }
         },
+        watch: {
+            files: ['<config:jasmine.specs>', 'grunt.js', 'require.js', '../build/main/*.js'],
+            tasks: 'jasmine'
+        },
         jasmine: {
-            src: '/FoundOPS/html5/build/main/main-built.js',
-            specs: '/FoundOPS/html5/test/mobileTests.js',
-            server: {
-                port: 8888
-            },
-            timeout: 10000,
-            junit : {
-                output: 'junit/'
-            },
-            phantomjs: {
-                'ignore-ssl-errors' : true
+            src: ['../../app/js/main.js'],
+            specs: '../../test/mobile/mobileTests.js',
+//            helpers: "",
+            server : {
+                port : 9900
             }
         },
         'jasmine-server': {

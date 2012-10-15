@@ -8,6 +8,7 @@
 - npm install grunt-less
 - npm install grunt-contrib
 - npm install grunt-replace
+- npm install grunt-jasmine-runner
 4. Install underscore (in grunt folder).
 - npm install underscore
 5. Install PhantomJS - [Troubleshooting](https://github.com/gruntjs/grunt/blob/master/docs/faq.md#why-does-grunt-complain-that-phantomjs-isnt-installed)
@@ -22,7 +23,7 @@
 
 Run test cases
 
-	`grunt.cmd jasmine`
+	grunt.cmd jasmine
 
 ## Organization
 
