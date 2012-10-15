@@ -128,15 +128,16 @@
     // Listeners that change styles to show Login button press animation.
     $("#submit").mousedown(function (e) {
         $("#submit").toggleClass("buttonClicked");
-    })
-    $("#submit").mouseup(function (e) {
+    }).mouseup(function (e) {
         $("#submit").toggleClass("buttonClicked");
     });
     document.getElementById("submit").addEventListener('touchstart', function (e) {
         $("#submit").toggleClass("buttonClicked");
-    }).addEventListener('touchend', function (e) {
+    })
+    document.getElementById("submit").addEventListener('touchend', function (e) {
         $("#submit").toggleClass("buttonClicked");
-    }).addEventListener('touchcancel', function (e) {
+    })
+    document.getElementById("submit").addEventListener('touchcancel', function (e) {
         $("#submit").toggleClass("buttonClicked");
     });
 </script>
