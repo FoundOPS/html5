@@ -538,7 +538,7 @@ require(["jquery", "db/session", "db/services", "parameters", "tools", "db/saveH
         });
 
         $("#serviceDetails").kendoServiceDetails();
-        $("#repeat").kendoRepeat();
+        $("#repeat").repeat();
 
         //hookup the add & delete buttons
         $("#services .k-grid-add").on("click", function () {
