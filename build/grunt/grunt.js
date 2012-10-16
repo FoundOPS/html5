@@ -193,15 +193,20 @@ module.exports = function (grunt) {
             }
         },
         watch: {
-            files: ['<config:jasmine.specs>', 'grunt.js', 'require.js', '../build/main/*.js'],
+            files: ['<config:jasmine.specs>', '../../app/js/main.js'],
             tasks: 'jasmine'
         },
         jasmine: {
-            src: ['../../app/js/main.js'],
-            specs: '../../test/mobile/mobileTests.js',
-//            helpers: "",
+//            src: ['../..app/js/main.js'],
+            specs: ['../../test/mobile/mobileTests.js', '../../test/navigator/spec/navTests.js'],
+            helpers: ["../../app/lib/jquery.js", "../../app/lib/require.js", "../../test/mobile/requireConfig.js"],
+            amd: true,
+            timeout: 10000,
             server : {
                 port : 9900
+            },
+            phantomjs: {
+                'ignore-ssl-errors': true
             }
         },
         'jasmine-server': {

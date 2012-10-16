@@ -7,16 +7,7 @@
     <meta charset="utf-8">
     <title>FoundOPS</title>
     <meta name="description" content="">
-    <meta name="HandheldFriendly" content="True">
-	<meta name="MobileOptimized" content="320">
-	<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-	<link rel="apple-touch-icon-precomposed" sizes="114x114" href="img/Icon-96x96.png">
-	<link rel="apple-touch-icon-precomposed" sizes="72x72" href="img/Icon-72x72.png">
-	<link rel="apple-touch-icon-precomposed" href="img/Icon-36x36.png">
-	<link rel="shortcut icon" href="img/Icon-36x36.png">
-	<meta name="apple-mobile-web-app-capable" content="yes">
-	<meta name="apple-mobile-web-app-status-bar-style" content="black">
-	<script>(function(a,b,c){if(c in b&&b[c]){var d,e=a.location,f=/^(a|html)$/i;a.addEventListener("click",function(a){d=a.target;while(!f.test(d.nodeName))d=d.parentNode;"href"in d&&(d.href.indexOf("http")||~d.href.indexOf(e.host))&&(a.preventDefault(),e.href=d.href)},!1)}})(document,window.navigator,"standalone")</script>
+    @@mobileOptimization
     <!--[if IE]>
     <style type="text/css">.leaflet-marker-icon .number{top: -5.3px;left: -2.5px;}</style>
     <![endif]-->
@@ -39,9 +30,7 @@
     var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
     document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
 </script>
-<script type="text/javascript" charset="utf-8" src="cordova-2.1.0.js"></script>
-<script type="text/javascript" charset="utf-8" src="statusbarnotification.js"></script>
-<script type="text/javascript" charset="utf-8" src="childbrowser.js"></script>
-<link rel="stylesheet" type="text/css" href="styles/main-built.css">
-<script src="js/main-built.js"></script>
+@@cordova
+<link rel="stylesheet" type="text/css" href="@@CSSblobRoot">
+<script src="@@JSblobRoot"></script>
 </html>

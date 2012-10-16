@@ -15,6 +15,9 @@
 - Download from [here](http://phantomjs.org/download.html).
 - Place files anywhere locally.
 - Add phantomjs to system Path.
+6. Modify jasmine.js
+- html5/build/grunt/node_modules/grunt-jasmine-runner/tasks/lib/jasmine.js
+- In "`getRelativeFileList()`" add "`.replace(/\\/g,'/')`" to the end of "`path.resolve(file).replace(base,'')`" for windows compatibility.
 
 ## Building
 
