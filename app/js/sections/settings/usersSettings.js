@@ -139,18 +139,19 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
                     win.find('.k-window-title').html("Add New User");
                     //change update to Send Invite Email
                     win.find('.k-grid-update').html("Send Invite Email").attr("style", "margin-left:91px");
-
-                    $(".k-grid-cancel").on("click", function () {
-                        //check if the Send Invite button is disabled
-                        if ($(".k-window-content .k-grid-update").attr("disabled") == "disabled") {
-                            //prevent cancel
-                            return false;
-                        }
-                    });
                 }
                 else {
                     win.find('.k-window-title').html("Edit User");
                 }
+
+                //
+                $(".k-grid-cancel").on("click", function () {
+                    //check if the Send Invite button is disabled
+                    if ($(".k-window-content .k-grid-update").attr("disabled") == "disabled") {
+                        //prevent cancel
+                        return false;
+                    }
+                });
             },
             save: function (e) {
                 //check if the Send Invite button is disabled
@@ -159,7 +160,7 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
                     e.preventDefault();
                 }
                 //disable the save and cancel buttons, and hide the exit button
-                if (e.container[0].innerText.match(/Invite/)) {
+                if (e.container[0].innerText.match(/Invite/) || e.container[0].innerText.match(/Update/)) {
                     $(".k-window-content .k-grid-update, .k-window-content .k-grid-cancel").attr("disabled", "true");
                     $(".k-window-action").attr("style", "visibility: hidden");
                 }
