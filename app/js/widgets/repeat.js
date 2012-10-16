@@ -2,21 +2,14 @@
 
 'use strict';
 
-define(["jquery", "db/services", "kendo"], function ($, dbServices) {
-    var kendo = window.kendo,
-        ui = kendo.ui,
-        Widget = ui.Widget,
-        serviceA = {Frequency: 1, StartDate: new Date(), RepeatEvery: 3, RepeatOn: "Monday,Wednesday", EndDate: 4},
+define(["jquery", "kendo"], function ($) {
+    var serviceA = {Frequency: 1, StartDate: new Date(), RepeatEvery: 3, RepeatOn: "Monday,Wednesday", EndDate: 4},
         serviceB = {Frequency: 2, StartDate: new Date(), RepeatEvery: 1, RepeatOn: 1, EndDate: new Date()};
     var service = serviceA;
 
-    var Repeat = Widget.extend({
-        init: function (element, options) {
-            var _repeat, that = this, repeatFormat, endSelection, endAfterValue, endOnValue, endAfterFormat;
-
-            Widget.fn.init.call(that, element, options);
-
-            options = this.options;
+    $.widget("ui.repeat", {
+        _create: function () {
+            var _repeat, that = this;
 
             _repeat = $('<h3>Repeat</h3>' +
                 '<label>Frequency</label><br />' +
@@ -50,7 +43,7 @@ define(["jquery", "db/services", "kendo"], function ($, dbServices) {
                     '<input id="endDatePicker" />' +
                 '</div>');
 
-            this.element.append(_repeat);
+            that.element.append(_repeat);
 
             //region SetupFields
             //setup the startdate datepicker
@@ -73,7 +66,7 @@ define(["jquery", "db/services", "kendo"], function ($, dbServices) {
             if(service.RepeatEvery > 1){
                 frequencyName += "s";
             }
-            repeatFormat = "# " + frequencyName;
+            that._repeatFormat = "# " + frequencyName;
 
             //setup the Repeat Every numeric textbox
             $(_repeat).find('#repeatEveryNum').kendoNumericTextBox({
@@ -82,8 +75,8 @@ define(["jquery", "db/services", "kendo"], function ($, dbServices) {
                 max: 1000,
                 value: service.RepeatEvery,
                 decimals: 0,
-                format: repeatFormat,
-                change: this.repeatEveryChanged
+                format: that._repeatFormat,
+                change: that.repeatEveryChanged
             });
 
             //if frequency is monthly
@@ -95,18 +88,18 @@ define(["jquery", "db/services", "kendo"], function ($, dbServices) {
             //set the endDate value only for the correct endDate field and
             //determine which item in the endDate dropdown should be selected
             if(!isNaN(parseFloat(service.EndDate)) && isFinite(service.EndDate) && !service.getMonth){
-                endSelection = 1;
-                endAfterValue = service.EndDate;
+                that._endSelection = 1;
+                that._endAfterValue = service.EndDate;
                 if(service.EndDate > 1){
-                    endAfterFormat = "# Occurrences";
+                    that._endAfterFormat = "# Occurrences";
                 }else{
-                    endAfterFormat = "# Occurrence";
+                    that._endAfterFormat = "# Occurrence";
                 }
             }else if(service.EndDate.getMonth){
-                endSelection = 2;
-                endOnValue = service.EndDate;
+                that._endSelection = 2;
+                that._endOnValue = service.EndDate;
             }else{
-                endSelection = 0;
+                that._endSelection = 0;
             }
 
             //setup the endAfter numeric textbox
@@ -114,9 +107,9 @@ define(["jquery", "db/services", "kendo"], function ($, dbServices) {
                 step: 1,
                 min: 1,
                 max: 1000,
-                value: endAfterValue,
+                value: that._endAfterValue,
                 decimals: 0,
-                format: endAfterFormat,
+                format: that._endAfterFormat,
                 change: function (e) {
                     //set the text based on the value
                     if(e.sender._value > 1){
@@ -132,7 +125,7 @@ define(["jquery", "db/services", "kendo"], function ($, dbServices) {
 
             //setup the endDate datepicker
             $(_repeat).find('#endDatePicker').kendoDatePicker({
-                value: endOnValue
+                value: that._endOnValue
             });
 
             //initially show the correct endDate field based on the format of service.EndDate
@@ -146,7 +139,7 @@ define(["jquery", "db/services", "kendo"], function ($, dbServices) {
 
             //setup the frequency dropdownlist
             $($(_repeat)[3]).kendoDropDownList({
-                change: this.frequencyChanged,
+                change: that.frequencyChanged,
                 dataTextField: "Name",
                 dataValueField: "value",
                 dataSource: [ { value: 0, Name: "Daily" }, { value: 1, Name: "Weekly" }, { value: 2, Name: "Monthly" }, { value: 3, Name: "Yearly" } ],
@@ -158,7 +151,7 @@ define(["jquery", "db/services", "kendo"], function ($, dbServices) {
                 dataTextField: "Name",
                 dataValueField: "value",
                 dataSource: [ { value: 0, Name: "Never" }, { value: 1, Name: "After" }, { value: 2, Name: "On" } ],
-                index: endSelection,
+                index: that._endSelection,
                 change: function (e) {
                     //show the correct field based on the end date option
                     if(e.sender.value() == 0){
@@ -197,20 +190,17 @@ define(["jquery", "db/services", "kendo"], function ($, dbServices) {
                 $(".workday").addClass("selected");
             });
 
-            this.frequencyChanged(service.Frequency, true);
+            that.frequencyChanged(service.Frequency, true);
 
             //check if weekly
             if(service.Frequency == 1){
                 //set the repeatOn days
-                this.setRepeatDays();
+                that.setRepeatDays();
             }
         },
 
         //region Functions
-        /**
-         * Sets the initial selected days for a weekly repeat
-         * @param {string} repeat The repeat widget html
-         */
+        //sets the initial selected days for a weekly repeat
         setRepeatDays: function () {
             //makes an array of the selected days from the service RepeatOn string
             var daysToSelect = service.RepeatOn.split(",");
@@ -336,13 +326,7 @@ define(["jquery", "db/services", "kendo"], function ($, dbServices) {
                 suffix = "rd";
             }
             return dayOfMonth + suffix;
-        },
+        }
         //endregion
-
-        options: new kendo.data.ObservableObject({
-            name: "Repeat"
-        })
     });
-
-    ui.plugin(Repeat);
 });
