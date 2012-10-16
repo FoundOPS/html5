@@ -5,7 +5,7 @@
 define(["jquery", "kendo", "select2"], function ($) {
     var serviceA = {Frequency: 1, StartDate: new Date(), RepeatEvery: 3, RepeatOn: "Monday,Wednesday", EndDate: 4},
         serviceB = {Frequency: 2, StartDate: new Date(), RepeatEvery: 1, RepeatOn: 1, EndDate: new Date()};
-    var service = serviceB;
+    var service = serviceA;
 
     $.widget("ui.repeat", {
         _create: function () {
@@ -13,7 +13,7 @@ define(["jquery", "kendo", "select2"], function ($) {
 
             _repeat = $('<h3>Repeat</h3>' +
                 '<label>Frequency</label><br />' +
-                '<input id="frequency"/>' +
+                '<input id="frequency" />' +
                 '<div id="startDate">' +
                     '<label for="startDatePicker">Start Date</label><br />' +
                     '<input id="startDatePicker" /></div>' +
@@ -38,7 +38,7 @@ define(["jquery", "kendo", "select2"], function ($) {
                 '</div>' +
                 '<div id="endDate">' +
                     '<label>End Date</label><br />' +
-                    '<input id="endDropdown"/>' +
+                    '<input id="endDropdown" />' +
                     '<input id="endAfterNum" type="number" />' +
                     '<input id="endDatePicker" />' +
                 '</div>');
