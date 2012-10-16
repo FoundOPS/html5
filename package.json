@@ -1,0 +1,38 @@
+{
+    "name"            : "FoundOPSHTML5",
+    "description"     : "An HTML5 cross plataform application that works together with FoundOPS's fleet managment software.",
+    "version"         : "9.0",
+    "homepage"        : "https://play.google.com/store/apps/details?id=foundOps.mobile",
+    "private"         : true,
+    "author"          : {
+        "name"  : "FoundOPS",
+        "email" : "dev@foundops.com",
+        "url"   : "www.foundops.com"
+    },
+    "main"            : "app/js/main.js",
+    "repository"      : {
+        "type" : "git",
+        "url"  : "https://github.com/FoundOPS/html5.git"
+    },
+    "bugs"            : {
+        "url" : "https://github.com/FoundOPS/html5/issues"
+    },
+    "licenses"        : [
+        {
+            "type" : "Copyright FoundOPS LLC.",
+            "url"  : "http://foundops.uservoice.com/tos"
+        }
+    ],
+    "dependencies"    : {
+        "grunt"                 : "git://github.com/gruntjs/grunt.git",
+        "grunt-requirejs"       : "git://github.com/asciidisco/grunt-requirejs.git",
+        "grunt-contrib"         : "git://github.com/gruntjs/grunt-contrib.git",
+        "grunt-replace"         : "git://github.com/outaTiME/grunt-replace.git"
+    },
+    "devDependencies" : {
+        "grunt-jasmine-runner"  : "git://github.com/jasmine-contrib/grunt-jasmine-runner.git"
+    },
+    "keywords"        : [
+        "FoundOPS"
+    ]
+}
