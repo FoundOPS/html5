@@ -2,7 +2,8 @@
 
 'use strict';
 
-require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateTools", "db/saveHistory", "tools/kendoTools", "widgets/serviceDetails", "jform"], function ($, session, dbServices, parameters, dateTools, saveHistory, kendoTools) {
+require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateTools", "db/saveHistory", "tools/kendoTools", "widgets/serviceDetails",
+    "jform", "select2"], function ($, session, dbServices, parameters, dateTools, saveHistory, kendoTools) {
     var services = {}, serviceHoldersDataSource, grid, handleChange, serviceTypesDropDown, selectedServiceHolder, vm;
 
     //region Public
@@ -501,10 +502,11 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
             createDataSourceAndGrid();
 
             var serviceTypeId = vm.get("serviceType.Id");
+            var serviceTypeName = vm.get("serviceType.Name");
 
             //make sure dropdownlist has service type selected
-            if (serviceTypesDropDown.dataItem().Id !== serviceTypeId) {
-                serviceTypesDropDown.value(serviceTypeId);
+            if($("#serviceTypes").select2("val") !== serviceTypeId){
+                $("#serviceTypes").select2("data", {Id:serviceTypeId, Name:serviceTypeName});
             }
         }
         //reload the services whenever the start or end date changes
@@ -530,24 +532,41 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
 
         vm.bind("change", _.debounce(vmChanged, 200));
 
+        var formatserviceName = function (service) {
+            return service.Name;
+        };
+
         //load the current business account's service types then
         //1) setup the service types drop down
         //2) choose the first service+ type
         dbServices.serviceTemplates.read().done(function (serviceTypes) {
             services.serviceTypes = serviceTypes;
 
-            serviceTypesDropDown = $("#serviceTypes").kendoDropDownList({
-                dataTextField: "Name",
-                dataValueField: "Id",
-                dataSource: services.serviceTypes,
-                change: function (e) {
-                    vm.set("serviceType", this.dataItem());
+            $("#serviceTypes").select2({
+                width: "200px",
+                placeholder: "Select a service",
+                id: function (service) {
+                    return service.Id;
+                },
+                query: function (query) {
+                    if (!serviceTypes) {
+                        serviceTypes = [];
+                    }
+                    var data = {results: serviceTypes};
+                    query.callback(data);
+                },
+                //needed so that $("#serviceTypes").select2("val") will work
+                initSelection : function () {},
+                formatSelection: formatserviceName,
+                formatResult: formatserviceName,
+                dropdownCssClass: "bigdrop"
+            }).on("change", function() {
+                    vm.set("serviceType", $("#serviceTypes").select2("data"));
 
                     //disable the delete button and hide the service details
                     $('#services .k-grid-delete').attr("disabled", "disabled");
                     $("#serviceDetails").attr("style", "display:none");
-                }
-            }).data("kendoDropDownList");
+                });
 
             //now that the service types are loaded,
             //setup the grid by reparsing the hash

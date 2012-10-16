@@ -222,6 +222,10 @@ define(["jquery", "db/services", "db/session", "db/models", "kendo", "jmaskmoney
 
                     fieldElement[0].innerHTML = options;
 
+                    $("#select").select2({
+                        placeholder: "Select an option"
+                    });
+
                     $("#select").change(function (e) {
                         for (i = 0; i < field.Options.length; i++) {
                             field.Options[i].IsChecked = false;
