@@ -2,9 +2,9 @@
 
 'use strict';
 
-require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateTools", "db/saveHistory", "tools/kendoTools", "widgets/serviceDetails",
+require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateTools", "db/saveHistory", "tools/kendoTools", "widgets/serviceDetails", "widgets/repeat",
     "jform", "select2"], function ($, session, dbServices, parameters, dateTools, saveHistory, kendoTools) {
-    var services = {}, serviceHoldersDataSource, grid, handleChange, serviceTypesDropDown, selectedServiceHolder, vm;
+    var services = {}, serviceHoldersDataSource, grid, handleChange, selectedServiceHolder, vm;
 
     //region Public
     services.vm = vm = kendo.observable({
@@ -571,7 +571,7 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
                     $('#services .k-grid-delete').attr("disabled", "disabled");
                     $("#serviceDetails").attr("style", "display:none");
                     $("#repeat").attr("style", "display:none");
-
+                });
             //now that the service types are loaded,
             //setup the grid by reparsing the hash
             parameters.parse();

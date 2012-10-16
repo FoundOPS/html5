@@ -2,10 +2,10 @@
 
 'use strict';
 
-define(["jquery", "kendo"], function ($) {
+define(["jquery", "kendo", "select2"], function ($) {
     var serviceA = {Frequency: 1, StartDate: new Date(), RepeatEvery: 3, RepeatOn: "Monday,Wednesday", EndDate: 4},
         serviceB = {Frequency: 2, StartDate: new Date(), RepeatEvery: 1, RepeatOn: 1, EndDate: new Date()};
-    var service = serviceA;
+    var service = serviceB;
 
     $.widget("ui.repeat", {
         _create: function () {
@@ -13,7 +13,7 @@ define(["jquery", "kendo"], function ($) {
 
             _repeat = $('<h3>Repeat</h3>' +
                 '<label>Frequency</label><br />' +
-                '<input id="frequency" />' +
+                '<input id="frequency"/>' +
                 '<div id="startDate">' +
                     '<label for="startDatePicker">Start Date</label><br />' +
                     '<input id="startDatePicker" /></div>' +
@@ -38,7 +38,7 @@ define(["jquery", "kendo"], function ($) {
                 '</div>' +
                 '<div id="endDate">' +
                     '<label>End Date</label><br />' +
-                    '<input id="endDropdown" />' +
+                    '<input id="endDropdown"/>' +
                     '<input id="endAfterNum" type="number" />' +
                     '<input id="endDatePicker" />' +
                 '</div>');
@@ -137,35 +137,74 @@ define(["jquery", "kendo"], function ($) {
                 $("#endDate .k-datepicker").addClass("showInput");
             }
 
+            //function to format the option names of the frequency and end Date dropdowns
+            var formatItemName = function (item) {
+                return item.Name;
+            };
+
             //setup the frequency dropdownlist
-            $($(_repeat)[3]).kendoDropDownList({
-                change: that.frequencyChanged,
-                dataTextField: "Name",
-                dataValueField: "value",
-                dataSource: [ { value: 0, Name: "Daily" }, { value: 1, Name: "Weekly" }, { value: 2, Name: "Monthly" }, { value: 3, Name: "Yearly" } ],
-                index: service.Frequency
+            //TODO: when setting up saving, refer to timezone dropdown in prsonalSettings
+            var frequencyValues = [ { value: 0, Name: "Daily" }, { value: 1, Name: "Weekly" }, { value: 2, Name: "Monthly" }, { value: 3, Name: "Yearly" } ];
+
+            $($(_repeat)[3]).select2({
+                placeholder: "Select a frequency",
+                minimumResultsForSearch: 15,
+                width: "250px",
+                id: function (frequency) {
+                    return frequency.value;
+                },
+                query: function (query) {
+                    if (!frequencyValues) {
+                        frequencyValues = [];
+                    }
+                    var data = {results: frequencyValues};
+                    query.callback(data);
+                },
+                formatSelection: formatItemName,
+                formatResult: formatItemName,
+                dropdownCssClass: "bigdrop"
             });
 
+            //initially set the correct frequency
+            $($(_repeat)[3]).select2("data", {value: that._endSelection, Name: frequencyValues[that._endSelection].Name});
+
+            var endValues = [ { value: 0, Name: "Never" }, { value: 1, Name: "After" }, { value: 2, Name: "On" } ];
+
             //setup the endDate dropdownlist
-            $(_repeat).find('#endDropdown').kendoDropDownList({
-                dataTextField: "Name",
-                dataValueField: "value",
-                dataSource: [ { value: 0, Name: "Never" }, { value: 1, Name: "After" }, { value: 2, Name: "On" } ],
-                index: that._endSelection,
-                change: function (e) {
+            //TODO: when setting up saving, refer to timezone dropdown in prsonalSettings
+            $(_repeat).find('#endDropdown').select2({
+                placeholder: "",
+                minimumResultsForSearch: 15,
+                width: "80px",
+                id: function (end) {
+                    return end.value;
+                },
+                query: function (query) {
+                    if (!endValues) {
+                        endValues = [];
+                    }
+                    var data = {results: endValues};
+                    query.callback(data);
+                },
+                formatSelection: formatItemName,
+                formatResult: formatItemName,
+                dropdownCssClass: "bigdrop"
+            }).on("change", function(e) {
                     //show the correct field based on the end date option
-                    if(e.sender.value() == 0){
+                    if(e.val == 0){
                         $("#endDate .k-numerictextbox").removeClass("showInput");
                         $("#endDate .k-datepicker").removeClass("showInput");
-                    }else if(e.sender.value() == 1){
+                    }else if(e.val == 1){
                         $("#endDate .k-numerictextbox").addClass("showInput");
                         $("#endDate .k-datepicker").removeClass("showInput");
-                    }else if(e.sender.value() == 2){
+                    }else if(e.val == 2){
                         $("#endDate .k-numerictextbox").removeClass("showInput");
                         $("#endDate .k-datepicker").addClass("showInput");
                     }
-                }
-            });
+                });
+
+            //initially set the correct end option
+            $(_repeat).find('#endDropdown').select2("data", {value: service.Frequency, Name: endValues[service.Frequency].Name});
             //endregion
 
             //event for clicking on a day of the week
