@@ -163,7 +163,9 @@ define(["jquery", "kendo", "select2"], function ($) {
                 formatSelection: formatItemName,
                 formatResult: formatItemName,
                 dropdownCssClass: "bigdrop"
-            });
+            }).on("change", function() {
+                    that.frequencyChanged($($(_repeat)[3]).select2("data").value, false);
+                });
 
             //initially set the correct frequency
             $($(_repeat)[3]).select2("data", {value: that._endSelection, Name: frequencyValues[that._endSelection].Name});
