@@ -223,7 +223,8 @@ define(["jquery", "db/services", "db/session", "db/models", "kendo", "jmaskmoney
                     fieldElement[0].innerHTML = options;
 
                     $("#select").select2({
-                        placeholder: "Select an option"
+                        placeholder: "Select an option",
+                        minimumResultsForSearch: 15
                     });
 
                     $("#select").change(function (e) {

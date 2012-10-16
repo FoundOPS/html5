@@ -107,7 +107,8 @@ define(["db/services", "db/saveHistory", "tools/dateTools", "underscore", "widge
                     },
                     formatSelection: formatTimeZoneName,
                     formatResult: formatTimeZoneName,
-                    dropdownCssClass: "bigdrop"
+                    dropdownCssClass: "bigdrop",
+                    minimumResultsForSearch: 15
                 }).on("change", function() {
                         //set the vm with the new timezone
                         vm.set("userAccount.TimeZone", $("#TimeZone").select2("data"));

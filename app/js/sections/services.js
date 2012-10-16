@@ -559,7 +559,8 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
                 initSelection : function () {},
                 formatSelection: formatserviceName,
                 formatResult: formatserviceName,
-                dropdownCssClass: "bigdrop"
+                dropdownCssClass: "bigdrop",
+                minimumResultsForSearch: 15
             }).on("change", function() {
                     vm.set("serviceType", $("#serviceTypes").select2("data"));
 
