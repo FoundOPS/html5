@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(["db/services", "db/saveHistory", "tools/dateTools", "underscore", "widgets/imageUpload"], function (dbServices, saveHistory, dateTools, _) {
+define(["db/services", "db/saveHistory", "tools/dateTools", "underscore", "tools/parameters", "widgets/imageUpload"], function (dbServices, saveHistory, dateTools, _, parameters) {
     var personalSettings = {}, imageUpload, vm = kendo.observable();
 
     personalSettings.vm = vm;
@@ -14,7 +14,7 @@ define(["db/services", "db/saveHistory", "tools/dateTools", "underscore", "widge
     personalSettings.undo = function (state) {
         vm.set("userAccount", state);
         //set the correct timezone
-        $("#TimeZone").select2("data", {Id:vm.get("userAccount.TimeZone").Id, DisplayName:vm.get("userAccount.TimeZone").DisplayName});
+        $("#TimeZone").select2("data", {Id: vm.get("userAccount.TimeZone").Id, DisplayName: vm.get("userAccount.TimeZone").DisplayName});
         personalSettings.save();
     };
 
@@ -41,7 +41,6 @@ define(["db/services", "db/saveHistory", "tools/dateTools", "underscore", "widge
 
         //setup image upload
         imageUpload = $("#personalImageUpload").kendoImageUpload({
-            uploadUrl: dbServices.API_URL + "userAccount/UpdateUserImage",
             imageWidth: 200,
             containerWidth: 500
         }).data("kendoImageUpload");
@@ -72,12 +71,14 @@ define(["db/services", "db/saveHistory", "tools/dateTools", "underscore", "widge
             //set the image url after it was initially loaded
             imageUpload.setImageUrl(vm.get("userAccount.ImageUrl"));
 
+            imageUpload.setUploadUrl(dbServices.API_URL + "partyImage?roleId=" + parameters.get().roleId + "&id=" + currentUserAccount.Id);
+
             saveHistory.resetHistory();
 
-            if(vm.get("userAccount.TimeZone")){
+            if (vm.get("userAccount.TimeZone")) {
                 _.delay(function () {
                     //set the correct timezone
-                    $("#TimeZone").select2("data", {Id:vm.get("userAccount.TimeZone").Id, DisplayName:vm.get("userAccount.TimeZone").DisplayName});
+                    $("#TimeZone").select2("data", {Id: vm.get("userAccount.TimeZone").Id, DisplayName: vm.get("userAccount.TimeZone").DisplayName});
                 }, 200);
             }
         });
@@ -109,7 +110,7 @@ define(["db/services", "db/saveHistory", "tools/dateTools", "underscore", "widge
                     formatResult: formatTimeZoneName,
                     dropdownCssClass: "bigdrop",
                     minimumResultsForSearch: 15
-                }).on("change", function() {
+                }).on("change", function () {
                         //set the vm with the new timezone
                         vm.set("userAccount.TimeZone", $("#TimeZone").select2("data"));
                     });
@@ -117,7 +118,7 @@ define(["db/services", "db/saveHistory", "tools/dateTools", "underscore", "widge
                 if (!vm.get("userAccount.TimeZone")) {
                     var timezone = dateTools.getLocalTimeZone();
                     //set the correct timezone
-                    $("#TimeZone").select2("data", {Id:timezone.Id, DisplayName:timezone.DisplayName});
+                    $("#TimeZone").select2("data", {Id: timezone.Id, DisplayName: timezone.DisplayName});
                 }
             });
         }

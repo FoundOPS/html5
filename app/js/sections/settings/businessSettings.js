@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(["db/services", "db/saveHistory", "db/session", "widgets/imageUpload", "widgets/settingsMenu"], function (dbServices, saveHistory, session) {
+define(["db/services", "db/saveHistory", "tools/parameters", "widgets/imageUpload", "widgets/settingsMenu"], function (dbServices, saveHistory, parameters) {
     var businessSettings = {}, imageUpload, vm = kendo.observable();
 
     businessSettings.vm = vm;
@@ -42,6 +42,7 @@ define(["db/services", "db/saveHistory", "db/session", "widgets/imageUpload", "w
 
             //set the image url after it was initially loaded
             imageUpload.setImageUrl(vm.get("settings.ImageUrl"));
+            imageUpload.setUploadUrl(dbServices.API_URL + "partyImage?roleId=" + parameters.get().roleId + "&id=" + settings.Id);
 
             saveHistory.resetHistory();
         });
@@ -52,10 +53,6 @@ define(["db/services", "db/saveHistory", "db/session", "widgets/imageUpload", "w
             imageWidth: 200,
             containerWidth: 500
         }).data("kendoImageUpload");
-
-        session.followRole(function (role) {
-            imageUpload.setUploadUrl(dbServices.API_URL + "settings/UpdateBusinessImage?roleId=" + role.id);
-        });
     };
 
     businessSettings.show = function () {
