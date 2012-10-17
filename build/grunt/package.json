@@ -9,7 +9,7 @@
         "email" : "dev@foundops.com",
         "url"   : "www.foundops.com"
     },
-    "main"            : "../..app/js/main.js",
+    "main"            : "../../app/js/main.js",
     "bin"             : "node_modules/.bin",
     "directories"     : {
         "docs" : "docs"
@@ -24,16 +24,21 @@
     "licenses"        : [
         {
             "type" : "Copyright FoundOPS LLC.",
-            "url"  : "http://foundops.uservoice.com/tos"
+            "url"  : "https://docs.google.com/a/foundops.com/document/pub?id=1lxcX0LHrZfq_a3IAoW9ysqrKkI20glnVllV_Xk88bx4"
         }
     ],
+    "scripts": {
+        "preinstall": "npm install -g grunt"
+    },
     "dependencies"    : {
-        "grunt"                 : "https://github.com/gruntjs/grunt.git",
-        "grunt-contrib"         : "https://github.com/gruntjs/grunt-lib-contrib.git",
-        "grunt-replace"         : "https://github.com/outaTiME/grunt-replace.git"
+        "grunt-requirejs"   : "https://github.com/asciidisco/grunt-requirejs/tarball/master",
+        "grunt-less"        : "https://github.com/jharding/grunt-less/tarball/master",
+        "grunt-contrib"     : "https://github.com/gruntjs/grunt-contrib/tarball/master",
+        "grunt-replace"     : "https://github.com/outaTiME/grunt-replace/tarball/master",
+        "underscore"        : "1.4.x"
     },
     "devDependencies" : {
-        "grunt-jasmine-runner"  : "https://github.com/jasmine-contrib/grunt-jasmine-runner.git"
+        "grunt-jasmine-runner"  : "https://github.com/jasmine-contrib/grunt-jasmine-runner/tarball/master"
     },
     "keywords"        : [
         "FoundOPS"
