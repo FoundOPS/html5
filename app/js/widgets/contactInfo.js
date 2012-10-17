@@ -3,57 +3,60 @@
 'use strict';
 
 define(["jquery", "select2"], function ($) {
-    var sampleContactInfo = [{Entity: "Burger King", Value: "765-494-2786", Label: "Phone"}, {Entity: "Burger King", Value: "bk47906@gmail.com", Label: "Email"}, {Entity: "Mary Lou's", Value: "http://www.marylousdonuts.com", Label: ""}];
+    var sampleContactInfo = [
+        {Entity: "Burger King", Value: "765-494-2786", Label: "Phone"},
+        {Entity: "Burger King", Value: "bk47906@gmail.com", Label: "Email"},
+        {Entity: "Mary Lou's", Value: "http://www.marylousdonuts.com", Label: "Website"}
+    ];
 
     $.widget("ui.contactInfo", {
         _create: function () {
             var that = this;
 
             var _contactInfo = $('<h3>Contact Info</h3>' +
-                '<ul id="list">' +
-                '</ul>' +
-                '<button class="k-button k-button-icontext add"><span class="k-icon k-add"></span>Add New</button>');
+                '<div id="listWrapper">' +
+                    '<ul id="list"></ul>' +
+                    '<button class="k-button k-button-icontext add"><span class="k-icon k-add"></span>Add New</button>' +
+                '</div>' +
+                '<div id="editWrapper">' +
+                '<label>Info/Value</label><br />' +
+                '<input id="value" type="text"/><br />' +
+                '<label>Label</label><br />' +
+                '<span id="labelIcon" class="Email"></span>' +
+                '<input id="label" type="hidden"/><br />' +
+                '<button class="k-button k-button-icontext save"><span class="k-icon k-update"></span>Save</button>' +
+                '<button class="k-button k-button-icontext delete"><span class="k-icon k-delete"></span>Delete</button>' +
+                '</div>');
 
             that.element.append(_contactInfo);
 
-            var list = $($(_contactInfo)[1]);
+            var list = $($(_contactInfo)[1].firstChild), value;
             for(var i in sampleContactInfo){
-                var element = "<li id='" + i + "'><input class='entity' /><input class='value' style='width:50px' /><input class='label'/><button class='k-button k-button-icontext k-grid-delete'></button></li>";
+                value = sampleContactInfo[i].Value.replace("http://", "");
+                var element = "<li><div class='info'><span class='" + sampleContactInfo[i].Label + "'></span><p class='label'>" + sampleContactInfo[i].Label +
+                    "</p><p class='value'>" + value + "</p></div><div class='editBtn'><span></span></div></li>";
                 list.append(element);
             }
 
-            var labels = [{Value: "0", Name: "Phone Number"}, {Value: "1", Name: "Email Address"}, {Value: "2", Name: "Website"}, {Value: "3", Name: "Fax Number"}];
-            var entities = [{Value: "0", Name: "Location A"}, {Value: "1", Name: "Location B"}];
+            var labels = [
+                {Value: "0", Name: "Phone Number"},
+                {Value: "1", Name: "Email Address"},
+                {Value: "2", Name: "Website"},
+                {Value: "3", Name: "Fax Number"}
+            ];
 
-            that._createDropdown($("#contactInfo .label"), labels, "100px");
-            that._createDropdown($("#contactInfo .entity"), entities, "90px");
-
-            $("#contactInfo .add").on("click", function () {
-                var element = "<li class='newLi'><input class='entity' /><input class='value' style='width:50px' /><input class='label'/><button class='k-button k-button-icontext k-grid-delete'></button></li>";
-                list.append(element);
-                that._createDropdown($("#contactInfo li:last-child .label"), labels, "100px");
-                that._createDropdown($("#contactInfo li:last-child .entity"), entities, "90px");
-            });
-
-            $("#contactInfo .k-grid-delete").live("click", function (e) {
-                var item = e.target.parentNode;
-                $("#contactInfo #list")[0].removeChild(item);
-            });
-        },
-
-        _createDropdown: function (element, results, width) {
-            element.select2({
-                placeholder: "",
+            $("#contactInfo #label").select2({
+                placeholder: "Select a label",
                 minimumResultsForSearch: 15,
-                width: width,
+                width: "244px",
                 id: function (item) {
                     return item.value;
                 },
                 query: function (query) {
-                    if (!results) {
-                        results = [];
+                    if (!labels) {
+                        labels = [];
                     }
-                    var data = {results: results};
+                    var data = {results: labels};
                     query.callback(data);
                 },
                 formatSelection: function (item) {
@@ -63,6 +66,19 @@ define(["jquery", "select2"], function ($) {
                     return item.Name;
                 },
                 dropdownCssClass: "bigdrop"
+            });
+
+            $("#contactInfo .editBtn").on("click", function () {
+                $("#contactInfo #listWrapper").attr("style", "display:none");
+                $("#contactInfo #editWrapper").attr("style", "display:block");
+            });
+
+            $("#contactInfo .add").on("click", function () {
+            });
+
+            $("#contactInfo .k-grid-delete").live("click", function (e) {
+//                var item = e.target.parentNode;
+//                $("#contactInfo #list")[0].removeChild(item);
             });
         }
     });
