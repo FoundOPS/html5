@@ -204,7 +204,7 @@ module.exports = function (grunt) {
             }
         },
         watch: {
-            files: ['<config:jasmine.specs>', '../../app/js/main.js'],
+            files: ['../../app/js/**/*', '../../app/lib/**/*', "../../app/styles/**/*"],
             tasks: 'jasmine'
         },
         jasmine: {
@@ -217,7 +217,9 @@ module.exports = function (grunt) {
                 port : 9900
             },
             phantomjs: {
-                'ignore-ssl-errors': true
+                'ignore-ssl-errors': false,
+                'local-to-remote-url-access': true,
+                'web-security': true
             }
         },
         'jasmine-server': {
@@ -226,7 +228,7 @@ module.exports = function (grunt) {
     });
 
     //Order of loadNpmTasks is important.
-    grunt.registerTask('default', 'clean less requirejs copy replace jasmine');
+    grunt.registerTask('default', 'clean less requirejs copy replace watch');
     grunt.loadNpmTasks('grunt-contrib');
     grunt.loadNpmTasks('grunt-less');
     grunt.loadNpmTasks('grunt-requirejs');

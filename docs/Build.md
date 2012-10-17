@@ -10,7 +10,8 @@
  2. grunt-contrib
  2. grunt-replace
  2. underscore
- 2. grunt-jasmine-runner (for testing) 
+ 2. grunt-jasmine-runner (for testing)
+<br/> *Note: Installing packages with a URL requires a tarball URL (Github Repo -> Downloads -> Right click Download as tar.gz -> Copy link address).
 3. Install PhantomJS - [Troubleshooting](https://github.com/gruntjs/grunt/blob/master/docs/faq.md#why-does-grunt-complain-that-phantomjs-isnt-installed)
 - Download from [here](http://phantomjs.org/download.html).
 - Place files anywhere locally.
