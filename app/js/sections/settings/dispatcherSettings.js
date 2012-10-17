@@ -1,7 +1,7 @@
 // Copyright 2012 FoundOPS LLC. All Rights Reserved.
 
 /**
- * @fileoverview Class to hold dispatcher settings logic.
+ * @fileoverview Class to hold dispatcher settings logic
  */
 
 "use strict";
@@ -138,18 +138,18 @@ define(["tools/generalTools", "db/services", "db/session", "db/saveHistory", "to
         });
     }; //end initialize
 
-    var load = function () {
-        dataSource.read();
-    };
     dispatcherSettings.show = function () {
         dispatcherSettings.setupSaveHistory();
         //wait to load until the roleId parameter is set
-        _.delay(load, 250);
+        _.delay(function () {
+            dataSource.read();
+        }, 250);
     };
 
     //endregion
 
     //region Methods
+
     //region Checkbox
 
     /**
@@ -183,11 +183,24 @@ define(["tools/generalTools", "db/services", "db/session", "db/saveHistory", "to
         selectedItem.set("RemoveFromRoute", checked);
         saveHistory.save();
     };
+
     //endregion
 
     //region Color
-    //attaches a color picker to the color element
-    var addColorPicker = function () {
+
+    /**
+     * Creates the cell edit template for the color
+     * @param {Object} container
+     * @param {Object} options
+     */
+    var colorEditor = function (container, options) {
+        //attach the color picker element
+        $("<input class='colorInput' data-text-field='Color' data-value-field='Color' data-bind='value:" + options.field + "'/>" +
+            "<div class='customWidget'><div class='colorSelector2'><div class='innerSelector' style='background-color:" +
+            options.model.Color + "'></div></div><div class='colorpickerHolder2'></div></div>")
+            .appendTo(container);
+
+        //attach the color picker
         $('.colorSelector2').ColorPicker({
             //set the initial color of the picker to be the current color
             color: dispatcherSettings.grid.dataItem(dispatcherSettings.grid.select()).Color, // rgbToHex($('.innerSelector').eq(i))
@@ -210,21 +223,6 @@ define(["tools/generalTools", "db/services", "db/session", "db/saveHistory", "to
     };
 
     /**
-     * Creates the cell edit template for the color
-     * @param {Object} container
-     * @param {Object} options
-     */
-    var colorEditor = function (container, options) {
-        //attach the color picker element
-        $("<input class='colorInput' data-text-field='Color' data-value-field='Color' data-bind='value:" + options.field + "'/>" +
-            "<div class='customWidget'><div class='colorSelector2'><div class='innerSelector' style='background-color:" +
-            options.model.Color + "'></div></div><div class='colorpickerHolder2'></div></div>")
-            .appendTo(container);
-        //attach the color picker
-        addColorPicker();
-    };
-
-    /**
      * Updates the model with the selected color
      * @param {string} color The picked color
      */
@@ -233,23 +231,21 @@ define(["tools/generalTools", "db/services", "db/session", "db/saveHistory", "to
         selectedItem.set('Color', color);
         saveHistory.save();
     };
+
     //endregion
 
+    var attributeText = ["Default status for newly created tasks", "Default status when placed into a route", "Task completed"];
     /**
-     * Takes a number and converts it to one of three default strings
+     * Takes a number and converts it to a descriptive attribute string
      * @param {number} typeInt
      * @return {string}
      */
     dispatcherSettings.getAttributeText = function (typeInt) {
-        if (typeInt === 1) {
-            return "Default status for newly created tasks";
-        } else if (typeInt === 2) {
-            return "Default status when placed into a route";
-        } else if (typeInt === 3) {
-            return "Task completed";
-        } else {
-            return "";
+        if (typeInt >= 1 && typeInt <= 3) {
+            return attributeText[typeInt - 1];
         }
+
+        return "";
     };
 
     //after the data is loaded, assign the color picker to each of the current color boxes
@@ -264,7 +260,14 @@ define(["tools/generalTools", "db/services", "db/session", "db/saveHistory", "to
         busAcctId = dispatcherSettings.grid._data[1].BusinessAccountId;
         //bind to the selection change event
         dispatcherSettings.grid.bind("change", function () {
-            enableOrDisableDelete();
+            //hide the delete button if a default row is selected, otherwise show it
+            var row = getSelectedRow();
+            if (row[0].cells[3].innerHTML !== "") {
+                $('#dispatcher .k-grid-delete').attr("disabled", "disabled");
+            } else {
+                $('#dispatcher .k-grid-delete').removeAttr("disabled");
+            }
+
             selectedItem = dispatcherSettings.grid.dataItem(dispatcherSettings.grid.select());
         });
         //bind to grid edit event
@@ -287,29 +290,6 @@ define(["tools/generalTools", "db/services", "db/session", "db/saveHistory", "to
         });
     };
 
-//    //detect cancel button click
-//    dispatcherSettings.cancel = function () {
-//        //disable the delete button(there isn't a selected row after cancel is clicked)
-//        $('#dispatcher .k-grid-delete').attr("disabled", "disabled");
-//        dispatcherSettings.grid.dataSource.data(dispatcherSettings.originalData);
-//        dispatcherSettings.grid.dataSource.read();
-//    };
-//
-//    dispatcherSettings.undo = function () {
-//        saveHistory.states.pop();
-//        if(saveHistory.states.length !== 0){
-//            dispatcherSettings.grid.dataSource.data(saveHistory.states[saveHistory.states.length - 1]._data);
-//            dispatcherSettings.grid.dataSource.read();
-//            if(saveHistory.states.length === 1){
-//                saveHistory.multiple = false;
-//                saveHistory.close();
-//                saveHistory.success();
-//            }
-//        }else{
-//            saveHistory.cancel();
-//        }
-//    };
-
     dispatcherSettings.setupSaveHistory = function () {
         saveHistory.setCurrentSection({
             page: "Dispatcher Settings",
@@ -320,33 +300,21 @@ define(["tools/generalTools", "db/services", "db/session", "db/saveHistory", "to
         });
     };
 
-    //removes the selected row from the grid(stays in pending changes until changes are saved)
+    //removes the selected row from the grid (stays in pending changes until changes are saved)
     dispatcherSettings.removeSelectedRow = function () {
         //get selected row
-        var row = getSelectedRow(dispatcherSettings.grid);
+        var row = getSelectedRow();
         //remove selected row
         dispatcherSettings.grid.removeRow(row);
         saveHistory.save();
     };
 
-    //hide the delete button if a default row is selected, otherwise show it
-    var enableOrDisableDelete = function () {
-        //get the selected row
-        var row = getSelectedRow(dispatcherSettings.grid);
-        if (row[0].cells[3].innerHTML !== "") {
-            $('#dispatcher .k-grid-delete').attr("disabled", "disabled");
-        } else {
-            $('#dispatcher .k-grid-delete').removeAttr("disabled");
-        }
-    };
-
     /**
      * Gets the selected row
-     * @param {object} g The grid
      * @return {object}
      */
-    var getSelectedRow = function (g) {
-        return g.tbody.find(".k-state-selected");
+    var getSelectedRow = function () {
+        return dispatcherSettings.grid.tbody.find(".k-state-selected");
     };
     //endregion
 
