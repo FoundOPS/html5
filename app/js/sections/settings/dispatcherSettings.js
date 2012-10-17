@@ -252,8 +252,6 @@ define(["tools/generalTools", "db/services", "db/session", "db/saveHistory", "to
     var onDataBound = function () {
         //get a reference to the grid widget
         dispatcherSettings.grid = $("#dispatcherGrid").data("kendoGrid");
-        //set the original data(used for canceling changes)
-        dispatcherSettings.originalData = dispatcherSettings.grid._data;
         //disable the checkboxes for the default rows
         dispatcherSettings.disableDefaultCheckboxes();
         //get the BusinessAccountId from another row to be used to set in new rows
