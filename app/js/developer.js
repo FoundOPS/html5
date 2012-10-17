@@ -10,10 +10,11 @@ define(function () {
     var developer = {};
     /**
      * Enum for the data source.
-     * LOCAL: load data from JSON files in the application's directory. Works for both Android & Browser Debugging. TODO: Implement this mode.
-     * BROWSER_LOCALAPI: load data from the local api server.
-     * ANDROID_LOCALAPI: debug in Android Emulator using the local api server.
-     * LIVE: load from the main server.
+     * BROWSER_LOCALAPI: load data from the local api server
+     * ANDROID_EMULATOR_LOCALAPI: debug in Android Emulator using the local api server
+     * LIVE: load from the main server
+     * REMOTE_API: using the local computers ip address
+     * TESTAPI: using the test api server
      * @enum {number}
      */
     developer.DataSource = {
