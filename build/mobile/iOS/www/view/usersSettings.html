@@ -24,7 +24,7 @@
         <div data-container-for="FirstName" class="k-edit-field">
             <input type="text" id="FirstName" name="FirstName" required="required" data-type="text"
                    data-bind="value:FirstName"
-                   data-role="textbox" onchange="usersSettings.matchEmployee()"/>
+                   data-role="textbox"/>
         </div>
         <div class="k-edit-label">
             <label for="LastName">Last Name</label>
@@ -32,7 +32,7 @@
         <div data-container-for="LastName" class="k-edit-field">
             <input type="text" id="LastName" name="LastName" required="required" data-type="text"
                    data-bind="value:LastName"
-                   data-role="textbox" onchange="usersSettings.matchEmployee()"/>
+                   data-role="textbox" />
         </div>
         <div class="k-edit-label">
             <label for="EmailAddress">Email</label>
@@ -76,23 +76,10 @@
             <label for="linkedEmployee">Linked Employee</label>
         </div>
         <div data-container-for="Employee" class="k-edit-field">
-            <input id="linkedEmployee" name="linkedEmployee" data-autoBind="false" data-bind="value:EmployeeId"
-                   data-role="dropdownlist"/>
+            <input id="linkedEmployee" data-source="usersSettings.availableEmployees" data-text-field="DisplayName"
+                   data-value-field="Id" data-bind="value:EmployeeId" data-role="dropdownlist"/>
         </div>
 
         <br/><br/>
-
-        # if (usersSettings.editorType === 'add') {#
-
-        <a class="k-button k-button-icontext k-grid-update" id="btnAdd">
-            <span class="k-icon k-update"></span>
-            Send Invite Email
-        </a>
-        <a class="k-button k-button-icontext k-grid-cancel" id="btnCancel">
-            <span class="k-icon k-cancel"></span>
-            Cancel
-        </a>
-
-        # } #
     </div>
 </script>

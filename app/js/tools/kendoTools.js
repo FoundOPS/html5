@@ -49,7 +49,7 @@ define(['db/session', 'db/services', 'tools/parameters'], function (session, dbS
         newConfigurations.push(columnConfiguration);
         kendoTools._columnConfigurations = newConfigurations;
 
-        dbServices.updateColumnConfigurations(newConfigurations);
+        dbServices.columnConfigurations.update({body: newConfigurations});
     }, 300);
 
     /**

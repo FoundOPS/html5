@@ -2,8 +2,15 @@
 module.exports = function (grunt) {
     var _ = require('underscore');
 
-    var version = "0.021",
-        mobileOptimizationTags = '<meta name="HandheldFriendly" content="True">\n\t<meta name="MobileOptimized" content="320">\n\t<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>\n\t<link rel="apple-touch-icon-precomposed" sizes="114x114" href="@@blobRootimg/Icon-96x96.png">\n\t<link rel="apple-touch-icon-precomposed" sizes="72x72" href="@@blobRootimg/Icon-72x72.png">\n\t<link rel="apple-touch-icon-precomposed" href="@@blobRootimg/Icon-36x36.png">\n\t<link rel="shortcut icon" href="@@blobRootimg/Icon-36x36.png">\n\t<meta name="apple-mobile-web-app-capable" content="yes">\n\t<meta name="apple-mobile-web-app-status-bar-style" content="black">\n\t<script>(function(a,b,c){if(c in b&&b[c]){var d,e=a.location,f=/^(a|html)$/i;a.addEventListener("click",function(a){d=a.target;while(!f.test(d.nodeName))d=d.parentNode;"href"in d&&(d.href.indexOf("http")||~d.href.indexOf(e.host))&&(a.preventDefault(),e.href=d.href)},!1)}})(document,window.navigator,"standalone")</script>';
+    var version = "0.031",
+        mobileOptimizationTags = '<meta name="HandheldFriendly" content="True">\n\t<meta name="MobileOptimized" content="320">\n\t<meta ' +
+            'name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>\n\t<link ' +
+            'rel="apple-touch-icon-precomposed" sizes="114x114" href="@@blobRootimg/Icon-96x96.png">\n\t<link rel="apple-touch-icon-precomposed" ' +
+            'sizes="72x72" href="@@blobRootimg/Icon-72x72.png">\n\t<link rel="apple-touch-icon-precomposed" href="@@blobRootimg/Icon-36x36.png">\n\t<link ' +
+            'rel="shortcut icon" href="@@blobRootimg/Icon-36x36.png">\n\t<meta name="apple-mobile-web-app-capable" content="yes">\n\t<meta ' +
+            'name="apple-mobile-web-app-status-bar-style" content="black">\n\t<script>' +
+            '(function(a,b,c){if(c in b&&b[c]){var d,e=a.location,f=/^(a|html)$/i;a.addEventListener("click",function(a){d=a.target;' +
+            'while(!f.test(d.nodeName))d=d.parentNode;"href"in d&&(d.href.indexOf("http")||~d.href.indexOf(e.host))&&(a.preventDefault(),e.href=d.href)},!1)}})(document,window.navigator,"standalone")</script>';
 
 //region setup the copy paths
     var mobileCopyPaths = {},
@@ -36,7 +43,7 @@ module.exports = function (grunt) {
 
     //iOS specific
     mobileCopyPaths[iOSPath] = mainPath + "build/mobile/cordova/iOS/*";
- //endregion
+    //endregion
 
 
     // Project configuration.
@@ -69,60 +76,64 @@ module.exports = function (grunt) {
             }
         },
         requirejs: {
-            almond: true,
-            baseUrl: "../../app/js",
-            paths: {
-                //root paths
-                lib: "../lib",
-                //libraries
-                colorpicker: "ui/colorPicker",
-                hasher: "../lib/hasher",
-                kendo: "../lib/kendo.all",
-                jautosize: "../lib/jquery.autosize",
-                jfilereader: "../lib/jquery.FileReader",
-                jform: "../lib/jquery.form",
-                jmaskmoney: "../lib/jquery.maskMoney",
-                jmousewheel: "../lib/jquery.mousewheel",
-                jquery: "../lib/jquery",
-                jscrollpane: "../lib/jquery.jScrollPane",
-                jtooltip: "../lib/jquery.tooltip.min",
-                jui: "../lib/jquery-ui-1.8.21.core.min",
-                moment: "../lib/moment",
-                noty: "../lib/noty",
-                select2: "../lib/select2",
-                signals: "../lib/signals",
-                totango: "../lib/totango",
-                underscore: "../lib/underscore",
-                "underscore.string": "../lib/underscore.string",
-                uservoice: "../lib/userVoice"
-            },
-            shim: {
-                underscore: {
-                    exports: '_'
+            std: {
+                almond: true,
+                baseUrl: "../../app/js",
+                paths: {
+                    //root paths
+                    lib: "../lib",
+                    //libraries
+                    colorpicker: "ui/colorPicker",
+                    doT: "../lib/doT.min",
+                    hasher: "../lib/hasher",
+                    kendo: "../lib/kendo.all",
+                    jautosize: "../lib/jquery.autosize",
+                    jfilereader: "../lib/jquery.FileReader",
+                    jform: "../lib/jquery.form",
+                    jmaskmoney: "../lib/jquery.maskMoney",
+                    jmousewheel: "../lib/jquery.mousewheel",
+                    jquery: "../lib/jquery",
+                    jscrollpane: "../lib/jquery.jScrollPane",
+                    jtooltip: "../lib/jquery.tooltip.min",
+                    jui: "../lib/jquery-ui-1.8.21.core.min",
+                    moment: "../lib/moment",
+                    noty: "../lib/noty",
+                    select2: "../lib/select2",
+                    signals: "../lib/signals",
+                    totango: "../lib/totango",
+                    underscore: "../lib/underscore",
+                    "underscore.string": "../lib/underscore.string",
+                    uservoice: "../lib/userVoice"
                 },
-                colorpicker: ['jquery'],
-                hasher: ['signals'],
-                jautosize: ['jquery'],
-                jfilereader: ['jquery'],
-                jform: ['jquery'],
-                jmaskmoney: ['jquery'],
-                jmousewheel: ['jquery'],
-                jscrollpane: ['jquery'],
-                jtooltip: ['jquery'],
-                jui: ['jquery'],
-                kendo: ['jquery'],
-                moment: {},
-                noty: ['jquery'],
-                select2: ['jquery'],
-                uservoice: {},
-                totango: {}
-            },
-            include: ["main"],
-            wrap: true,
-            out: "../main/main-built.js"
+                shim: {
+                    underscore: {
+                        exports: '_'
+                    },
+                    colorpicker: ['jquery'],
+                    hasher: ['signals'],
+                    jautosize: ['jquery'],
+                    jfilereader: ['jquery'],
+                    jform: ['jquery'],
+                    jmaskmoney: ['jquery'],
+                    jmousewheel: ['jquery'],
+                    jscrollpane: ['jquery'],
+                    jtooltip: ['jquery'],
+                    jui: ['jquery'],
+                    kendo: ['jquery'],
+                    moment: {},
+                    noty: ['jquery'],
+                    select2: ['jquery'],
+                    uservoice: {},
+                    totango: {}
+                },
+                include: ["main"],
+                //cannot wrap or else there will be bugs with external libraries (AKA UserVoice closing bug)
+                wrap: false,
+                out: "../main/main-built.js"
+            }
         },
         //delete the directories before recreating them
-        clean: ["/FoundOPS/html5/build/main", "/FoundOPS/html5/build/mobile/Android/assets/www", "/FoundOPS/html5/build/mobile/iOS/www"],
+        clean: ["C:/FoundOPS/html5/build/main", "C:/FoundOPS/html5/build/mobile/Android/assets/www", "C:/FoundOPS/html5/build/mobile/iOS/www"],
         copy: {
             browser: {
                 files: {
@@ -149,9 +160,9 @@ module.exports = function (grunt) {
                 options: {
                     variables: {
                         mobileOptimization: mobileOptimizationTags,
-                        blobRoot: '@Model["BlobRoot"]../',
-                        CSSblobRoot: '@Model["BlobRoot"]main-built.css?cb=' + version,
-                        JSblobRoot: '@Model["BlobRoot"]main-built.js?cb=' + version,
+                        blobRoot: "@Model['BlobRoot']../",
+                        CSSblobRoot: "@Model['BlobRoot']main-built.css?cb=" + version,
+                        JSblobRoot: "@Model['BlobRoot']main-built.js?cb=" + version,
                         cordova: '',
                         appLocation: '"http://app.foundops.com"'
                     }

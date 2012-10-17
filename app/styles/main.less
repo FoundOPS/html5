@@ -280,24 +280,24 @@ hr{
 .saveBtn:hover{
     .buttonGradientHover;
 }
-button[disabled]{
+button[disabled], .k-grid-update[disabled], .k-grid-cancel[disabled]{
     color: #999;
     cursor: default;
 }
 button[disabled] .k-icon, button[disabled] .k-icon:hover{
     opacity: .5;
 }
-.saveBtn[disabled]{
+.saveBtn[disabled], .k-grid-update[disabled]{
     border-color: #c5c5c5;
     .buttonGradient;
 }
-.saveBtn[disabled]:hover{
+.saveBtn[disabled]:hover, .k-grid-update[disabled]:hover{
     color: #999;
 }
 .cancelBtn{
     margin-left: 4px;
 }
-.cancelBtn[disabled]:hover{
+.cancelBtn[disabled]:hover, .k-grid-cancel[disabled]:hover{
     background-color: #e3e3e3;
     border-color: #c5c5c5;
     color: #999;
@@ -388,6 +388,9 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
 #createPassword .save{
     margin-left: 217px;
 }
+#timeZoneForm .select2-container{
+    margin-left: 95px;
+}
 /*endregion*/
 /*endregion*/
 /*region Settings - Business */
@@ -431,8 +434,12 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
     margin-left: 2px;
 }
 .k-edit-form-container .k-grid-update{
-    margin-left: 120px;
+    margin-left: 116px;
     .buttonGradient;
+}
+div.k-window-content{
+  padding-top: 25px;
+  padding-bottom: 25px;
 }
 .k-edit-form-container .k-grid-update:hover{
     .buttonGradientHover;
@@ -441,6 +448,9 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
     margin-left: 87px;
     margin-right: 0;
     .buttonGradient;
+}
+.k-edit-form-container .k-edit-label{
+    margin-left: 45px;
 }
 #btnAdd:hover{
     .buttonGradientHover;
@@ -478,6 +488,9 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
 }
 .k-edit-form-container .k-dropdown{
     width: 157px;
+}
+.k-edit-field{
+  width: 200px;
 }
 /*endregion*/
 /*region Settings - Dispatcher*/
@@ -759,17 +772,8 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
             padding-left: 20px;
             font-size: 1.5em;
         }
-        .k-dropdown{
-            margin-right: 7px;
-            height: 30px;
-            font-size: 1em;
-        }
-        .k-dropdown-wrap{
-            border-radius: 4px;
-            .k-input{
-                height: 1.5em;
-                line-height: 1.4em;
-            }
+        .select2-container{
+          margin-top: 5px;
         }
     }
 }
@@ -806,7 +810,6 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
     }
     input[type="number"], input[type="text"]{
         height: 24px;
-        width: 244px;
         padding-left: 2px;
         font-family: "PTSans";
     }
@@ -817,7 +820,10 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
         padding: 0;
     }
     .k-numeric-wrap .k-input{
-        width: 242px;
+        width: 100%;
+    }
+    .k-numeric-wrap .k-formatted-value{
+      width: 99%;
     }
     .k-numerictextbox .k-select {
         padding-top: 3px;
@@ -837,7 +843,7 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
         border-radius: 4px;
     }
     textarea{
-        width: 246px !important;
+        width: 100% !important;
         margin: 0;
         min-width: 6em;
         padding: 0 0 0 2px;
@@ -862,6 +868,9 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover{
     #select {
         border-color: rgb(197, 197, 197);
         width: 100%;
+        height: 28px;
+        font-size: 14px;
+        font-family: PTSans;
     }
 }
 #serviceDetails {

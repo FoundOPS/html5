@@ -1,4 +1,5 @@
 .idea/
 *.xcuserstate
 */.DS_Store
+npm-debug.log
 build/grunt/node_modules

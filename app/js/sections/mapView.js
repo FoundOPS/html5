@@ -76,7 +76,8 @@ define(["db/session", "db/services", "tools/generalTools", "tools/dateTools", "t
                 //check if a route is currently selected
                 if (selectedRouteId) {
                     //the second to last trackpoint(used to know where to start the line)
-                    newTrackPoints.push(routeTrackPoints[routeTrackPoints.length - 2]);
+                    var lastLocation = routeTrackPoints[routeTrackPoints.length - 2];
+                    newTrackPoints.push(lastLocation);
                     //the latest trackpoint
                     newTrackPoints.push(resource);
                 }
@@ -114,7 +115,7 @@ define(["db/session", "db/services", "tools/generalTools", "tools/dateTools", "t
             //if they are not loaded: load them then draw them
             routesTrackPoints[routeId] = dbServices.Status.LOADING;
 
-            dbServices.getTrackPoints(routeId, function (loadedTrackPoints) {
+            dbServices.trackPoints.read({params: {routeId: routeId}}).done(function (loadedTrackPoints) {
                 //if the selected route is the loaded track points, draw them
                 if (selectedRouteId === routeId) {
                     removeLayer(trackPointsGroup);
@@ -132,7 +133,7 @@ define(["db/session", "db/services", "tools/generalTools", "tools/dateTools", "t
         //remove old depot from map
         removeLayer(depotsGroup);
 
-        dbServices.load.depots().complete(function (loadedDepots) {
+        dbServices.locations.read({params: {getDepots: true}}).done(function (loadedDepots) {
             depotsGroup = leaflet.drawDepots(map, loadedDepots);
         });
     };
@@ -142,7 +143,7 @@ define(["db/session", "db/services", "tools/generalTools", "tools/dateTools", "t
         //check if there is a roleId set
         //if the date is today: load the resources with latest points
         if (dateTools.dateEqual(selectedDate, new Date(), true)) {
-            dbServices.getResourcesWithLatestPoints(function (resourcesWithLatestPoints) {
+            dbServices.resourceWithLastPoints.read().done(function (resourcesWithLatestPoints) {
                 resources = resourcesWithLatestPoints;
                 drawResources();
             });
@@ -156,7 +157,7 @@ define(["db/session", "db/services", "tools/generalTools", "tools/dateTools", "t
     //load/draw the routes for the date
     var getRoutes = function () {
         //check if there is a roleId set
-        dbServices.getRoutes(selectedDate, function (loadedRoutes) {
+        dbServices.routes.read({params: {serviceDateUtc: dateTools.stripDate(selectedDate)}}).done(function (loadedRoutes) {
             removeLayer(routesGroup);
             //draw the routes
             routesGroup = leaflet.drawRoutes(map, loadedRoutes, routeColorSelector, center,
@@ -246,13 +247,6 @@ define(["db/session", "db/services", "tools/generalTools", "tools/dateTools", "t
     var functions = {
         getRoutes: getRoutes,
         setDate: setDate,
-        setRoleId: function (roleId) {
-            selectedRouteId = null;
-            dbServices.setRoleId(roleId);
-            getDepots();
-            getRoutes();
-            getResources();
-        },
         setSelectedRoute: setSelectedRoute
     };
 

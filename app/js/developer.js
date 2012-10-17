@@ -18,7 +18,7 @@ define(function () {
      */
     developer.DataSource = {
         BROWSER_LOCALAPI: 0,
-        ANDROID_LOCALAPI: 1,
+        ANDROID_EMULATOR_LOCALAPI: 1,
         LIVE: 2,
         REMOTE_API: 3,
         TESTAPI: 4
@@ -62,7 +62,7 @@ define(function () {
     /**
      * The current silverlight version
      */
-    developer.CURRENT_SILVERLIGHT_VERSION = 0.2;
+    developer.CURRENT_SILVERLIGHT_VERSION = 0.22;
 
     return developer;
 });

@@ -48,7 +48,7 @@ define(["jquery", "db/services", "db/session", "db/models", "kendo", "jmaskmoney
 
                 if (client) {
                     //load the client's locations
-                    dbServices.getClientLocations(client.Id, function (locations) {
+                    dbServices.locations.read({params: {clientId: client.Id}}).done(function (locations) {
                         that._locations = locations;
 
                         // select the selected destination
@@ -209,7 +209,7 @@ define(["jquery", "db/services", "db/session", "db/models", "kendo", "jmaskmoney
             "OptionsField": function (field, fieldIndex, elementToAppendTo) {
                 var fieldElement, options = [], i;
                 if (field.TypeInt === 0) {
-                    
+
                     //Select Dropdown
                     fieldElement = $('<select id="select" ></select>').appendTo(elementToAppendTo).wrap("<li><label>" + field.Name + "<br/></label></li>");
 
@@ -221,6 +221,11 @@ define(["jquery", "db/services", "db/session", "db/models", "kendo", "jmaskmoney
                     }
 
                     fieldElement[0].innerHTML = options;
+
+                    $("#select").select2({
+                        placeholder: "Select an option",
+                        minimumResultsForSearch: 15
+                    });
 
                     $("#select").change(function (e) {
                         for (i = 0; i < field.Options.length; i++) {

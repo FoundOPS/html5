@@ -5,9 +5,9 @@
             //must use JSONP because the javascript may be hosted on a different url than the api
             type: "GET",
             dataType: 'JSONP',
-//            url: 'http://localhost:9711/api/session/LogOut',       //LOCAL
-            url: 'http://api.foundops.com/api/session/LogOut',       //LIVE
-//            url: 'http://192.168.0.106:70/api/session/LogOut',   //REMOTE - Local IP of host computer (might change everyday).
+//            url: 'http://localhost:9711/api/sessions/LogOut',       //LOCAL\
+//            url: 'http://192.168.0.108:70/api/sessions/LogOut',   //REMOTE - Local IP of host computer (might change everyday).
+            url: 'http://api.foundops.com/api/sessions/LogOut',       //LIVE
             error: function (errorThrown, textStatus) {
                 console.log(textStatus);
                 console.log(errorThrown);

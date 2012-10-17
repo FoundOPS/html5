@@ -2,7 +2,16 @@
 <html style="height:100%;">
 <head>
     <title>FoundOPS</title>
-    @@mobileOptimization <!--Gets replaced by Grunt on build-->
+    <meta name="HandheldFriendly" content="True">
+	<meta name="MobileOptimized" content="320">
+	<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+	<link rel="apple-touch-icon-precomposed" sizes="114x114" href="img/Icon-96x96.png">
+	<link rel="apple-touch-icon-precomposed" sizes="72x72" href="img/Icon-72x72.png">
+	<link rel="apple-touch-icon-precomposed" href="img/Icon-36x36.png">
+	<link rel="shortcut icon" href="img/Icon-36x36.png">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<script>(function(a,b,c){if(c in b&&b[c]){var d,e=a.location,f=/^(a|html)$/i;a.addEventListener("click",function(a){d=a.target;while(!f.test(d.nodeName))d=d.parentNode;"href"in d&&(d.href.indexOf("http")||~d.href.indexOf(e.host))&&(a.preventDefault(),e.href=d.href)},!1)}})(document,window.navigator,"standalone")</script> <!--Gets replaced by Grunt on build-->
     <link rel="stylesheet/less" type="text/css" href="styles/styles.less"/>
     <script type="text/javascript" src="lib/jquery.min.js"></script>
     <script type="text/javascript" src="lib/less.min.js"></script>
@@ -60,7 +69,7 @@
                 dataType:'JSON',
 //                url: 'http://localhost:9711/api/sessions/' + url,    //LOCAL - For testing and debugging purposes.
 //                url: 'http://192.168.0.108:70/api/sessions/' + url,   //REMOTE - For testing LOCAL on a remote device.
-                // Local IP of host computer (might change everyday).
+                                                                       // Local IP of host computer (might change everyday).
                 url:'http://api.foundops.com/api/sessions' + url, //LIVE - For publishing.
                 tryCount:0,
                 retryLimit:2,
@@ -69,7 +78,7 @@
                     if (response) {
                         //Save the application's login state.
                         localStorage.setItem("loggedIn", true);
-                        window.location.href = @@appLocation; //Grunt replaces appLocation on build.
+                        window.location.href = "navigator.html"; //Grunt replaces appLocation on build.
                     } else if (loginType !== "startUpCheck") {
                         alert("Login information is incorrect.\nPlease try again.");
                     }
@@ -120,8 +129,8 @@
     $("#submit").mousedown(function (e) {
         $("#submit").toggleClass("buttonClicked");
     }).mouseup(function (e) {
-                $("#submit").toggleClass("buttonClicked");
-            });
+        $("#submit").toggleClass("buttonClicked");
+    });
     document.getElementById("submit").addEventListener('touchstart', function (e) {
         $("#submit").toggleClass("buttonClicked");
     })

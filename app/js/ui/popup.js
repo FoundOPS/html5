@@ -107,9 +107,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
             clickedDiv.trigger("popupEvent", clickedDiv);
 
             $("#popup").stop(false, true).fadeIn('fast');
-            //TODO: Remove fix below in future builds. Fixes the popup z-index bug.
-            $('#popupWrapper').hide().show();
-
+            $("#popupWrapper").css("visibility", "visible");
             //TODO: Change namespace.
             popupWrapperDiv.trigger("popup.visible");
             lastElementClick = clickedDiv.attr("id");
@@ -174,6 +172,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
             //Click listener for popup close button.
             $("#popupClose").click(function () {
                 thisPopup.closePopup();
+                $("#popupWrapper").css("visibility", "hidden");
             });
 
             $("#popupBack").click(function () {
@@ -273,6 +272,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         this.closePopup = function () {
             history = [];
             $("#popup").stop(false, true).fadeOut('fast');
+            $("#popupWrapper").css("visibility", "hidden");
         };
 
         //Public void function that populates setTitle and setContent with data found by id passed.

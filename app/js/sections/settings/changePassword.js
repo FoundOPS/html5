@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(["db/services", "tools/generalTools", "widgets/settingsMenu"], function (services, generalTools) {
+define(["db/services", "tools/generalTools", "widgets/settingsMenu"], function (dbServices, generalTools) {
     var changePassword = {};
 
     changePassword.save = function () {
@@ -14,7 +14,7 @@ define(["db/services", "tools/generalTools", "widgets/settingsMenu"], function (
         var newPass = $("#new")[0].value;
         var confirmPass = $("#confirm")[0].value;
         if (changePassword.validator.validate) {
-            services.updatePassword(oldPass, newPass, confirmPass);
+            dbServices.userAccounts.update({excludeRoleId: true, params: {oldPass: oldPass, newPass: newPass}});
             $("#old")[0].value = "";
             $("#new")[0].value = "";
             $("#confirm")[0].value = "";

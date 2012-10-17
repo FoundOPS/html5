@@ -15,6 +15,6 @@ public class FoundOPS extends DroidGap {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.activity_found_ops, menu);
-		return true;
+		return false;
 	}
 }

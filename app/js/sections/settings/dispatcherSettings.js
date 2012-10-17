@@ -6,9 +6,9 @@
 
 "use strict";
 
-define(["tools/generalTools", "db/services", "db/session", "db/saveHistory", "widgets/settingsMenu", "colorpicker",
-    "ui/kendoChanges"], function (generalTools, dbServices, session, saveHistory) {
-    var dispatcherSettings = {};
+define(["tools/generalTools", "db/services", "db/session", "db/saveHistory", "tools/parameters", "widgets/settingsMenu", "colorpicker",
+    "ui/kendoChanges"], function (generalTools, dbServices, session, saveHistory, parameters) {
+    var dispatcherSettings = {}, dataSource;
 
     //region Locals
     //keep track of the business account id to be used for new items
@@ -24,22 +24,35 @@ define(["tools/generalTools", "db/services", "db/session", "db/saveHistory", "wi
         kendo.bind(menu);
         menu.kendoSettingsMenu({selectedItem: "Dispatcher"});
 
-        var dataSource = new kendo.data.DataSource({
+        var getBaseUrl = function () {
+            return dbServices.API_URL + "taskStatuses?roleId=" + parameters.get().roleId;
+        };
+
+        dataSource = new kendo.data.DataSource({
             transport: {
+                create: {
+                    type: "POST",
+                    contentType: "application/json; charset=utf-8",
+                    url: getBaseUrl
+                },
                 read: {
                     type: "GET",
+                    url: getBaseUrl,
                     dataType: "jsonp",
                     contentType: "application/json; charset=utf-8"
                 },
                 update: {
-                    type: "POST"
+                    type: "PUT",
+                    contentType: "application/json; charset=utf-8",
+                    url: getBaseUrl
                 },
                 destroy: {
-                    type: "POST"
+                    type: "DELETE",
+                    url: function (status) {
+                        return getBaseUrl() + "&id=" + status.Id;
+                    }
                 },
-                create: {
-                    type: "POST"
-                }
+                parameterMap: dbServices.parameterMap()
             },
             schema: {
                 model: {
@@ -77,20 +90,8 @@ define(["tools/generalTools", "db/services", "db/session", "db/saveHistory", "wi
         });
         dbServices.hookupDefaultComplete(dataSource);
 
-        //set the dataSource urls initially, and when the role is changed
-        session.followRole(function (role) {
-            var roleId = session.get("role.id");
-            if (!roleId) {
-                return;
-            }
-            dataSource.transport.options.read.url = dbServices.API_URL + "taskStatuses/GetStatuses?roleId=" + roleId;
-            dataSource.transport.options.update.url = dbServices.API_URL + "taskStatuses/UpdateTaskStatus?roleId=" + roleId;
-            dataSource.transport.options.destroy.url = dbServices.API_URL + "taskStatuses/DeleteTaskStatus?roleId=" + roleId;
-            dataSource.transport.options.create.url = dbServices.API_URL + "taskStatuses/InsertTaskStatus?roleId=" + roleId;
-            dataSource.read();
-        });
-
         $("#dispatcherGrid").kendoGrid({
+            autoBind: false,
             columns: [
                 {
                     field: "Name",
@@ -137,8 +138,13 @@ define(["tools/generalTools", "db/services", "db/session", "db/saveHistory", "wi
         });
     }; //end initialize
 
+    var load = function () {
+        dataSource.read();
+    };
     dispatcherSettings.show = function () {
         dispatcherSettings.setupSaveHistory();
+        //wait to load until the roleId parameter is set
+        _.delay(load, 250);
     };
 
     //endregion

@@ -42,7 +42,9 @@ html{
     top: 0;
     left: 0;
     .borderBox;
-    z-index: 99999 !important;
+    z-index: 10;
+
+    -webkit-transform: translateZ(0);
 }
 
 #popup {
@@ -51,7 +53,10 @@ html{
     height: 100%;
     width: 100%;
     color: @charcoal;
-    visibility: visible;
+    visibility: visible !important;
+    z-index: 10;
+
+    -webkit-transform: translateZ(0);
 
     a {
         color: @charcoal;

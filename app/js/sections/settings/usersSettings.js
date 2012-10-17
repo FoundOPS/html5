@@ -3,20 +3,7 @@
 "use strict";
 
 define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tools/dateTools", "widgets/settingsMenu"], function (dbServices, session, saveHistory, parameters, dateTools) {
-    var usersSettings = {}, usersDataSource, availableEmployees;
-
-    //on add and edit, select a linked employee if the name matches the name in the form
-    usersSettings.matchEmployee = function () {
-        return;
-        var dropDownList = $("#Employee").data("kendoDropDownList");
-
-        //get the user's name from the form fields
-        var name = $("#FirstName")[0].value + " " + $("#LastName")[0].value;
-        //select it in the dropDownList
-        dropDownList.select(function (dataItem) {
-            return dataItem.DisplayName === name;
-        });
-    };
+    var usersSettings = {}, usersDataSource, grid;
 
     usersSettings.setupSaveHistory = function () {
         saveHistory.setCurrentSection({
@@ -49,10 +36,11 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
             Role: {
                 type: "string",
                 validation: { required: true },
-                defaultValue: ""
+                defaultValue: "Administrator"
             },
             EmployeeId: {
-                defaultValue: ""
+                //for new entities, default to creating a new employee
+                defaultValue: "10000000-0000-0000-0000-000000000000"
             }
 //            TimeZone: {
 //                defaultValue: ""
@@ -60,7 +48,7 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
         };
 
         var getBaseUrl = function () {
-            return dbServices.API_URL + "userAccounts?roleId=" + session.get("role.id");
+            return dbServices.API_URL + "userAccounts?roleId=" + parameters.get().roleId;
         };
         usersDataSource = new kendo.data.DataSource({
             transport: {
@@ -95,12 +83,7 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
                         return getBaseUrl() + "&id=" + userAccount.Id;
                     }
                 },
-                parameterMap: function (options) {
-                    if (_.any(_.keys(options))) {
-                        return JSON.stringify(options);
-                    }
-                    return "";
-                }
+                parameterMap: dbServices.parameterMap()
             },
             schema: {
                 model: {
@@ -110,12 +93,26 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
                 }
             }
         });
-        dbServices.hookupDefaultComplete(usersDataSource);
+
+        dbServices.hookupDefaultComplete(usersDataSource, {
+            //after insert or update, reload employees and user accounts
+            //delay to let popup close
+            create: {
+                done: function () {
+                    _.delay(load, 200);
+                }
+            },
+            update: {
+                done: function () {
+                    _.delay(load, 200);
+                }
+            }
+        });
     };
 
     var setupUsersGrid = function () {
         //add a grid to the #usersGrid div element
-        return $("#usersGrid").kendoGrid({
+        grid = $("#usersGrid").kendoGrid({
             autoBind: false,
             dataSource: usersDataSource,
             dataBound: function () {
@@ -126,6 +123,7 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
                 $(".k-grid-delete").each(function () {
                     $(this).attr("title", "Delete");
                 });
+                //set the editor type
                 $('.k-grid-edit').on('click', function () {
                     usersSettings.editorType = 'edit';
                 });
@@ -135,49 +133,37 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
                 template: $("#userPopupTemplate").html(),
                 confirmation: "Are you sure you want to delete this user?"
             },
-            edit: function (e) {
+            edit: function () {
                 var win = $('.k-window');
                 if (usersSettings.editorType === 'add') {
-                    //remove extra add/cancel buttons
-                    win.find('.k-button').not('#btnAdd, #btnCancel').remove();
                     win.find('.k-window-title').html("Add New User");
+                    //change update to Send Invite Email
+                    win.find('.k-grid-update').html("Send Invite Email").attr("style", "margin-left:91px");
                 }
                 else {
                     win.find('.k-window-title').html("Edit User");
                 }
 
-                //TODO setup employee link
-
-                //    $("#Employee").kendoDropDownList({
-//        dataSource: availableEmployees,
-//        dataTextField: "DisplayName",
-//        change: function () {
-//            //clear other UserAccounts with this EmployeeId
-//            _.each(usersDataSource.data(), function (ua) {
-//                if (ua.EmployeeId === employee.Id) {
-//                    ua.EmployeeId = null;
-//                }
-//            });
-//
-//            //update the employee id to the selected one
-//            var employee = this.dataItem();
-//            model.EmployeeId = employee.Id;
-//        }
-//    });
-
-                //                choose the non-linked employees
-//                var availableEmployees = usersSettings.employees.filter(function (employee) {
-//                    return !(employee.LinkedUserAccountId in linkedEmployees);
-//                });
-//                //if there is a linked employee, add it to the list
-//                if (e.model.Employee) {
-//                    availableEmployees.push(e.model.Employee);
-//                }
-//                //update the dataSource
-//                usersSettings.availableEmployeesDataSource.data(availableEmployees);
+                //
+                $(".k-grid-cancel").on("click", function () {
+                    //check if the Send Invite button is disabled
+                    if ($(".k-window-content .k-grid-update").attr("disabled") == "disabled") {
+                        //prevent cancel
+                        return false;
+                    }
+                });
             },
-            saveChanges: function () {
-                saveHistory.success();
+            save: function (e) {
+                //check if the Send Invite button is disabled
+                if ($(".k-window-content .k-grid-update").attr("disabled") == "disabled") {
+                    //if so, don't save again
+                    e.preventDefault();
+                }
+                //disable the save and cancel buttons, and hide the exit button
+                if (e.container[0].innerText.match(/Invite/) || e.container[0].innerText.match(/Update/)) {
+                    $(".k-window-content .k-grid-update, .k-window-content .k-grid-cancel").attr("disabled", "true");
+                    $(".k-window-action").attr("style", "visibility: hidden");
+                }
             },
             scrollable: false,
             sortable: true,
@@ -199,7 +185,7 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
                 },
                 //TODO: V2 add an employee records link
                 {
-                    field: "Employee",
+                    field: "EmployeeId",
                     title: "Employee Record",
                     template: "# if (EmployeeId) {#" +
                         "#= usersSettings.getEmployeeName(EmployeeId) #" +
@@ -220,7 +206,7 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
         menu.kendoSettingsMenu({selectedItem: "Users"});
 
         setupDataSource();
-        var grid = setupUsersGrid();
+        setupUsersGrid();
         //setup add button
         $("#addUser").on("click", function () {
             //workaround for lacking add/edit templates
@@ -231,22 +217,39 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
         });
     };
 
-    usersSettings.show = function () {
-        usersSettings.setupSaveHistory();
+    var load = function () {
         dbServices.employees.read().done(function (data) {
-            availableEmployees = data;
-            //add a create new option
-            var createNew = {Id: "", DisplayName: "Create New", FirstName: "", LastName: "", LinkedUserAccountId: ""};
-            availableEmployees.splice(0, 0, createNew);
+            var employees = data;
 
+            //add a create new option
+            var createNew = {Id: "10000000-0000-0000-0000-000000000000", DisplayName: "Create New", FirstName: "", LastName: "", LinkedUserAccountId: ""};
+            employees.splice(0, 0, createNew);
+
+            //add a none option above create new
+            var none = {Id: "00000000-0000-0000-0000-000000000000", DisplayName: "None", FirstName: "", LastName: "", LinkedUserAccountId: ""};
+            employees.splice(0, 0, none);
+
+            usersSettings.availableEmployees = employees;
             usersDataSource.read();
         });
     };
 
+    usersSettings.show = function () {
+        usersSettings.setupSaveHistory();
+        //ensures role id gets set
+        _.delay(load, 250);
+    };
+
     usersSettings.getEmployeeName = function (employeeId) {
-        return _.find(availableEmployees,function (e) {
+        var employee = _.find(usersSettings.availableEmployees, function (e) {
             return e.Id === employeeId;
-        }).DisplayName;
+        });
+
+        if (employee) {
+            return employee.DisplayName;
+        }
+
+        return "";
     };
 
     window.usersSettings = usersSettings;
