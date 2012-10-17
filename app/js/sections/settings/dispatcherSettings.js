@@ -6,9 +6,9 @@
 
 "use strict";
 
-define(["tools/generalTools", "db/services", "db/session", "db/saveHistory", "tools/parameters", "widgets/settingsMenu", "colorpicker",
-    "ui/kendoChanges"], function (generalTools, dbServices, session, saveHistory, parameters) {
-    var dispatcherSettings = {}, dataSource;
+define(["tools/generalTools", "db/services", "db/session", "db/saveHistory", "tools/parameters", "tools/kendoTools", "widgets/settingsMenu", "colorpicker",
+    "ui/kendoChanges"], function (generalTools, dbServices, session, saveHistory, parameters, kendoTools) {
+    var dispatcherSettings = {}, dataSource, grid;
 
     //region Locals
     //keep track of the business account id to be used for new items
@@ -108,7 +108,10 @@ define(["tools/generalTools", "db/services", "db/session", "db/saveHistory", "to
                 {
                     field: "RemoveFromRoute",
                     title: "Remove from Route on Selection",
-                    template: "#= dispatcherSettings.getChecked(RemoveFromRoute)#"
+                    template: "<input type='checkbox' onclick='dispatcherSettings.updateCheckbox(checked)'" +
+                        "# if (RemoveFromRoute) { # " +
+                        "#= 'checked' # " +
+                        "# } # />"
                 },
                 {
                     field: "DefaultTypeInt",
@@ -133,7 +136,7 @@ define(["tools/generalTools", "db/services", "db/session", "db/saveHistory", "to
 
         //detect add button click
         $("#dispatcher .k-grid-add").click(function () {
-            dispatcherSettings.grid.addRow();
+            grid.addRow();
             saveHistory.save();
         });
     }; //end initialize
@@ -152,23 +155,11 @@ define(["tools/generalTools", "db/services", "db/session", "db/saveHistory", "to
 
     //region Checkbox
 
-    /**
-     * Takes a boolean and converts it to a checked(if true) or unchecked(if false) checkbox
-     * @param {boolean} checked
-     * @return {string}
-     */
-    dispatcherSettings.getChecked = function (checked) {
-        if (checked === true) {
-            return "<input type='checkbox' checked onclick='dispatcherSettings.updateCheckbox(checked)'/>";
-        } else {
-            return "<input type='checkbox' onclick='dispatcherSettings.updateCheckbox(checked)' />";
-        }
-    };
     //disable the checkboxes for the default rows
-    dispatcherSettings.disableDefaultCheckboxes = function () {
+    var disableDefaultCheckboxes = function () {
         $("#dispatcher input[type='checkbox']").each(function (i) {
             // Get the DefaultTypeInt for the row
-            var typeInt = dispatcherSettings.grid._data[i].DefaultTypeInt;
+            var typeInt = grid._data[i].DefaultTypeInt;
             // Check if the row is a default type
             if (typeInt !== null) {
                 //disable checkbox
@@ -203,7 +194,7 @@ define(["tools/generalTools", "db/services", "db/session", "db/saveHistory", "to
         //attach the color picker
         $('.colorSelector2').ColorPicker({
             //set the initial color of the picker to be the current color
-            color: dispatcherSettings.grid.dataItem(dispatcherSettings.grid.select()).Color, // rgbToHex($('.innerSelector').eq(i))
+            color: grid.dataItem(grid.select()).Color, // rgbToHex($('.innerSelector').eq(i))
             onShow: function (colpkr) {
                 //set a high z-index so picker show up above the grid
                 $(colpkr).css('z-index', "1000");
@@ -251,27 +242,30 @@ define(["tools/generalTools", "db/services", "db/session", "db/saveHistory", "to
     //after the data is loaded, assign the color picker to each of the current color boxes
     var onDataBound = function () {
         //get a reference to the grid widget
-        dispatcherSettings.grid = $("#dispatcherGrid").data("kendoGrid");
+        grid = $("#dispatcherGrid").data("kendoGrid");
         //disable the checkboxes for the default rows
-        dispatcherSettings.disableDefaultCheckboxes();
+        disableDefaultCheckboxes();
+
         //get the BusinessAccountId from another row to be used to set in new rows
-        busAcctId = dispatcherSettings.grid._data[1].BusinessAccountId;
+        busAcctId = grid._data[1].BusinessAccountId;
+
         //bind to the selection change event
-        dispatcherSettings.grid.bind("change", function () {
+        grid.bind("change", function () {
             //hide the delete button if a default row is selected, otherwise show it
-            var row = getSelectedRow();
+            var row = kendoTools.getSelectedRow(grid);
             if (row[0].cells[3].innerHTML !== "") {
                 $('#dispatcher .k-grid-delete').attr("disabled", "disabled");
             } else {
                 $('#dispatcher .k-grid-delete').removeAttr("disabled");
             }
 
-            selectedItem = dispatcherSettings.grid.dataItem(dispatcherSettings.grid.select());
+            selectedItem = grid.dataItem(grid.select());
         });
+
         //bind to grid edit event
-        dispatcherSettings.grid.bind("edit", function (e) {
+        grid.bind("edit", function (e) {
             //disable the checkboxes for the default rows
-            dispatcherSettings.disableDefaultCheckboxes();
+            disableDefaultCheckboxes();
             if (e.sender._editContainer.context) {
                 if (e.sender._editContainer.context.cellIndex === 1) {
                     $('.colorSelector2').ColorPickerShow();
@@ -292,7 +286,7 @@ define(["tools/generalTools", "db/services", "db/session", "db/saveHistory", "to
         saveHistory.setCurrentSection({
             page: "Dispatcher Settings",
             save: function () {
-                dispatcherSettings.grid.saveChanges();
+                grid.saveChanges();
             },
             section: dispatcherSettings
         });
@@ -301,19 +295,12 @@ define(["tools/generalTools", "db/services", "db/session", "db/saveHistory", "to
     //removes the selected row from the grid (stays in pending changes until changes are saved)
     dispatcherSettings.removeSelectedRow = function () {
         //get selected row
-        var row = getSelectedRow();
+        var row = kendoTools.getSelectedRow(grid);
         //remove selected row
-        dispatcherSettings.grid.removeRow(row);
+        grid.removeRow(row);
         saveHistory.save();
     };
 
-    /**
-     * Gets the selected row
-     * @return {object}
-     */
-    var getSelectedRow = function () {
-        return dispatcherSettings.grid.tbody.find(".k-state-selected");
-    };
     //endregion
 
     window.dispatcherSettings = dispatcherSettings;

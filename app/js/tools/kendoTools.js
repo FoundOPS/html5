@@ -115,10 +115,21 @@ define(['db/session', 'db/services', 'tools/parameters'], function (session, dbS
 
     //endregion
 
+    //region Grid Tools
+
+    /**
+     * Gets the selected row
+     * @return {object}
+     */
+    kendoTools.getSelectedRow = function (grid) {
+        return grid.tbody.find(".k-state-selected");
+    };
+
     /**
      * Converts a datasource's view to CSV and saves it using data URI.
      * Uses moment.js for date parsing (you can change this if you would like)
      * @param {Array.<Object>} data The data to convert.
+     *
      * @param {boolean} humanize If true, it will humanize the column header names.
      * It will replace _ with a space and split CamelCase naming to have a space in between names -> Camel Case
      * @param {Array.<String>} ignore Columns to ignore.
@@ -197,6 +208,10 @@ define(['db/session', 'db/services', 'tools/parameters'], function (session, dbS
 
         return csv;
     };
+
+    //endregion
+
+    //region Hash & Filters
 
     var filterMatchRegEx = /^f_(lt|lte|eq|neq|gt|gte|startswith|endswith|contains|doesnotcontain)_.*$/;
     //pass a query parameter and this will return the filter's name
@@ -355,6 +370,8 @@ define(['db/session', 'db/services', 'tools/parameters'], function (session, dbS
             dataSource.filter(filterSet);
         }
     };
+
+    //endregion
 
     return kendoTools;
 });
