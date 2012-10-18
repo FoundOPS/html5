@@ -17,8 +17,10 @@
 - Place files anywhere locally.
 - Add phantomjs to system Path.
 4. Modify jasmine.js
-- html5/build/grunt/node_modules/grunt-jasmine-runner/tasks/lib/jasmine.js
-- In "`getRelativeFileList()`" add "`.replace(/\\/g,'/')`" to the end of "`path.resolve(file).replace(base,'')`" for windows compatibility.
+- In html5/build/grunt/node_modules/grunt-jasmine-runner/tasks/lib/jasmine.js
+- Find "`getRelativeFileList`" function and replace the `return` statement with 
+> `var finalPath = path.resolve(file).replace(base,'').replace(/\\/g,'/');` <br/>
+>  `return finalPath.charAt(0) === "/" ? finalPath.substring(1) : finalPath;`
 
 ## Building
 
@@ -27,7 +29,9 @@
 
 Run test cases
 
-	grunt.cmd jasmine
+	grunt.cmd jasmine-server
+
+* Note: After copying files to grunt directory you must remove require.config from the copied main.js
 
 ## Organization
 

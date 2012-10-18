@@ -35,7 +35,7 @@
         "grunt-less"        : "https://github.com/jharding/grunt-less/tarball/master",
         "grunt-contrib"     : "https://github.com/gruntjs/grunt-contrib/tarball/master",
         "grunt-replace"     : "https://github.com/outaTiME/grunt-replace/tarball/master",
-        "underscore"        : "1.4.x"
+        "underscore"        : "latest"
     },
     "devDependencies" : {
         "grunt-jasmine-runner"  : "https://github.com/jasmine-contrib/grunt-jasmine-runner/tarball/master"
