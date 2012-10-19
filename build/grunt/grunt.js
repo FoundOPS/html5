@@ -3,30 +3,18 @@ module.exports = function (grunt) {
     var _ = require('underscore');
 
     var version = "0.031",
-        mobileOptimizationTags = '<meta name="HandheldFriendly" content="True">\n\t<meta name="MobileOptimized" content="320">\n\t<meta ' +
-            'name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>\n\t<link ' +
-            'rel="apple-touch-icon-precomposed" sizes="114x114" href="@@blobRootimg/Icon-96x96.png">\n\t<link rel="apple-touch-icon-precomposed" ' +
-            'sizes="72x72" href="@@blobRootimg/Icon-72x72.png">\n\t<link rel="apple-touch-icon-precomposed" href="@@blobRootimg/Icon-36x36.png">\n\t<link ' +
-            'rel="shortcut icon" href="@@blobRootimg/Icon-36x36.png">\n\t<meta name="apple-mobile-web-app-capable" content="yes">\n\t<meta ' +
-            'name="apple-mobile-web-app-status-bar-style" content="black">\n\t<script>' +
-            '(function(a,b,c){if(c in b&&b[c]){var d,e=a.location,f=/^(a|html)$/i;a.addEventListener("click",function(a){d=a.target;' +
-            'while(!f.test(d.nodeName))d=d.parentNode;"href"in d&&(d.href.indexOf("http")||~d.href.indexOf(e.host))&&(a.preventDefault(),e.href=d.href)},!1)}})(document,window.navigator,"standalone")</script>';
+        mobileOptimizationTags = '<meta name="HandheldFriendly" content="True">\n\t<meta name="MobileOptimized" content="320">\n\t<meta ' + 'name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>\n\t<link ' + 'rel="apple-touch-icon-precomposed" sizes="114x114" href="@@blobRootimg/Icon-96x96.png">\n\t<link rel="apple-touch-icon-precomposed" ' + 'sizes="72x72" href="@@blobRootimg/Icon-72x72.png">\n\t<link rel="apple-touch-icon-precomposed" href="@@blobRootimg/Icon-36x36.png">\n\t<link ' + 'rel="shortcut icon" href="@@blobRootimg/Icon-36x36.png">\n\t<meta name="apple-mobile-web-app-capable" content="yes">\n\t<meta ' + 'name="apple-mobile-web-app-status-bar-style" content="black">\n\t<script>' + '(function(a,b,c){if(c in b&&b[c]){var d,e=a.location,f=/^(a|html)$/i;a.addEventListener("click",function(a){d=a.target;' + 'while(!f.test(d.nodeName))d=d.parentNode;"href"in d&&(d.href.indexOf("http")||~d.href.indexOf(e.host))&&(a.preventDefault(),e.href=d.href)},!1)}})(document,window.navigator,"standalone")</script>';
 
-//region setup the copy paths
+    //region setup the copy paths
     var mobileCopyPaths = {},
         loginCopyPaths = {},
         mainPath = "C:/FoundOPS/html5/",
         androidPath = mainPath + "build/mobile/Android/assets/www/",
         iOSPath = mainPath + "build/mobile/iOS/www/",
     //11 common destinations (iOS & android)
-        destinationPaths = ["js/main-built.js", "styles/main-built.css", "styles/PTS55F.ttf", "styles/styles.less", "lib/",
-            "img/", "view/", "styles/images/", "styles/textures/", "navigator.html", "index.html"],
+        destinationPaths = ["js/main-built.js", "styles/main-built.css", "styles/PTS55F.ttf", "styles/styles.less", "lib/", "img/", "view/", "styles/images/", "styles/textures/", "navigator.html", "index.html"],
     //11 common sources (iOS & android)
-        sourcePaths = ["build/main/main-built.js", "build/main/main-built.css",
-            "app/styles/PTS55F.ttf", "login/styles/styles.less", "login/lib/*",
-            "app/img/*", "app/view/*", "app/styles/kendo/images/*",
-            "app/styles/kendo/textures/*", "app/navigator-build.html",
-            "login/login.html"],
+        sourcePaths = ["build/main/main-built.js", "build/main/main-built.css", "app/styles/PTS55F.ttf", "login/styles/styles.less", "login/lib/*", "app/img/*", "app/view/*", "app/styles/kendo/images/*", "app/styles/kendo/textures/*", "app/navigator-build.html", "login/login.html"],
         i = 0;
     _.each(destinationPaths, function (destinationPath) {
         mobileCopyPaths[androidPath + destinationPath] = mainPath + sourcePaths[i];
@@ -50,18 +38,12 @@ module.exports = function (grunt) {
     grunt.initConfig({
         meta: {
             version: version,
-            banner: '/*! PROJECT_NAME - v<%= meta.version %> - ' +
-                '<%= grunt.template.today("yyyy-mm-dd") %>\n' +
-                '* http://foundops.com \n' +
-                '* Copyright (c) <%= grunt.template.today("yyyy") %> ' +
-                'FoundOps LLC; Copyright */'
+            banner: '/*! PROJECT_NAME - v<%= meta.version %> - ' + '<%= grunt.template.today("yyyy-mm-dd") %>\n' + '* http://foundops.com \n' + '* Copyright (c) <%= grunt.template.today("yyyy") %> ' + 'FoundOps LLC; Copyright */'
         },
         //https://github.com/jharding/grunt-less
         less: {
             all: {
-                src: [
-                    '../../app/styles/main.less'
-                ],
+                src: ['../../app/styles/main.less'],
                 dest: '../main/main-built.css',
                 options: {
                     compile: true,
@@ -185,9 +167,7 @@ module.exports = function (grunt) {
                         blobRoot: "",
                         CSSblobRoot: "styles/main-built.css",
                         JSblobRoot: "js/main-built.js",
-                        cordova: '<script type="text/javascript" charset="utf-8" src="cordova-2.1.0.js"></script>\n' +
-                            '<script type="text/javascript" charset="utf-8" src="statusbarnotification.js"></script>\n' +
-                            '<script type="text/javascript" charset="utf-8" src="childbrowser.js"></script>',
+                        cordova: '<script type="text/javascript" charset="utf-8" src="cordova-2.1.0.js"></script>\n' + '<script type="text/javascript" charset="utf-8" src="statusbarnotification.js"></script>\n' + '<script type="text/javascript" charset="utf-8" src="childbrowser.js"></script>',
                         appLocation: '"navigator.html"'
                     }
                 }
@@ -209,18 +189,18 @@ module.exports = function (grunt) {
                 }
             }
         },
-        // Takes a LONG time to run.
+        //Takes a LONG time to run.
 //        watch: {
 //            files: ['../../app/js/**/*', '../../app/lib/**/*', "../../app/styles/**/*"],
 //            tasks: 'jasmine'
 //        },
         jasmine: {
-            specs: ['test/mobile/mobileTests.js'],
+            specs: ['test/mobile/mobileTests.js', 'test/navigator/spec/navTests.js', "test/tests.js"],
             helpers: ["app/lib/jquery.js", "app/lib/require.js", "test/requireConfig.js"],
             amd: true,
             timeout: 10000,
-            server : {
-                port : 9900
+            server: {
+                port: 9900
             },
             phantomjs: {
                 'ignore-ssl-errors': false,

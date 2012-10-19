@@ -3,14 +3,24 @@
 define(function (require) {
     var main = require('main');
 
-    describe("Kendo", function () {
-        it("Should be initialized.", function () {
+    describe("Initialization", function () {
+        it("RequireJS should be initialized.", function () {
+            expect(require).toBeDefined();
+        });
+        it("Kendo should be initialized.", function () {
             expect(kendo).toBeDefined();
         });
-    });
-    describe("RequireJS", function () {
-        it("Should be initialized.", function () {
-            expect(require).toBeDefined();
+        it("Routes should be initialized.", function () {
+            expect(window.routes).toBeDefined();
+        });
+        it("Route details hould be initialized.", function () {
+            expect(window.routeDetails).toBeDefined();
+        });
+        it("Route destination details hould be initialized.", function () {
+            expect(window.routeDestinationDetails).toBeDefined();
+        });
+        it("Route tasks should be initialized.", function () {
+            expect(window.routeTask).toBeDefined();
         });
     });
     describe("Main", function () {
@@ -19,26 +29,6 @@ define(function (require) {
         });
         it("Should have accessible objects.", function () {
             expect(window.main.onBack).toBeDefined();
-        });
-    });
-    describe("Routes", function () {
-        it("Should be initialized.", function () {
-            expect(window.routes).toBeDefined();
-        });
-    });
-    describe("Route Destinations", function () {
-        it("Should be initialized.", function () {
-            expect(window.routeDetails).toBeDefined();
-        });
-    });
-    describe("Route Destination Details", function () {
-        it("Should be initialized.", function () {
-            expect(window.routeDestinationDetails).toBeDefined();
-        });
-    });
-    describe("Route Task", function () {
-        it("Should be initialized.", function () {
-            expect(window.routeTask).toBeDefined();
         });
     });
 });
