@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(['underscore', 'db/models', 'tools/generalTools', 'ui/ui', 'lib/leaflet'], function (_, models, generalTools, ui) {
+define(['underscore', 'db/models', 'tools/generalTools', 'ui/ui', 'lib/leaflet', 'moment'], function (_, models, generalTools, ui) {
     var leaflet = {};
 
     /**
@@ -32,7 +32,6 @@ define(['underscore', 'db/models', 'tools/generalTools', 'ui/ui', 'lib/leaflet']
 
         return map;
     };
-
 
 
     /**
@@ -157,6 +156,12 @@ define(['underscore', 'db/models', 'tools/generalTools', 'ui/ui', 'lib/leaflet']
 
         var rotateDegrees = resource.Heading;
         var color = routeColorSelector.getValue(resource.RouteId).name;
+        var minutesSinceCollected = moment().diff(moment.utc(resource.CollectedTimeStamp), 'minutes');
+        //change the color to gray to symbolize inactive
+        if (minutesSinceCollected >= 30) {
+            color = 'gray';
+        }
+
         var locationLatLng = [resource.Latitude, resource.Longitude];
         var iconUrl = ui.ImageUrls.PHONE;
         var source = resource.Source ? resource.Source.toLowerCase() : "";
