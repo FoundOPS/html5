@@ -158,7 +158,7 @@ define(['underscore', 'db/models', 'tools/generalTools', 'ui/ui', 'lib/leaflet',
         var color = routeColorSelector.getValue(resource.RouteId).name;
         var minutesSinceCollected = moment().diff(moment.utc(resource.CollectedTimeStamp), 'minutes');
         //change the color to gray to symbolize inactive
-        if (minutesSinceCollected >= 30) {
+        if (minutesSinceCollected >= 60) {
             color = 'gray';
         }
 
