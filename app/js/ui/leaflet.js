@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(['underscore', 'db/models', 'tools/generalTools', 'ui/ui', 'lib/leaflet'], function (_, models, generalTools, ui) {
+define(['underscore', 'db/models', 'tools/generalTools', 'ui/ui', 'lib/leaflet', 'moment'], function (_, models, generalTools, ui) {
     var leaflet = {};
 
     /**
@@ -25,8 +25,14 @@ define(['underscore', 'db/models', 'tools/generalTools', 'ui/ui', 'lib/leaflet']
         });
         cloudMade.addTo(map);
 
+        //for testing
+        map.on('click', function (e) {
+            console.log(e.latlng);
+        });
+
         return map;
     };
+
 
     /**
      * Center the map based on the array of LatLng.
@@ -150,6 +156,12 @@ define(['underscore', 'db/models', 'tools/generalTools', 'ui/ui', 'lib/leaflet']
 
         var rotateDegrees = resource.Heading;
         var color = routeColorSelector.getValue(resource.RouteId).name;
+        var minutesSinceCollected = moment().diff(moment.utc(resource.CollectedTimeStamp), 'minutes');
+        //change the color to gray to symbolize inactive
+        if (minutesSinceCollected >= 60) {
+            color = 'gray';
+        }
+
         var locationLatLng = [resource.Latitude, resource.Longitude];
         var iconUrl = ui.ImageUrls.PHONE;
         var source = resource.Source ? resource.Source.toLowerCase() : "";
@@ -162,7 +174,7 @@ define(['underscore', 'db/models', 'tools/generalTools', 'ui/ui', 'lib/leaflet']
         //add the icon for the resource
         var resourceIcon = L.icon();
         $.extend(resourceIcon, {
-            options:{
+            options: {
                 routeId: resource.RouteId,
                 iconUrl: null,
                 iconAnchor: [11, 12],
@@ -170,22 +182,26 @@ define(['underscore', 'db/models', 'tools/generalTools', 'ui/ui', 'lib/leaflet']
                 popupAnchor: [0, -12],
                 className: color + " resource",
                 html: "<img class='directionIcon' src='" + ui.ImageUrls.OUTER_CIRCLE + "'/><img class='sourceIcon' src='" + iconUrl + "' />"},
-            createIcon:function(){
-                var e=document.createElement("div");
+            createIcon: function () {
+                var e = document.createElement("div");
                 var t = this.options;
-                return t.html&&(e.innerHTML=t.html),
-                    t.bgPos && (e.style.backgroundPosition=-t.bgPos.x+"px "+ -t.bgPos.y+"px"),
-                    this._setIconStyles(e,"icon"),e
+                return t.html && (e.innerHTML = t.html),
+                    t.bgPos && (e.style.backgroundPosition = -t.bgPos.x + "px " + -t.bgPos.y + "px"),
+                    this._setIconStyles(e, "icon"), e
             },
-            createShadow:function(){return null}
+            createShadow: function () {
+                return null
+            }
         });
-        L.divIcon=function(e){return L.divIcon(e)};
+        L.divIcon = function (e) {
+            return L.divIcon(e)
+        };
 
         //convert speed from m/s to mph and round it to whole number
         var speed = Math.round(resource.Speed * 2.23693629);
         var speedDirString = "";
         //only show speed and direction if there is a speed(i.e., if on mobile)
-        if(speed){
+        if (speed) {
             speedDirString = "<br />Speed: " + speed + " mph " + generalTools.getDirection(rotateDegrees);
         }
 
@@ -259,23 +275,27 @@ define(['underscore', 'db/models', 'tools/generalTools', 'ui/ui', 'lib/leaflet']
         //an icon for the destination
         var destinationIcon = L.icon();
         $.extend(destinationIcon, {
-            options:{
+            options: {
                 routeId: routeId,
                 iconUrl: "",
-                iconSize: [13,13],
+                iconSize: [13, 13],
                 className: className,
                 html: "<span class='number'>" + destination.OrderInRoute + "</span>",
                 popupAnchor: [0, -8]},
-            createIcon:function(){
-                var e=document.createElement("div");
+            createIcon: function () {
+                var e = document.createElement("div");
                 var t = this.options;
-                return t.html&&(e.innerHTML=t.html),
-                t.bgPos && (e.style.backgroundPosition=-t.bgPos.x+"px "+ -t.bgPos.y+"px"),
-                this._setIconStyles(e,"icon"),e
+                return t.html && (e.innerHTML = t.html),
+                    t.bgPos && (e.style.backgroundPosition = -t.bgPos.x + "px " + -t.bgPos.y + "px"),
+                    this._setIconStyles(e, "icon"), e
             },
-            createShadow:function(){return null}
+            createShadow: function () {
+                return null
+            }
         });
-        L.divIcon=function(e){return L.divIcon(e)};
+        L.divIcon = function (e) {
+            return L.divIcon(e)
+        };
 
 
         //add a number marker with the destination's order in the route
@@ -356,48 +376,41 @@ define(['underscore', 'db/models', 'tools/generalTools', 'ui/ui', 'lib/leaflet']
     /**
      * Draws the track points on the map for the given route
      * @param {L.map} map
-     * @param {Array<Object>} trackpoints
-     * @param {Array<Object>} resources
+     * @param {Array<Object>} trackpoints The trackpoints to draw
      * @param {tools.ValueSelector} routeColorSelector
      * @param {tools.ValueSelector} routeOpacitySelector
      * @param {string} routeId The id of the route to draw
      * @return {L.layerGroup} The historical trackpoints added to the map.
      */
-    leaflet.drawTrackPoints = function (map, trackpoints, resources, routeColorSelector, routeOpacitySelector, routeId) {
+    leaflet.drawTrackPoints = function (map, trackpoints, routeColorSelector, routeOpacitySelector, routeId) {
         var trackPointsGroup = L.layerGroup();
 
-        //loop through all the resources
-        _.each(resources, function (resource) {
-            //Check if the resource is on the selected route
-            if (resource.RouteId !== routeId) {
-                return;
-            }
+        //group the trackpoints based on resource
+        var resourcesTrackPoints = _.groupBy(trackpoints, "Id");
 
-            //get the Id of the resource
-            var resourceId;
-            if (resource.EmployeeId !== null) {
-                resourceId = resource.EmployeeId;
-            } else {
-                resourceId = resource.VehicleId;
-            }
+        //loop through all the resources
+        _.each(resourcesTrackPoints, function (resourceTrackPoints) {
             //creates an empty array(necessary for the polyline to initiate)
             var latlngs = [];
             //create a polyline to connect the trackpoints
             var polyline = L.polyline(latlngs, {
                 color: routeColorSelector.getValue(routeId).color,
                 weight: 2,
-                opacity: routeOpacitySelector.getValue(resourceId),
+                opacity: routeOpacitySelector.getValue(routeId),
                 clickable: false
             });
 
+            var i = 0;
             //loop through every trackpoint
-            _.each(trackpoints, function (trackPoint) {
+            _.each(resourceTrackPoints, function (trackPoint) {
                 //check if trackpoint is for the current resource and route
-                if (!trackPoint || trackPoint.Id !== resourceId || trackPoint.RouteId !== routeId) {
+                if (trackPoint.RouteId !== routeId) {
                     return;
                 }
 
                 leaflet.drawTrackPoint_(polyline, trackPoint);
+
+                i++;
             });
 
             polyline.addTo(trackPointsGroup);

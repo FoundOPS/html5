@@ -114,6 +114,7 @@ define(["tools/generalTools", "db/saveHistory", "db/services", "jquery" ,"tools/
             //check if image has been changed, and image data was set
             if (that.newImage && that.imageDataField.val()) {
                 that.form.ajaxSubmit({
+                    type: "POST",
                     //from http://stackoverflow.com/questions/8151138/ie-jquery-form-multipart-json-response-ie-tries-to-download-response
                     dataType: "text",
                     contentType: "multipart/form-data",

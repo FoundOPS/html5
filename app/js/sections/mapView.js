@@ -87,7 +87,7 @@ define(["db/session", "db/services", "tools/generalTools", "tools/dateTools", "t
         //draw the new track points if there is a selected route
         if (selectedRouteId && trackPointsGroup) {
             //add the new trackpoints to the current trackpoints group
-            trackPointsGroup.addLayer(leaflet.drawTrackPoints(map, newTrackPoints, resources, routeColorSelector, routeOpacitySelector, selectedRouteId));
+            trackPointsGroup.addLayer(leaflet.drawTrackPoints(map, newTrackPoints, routeColorSelector, routeOpacitySelector, selectedRouteId));
         }
 
         resourcesGroup = leaflet.drawResources(map, resources, routeColorSelector, function (selectedRoute) {
@@ -110,7 +110,7 @@ define(["db/session", "db/services", "tools/generalTools", "tools/dateTools", "t
 
         //if the track points are loaded draw them
         if (routeTrackPoints) {
-            trackPointsGroup = leaflet.drawTrackPoints(map, routeTrackPoints, resources, routeColorSelector, routeOpacitySelector, routeId);
+            trackPointsGroup = leaflet.drawTrackPoints(map, routeTrackPoints, routeColorSelector, routeOpacitySelector, routeId);
         } else {
             //if they are not loaded: load them then draw them
             routesTrackPoints[routeId] = dbServices.Status.LOADING;
@@ -119,7 +119,7 @@ define(["db/session", "db/services", "tools/generalTools", "tools/dateTools", "t
                 //if the selected route is the loaded track points, draw them
                 if (selectedRouteId === routeId) {
                     removeLayer(trackPointsGroup);
-                    trackPointsGroup = leaflet.drawTrackPoints(map, loadedTrackPoints, resources, routeColorSelector, routeOpacitySelector, routeId);
+                    trackPointsGroup = leaflet.drawTrackPoints(map, loadedTrackPoints, routeColorSelector, routeOpacitySelector, routeId);
                 }
 
                 //add the loaded track points to the map

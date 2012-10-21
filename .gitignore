@@ -1,4 +1,8 @@
 .idea/
 *.xcuserstate
 */.DS_Store
+npm-debug.log
+build/main/
 build/grunt/node_modules
+build/mobile/Android/assets/www/
+build/mobile/iOS/www/

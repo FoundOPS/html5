@@ -22,7 +22,7 @@ define(["developer", "tools/dateTools", "db/saveHistory", "tools/parameters"], f
         var mode = developer.CURRENT_DATA_SOURCE;
         if (mode === developer.DataSource.BROWSER_LOCALAPI) {
             rootApiUrl = 'http://localhost:9711/';
-        } else if (mode === developer.DataSource.ANDROID_LOCALAPI) {
+        } else if (mode === developer.DataSource.ANDROID_EMULATOR_LOCALAPI) {
             rootApiUrl = 'http://10.0.2.2:9711/';
         } else if (mode === developer.DataSource.LIVE) {
             rootApiUrl = 'http://api.foundops.com/';
