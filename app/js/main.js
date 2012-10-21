@@ -155,10 +155,12 @@ require(["jquery", "widgets/navigator", "developer", "db/services", "db/session"
 
         //reset the images 1.5 seconds after loading to workaround a shared access key buy
         _.delay(function () {
-            if (navigator) {
-                navigator.changeAvatar(data.avatarUrl);
-                navigator.changeBusinessLogo(session.get("role.businessLogoUrl"));
-            }
+            //if (navigator) {
+                $(document).navigator('changeAvatar', data.avatarUrl);
+                //navigator.changeAvatar(data.avatarUrl);
+                $(document).navigator('changeBusinessLogo', session.get("role.businessLogoUrl"));
+                //navigator.changeBusinessLogo(session.get("role.businessLogoUrl"));
+            //}
         }, 1500);
 
         if (!parameters.getSection()) {
