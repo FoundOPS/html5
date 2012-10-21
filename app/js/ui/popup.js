@@ -4,6 +4,19 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         var methods = {
             init: function (options) {
                 popup = new Popup(this.selector);
+
+                if(typeof(options.backgroundColor) != null){
+                    popup.setBackgroundColor(options.backgroundColor);
+                }
+
+                if(typeof(options.fontColor) != null){
+                    popup.setFontColor(options.fontColor);
+                }
+
+                if(typeof(options.borderColor) != null){
+                    popup.setBorderColor(options.borderColor);
+                }
+
                 popup.addMenu(options.id, options.title, options.contents);
             },
             addMenu: function (menu) {
@@ -45,6 +58,9 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         var title = "";
         var content = "";
         var object = null;
+        var backgroundColor = null;
+        var fontColor = null;
+        var borderColor = null;
 
         if ((typeof(popupListener) === 'undefined') || popupListener === null) {
             console.log("ERROR: No listener passed!");
@@ -62,6 +78,21 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
 
         this.addMenu = function (id, title, contents) {
             menus.push({'id': id, 'title': title, 'contents': contents});
+        };
+
+        this.setBackgroundColor = function(color){
+            //TODO: Check color value as hex or color?
+            backgroundColor = color;
+        };
+
+        this.setFontColor = function(color){
+            //TODO: Check color value as hex or color?
+            fontColor = color;
+        };
+
+        this.setBorderColor = function(color){
+            //TODO: Check color value as hex or color?
+            borderColor = color;
         };
 
         this.toggleVisible = function (e, clicked) {
@@ -105,6 +136,22 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
             this.populate(id);
 
             clickedDiv.trigger("popupEvent", clickedDiv);
+
+            if(backgroundColor!==null){
+                $("#popupHeader").css("backgroundColor", backgroundColor);
+                $("#popupContent").css("backgroundColor", backgroundColor);
+            }
+
+            if(fontColor!==null){
+                $("#popup").css("color", fontColor);
+                $("#popup a").css("color", fontColor);
+            }
+
+            if(borderColor!==null){
+                $("#popupHeader").css("border-color", borderColor);
+                $("#popupContent").css("border-color", borderColor);
+                $(".popupContentRow").css("border-color", borderColor);
+            }
 
             $("#popup").stop(false, true).fadeIn('fast');
             $("#popupWrapper").css("visibility", "visible");
