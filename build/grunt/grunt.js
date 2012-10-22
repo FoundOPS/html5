@@ -2,7 +2,11 @@
 module.exports = function (grunt) {
     var _ = require('underscore');
 
-    var version = "0.031",
+    //versions (0._bc)
+    //increment b every publish with new features (and clear c)
+    //increment c on publishes with only fixes
+    //aiming to hit v1 with internet distribution, full user case coverage, and no sl sections
+    var version = "0.320",
         mobileOptimizationTags = '<meta name="HandheldFriendly" content="True">\n\t<meta name="MobileOptimized" content="320">\n\t<meta ' +
             'name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>\n\t<link ' +
             'rel="apple-touch-icon-precomposed" sizes="114x114" href="@@blobRootimg/Icon-96x96.png">\n\t<link rel="apple-touch-icon-precomposed" ' +
@@ -160,9 +164,9 @@ module.exports = function (grunt) {
                 options: {
                     variables: {
                         mobileOptimization: mobileOptimizationTags,
-                        blobRoot: "@Model['BlobRoot']../",
-                        CSSblobRoot: "@Model['BlobRoot']main-built.css?cb=" + version,
-                        JSblobRoot: "@Model['BlobRoot']main-built.js?cb=" + version,
+                        blobRoot: '@Model[\"BlobRoot\"]../',
+                        CSSblobRoot: '@Model[\"BlobRoot\"]main-built.css?cb=' + version,
+                        JSblobRoot: '@Model[\"BlobRoot\"]main-built.js?cb=' + version,
                         cordova: '',
                         appLocation: '"http://app.foundops.com"'
                     }

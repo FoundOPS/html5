@@ -31,17 +31,21 @@ define(['jquery', 'containers/silverlight', 'developer', 'tools/parameters', 'db
 
     analytics.track = function (activity, section) {
         var user = session.get("user");
-
         var organization = session.get("role.name");
-
         var email = session.get("email");
+
         //don't include foundops emails
-        if(email && _s.include(email, "foundops.com")){
+        if (email && _s.include(email, "foundops.com")) {
             return;
         }
 
         if (!section) {
             section = _s.capitalize(parameters.getSection().name);
+        }
+
+        //triggered before session loaded
+        if (!organization || !user) {
+            return;
         }
 
         totango.track(activity, section, organization, user);

@@ -1,7 +1,7 @@
 ## Setup ##
 
-1. Install [Node](http://nodejs.org/)
-- Make sure it is in your system path.
+1. Install Node (make sure it is in your system path)
+- [windows](https://github.com/marcelklehr/nodist) 
 2. Run `npm install` from the grunt folder (this works with the package.json file).
 - The following are the project dependencies:
  2. grunt (global)

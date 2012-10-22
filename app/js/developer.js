@@ -63,7 +63,7 @@ define(function () {
     /**
      * The current silverlight version
      */
-    developer.CURRENT_SILVERLIGHT_VERSION = 0.22;
+    developer.CURRENT_SILVERLIGHT_VERSION = 0.23;
 
     return developer;
 });
