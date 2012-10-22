@@ -38,7 +38,6 @@
         "underscore"        : "latest"
     },
     "devDependencies" : {
-        "grunt-jasmine-runner"  : "https://github.com/jasmine-contrib/grunt-jasmine-runner/tarball/master"
     },
     "keywords"        : [
         "FoundOPS"

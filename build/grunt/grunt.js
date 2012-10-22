@@ -131,12 +131,6 @@ module.exports = function (grunt) {
             },
             mobile: {
                 files: mobileCopyPaths
-            },
-            tests: {
-                files: {
-                    "C:/FoundoPS/html5/build/grunt/app/": "../../app/**",
-                    "C:/FoundoPS/html5/build/grunt/test/": "../../test/**"
-                }
             }
         },
         replace: {
@@ -188,36 +182,13 @@ module.exports = function (grunt) {
                     }
                 }
             }
-        },
-        //Takes a LONG time to run.
-//        watch: {
-//            files: ['../../app/js/**/*', '../../app/lib/**/*', "../../app/styles/**/*"],
-//            tasks: 'jasmine'
-//        },
-        jasmine: {
-            specs: ['test/mobile/mobileTests.js', 'test/navigator/spec/navTests.js', "test/tests.js"],
-            helpers: ["app/lib/jquery.js", "app/lib/require.js", "test/requireConfig.js"],
-            amd: true,
-            timeout: 10000,
-            server: {
-                port: 9900
-            },
-            phantomjs: {
-                'ignore-ssl-errors': false,
-                'local-to-remote-url-access': true,
-                'web-security': true
-            }
-        },
-        'jasmine-server': {
-            browser: true
         }
     });
 
     //Order of loadNpmTasks is important.
-    grunt.registerTask('default', 'clean less requirejs copy replace jasmine'); //watch
+    grunt.registerTask('default', 'clean less requirejs copy replace'); //watch
     grunt.loadNpmTasks('grunt-contrib');
     grunt.loadNpmTasks('grunt-less');
     grunt.loadNpmTasks('grunt-requirejs');
     grunt.loadNpmTasks('grunt-replace');
-    grunt.loadNpmTasks('grunt-jasmine-runner');
 };
