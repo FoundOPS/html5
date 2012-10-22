@@ -2,9 +2,9 @@
 
 'use strict';
 
-require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateTools", "db/saveHistory", "tools/kendoTools", "widgets/serviceDetails",
+require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateTools", "db/saveHistory", "tools/kendoTools", "widgets/serviceDetails", "widgets/contactInfo",
     "jform", "select2"], function ($, session, dbServices, parameters, dateTools, saveHistory, kendoTools) {
-    var services = {}, serviceHoldersDataSource, grid, handleChange, serviceTypesDropDown, selectedServiceHolder, vm;
+    var services = {}, serviceHoldersDataSource, grid, handleChange, selectedServiceHolder, vm;
 
     //region Public
     services.vm = vm = kendo.observable({
@@ -40,8 +40,10 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
             saveHistory.resetHistory();
 
             if (service) {
-                //show the service details
+                //show the serviceDetails
                 $("#serviceDetails").attr("style", "display:block");
+                //show the contactInfo
+                $("#contactInfo").attr("style", "display:block");
             }
         },
         deleteSelectedService: function () {
@@ -49,7 +51,9 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
             if (answer) {
                 grid.dataSource.remove(selectedServiceHolder);
                 dbServices.services.destroy({body: this.get("selectedService")});
+                //hide the serviceDetails and contactInfo
                 $("#serviceDetails").attr("style", "display:none");
+                $("#contactInfo").attr("style", "display:none");
             }
         },
         /**
@@ -566,7 +570,9 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
 
                     //disable the delete button and hide the service details
                     $('#services .k-grid-delete').attr("disabled", "disabled");
+                    //hide the serviceDetails and contactInfo
                     $("#serviceDetails").attr("style", "display:none");
+                    $("#contactInfo").attr("style", "display:none");
                 });
 
             //now that the service types are loaded,
@@ -575,12 +581,13 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
         });
 
         $("#serviceDetails").kendoServiceDetails();
+        $("#contactInfo").contactInfo();
 
         //hookup the add & delete buttons
-        $("#services .k-grid-add").on("click", function () {
+        $("#services .addDeleteBtns .k-grid-add").on("click", function () {
             vm.addNewService();
         });
-        $("#services .k-grid-delete").on("click", function () {
+        $("#services .addDeleteBtns .k-grid-delete").on("click", function () {
             vm.deleteSelectedService();
         });
 
