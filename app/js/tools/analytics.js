@@ -9,9 +9,9 @@
 define(['jquery', 'containers/silverlight', 'developer', 'tools/parameters', 'db/session', 'underscore.string', 'totango'], function ($, silverlight, developer, parameters, session, _s) {
     var analytics = {}, totango, totangoServiceId;
 
-    if (developer.TRACK_ANALYTICS === developer.TRACK_ANALYTICS_OPTION.DEBUG) {
+    if (developer.CURRENT_ANALYTICS === developer.AnalyticsStore.DEBUG) {
         totangoServiceId = "SP-12680-01";
-    } else if (developer.TRACK_ANALYTICS === developer.TRACK_ANALYTICS_OPTION.LIVE) {
+    } else if (developer.CURRENT_ANALYTICS === developer.AnalyticsStore.LIVE) {
         totangoServiceId = "SP-1268-01";
     }
 

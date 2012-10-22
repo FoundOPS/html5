@@ -8,6 +8,17 @@
 
 define(function () {
     var developer = {};
+
+    /**
+     * Enum for analytics storage
+     * @enum {number}
+     */
+    developer.AnalyticsStore = {
+        OFF: 0,
+        DEBUG: 1,
+        LIVE: 2
+    };
+
     /**
      * Enum for the data source.
      * BROWSER_LOCALAPI: load data from the local api server
@@ -41,24 +52,22 @@ define(function () {
     };
 
     /**
-     * The current web service source. Used when running local server for debugging.
+     * The storage for analytics
+     * @type {developer.AnalyticsStore}
+     */
+    developer.CURRENT_ANALYTICS = developer.AnalyticsStore.DEBUG;
+
+    /**
+     * The current web service source. Used when running local server for debugging
      * @type {developer.DataSource}
      */
     developer.CURRENT_DATA_SOURCE = developer.DataSource.BROWSER_LOCALAPI;
 
     /**
-     * This is for sections that are in the Silverlight application and is used for debugging.
+     * This is for sections that are in the Silverlight application and is used for debugging
      * @type {developer.Frame}
      */
     developer.CURRENT_FRAME = developer.Frame.BROWSER;
-
-    developer.TRACK_ANALYTICS_OPTION = {
-        OFF: 0,
-        DEBUG: 1,
-        LIVE: 2
-    };
-
-    developer.TRACK_ANALYTICS = developer.TRACK_ANALYTICS_OPTION.DEBUG;
 
     /**
      * The current silverlight version
