@@ -62,7 +62,7 @@ define(['lib/platform', "underscore", 'underscore.string'], function (platform, 
     developer.DEPLOY = false;
     if (developer.DEPLOY) {
         developer.CURRENT_DATA_SOURCE = developer.DataSource.LIVE;
-        developer.CURRENT_FRAME = developer.Frame.AUTO;
+        developer.CURRENT_FRAME = developer.Frame.DEFAULT;
     }
 
     /**
