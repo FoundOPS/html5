@@ -1,5 +1,5 @@
 'use strict';
-define(["jquery", "db/services", "db/session", "db/models", "kendo", "jmaskmoney", "jautosize", "select2", "jtooltip"], function ($, dbServices, session, models) {
+define(["jquery", "db/services", "db/session", "db/models", "selectBox", "kendo", "jmaskmoney", "jautosize", "jtooltip"], function ($, dbServices, session, models, selectBox) {
 
     var kendo = window.kendo,
         ui = kendo.ui,
@@ -213,6 +213,8 @@ define(["jquery", "db/services", "db/session", "db/models", "kendo", "jmaskmoney
                     //Select Dropdown
                     fieldElement = $('<select id="select" ></select>').appendTo(elementToAppendTo).wrap("<li><label>" + field.Name + "<br/></label></li>");
 
+                    $("#select").selectBox({options: field.Options});
+
                     for (i = 0; i < field.Options.length; i++) {
                         options[i] = "<option>" + field.Options[i].Name + "</option>\n";
                         if (field.Options[i].IsChecked === true) {
@@ -221,11 +223,6 @@ define(["jquery", "db/services", "db/session", "db/models", "kendo", "jmaskmoney
                     }
 
                     fieldElement[0].innerHTML = options;
-
-                    $("#select").select2({
-                        placeholder: "Select an option",
-                        minimumResultsForSearch: 15
-                    });
 
                     $("#select").change(function (e) {
                         for (i = 0; i < field.Options.length; i++) {

@@ -61,13 +61,13 @@ define(function () {
      * The current web service source. Used when running local server for debugging
      * @type {developer.DataSource}
      */
-    developer.CURRENT_DATA_SOURCE = developer.DataSource.BROWSER_LOCALAPI;
+    developer.CURRENT_DATA_SOURCE = developer.DataSource.LIVE;
 
     /**
      * This is for sections that are in the Silverlight application and is used for debugging
      * @type {developer.Frame}
      */
-    developer.CURRENT_FRAME = developer.Frame.BROWSER;
+    developer.CURRENT_FRAME = developer.Frame.MOBILE_APP;
 
     /**
      * The current silverlight version
