@@ -210,26 +210,22 @@ define(["jquery", "db/services", "db/session", "db/models", "selectBox", "kendo"
                 var fieldElement, options = [], i;
                 if (field.TypeInt === 0) {
 
-                    //Select Dropdown
-                    fieldElement = $('<select id="select" ></select>').appendTo(elementToAppendTo).wrap("<li><label>" + field.Name + "<br/></label></li>");
-
-                    $("#select").selectBox({options: field.Options});
-
                     for (i = 0; i < field.Options.length; i++) {
-                        options[i] = "<option>" + field.Options[i].Name + "</option>\n";
-                        if (field.Options[i].IsChecked === true) {
-                            options[i] = "<option selected='selected'>" + field.Options[i].Name + "</option>\n";
-                        }
+                        options[i] = {name: field.Options[i].Name, value: field.Options[i].IsChecked};
                     }
 
-                    fieldElement[0].innerHTML = options;
+                    //Select Dropdown
+                    fieldElement = $('<div class="selectBox"></div>').selectBox(options).appendTo(elementToAppendTo).wrap("<li><label>" + field.Name + "<br/></label></li>");
 
-                    $("#select").change(function (e) {
-                        for (i = 0; i < field.Options.length; i++) {
-                            field.Options[i].IsChecked = false;
+                    fieldElement.change(function (e) {
+                        var optionsHTML = e.srcElement.children;
+                        for(i=0; i < optionsHTML.length; i++) {
+                            option = optionsHTML[i];
+                            options[i] = { name :option.text, index: option.index, value: option.selected};
                         }
-                        field.set('Options[' + e.target.selectedIndex + '].IsChecked', true);
+                        $("selectBox").selectBox("selected", options);
                     });
+
                 } else {
                     //Checkbox (1) or checklist (2)
                     fieldElement = $('<ul data-role="listview" data-style="inset">' + field.Name + '</ul>').appendTo(elementToAppendTo);

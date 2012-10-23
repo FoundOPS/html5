@@ -28,7 +28,7 @@ require.config({
         moment: "../lib/moment",
         noty: "../lib/noty",
         select2: "../lib/select2",
-        selectBox: "ui/selectBox",
+        selectBox: "widgets/selectBox",
         signals: "../lib/signals",
         totango: "../lib/totango",
         underscore: "../lib/underscore",
