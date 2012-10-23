@@ -1,0 +1,145 @@
+<!DOCTYPE HTML>
+<html style="height:100%;">
+<head>
+    <title>FoundOPS</title>
+    <meta name="HandheldFriendly" content="True">
+	<meta name="MobileOptimized" content="320">
+	<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+	<link rel="apple-touch-icon-precomposed" sizes="114x114" href="img/Icon-96x96.png">
+	<link rel="apple-touch-icon-precomposed" sizes="72x72" href="img/Icon-72x72.png">
+	<link rel="apple-touch-icon-precomposed" href="img/Icon-36x36.png">
+	<link rel="shortcut icon" href="img/Icon-36x36.png">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<script>(function(a,b,c){if(c in b&&b[c]){var d,e=a.location,f=/^(a|html)$/i;a.addEventListener("click",function(a){d=a.target;while(!f.test(d.nodeName))d=d.parentNode;"href"in d&&(d.href.indexOf("http")||~d.href.indexOf(e.host))&&(a.preventDefault(),e.href=d.href)},!1)}})(document,window.navigator,"standalone")</script> <!--Gets replaced by Grunt on build-->
+    <link rel="stylesheet/less" type="text/css" href="styles/styles.less"/>
+    <script type="text/javascript" src="lib/jquery.min.js"></script>
+    <script type="text/javascript" src="lib/less.min.js"></script>
+</head>
+<body>
+<div id="vertCenterUpper" style="#position: relative;">                     <!--Used to-->
+    <div id="vertCenterMiddle" style=" #position: absolute; #top: 50%;">    <!--place content-->
+        <div id="vertCenterLower" style=" #position: relative; #top: -50%"> <!--in middle of page-->
+            <img src="img/LogoWhiteText.png" alt="FoundOPS" style="width:70%; max-width:600px"/><br/>
+            <form id="loginForm" name="loginForm">
+                <input id="EmailAddress" name="EmailAddress" placeholder="E-mail Address" required="required" type="email"
+                       onblur="rememberMe();"/><br />
+                <input id="Password" name="Password" placeholder="Password" required="required" type="password"/><br />
+                <input id="submit" type="submit" value="Login"/><br/>
+            </form>
+            <br/>
+            <div id="toggleWrapper">
+                <p id="toggleLabel">Remember Me</p>
+                <div class="switch">
+                    <a class="on" href="javascript:toggleRememberMe('on')"><span>On</span></a>
+                    <a class="off active" href="javascript:toggleRememberMe('off')"><span>Off</span></a>
+                </div>
+            </div>
+            <br/>
+            <a id="forgotPassword" rel="external" href="http://app.foundops.com/Account/ForgotPassword">Forgot Password?</a>
+        </div>
+    </div>
+</div>
+<script>
+    //Enables accessing data from external resources.
+    $.support.cors = true;
+
+    $(document).ready(function () {
+        //Check if user is remembered.
+        if (localStorage.getItem("rememberMe") === "true") {
+            $("#EmailAddress").val(localStorage.getItem("email"));
+            toggleRememberMe("on");
+        }
+        //Check if user is already logged in.
+        login("", "GET", "startUpCheck");
+    });
+
+    //Overrides the submit event of the login form to make an ajax call instead.
+    $("#loginForm").submit(function (e) {
+        e.preventDefault();
+        rememberMe();
+        login('?email=' + $("#EmailAddress").val() + '&pass=' + $("#Password").val(), "PUT", "userLogin");
+    });
+
+    //Serves as a dual purpose ajax call that either logs a user in or checks whether a user is logged in and acts accordingly.
+    var login = function (url, requestType, loginType) {
+        if (localStorage.getItem("loggedIn") === "true" || url !== "") {
+            $.ajax({
+                type: requestType,
+                dataType:'JSON',
+//                url: 'http://localhost:9711/api/sessions/' + url,    //LOCAL - For testing and debugging purposes.
+//                url: 'http://192.168.0.108:70/api/sessions/' + url,   //REMOTE - For testing LOCAL on a remote device.
+                                                                       // Local IP of host computer (might change everyday).
+                url:'http://api.foundops.com/api/sessions' + url, //LIVE - For publishing.
+                tryCount:0,
+                retryLimit:2,
+                timeout:1667, // 5/3 of a second so total time will be 5 seconds because of automatic retry.
+                success:function (response) {
+                    if (response) {
+                        //Save the application's login state.
+                        localStorage.setItem("loggedIn", true);
+                        window.location.href = "navigator.html"; //Grunt replaces appLocation on build.
+                    } else if (loginType !== "startUpCheck") {
+                        alert("Login information is incorrect.\nPlease try again.");
+                    }
+                },
+                error:function (jqXHR, textStatus, errorThrown) {
+                    // In case of timeout, retry call up to the amount of times specified by the retryLimit.
+                    if (textStatus === 'timeout') {
+                        this.tryCount++;
+                        if (this.tryCount <= this.retryLimit) {
+                            //Try again
+                            $.ajax(this);
+                        } else if (this.tryCount = this.retryLimit && loginType === "userLogin") {
+                            alert("Your login request has timed out. Please check your network settings or internet connectivity.");
+                        }
+                    } else {
+                        console.log(jqXHR);
+                        console.log(textStatus);
+                        console.log(errorThrown);
+                    }
+                }
+            });
+        }
+    };
+    // Stores a user's email address in local storage if he or she has turned on the Remember Me option.
+    // Forgets him/her otherwise.
+    var rememberMe = function () {
+        if ($(".on").hasClass("active")) {
+            localStorage.setItem("rememberMe", true);
+            localStorage.setItem("email", $("#EmailAddress").val());
+        } else {
+            localStorage.setItem("rememberMe", false);
+            localStorage.removeItem("email");
+        }
+    };
+    // Changes the styles of the Remember Me buttons to reflect the user's selection.
+    var toggleRememberMe = function (state) {
+        if (state === "on") {
+            $(".on").addClass("active");
+            $(".off").removeClass("active");
+            rememberMe();
+        } else {
+            $(".on").removeClass("active");
+            $(".off").addClass("active");
+            rememberMe();
+        }
+    };
+    // Listeners that change styles to show Login button press animation.
+    $("#submit").mousedown(function (e) {
+        $("#submit").toggleClass("buttonClicked");
+    }).mouseup(function (e) {
+        $("#submit").toggleClass("buttonClicked");
+    });
+    document.getElementById("submit").addEventListener('touchstart', function (e) {
+        $("#submit").toggleClass("buttonClicked");
+    })
+    document.getElementById("submit").addEventListener('touchend', function (e) {
+        $("#submit").toggleClass("buttonClicked");
+    })
+    document.getElementById("submit").addEventListener('touchcancel', function (e) {
+        $("#submit").toggleClass("buttonClicked");
+    });
+</script>
+</body>
+</html>

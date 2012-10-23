@@ -1,0 +1,38 @@
+<script language=javascript>
+    {
+        //Clear application's login state
+        $.ajax({
+            //must use JSONP because the javascript may be hosted on a different url than the api
+            type: "GET",
+            dataType: 'JSONP',
+//            url: 'http://localhost:9711/api/sessions/LogOut',       //LOCAL\
+//            url: 'http://192.168.0.108:70/api/sessions/LogOut',   //REMOTE - Local IP of host computer (might change everyday).
+            url: 'http://api.foundops.com/api/sessions/LogOut',       //LIVE
+            error: function (errorThrown, textStatus) {
+                console.log(textStatus);
+                console.log(errorThrown);
+            },
+            success: function (response) {
+                if (response) {
+                    //Save the application's login state.
+                    localStorage.setItem("loggedIn", false);
+                } else {
+                    console.log(response);
+                }
+            }
+        });
+        localStorage.setItem("loggedIn", false);
+
+        //Erases localStorage picks.
+//        localStorage.removeItem("selectedRoute");
+//        localStorage.removeItem("selectedDestination");
+//        localStorage.removeItem("selectedTask");
+
+        //Erases history so user can't hit back button to access application and redirects user to the login page.
+        var Backlen = history.length;
+        history.go(-Backlen);
+        history.length = 0;
+//        window.location.href="login.html";      //DEBUG
+        window.location.href="index.html";    //BUILT
+    }
+</script>
