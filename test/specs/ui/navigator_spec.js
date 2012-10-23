@@ -1,4 +1,4 @@
-describeUi("navigator", "/html5/navigator.html", function () {
+describeUi("navigator", "/app/navigator-test.html", function () {
 
     it("should show the popup when the client icon is clicked", function () {
         var win, field, button;
