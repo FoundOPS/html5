@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(['moment'], function () {
+define(['jquery','moment'], function ($) {
     var generalTools = {};
 
     /**
@@ -155,23 +155,25 @@ define(['moment'], function () {
     };
 
     /**
-     * watches all input elements on page for value change
-     * param {string} pageDiv the id of the view. ex: "#personal"
+     * watches all input elements in the given div for value change
+     * @param div {string} pageDiv the id of the view. ex: "#personal"
+     * @param callback
      */
-    generalTools.observeInput = function (pageDiv) {
-        $(pageDiv + ' input').each(function () {
+    generalTools.observeInput = function (div, callback) {
+        $(div + ' input').each(function () {
             // Save current value of element
             $(this).data('oldVal', $(this).val());
             // Look for changes in the value
-            $(this).bind("propertychange keyup input paste change", function () {
+            $(this).delayKeyup(function (e) {
                 // If value has changed...
-                if ($(this).data('oldVal') != $(this).val()) {
+                if (e.data('oldVal') != e.val()) {
                     // Updated stored value
-                    $(this).data('oldVal', $(this).val());
-                    //enable save and cancel buttons
-                    generalTools.enableButtons(pageDiv);
+                    e.data('oldVal', e.val());
+                    //call the callback function
+                    if (callback)
+                        callback(e.val());
                 }
-            });
+            }, 1000);
         });
     };
 
