@@ -220,7 +220,7 @@ define(["developer", "tools/dateTools", "db/saveHistory", "tools/parameters"], f
         serviceHolders: {},
         serviceTemplates: {},
         sessions: {
-            params: {isMobile: developer.CURRENT_FRAME === developer.Frame.MOBILE_APP},
+            params: {isMobile: developer.IS_MOBILE},
             excludeRoleId: true,
             headers: {"ops-details": "true"}
         },

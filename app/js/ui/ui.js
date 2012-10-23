@@ -46,11 +46,6 @@ define(function () {
     ];
 
     var imageRootUrl = 'img/';
-//TODO remove after publish if it works
-//    if (developer.CURRENT_FRAME === developer.Frame.SILVERLIGHT || developer.CURRENT_FRAME === developer.Frame.SILVERLIGHT_PUBLISHED) {
-//        imageRootUrl = "../Content/";
-//    }
-
     /**
      * Enum for image urls.
      * @enum {String}

@@ -6,18 +6,8 @@
 
 "use strict";
 
-define(function () {
+define(['lib/platform', "underscore", 'underscore.string'], function (platform, _, _s) {
     var developer = {};
-
-    /**
-     * Enum for analytics storage
-     * @enum {number}
-     */
-    developer.AnalyticsStore = {
-        OFF: 0,
-        DEBUG: 1,
-        LIVE: 2
-    };
 
     /**
      * Enum for the data source.
@@ -38,24 +28,14 @@ define(function () {
 
     /**
      * Enum for the application's frame.
-     * SILVERLIGHT: The application is loaded with the local SL app.
-     * SILVERLIGHT_PUBLISHED: The application is loaded with the live SL app.
-     * BROWSER: The application is loaded without the SL app.
-     * MOBILE_APP: The application is loaded for mobile phones.
+     * DEFAULT: Load the application normally depending on the platform
+     * DISABLE_SL: The application is loaded without the Silverlight app
      * @enum {number}
      */
     developer.Frame = {
-        SILVERLIGHT: 0,
-        SILVERLIGHT_PUBLISHED: 1,
-        BROWSER: 2,
-        MOBILE_APP: 3
+        DEFAULT: 0,
+        DISABLE_SL: 1
     };
-
-    /**
-     * The storage for analytics
-     * @type {developer.AnalyticsStore}
-     */
-    developer.CURRENT_ANALYTICS = developer.AnalyticsStore.DEBUG;
 
     /**
      * The current web service source. Used when running local server for debugging
@@ -67,12 +47,29 @@ define(function () {
      * This is for sections that are in the Silverlight application and is used for debugging
      * @type {developer.Frame}
      */
-    developer.CURRENT_FRAME = developer.Frame.BROWSER;
+    developer.CURRENT_FRAME = developer.Frame.DISABLE_SL;
 
     /**
      * The current silverlight version
      */
     developer.CURRENT_SILVERLIGHT_VERSION = 0.23;
+
+    /**
+     * Set to true if deploying
+     * This will cause CURRENT_FRAME and CURRENT_DATA_SOURCE to be overridden
+     * @type {boolean}
+     */
+    developer.DEPLOY = false;
+    if (developer.DEPLOY) {
+        developer.CURRENT_DATA_SOURCE = developer.DataSource.LIVE;
+        developer.CURRENT_FRAME = developer.Frame.AUTO;
+    }
+
+    /**
+     * Set to true if this is a mobile platform
+     * @type {Boolean}
+     */
+    developer.IS_MOBILE = _s.include(platform.product, "iPhone") || _s.include(platform.product, "iPad") || _s.include(platform.os, "Android");
 
     return developer;
 });
