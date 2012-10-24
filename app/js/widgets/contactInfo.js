@@ -3,11 +3,11 @@
 'use strict';
 
 //need to require kendo so it is loaded before this widget, otherwise funky stuff happens
-define(["jquery", "tools/generalTools", "select2", "kendo"], function ($, generalTools) {
+define(["jquery", "tools/generalTools", "tools/parserTools", "select2", "kendo"], function ($, generalTools, parserTools) {
     var sampleContacts = [
-        {Entity: "Burger King", Value: "765-494-2786", Label: "Phone"},
-        {Entity: "Burger King", Value: "bk47906@gmail.com", Label: "Email"},
-        {Entity: "Mary Lou's", Value: "http://www.marylousdonuts.com", Label: "Website"}
+        {Entity: "Burger King", Value: "765-494-2786", Category: "Phone", Label: "Mobile"},
+        {Entity: "Burger King", Value: "bk47906@gmail.com", Category: "Email", Label: "Personal"},
+        {Entity: "Mary Lou's", Value: "http://www.marylousdonuts.com", Category: "Website", Label: "Business"}
     ];
 
     $.widget("ui.contactInfo", {
@@ -23,11 +23,11 @@ define(["jquery", "tools/generalTools", "select2", "kendo"], function ($, genera
                 '<label>Value</label><br />' +
                 '<input id="value" type="text"/><br />' +
                 '<label>Label</label><br />' +
-                '<select id="labelIcon" class="EmailSmall">' +
-                    '<option class="EmailSmall" value="Email">&nbsp;</option>' +
-                    '<option class="WebsiteSmall" value="Website">&nbsp;</option>' +
-                    '<option class="PhoneSmall" value="Phone">&nbsp;</option>' +
-                    '<option class="OtherSmall" value="Other">&nbsp;</option>' +
+                '<select id="labelIcon">' +
+                '<option class="EmailSmall" value="Email">&nbsp;</option>' +
+                '<option class="WebsiteSmall" value="Website">&nbsp;</option>' +
+                '<option class="PhoneSmall" value="Phone">&nbsp;</option>' +
+                '<option class="OtherSmall" value="Other">&nbsp;</option>' +
                 '</select>​' +
                 '<input id="label" /><br />' +
                 '<button class="k-button k-button-icontext save"><span class="k-icon k-update"></span>Save</button>' +
@@ -38,24 +38,34 @@ define(["jquery", "tools/generalTools", "select2", "kendo"], function ($, genera
 
             that._renderContactList(sampleContacts);
 
+            $("#contactInfo #labelIcon").select2({
+                placeholder: "",
+                width: "26px",
+                containerCssClass: "iconContainer OtherSmall",
+                minimumResultsForSearch: 15,
+                dropdownCssClass: "bigdrop iconDropdown"
+            }).on("change", function (e) {
+                //change the label icon
+                that._changeLabelClass(e.val);
+            });
+
             var labels = [
-                {name: "Mobile"},
-                {name: "Work"},
-                {name: "Home"},
-                {name: "Fax"}
+                {value: "Mobile"},
+                {value: "Work"},
+                {value: "Home"},
+                {value: "Fax"}
             ];
 
             //function to format the option names of the dropdown
             var formatItemName = function (item) {
-                return item.name;
+                return item.value;
             };
 
             $("#contactInfo #label").select2({
                 placeholder: "Select a label",
-                minimumResultsForSearch: 15,
                 width: "244px",
                 id: function (item) {
-                    return item.name;
+                    return item.value;
                 },
                 query: function (query) {
                     if (!labels) {
@@ -65,6 +75,11 @@ define(["jquery", "tools/generalTools", "select2", "kendo"], function ($, genera
                     query.callback(data);
                 },
                 initSelection: function () {},
+//                multiple: true,
+//                tags: labels,
+//                maximumSelectionSize: 1,
+//                tokenSeparators: [",", " "],
+//                tokenizer(input, selection, selectCallback, opts),
                 formatSelection: formatItemName,
                 formatResult: formatItemName,
                 dropdownCssClass: "bigdrop"
@@ -73,16 +88,8 @@ define(["jquery", "tools/generalTools", "select2", "kendo"], function ($, genera
                 $("#contactInfo #labelIcon")[0].className = e.val;
             });
 
-            $("#contactInfo #labelIcon").select2({
-                placeholder: "",
-                width: "26px",
-                containerCssClass: "iconContainer",
-                minimumResultsForSearch: 15,
-                dropdownCssClass: "bigdrop iconDropdown"
-            });
-
             $("#contactInfo .add").on("click", function () {
-                sampleContacts.push({Entity: "", Value: "", Label: ""});
+                sampleContacts.push({Entity: "New", Value: "", Category: "Other", Label: ""});
                 that._renderContactList(sampleContacts);
                 that._editIndex = sampleContacts.length - 1;
                 that._edit(sampleContacts[sampleContacts.length - 1]);
@@ -91,6 +98,7 @@ define(["jquery", "tools/generalTools", "select2", "kendo"], function ($, genera
                 $("#contactInfo h3")[0].innerText = "Contact Info";
                 sampleContacts[that._editIndex].Value = $("#contactInfo #value").val();
                 sampleContacts[that._editIndex].Label = $("#contactInfo #label").select2("val");
+                sampleContacts[that._editIndex].Category = $("#contactInfo #labelIcon").select2("val");
                 that._renderContactList(sampleContacts);
 
                 $("#contactInfo #listWrapper").attr("style", "display:block");
@@ -108,35 +116,40 @@ define(["jquery", "tools/generalTools", "select2", "kendo"], function ($, genera
             //attempt to update label on value change
             generalTools.observeInput("#contactInfo #value", function (string) {
                 string = string.toLowerCase();
-                //if value is a website /((http|https):\/\/(\w+:{0,1}\w*@)?(\S+)|)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/
-                if (string.match(/^(?:([A-Za-z]+):)?(\/{0,3})([0-9.\-A-Za-z]+)(?::(\d+))?(?:\/([^?#]*))?(?:\?([^#]*))?(?:#(.*))?$/)) {
-                    $("#contactInfo #labelIcon").val("Website");
-                //if value is an email
-                } else if (string.match(/^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/)){
-                    $("#contactInfo #labelIcon").val("Email");
-                //if value is a phone number  /\d{3}-\d{3}-\d{4}|\d{10}/
-                } else if (string.match(/^\(([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/)){
-                    $("#contactInfo #labelIcon").val("Phone");
+                var label;
+                //if value is a website
+                if (parserTools.isEmail(string)) {
+                    label = "Email";
+                    //if value is an email
+                } else if (parserTools.isUrl(string)) {
+                    label = "Website";
+                    //if value is a phone number
+                } else if (parserTools.isPhone(string)) {
+                    label = "Phone";
                 } else {
-                    $("#contactInfo #labelIcon").val("Other");
+                    label = "Other";
                 }
+
+                $("#contactInfo #labelIcon").select2("data", {value: label});
+                that._changeLabelClass(label);
             });
         },
 
         _renderContactList: function (contacts) {
-            var that = this, label, value, href;
+            var that = this, category, label, value, href;
 
             $("#contactInfo #list")[0].innerHTML = "";
 
             for (var i = 0; i < contacts.length; i++) {
                 value = contacts[i].Value;
+                category = contacts[i].Category;
                 label = contacts[i].Label;
                 href = "javascript:void(0)";
-                if (label === "Website") {
+                if (category === "Website") {
                     href = value;
-                } else if (label === "Email") {
+                } else if (category === "Email") {
                     href = "mailto:" + value;
-                } else if (label === "Phone") {
+                } else if (category === "Phone") {
                     href = "tel:" + value;
                 }
 
@@ -144,7 +157,7 @@ define(["jquery", "tools/generalTools", "select2", "kendo"], function ($, genera
                     value = value.replace("http://", "");
                 }
 
-                var element = "<li id='" + i + "'><a href='" + href + "' class='info' target='_blank'><span class='" + label + "'></span><p class='label'>" + label +
+                var element = "<li id='" + i + "'><a href='" + href + "' class='info' target='_blank'><span class='" + category + "'></span><p class='label'>" + label +
                     "</p><p class='value'>" + value + "</p></a><div class='editBtn'><span></span></div></li>";
                 $("#contactInfo #list").append(element);
             }
@@ -162,13 +175,23 @@ define(["jquery", "tools/generalTools", "select2", "kendo"], function ($, genera
         },
 
         _edit: function (contact) {
-            $("#contactInfo #value").val(contact.Value);
-            $("#contactInfo #labelIcon")[0].className = contact.Label;
-            $("#contactInfo #label").select2("data", {name: contact.Label});
+            var that = this;
             $("#contactInfo h3")[0].innerText = contact.Entity;
-
+            $("#contactInfo #value").val(contact.Value);
+            that._changeLabelClass(contact.Category);
+            $("#contactInfo #labelIcon").select2("data", {value: contact.Category});
+            $("#contactInfo #label").select2("data", {value: contact.Label});
             $("#contactInfo #listWrapper").attr("style", "display:none");
             $("#contactInfo #editWrapper").attr("style", "display:block");
+        },
+
+        _changeLabelClass: function (newClass) {
+            var container = $("#contactInfo .iconContainer")[0];
+            var className = container.className.match(/(\s(.*)Small)/);
+            var extra = className[0].match(/((.*)\s)/);
+            var match = className[0].replace(extra[0], "");
+            $(container).removeClass(match);
+            $(container).addClass(newClass + "Small");
         }
     });
 });

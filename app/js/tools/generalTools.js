@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(['jquery','moment'], function ($) {
+define(['jquery', 'moment'], function ($) {
     var generalTools = {};
 
     /**
@@ -17,7 +17,7 @@ define(['jquery','moment'], function ($) {
      * @return {string} The direction.
      */
     generalTools.getDirection = function (deg) {
-        if(deg == ""){
+        if (deg == "") {
             return "";
         }
 
@@ -154,13 +154,25 @@ define(['jquery','moment'], function ($) {
         $(page + " .saveBtn").attr("disabled", "disabled");
     };
 
+    $.fn.delayKeyup = function (callback, ms) {
+        var timer = 0;
+        var el = $(this);
+        $(this).keyup(function () {
+            clearTimeout(timer);
+            timer = setTimeout(function () {
+                callback(el);
+            }, ms);
+        });
+        return $(this);
+    };
+
     /**
      * watches all input elements in the given div for value change
-     * @param div {string} pageDiv the id of the view. ex: "#personal"
+     * @param {string} element the selector to observe ex: "#personalSettings input" or "#contactInfo #value"
      * @param callback
      */
-    generalTools.observeInput = function (div, callback) {
-        $(div + ' input').each(function () {
+    generalTools.observeInput = function (element, callback) {
+        $(element).each(function () {
             // Save current value of element
             $(this).data('oldVal', $(this).val());
             // Look for changes in the value

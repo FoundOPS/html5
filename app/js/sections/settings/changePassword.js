@@ -37,7 +37,9 @@ define(["db/services", "tools/generalTools", "widgets/settingsMenu"], function (
         kendo.bind(menu);
         menu.kendoSettingsMenu();
 
-        generalTools.observeInput("#changePassword");
+        generalTools.observeInput("#changePassword input", function () {
+            generalTools.enableButtons("#changePassword");
+        });
 
         changePassword.validator = $("#changePasswordForm").kendoValidator({
             rules: {
