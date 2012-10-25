@@ -28,7 +28,6 @@ require.config({
         moment: "../lib/moment",
         noty: "../lib/noty",
         select2: "../lib/select2",
-        selectBox: "widgets/selectBox",
         signals: "../lib/signals",
         totango: "../lib/totango",
         underscore: "../lib/underscore",
@@ -53,7 +52,6 @@ require.config({
         moment: {},
         noty: ['jquery'],
         select2: ['jquery'],
-        selectBox: ['jquery'],
         uservoice: {},
         totango: {}
     }

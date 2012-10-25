@@ -41,7 +41,7 @@ define(['lib/platform', "underscore", 'underscore.string'], function (platform, 
      * The current web service source. Used when running local server for debugging
      * @type {developer.DataSource}
      */
-    developer.CURRENT_DATA_SOURCE = developer.DataSource.BROWSER_LOCALAPI;
+    developer.CURRENT_DATA_SOURCE = developer.DataSource.REMOTE_API;
 
     /**
      * This is for sections that are in the Silverlight application and is used for debugging
