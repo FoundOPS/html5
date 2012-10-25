@@ -27,7 +27,7 @@ define(["developer", "tools/dateTools", "db/saveHistory", "tools/parameters"], f
         } else if (mode === developer.DataSource.LIVE) {
             rootApiUrl = 'http://api.foundops.com/';
         } else if (mode === developer.DataSource.REMOTE_API) {
-            rootApiUrl = "http://192.168.0.108:70/"; // Local IP of host computer (might change everyday).
+            rootApiUrl = "http://192.168.0.111:70/"; // Local IP of host computer (might change everyday).
         } else if (mode === developer.DataSource.TESTAPI) {
             rootApiUrl = 'http://testapi.foundops.com/';
         }
@@ -220,7 +220,7 @@ define(["developer", "tools/dateTools", "db/saveHistory", "tools/parameters"], f
         serviceHolders: {},
         serviceTemplates: {},
         sessions: {
-            params: {isMobile: developer.CURRENT_FRAME === developer.Frame.MOBILE_APP},
+            params: {isMobile: developer.IS_MOBILE},
             excludeRoleId: true,
             headers: {"ops-details": "true"}
         },

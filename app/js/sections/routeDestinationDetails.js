@@ -6,49 +6,50 @@
 
 'use strict';
 
-define(["sections/linkedEntitySection", "sections/routeDetails", "tools/parameters", "developer", "tools/analytics"], function (createBase, routeDetails, parameters, developer, analytics) {
-    var vm, section = createBase("routeTask", "routeTaskId",
-        //on show
-        function () {
-            var routeDestination = routeDetails.vm.get("nextEntity");
+define(["sections/linkedEntitySection", "sections/routeDetails", "tools/parameters", "developer", "tools/analytics",
+    "lib/platform", 'underscore.string'], function (createBase, routeDetails, parameters, developer, analytics, platform, _s) {
+    var vm,
+    //true if on an Android device with cordova
+        androidCordova = window.cordova && _s.include(platform.os, "Android"),
+        section = createBase("routeTask", "routeTaskId",
+            //on show
+            function () {
+                var routeDestination = routeDetails.vm.get("nextEntity");
 
-            if (!routeDestination || !routeDestination.RouteTasks) {
-                parameters.set({section: {name: "routeDetails"}});
-                return;
-            }
+                if (!routeDestination || !routeDestination.RouteTasks) {
+                    parameters.set({section: {name: "routeDetails"}});
+                    return;
+                }
 
-            vm.set("selectedEntity", routeDestination);
-            vm.set("dataSource", new kendo.data.DataSource({
-                data: routeDestination.RouteTasks
-            }));
+                vm.set("selectedEntity", routeDestination);
+                vm.set("dataSource", new kendo.data.DataSource({
+                    data: routeDestination.RouteTasks
+                }));
 
-            kendo.bind($("#routeDestinationDetails"), vm, kendo.mobile.ui);
-            kendo.bind($("#directionsButton"), vm);
+                kendo.bind($("#routeDestinationDetails"), vm, kendo.mobile.ui);
+                kendo.bind($("#directionsButton"), vm);
 
-            //try to move forward
-            section._moveForward();
+                //try to move forward
+                section._moveForward();
 
-            //region Set touch/click animation for Direction's button.
-            document.getElementById("directionsButton").addEventListener('touchstart', function (e) {
-                $("#directionsButton").toggleClass("buttonClicked");
+                //region Set touch/click animation for Direction's button.
+                document.getElementById("directionsButton").addEventListener('touchstart', function (e) {
+                    $("#directionsButton").toggleClass("buttonClicked");
+                });
+                document.getElementById("directionsButton").addEventListener('touchend', function (e) {
+                    $("#directionsButton").toggleClass("buttonClicked");
+                });
+                document.getElementById("directionsButton").addEventListener('touchcancel', function (e) {
+                    $("#directionsButton").toggleClass("buttonClicked");
+                });
+                document.getElementById("directionsButton").addEventListener('mousedown', function (e) {
+                    $("#directionsButton").toggleClass("buttonClicked");
+                });
+                document.getElementById("directionsButton").addEventListener('mouseup', function (e) {
+                    $("#directionsButton").toggleClass("buttonClicked");
+                });
+                //endregion
             });
-            document.getElementById("directionsButton").addEventListener('touchend', function (e) {
-                $("#directionsButton").toggleClass("buttonClicked");
-            });
-            document.getElementById("directionsButton").addEventListener('touchcancel', function (e) {
-                $("#directionsButton").toggleClass("buttonClicked");
-            });
-            document.getElementById("directionsButton").addEventListener('mousedown', function (e) {
-                $("#directionsButton").toggleClass("buttonClicked");
-            });
-            document.getElementById("directionsButton").addEventListener('mouseup', function (e) {
-                $("#directionsButton").toggleClass("buttonClicked");
-            });
-            //endregion
-        });
-
-        //Boolean that states whether user is on Android device or not.
-    var androidDevice = developer.CURRENT_FRAME === developer.Frame.MOBILE_APP && kendo.support.detectOS(navigator.userAgent).device === "android";
 
     window.routeDestinationDetails = section;
     vm = section.vm;
@@ -71,8 +72,8 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "tools/paramete
             destination = vm.get("selectedEntity.Location.Latitude") + "," + vm.get("selectedEntity.Location.Longitude");
 
         var navigateTo = function (destination, currentPosition) {
-            if (androidDevice) {
-                window.location.href = "geo:0,0?q=" + destination; //Opens google navigation on Android phones.
+            if (androidCordova) {
+                window.location.href = "geo:0,0?q=" + destination; //Opens google navigation on Android phones
             } else if (currentPosition) {
                 window.open("http://maps.google.com/maps?saddr=" + currentPosition + "&daddr=" + destination);
             } else {
@@ -100,7 +101,7 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "tools/paramete
             window.location.href = "mailto:" + e.dataItem.Data;
         } else if (e.dataItem.Type === "Website") {
             analytics.track("Website Contact Click");
-            if (androidDevice) {
+            if (androidCordova) {
                 window.plugins.childBrowser.showWebPage("http://" + e.dataItem.Data);
             } else {
                 window.open("http://" + e.dataItem.Data);

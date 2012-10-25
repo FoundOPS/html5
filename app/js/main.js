@@ -93,7 +93,10 @@ require(["jquery", "widgets/navigator", "developer", "db/services", "db/session"
         //Listens for back button being pressed on a mobile device and overrides it.
         document.addEventListener("backbutton", main.onBack, false);
         //Listens for menu button being pressed on a mobile device and overrides it.
-        function onMenuKeyPressed() { application.navigate('view/personalSettings.html'); }
+        function onMenuKeyPressed() {
+            application.navigate('view/personalSettings.html');
+        }
+
         document.addEventListener("menubutton", onMenuKeyPressed, false);
     }
 
@@ -110,23 +113,21 @@ require(["jquery", "widgets/navigator", "developer", "db/services", "db/session"
             return;
         }
 
-        var frame = developer.CURRENT_FRAME;
-
-        //setup the silverlight div for the proper frames
-        if (frame === developer.Frame.SILVERLIGHT || frame === developer.Frame.SILVERLIGHT_PUBLISHED) {
+        //only show silverlight if the frame is auto and the platform supports it
+        if (developer.CURRENT_FRAME !== developer.Frame.DISABLE_SL && !developer.IS_MOBILE) {
             var silverlightElement = '<div id="silverlightControlHost">' +
                 '<object id="silverlightPlugin" data="data:application/x-silverlight-2," type="application/x-silverlight-2" style="height: 1px; width: 1px">' +
                 '<param name="onSourceDownloadProgressChanged" value="onSourceDownloadProgressChanged"/>';
-            if (frame === developer.Frame.SILVERLIGHT) {
-                //if debugging update version to random
-                developer.CURRENT_SILVERLIGHT_VERSION = Math.floor((Math.random() * 1000) + 1);
-                silverlightElement += '<param name="splashscreensource" value="http://localhost:31820/ClientBin/SplashScreen.xaml"/>' +
-                    '<param name="source" value="http://localhost:31820/ClientBin/FoundOps.SLClient.Navigator.xap"/>';
-            } else if (frame === developer.Frame.SILVERLIGHT_PUBLISHED) {
+            if (developer.DEPLOY) {
                 //TODO centralize blobUrl to developer or dbServices
                 var blobUrl = "http://bp.foundops.com/";
                 silverlightElement += '<param name="splashscreensource" value="' + blobUrl + 'xaps/SplashScreen.xaml" />' +
-                    '<param name="source" value="' + blobUrl + 'xaps/FoundOps.SLClient.Navigator.xap?ignore=' + developer.CURRENT_SILVERLIGHT_VERSION + '/>';
+                    '<param name="source" value="' + blobUrl + 'xaps/FoundOps.SLClient.Navigator.xap?ignore=' + developer.CURRENT_SILVERLIGHT_VERSION + '"/>';
+            } else {
+                //if debugging update version to random
+                developer.CURRENT_SILVERLIGHT_VERSION = Math.floor((Math.random() * 1000) + 1);
+                silverlightElement += '<param name="splashscreensource" value="http://localhost:31820/ClientBin/SplashScreen.xaml"/>' +
+                    '<param name="source" value="http://localhost:31820/ClientBin/FoundOps.SLClient.Navigator.xap?ignore=' + developer.CURRENT_SILVERLIGHT_VERSION + '"/>';
             }
             silverlightElement +=
                 '<param name="onError" value="onSilverlightError"/>' +
@@ -146,25 +147,18 @@ require(["jquery", "widgets/navigator", "developer", "db/services", "db/session"
         }
 
         //setup the navigator
-        //navigator = new Navigator(data);
-        //navigator.hideSearch();
-        data.enableBackButton = developer.CURRENT_FRAME === developer.Frame.MOBILE_APP;
-
+        data.enableBackButton = developer.IS_MOBILE;
         $(document).navigator(data);
         $(document).navigator('hideSearch');
 
-        //reset the images 1.5 seconds after loading to workaround a shared access key buy
+        //reset the images 1.5 seconds after loading to workaround a shared access key bug
         _.delay(function () {
-            //if (navigator) {
-                $(document).navigator('changeAvatar', data.avatarUrl);
-                //navigator.changeAvatar(data.avatarUrl);
-                $(document).navigator('changeBusinessLogo', session.get("role.businessLogoUrl"));
-                //navigator.changeBusinessLogo(session.get("role.businessLogoUrl"));
-            //}
+            $(document).navigator('changeAvatar', data.avatarUrl);
+            $(document).navigator('changeBusinessLogo', session.get("role.businessLogoUrl"));
         }, 1500);
 
         if (!parameters.getSection()) {
-            var initialSection = {name: developer.CURRENT_FRAME === developer.Frame.MOBILE_APP ? "routes" : "updates"};
+            var initialSection = {name: developer.IS_MOBILE ? "routes" : "updates" };
             parameters.set({section: initialSection, replace: true});
         }
     });
