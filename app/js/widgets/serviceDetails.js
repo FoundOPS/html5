@@ -211,20 +211,25 @@ define(["jquery", "db/services", "db/session", "db/models", "selectBox", "kendo"
                 if (field.TypeInt === 0) {
 
                     for (i = 0; i < field.Options.length; i++) {
-                        options[i] = {name: field.Options[i].Name, value: field.Options[i].IsChecked};
+                        options[i] = {name: field.Options[i].Name, selected: field.Options[i].IsChecked};
                     }
 
-                    //Select Dropdown
-                    fieldElement = $('<div class="selectBox"></div>').selectBox(options).appendTo(elementToAppendTo).wrap("<li><label>" + field.Name + "<br/></label></li>");
+                    var save = function (options) {
+                        var selectedIndex;
+                        for (i = 0; i < field.Options.length; i++) {
+                            if(options[i].selected === true) {
+                                selectedIndex = options[i].index;
+                                field.set('Options[' + selectedIndex + '].IsChecked', true);
+                            } else {
+                                field.Options[i].IsChecked = false;
+                            }
 
-                    fieldElement.change(function (e) {
-                        var optionsHTML = e.srcElement.children;
-                        for(i=0; i < optionsHTML.length; i++) {
-                            option = optionsHTML[i];
-                            options[i] = { name :option.text, index: option.index, value: option.selected};
                         }
-                        $("selectBox").selectBox("selected", options);
-                    });
+
+                    };
+
+                    //Select Dropdown
+                    fieldElement = $('<div></div>').selectBox(options, save).appendTo(elementToAppendTo).wrap("<li><label>" + field.Name + "<br/></label></li>");
 
                 } else {
                     //Checkbox (1) or checklist (2)
