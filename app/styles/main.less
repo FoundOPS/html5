@@ -343,22 +343,17 @@ span.k-tooltip {
 h1, h2, h3, td, p {
     cursor: default;
 }
-
 h1.title {
     width: 500px;
 }
-
 body {
     font-family: PTSans;
-    background-color: #fff;
-    background-image: url("../img/background-tile.png");
+    background-color: #efefef;
     color: @charcoal;
 }
-
 hr {
     border: 1px solid #666;
 }
-
 .wrap {
     margin: 0 20px 10px 180px;
     padding: 15px;
@@ -367,57 +362,45 @@ hr {
     box-shadow: 0 5px 8px #aaa;
     background-color: #fff;
 }
-
 #dispatcher .addDeleteBtns {
     float: right;
     margin: -8px 0 0 0;
 }
-
 .addDeleteBtns .k-grid-delete, .addDeleteBtns .k-grid-add {
     padding-right: 6px;
 }
-
 .addDeleteBtns .k-grid-delete {
     margin: 0;
 }
-
 .saveBtn {
     margin-left: 145.5px;
     .buttonGradient;
 }
-
 .saveBtn:hover {
     .buttonGradientHover;
 }
-
 button[disabled], .k-grid-update[disabled], .k-grid-cancel[disabled] {
     color: #999;
     cursor: default;
 }
-
 button[disabled] .k-icon, button[disabled] .k-icon:hover {
     opacity: .5;
 }
-
 .saveBtn[disabled], .k-grid-update[disabled] {
     border-color: #c5c5c5;
     .buttonGradient;
 }
-
 .saveBtn[disabled]:hover, .k-grid-update[disabled]:hover {
     color: #999;
 }
-
 .cancelBtn {
     margin-left: 4px;
 }
-
 .cancelBtn[disabled]:hover, .k-grid-cancel[disabled]:hover {
     background-color: #e3e3e3;
     border-color: #c5c5c5;
     color: #999;
 }
-
 .k-grid-edit, .k-grid-edit:hover, .k-grid-delete, .k-grid-delete:hover, .k-grid-add,
 .k-grid-add:hover, .k-grid-delete[disabled], .k-grid-delete[disabled]:hover, .csvBtn, .csvBtn:hover {
     background: url("../img/btnSprite.png") no-repeat;
@@ -425,7 +408,6 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover {
     height: 22px;
     background-position: 0 -132px;
 }
-
 /*endregion*/
 /*region ImageUploadButton */
 .imageupload-button {
@@ -658,30 +640,24 @@ div.k-window-content {
 #dispatcher .wrap {
     min-width: 450px;
 }
-
 #dispatcher .k-grid th {
     text-overflow: ellipsis;
 }
-
 #dispatcher #color {
     width: 20px;
     height: 20px;
     border: 1px solid #000000;
     margin-left: 12px;
 }
-
 #dispatcher #color:hover {
     cursor: pointer;
 }
-
 #dispatcher .k-grid .k-grid-header .k-header .k-link {
     height: auto;
 }
-
 #dispatcher .k-grid .k-grid-header .k-header {
     white-space: normal;
 }
-
 #dispatcher .arrow {
     position: relative;
     top: -4px;
@@ -690,19 +666,15 @@ div.k-window-content {
     height: 8px;
     background-image: url(../img/arrow.png);
 }
-
 #dispatcher .saveBtn {
     margin-left: 145.5px;
 }
-
 .k-grid-add {
     background-position: 0 -22px;
 }
-
 .k-grid-add:hover {
     background-position: 0 0;
 }
-
 /*region COLOR PICKER*/
 .colorpicker {
     width: 211px;
@@ -713,7 +685,6 @@ div.k-window-content {
     font-family: Arial, Helvetica, sans-serif;
     display: none;
 }
-
 .colorpicker_color {
     width: 150px;
     height: 150px;
@@ -724,7 +695,6 @@ div.k-window-content {
     overflow: hidden;
     cursor: crosshair;
 }
-
 .colorpicker_color div {
     position: absolute;
     top: 0;
@@ -847,7 +817,7 @@ div.k-window-content {
     left: 0;
     width: 36px;
     height: 36px;
-    background: url(../img/select2.png);
+    background: url(../img/selectColor.png);
 }
 
 .colorSelector2:hover {
@@ -860,7 +830,7 @@ div.k-window-content {
     left: 4px;
     width: 28px;
     height: 28px;
-    background: url(../img/select2.png) center;
+    background: url(../img/selectColor.png) center;
 }
 
 .colorpickerHolder2 {
@@ -930,6 +900,8 @@ div.k-window-content {
 /*endregion*/
 /*region Services */
 #services {
+    background-color: #fff;
+    background-image: url("../img/background-tile.png");
     .km-content {
         min-width: 720px;
     }
@@ -1223,6 +1195,17 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
         }
         .select2-container{
             margin-bottom: 10px;
+            .select2-choices{
+                height: 26px !important;
+                border: none;
+                background-image: none;
+                .select2-search-choice-close{
+                    top:2px;
+                }
+                .select2-search-choice{
+                    padding-top: 2px;
+                }
+            }
         }
         button{
             font-size: 14px;
@@ -1693,6 +1676,14 @@ ul.noty_cont.noty_layout_topRight li {
     -moz-box-shadow: none;
     -o-box-shadow: none;
     box-shadow: none;
+}
+.select2-container-multi.select2-container-active .select2-choices {
+    -webkit-box-shadow: 0 0 0px;
+    -moz-box-shadow   : 0 0 0px;
+    -o-box-shadow     : 0 0 0px;
+    box-shadow        : 0 0 0px;
+    border: none;
+    outline: none;
 }
 .select2-container .select2-choice div{
     background-color: #fff;
