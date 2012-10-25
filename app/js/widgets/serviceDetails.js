@@ -1,5 +1,5 @@
 'use strict';
-define(["jquery", "db/services", "db/session", "db/models", "kendo", "jmaskmoney", "jautosize", "select2", "jtooltip"], function ($, dbServices, session, models) {
+define(["jquery", "db/services", "db/session", "db/models", "selectBox", "kendo", "jmaskmoney", "jautosize", "jtooltip"], function ($, dbServices, session, models, selectBox) {
 
     var kendo = window.kendo,
         ui = kendo.ui,
@@ -210,29 +210,27 @@ define(["jquery", "db/services", "db/session", "db/models", "kendo", "jmaskmoney
                 var fieldElement, options = [], i;
                 if (field.TypeInt === 0) {
 
-                    //Select Dropdown
-                    fieldElement = $('<select id="select" ></select>').appendTo(elementToAppendTo).wrap("<li><label>" + field.Name + "<br/></label></li>");
-
                     for (i = 0; i < field.Options.length; i++) {
-                        options[i] = "<option>" + field.Options[i].Name + "</option>\n";
-                        if (field.Options[i].IsChecked === true) {
-                            options[i] = "<option selected='selected'>" + field.Options[i].Name + "</option>\n";
-                        }
+                        options[i] = {name: field.Options[i].Name, selected: field.Options[i].IsChecked};
                     }
 
-                    fieldElement[0].innerHTML = options;
-
-                    $("#select").select2({
-                        placeholder: "Select an option",
-                        minimumResultsForSearch: 15
-                    });
-
-                    $("#select").change(function (e) {
+                    var save = function (options) {
+                        var selectedIndex;
                         for (i = 0; i < field.Options.length; i++) {
-                            field.Options[i].IsChecked = false;
+                            if(options[i].selected === true) {
+                                selectedIndex = options[i].index;
+                                field.set('Options[' + selectedIndex + '].IsChecked', true);
+                            } else {
+                                field.Options[i].IsChecked = false;
+                            }
+
                         }
-                        field.set('Options[' + e.target.selectedIndex + '].IsChecked', true);
-                    });
+
+                    };
+
+                    //Select Dropdown
+                    fieldElement = $('<div></div>').selectBox(options, save).appendTo(elementToAppendTo).wrap("<li><label>" + field.Name + "<br/></label></li>");
+
                 } else {
                     //Checkbox (1) or checklist (2)
                     fieldElement = $('<ul data-role="listview" data-style="inset">' + field.Name + '</ul>').appendTo(elementToAppendTo);

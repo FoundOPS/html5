@@ -12,9 +12,9 @@ public class FoundOPS extends DroidGap {
 		super.loadUrl("file:///android_asset/www/index.html");
 	}
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.activity_found_ops, menu);
-		return false;
-	}
+//	@Override
+//	public boolean onCreateOptionsMenu(Menu menu) {
+//		getMenuInflater().inflate(R.menu.activity_found_ops, menu);
+//		return false;
+//	}
 }
