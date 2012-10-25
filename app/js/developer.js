@@ -41,7 +41,7 @@ define(['lib/platform', "underscore", 'underscore.string'], function (platform, 
      * The current web service source. Used when running local server for debugging
      * @type {developer.DataSource}
      */
-    developer.CURRENT_DATA_SOURCE = developer.DataSource.REMOTE_API;
+    developer.CURRENT_DATA_SOURCE = developer.DataSource.BROWSER_LOCALAPI;
 
     /**
      * This is for sections that are in the Silverlight application and is used for debugging
@@ -59,7 +59,7 @@ define(['lib/platform', "underscore", 'underscore.string'], function (platform, 
      * This will cause CURRENT_FRAME and CURRENT_DATA_SOURCE to be overridden
      * @type {boolean}
      */
-    developer.DEPLOY = false;
+    developer.DEPLOY = true;
     if (developer.DEPLOY) {
         developer.CURRENT_DATA_SOURCE = developer.DataSource.LIVE;
         developer.CURRENT_FRAME = developer.Frame.DEFAULT;
