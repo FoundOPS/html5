@@ -779,7 +779,7 @@ div.k-window-content{
 }
 #serviceDetails, #taskServiceDetails {
     font-family: "PTSans";
-    width: 250px;
+    width: 95%;
     label, li{
         font-size: 16px;
     }
@@ -810,7 +810,7 @@ div.k-window-content{
     }
     input[type="number"], input[type="text"]{
         height: 24px;
-        padding-left: 2px;
+        padding-left: 0px;
         font-family: "PTSans";
     }
     //this fixes a large border bug in IE
@@ -873,6 +873,10 @@ div.k-window-content{
         font-family: PTSans;
     }
 }
+#taskServiceDetails{
+  padding: 0;
+  margin: auto;
+}
 #serviceDetails {
     display:none;
     position: absolute;
@@ -906,10 +910,6 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
         -moz-border-radius: 0 0 4px 4px;
         -webkit-border-radius: 0 0 4px 4px;
     }
-}
-#taskServiceDetails{
-    padding: 15px 15px 0 15px;
-    margin: 0 auto;
 }
 /*Tooltip*/
 #tooltip {

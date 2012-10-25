@@ -78,9 +78,14 @@ footer {
 #taskStatuses-listview .km-listview-link::after, #taskStatuses-listview .km-detaildisclose::after {
     border: 0 none white;
 }
+.statusLabel {
+  margin: auto;
+  width: 95%;
+  font-size: 16px;
+}
 #routeStatus-listview{
-    margin: 0 auto;
-    width:250px;
+    margin: auto;
+    width: 95%;
 }
 #routeStatus-listview a{
     min-height: 42px;
@@ -138,6 +143,13 @@ footer {
 #taskStatuses-cancelButton a.km-listview-link::after  {
     border: none;
 }
+#routeDestinationDetails hr {
+  width:auto;
+  margin: 10px 1em 0 1em;
+}
+#topHR {
+  margin: 10px 1em 20px 0em !important;
+}
 /* Class Styles */
 .contactData{
     font-size: x-small;
@@ -147,13 +159,6 @@ footer {
 }
 .mobileMode { /* Changes the padding of the Client icon in the navigator to accomodate for the back button on mobile */
     padding-left: 57px !important;
-}
-.statusLabel {
-    margin: 0 auto;
-    width: 250px;
-}
-.statusLabel span{
-    font-size: 16px;
 }
 /* Fixes displaying issues with the task statuses modal view */
 .km-modalview-wrapper {

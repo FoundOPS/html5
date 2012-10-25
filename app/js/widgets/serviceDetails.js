@@ -1,5 +1,5 @@
 'use strict';
-define(["jquery", "db/services", "db/session", "db/models", "selectBox", "kendo", "jmaskmoney", "jautosize", "jtooltip"], function ($, dbServices, session, models, selectBox) {
+define(["jquery", "db/services", "db/session", "db/models", "widgets/selectBox", "kendo", "jmaskmoney", "jautosize", "jtooltip"], function ($, dbServices, session, models) {
 
     var kendo = window.kendo,
         ui = kendo.ui,
@@ -7,7 +7,7 @@ define(["jquery", "db/services", "db/session", "db/models", "selectBox", "kendo"
         DATABINDING = "dataBinding",
         DATABOUND = "dataBound",
         inputTemplate = "<input />",
-        multiLineTextTemplate = "<textarea class='textarea' style='padding: 5px 0 5px 2px;'></textarea>";
+        multiLineTextTemplate = "<textarea class='textarea' style='padding: 5px 0 5px 0;'></textarea>";
 
     var ServiceDetails = Widget.extend({
         init: function (element, options) {
@@ -210,22 +210,17 @@ define(["jquery", "db/services", "db/session", "db/models", "selectBox", "kendo"
                 var fieldElement, options = [], i;
                 if (field.TypeInt === 0) {
 
+                    //Format options for jquery selectBox widget.
                     for (i = 0; i < field.Options.length; i++) {
                         options[i] = {name: field.Options[i].Name, selected: field.Options[i].IsChecked};
                     }
 
-                    var save = function (options) {
-                        var selectedIndex;
+                    var save = function (selectedOption) {
+                        //Clear previous selections.
                         for (i = 0; i < field.Options.length; i++) {
-                            if(options[i].selected === true) {
-                                selectedIndex = options[i].index;
-                                field.set('Options[' + selectedIndex + '].IsChecked', true);
-                            } else {
-                                field.Options[i].IsChecked = false;
-                            }
-
+                            field.Options[i].IsChecked = false;
                         }
-
+                        field.set('Options[' + selectedOption.index + '].IsChecked', selectedOption.selected);
                     };
 
                     //Select Dropdown

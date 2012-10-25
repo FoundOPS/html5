@@ -3,7 +3,6 @@ package foundOps.mobile;
 import org.apache.cordova.*;
 
 import android.os.Bundle;
-import android.view.Menu;
 
 public class FoundOPS extends DroidGap {
 	@Override
