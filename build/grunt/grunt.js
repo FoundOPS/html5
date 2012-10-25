@@ -23,11 +23,11 @@ module.exports = function (grunt) {
         androidPath = mainPath + "build/mobile/Android/assets/www/",
         iOSPath = mainPath + "build/mobile/iOS/www/",
     //11 common destinations (iOS & android)
-        destinationPaths = ["js/main-built.js", "styles/main-built.css", "styles/PTS55F.ttf", "styles/styles.less", "lib/",
+        destinationPaths = ["js/main-built.js", "styles/main-built.css", "styles/PTS55F.ttf", "styles/styles.less", "styles/jquery-mobile.less", "lib/",
             "img/", "view/", "styles/images/", "styles/textures/", "navigator.html", "index.html"],
     //11 common sources (iOS & android)
         sourcePaths = ["build/main/main-built.js", "build/main/main-built.css",
-            "app/styles/PTS55F.ttf", "login/styles/styles.less", "login/lib/*",
+            "app/styles/PTS55F.ttf", "login/styles/styles.less", "login/styles/jquery-mobile.less", "login/lib/*",
             "app/img/*", "app/view/*", "app/styles/kendo/images/*",
             "app/styles/kendo/textures/*", "app/navigator-build.html",
             "login/login.html"],
