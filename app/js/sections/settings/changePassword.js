@@ -37,7 +37,7 @@ define(["db/services", "tools/generalTools", "widgets/settingsMenu"], function (
         kendo.bind(menu);
         menu.kendoSettingsMenu();
 
-        generalTools.observeInput("#changePassword input", function () {
+        generalTools.observeInput($("#changePassword input"), function () {
             generalTools.enableButtons("#changePassword");
         });
 

@@ -3,7 +3,7 @@
 'use strict';
 
 //need to require kendo so it is loaded before this widget, otherwise funky stuff happens
-define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tools/analytics", "developer", "select2", "kendo"], function ($, _, generalTools, parserTools, analytics, developer) {
+define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "select2", "kendo"], function ($, _, generalTools, parserTools) {
     //region Locals
     var sampleContacts = [
         {Entity: "Burger King", Value: "765-494-2786", Category: "Phone", Label: "Mobile"},
@@ -20,12 +20,13 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
     $.widget("ui.contactInfo", {
         _create: function () {
             var that = this;
-
-            var _contactInfo = $('<h3>Contact Info</h3>' +
+            that._contactInfo = $('<h3>Contact Info</h3>' +
+                //first view
                 '<div id="listWrapper">' +
                 '<ul id="list"></ul>' +
                 '<button class="k-button k-button-icontext add"><span class="k-icon k-add"></span>Add New</button>' +
                 '</div>' +
+                //edit pane
                 '<div id="editWrapper">' +
                 '<label>Value</label><br />' +
                 '<input id="value" type="text"/><br />' +
@@ -41,12 +42,12 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
                 '<button class="k-button k-button-icontext delete"><span class="k-icon k-delete"></span>Delete</button>' +
                 '</div>');
 
-            that.element.append(_contactInfo);
+            that.element.append(that._contactInfo);
 
             that._renderContactList(sampleContacts);
 
             //setup the dropdown of category icons
-            $("#contactInfo #labelIcon").select2({
+            $(that._contactInfo).find("#labelIcon").select2({
                 placeholder: "",
                 width: "26px",
                 containerCssClass: "iconContainer OtherSmall",
@@ -59,9 +60,9 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
 
             that._setupLabelDropdown();
 
-            $("#contactInfo .add").on("click", function () {
+            $(that.element).find(".add").on("click", function () {
                 //add an empty contact to the list
-                sampleContacts.push({Entity: "New", Value: "", Category: "Other", Label: ""});
+                sampleContacts.unshift({Entity: "New", Value: "", Category: "Other", Label: ""});
                 //refresh the list so it contains the new contact
                 that._renderContactList(sampleContacts);
                 //set the edit index to the last item(the new item gets added to the end)
@@ -69,45 +70,43 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
                 //move to edit mode with the new contact
                 that._edit(sampleContacts[sampleContacts.length - 1]);
             });
-            $("#contactInfo .delete").live("click", function () {
-                $("#contactInfo h3")[0].innerText = "Contact Info";
+            $(that.element).find(".delete").live("click", function () {
+                $(that.element).find("h3")[0].innerText = "Contact Info";
                 //remove the selected contact from the list
                 sampleContacts.splice(that._editIndex, 1);
                 //refresh the list of contacts
                 that._renderContactList(sampleContacts);
                 //show the list of contacts
-                $("#contactInfo #listWrapper").attr("style", "display:block");
-                $("#contactInfo #editWrapper").attr("style", "display:none");
+                that._changePane("list");
             });
-            $("#contactInfo .save").live("click", function () {
-                $("#contactInfo h3")[0].innerText = "Contact Info";
+            $(that.element).find(".save").live("click", function () {
+                $(that.element).find("h3")[0].innerText = "Contact Info";
                 //get the value of the selected label
-                var selectedLabel = $("#contactInfo #label").select2("val");
+                var selectedLabel = $(that.element).find("#label").select2("val");
                 //set the value
-                sampleContacts[that._editIndex].Value = $("#contactInfo #value").val();
+                sampleContacts[that._editIndex].Value = $(that.element).find("#value").val();
                 //set the label
                 sampleContacts[that._editIndex].Label = selectedLabel;
                 //set the category
-                sampleContacts[that._editIndex].Category = $("#contactInfo #labelIcon").select2("val");
+                sampleContacts[that._editIndex].Category = $(that.element).find("#labelIcon").select2("val");
                 //refresh the list with the new values
                 that._renderContactList(sampleContacts);
                 //show the list
-                $("#contactInfo #listWrapper").attr("style", "display:block");
-                $("#contactInfo #editWrapper").attr("style", "display:none");
+                that._changePane("list");
 
                 //check if the label is one that was custon added
-                var isOldLabel = _.find(that._currentLables, function (label) {
+                var isOldLabel = _.find(that._currentLabels, function (label) {
                     return label.value === selectedLabel;
                 });
 
                 //if custom label, save it to the corresponding list
                 if (!isOldLabel) {
-                    that._currentLables.push({value: selectedLabel});
+                    that._currentLabels.push({value: selectedLabel});
                 }
             });
 
             //automatically update the category as the value changes
-            generalTools.observeInput("#contactInfo #value", function (string) {
+            generalTools.observeInput($(that._contactInfo).find("#value"), function (string) {
                 var category;
                 //check what the value is(phone, email, website, or other)
                 if (parserTools.isEmail(string)) {
@@ -122,7 +121,7 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
 
                 //set the category
                 that._changeCategory(category, true);
-            });
+            }, 250);
         },
 
         /**
@@ -133,7 +132,7 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
         _renderContactList: function (contacts) {
             var that = this, list, category, label, value, href;
 
-            list = $("#contactInfo #list");
+            list = $(that.element).find("#list");
             list[0].innerHTML = "";
 
             for (var i = 0; i < contacts.length; i++) {
@@ -144,12 +143,11 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
                 href = "javascript:void(0)";
                 //setup the correct link
                 if (category === "Website") {
-//                    var androidDevice = developer.CURRENT_FRAME === developer.Frame.MOBILE_APP && kendo.support.detectOS(navigator.userAgent).device === "android";
-//                    if (androidDevice) {
-//                        window.plugins.childBrowser.showWebPage(value);
-//                    } else {
-//                        window.open(value);
-//                    }
+                    //TODO use this, move navigating to a function(instead of using hrefs)
+                    //generalTools.goToUrl(value);
+                    if (value.substr(0, 7) !== "http://" && value.substr(0, 8) !== "https://") { //TODO: test
+                        value = "http://" + value;
+                    }
                     href = value;
                 } else if (category === "Email") {
                     href = "mailto:" + value;
@@ -170,7 +168,7 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
             }
 
             //on edit button click
-            $("#contactInfo .editBtn").on("click", function (e) {
+            $(that.element).find(".editBtn").on("click", function (e) {
                 var index;
                 //get the id of the list item that was clicked on(need to check if the span or div element was clicked on)
                 if (e.target.className === "editBtn") {
@@ -194,7 +192,7 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
                 return item.value;
             };
 
-            $("#contactInfo #label").select2({
+            $(that.element).find("#label").select2({
                 placeholder: "Select a label",
                 width: "244px",
                 id: function (item) {
@@ -202,11 +200,11 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
                 },
                 query: function (query) {
                     var data = {
-                        results: that._currentLables.slice() //clone the phone labels
+                        results: that._currentLabels.slice() //clone the phone labels
                     };
 
                     if(query.term !== ""){
-                        data.results.push({value: query.term});
+                        data.results.unshift({value: query.term});
                     }
 
                     query.callback(data);
@@ -227,16 +225,15 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
         _edit: function (contact) {
             var that = this;
             //set the title of the edit pane to the name of the entity(the client or location)
-            $("#contactInfo h3")[0].innerText = contact.Entity;
+            $(that.element).find("h3")[0].innerText = contact.Entity;
             //set the value in the textbox
-            $("#contactInfo #value").val(contact.Value);
+            $(that.element).find("#value").val(contact.Value);
             //set the category
             that._changeCategory(contact.Category, true);
             //set the label
-            $("#contactInfo #label").select2("data", {value: contact.Label});
+            $(that.element).find("#label").select2("data", {value: contact.Label});
             //show the edit pane
-            $("#contactInfo #listWrapper").attr("style", "display:none");
-            $("#contactInfo #editWrapper").attr("style", "display:block");
+            that._changePane("edit");
         },
 
         /**
@@ -248,7 +245,7 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
         _changeCategory: function (category, manuallySelect) {
             var that = this, labels = [];
             //remove the select2 from the label dropdown
-            $("#contactInfo #label").select2("destroy");
+            $(that.element).find("#label").select2("destroy");
             //set the correct label list based on the category
             if(category === "Phone"){
                 labels = phoneLabels;
@@ -261,36 +258,40 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
             }
 
             //get the selected label
-            var label = $("#contactInfo #label").select2("val").val();
+            var label = $(that.element).find("#label").select2("val").val();
             var sameLabels;
-            if(that._currentLables === labels){
+            if(that._currentLabels === labels){
                 sameLabels = true;
             } else {
-                that._currentLables = labels;
+                that._currentLabels = labels;
             }
             //set the correct list of labels
             that._setupLabelDropdown();
             //if the labels are the same as before, reset to the original selected label
             if(sameLabels){
-                $("#contactInfo #label").select2("data", {value: label});
+                $(that.element).find("#label").select2("data", {value: label});
             }
 
             //change the selected category icon
             //get reference to the icon category dropdown
-            var container = $("#contactInfo .iconContainer")[0];
-            //check what the old value was so the old class name can be removed from the select2 container
-            var className = container.className.match(/(\s(.*)Small)/);
-            //make sure only the class name is matched
-            var extra = className[0].match(/((.*)\s)/);
-            var match = className[0].replace(extra[0], "");
-            //remove the old class
-            $(container).removeClass(match);
-            //add the new class
-            $(container).addClass(category + "Small");
+            var container = $(that.element).find(".iconContainer")[0];
+            //replace the select2 container's class name with the new class
+            $(container)[0].className = "select2-container iconContainer " + category + "Small";
 
             //set the category in the icon dropdown
             if(manuallySelect){
-                $("#contactInfo #labelIcon").select2("val", category);
+                $(that.element).find("#labelIcon").select2("val", category);
+            }
+        },
+
+        _changePane: function (newPane) {
+            var that = this;
+            if(newPane === "edit"){
+                $(that.element).find("#listWrapper").attr("style", "display:none");
+                $(that.element).find("#editWrapper").attr("style", "display:block");
+            } else {
+                $(that.element).find("#editWrapper").attr("style", "display:none");
+                $(that.element).find("#listWrapper").attr("style", "display:block");
             }
         }
     });

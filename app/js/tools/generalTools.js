@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(['jquery', 'moment'], function ($) {
+define(['jquery', "developer", 'moment'], function ($, developer) {
     var generalTools = {};
 
     /**
@@ -170,9 +170,14 @@ define(['jquery', 'moment'], function ($) {
      * watches all input elements in the given div for value change
      * @param {string} element the selector to observe ex: "#personalSettings input" or "#contactInfo #value"
      * @param callback
+     * @param [delay] Defaults to 1000 milliseconds
      */
-    generalTools.observeInput = function (element, callback) {
-        $(element).each(function () {
+    generalTools.observeInput = function (element, callback, delay) {
+        if (!delay) {
+            delay = 1000;
+        }
+
+        element.each(function () {
             // Save current value of element
             $(this).data('oldVal', $(this).val());
             // Look for changes in the value
@@ -185,8 +190,20 @@ define(['jquery', 'moment'], function ($) {
                     if (callback)
                         callback(e.val());
                 }
-            }, 1000);
+            }, delay);
         });
+    };
+
+    generalTools.goToUrl = function(url) {
+        var androidDevice = developer.CURRENT_FRAME === developer.Frame.MOBILE_APP && kendo.support.detectOS(navigator.userAgent).device === "android";
+        if (url.substr(0, 6) !== "http://" || url.substr(0, 7) !== "https://") { //TODO: test
+            url = "http://" + url;
+        }
+        if (androidDevice) {
+            window.plugins.childBrowser.showWebPage(url);
+        } else {
+            window.open(url);
+        }
     };
 
     return generalTools;
