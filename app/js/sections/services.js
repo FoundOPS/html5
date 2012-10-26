@@ -542,6 +542,8 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
         dbServices.serviceTemplates.read().done(function (serviceTypes) {
             services.serviceTypes = serviceTypes;
 
+            $("#serviceTypes")
+
             $("#serviceTypes").select2({
                 width: "200px",
                 placeholder: "Select a service",
