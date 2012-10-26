@@ -3,7 +3,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         var popup = null;
         var methods = {
             init: function (options) {
-                popup = new Popup(this.selector);
+                popup = new OptionsPopup(this.selector);
 
                 if(typeof(options.backgroundColor) != null){
                     popup.setBackgroundColor(options.backgroundColor);
@@ -47,13 +47,9 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
 
     /** Popup Constructor **/
     function Popup(popupListener) {
-        //TODO: Refactor; Give a namespace.
-        var menus = [];
         var lastElementClick = null;
         var currentTarget = null;
 
-        //Note: Making history a global broke on Android 2.3
-        var history = [];
         var thisPopup = this;
         var title = "";
         var content = "";
@@ -77,10 +73,6 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         listenerElements.click(function (e) {
             thisPopup.toggleVisible(e, $(this));
         });
-
-        this.addMenu = function (id, title, contents) {
-            menus.push({'id': id, 'title': title, 'contents': contents});
-        };
 
         this.setBackgroundColor = function(color){
             backgroundColor = color;
@@ -271,30 +263,6 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
                 }
             );
 
-
-            //TODO: LINKPOPUP REFACTOR: Push this into the new linkPopup
-            $(document)
-                .on('touchstart mousedown', '#popup a',
-                function () {
-                    $(this).css({backgroundColor: "#488FCD"});
-                })
-                .on('touchend mouseup mouseout', '#popup a',
-                function () {
-                    $(this).css({backgroundColor: ""});
-                })
-                .on('click', '.popupContentRow',
-                function () {
-                    var newId = $(this).attr('id');
-
-                    //TODO: Refactor
-                    if ($(this).hasClass("popupEvent")) {
-                        $(this).trigger("popupEvent", $(this));
-                    }
-
-                    var keepOpen = thisPopup.populate(newId);
-                    if (!keepOpen) thisPopup.closePopup();
-                });
-
             var popupContentWrapperDiv = $("#popupContentWrapper");
             var throttleTimeout;
             $(window).bind('resize', function () {
@@ -324,6 +292,65 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
             $("#popup").stop(false, true).fadeOut('fast');
             $("#popupWrapper").css("visibility", "hidden");
         };
+
+        this.getAction = function () {
+            return $("#currentPopupAction").html();
+        };
+
+        this.setAction = function (id) {
+            $("#currentPopupAction").html(id);
+        };
+
+        //Public setter function for private var title and sets title of the html popup element.
+        this.setTitle = function (t) {
+            title = t;
+            $("#popupTitle").html(title);
+        };
+
+        //Public setter function for private var content and sets content of the html popup element.
+        this.setContent = function (cont) {
+            content = cont;
+            var popupContentWrapperDiv = $("#popupContentWrapper");
+            //popupContentDiv.data('jsp').getContentPane().find("#popupContent").html(content);
+            //TODO: Is setting the content w/o using the jScrollPane api safe to do?
+            $("#popupContent").html(content);
+            //TODO: Change event namespace.
+            popupContentWrapperDiv.trigger("popup.setContent", $(this));
+        };
+
+
+    }
+
+    function OptionsPopup(popupListener){
+        Popup.apply(this, [popupListener]);
+
+        var menus = [];
+        //Note: Making history a global broke on Android 2.3
+        var history = [];
+
+        //TODO: Do this oncreate.
+        //TODO: LINKPOPUP REFACTOR: Push this into the new linkPopup
+        $(document)
+            .on('touchstart mousedown', '#popup a',
+            function () {
+                $(this).css({backgroundColor: "#488FCD"});
+            })
+            .on('touchend mouseup mouseout', '#popup a',
+            function () {
+                $(this).css({backgroundColor: ""});
+            })
+            .on('click', '.popupContentRow',
+            function () {
+                var newId = $(this).attr('id');
+
+                //TODO: Refactor
+                if ($(this).hasClass("popupEvent")) {
+                    $(this).trigger("popupEvent", $(this));
+                }
+
+                var keepOpen = thisPopup.populate(newId);
+                if (!keepOpen) thisPopup.closePopup();
+            });
 
         //TODO: LINKPOPUP REFACTOR
         //Public void function that populates setTitle and setContent with data found by id passed.
@@ -375,31 +402,6 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
             this.setContent(c);
         };
 
-        this.getAction = function () {
-            return $("#currentPopupAction").html();
-        };
-
-        this.setAction = function (id) {
-            $("#currentPopupAction").html(id);
-        };
-
-        //Public setter function for private var title and sets title of the html popup element.
-        this.setTitle = function (t) {
-            title = t;
-            $("#popupTitle").html(title);
-        };
-
-        //Public setter function for private var content and sets content of the html popup element.
-        this.setContent = function (cont) {
-            content = cont;
-            var popupContentWrapperDiv = $("#popupContentWrapper");
-            //popupContentDiv.data('jsp').getContentPane().find("#popupContent").html(content);
-            //TODO: Is setting the content w/o using the jScrollPane api safe to do?
-            $("#popupContent").html(content);
-            //TODO: Change event namespace.
-            popupContentWrapperDiv.trigger("popup.setContent", $(this));
-        };
-
         //TODO: LINKPOPUP REFACTOR
         // Public getter function that returns a popup data object.
         // Returns: Popup data object if found, null if not.
@@ -422,10 +424,10 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
             //console.log("No data found, returning null.");
             return null;
         };
-    }
 
-    function optionsPopup(popupListener){
-
+        this.addMenu = function (id, title, contents) {
+            menus.push({'id': id, 'title': title, 'contents': contents});
+        };
     }
 
     return Popup;
