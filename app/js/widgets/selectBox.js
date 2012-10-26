@@ -21,7 +21,7 @@ define(['jquery', 'underscore'], function ($, _) {
                 }
             }
 
-            $(".selectBox").live('change', function (e) {
+            $(this).live('change', function (e) {
                 var i, optionsHTML = e.srcElement.children;
 
                 //call the onSelect function with the selected item

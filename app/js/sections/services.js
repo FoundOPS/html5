@@ -3,7 +3,7 @@
 'use strict';
 
 require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateTools", "db/saveHistory", "tools/kendoTools", "widgets/serviceDetails",
-    "jform", "select2"], function ($, session, dbServices, parameters, dateTools, saveHistory, kendoTools) {
+    "jform", "lib/select2", "widgets/selectBox"], function ($, session, dbServices, parameters, dateTools, saveHistory, kendoTools) {
     var services = {}, serviceHoldersDataSource, grid, handleChange, serviceTypesDropDown, selectedServiceHolder, vm;
 
     //region Public
@@ -505,9 +505,12 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
             var serviceTypeName = vm.get("serviceType.Name");
 
             //make sure dropdownlist has service type selected
-            if($("#serviceTypes").select2("val") !== serviceTypeId){
-                $("#serviceTypes").select2("data", {Id:serviceTypeId, Name:serviceTypeName});
-            }
+            var i, options = $(".selectBox").children("*");
+            for(i=0; i<options.length; i++) {
+                if(options[i].dataset.data === serviceTypeId) {
+                    options[i].selected = true;
+                }
+            };
         }
         //reload the services whenever the start or end date changes
         else if (e.field === "startDate" || e.field === "endDate") {
@@ -542,34 +545,21 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
         dbServices.serviceTemplates.read().done(function (serviceTypes) {
             services.serviceTypes = serviceTypes;
 
-            $("#serviceTypes")
+            //Callback for selectBox.
+            var onSelect = function (selectedOption) {
+                vm.set("serviceType", {Id: selectedOption.data, Name: selectedOption.name});
 
-            $("#serviceTypes").select2({
-                width: "200px",
-                placeholder: "Select a service",
-                id: function (service) {
-                    return service.Id;
-                },
-                query: function (query) {
-                    if (!serviceTypes) {
-                        serviceTypes = [];
-                    }
-                    var data = {results: serviceTypes};
-                    query.callback(data);
-                },
-                //needed so that $("#serviceTypes").select2("val") will work
-                initSelection : function () {},
-                formatSelection: formatserviceName,
-                formatResult: formatserviceName,
-                dropdownCssClass: "bigdrop",
-                minimumResultsForSearch: 15
-            }).on("change", function() {
-                    vm.set("serviceType", $("#serviceTypes").select2("data"));
+                //disable the delete button and hide the service details
+                $('#services .k-grid-delete').attr("disabled", "disabled");
+                $("#serviceDetails").attr("style", "display:none");
+            };
 
-                    //disable the delete button and hide the service details
-                    $('#services .k-grid-delete').attr("disabled", "disabled");
-                    $("#serviceDetails").attr("style", "display:none");
-                });
+            //Setup selectBox.
+            var i, options = [];
+            for(i = 0; i<serviceTypes.length; i++) {
+                options[i] = {name: serviceTypes[i].Name, data: serviceTypes[i].Id};
+            }
+            $("#serviceTypes").selectBox(options, onSelect);
 
             //now that the service types are loaded,
             //setup the grid by reparsing the hash
