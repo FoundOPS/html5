@@ -30,6 +30,12 @@ define(["jquery", "ui/popup", "lib/doT.min", "jmousewheel", "jscrollpane"], func
             },
             showSearch: function(){
                 navigator.showSearch();
+            },
+            hideBusinessLogo: function(){
+                navigator.hideBusinessLogo();
+            },
+            showBusinessLogo: function(){
+                navigator.showBusinessLogo();
             }
         };
 
@@ -682,12 +688,16 @@ define(["jquery", "ui/popup", "lib/doT.min", "jmousewheel", "jscrollpane"], func
         };
 
         this.hideBusinessLogo = function() {
-
+            $("#clientLogo").hide();
         };
 
         this.showSearch = function () {
             $("#navSearch").show();
         };
+
+        this.showBusinessLogo = function(){
+            $('#clientLogo').show();
+        }
 
         this.coverWindow = function () {
             var sideBarDiv = $("#sideBar");
