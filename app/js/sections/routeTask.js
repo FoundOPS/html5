@@ -83,6 +83,8 @@ define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "to
         dbServices.services.read({params: params}).done(function (services) {
             if (services && services[0]) {
                 vm.set("selectedService", services[0]);
+                //update the ServiceId so the correct service is requested next time
+                vm.set("selectedTask.ServiceId", services[0].Id);
             }
 
             saveHistory.close();

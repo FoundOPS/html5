@@ -159,6 +159,7 @@ define(["db/session", "db/services", "tools/generalTools", "tools/dateTools", "t
         //check if there is a roleId set
         dbServices.routes.read({params: {serviceDateUtc: dateTools.stripDate(selectedDate)}}).done(function (loadedRoutes) {
             removeLayer(routesGroup);
+
             //draw the routes
             routesGroup = leaflet.drawRoutes(map, loadedRoutes, routeColorSelector, center,
                 /**

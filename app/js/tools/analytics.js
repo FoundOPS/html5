@@ -9,10 +9,10 @@
 define(['jquery', 'containers/silverlight', 'developer', 'tools/parameters', 'db/session', 'underscore.string', 'totango'], function ($, silverlight, developer, parameters, session, _s) {
     var analytics = {}, totango, totangoServiceId;
 
-    if (developer.TRACK_ANALYTICS === developer.TRACK_ANALYTICS_OPTION.DEBUG) {
-        totangoServiceId = "SP-12680-01";
-    } else if (developer.TRACK_ANALYTICS === developer.TRACK_ANALYTICS_OPTION.LIVE) {
+    if (developer.DEPLOY) {
         totangoServiceId = "SP-1268-01";
+    } else {
+        totangoServiceId = "SP-12680-01";
     }
 
     try {
@@ -31,17 +31,21 @@ define(['jquery', 'containers/silverlight', 'developer', 'tools/parameters', 'db
 
     analytics.track = function (activity, section) {
         var user = session.get("user");
-
         var organization = session.get("role.name");
-
         var email = session.get("email");
+
         //don't include foundops emails
-        if(email && _s.include(email, "foundops.com")){
+        if (email && _s.include(email, "foundops.com")) {
             return;
         }
 
         if (!section) {
             section = _s.capitalize(parameters.getSection().name);
+        }
+
+        //triggered before session loaded
+        if (!organization || !user) {
+            return;
         }
 
         totango.track(activity, section, organization, user);

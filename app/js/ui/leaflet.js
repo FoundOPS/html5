@@ -26,9 +26,6 @@ define(['underscore', 'db/models', 'tools/generalTools', 'ui/ui', 'lib/leaflet',
         cloudMade.addTo(map);
 
         //for testing
-        map.on('click', function (e) {
-            console.log(e.latlng);
-        });
 
         return map;
     };
@@ -349,7 +346,7 @@ define(['underscore', 'db/models', 'tools/generalTools', 'ui/ui', 'lib/leaflet',
 
         routesGroup.addTo(map);
 
-        if (shouldCenter) {
+        if (_.any(routes) && shouldCenter) {
             leaflet.center(map, destinationLatLngs);
         }
 
@@ -423,4 +420,5 @@ define(['underscore', 'db/models', 'tools/generalTools', 'ui/ui', 'lib/leaflet',
     };
 
     return leaflet;
-});
+})
+;
