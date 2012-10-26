@@ -45,13 +45,13 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         };
     })(jQuery);
 
-    //TODO: Refactor; Give a namespace.
-    var menus = [];
-    var lastElementClick = null;
-    var currentTarget = null;
-
     /** Popup Constructor **/
     function Popup(popupListener) {
+        //TODO: Refactor; Give a namespace.
+        var menus = [];
+        var lastElementClick = null;
+        var currentTarget = null;
+
         //Note: Making history a global broke on Android 2.3
         var history = [];
         var thisPopup = this;
@@ -144,6 +144,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
 
             if(fontColor!==null){
                 $("#popup").css("color", fontColor);
+                //TODO: LINKPOPUP REFACTOR: Possibly push this into new link popup.
                 $("#popup a").css("color", fontColor);
             }
 
@@ -270,6 +271,8 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
                 }
             );
 
+
+            //TODO: LINKPOPUP REFACTOR: Push this into the new linkPopup
             $(document)
                 .on('touchstart mousedown', '#popup a',
                 function () {
@@ -322,6 +325,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
             $("#popupWrapper").css("visibility", "hidden");
         };
 
+        //TODO: LINKPOPUP REFACTOR
         //Public void function that populates setTitle and setContent with data found by id passed.
         this.populate = function (id) {
             var newMenu = this.getMenu(id);
@@ -335,6 +339,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
             return true;
         };
 
+        //TODO: LINKPOPUP REFACTOR
         //Links are given the popupEvent class if no url passed. If link has popupEvent,
         // event is fired based on currentPopupAction.
         this.setData = function (data) {
@@ -395,6 +400,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
             popupContentWrapperDiv.trigger("popup.setContent", $(this));
         };
 
+        //TODO: LINKPOPUP REFACTOR
         // Public getter function that returns a popup data object.
         // Returns: Popup data object if found, null if not.
         // Identifiers in object:
@@ -416,6 +422,10 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
             //console.log("No data found, returning null.");
             return null;
         };
+    }
+
+    function optionsPopup(popupListener){
+
     }
 
     return Popup;
