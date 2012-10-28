@@ -161,7 +161,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
 
             if(fontColor!==null){
                 $("#popup").css("color", fontColor);
-                //TODO: LINKPOPUP REFACTOR: Possibly push this into new link popup.
+                //TODO: OPTIONSPOPUP REFACTOR: Possibly push this into new optionsPopup.
                 $("#popup a").css("color", fontColor);
             }
 
@@ -335,7 +335,6 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
             $("#popupContentWrapper").trigger("popup.setContent", $(this));
         };
 
-        //TODO: LINKPOPUP REFACTOR
         // Public getter function that returns a popup data object.
         // Returns: Popup data object if found, null if not.
         // Identifiers in object:
@@ -343,7 +342,6 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         //      title: Display text for popup header
         //      contents: Array of objects, included identifiers below
         //          name: Display text for links
-        //TODO: Refactor
         this.getMenu = function (id) {
             //Searches for a popup data object by the id passed, returns data object if found.
             var i;
@@ -362,7 +360,6 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
             menus.push({'id': id, 'title': title, 'contents': contents});
         };
 
-        //TODO: LINKPOPUP REFACTOR
         //Public void function that populates setTitle and setContent with data found by id passed.
         this.populate = function (id) {
             var newMenu = this.getMenu(id);
@@ -389,8 +386,6 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         //Popup.call(this, popupListener);
         var thisOptionsPopup = this;
 
-        //TODO: Do this oncreate.
-        //TODO: LINKPOPUP REFACTOR: Push this into the new linkPopup
         $(document)
             .on('touchstart mousedown', '#popup a',
             function () {
@@ -413,7 +408,6 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
                 if (!keepOpen) thisOptionsPopup.closePopup();
             });
 
-        //TODO: LINKPOPUP REFACTOR
         //Links are given the popupEvent class if no url passed. If link has popupEvent,
         // event is fired based on currentPopupAction.
         this.setData = function (data) {
