@@ -182,7 +182,11 @@ footer {
 .km-list input[type="datetime"], .km-list select:not([multiple]), .km-list .k-dropdown {
     width: auto;
 }
+<<<<<<< HEAD
 /* Styling for serviceDetails widget*/
+=======
+/* Styling for serviceDetails widget (in iOS)*/
+>>>>>>> selectBox
 #taskServiceDetails {
   width: 95% !important;
 }

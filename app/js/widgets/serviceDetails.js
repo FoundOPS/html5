@@ -1,5 +1,5 @@
 'use strict';
-define(["jquery", "db/services", "db/session", "db/models", "kendo", "jmaskmoney", "jautosize", "select2", "jtooltip"], function ($, dbServices, session, models) {
+define(["jquery", "db/services", "db/session", "db/models", "widgets/selectBox", "lib/select2", "kendo", "jmaskmoney", "jautosize", "jtooltip"], function ($, dbServices, session, models) {
 
     var kendo = window.kendo,
         ui = kendo.ui,
@@ -7,7 +7,7 @@ define(["jquery", "db/services", "db/session", "db/models", "kendo", "jmaskmoney
         DATABINDING = "dataBinding",
         DATABOUND = "dataBound",
         inputTemplate = "<input />",
-        multiLineTextTemplate = "<textarea class='textarea' style='padding: 5px 0 5px 2px;'></textarea>";
+        multiLineTextTemplate = "<textarea class='textarea' style='padding: 5px 0 5px 0;'></textarea>";
 
     var ServiceDetails = Widget.extend({
         init: function (element, options) {
@@ -210,29 +210,22 @@ define(["jquery", "db/services", "db/session", "db/models", "kendo", "jmaskmoney
                 var fieldElement, options = [], i;
                 if (field.TypeInt === 0) {
 
-                    //Select Dropdown
-                    fieldElement = $('<select id="select" ></select>').appendTo(elementToAppendTo).wrap("<li><label>" + field.Name + "<br/></label></li>");
-
+                    //Format options for jquery selectBox widget.
                     for (i = 0; i < field.Options.length; i++) {
-                        options[i] = "<option>" + field.Options[i].Name + "</option>\n";
-                        if (field.Options[i].IsChecked === true) {
-                            options[i] = "<option selected='selected'>" + field.Options[i].Name + "</option>\n";
-                        }
+                        options[i] = {name: field.Options[i].Name, selected: field.Options[i].IsChecked};
                     }
 
-                    fieldElement[0].innerHTML = options;
-
-                    $("#select").select2({
-                        placeholder: "Select an option",
-                        minimumResultsForSearch: 15
-                    });
-
-                    $("#select").change(function (e) {
+                    var save = function (selectedOption) {
+                        //Clear previous selections.
                         for (i = 0; i < field.Options.length; i++) {
                             field.Options[i].IsChecked = false;
                         }
-                        field.set('Options[' + e.target.selectedIndex + '].IsChecked', true);
-                    });
+                        field.set('Options[' + selectedOption.index + '].IsChecked', selectedOption.selected);
+                    };
+
+                    //Select Dropdown
+                    fieldElement = $('<div></div>').selectBox(options, save).appendTo(elementToAppendTo).wrap("<li><label>" + field.Name + "<br/></label></li>");
+
                 } else {
                     //Checkbox (1) or checklist (2)
                     fieldElement = $('<ul data-role="listview" data-style="inset">' + field.Name + '</ul>').appendTo(elementToAppendTo);

@@ -6,7 +6,7 @@
 
 'use strict';
 
-define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "tools/parameters", "widgets/serviceDetails"], function (routeDestinationDetails, dbServices, saveHistory, parameters) {
+define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "tools/parameters", "underscore", "widgets/serviceDetails"], function (routeDestinationDetails, dbServices, saveHistory, parameters, _) {
     /**
      * routeTask = wrapper for all service objects
      * vm = viewModel
@@ -83,6 +83,8 @@ define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "to
         dbServices.services.read({params: params}).done(function (services) {
             if (services && services[0]) {
                 vm.set("selectedService", services[0]);
+                //update the ServiceId so the correct service is requested next time
+                vm.set("selectedTask.ServiceId", services[0].Id);
             }
 
             saveHistory.close();

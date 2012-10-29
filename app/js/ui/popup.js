@@ -57,10 +57,12 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         var thisPopup = this;
         var title = "";
         var content = "";
-        var object = null;
         var backgroundColor = null;
         var fontColor = null;
         var borderColor = null;
+
+        var padding = 3;
+        var offScreen = false;
 
         if ((typeof(popupListener) === 'undefined') || popupListener === null) {
             console.log("ERROR: No listener passed!");
@@ -81,17 +83,14 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         };
 
         this.setBackgroundColor = function(color){
-            //TODO: Check color value as hex or color?
             backgroundColor = color;
         };
 
         this.setFontColor = function(color){
-            //TODO: Check color value as hex or color?
             fontColor = color;
         };
 
         this.setBorderColor = function(color){
-            //TODO: Check color value as hex or color?
             borderColor = color;
         };
 
@@ -125,14 +124,15 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
                 console.log("Clicked on different element!");
                 this.closePopup();
             }
-            $("#popup").promise().done(function () {
-            });
-            var left = this.getLeft(clickedDiv, popupWrapperDiv);
-            popupWrapperDiv.css("left", left);
 
-            //console.log("scroll top: "+$(window).scrollTop());
+            //Blocking statement that waits until popup closing animation is complete.
+            $("#popup").promise().done(function () {});
+
+            this.updateLeftPosition(clickedDiv);
+
             var top = clickedDiv.outerHeight() + clickedDiv.offset().top - $(window).scrollTop() + (-1 * parseInt($("#popupArrow").css("margin-top"), 10)); //popupArrow is offset over the border, so this gives easier measurements.
             popupWrapperDiv.css("padding-top", top + "px");
+
             this.populate(id);
 
             clickedDiv.trigger("popupEvent", clickedDiv);
@@ -160,19 +160,15 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
             lastElementClick = clickedDiv.attr("id");
         };
 
-        //Function returns the left offset of the popup and sets the carrot element's position.
+        //Function returns the left offset of the popup and target element.
         this.getLeft = function (target, popupDiv) {
-            var padding = 3;
             currentTarget = target;
-            var x = target.offset().left + target.outerWidth() / 2;
-            var rightOffset = x + popupDiv.outerWidth() / 2;
-            var offset = x - popupDiv.outerWidth() / 2 + padding + 1; //TODO: Figure out where the 1 extra pixel is.. could just be rounding.
+            var targetOffset = target.offset().left + target.outerWidth() / 2;
+            var rightOffset = targetOffset + popupDiv.outerWidth() / 2;
+            var offset = targetOffset - popupDiv.outerWidth() / 2 + padding + 1; //TODO: Figure out where the 1 extra pixel is.. could just be rounding.
             var windowWidth = $(window).width();
 
-            //Sets popup variables referenced in resize listener.
-            var offScreen = false;
-
-            var carrotPos = "50%";
+            offscreen = false;
             if (offset < 0) {
                 offScreen = true;
                 offset = padding;
@@ -181,15 +177,25 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
                 offset = windowWidth - popupDiv.outerWidth();
             }
 
-            var carrot = $("#popupArrow");
+            //Returns left offset of popup from window.
+            return {targetOffset: targetOffset, offset: offset};
+        };
+
+        this.setCaretPosition = function(targetOffset, outerOffset){
+            var caretPos = "50%";
+            var caret = $("#popupArrow");
             if (offScreen) {
-                carrotPos = (x - offset + padding);
+                caretPos = (targetOffset - outerOffset + padding);
             }
             //Moves carrot on popup div.
-            carrot.css("left", carrotPos);
+            caret.css("left", caretPos);
+        };
 
-            //Returns left offset of popup from window.
-            return offset;
+        this.updateLeftPosition = function(target){
+            var popupWrapperDiv = $("#popupWrapper");
+            var offset = thisPopup.getLeft(target, popupWrapperDiv);
+            popupWrapperDiv.css("left", offset.offset);
+            this.setCaretPosition(offset.targetOffset, offset.offset);
         };
 
         // createPopup: Prepends popup to dom
@@ -235,9 +241,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
             $(window).on('resize', function () {
                     var popupWrapperDiv = $("#popupWrapper");
                     if ($("#popup").is(":visible")) {
-                        var left = thisPopup.getLeft(currentTarget, popupWrapperDiv);
-                        popupWrapperDiv.css("left", left);
-                        //TODO: Move to getTop.
+                        thisPopup.updateLeftPosition(currentTarget);
                         var top = $(currentTarget).outerHeight() + $(currentTarget).offset().top - $(window).scrollTop() + (-1 * parseInt($("#popupArrow").css("margin-top"), 10)); //popupArrow is offset over the border, so this gives easier measurements.
                         popupWrapperDiv.css("padding-top", top + "px");
                     }
@@ -287,10 +291,6 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
                     var keepOpen = thisPopup.populate(newId);
                     if (!keepOpen) thisPopup.closePopup();
                 });
-
-            //Sets global popup object, object, with the created div.
-            //TODO: Rename or remove.
-            object = popupWrapperDiv;
 
             var popupContentWrapperDiv = $("#popupContentWrapper");
             var throttleTimeout;
