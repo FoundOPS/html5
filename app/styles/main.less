@@ -75,7 +75,16 @@ table {
     filter: progid:dximagetransform.microsoft.gradient(startColorstr = @darkBlue, endColorstr = @blue);
     background: -webkit-gradient(linear, left top, left bottom, from(@darkBlue), to(@blue));
 }
-
+.bgGradient(@top, @bottom){
+    background-color: @top;
+    background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0, @bottom), color-stop(0.5, @top));
+    background-image: -webkit-linear-gradient(center bottom, @bottom 0%, @top 50%);
+    background-image: -moz-linear-gradient(center bottom, @bottom 0%, @top 50%);
+    background-image: -o-linear-gradient(bottom, @bottom 0%, @top 50%);
+    background-image: -ms-linear-gradient(top, @bottom 0%, @top 50%);
+    filter: progid:dximagetransform.microsoft.gradient(startColorstr=@bottom, endColorstr=@top, GradientType=0);
+    background-image: linear-gradient(top, @bottom 0%, @top 50%);
+}
 /*endregion*/
 /*region Kendo */
 
@@ -960,6 +969,7 @@ div.k-window-content {
     display: inline;
   }
 }
+
 #serviceDetails, #taskServiceDetails {
     font-family: "PTSans";
     color: @textColor;
@@ -1059,7 +1069,7 @@ div.k-window-content {
         font-size: 1em;
         width: 100%;
     }
-  .selectBox {
+    .selectBox {
         border-color: rgb(197, 197, 197);
         width: 100%;
         height: 28px;
@@ -1067,10 +1077,12 @@ div.k-window-content {
         font-family: PTSans;
     }
 }
+
 #taskServiceDetails{
   padding: 0;
   margin: auto;
 }
+
 #serviceDetails {
     display: none;
     position: absolute;
@@ -1105,6 +1117,9 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
         -webkit-border-radius: 0 0 4px 4px;
     }
 }
+/*endregion*/
+/*region Widgets */
+
 #contactInfo {
     display: none;
     position: absolute;
@@ -1273,7 +1288,126 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
         }
     }
 }
-/*region Tooltip*/
+
+#repeat{
+    display: none;
+    position: absolute;
+    top: 54px;
+    right: 30px;
+    width: 250px;
+    padding: 10px 20px;
+    font-size: 15px;
+    background-color:#fff;
+    -moz-box-shadow: 0 5px 8px #aaa;
+    -webkit-box-shadow: 0 5px 8px #AAA;
+    box-shadow: 0 5px 8px #AAA;
+    h3{
+        font-size: 20px;
+        margin: 0 0 5px 0;
+    }
+    label:not(#weeklyRepeatOn label){
+        line-height: 1.5em;
+    }
+    #weeklyRepeatOn{
+        display: none;
+        position: relative;
+        top:5px;
+        label{
+            float: left;
+        }
+    }
+    #monthlyRepeatOn {
+        display:none;
+        label{
+            vertical-align: middle;
+        }
+    }
+    #weekdayWrapper{
+        width: 225px;
+        margin: 0 auto;
+    }
+    .weekday{
+        float: left;
+        width: 26px;
+        height: 24px;
+        padding-top: 3px;
+        vertical-align: middle;
+        text-align: center;
+        color:#000000;
+        border: 1px solid #c5c5c5;
+        border-left: none;
+        .bgGradient(#ffffff, #eeeeee);
+        &:hover{
+            cursor: pointer;
+            .bgGradient(#eeeeee, #cccccc);
+        }
+        &:active{
+            cursor: pointer;
+            .bgGradient(#aaaaaa, #888888);
+        }
+        //rounded left piece of weekday selectors
+        &.left{
+            width: 16px;
+            border-left: 1px solid #c5c5c5;
+            border-bottom-left-radius: 16px;
+            border-top-left-radius: 16px;
+        }
+        //rounded right piece of weekday selectors
+        &.right{
+            width: 16px;
+            border-right: 1px solid #c5c5c5;
+            border-bottom-right-radius: 16px;
+            border-top-right-radius: 16px;
+        }
+        //don't make the ends blue when they're selected
+        &.selected:not(.left):not(.right){
+            color: #ffffff;
+            .bgGradient(#36C3E3, #488FCD);
+        }
+        &.selected:hover:not(.left):not(.right){
+            .bgGradient(#44AFE4, #0067A0);
+        }
+    }
+    #repeatLabel{
+        position: relative;
+        top: 2px;
+        left: 2px;
+    }
+    #startDate .k-datepicker, .k-dropdown, #repeatEvery .k-numerictextbox{
+        width: 100%;
+        font-size: 1em;
+    }
+    .k-dropdown{
+        height: 29px;
+        .k-input{
+            padding-top: 5px;
+        }
+    }
+    #endDate{
+        label{
+            padding-left: 2px;
+            vertical-align: text-bottom;
+        }
+        .k-dropdown{
+            width: 80px;
+        }
+        .k-numerictextbox,.k-datepicker{
+            display: none !important;
+            width: 160px;
+            margin: 0px 0 3px 10px;
+        }
+        .k-numerictextbox.showInput,.k-datepicker.showInput{
+             display: inline-block !important;
+         }
+    }
+    .k-dropdown, #startDate, #repeatEvery, #weeklyRepeatOn, #monthlyRepeatOn, .select2-container{
+        margin-bottom: 10px;
+    }
+    .k-input{
+      height: 17px;
+    }
+}
+
 #locationWidget{
     display: none;
     position: absolute;
@@ -1417,7 +1551,10 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
        left: -300px;
     }
 }
-/*Tooltip*/
+
+/*endregion/
+
+/*region Tooltip*/
 #tooltip {
     position: absolute;
     margin-right: 60px;
@@ -1432,7 +1569,6 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
 #tooltip h3, #tooltip div {
     margin: 0;
 }
-/*endregion*/
 /*endregion*/
 /*region Noty*/
 /*region Noty Base*/
