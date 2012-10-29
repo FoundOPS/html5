@@ -121,7 +121,7 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
             });
         } else {
             //force validate clients
-            var clientInput = $("#serviceDetails .client input:not(.select2-input)");
+            var clientInput = $("#serviceDetails").find(".client input:not(.select2-input)");
             services.validator.validateInput(clientInput);
         }
     };
@@ -584,10 +584,10 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
         $("#contactInfo").contactInfo();
 
         //hookup the add & delete buttons
-        $("#services .addDeleteBtns .k-grid-add").on("click", function () {
+        $("#services").find(".addDeleteBtns .k-grid-add").on("click", function () {
             vm.addNewService();
         });
-        $("#services .addDeleteBtns .k-grid-delete").on("click", function () {
+        $("#services").find(".addDeleteBtns .k-grid-delete").on("click", function () {
             vm.deleteSelectedService();
         });
 

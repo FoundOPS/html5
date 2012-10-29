@@ -55,6 +55,7 @@ table {
 @buttonDark: #8dd85b;
 @buttonHoverLight: #9cee65;
 @buttonHoverDark: #7ec152;
+@textColor: #222222;
 .buttonGradient {
     background: -moz-linear-gradient(top, @buttonLight, @buttonDark);
     filter: progid:dximagetransform.microsoft.gradient(startColorstr = @buttonLight, endColorstr = @buttonDark);
@@ -944,6 +945,7 @@ div.k-window-content {
             top: 3px;
             margin-right: 5px;
             padding-left: 20px;
+            color: @textColor;
             font-size: 1.5em;
         }
         .select2-container {
@@ -953,7 +955,11 @@ div.k-window-content {
 }
 #serviceDetails, #taskServiceDetails {
     font-family: "PTSans";
+    color: @textColor;
     width: 270px;
+    input, label{
+        color: @textColor;
+    }
     label, li {
         line-height: 22px;
     }
@@ -1023,6 +1029,7 @@ div.k-window-content {
         padding: 0 0 0 2px;
         outline: 0;
         background: #fff;
+        color: @textColor;
         font-family: "PTSans";
         font-size: 14px;
     }
@@ -1088,17 +1095,20 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
     top: 54px;
     right: 30px;
     width: 270px;
-    padding: 10px 20px;
+    padding: 10px 20px 15px 20px;
+    color: @textColor;
     font-size: 12px;
     background-color: rgb(242,242,242);
     h3 {
-        font-size: 20px;
         margin: 0 0 5px 0;
+        font-size: 20px;
+        color: @textColor;
     }
-    #listWrapper{
-
+    label{
+        color: @textColor;
     }
     #list {
+        margin-bottom: 15px;
         li {
             width: 100%;
             height: 60px;
@@ -1171,12 +1181,18 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
         }
     }
     .add {
+        margin-left: 92.5px;
         font-size: 14px;
+        color: @green;
+        span{
+            background-position: -115px -180px;
+        }
     }
     #editWrapper{
         display: none;
         width: 100%;
         label{
+            color: @textColor;
             font-size: 14px;
             line-height: 22px;
         }
@@ -1192,6 +1208,7 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
             margin-bottom: 5px;
             padding-left: 2px;
             border: none;
+            color: @textColor;
         }
         .select2-container{
             margin-bottom: 10px;
@@ -1206,12 +1223,37 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
                     padding-top: 2px;
                 }
             }
+            &:not(.iconContainer){
+                margin-bottom: 15px;
+            }
         }
-        button{
-            font-size: 14px;
+    }
+    button{
+        font-size: 14px;
+    }
+    .save, .delete{
+        display: none;
+    }
+    .delete{
+        color: @red;
+        span{
+            background-position: -115px -135px;
         }
-        .save{
-            margin: 0 5px 0 65px;
+    }
+    .save{
+        float: left;
+        margin: 0 9px 0 63px;
+        color: @green;
+        span{
+            background-position: -114px -157px;
+        }
+    }
+    .k-button{
+        border-radius: 0;
+        border: none;
+        background: #fff;
+        &:hover{
+            background-color: #ddd;
         }
     }
 }
@@ -1664,11 +1706,16 @@ ul.noty_cont.noty_layout_topRight li {
     border-radius: 0;
     background-color: #fff;
     background-image:none;
+    color: @textColor;
+    font-size: 14px;
     div{
         border: none;
         border-radius: 0;
         background-image:none;
     }
+}
+.iconDropdown.select2-drop{
+    font-size: 16px;
 }
 //remove shadows
 .select2-drop, .select2-container-active .select2-choice, .select2-container-active .select2-choices {
@@ -1707,6 +1754,15 @@ ul.noty_cont.noty_layout_topRight li {
 .select2-container .select2-choice span {
     font-size: 14px;
 }
+.select2-search input{
+    border: 1px solid #f2f2f2;
+}
+.labelDropdown, .iconDropdown{
+    border: 2px solid #F2F2F2;
+    border-top: none;
+    margin-top: 0;
+    margin-left: -1px;
+}
 .iconContainer {
     .select2-choice {
         background-color: transparent;
@@ -1719,6 +1775,9 @@ ul.noty_cont.noty_layout_topRight li {
     }
 }
 .iconDropdown {
+    .select2-results{
+        margin: 4px 2px 4px -1px;
+    }
     ul{
         padding: 0;
     }

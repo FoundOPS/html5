@@ -3,7 +3,7 @@
 'use strict';
 
 //need to require kendo so it is loaded before this widget, otherwise funky stuff happens
-define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "select2", "kendo"], function ($, _, generalTools, parserTools) {
+define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tools/analytics", "select2", "kendo"], function ($, _, generalTools, parserTools, analytics) {
     //region Locals
     var sampleContacts = [
         {Entity: "Burger King", Value: "765-494-2786", Category: "Phone", Label: "Mobile"},
@@ -21,11 +21,9 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "sele
         _create: function () {
             var that = this;
             that._contactInfo = $('<h3>Contact Info</h3>' +
-                //first view
-                '<div id="listWrapper">' +
+                //list pane(first view)
                 '<ul id="list"></ul>' +
                 '<button class="k-button k-button-icontext add"><span class="k-icon k-add"></span>Add New</button>' +
-                '</div>' +
                 //edit pane
                 '<div id="editWrapper">' +
                 '<label>Value</label><br />' +
@@ -38,9 +36,9 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "sele
                 '<option class="OtherSmall" value="Other">&nbsp;</option>' +
                 '</select>​' +
                 '<input id="label" /><br />' +
+                '</div>' +
                 '<button class="k-button k-button-icontext save"><span class="k-icon k-update"></span>Save</button>' +
-                '<button class="k-button k-button-icontext delete"><span class="k-icon k-delete"></span>Delete</button>' +
-                '</div>');
+                '<button class="k-button k-button-icontext delete"><span class="k-icon k-delete"></span>Delete</button>');
 
             that.element.append(that._contactInfo);
 
@@ -49,7 +47,7 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "sele
             //setup the dropdown of category icons
             $(that._contactInfo).find("#labelIcon").select2({
                 placeholder: "",
-                width: "26px",
+                width: "28px",
                 containerCssClass: "iconContainer OtherSmall",
                 minimumResultsForSearch: 15,
                 dropdownCssClass: "bigdrop iconDropdown"
@@ -66,12 +64,11 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "sele
                 //refresh the list so it contains the new contact
                 that._renderContactList(sampleContacts);
                 //set the edit index to the last item(the new item gets added to the end)
-                that._editIndex = sampleContacts.length - 1;
+                that._editIndex = 0;
                 //move to edit mode with the new contact
-                that._edit(sampleContacts[sampleContacts.length - 1]);
+                that._edit(sampleContacts[that._editIndex]);
             });
             $(that.element).find(".delete").live("click", function () {
-                $(that.element).find("h3")[0].innerText = "Contact Info";
                 //remove the selected contact from the list
                 sampleContacts.splice(that._editIndex, 1);
                 //refresh the list of contacts
@@ -80,7 +77,6 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "sele
                 that._changePane("list");
             });
             $(that.element).find(".save").live("click", function () {
-                $(that.element).find("h3")[0].innerText = "Contact Info";
                 //get the value of the selected label
                 var selectedLabel = $(that.element).find("#label").select2("val");
                 //set the value
@@ -140,20 +136,6 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "sele
                 value = contacts[i].Value;
                 category = contacts[i].Category;
                 label = contacts[i].Label;
-                href = "javascript:void(0)";
-                //setup the correct link
-                if (category === "Website") {
-                    //TODO use this, move navigating to a function(instead of using hrefs)
-                    //generalTools.goToUrl(value);
-                    if (value.substr(0, 7) !== "http://" && value.substr(0, 8) !== "https://") { //TODO: test
-                        value = "http://" + value;
-                    }
-                    href = value;
-                } else if (category === "Email") {
-                    href = "mailto:" + value;
-                } else if (category === "Phone") {
-                    href = "tel:" + value;
-                }
 
                 //remove the "http://" if website
                 if (value && category === "Website") {
@@ -161,11 +143,24 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "sele
                 }
 
                 //setup the individual contact element
-                var element = "<li id='" + i + "'><a href='" + href + "' class='info' target='_blank'><span class='" + category + "'></span><p class='label'>" + label +
+                var element = "<li id='" + i + "'><a class='info' target='_blank'><span class='" + category + "'></span><p class='label'>" + label +
                     "</p><p class='value'>" + value + "</p></a><div class='editBtn'><span></span></div></li>";
                 //add it to the list
                 list.append(element);
             }
+
+            $(that.element).find("#list a").on("click", function (e) {
+                if (e.currentTarget.children[0].className === "Phone") {
+                    analytics.track("Phone Contact Click");
+                    window.location.href = "tel:" + e.currentTarget.children[2].innerText;
+                } else if (e.currentTarget.children[0].className === "Email") {
+                    analytics.track("Email Contact Click");
+                    window.open("mailto:" + e.currentTarget.children[2].innerText, "_blank");
+                } else if (e.currentTarget.children[0].className === "Website") {
+                    analytics.track("Website Contact Click");
+                    generalTools.goToUrl(e.currentTarget.children[2].innerText);
+                }
+            });
 
             //on edit button click
             $(that.element).find(".editBtn").on("click", function (e) {
@@ -193,8 +188,7 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "sele
             };
 
             $(that.element).find("#label").select2({
-                placeholder: "Select a label",
-                width: "244px",
+                width: "242px",
                 id: function (item) {
                     return item.value;
                 },
@@ -213,7 +207,7 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "sele
                 },
                 formatSelection: formatItemName,
                 formatResult: formatItemName,
-                dropdownCssClass: "bigdrop"
+                dropdownCssClass: "bigdrop labelDropdown"
             });
         },
 
@@ -224,8 +218,6 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "sele
          */
         _edit: function (contact) {
             var that = this;
-            //set the title of the edit pane to the name of the entity(the client or location)
-            $(that.element).find("h3")[0].innerText = contact.Entity;
             //set the value in the textbox
             $(that.element).find("#value").val(contact.Value);
             //set the category
@@ -286,12 +278,30 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "sele
 
         _changePane: function (newPane) {
             var that = this;
+            //if moving to edit pane
             if(newPane === "edit"){
-                $(that.element).find("#listWrapper").attr("style", "display:none");
-                $(that.element).find("#editWrapper").attr("style", "display:block");
+                $(that.element).find("#list").animate({
+                    height:'hide'
+                }, "swing", function () {
+                    $(that.element).find(".add").attr("style", "display:none");
+                    $(that.element).find(".save, .delete").attr("style", "display:block");
+                    $(that.element).find("#editWrapper").animate({
+                        height:'show'
+                    }, "swing");
+                });
+
+            //if moving to list pane
             } else {
-                $(that.element).find("#editWrapper").attr("style", "display:none");
-                $(that.element).find("#listWrapper").attr("style", "display:block");
+                $(that.element).find("#editWrapper").animate({
+                    height:'hide'
+                }, "swing", function () {
+                    $(that.element).find(".save, .delete").attr("style", "display:none");
+                    $(that.element).find(".add").attr("style", "display:block");
+                    $(that.element).find("#list").animate({
+                        height:'show'
+                    }, "swing");
+                });
+
             }
         }
     });

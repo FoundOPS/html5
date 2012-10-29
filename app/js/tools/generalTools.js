@@ -183,7 +183,7 @@ define(['jquery', "developer", 'moment'], function ($, developer) {
             // Look for changes in the value
             $(this).delayKeyup(function (e) {
                 // If value has changed...
-                if (e.data('oldVal') != e.val()) {
+                if (e.data('oldVal') !== e.val()) {
                     // Updated stored value
                     e.data('oldVal', e.val());
                     //call the callback function
@@ -196,13 +196,13 @@ define(['jquery', "developer", 'moment'], function ($, developer) {
 
     generalTools.goToUrl = function(url) {
         var androidDevice = developer.CURRENT_FRAME === developer.Frame.MOBILE_APP && kendo.support.detectOS(navigator.userAgent).device === "android";
-        if (url.substr(0, 6) !== "http://" || url.substr(0, 7) !== "https://") { //TODO: test
+        if (url.substr(0, 7) !== "http://" && url.substr(0, 8) !== "https://") {
             url = "http://" + url;
         }
         if (androidDevice) {
             window.plugins.childBrowser.showWebPage(url);
         } else {
-            window.open(url);
+            window.open(url, "_blank");
         }
     };
 

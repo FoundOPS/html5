@@ -33,11 +33,11 @@ define(["db/services", "tools/generalTools", "widgets/settingsMenu"], function (
 
     changePassword.initialize = function () {
         //setup menu
-        var menu = $("#changePassword .settingsMenu");
+        var menu = $("#changePassword").find(".settingsMenu");
         kendo.bind(menu);
         menu.kendoSettingsMenu();
 
-        generalTools.observeInput($("#changePassword input"), function () {
+        generalTools.observeInput($("#changePassword").find("input"), function () {
             generalTools.enableButtons("#changePassword");
         });
 

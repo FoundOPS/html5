@@ -26,7 +26,7 @@ define(["db/services", "db/saveHistory", "tools/parameters", "widgets/imageUploa
         businessSettings.validator = $("#businessForm").kendoValidator().data("kendoValidator");
 
         //setup menu
-        var menu = $("#business .settingsMenu");
+        var menu = $("#business").find(".settingsMenu");
         kendo.bind(menu);
         menu.kendoSettingsMenu({selectedItem: "Business"});
 

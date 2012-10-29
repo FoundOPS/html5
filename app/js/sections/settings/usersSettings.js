@@ -201,7 +201,7 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
 
     usersSettings.initialize = function () {
         //setup menu
-        var menu = $("#users .settingsMenu");
+        var menu = $("#users").find(".settingsMenu");
         kendo.bind(menu);
         menu.kendoSettingsMenu({selectedItem: "Users"});
 

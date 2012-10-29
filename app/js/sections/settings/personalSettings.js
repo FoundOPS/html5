@@ -33,7 +33,7 @@ define(["db/services", "db/saveHistory", "tools/dateTools", "underscore", "tools
         personalSettings.validator2 = $("#timeZoneForm").kendoValidator().data("kendoValidator");
 
         //setup menu
-        var menu = $("#personal .settingsMenu");
+        var menu = $("#personal").find(".settingsMenu");
         kendo.bind(menu);
         menu.kendoSettingsMenu({selectedItem: "Personal"});
 
