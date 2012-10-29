@@ -457,15 +457,13 @@
     font-family: PTSans;
     src: url(PTS55F.ttf);  /* TTF file for CSS3 browsers */
 }
-
-#map {
+#mapView #map {
     position: absolute;
     height: 100%;
     width: 100%;
     font-family: PTSans;
 }
-
-.number {
+#mapView #map .number{
     position: relative;
     top: -4.4px;
     left: 3.5px;
@@ -474,6 +472,9 @@
     margin: 0;
     padding: 0;
     text-align: center;
+}
+.leaflet-popup-content-wrapper{
+    border-radius: 0;
 }
 
 .doubleDigit .number {

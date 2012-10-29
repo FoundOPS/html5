@@ -50,6 +50,7 @@ table {
 @red: #991A36;
 @orange: #D9591E;
 @charcoal: #333335;
+@white:#ffffff;
 @darkBlue: #36C3E3;
 @buttonLight: #a7ff6c;
 @buttonDark: #8dd85b;
@@ -971,7 +972,8 @@ div.k-window-content {
     }
     li {
         margin-bottom: 5px;
-        padding: 1px 0 1px 0;
+        padding: 3px 0 1px 0;
+        line-height: 1.5em;
         .percentSign {
             position: absolute;
             margin-top: 5px;
@@ -989,6 +991,7 @@ div.k-window-content {
     }
     li.textarea {
         vertical-align: top;
+        margin-bottom: 0;
     }
     .k-timepicker, .k-datepicker, .k-combobox, input[type="text"], input[type="number"], .select2-container, .k-numerictextbox {
         width: 100%;
@@ -1052,7 +1055,11 @@ div.k-window-content {
         font-size: 14px;
         padding-left: 15px;
     }
-    .selectBox {
+    .k-dropdown{
+        font-size: 1em;
+        width: 100%;
+    }
+  .selectBox {
         border-color: rgb(197, 197, 197);
         width: 100%;
         height: 28px;
@@ -1072,6 +1079,9 @@ div.k-window-content {
     background-color: rgb(242,242,242);
     padding: 10px 20px;
     overflow-y: auto;
+    label.client, label.location{
+        line-height: 1.5em;
+    }
     .km-ios .km-listinset > li:first-child:last-child, .km-ios .km-listgroupinset .km-list > li:first-child:last-child {
         border-color: #aaa;
         border-radius: 4px;
@@ -1264,11 +1274,155 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
     }
 }
 /*region Tooltip*/
+#locationWidget{
+    display: none;
+    position: absolute;
+    top: 54px;
+    right: 30px;
+    width: 250px;
+    height: 285px;
+    overflow: hidden;
+    padding: 15px 20px;
+    font-size: 15px;
+    background-color:@white;
+    -moz-box-shadow: 0 5px 8px #aaa;
+    -webkit-box-shadow: 0 5px 8px #AAA;
+    box-shadow: 0 5px 8px #AAA;
+    h3{
+        font-size: 20px;
+        margin: 0 0 5px 0;
+    }
+    label{
+        line-height: 1.5em;
+    }
+    #locationWidgetMap{
+        width: 250px;
+        height: 250px;
+        .leaflet-popup-content {
+            margin: 10px;
+        }
+    }
+    #locationWidgetMap.shown {
+      opacity: 1;
+    }
+    #locationWidgetMap.hidden {
+      opacity: .3;
+    }
+    #buttonPane{
+        position: relative;
+        top: -250px;
+        left: 0;
+        width: 250px;
+        height: 2px;
+        background:none;
+        border: 1px solid transparent;
+        #navigateBtn{
+          display: none;
+            position: absolute;
+            top:5px;
+            right: 5px;
+            width: 22px;
+            height: 22px;
+            background: url("../img/navigateBtn.png") no-repeat;
+        }
+        .k-grid-edit{
+            position: absolute;
+            top:5px;
+            left: 5px;
+            width: 22px;
+            height: 22px;
+            background-position: 0 -66px;
+            &:hover{
+                background-position: 0 -44px;
+            }
+        }
+    }
+    #buttonPane.shown{
+      left: 0;
+    }
+    #buttonPane.hidden{
+      left: 300px;
+    }
+    #editPane{
+        position: relative;
+        top: -250px;
+        left: -300px;
+        width: 250px;
+        min-height: 35px;
+        border: 1px solid #aaaaaa;
+        background-color: @white;
+        input{
+            width: 213px;
+            margin: 3px 0 3px 3px;
+            padding: 2px 25px 2px 4px;
+            border: 1px solid #AAA;
+            border-radius: 4px;
+            font-family: PTSans;
+            background: url("../img/smallSearch.png") no-repeat right center;
+        }
+        ul{
+            width: 250px;
+            max-height: 215px;
+            border-top: 1px solid #aaaaaa;
+            overflow-y: auto;
+        }
+        li{
+            height: 36px;
+            padding: 5px 4px 5px 4px;
+            font-size: 14px;
+            background-color: #efefef;
+            cursor: pointer;
+            &:hover{
+              .rowGradient;
+              color: @white;
+            }
+            &:not(:last-child){
+                border-bottom: 1px solid #aaaaaa;
+            }
+            span{
+              display: table-cell;
+            }
+            span.name{
+              height: 36px;
+              vertical-align: middle;
+            }
+            .fromWeb, #previousLocation, #currentLocation, #manuallyDropPin{
+              width: 20px;
+              height: 36px;
+              vertical-align: middle;
+              padding-right: 4px;
+              background: url("../img/previousLocation.png") no-repeat left center;
+            }
+            #currentLocation{
+              background: url("../img/currentLocation.png") no-repeat left center;
+            }
+            #manuallyDropPin{
+              background: url("../img/markerIcon.png") no-repeat left center;
+            }
+            .fromWeb{
+              background: url("../img/webIcon.png") no-repeat left center;
+            }
+        }
+        li.singleLine .name{
+            padding-top: 9px;
+        }
+        li.tripleLine .name{
+            font-size: 11px;
+        }
+    }
+    #editPane.shown{
+        left: 0px;
+    }
+    #editPane.hidden{
+       left: -300px;
+    }
+}
+/*Tooltip*/
 #tooltip {
     position: absolute;
     margin-right: 60px;
     z-index: 3000;
-    color: #fff;
+    color: @white;
     border-radius: 4px;
     background-color: #000;
     padding: 4px 8px;
@@ -1576,7 +1730,7 @@ ul.noty_cont.noty_layout_topRight li {
 
 /* noty_notification */
 .noty_bar.noty_theme_default.noty_notification {
-    background-color: #fff;
+    background-color: @white;
     border-color: #ccc;
     color: #555;
 }
@@ -1604,7 +1758,7 @@ ul.noty_cont.noty_layout_topRight li {
 
 /* noty_alert */
 .noty_bar.noty_theme_default.noty_alert {
-    background-color: #fff;
+    background-color: @white;
     border-color: #ccc;
 }
 
@@ -1618,7 +1772,7 @@ ul.noty_cont.noty_layout_topRight li {
 /* noty_error */
 .noty_bar.noty_theme_default.noty_error {
     background-color: #ff0000;
-    color: #fff;
+    color: @white;
     border-color: darkred;
 }
 
@@ -1651,7 +1805,7 @@ ul.noty_cont.noty_layout_topRight li {
 .noty_bar.noty_theme_default.noty_information {
     background-color: #57B7E2;
     border-color: #0B90C4;
-    color: #fff;
+    color: @white;
 }
 
 .noty_bar.noty_theme_default.noty_information.noty_layout_topLeft .noty_message .noty_buttons,
@@ -1681,22 +1835,22 @@ ul.noty_cont.noty_layout_topRight li {
 
 /* noty_success */
 .noty_bar.noty_theme_default.noty_success {
-    background-color: #fff;
+    background-color: @white;
     color: @green;
 }
 
 .noty_bar.noty_theme_default.noty_layout_topCenter.noty_success {
-    border-color: #fff;
+    border-color: @white;
 }
 
 /* noty_error */
 .noty_bar.noty_theme_default.noty_error {
-    background-color: #fff;
+    background-color: @white;
     color: @red;
 }
 
 .noty_bar.noty_theme_default.noty_layout_topCenter.noty_error {
-    border-color: #fff;
+    border-color: @white;
 }
 
 .noty_bar a {
