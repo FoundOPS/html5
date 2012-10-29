@@ -8,3 +8,4 @@ build/mobile/Android/assets/www/
 build/mobile/iOS/www/
 build/grunt/app/
 build/grunt/test/
+login/login-test.html
