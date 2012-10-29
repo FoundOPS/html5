@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(['moment'], function () {
+define(['jquery', "developer", 'moment'], function ($, developer) {
     var generalTools = {};
 
     /**
@@ -17,7 +17,7 @@ define(['moment'], function () {
      * @return {string} The direction.
      */
     generalTools.getDirection = function (deg) {
-        if(deg == ""){
+        if (deg == "") {
             return "";
         }
 
@@ -154,25 +154,56 @@ define(['moment'], function () {
         $(page + " .saveBtn").attr("disabled", "disabled");
     };
 
+    $.fn.delayKeyup = function (callback, ms) {
+        var timer = 0;
+        var el = $(this);
+        $(this).keyup(function () {
+            clearTimeout(timer);
+            timer = setTimeout(function () {
+                callback(el);
+            }, ms);
+        });
+        return $(this);
+    };
+
     /**
-     * watches all input elements on page for value change
-     * param {string} pageDiv the id of the view. ex: "#personal"
+     * watches all input elements in the given div for value change
+     * @param {string} element the selector to observe ex: "#personalSettings input" or "#contactInfo #value"
+     * @param callback
+     * @param [delay] Defaults to 1000 milliseconds
      */
-    generalTools.observeInput = function (pageDiv) {
-        $(pageDiv + ' input').each(function () {
+    generalTools.observeInput = function (element, callback, delay) {
+        if (!delay) {
+            delay = 1000;
+        }
+
+        element.each(function () {
             // Save current value of element
             $(this).data('oldVal', $(this).val());
             // Look for changes in the value
-            $(this).bind("propertychange keyup input paste change", function () {
+            $(this).delayKeyup(function (e) {
                 // If value has changed...
-                if ($(this).data('oldVal') != $(this).val()) {
+                if (e.data('oldVal') !== e.val()) {
                     // Updated stored value
-                    $(this).data('oldVal', $(this).val());
-                    //enable save and cancel buttons
-                    generalTools.enableButtons(pageDiv);
+                    e.data('oldVal', e.val());
+                    //call the callback function
+                    if (callback)
+                        callback(e.val());
                 }
-            });
+            }, delay);
         });
+    };
+
+    generalTools.goToUrl = function(url) {
+        var androidDevice = developer.CURRENT_FRAME === developer.Frame.MOBILE_APP && kendo.support.detectOS(navigator.userAgent).device === "android";
+        if (url.substr(0, 7) !== "http://" && url.substr(0, 8) !== "https://") {
+            url = "http://" + url;
+        }
+        if (androidDevice) {
+            window.plugins.childBrowser.showWebPage(url);
+        } else {
+            window.open(url, "_blank");
+        }
     };
 
     return generalTools;

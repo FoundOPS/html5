@@ -20,7 +20,7 @@ define(["tools/generalTools", "db/services", "db/session", "db/saveHistory", "to
     //region Setup Grid
     dispatcherSettings.initialize = function () {
         //setup menu
-        var menu = $("#dispatcher .settingsMenu");
+        var menu = $("#dispatcher").find(".settingsMenu");
         kendo.bind(menu);
         menu.kendoSettingsMenu({selectedItem: "Dispatcher"});
 
@@ -135,7 +135,7 @@ define(["tools/generalTools", "db/services", "db/session", "db/saveHistory", "to
         });
 
         //detect add button click
-        $("#dispatcher .k-grid-add").click(function () {
+        $("#dispatcher").find(".k-grid-add").click(function () {
             grid.addRow();
             saveHistory.save();
         });
@@ -157,7 +157,7 @@ define(["tools/generalTools", "db/services", "db/session", "db/saveHistory", "to
 
     //disable the checkboxes for the default rows
     var disableDefaultCheckboxes = function () {
-        $("#dispatcher input[type='checkbox']").each(function (i) {
+        $("#dispatcher").find("input[type='checkbox']").each(function (i) {
             // Get the DefaultTypeInt for the row
             var typeInt = grid._data[i].DefaultTypeInt;
             // Check if the row is a default type
@@ -254,9 +254,9 @@ define(["tools/generalTools", "db/services", "db/session", "db/saveHistory", "to
             //hide the delete button if a default row is selected, otherwise show it
             var row = kendoTools.getSelectedRow(grid);
             if (row[0].cells[3].innerHTML !== "") {
-                $('#dispatcher .k-grid-delete').attr("disabled", "disabled");
+                $("#dispatcher").find(".k-grid-delete").attr("disabled", "disabled");
             } else {
-                $('#dispatcher .k-grid-delete').removeAttr("disabled");
+                $("#dispatcher").find(".k-grid-delete").removeAttr("disabled");
             }
 
             selectedItem = grid.dataItem(grid.select());
@@ -268,7 +268,7 @@ define(["tools/generalTools", "db/services", "db/session", "db/saveHistory", "to
             disableDefaultCheckboxes();
             if (e.sender._editContainer.context) {
                 if (e.sender._editContainer.context.cellIndex === 1) {
-                    $('.colorSelector2').ColorPickerShow();
+                    $(".colorSelector2").ColorPickerShow();
                 }
             }
             //set the BusinessAccountId if it is empty
