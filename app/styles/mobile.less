@@ -41,17 +41,32 @@ footer {
 /* Metro-like styles for listviews */
 .km-listview-wrapper {
   li {
+    border-radius: 0 !important;
+    webkit-border-radius: 0 !important;
+    moz-border-radius: 0 !important;
+    border: none !important;
+    background-color: #fff;
+    box-shadow: none !important;
+    -webkit-box-shadow: none !important;
+    border-bottom: 1px solid rgb(242, 242, 242) !important;
+  }
+  a {
     height: 60px;
     border-radius: 0 !important;
     webkit-border-radius: 0 !important;
     moz-border-radius: 0 !important;
     border: none !important;
+    margin-top: 10px;
   }
-  a {
-    border-radius: 0 !important;
-    webkit-border-radius: 0 !important;
-    moz-border-radius: 0 !important;
-    border: none !important;
+  span {
+    color: rgb(72, 143, 205);
+    position: relative;
+    top: 8px;
+  }
+  label {
+    position: relative;
+    font-size: small;
+    color: #222222;
   }
 }
 /* endregion */
@@ -61,20 +76,56 @@ footer {
   border-radius: 0;
   webkit-border-radius: 0;
   moz-border-radius: 0;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+  background: #fff;
+  color: #65DA2A;
+  font-weight: normal;
+  text-shadow: none;
+  a {
+    border: none;
+  }
+  &:hover{
+    background-color: #ddd;
+  }
 }
 /* endregion */
 
 /* region Route Destinations */
+#startButton {
+  color: #65DA2A;
+}
+#endButton {
+  color: red;
+}
 #startButton, #endButton {
   margin: 1em 1em 0 1em;
   border-radius: 0;
   webkit-border-radius: 0;
   moz-border-radius: 0;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+  background: #fff;
+  font-weight: normal;
+  text-shadow: none;
+  a {
+    border: none;
+  }
+  &:hover{
+    background-color: #ddd;
+  }
 }
-.addressLabel {
-  font-size: small;
-  color: rgb(72, 143, 205);
-  position: relative;
+#routeDestinations-listview {
+  span {
+    color: rgb(72, 143, 205);
+    top: 0;
+  }
+  label {
+    color: #222222;
+    top: -8px;
+  }
 }
 /* endregion */
 /* region Route Destination Details */
@@ -111,7 +162,6 @@ footer {
 }
 /* endregion */
 /* region Route Tasks */
-/* Task statuses selection popup styles */
 .statusLabel {
   margin: auto;
   width: 95%;
@@ -120,10 +170,22 @@ footer {
 #routeStatus-listview{
   margin: auto;
   width: 95%;
+  li {
+    border: none;
+    padding-bottom: 8px;
+    text-align: center;
+  }
+  a {
+    box-shadow: none;
+    height: 42px;
+  }
+  span {
+    color: #222222;
+    text-shadow: none;
+    top:0;
+  }
 }
-#routeStatus-listview a{
-  min-height: 42px;
-}
+/* Task statuses selection popup styles */
 #taskStatuses-dimmer {
   background:#000;
   position:fixed;
@@ -151,25 +213,42 @@ footer {
   margin-top: 10px;
   font-size: 1.4em;
 }
-#taskStatuses-listview {
-  box-shadow: 0px 0px 10px #777779;
+#taskStatuses-listview{
   margin-bottom: 0;
+  li {
+    -webkit-transform: none;
+    overflow: visible;
+    border-bottom: none !important;
+  }
+  a {
+    height: 42px;
+  }
+  span {
+    color: #222222;
+    top:0;
+  }
 }
-#taskStatuses-listview > li {
-  -webkit-transform: none;
-  overflow: visible;
-}
-#taskStatuses-cancelButton a {
-  color: white;
-  background-image: linear-gradient(bottom, rgb(34,34,36) 31%, rgb(85,85,86) 100%);
-  background-image: -o-linear-gradient(bottom, rgb(34,34,36) 31%, rgb(85,85,86) 100%);
-  background-image: -moz-linear-gradient(bottom, rgb(34,34,36) 31%, rgb(85,85,86) 100%);
-  background-image: -webkit-linear-gradient(bottom, rgb(34,34,36) 31%, rgb(85,85,86) 100%);
-  background-image: -ms-linear-gradient(bottom, rgb(34,34,36) 31%, rgb(85,85,86) 100%);
-  background-image: -webkit-gradient(linear,left bottom,left top,color-stop(0.31, rgb(34,34,36)),color-stop(1, rgb(85,85,86)));
+#taskStatuses-cancelButton {
+  li {
+    border-bottom: none;
+  }
+  a {
+    height: 42px;
+    background-image: linear-gradient(bottom, rgb(34,34,36) 31%, rgb(85,85,86) 100%);
+    background-image: -o-linear-gradient(bottom, rgb(34,34,36) 31%, rgb(85,85,86) 100%);
+    background-image: -moz-linear-gradient(bottom, rgb(34,34,36) 31%, rgb(85,85,86) 100%);
+    background-image: -webkit-linear-gradient(bottom, rgb(34,34,36) 31%, rgb(85,85,86) 100%);
+    background-image: -ms-linear-gradient(bottom, rgb(34,34,36) 31%, rgb(85,85,86) 100%);
+    background-image: -webkit-gradient(linear,left bottom,left top,color-stop(0.31, rgb(34,34,36)),color-stop(1, rgb(85,85,86)));
+  }
+  span {
+    color: #fff;
+    top:0;
+  }
 }
 /* Styling for serviceDetails widget*/
 #taskServiceDetails {
+  margin-top: 10px !important;
   width: 95% !important;
 }
 /* endregion */
