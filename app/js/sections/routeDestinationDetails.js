@@ -7,8 +7,8 @@
 'use strict';
 
 define(["sections/linkedEntitySection", "sections/routeDetails", "tools/parameters", "developer", "tools/analytics",
-    "lib/platform", 'underscore.string'], function (createBase, routeDetails, parameters, developer, analytics, platform, _s) {
-    var vm,
+    "lib/platform", "underscore", "underscore.string", "widgets/contactInfo"], function (createBase, routeDetails, parameters, developer, analytics, platform, _, _s) {
+    var vm, contacts,
     //true if on an Android device with cordova
         androidCordova = window.cordova && _s.include(platform.os, "Android"),
         section = createBase("routeTask", "routeTaskId",
@@ -26,13 +26,23 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "tools/paramete
                     data: routeDestination.RouteTasks
                 }));
 
+                //get the list of contacts
+                if (vm.get("selectedEntity.Location")) {
+                    contacts = _.union(vm.get("selectedEntity.Client.ContactInfoSet").slice(0), vm.get("selectedEntity.Location.ContactInfoSet").slice(0));
+                } else {
+                    contacts = vm.get("selectedEntity.Client.ContactInfoSet").slice(0);
+                }
+
+                //initiate the contactInfo widget
+                $("#routeDestinationDetails .contactInfo").contactInfo({contacts: contacts});
+
                 kendo.bind($("#routeDestinationDetails"), vm, kendo.mobile.ui);
                 kendo.bind($("#directionsButton"), vm);
 
                 //try to move forward
                 section._moveForward();
 
-                //region Set touch/click animation for Direction's button.
+                //Set touch/click animation for Direction's button.
                 document.getElementById("directionsButton").addEventListener('touchstart', function (e) {
                     $("#directionsButton").toggleClass("buttonClicked");
                 });
@@ -48,25 +58,11 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "tools/paramete
                 document.getElementById("directionsButton").addEventListener('mouseup', function (e) {
                     $("#directionsButton").toggleClass("buttonClicked");
                 });
-                //endregion
             });
 
     window.routeDestinationDetails = section;
     vm = section.vm;
 
-//vm additions
-
-    /**
-     * Creates dataSources for the contacts listview
-     * @return {*}
-     */
-    vm.contacts = function () {
-        if (vm.get("selectedEntity.Location")) {
-            return _.union(vm.get("selectedEntity.Client.ContactInfoSet").slice(0), vm.get("selectedEntity.Location.ContactInfoSet").slice(0));
-        } else {
-            return vm.get("selectedEntity.Client.ContactInfoSet").slice(0);
-        }
-    };
     vm.getDirections = function () {
         var currentPosition,
             destination = vm.get("selectedEntity.Location.Latitude") + "," + vm.get("selectedEntity.Location.Longitude");
@@ -91,22 +87,6 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "tools/paramete
             },
             {timeout: 10000, enableHighAccuracy: true} //Options for geolocation API.
         );
-    };
-    vm.contactClick = function (e) {
-        if (e.dataItem.Type === "Phone Number") {
-            analytics.track("Phone Contact Click");
-            window.location.href = "tel:" + e.dataItem.Data;
-        } else if (e.dataItem.Type === "Email Address") {
-            analytics.track("Email Contact Click");
-            window.location.href = "mailto:" + e.dataItem.Data;
-        } else if (e.dataItem.Type === "Website") {
-            analytics.track("Website Contact Click");
-            if (androidCordova) {
-                window.plugins.childBrowser.showWebPage("http://" + e.dataItem.Data);
-            } else {
-                window.open("http://" + e.dataItem.Data);
-            }
-        }
     };
 
     return section;
