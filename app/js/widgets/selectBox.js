@@ -39,7 +39,7 @@ define(['jquery', 'underscore'], function ($, _) {
             //setup this element's html
             var sel = document.createElement("select");
             sel.setAttribute("class", "selectBox");
-            for(i=0; i<options.length; i++) {
+            for (i = 0; i < options.length; i++) {
                 sel.appendChild(options[i]);
             }
             selectBox.appendChild(sel);

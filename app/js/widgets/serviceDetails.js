@@ -224,7 +224,7 @@ define(["jquery", "db/services", "db/session", "db/models", "widgets/selectBox",
                     };
 
                     //Select Dropdown
-                    fieldElement = $('<div></div>').selectBox(options, save).appendTo(elementToAppendTo).wrap("<li><label>" + field.Name + "<br/></label></li>");
+                    fieldElement = $('<div class="styled-select"></div>').selectBox(options, save).appendTo(elementToAppendTo).wrap("<li><label>" + field.Name + "<br/></label></li>");
 
                 } else {
                     //Checkbox (1) or checklist (2)

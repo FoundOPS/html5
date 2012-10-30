@@ -1069,12 +1069,24 @@ div.k-window-content {
         font-size: 1em;
         width: 100%;
     }
-    .selectBox {
-        border-color: rgb(197, 197, 197);
+    .styled-select{
         width: 100%;
         height: 28px;
+        overflow: hidden;
+        background: url("../img/select-closed.png") no-repeat right #fff;
+    }
+    .styled-select.open{
+        background: url("../img/select-open.png") no-repeat right #fff;
+    }
+    .selectBox {
+        width: 100%;
+        height: 28px;
+        padding: 5px;
+        border: none;
         font-size: 14px;
         font-family: PTSans;
+        -webkit-appearance: none;
+        background: transparent;
     }
 }
 
@@ -2036,10 +2048,10 @@ ul.noty_cont.noty_layout_topRight li {
 }
 //next 2 styles make the dropdown arrow blue
 .select2-container .select2-choice div b {
-    background: url('../img/2select2_blue.png') no-repeat 0 1px;
+    background: url('../img/select-closed.png') no-repeat right;
 }
 .select2-dropdown-open .select2-choice div b {
-    background-position: -18px 1px;
+    background-position: 1px 8px;
 }
 .select2-results {
     min-height: 18px;
