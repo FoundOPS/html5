@@ -52,12 +52,7 @@ define(['db/services', 'db/session', 'hasher', 'tools/parameters'], function (db
         _.delay(resizeContainers, 150);
     };
 
-    //a workaround for opening the importer
-    //this is called when the importer view is shown
-    window.openImporter = function () {
         parameters.set({section: {name: "Importer", isSilverlight: true}});
-    };
-
     //endregion
 
     //region functions for the silverlight object

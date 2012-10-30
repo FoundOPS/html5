@@ -1,0 +1,30 @@
+<div data-init="importerReview.initialize" data-show="importerReview.show" data-role="view" data-title="Review Data" id="importerReview">
+    <ul class="crumbs">
+        <li class="active" onclick="window.viewImporterUpload()"><a>Upload File</a></li>
+        <li><a>Select Fields</a></li>
+        <li><a>Review Data</a></li>
+    </ul>
+    <img class="cover" width="10" height="30" src="../img/cover.png" alt="" />
+    <div class="help">
+        <ol>
+            <div class="arrowA"></div>
+            <li>Check Our Headers <br /> Make sure they correctly align with your data below.</li>
+            <li>Is this row headers or data? <br /> If it's one of your old headers,
+                we don't want to import it. Go back and select "Do not Import" for this field.</li>
+            <li>Review Your Data <br /> If you see <span class="warning">&nbsp;&nbsp;</span>, it means we are missing data
+                and cannot create a service from this row. Click on the cell to add the correct information. We
+                have automatically filled in some cells for you already.
+                <ul>
+                    <li><div id="exists"></div><p>Matched to existing</p></li>
+                    <li><div id="autofilled"></div><p>Autofilled from FoundOPS</p></li>
+                </ul>
+            </li>
+            <li>When everything is correct, Click "Import".</li>
+        </ol>
+    </div>
+    <div class="wrap">
+        <div id="gridView"></div>
+        <button class="k-button k-button-icontext cancelBtn" onclick="window.viewImporterSelect()">Back</button>
+        <button id="importBtn" class="k-button k-button-icontext saveBtn" disabled>Import</button>
+    </div>
+</div>
