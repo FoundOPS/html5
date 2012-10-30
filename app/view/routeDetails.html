@@ -17,8 +17,8 @@
     <footer></footer>
 </div>
 <script type="text/x-kendo-template" id="routeDestinationViewTemplate">
-    # if (data.Location) { console.log(data); #
-        <a>#= Location.Name #<img class="taskStatusColorImg" src="/app/img/services/default.png" style="background-color:#=data.Color#"/>
+    # if (data.Location) { #
+        <a>#= Location.Name #<div class="taskStatusColorImg" style="background-color:#=routeDetails.getTaskColors(data.Id)#"></div>
             <br/><label class="addressLabel">#= Location.AddressLineOne #</label></a>
     # } else { #
         <a>#= Client.Name #<br/><label class="addressLabel" style="color:red">No Location Available</label></a>

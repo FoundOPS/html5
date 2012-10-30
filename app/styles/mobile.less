@@ -76,11 +76,12 @@ footer {
 #earliest-textbox, #default-textbox, #latest-textbox {
     text-align: center;
 }
-#contacts-listview .km-listview-link::after, #contacts-listview .km-detaildisclose::after,
-#routeStatus-listview .km-listview-link::after, #routeStatus-listview .km-detaildisclose::after,
-#taskStatuses-listview .km-listview-link::after, #taskStatuses-listview .km-detaildisclose::after
-#routeDestinations-listview .km-listview-link::after, #routeDestinations-listview .km-detaildisclose::after {
-    border: 0 none white;
+#contacts-listview .km-listview-link::after,
+#routeStatus-listview .km-listview-link::after,
+#taskStatuses-listview .km-listview-link::after,
+#routeDestinations-listview .km-listview-link::after,
+#taskStatuses-cancelButton a.km-listview-link::after {
+    border: none;
 }
 .statusLabel {
   margin: auto;
@@ -144,9 +145,6 @@ footer {
     background-image: -ms-linear-gradient(bottom, rgb(34,34,36) 31%, rgb(85,85,86) 100%);
     background-image: -webkit-gradient(linear,left bottom,left top,color-stop(0.31, rgb(34,34,36)),color-stop(1, rgb(85,85,86)));
 }
-#taskStatuses-cancelButton a.km-listview-link::after  {
-    border: none;
-}
 #routeDestinationDetails hr {
   width:auto;
   margin: 10px 1em 0 1em;
@@ -156,6 +154,10 @@ footer {
 }
 /* Class Styles */
 .taskStatusColorImg {
+  border-radius: 100px;
+  -webkit-border-radius: 100px;
+  -moz-border-radius: 100px;
+  background: url(app/img/services/default.png) no-repeat;
   width:36px;
   height:36px;
   float:right;
