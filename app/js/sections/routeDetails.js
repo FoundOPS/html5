@@ -23,6 +23,24 @@ define(["sections/linkedEntitySection", "sections/routes", "tools/parameters", "
 
             kendo.bind($("#routeDetails"), vm, kendo.mobile.ui);
 
+            var i, j, taskStatus, taskStatuses = [];
+            routes.vm.taskStatusesSource.read();
+            for(i = 0; i<routes.vm.taskStatusesSource._data.length; i++) {
+                taskStatus = routes.vm.taskStatusesSource._data[i];
+                taskStatuses[i] = taskStatus;
+                vm.set("taskStatuses", taskStatuses);
+            }
+
+            routes.vm.dataSource.read();
+            for (i = 0; i<routes.vm.nextEntity.RouteDestinations.length; i++) {
+                var taskStatusId = routes.vm.nextEntity.RouteDestinations[i].RouteTasks[0].TaskStatusId;
+                for(j = 0; j<vm.taskStatuses.length; j++) {
+                    if (vm.taskStatuses[j].Id === taskStatusId) {
+                        vm.dataSource._data[i].Color= vm.taskStatuses[j].Color;
+                    }
+                }
+            }
+
             //try to move forward
             section._moveForward();
         });
