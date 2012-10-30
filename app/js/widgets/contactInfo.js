@@ -37,10 +37,12 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
         _create: function () {
             var that = this;
             that.contacts = that.options.contacts;
-            that._contactInfo = $('<h3>Contact Info</h3>' +
+            var _contactInfo = $('<h3>Contact Info</h3>' +
                 //list pane(first view)
                 '<ul class="contactList"></ul>' +
+                '<div class="addButtonWrapper">' +
                 '<button class="k-button k-button-icontext add"><span class="k-icon k-add"></span>Add New</button>' +
+                '</div>' +
                 //edit pane
                 '<div class="editWrapper">' +
                 '<label>Value</label><br />' +
@@ -52,17 +54,19 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
                 '<option class="PhoneNumberSmall" value="Phone Number">&nbsp;</option>' +
                 '<option class="OtherSmall" value="Other">&nbsp;</option>' +
                 '</select>​' +
-                '<input id="label" /><br />' +
+                '<input class="label" /><br />' +
                 '</div>' +
+                '<div class="saveDeleteButtonWrapper">' +
                 '<button class="k-button k-button-icontext save"><span class="k-icon k-update"></span>Save</button>' +
-                '<button class="k-button k-button-icontext delete"><span class="k-icon k-delete"></span>Delete</button>');
+                '<button class="k-button k-button-icontext delete"><span class="k-icon k-delete"></span>Delete</button>' +
+                '</div>');
 
-            that.element.append(that._contactInfo);
+            that.element.append(_contactInfo);
 
             that._renderContactList(that.contacts);
 
             //setup the dropdown of category icons
-            $(that._contactInfo).find(".labelIcon").select2({
+            $(that.element).find(".labelIcon").select2({
                 placeholder: "",
                 width: "28px",
                 containerCssClass: "iconContainer OtherSmall",
@@ -84,6 +88,7 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
                 that._editIndex = 0;
                 //move to edit mode with the new contact
                 that._edit(that.contacts[that._editIndex]);
+                that._isNew = true;
             });
             $(that.element).find(".delete").live("click", function () {
                 //remove the selected contact from the list
@@ -92,10 +97,14 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
                 that._renderContactList(that.contacts);
                 //show the list of contacts
                 that._changePane("list");
+                //submit the change
+                that.options.update(that.contacts);
             });
             $(that.element).find(".save").live("click", function () {
+                //save the old value to be used to check for changes
+                var oldContact = generalTools.deepClone(that.contacts[that._editIndex]);
                 //get the value of the selected label
-                var selectedLabel = $(that.element).find("#label").select2("val");
+                var selectedLabel = $(that.element).find(".editWrapper .label").select2("val");
                 //set the value
                 that.contacts[that._editIndex].Data = $(that.element).find(".editWrapper .value").val();
                 //set the label
@@ -116,10 +125,21 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
                 if (!isOldLabel) {
                     that._currentLabels.push({value: selectedLabel});
                 }
+                //save changes
+                if (that._isNew) {
+                    that.options.create(that.contacts);
+                } else {
+                    //check if contact changed
+                    var newContact = generalTools.deepClone(that.contacts[that._editIndex]);
+                    if (!_.isEqual(newContact, oldContact)) {
+                        that.options.update(that.contacts);
+                    }
+                }
+                that._isNew = false;
             });
 
             //automatically update the category as the value changes
-            generalTools.observeInput($(that._contactInfo).find(".editWrapper .value"), function (string) {
+            generalTools.observeInput($(that.element).find(".editWrapper .value"), function (string) {
                 var category;
                 //check what the value is(phone, email, website, or other)
                 if (parserTools.isEmail(string)) {
@@ -135,6 +155,10 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
                 //set the category
                 that._changeType(category, true);
             }, 250);
+
+            $(window).resize(function () {
+                that._setLabelWidth(".editWrapper");
+            });
         },
 
         /**
@@ -204,7 +228,7 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
                 return item.value;
             };
 
-            $(that.element).find("#label").select2({
+            $(that.element).find(".editWrapper .label").select2({
                 id: function (item) {
                     return item.value;
                 },
@@ -240,7 +264,7 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
             //set the category
             that._changeType(contact.Type, true);
             //set the label
-            $(that.element).find("#label").select2("data", {value: contact.Label});
+            $(that.element).find(".editWrapper .label").select2("data", {value: contact.Label});
             //show the edit pane
             that._changePane("edit");
         },
@@ -254,7 +278,7 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
         _changeType: function (category, manuallySelect) {
             var that = this, labels = [];
             //remove the select2 from the label dropdown
-            $(that.element).find("#label").select2("destroy");
+            $(that.element).find(".editWrapper .label").select2("destroy");
             //set the correct label list based on the category
             if (category === "Phone Number") {
                 labels = phoneLabels;
@@ -267,7 +291,7 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
             }
 
             //get the selected label
-            var label = $(that.element).find("#label").select2("val").val();
+            var label = $(that.element).find(".editWrapper .label").select2("val").val();
             var sameLabels;
             if (that._currentLabels === labels) {
                 sameLabels = true;
@@ -278,7 +302,7 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
             that._setupLabelDropdown();
             //if the labels are the same as before, reset to the original selected label
             if (sameLabels) {
-                $(that.element).find("#label").select2("data", {value: label});
+                $(that.element).find(".editWrapper .label").select2("data", {value: label});
             }
 
             //change the selected category icon
@@ -306,6 +330,8 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
                         height: 'show'
                     }, "swing");
                 });
+                //make sure the label dropdown is correct width
+                that._setLabelWidth(".contactList");
 
                 //if moving to list pane
             } else {
@@ -320,6 +346,13 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
                 });
 
             }
+        },
+
+        //make sure the label dropdown is correct width
+        _setLabelWidth: function (guideElement) {
+            var that = this;
+            var containerWidth = $(that.element).find(guideElement).width();
+            $(that.element).find(".editWrapper .label").width(containerWidth - 28);
         }
     });
 });

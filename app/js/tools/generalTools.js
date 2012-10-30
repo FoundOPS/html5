@@ -9,6 +9,10 @@
 define(['jquery', "developer", 'moment'], function ($, developer) {
     var generalTools = {};
 
+    generalTools.deepClone = function(obj){
+        return JSON.parse(JSON.stringify(obj));
+    };
+
     /**
      * Generates a compass direction from rotation degrees.
      * Example: NW, or NNW.

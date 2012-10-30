@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(['underscore', 'noty'], function (_) {
+define(['underscore', 'tools/generalTools', 'noty'], function (_, generalTools) {
     var saveHistory = {}, successText = "Your Changes Have Been Saved.", errorText = "Error - Your Changes May Not Have Been Saved";
 
     //Stores the states of the current section
@@ -117,7 +117,7 @@ define(['underscore', 'noty'], function (_) {
                 return;
             }
             //deep copy
-            state = JSON.parse(JSON.stringify(state));
+            state = generalTools.deepClone(state);
             saveHistory.states.push(state);
         }
     };
@@ -130,7 +130,7 @@ define(['underscore', 'noty'], function (_) {
                 return;
             }
             //deep copy
-            state = JSON.parse(JSON.stringify(state));
+            state = generalTools.deepClone(state);
 
             saveHistory.states.push(state);
         }

@@ -34,7 +34,18 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "tools/paramete
                 }
 
                 //initiate the contactInfo widget
-                $("#routeDestinationDetails .contactInfo").contactInfo({contacts: contacts});
+                $("#routeDestinationDetails .contactInfo").contactInfo({
+                    contacts: contacts,
+                    create: function (contactInfo) {
+                        //TODO
+                    },
+                    update: function (contactInfo) {
+                        //TODO
+                    },
+                    destroy: function (contactInfo) {
+                        //TODO
+                    }
+                });
 
                 kendo.bind($("#routeDestinationDetails"), vm, kendo.mobile.ui);
                 kendo.bind($("#directionsButton"), vm);
