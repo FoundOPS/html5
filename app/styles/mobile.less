@@ -9,7 +9,8 @@ footer {
 #contacts-listview .km-listview-link::after,
 #routeStatus-listview .km-listview-link::after,
 #taskStatuses-listview .km-listview-link::after,
-#taskStatuses-cancelButton .km-listview-link::after {
+#routeDestinations-listview .km-listview-link::after,
+#taskStatuses-cancelButton a.km-listview-link::after {
   border: none;
 }
 /* Back Button Styles */
@@ -125,8 +126,19 @@ footer {
   }
   label {
     color: #222222;
-    top: -35px;
+    top: -8px;
   }
+}
+.taskStatusColorImg {
+  border-radius: 100px;
+  -webkit-border-radius: 100px;
+  -moz-border-radius: 100px;
+  background: url(img/services/default.png) no-repeat;
+  width:30px;
+  height:30px;
+  float:right;
+  position: relative;
+  top: 6px;
 }
 /* endregion */
 /* region Route Destination Details */
