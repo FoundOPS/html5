@@ -1035,6 +1035,12 @@ div.k-window-content {
     input[type="text"].k-input {
         height: 19px;
     }
+    input[type="text"]:not(.k-input) {
+        padding-left: 5px;
+        box-sizing: border-box;
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+    }
     .k-combobox input[type="text"] {
         height: 21px;
     }
@@ -1045,12 +1051,15 @@ div.k-window-content {
         width: 100% !important;
         margin: 0;
         min-width: 6em;
-        padding: 0 0 0 2px;
+        padding-left: 5px !important;
         outline: 0;
         background: #fff;
         color: @textColor;
         font-family: "PTSans";
         font-size: 14px;
+        box-sizing: border-box;
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
     }
     .km-listview-wrapper ul {
         width: 100%;
@@ -1131,17 +1140,10 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
 }
 /*endregion*/
 /*region Widgets */
-
-#contactInfo {
-    display: none;
-    position: absolute;
-    top: 54px;
-    right: 30px;
-    width: 270px;
-    padding: 10px 20px 15px 20px;
+.contactInfo {
+    margin: 1em;
     color: @textColor;
     font-size: 12px;
-    background-color: rgb(242,242,242);
     h3 {
         margin: 0 0 5px 0;
         font-size: 20px;
@@ -1150,17 +1152,23 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
     label{
         color: @textColor;
     }
-    #list {
+    .addButtonWrapper{
+        width: 82px;
+        margin: 0 auto;
+    }
+    .saveDeleteButtonWrapper{
+        width: 140px;
+        margin: 0 auto;
+    }
+    .contactList {
         margin-bottom: 15px;
         li {
-            width: 100%;
             height: 60px;
             background-color: #fff;
             border-bottom:1px solid rgb(242,242,242);
             .info {
-                float: left;
-                width: 210px;
                 height: 45px;
+                overflow: hidden;
                 display: block;
                 padding: 10px 5px 5px 5px;
                 cursor: pointer;
@@ -1200,7 +1208,7 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
                 }
             }
             .editBtn {
-                float: left;
+                float: right;
                 width: 50px;
                 height: 100%;
                 cursor: pointer;
@@ -1224,14 +1232,14 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
         }
     }
     .add {
-        margin-left: 92.5px;
+        width: 85px;
         font-size: 14px;
         color: @green;
         span{
             background-position: -115px -180px;
         }
     }
-    #editWrapper{
+    .editWrapper{
         display: none;
         width: 100%;
         label{
@@ -1239,19 +1247,22 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
             font-size: 14px;
             line-height: 22px;
         }
-        #labelIcon{
+        .labelIcon{
             width: 26px;
             height: 26px;
             display: block;
             float: left;
         }
-        #value{
+        .value{
             width: 100%;
             height: 24px;
             margin-bottom: 5px;
-            padding-left: 2px;
+            padding-left: 5px;
             border: none;
             color: @textColor;
+            box-sizing: border-box;
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
         }
         .select2-container{
             margin-bottom: 10px;
@@ -1270,6 +1281,9 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
                 margin-bottom: 15px;
             }
         }
+        .labelContainer{
+            right: 0;
+        }
     }
     button{
         font-size: 14px;
@@ -1285,7 +1299,7 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
     }
     .save{
         float: left;
-        margin: 0 9px 0 63px;
+        margin: 0 9px 0 0;
         color: @green;
         span{
             background-position: -114px -157px;
@@ -1563,10 +1577,8 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
        left: -300px;
     }
 }
-
-/*endregion/
-
-/*region Tooltip*/
+/*endregion*/
+/*region Tooltip */
 #tooltip {
     position: absolute;
     margin-right: 60px;
@@ -2090,28 +2102,28 @@ ul.noty_cont.noty_layout_topRight li {
         padding: 0;
     }
 }
-.EmailSmall, .WebsiteSmall, .PhoneSmall, .OtherSmall, .iconDropdown .select2-results .select2-highlighted{
+.EmailAddressSmall, .WebsiteSmall, .PhoneNumberSmall, .OtherSmall, .iconDropdown .select2-results .select2-highlighted{
     background: url("../img/contactInfoSmall.png") no-repeat 0 0;
 }
-.select2-results .EmailSmall{
+.select2-results .EmailAddressSmall{
     background-position: 0 -140px;
 }
 .select2-results .WebsiteSmall{
     background-position: 0 -175px;
 }
-.select2-results .PhoneSmall{
+.select2-results .PhoneNumberSmall{
     background-position: 0 -210px;
 }
 .select2-results .OtherSmall{
     background-position: 0 -245px;
 }
-.EmailSmall, .select2-results .EmailSmall.select2-highlighted{
+.EmailAddressSmall, .select2-results .EmailAddressSmall.select2-highlighted{
     background-position: 0 0;
 }
 .WebsiteSmall, .select2-results .WebsiteSmall.select2-highlighted{
     background-position: 0 -35px;
 }
-.PhoneSmall, .select2-results .PhoneSmall.select2-highlighted{
+.PhoneNumberSmall, .select2-results .PhoneNumberSmall.select2-highlighted{
     background-position: 0 -70px;
 }
 .OtherSmall, .select2-results .OtherSmall.select2-highlighted{
