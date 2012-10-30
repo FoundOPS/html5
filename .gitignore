@@ -6,3 +6,4 @@ build/main/
 build/grunt/node_modules
 build/mobile/Android/assets/www/
 build/mobile/iOS/www/
+login/login-test.html

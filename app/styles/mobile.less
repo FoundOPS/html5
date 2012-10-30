@@ -5,6 +5,9 @@ footer {
     height: 10px;
 }
 /* Id Styles */
+//#routeDestinations-listview li {
+//  -webkit-mask-box-image: url("../img/services/default.png");
+//}
 #startButton, #endButton {
   margin: 1em 1em 0 1em;
 }
@@ -21,7 +24,7 @@ footer {
     height:100%;
     width: 100%;
 }
-#addressLabel {
+.addressLabel {
     font-size: x-small;
     margin: -50px 0px -15px 0px;
  }
@@ -73,10 +76,12 @@ footer {
 #earliest-textbox, #default-textbox, #latest-textbox {
     text-align: center;
 }
-#contacts-listview .km-listview-link::after, #contacts-listview .km-detaildisclose::after,
-#routeStatus-listview .km-listview-link::after, #routeStatus-listview .km-detaildisclose::after,
-#taskStatuses-listview .km-listview-link::after, #taskStatuses-listview .km-detaildisclose::after {
-    border: 0 none white;
+#contacts-listview .km-listview-link::after,
+#routeStatus-listview .km-listview-link::after,
+#taskStatuses-listview .km-listview-link::after,
+#routeDestinations-listview .km-listview-link::after,
+#taskStatuses-cancelButton a.km-listview-link::after {
+    border: none;
 }
 .statusLabel {
   margin: auto;
@@ -140,9 +145,6 @@ footer {
     background-image: -ms-linear-gradient(bottom, rgb(34,34,36) 31%, rgb(85,85,86) 100%);
     background-image: -webkit-gradient(linear,left bottom,left top,color-stop(0.31, rgb(34,34,36)),color-stop(1, rgb(85,85,86)));
 }
-#taskStatuses-cancelButton a.km-listview-link::after  {
-    border: none;
-}
 #routeDestinationDetails hr {
   width:auto;
   margin: 10px 1em 0 1em;
@@ -151,6 +153,17 @@ footer {
   margin: 10px 1em 20px 0em !important;
 }
 /* Class Styles */
+.taskStatusColorImg {
+  border-radius: 100px;
+  -webkit-border-radius: 100px;
+  -moz-border-radius: 100px;
+  background: url(img/services/default.png) no-repeat;
+  width:30px;
+  height:30px;
+  float:right;
+  position: relative;
+  top: 2px;
+}
 .contactData{
     font-size: x-small;
     margin: -10px 0px -10px 2px;

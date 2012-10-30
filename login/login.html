@@ -58,10 +58,7 @@
             $.ajax({
                 type: requestType,
                 dataType:'JSON',
-//                url: 'http://localhost:9711/api/sessions/' + url,    //LOCAL - For testing and debugging purposes.
-//                url: 'http://192.168.0.108:70/api/sessions/' + url,   //REMOTE - For testing LOCAL on a remote device.
-                                                                       // Local IP of host computer (might change everyday).
-                url:'http://api.foundops.com/api/sessions' + url, //LIVE - For publishing.
+                url:'http://api.foundops.com/api/sessions' + url,
                 tryCount:0,
                 retryLimit:2,
                 timeout:1667, // 5/3 of a second so total time will be 5 seconds because of automatic retry.
