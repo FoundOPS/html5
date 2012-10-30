@@ -18,8 +18,8 @@
 </div>
 <script type="text/x-kendo-template" id="routeDestinationViewTemplate">
     # if (data.Location) { #
-        <a class="km-listview-link">#= Location.Name #<br/><label id="addressLabel">#= Location.AddressLineOne #</label></a>
+        <a class="km-listview-link">#= Location.Name #<br/><label class="addressLabel">#= Location.AddressLineOne #</label></a>
     # } else { #
-        <a class="km-listview-link">#= Client.Name #<br/><label id="addressLabel" style="color:red">No Location Available</label></a>
+        <a class="km-listview-link">#= Client.Name #<br/><label class="addressLabel" style="color:red">No Location Available</label></a>
     # } #
 </script>
