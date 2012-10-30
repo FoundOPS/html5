@@ -6,7 +6,7 @@
 
 'use strict';
 
-define(["sections/linkedEntitySection", "sections/routes", "tools/parameters", "db/services", "db/models", "tools/analytics"], function (createBase, routes, parameters, dbServices, models, analytics) {
+define(["sections/linkedEntitySection", "sections/routes", "tools/parameters", "db/services", "db/models", "tools/analytics", "underscore"], function (createBase, routes, parameters, dbServices, models, analytics, _) {
     var vm, section = createBase("routeDestinationDetails", "routeDestinationId",
         //on show
         function () {
@@ -26,9 +26,10 @@ define(["sections/linkedEntitySection", "sections/routes", "tools/parameters", "
             //try to move forward
             section._moveForward();
 
-            setTimeout( function () {
+            //refresh the listview to update task status colors
+            setTimeout(function () {
                 $("#routeDestinations-listview").data("kendoMobileListView").refresh();
-            }, 500);
+            }, 200); //wait until it is initialized
         });
 
     window.routeDetails = section;
@@ -41,34 +42,37 @@ define(["sections/linkedEntitySection", "sections/routes", "tools/parameters", "
         parameters.set({params: query, replace: true, section: {name: "routes"}});
     };
 
-    section.getTaskColors = function (destinationId) {
-        var i, j, k, routeColor;
-        routes.vm.taskStatusesSource.read();
-        routes.vm.dataSource.read();
+    /**
+     * Returns the appropriate color for a route destination's task status.
+     * @param destinationId {guid} - A route destination's Id.
+     * @return {string} - A hexidecimal color value.
+     */
+    section.getTaskColor = function (destinationId) {
+        var i, j, routeColor;
 
-        var taskStatuses = routes.vm.taskStatusesSource.data();
+        var taskStatuses = routes.vm.get("taskStatusesSource").data();
         var routeDestinations = routes.vm.get("nextEntity.RouteDestinations");
 
-        for (i = 0; i<routeDestinations.length; i++) {
+        //find the RouteDestination
+        for (i = 0; i < routeDestinations.length; i++) {
             if (routeDestinations[i].Id === destinationId) {
                 var destination = routeDestinations[i];
-                for (j=0; j<taskStatuses.length; j++) {
-                    if(taskStatuses[j].Id === destination.RouteTasks[0].TaskStatusId) {
+                //find the status for the RouteDestination's tasks
+                for (j = 0; j < taskStatuses.length; j++) {
+                    if (taskStatuses[j].Id === destination.RouteTasks[0].TaskStatusId) {
                         routeColor = taskStatuses[j].Color;
                     }
                 }
             }
         }
-        if (routeColor) {
-            return routeColor;
-        }
-    }
+
+        return routeColor;
+    };
 
     /**
-     * intervalId = used to start and stop a route
      * trackPointsToSend = stores the track points that will be sent to the API
      */
-    var intervalId = null, trackPointsToSend = [], watchId;
+    var trackPointsToSend = [], watchId;
 
 //region TrackPoint Collection & Management
     /**
