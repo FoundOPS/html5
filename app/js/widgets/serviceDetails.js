@@ -209,12 +209,6 @@ define(["jquery", "db/services", "db/session", "db/models", "widgets/selectBox",
             "OptionsField": function (field, fieldIndex, elementToAppendTo) {
                 var fieldElement, options = [], i;
                 if (field.TypeInt === 0) {
-
-                    //Format options for jquery selectBox widget.
-                    for (i = 0; i < field.Options.length; i++) {
-                        options[i] = {name: field.Options[i].Name, selected: field.Options[i].IsChecked};
-                    }
-
                     var save = function (selectedOption) {
                         //Clear previous selections.
                         for (i = 0; i < field.Options.length; i++) {
@@ -224,7 +218,10 @@ define(["jquery", "db/services", "db/session", "db/models", "widgets/selectBox",
                     };
 
                     //Select Dropdown
-                    fieldElement = $('<div class="styled-select"></div>').selectBox(options, save).appendTo(elementToAppendTo).wrap("<li><label>" + field.Name + "<br/></label></li>");
+                    fieldElement = $('<div class="styled-select"></div>')
+                        .selectBox({data: field.Options, dataTextField: "Name", dataSelectedField: "IsChecked", onSelect: save})
+                        .appendTo(elementToAppendTo)
+                        .wrap("<li><label>" + field.Name + "<br/></label></li>");
 
                 } else {
                     //Checkbox (1) or checklist (2)
