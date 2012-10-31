@@ -3,7 +3,7 @@
 define(['jquery', 'underscore'], function ($, _) {
     /**
      * A drop down list jquery widget.
-     * @param optionsArray - [{name: string, data: string, selected: boolean}, ...]
+     * @param optionsArray - [{name: string, data: object, selected: boolean}, ...]
      * @param onSelect A callback function that recieves the selected item.
      * @return {*} Returns the jquery widget (allows widget to be chainable).
      */

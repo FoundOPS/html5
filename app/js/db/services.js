@@ -194,18 +194,20 @@ define(["developer", "tools/dateTools", "db/saveHistory", "tools/parameters"], f
             read: {},
             update: {}
         },
-        employees: {},
-        errors: {
-            create: {}
-        },
         columnConfigurations: {
             read: {},
             update: {disableNotifications: true}
+        },
+        employees: {},
+        errors: {
+            create: {}
         },
         locations: {},
         routeTasks: {
             update: {}
         },
+        resourceWithLastPoints: {},
+        routes: {},
         services: {
             parse: function (service) {
                 //converts the service's Field's DateTime values to dates (there is only one right now)
@@ -215,8 +217,6 @@ define(["developer", "tools/dateTools", "db/saveHistory", "tools/parameters"], f
             update: {},
             destroy: {}
         },
-        resourceWithLastPoints: {},
-        routes: {},
         serviceHolders: {},
         serviceTemplates: {},
         sessions: {

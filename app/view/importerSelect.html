@@ -1,10 +1,10 @@
-<div data-init="importerSelect.initialize" data-role="view" data-title="Select Fields" id="importerSelect">
+<div data-init="importerSelect.initialize" data-show="importerSelect.show" data-role="view" data-title="Select Fields" id="importerSelect">
     <ul class="crumbs">
-        <li class="active" onclick="window.viewImporterUpload()"><a>Upload File</a></li>
-        <li><a>Select Fields</a></li>
+        <li onclick="window.viewImporterUpload()"><a>Upload File</a></li>
+        <li class="active"><a>Select Fields</a></li>
         <li><a>Review Data</a></li>
     </ul>
-    <img class="cover" width="10" height="30" src="../img/cover.png" alt="" />
+    <img class="cover" width="10" height="25" src="../img/cover.png" alt="" />
     <div class="help">
         <ol>
             <div class="arrowA low"></div>
@@ -23,6 +23,6 @@
         </ul>
         <div id="listView"></div>
         <button class="k-button k-button-icontext cancelBtn" onclick="window.viewImporterUpload()">Back</button>
-        <button class="k-button k-button-icontext saveBtn" onclick="window.viewImporterReview()">Review Data</button>
+        <button class="k-button k-button-icontext saveBtn">Review Data</button>
     </div>
 </div>

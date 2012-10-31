@@ -51,6 +51,7 @@ table {
 @orange: #D9591E;
 @charcoal: #333335;
 @white:#ffffff;
+@grey: rgb(242,242,242); //inner background
 @darkBlue: #36C3E3;
 @buttonLight: #a7ff6c;
 @buttonDark: #8dd85b;
@@ -126,10 +127,6 @@ table {
 @font-face {
     font-family: PTSans;
     src: url(PTS55F.ttf);  /* TTF file for CSS3 browsers */
-}
-
-    font-family: kurzetsType;
-    src: url("kurzetsType.ttf") /* TTF file for CSS3 browsers */
 }
 .km-view {
     z-index: 1;
@@ -915,10 +912,17 @@ div.k-window-content {
     color: #000;
 }
 #importerUpload, #importerSelect, #importerReview{
+    background-color: #fff;
+    background-image: url("../img/background-tile.png");
     .wrap{
         margin-top: 40px;
         margin-left: 320px;
         min-width: 300px;
+        background-color: @grey;
+        -webkit-box-shadow: none;
+        -moz-box-shadow: none;
+        -o-box-shadow: none;
+        box-shadow: none;
     }
     .border{
         border: 1px solid #ccc;
@@ -937,15 +941,15 @@ div.k-window-content {
     .k-list-container .k-state-hover:hover{
         background-color: #ccc;
     }
-    .k-list-container{
-        background-color: #fff;
-    }
     .k-dropdown{
         width: 280px;
     }
     .k-listview{
         border: none;
         margin-left: 5px;
+    }
+    .k-block, .k-widget {
+        background: none;
     }
     .help{
         position: absolute;
@@ -984,7 +988,7 @@ div.k-window-content {
     #hints{
         margin-bottom: 10px;
         padding: 10px;
-        background-color: #ffff99;
+        background-color: #ffffAA;
         fieldset{
             padding: 0;
             border: none;
@@ -1023,9 +1027,6 @@ div.k-window-content {
     .saveBtn{
         margin-left: 0;
     }
-    ol{
-    /*margin-top: -20px;*/
-    }
 }
 /*endregion*/
 /* region Select */
@@ -1039,13 +1040,6 @@ div.k-window-content {
         margin-top: 5px;
     }
     #listView{
-        .k-dropdown{
-            font-size: 1em;
-        }
-        .k-dropdown-wrap .k-input{
-            height: 18px;
-            padding-top: 2px;
-        }
     }
     #topHeader{
         margin: 0 3px 0 0;
@@ -1082,12 +1076,6 @@ div.k-window-content {
     }
     #listView{
         margin-bottom: 15px;
-        .k-dropdown, input.field{
-            width: 200px;
-            float: right;
-            margin: -27px 0 0 0;
-            background-color: #fff;
-        }
         li{
              margin-bottom: 3px;
         }
@@ -1098,8 +1086,8 @@ div.k-window-content {
         }
     }
     .wrap li{
-        list-style: none;
-    }
+         list-style: none;
+     }
     .help {
         top: 90px;
     }
@@ -1157,13 +1145,6 @@ div.k-window-content {
         vertical-align: middle;
         background: url("../img/warning.png") no-repeat;
     }
-    .locationLink{
-        width: 20px;
-        height: 20px;
-        vertical-align: middle;
-        font-size: 26px;
-        background: url("../img/locationsColor.png") no-repeat;
-    }
 }
 /*endregion*/
 /*region Breadcrumbs*/
@@ -1213,8 +1194,8 @@ div.k-window-content {
 }
 .cover{
     position: absolute;
-    top: 17px;
-    left: 587px;
+    top: 20px;
+    left: 588px;
 }
 /*endregion*/
 /*endregion*/
@@ -1387,25 +1368,6 @@ div.k-window-content {
         font-size: 1em;
         width: 100%;
     }
-    .styled-select{
-        width: 100%;
-        height: 28px;
-        overflow: hidden;
-        background: url("../img/select-closed.png") no-repeat right #fff;
-    }
-    .styled-select.open{
-        background: url("../img/select-open.png") no-repeat right #fff;
-    }
-    .selectBox {
-        width: 100%;
-        height: 28px;
-        padding: 5px;
-        border: none;
-        font-size: 14px;
-        font-family: PTSans;
-        -webkit-appearance: none;
-        background: transparent;
-    }
 }
 
 #taskServiceDetails{
@@ -1418,7 +1380,7 @@ div.k-window-content {
     position: absolute;
     top: 51px;
     right: 30px;
-    background-color: rgb(242,242,242);
+    background-color: @grey;
     padding: 10px 20px;
     overflow-y: auto;
     label.client, label.location{
@@ -1474,7 +1436,7 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
         li {
             height: 60px;
             background-color: #fff;
-            border-bottom:1px solid rgb(242,242,242);
+            border-bottom:1px solid @grey;
             .info {
                 height: 45px;
                 overflow: hidden;
@@ -1633,9 +1595,6 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
     padding: 10px 20px;
     font-size: 15px;
     background-color:#fff;
-    -moz-box-shadow: 0 5px 8px #aaa;
-    -webkit-box-shadow: 0 5px 8px #AAA;
-    box-shadow: 0 5px 8px #AAA;
     h3{
         font-size: 20px;
         margin: 0 0 5px 0;
@@ -1754,9 +1713,6 @@ li:first-child > .km-listview-link, .km-ios .km-listgroupinset li:first-child > 
     padding: 15px 20px;
     font-size: 15px;
     background-color:@white;
-    -moz-box-shadow: 0 5px 8px #aaa;
-    -webkit-box-shadow: 0 5px 8px #AAA;
-    box-shadow: 0 5px 8px #AAA;
     h3{
         font-size: 20px;
         margin: 0 0 5px 0;
@@ -2437,5 +2393,38 @@ ul.noty_cont.noty_layout_topRight li {
 }
 .OtherSmall, .select2-results .OtherSmall.select2-highlighted{
     background-position: 0 -105px;
+}
+/*endregion*/
+/*region SelectBox*/
+#serviceDetails, #taskServiceDetails, #importerUpload, #importerSelect, #importerReview {
+    .styled-select{
+        width: 100%;
+        height: 28px;
+        overflow: hidden;
+        background: url("../img/select-closed.png") no-repeat right #fff;
+    }
+    .selectBox {
+        width: 100%;
+        height: 28px;
+        padding: 5px;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+        font-family: PTSans;
+        -webkit-appearance: none;
+        background: transparent;
+    }
+}
+#importerUpload{
+    .styled-select{
+        width: 200px;
+    }
+}
+#importerSelect{
+    .styled-select{
+        float: right;
+        width: 200px;
+        margin: -27px 0 0 0;
+    }
 }
 /*endregion*/

@@ -1,87 +1,107 @@
 'use strict';
 
-define(["sections/importerUpload", "db/services"], function (importerUpload, dbServices) {
+define(["jquery", "sections/importerUpload", "db/services", "underscore"], function ($, importerUpload, dbServices, _) {
     var importerSelect = {};
     importerSelect.requiredFields = [
-            "Client Name",
-            "Address Line One",
-            "Address Line Two",
-            "City",
-            "State",
-            "Zip Code",
-            "Latitude",
-            "Longitude"
-        ];
+        "Client Name",
+        "Address Line One",
+        "Address Line Two",
+        "City",
+        "State",
+        "Zip Code",
+        "Latitude",
+        "Longitude"
+    ];
 
-    //region Custom Editors
-//    importerSelect.numberEditor = function (container, options) {
-//        $('<input data-text-field="Name" data-value-field="Name" data-bind="value:' + options.field + '"/>')
-//            .appendTo(container).kendoDatePicker();
-//    };
-//    importerSelect.dateEditor = function (container, options) {
-//        $('<input data-text-field="Name" data-value-field="Name" data-bind="value:' + options.field + '"/>')
-//            .appendTo(container)
-//            .kendoNumericTextBox({
-//                value: options.field
-//            });
-//    };
-//    importerSelect.repeatOnEditor = function (container, options) {
-//        $('<input data-text-field="Name" data-value-field="Name" data-bind="value:' + options.field + '"/>')
-//            .appendTo(container)
-//            .kendoDropDownList({
-//                autoBind: false,
-//                dataSource: new kendo.data.DataSource({
-//                    data: [
-//                        {
-//                            Name: "Day"
-//                        },
-//                        {
-//                            Name: "Date"
-//                        }
-//                    ]
-//                })
-//            });
-//    };
-//    importerSelect.frequencyEditor = function (container, options) {
-//        $('<input data-text-field="Name" data-value-field="Name" data-bind="value:' + options.field + '"/>')
-//            .appendTo(container)
-//            .kendoDropDownList({
-//                autoBind: false,
-//                dataSource: new kendo.data.DataSource({
-//                    data: [
-//                        {
-//                            Name: "Once"
-//                        },
-//                        {
-//                            Name: "Daily"
-//                        },
-//                        {
-//                            Name: "Weekly"
-//                        },
-//                        {
-//                            Name: "Monthly"
-//                        },
-//                        {
-//                            Name: "Yearly"
-//                        }
-//                    ]
-//                })
-//            });
-//    };
-    //endregion
+    var formatDataForValidation = function (data) {
+        var object, dataToValidate = [];
+        //iterate through each row of the data
+        for (var i in data){
+            //skip the first row, because that is the row with the headers
+            if(i !== 0){
+                object = data[i];
+                var newArray = [], newObject, keyNum;
+                //iterate through each of the grid fields
+                for (var c in importerSelect.fields) {
+                    //remove the "c" from the name
+                    keyNum = c.substr(1,3);
+                    //get the object from the data that corresponds to the current field
+                    newObject = object[c];
+                    //if no corresponding object exists, create a blank one
+                    if(!newObject){
+                        newObject = {
+                            H: "",
+                            S: 2,
+                            V: ""
+                        };
+                    }
+                    //set the row and cell
+                    newObject["r"] = i;
+                    newObject["c"] = keyNum;
+                    newArray.push(newObject);
+                }
+                dataToValidate.push(newArray);
+            }
+        }
+        return dataToValidate;
+    };
+
+    importerSelect.dropdownChanged = function () {
+        var i = 0, type, name, fieldName;
+        importerSelect.columns = [];
+        importerSelect.headers = [];
+        importerSelect.fields = {};
+        //iterate through all the dropdowns
+        $("#importerSelect .selectBox").each(function () {
+            name = this.value;
+            //check if the dropdown is not "Do not Import"
+            if (name !== "Do not Import") {
+                //setup the column
+                fieldName = "c" + i;
+                importerSelect.createColumn(fieldName, name, true);
+            }
+            i++;
+        });
+        //manually add location
+        importerSelect.createColumn("c" + i, "Location", true);
+
+        //this section checks if each of the required fields have been included
+        //if it hasn't, a hidden field is added
+        var hiddenNum = 0;
+        for (var f in importerSelect.requiredFields) {
+            var field = importerSelect.requiredFields[f];
+            var hasField = false;
+            //check if the current required field is included in the columns
+            hasField = _.any(importerSelect.columns, function (column) {
+                return column.title === field;
+            });
+            //if the required field is not included
+            if (!hasField) {
+                //add the field name to the list of headers
+                importerSelect.headers.push(field);
+
+                var fName = "c10" + hiddenNum;
+                //save the field(hidden) as a property of importerSelect.fields
+                importerSelect.fields[fName] = {
+                    defaultValue: ""
+                };
+                hiddenNum++;
+            }
+        }
+    }
 
     importerSelect.createColumn = function (field, name, addToFieldsAndHeaders) {
         var column, template, hidden = false;
-        if(name === "Location"){
-            template = "# if (" + field + ".S == 3) { # <div class='cellError'></div> # } else { # <a href='https://maps.google.com/maps?q=#=" + field + ".V#&z=17' class='locationLink'>&nbsp;&nbsp;&nbsp;&nbsp;</a>  # } #";
-            hidden = true;
-        }else{
+        if (name === "Location") {
+            template = "# if (" + field + ".S == 3) { # <div class='cellError'></div> # } else { # <a href='' class='location'>&nbsp;&nbsp;&nbsp;&nbsp;</a>  # } #";
+            //hidden = true;
+        } else {
             template = "# if (" + field + ".S == 3) { # <div class='cellError'></div> # } # #=" + field + ".V#";
         }
         //calculate the width of the title
         var width = name.length * 6.5 + 35;
         //set the width to 100 if it's less than 100
-        if(width < 100){
+        if (width < 100) {
             width = 100;
         }
         column = {
@@ -93,7 +113,7 @@ define(["sections/importerUpload", "db/services"], function (importerUpload, dbS
         };
         //add the column to the list of columns
         importerSelect.columns.push(column);
-        if(addToFieldsAndHeaders){
+        if (addToFieldsAndHeaders) {
             //save the field as a property of importerSelect.fields
             importerSelect.fields[field] = {
                 defaultValue: ""
@@ -104,6 +124,23 @@ define(["sections/importerUpload", "db/services"], function (importerUpload, dbS
     };
 
     importerSelect.initialize = function () {
+        //make sure there is a selected service type
+        if (!importerUpload.selectedService) {
+            window.application.navigate("view/importerUpload.html");
+            return;
+        }
+
+        $("#importerSelect").find(".saveBtn").on("click", function () {
+            var dataToValidate = formatDataForValidation(importerUpload.oldData);
+
+            dbServices.validateData(dataToValidate, importerSelect.headers, function (data) {
+                importerSelect.gridData = data;
+                window.viewImporterReview();
+            });
+        });
+    };
+
+    importerSelect.show = function () {
         //setup the default fields
         var fieldList = [
             {Name: "Do not Import", Type: "string"},
@@ -120,31 +157,27 @@ define(["sections/importerUpload", "db/services"], function (importerUpload, dbS
             {Name: 'Repeat Start Date', Type: "date"}
         ];
 
-        //make sure there is a selected service type
-        if(!importerUpload.selectedService){
-            window.application.navigate("view/importerUpload.html");
-            return;
-        }
-
         $("#listView").kendoListView({
             //setup the template to only include the header and the first row of data
-            template: "<li><div class='header'>#=data[0]#</div><div class='value'>#=data[1]#</div><input class='field' /></li>",
+            template: "<li><div class='header'>#=data[0]#</div><div class='value'>#=data[1]#</div><div class='styled-select'></div></li>",
             dataSource: importerUpload.data
         });
 
         //get the list of fields for the selected service
-        dbServices.getFields(importerUpload.selectedService, function (fields) {
-            var newFields = [];
-            var newField = fields[0];
+        dbServices.services.read({params: {serviceTemplateId: importerUpload.selectedService.Id}}).done(function (service) {
+            var newFields = [], name, type;
+            var fields = service[0].Fields;
             //iterate throught the list of fields
-            for(var i in newField){
+            for (var i in fields) {
+                name = fields[i].Name;
+                type = fields[i].Type;
                 //don't add if type is guid or if name is ClientName or OccurDate
-                if(newField[i] != "guid" && i != "ClientName" && i != "OccurDate"){
+                if (type !== "guid" && name !== "ClientName" && name !== "OccurDate") {
                     //add field to list
                     newFields.push({
                         //replace "_" with " "
-                        Name: i.replace(/_/g,' '),
-                        Type: newField[i]
+                        Name: name.replace(/_/g, ' '),
+                        Type: type
                     });
                 }
             }
@@ -152,85 +185,22 @@ define(["sections/importerUpload", "db/services"], function (importerUpload, dbS
             //combine the fields in fieldList with newFields
             var allFields = fieldList.concat(newFields);
 
-            $(".field").kendoDropDownList({
-                dataTextField: "Name",
-                dataValueField: "Name",
-                dataSource: allFields,
-                change: function () {
-                    var i = 0, type, name, fieldName;
-                    importerSelect.columns = [];
-                    importerSelect.headers = [];
-                    importerSelect.fields = {};
-                    //iterate through all the dropdowns
-                    $("#importerSelect input.field").each( function () {
-                        name = this.value;
-                        //check if the dropdown is not "Do not Import"
-                        if(name != "Do not Import") {
-                            //setup the column
-                            fieldName = "c" + i;
-                            importerSelect.createColumn(fieldName, name, true);
-                            //type = allFields[i].Type;
-                            //if(type != "string"){
-//                                    var editor;
-//                                    if(name == "Repeat On"){
-//                                        editor = importerSelect.repeatOnEditor;
-//                                    }else if(name == "Frequency") {
-//                                        editor = importerSelect.frequencyEditor;
-//                                    }else if(type == "date") {
-//                                        editor = importerSelect.dateEditor;
-//                                    }else if(type == "number") {
-//                                        editor = importerSelect.numberEditor;
-//                                    }
-//                                    column = {
-//                                        field: fieldName,
-//                                        title: name,
-//                                        template: template,
-//                                        width: width + "px",
-//                                        editor: editor
-//                                    };
-                            //}else{
-                            //}
-                        }
-                        i++;
-                    });
-                    //manually add location
-                    importerSelect.createColumn("c" + i, "Location", true);
-
-                    //this section checks if each of the required fields have been included
-                    //if it hasn't, a hidden field is added
-                    var hiddenNum = 0;
-                    for(var f in importerSelect.requiredFields){
-                        var field = importerSelect.requiredFields[f];
-                        var hasField = false;
-                        //check if the current required field is included in the columns
-                        hasField = _.any(importerSelect.columns, function (column) {
-                            return column.title === field;
-                        });
-                        //if the required field is not included
-                        if(!hasField){
-                            //add the field name to the list of headers
-                            importerSelect.headers.push(field);
-
-                            var fName = "c10" + hiddenNum;
-                            //save the field(hidden) as a property of importerSelect.fields
-                            importerSelect.fields[fName] = {
-                                defaultValue: ""
-                            };
-                            hiddenNum ++;
-                        }
-                    }
-                }
-            });
+            var j, options = [];
+            for(j = 0; j < allFields.length; j++) {
+                options[j] = {name: allFields[j].Name, data: allFields[j].Name};
+            }
+            $("#importerSelect").find(".styled-select").selectBox(options, importerSelect.dropdownChanged);
 
             //automatically select fields if there is a matching header
             var dropdown, headers = importerUpload.oldData[0];
-            for(var h in headers){
-                dropdown = $("#importerSelect input.field:eq(" + h + ")").data("kendoDropDownList");
+            for (var h in headers) {
+                dropdown = $("#importerSelect .selectBox:eq(" + h + ")");
                 //try to select a matching item
-                dropdown.select(function(field) {
-                    return field.Name == headers[h];
-                });
+                dropdown.val(headers[h]);
             }
+
+            //setup the grid settings initially in case the don't change any of the dropdowns
+            importerSelect.dropdownChanged();
         });
     };
 

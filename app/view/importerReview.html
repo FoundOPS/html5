@@ -1,10 +1,10 @@
 <div data-init="importerReview.initialize" data-show="importerReview.show" data-role="view" data-title="Review Data" id="importerReview">
     <ul class="crumbs">
-        <li class="active" onclick="window.viewImporterUpload()"><a>Upload File</a></li>
-        <li><a>Select Fields</a></li>
-        <li><a>Review Data</a></li>
+        <li onclick="window.viewImporterUpload()"><a>Upload File</a></li>
+        <li onclick="window.viewImporterSelect()"><a>Select Fields</a></li>
+        <li class="active"><a>Review Data</a></li>
     </ul>
-    <img class="cover" width="10" height="30" src="../img/cover.png" alt="" />
+    <img class="cover" width="10" height="25" src="../img/cover.png" alt="" />
     <div class="help">
         <ol>
             <div class="arrowA"></div>
@@ -25,6 +25,7 @@
     <div class="wrap">
         <div id="gridView"></div>
         <button class="k-button k-button-icontext cancelBtn" onclick="window.viewImporterSelect()">Back</button>
-        <button id="importBtn" class="k-button k-button-icontext saveBtn" disabled>Import</button>
+        <!--disable button initially-->
+        <button id="importBtn" class="k-button k-button-icontext saveBtn">Import</button>
     </div>
 </div>

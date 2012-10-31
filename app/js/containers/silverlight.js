@@ -52,7 +52,9 @@ define(['db/services', 'db/session', 'hasher', 'tools/parameters'], function (db
         _.delay(resizeContainers, 150);
     };
 
+    window.openImporter = function () {
         parameters.set({section: {name: "Importer", isSilverlight: true}});
+    };
     //endregion
 
     //region functions for the silverlight object

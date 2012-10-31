@@ -536,10 +536,6 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
 
         vm.bind("change", _.debounce(vmChanged, 200));
 
-        var formatserviceName = function (service) {
-            return service.Name;
-        };
-
         //load the current business account's service types then
         //1) setup the service types drop down
         //2) choose the first service+ type

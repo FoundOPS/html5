@@ -1,6 +1,6 @@
 'use strict';
 
-define(["lib/csv", "db/services", "lib/jquery-ui-1.8.21.core.min", "lib/jquery.FileReader", "lib/swfobject"], function (csv, dbServices) {
+define(["jquery", "lib/csv", "db/services", "widgets/selectBox", "jui", "jfilereader", "lib/swfobject"], function ($, csv, dbServices) {
     var importerUpload = {};
 
     //checks for .csv file type
@@ -53,20 +53,21 @@ define(["lib/csv", "db/services", "lib/jquery-ui-1.8.21.core.min", "lib/jquery.F
             $('#uploadBtn').removeAttr('disabled');
         });
 
-        dbServices.getServiceTypes(function (serviceTypes) {
-            //create the service types dropdown
-            importerUpload.serviceTypeDropDown = $("#serviceType").kendoDropDownList({
-                dataTextField: "Name",
-                dataValueField: "Id",
-                dataSource: serviceTypes
-            }).data("kendoDropDownList");
-
-            importerUpload.selectedService = importerUpload.serviceTypeDropDown._current[0].innerText;
-        });
-
         //listen to change event of the serviceType dropdown
-        $("#serviceType").on("change", function () {
-            importerUpload.selectedService = importerUpload.serviceTypeDropDown._current[0].innerText;
+        var onSelect = function (selectedService) {
+            var service = {Id: selectedService.data, Name: selectedService.name};
+            importerUpload.selectedService = service;
+        };
+
+        dbServices.serviceTemplates.read().done(function (serviceTypes) {
+            //create the service types dropdown
+            var i, options = [];
+            for(i = 0; i < serviceTypes.length; i++) {
+                options[i] = {name: serviceTypes[i].Name, data: serviceTypes[i].Id};
+            }
+            $("#importerUpload #serviceType").selectBox(options, onSelect);
+
+            importerUpload.selectedService = serviceTypes[0];
         });
     };
 
