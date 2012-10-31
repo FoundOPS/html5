@@ -506,7 +506,7 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
             var serviceTypeName = vm.get("serviceType.Name");
 
             //make sure dropdownlist has service type selected
-            var i, options = $(".selectBox").children("*");
+            var i, options = $("#serviceTypes").children("*");
             for(i=0; i<options.length; i++) {
                 if(options[i].dataset.data === serviceTypeId) {
                     options[i].selected = true;
@@ -561,7 +561,7 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
             for(i = 0; i<serviceTypes.length; i++) {
                 options[i] = {name: serviceTypes[i].Name, data: serviceTypes[i].Id};
             }
-            $("#serviceTypes").selectBox(options, onSelect);
+            $("#serviceTypes").selectBox({options: options, onSelect: onSelect});
 
             //now that the service types are loaded,
             //setup the grid by reparsing the hash
