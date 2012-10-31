@@ -23,6 +23,7 @@ require.config({
         jmousewheel: "../lib/jquery.mousewheel",
         jquery: "../lib/jquery",
         jscrollpane: "../lib/jquery.jScrollPane",
+        jsigpad: "../lib/jquery.signaturepad",
         jtooltip: "../lib/jquery.tooltip.min",
         jui: "../lib/jquery-ui-1.8.21.core.min",
         moment: "../lib/moment",
