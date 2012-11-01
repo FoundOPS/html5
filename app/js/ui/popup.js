@@ -399,7 +399,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
             function () {
                 var newId = $(this).attr('id');
 
-                //TODO: Refactor
+                //TODO: Prefix all events triggered
                 if ($(this).hasClass("popupEvent")) {
                     $(this).trigger("popupEvent", $(this));
                 }
@@ -408,8 +408,6 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
                 if (!keepOpen) thisOptionsPopup.closePopup();
             });
 
-        //Links are given the popupEvent class if no url passed. If link has popupEvent,
-        // event is fired based on currentPopupAction.
         this.setData = function (data) {
             var contArray = data.contents;
             var c = "";
@@ -424,6 +422,8 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
                     lastElement = " last";
                 }
 
+                //Links are given the popupEvent class if no url passed. If link has popupEvent,
+                // event is fired based on currentPopupAction.
                 if (typeof(contArray[i].id) !== 'undefined') {
                     menuId = " id='" + contArray[i].id + "'";
                 }
