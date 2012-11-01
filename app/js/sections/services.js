@@ -18,6 +18,9 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
                     serviceDate: dateTools.stripDate(vm.get("startDate")),
                     serviceTemplateId: vm.get("serviceType.Id")
                 }}).done(function (services) {
+                    //disable undo for new entities
+                    saveHistory.setUndoEnabled(false);
+
                     var service = services[0];
                     //add a new service holder
                     selectedServiceHolder = serviceHoldersDataSource.add();
@@ -106,15 +109,22 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
         //fixes a problem when the state is stored bc it is converted to json and back
         dbServices.services.parse(state);
         vm.set("selectedService", state);
-        services.save();
+        //skip validation because the location combobox will be null initially, not validate, and not save
+        services.save(true);
     };
 
-    services.save = function () {
+    /**
+     * Save the selected service
+     * @param skipValidation Skip validation
+     */
+    services.save = function (skipValidation) {
         var service = vm.get("selectedService");
 
-        if (services.validator.validate()) {
+        if (skipValidation || services.validator.validate()) {
             dbServices.services.update({body: service}).done(function () {
                 vm.syncServiceHolder();
+                //re-enable undo after a service is saved (in case it was disabled for a new service)
+                saveHistory.setUndoEnabled(true);
             });
         } else {
             //force validate clients and locations
