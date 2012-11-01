@@ -67,90 +67,55 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore"], funct
         return dataToValidate;
     };
 
-    importerSelect.dropdownChanged = function () {
-        var i = 0, type, name, fieldName;
-        importerSelect.columns = [];
-        importerSelect.headers = [];
-        importerSelect.fields = {};
-        //iterate through all the dropdowns
-        $("#importerSelect .selectBox").each(function () {
-            name = this.value;
-            //check if the dropdown is not "Do not Import"
-            if (name !== "Do not Import") {
-                //setup the column
-                fieldName = "c" + i;
-                importerSelect.createColumn(fieldName, name, true);
-            }
-            i++;
-        });
-        //manually add location
-        importerSelect.createColumn("c" + i, "Location", true);
-
-        //this section checks if each of the required fields have been included
-        //if it hasn't, a hidden field is added
-        var hiddenNum = 0;
-        for (var f in importerSelect.requiredFields) {
-            var field = importerSelect.requiredFields[f];
-            var hasField = false;
-            //check if the current required field is included in the columns
-            hasField = _.any(importerSelect.columns, function (column) {
-                return column.title === field;
-            });
-            //if the required field is not included
-            if (!hasField) {
-                //add the field name to the list of headers
-                importerSelect.headers.push(field);
-
-                var fName = "c10" + hiddenNum;
-                //save the field(hidden) as a property of importerSelect.fields
-                importerSelect.fields[fName] = {
-                    defaultValue: ""
-                };
-                hiddenNum++;
-            }
-        }
-    }
-
     importerSelect.initialize = function () {
         //make sure there is a selected service type
         if (!importerUpload.selectedService) {
             window.viewImporterUpload();
             return;
         }
-
-        $("#importerSelect").find(".saveBtn").on("click", function () {
-            //var dataToValidate = formatDataForValidation(importerUpload.oldData);
-
-            //dbServices.validateData(dataToValidate, function (data) {
-                var data = [];
-
-                importerSelect.gridData = data;
-                window.viewImporterReview();
-            //});
-        });
     };
 
     importerSelect.show = function () {
         //setup the default fields
         var fieldList = [
-            "Do not Import",
-            'Client Name',
-            'Address Line One',
-            'Address Line Two',
-            'City',
-            'State',
-            'Zip Code',
-            'Region Name',
-            'Frequency',
-            'Repeat On',
-            'Repeat Every',
-            'Repeat Start Date'
+            {Name: "Do not Import"},
+            {Name: 'Client Name'},
+            {Name: 'Address Line One'},
+            {Name: 'Address Line Two'},
+            {Name: 'City'},
+            {Name: 'State'},
+            {Name: 'Zipcode'},
+            {Name: 'Region Name'},
+            {Name: 'Frequency'},
+            {Name: 'Repeat On'},
+            {Name: 'Repeat Every'},
+            {Name: 'Repeat Start Date'}
         ];
 
         $("#listView").kendoListView({
             //setup the template to only include the header and the first row of data
             template: "<li><div class='header'>#=data[0]#</div><div class='value'>#=data[1]#</div><div class='styled-select'></div></li>",
             dataSource: importerUpload.data
+        });
+
+        $("#importerSelect").find(".saveBtn").on("click", function () {
+            //var dataToValidate = formatDataForValidation(importerUpload.oldData);
+
+            //dbServices.validateData(dataToValidate, function (data) {
+            var data = {
+                RowSuggestions : [
+                    ["25892e17", "80f6", "7395632f0223"], ["a53e98e4", "0197", "49836e406aaa"]
+                ],
+                Suggestions: {
+                    Clients: [{Id: "25892e17", Name: "BK"}, {Id: "a53e98e4", Name: "Subway"}],
+                    Locations: [{Id: "80f6", Name: "One"}, {Id: "0197", Name: "Two"}],
+                    Repeat: [{Id: "7395632f0223", Name: "11/05/2012"}, {Id: "49836e406aaa", Name: "Weekly on Tue"}]
+                }
+            };
+
+            importerSelect.gridData = data;
+            window.viewImporterReview();
+            //});
         });
 
         //get the list of fields for the selected service
@@ -164,18 +129,13 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore"], funct
                     //don't add if type is guid or if name is ClientName or OccurDate
                     if (name !== "ClientName" && name !== "OccurDate") {
                         //add field to list
-                        newFields.push(name.replace(/_/g, ' ')); //replace "_" with " "
+                        newFields.push({Name: name.replace(/_/g, ' ')}); //replace "_" with " "
                     }
                 }
 
                 //combine the fields in fieldList with newFields
                 var allFields = fieldList.concat(newFields);
-
-                var j, options = [];
-                for (j = 0; j < allFields.length; j++) {
-                    options[j] = {name: allFields[j], data: allFields[j]};
-                }
-                $("#importerSelect").find(".styled-select").selectBox(options, importerSelect.dropdownChanged);
+                $("#importerSelect").find(".styled-select").selectBox({data: allFields, dataTextField: "Name"});
 
                 //automatically select fields if there is a matching header
                 var dropdown, headers = importerUpload.oldData[0];
@@ -184,9 +144,6 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore"], funct
                     //try to select a matching item
                     dropdown.val(headers[h]);
                 }
-
-                //setup the grid settings initially in case the don't change any of the dropdowns
-                importerSelect.dropdownChanged();
             });
         }
     };

@@ -1,74 +1,114 @@
 'use strict';
 
 define(["jquery", "sections/importerUpload", "sections/importerSelect", "db/services"], function ($, importerUpload, importerSelect, dbServices) {
-    var importerReview = {}, dataSource, grid, gridData;
+    var importerReview = {}, dataSource, grid, columns = [
+        {
+            field: "Client",
+            template: "<div class='client #= Client #'>#= Client #</div>"
+        },
+        {
+            field: "Location",
+            attributes: {
+                "class": "locationCell"
+            }
+        },
+        {
+            field: "Repeat",
+            attributes: {
+                "class": "repeatCell"
+            }
+        }
+    ];
 
     /**
      * @param data
      * @return {Array} newData
      */
     var formatDataForGrid = function (data) {
+        var newData = [], newRow, row;
+        for (var i in data) {
+            row = data[i];
+            newRow = [];
+            for (var j in row) {
+                if (j === "0") {
+                    newRow["Client"] = row[j];
+                } else if (j === "1") {
+                    newRow["Location"] = row[j];
+                } else if (j === "2") {
+                    newRow["Repeat"] = row[j];
+                }
+            }
+            newData.push(newRow);
+        }
+        return newData;
     };
 
     /**
      * @param data
      * @return {Array} newData
      */
-    var formatGridDataForValidation = function (data) {
+    var formatGridDataForSubmission = function (data) {
     };
 
     var submitData = function (data) {
-        var dataToSubmit = formatGridDataForValidation(data);
+        var dataToSubmit = formatGridDataForSubmission(data);
 
         //dbServices.submitData(dataToSubmit, importerSelect.headers, importerUpload.selectedService);
     };
 
-    var createColumn = function (name) {
-        var column, template;
-        if (name === "Location") {
-            template = "# #";
-        } else {
-            template = "# #";
-        }
-        //calculate the width of the title
-        var width = name.length * 6.5 + 35;
-        //set the width to 100 if it's less than 100
-        if (width < 100) {
-            width = 100;
-        }
-        column = {
-            field: name.replace(/s+/g,''), //ex. "ClientName"
-            title: name, //ex. "Client Name"
-            template: template,
-            width: width + "px"
-        };
-        //add the column to the list of columns
-        importerSelect.columns.push(column);
-    };
+//    var createColumns = function (data) {
+//        for (var i in data) {
+//            var column, template;
+//            if (name === "Location") {
+//                template = "# #";
+//            } else {
+//                template = "# #";
+//            }
+//            //calculate the width of the title
+//            var width = name.length * 6.5 + 35;
+//            //set the width to 100 if it's less than 100
+//            if (width < 100) {
+//                width = 100;
+//            }
+//            column = {
+//                field: name.replace(/s+/g,''), //ex. "ClientName"
+//                title: name, //ex. "Client Name"
+//                template: template,
+//                width: width + "px"
+//            };
+//            //add the column to the list of columns
+//            columns.push(column);
+//        }
+//    };
 
     //region Grid Methods
     var setupGrid = function () {
+        var data = formatDataForGrid(importerSelect.gridData.RowSuggestions);
+
         dataSource = new kendo.data.DataSource({
-            data: gridData,
+            data: data,
             schema: {
                 model: {
-                    fields: importerSelect.fields
+                    fields: {
+                        Client: { type: "string" },
+                        Location: { type: "string" },
+                        Repeat: { type: "string" }
+                    }
                 }
             }
         });
 
-        grid = $("#gridView").kendoGrid({
-            columns: importerSelect.columns,
+        grid = $("#importerReview").find(".grid").kendoGrid({
+            columns: columns,
             dataSource: dataSource,
             editable: false,
             resizable: true,
-            scrollable: true,
-            sortable: "multiple"
+            scrollable: true
         }).data("kendoGrid");
     };
 
     var removeGrid = function () {
-        $("#gridView").empty();
+        $("#importerReview").find(".grid").empty();
         dataSource = "";
     };
 
@@ -77,7 +117,7 @@ define(["jquery", "sections/importerUpload", "sections/importerSelect", "db/serv
         var extraMargin = 230;
         var windowHeight = $(window).height();
         var contentHeight = windowHeight - extraMargin;
-        $('#gridView .k-grid-content').css("height", contentHeight + 'px');
+        $("#importerReview").find('.k-grid-content').css("height", contentHeight + 'px');
     };
     //endregion
 
@@ -96,9 +136,7 @@ define(["jquery", "sections/importerUpload", "sections/importerSelect", "db/serv
         //check if importerUpload exists
         //if not, then no data has been loaded
         //TODO:
-        if (importerUpload.oldData && importerSelect.gridData) {
-            gridData = formatDataForGrid(importerSelect.gridData);
-        } else {
+        if (!importerUpload.oldData) {
             //redirect to last page
             window.viewImporterSelect();
             return;

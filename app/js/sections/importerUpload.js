@@ -29,14 +29,14 @@ define(["jquery", "lib/csv", "db/services", "widgets/selectBox", "jui", "jfilere
     importerUpload.initialize = function () {
         //setup the FileReader on the fileUpload button
         //this will enable the flash FileReader polyfill from https://github.com/Jahdrien/FileReader
-        $("#fileUpload").fileReader({
+        $("#importerUpload #fileUpload").fileReader({
             id: "fileReaderSWFObject",
             filereader: "../../lib/filereader.swf",
             debugMode: false,
             multiple: false
         });
 
-        $("#fileUpload").on('change', function (evt) {
+        $("#importerUpload #fileUpload").on('change', function (evt) {
             var csvFile = evt.target.files[0];
             //if file is a .csv
             if(checkFileType(csvFile)){
@@ -49,23 +49,18 @@ define(["jquery", "lib/csv", "db/services", "widgets/selectBox", "jui", "jfilere
             }
             //since the csv file has been selected, read it as text
             reader.readAsText(csvFile);
-            $('#fileName').text(csvFile.name);
-            $('#uploadBtn').removeAttr('disabled');
+            $('#importerUpload #fileName').text(csvFile.name);
+            $('#importerUpload #uploadBtn').removeAttr('disabled');
         });
 
         //listen to change event of the serviceType dropdown
         var onSelect = function (selectedService) {
-            var service = {Id: selectedService.data, Name: selectedService.name};
-            importerUpload.selectedService = service;
+            importerUpload.selectedService = {Id: selectedService.value, Name: selectedService.name};
         };
 
         dbServices.serviceTemplates.read().done(function (serviceTypes) {
             //create the service types dropdown
-            var i, options = [];
-            for(i = 0; i < serviceTypes.length; i++) {
-                options[i] = {name: serviceTypes[i].Name, data: serviceTypes[i].Id};
-            }
-            $("#importerUpload #serviceType").selectBox(options, onSelect);
+            $("#importerUpload #serviceType").selectBox({data: serviceTypes, dataTextField: "Name", onSelect: onSelect});
 
             importerUpload.selectedService = serviceTypes[0];
         });
