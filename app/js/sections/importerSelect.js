@@ -1,47 +1,68 @@
 'use strict';
 
 define(["jquery", "sections/importerUpload", "db/services", "underscore"], function ($, importerUpload, dbServices, _) {
-    var importerSelect = {};
-    importerSelect.requiredFields = [
-        "Client Name",
-        "Address Line One",
-        "Address Line Two",
-        "City",
-        "State",
-        "Zip Code",
-        "Latitude",
-        "Longitude"
-    ];
+    var importerSelect = {},
+        requiredFields = [
+            "Client Name",
+            "Address Line One",
+            "Address Line Two",
+            "City",
+            "State",
+            "Zipcode",
+            "Country Code"
+        ];
 
     var formatDataForValidation = function (data) {
-        var object, dataToValidate = [];
-        //iterate through each row of the data
-        for (var i in data){
-            //skip the first row, because that is the row with the headers
-            if(i !== 0){
-                object = data[i];
-                var newArray = [], newObject, keyNum;
-                //iterate through each of the grid fields
-                for (var c in importerSelect.fields) {
-                    //remove the "c" from the name
-                    keyNum = c.substr(1,3);
-                    //get the object from the data that corresponds to the current field
-                    newObject = object[c];
-                    //if no corresponding object exists, create a blank one
-                    if(!newObject){
-                        newObject = {
-                            H: "",
-                            S: 2,
-                            V: ""
-                        };
-                    }
-                    //set the row and cell
-                    newObject["r"] = i;
-                    newObject["c"] = keyNum;
-                    newArray.push(newObject);
-                }
-                dataToValidate.push(newArray);
+        var selectedFields = [], fieldsToValidate;
+        //create an array of the fields to be used(based on the dropdowns)
+        $("#importerSelect").find(".selectBox").each(function () {
+            if (this.value !== "Do not Import") {
+                selectedFields.push({name: this.value, selected: true});
+            } else {
+                selectedFields.push(false);
             }
+        });
+
+        var fieldsToAdd = [];
+
+        //make sure the required fields are included
+        for (var i in requiredFields) {
+            var included = false, field = requiredFields[i];
+            for (var j in selectedFields) {
+                if (selectedFields[j] && selectedFields[j].name === field) {
+                    included = true;
+                }
+            }
+            if (!included) {
+                fieldsToAdd.push(field);
+            }
+        }
+
+        var dataToValidate = [], row;
+        //iterate through each row of the data
+        for (var r in data) {
+            row = data[r];
+            var newArray = [];
+            //iterate through each column of the current row
+            for (var c in row) {
+                //if the field is to be imported(if "Do not Import" wasn't selected for this row)
+                if (selectedFields[c]) {
+                    newArray.push(row[c]);
+                }
+            }
+            for (var f in fieldsToAdd) {
+                if (r === "0") {
+                    newArray.push(fieldsToAdd[f]);
+                } else {
+                    if (fieldsToAdd[f] === "Country Code") {
+                        newArray.push("US");
+                    } else {
+                        newArray.push("");
+                    }
+                }
+            }
+
+            dataToValidate.push(newArray);
         }
         return dataToValidate;
     };
@@ -90,71 +111,40 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore"], funct
         }
     }
 
-    importerSelect.createColumn = function (field, name, addToFieldsAndHeaders) {
-        var column, template, hidden = false;
-        if (name === "Location") {
-            template = "# if (" + field + ".S == 3) { # <div class='cellError'></div> # } else { # <a href='' class='location'>&nbsp;&nbsp;&nbsp;&nbsp;</a>  # } #";
-            //hidden = true;
-        } else {
-            template = "# if (" + field + ".S == 3) { # <div class='cellError'></div> # } # #=" + field + ".V#";
-        }
-        //calculate the width of the title
-        var width = name.length * 6.5 + 35;
-        //set the width to 100 if it's less than 100
-        if (width < 100) {
-            width = 100;
-        }
-        column = {
-            field: field, //ex. "c0"
-            title: name, //ex. "Client Name"
-            template: template,
-            width: width + "px",
-            hidden: hidden
-        };
-        //add the column to the list of columns
-        importerSelect.columns.push(column);
-        if (addToFieldsAndHeaders) {
-            //save the field as a property of importerSelect.fields
-            importerSelect.fields[field] = {
-                defaultValue: ""
-            };
-            //add the column name to the list of headers
-            importerSelect.headers.push(name);
-        }
-    };
-
     importerSelect.initialize = function () {
         //make sure there is a selected service type
         if (!importerUpload.selectedService) {
-            window.application.navigate("view/importerUpload.html");
+            window.viewImporterUpload();
             return;
         }
 
         $("#importerSelect").find(".saveBtn").on("click", function () {
-            var dataToValidate = formatDataForValidation(importerUpload.oldData);
+            //var dataToValidate = formatDataForValidation(importerUpload.oldData);
 
-            dbServices.validateData(dataToValidate, importerSelect.headers, function (data) {
+            //dbServices.validateData(dataToValidate, function (data) {
+                var data = [];
+
                 importerSelect.gridData = data;
                 window.viewImporterReview();
-            });
+            //});
         });
     };
 
     importerSelect.show = function () {
         //setup the default fields
         var fieldList = [
-            {Name: "Do not Import", Type: "string"},
-            {Name: 'Client Name', Type: "string"},
-            {Name: 'Address Line One', Type: "string"},
-            {Name: 'Address Line Two', Type: "string"},
-            {Name: 'City', Type: "string"},
-            {Name: 'State', Type: "string"},
-            {Name: 'Zip Code', Type: "string"},
-            {Name: 'Region Name', Type: "string"},
-            {Name: 'Frequency', Type: "none"},
-            {Name: 'Repeat On', Type: "none"},
-            {Name: 'Repeat Every', Type: "number"},
-            {Name: 'Repeat Start Date', Type: "date"}
+            "Do not Import",
+            'Client Name',
+            'Address Line One',
+            'Address Line Two',
+            'City',
+            'State',
+            'Zip Code',
+            'Region Name',
+            'Frequency',
+            'Repeat On',
+            'Repeat Every',
+            'Repeat Start Date'
         ];
 
         $("#listView").kendoListView({
@@ -164,44 +154,41 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore"], funct
         });
 
         //get the list of fields for the selected service
-        dbServices.services.read({params: {serviceTemplateId: importerUpload.selectedService.Id}}).done(function (service) {
-            var newFields = [], name, type;
-            var fields = service[0].Fields;
-            //iterate throught the list of fields
-            for (var i in fields) {
-                name = fields[i].Name;
-                type = fields[i].Type;
-                //don't add if type is guid or if name is ClientName or OccurDate
-                if (type !== "guid" && name !== "ClientName" && name !== "OccurDate") {
-                    //add field to list
-                    newFields.push({
-                        //replace "_" with " "
-                        Name: name.replace(/_/g, ' '),
-                        Type: type
-                    });
+        if (importerUpload.selectedService) {
+            dbServices.services.read({params: {serviceTemplateId: importerUpload.selectedService.Id}}).done(function (service) {
+                var newFields = [], name;
+                var fields = service[0].Fields;
+                //iterate throught the list of fields
+                for (var i in fields) {
+                    name = fields[i].Name;
+                    //don't add if type is guid or if name is ClientName or OccurDate
+                    if (name !== "ClientName" && name !== "OccurDate") {
+                        //add field to list
+                        newFields.push(name.replace(/_/g, ' ')); //replace "_" with " "
+                    }
                 }
-            }
 
-            //combine the fields in fieldList with newFields
-            var allFields = fieldList.concat(newFields);
+                //combine the fields in fieldList with newFields
+                var allFields = fieldList.concat(newFields);
 
-            var j, options = [];
-            for(j = 0; j < allFields.length; j++) {
-                options[j] = {name: allFields[j].Name, data: allFields[j].Name};
-            }
-            $("#importerSelect").find(".styled-select").selectBox(options, importerSelect.dropdownChanged);
+                var j, options = [];
+                for (j = 0; j < allFields.length; j++) {
+                    options[j] = {name: allFields[j], data: allFields[j]};
+                }
+                $("#importerSelect").find(".styled-select").selectBox(options, importerSelect.dropdownChanged);
 
-            //automatically select fields if there is a matching header
-            var dropdown, headers = importerUpload.oldData[0];
-            for (var h in headers) {
-                dropdown = $("#importerSelect .selectBox:eq(" + h + ")");
-                //try to select a matching item
-                dropdown.val(headers[h]);
-            }
+                //automatically select fields if there is a matching header
+                var dropdown, headers = importerUpload.oldData[0];
+                for (var h in headers) {
+                    dropdown = $("#importerSelect .selectBox:eq(" + h + ")");
+                    //try to select a matching item
+                    dropdown.val(headers[h]);
+                }
 
-            //setup the grid settings initially in case the don't change any of the dropdowns
-            importerSelect.dropdownChanged();
-        });
+                //setup the grid settings initially in case the don't change any of the dropdowns
+                importerSelect.dropdownChanged();
+            });
+        }
     };
 
     window.importerSelect = importerSelect;

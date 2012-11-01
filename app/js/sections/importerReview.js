@@ -23,6 +23,29 @@ define(["jquery", "sections/importerUpload", "sections/importerSelect", "db/serv
         //dbServices.submitData(dataToSubmit, importerSelect.headers, importerUpload.selectedService);
     };
 
+    var createColumn = function (name) {
+        var column, template;
+        if (name === "Location") {
+            template = "# #";
+        } else {
+            template = "# #";
+        }
+        //calculate the width of the title
+        var width = name.length * 6.5 + 35;
+        //set the width to 100 if it's less than 100
+        if (width < 100) {
+            width = 100;
+        }
+        column = {
+            field: name.replace(/s+/g,''), //ex. "ClientName"
+            title: name, //ex. "Client Name"
+            template: template,
+            width: width + "px"
+        };
+        //add the column to the list of columns
+        importerSelect.columns.push(column);
+    };
+
     //region Grid Methods
     var setupGrid = function () {
         dataSource = new kendo.data.DataSource({
@@ -78,6 +101,7 @@ define(["jquery", "sections/importerUpload", "sections/importerSelect", "db/serv
         } else {
             //redirect to last page
             window.viewImporterSelect();
+            return;
         }
 
         if (grid) {
