@@ -1,9 +1,9 @@
 <div id="routeDestinationDetails" data-role="view" data-show="routeDestinationDetails.show" data-title="Destination Info">
-    <div id="locationInfo" data-bind="source: this" data-template="locationTemplate" style="margin-bottom:10px"></div>
+    <div class="locationInfo" data-bind="source: this" data-template="locationTemplate" style="margin-bottom:10px"></div>
     <div>
     </div>
     <div class="contactInfo"></div>
-    <p style="top:10px; margin-bottom: -5px;">Tasks</p>
+    <p style="top:10px; margin-bottom: -5px; font-size:20px;">Tasks</p>
     <ul id="routeTasksListView" data-bind="source: dataSource, click: select"
         data-role="listview" data-style="inset" data-template="routeTasksTemplate">
     </ul>
@@ -23,5 +23,5 @@
     # } #
 </script>
 <script type="text/x-kendo-template" id="routeTasksTemplate">
-    <a>${Name}</a>
+    <a><span>${Name}</span></a>
 </script>

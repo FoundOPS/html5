@@ -506,9 +506,9 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
             var serviceTypeName = vm.get("serviceType.Name");
 
             //make sure dropdownlist has service type selected
-            var i, options = $(".selectBox").children("*");
+            var i, options = $("#serviceTypes > .selectBox").children("*");
             for(i=0; i<options.length; i++) {
-                if(options[i].dataset.data === serviceTypeId) {
+                if(options[i].dataset.value === serviceTypeId) {
                     options[i].selected = true;
                 }
             };
@@ -543,8 +543,8 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
             services.serviceTypes = serviceTypes;
 
             //Callback for selectBox.
-            var onSelect = function (selectedOption) {
-                vm.set("serviceType", {Id: selectedOption.data, Name: selectedOption.name});
+            var save = function (selectedOption) {
+                vm.set("serviceType", {Id: selectedOption.value, Name: selectedOption.name});
 
                 //disable the delete button and hide the service details
                 $('#services .k-grid-delete').attr("disabled", "disabled");
@@ -555,9 +555,9 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
             //Setup selectBox.
             var i, options = [];
             for(i = 0; i<serviceTypes.length; i++) {
-                options[i] = {name: serviceTypes[i].Name, data: serviceTypes[i].Id};
+                options[i] = {name: serviceTypes[i].Name, value: serviceTypes[i].Id};
             }
-            $("#serviceTypes").selectBox(options, onSelect);
+            $("#serviceTypes").selectBox({options: options, onSelect: save});
 
             //now that the service types are loaded,
             //setup the grid by reparsing the hash

@@ -226,17 +226,6 @@ require(["jquery", "widgets/navigator", "developer", "db/services", "db/session"
     //Hookup remote loading into remoteContent, by using the kendo mobile application
     window.application = application = new kendo.mobile.Application($("#remoteContent"), { platform: "ios"});
 
-    //setup page tracking
-    try {
-        var pageTracker = window._gat._getTracker("UA-25857232-1");
-        pageTracker._initData();
-        pageTracker._trackPageview();
-        window.trackEvent = function (section, action, label) {
-            pageTracker._trackEvent(section, action, label);
-        };
-    } catch (err) {
-    }
-
     /*region Importer Navigate Methods*/
     window.viewImporterUpload = function () {
         application.navigate("view/importerUpload.html");
