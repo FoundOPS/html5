@@ -41,6 +41,11 @@ footer {
 }
 /* Metro-like styles for listviews */
 .km-listview-wrapper {
+  .km-state-active {
+    span {
+      color: #fff;
+    }
+  }
   li {
     border-radius: 0 !important;
     webkit-border-radius: 0 !important;
@@ -49,7 +54,10 @@ footer {
     background-color: #fff;
     box-shadow: none !important;
     -webkit-box-shadow: none !important;
-    border-bottom: 1px solid rgb(242, 242, 242) !important;
+    border-bottom: 1px solid #F2F2F2 !important;
+    &:hover > div, &:hover > a {
+      background-color: #dfdfdf;
+    }
   }
   a {
     height: 60px;
@@ -60,7 +68,7 @@ footer {
     margin-top: 10px;
   }
   span {
-    color: rgb(72, 143, 205);
+    color: #488FCD;
     position: relative;
     top: 8px;
   }
@@ -71,7 +79,6 @@ footer {
   }
 }
 /* endregion */
-
 /* region Routes */
 #refreshButton {
   border-radius: 0;
@@ -121,11 +128,9 @@ footer {
 }
 #routeDestinations-listview {
   span {
-    color: rgb(72, 143, 205);
     top: 0;
   }
   label {
-    color: #222222;
     top: -8px;
   }
 }
@@ -133,6 +138,7 @@ footer {
   border-radius: 100px;
   -webkit-border-radius: 100px;
   -moz-border-radius: 100px;
+  border-radius: 1px solid black;
   background: url(../img/services/default.png) no-repeat;
   width:30px;
   height:30px;
@@ -175,7 +181,42 @@ footer {
 }
 /* endregion */
 /* region Route Tasks */
-.statusLabel {
+#signature {
+  margin: 10px auto;
+}
+/* Signature Field Styling */
+.sigBox {
+  width: 95%;
+  max-width: 950px;
+  max-height: 620px;
+  position: absolute;
+  left:100%;
+  top:10%;
+  z-index:-10;
+  padding: 10px;
+  background-color: #eee;
+  visibility: hidden;
+  canvas {
+    margin: 7px auto !important;
+    background-color: #fff;
+  }
+  #sigClear {
+    float: left;
+    padding: 3px;
+    background-color: #fff;
+  }
+  #sigSave {
+    float: right;
+    padding: 3px;
+    background-color: #fff;
+  }
+}
+#signature-listview {
+  img {
+    height: 100%;
+  }
+}
+.fieldLabel {
   margin: auto;
   width: 95%;
   font-size: 16px;
@@ -199,7 +240,7 @@ footer {
   }
 }
 /* Task statuses selection popup styles */
-#taskStatuses-dimmer {
+#background-dimmer {
   background:#000;
   position:fixed;
   top:0; left:0;

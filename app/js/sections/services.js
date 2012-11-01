@@ -557,11 +557,7 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
             };
 
             //Setup selectBox.
-            var i, options = [];
-            for(i = 0; i<serviceTypes.length; i++) {
-                options[i] = {name: serviceTypes[i].Name, value: serviceTypes[i].Id};
-            }
-            $("#serviceTypes").selectBox({options: options, onSelect: save});
+            $("#serviceTypes").selectBox({data: serviceTypes, dataTextField: "Name", onSelect: save});
 
             //now that the service types are loaded,
             //setup the grid by reparsing the hash
