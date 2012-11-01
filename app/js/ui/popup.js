@@ -2,9 +2,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
     (function ($) {
         var popup = null;
         var methods = {
-            init: function (options) {
-                popup = new Popup(this.selector);
-
+            init: function(options) {
                 if(typeof(options.backgroundColor) != null){
                     popup.setBackgroundColor(options.backgroundColor);
                 }
@@ -19,6 +17,14 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
 
                 popup.addMenu(options.id, options.title, options.contents);
             },
+            popupInit: function(options) {
+                window.popup = popup = new Popup(this.selector);
+                methods.init(options);
+            },
+            optionsPopupInit: function (options) {
+                window.popup = popup = new OptionsPopup(this.selector);
+                methods.init(options);
+            },
             addMenu: function (menu) {
                 if (popup === null)return;
                 popup.addMenu(menu.id, menu.title, menu.contents);
@@ -28,14 +34,14 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
             }
         };
 
-        $.fn.popup = function (method) {
+        $.fn.optionsPopup = function (method) {
             // Create some defaults, extending them with any options that were provided
             //var settings = $.extend({}, options);
             // Method calling logic
             if (methods[method]) {
                 return methods[ method ].apply(this, Array.prototype.slice.call(arguments, 1));
             } else if (typeof method === 'object' || !method) {
-                return methods.init.apply(this, arguments);
+                return methods.optionsPopupInit.apply(this, arguments);
             } else {
                 $.error('Method ' + method + ' does not exist on jQuery.popup');
             }
@@ -43,20 +49,35 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
             return this.each(function () {
             });
         };
-    })(jQuery);
 
-    //TODO: Refactor; Give a namespace.
-    var menus = [];
-    var lastElementClick = null;
-    var currentTarget = null;
+        $.fn.popup = function (method) {
+            // Create some defaults, extending them with any options that were provided
+            //var settings = $.extend({}, options);
+            // Method calling logic
+            if (methods[method]) {
+                return methods[ method ].apply(this, Array.prototype.slice.call(arguments, 1));
+            } else if (typeof method === 'object' || !method) {
+                return methods.popupInit.apply(this, arguments);
+            } else {
+                $.error('Method ' + method + ' does not exist on jQuery.popup');
+            }
+
+            return this.each(function () {
+            });
+        }
+    })(jQuery);
 
     /** Popup Constructor **/
     function Popup(popupListener) {
-        //Note: Making history a global broke on Android 2.3
-        var history = [];
+        var lastElementClick = null;
+        var currentTarget = null;
+
         var thisPopup = this;
         var title = "";
         var content = "";
+        var menus = [];
+        //Note: Making history a global broke on Android 2.3
+        var history = [];
         var backgroundColor = null;
         var fontColor = null;
         var borderColor = null;
@@ -77,10 +98,6 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         listenerElements.click(function (e) {
             thisPopup.toggleVisible(e, $(this));
         });
-
-        this.addMenu = function (id, title, contents) {
-            menus.push({'id': id, 'title': title, 'contents': contents});
-        };
 
         this.setBackgroundColor = function(color){
             backgroundColor = color;
@@ -144,6 +161,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
 
             if(fontColor!==null){
                 $("#popup").css("color", fontColor);
+                //TODO: OPTIONSPOPUP REFACTOR: Possibly push this into new optionsPopup.
                 $("#popup a").css("color", fontColor);
             }
 
@@ -252,45 +270,16 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
             $('html')
                 .on('click touchend', function (e) {
                     var clicked = $(e.target);
-                    //console.log(clicked[0].outerHTML);
-                    //console.log(clicked.parents("#popupContentWrapper"));
-                    //console.log(clicked.attr("id"));
                     //TODO: Return if not visible.
-                    //TODO: Also add arrow click detection?
                     var popupHeaderLen = clicked.parents("#popupHeader").length + clicked.is("#popupHeader") ? 1 : 0;
-                    //console.log("pHeaderLen: " + popupHeaderLen);
                     //TODO: Find better listener for this.
                     var popupContentLen = (clicked.parents("#popupContentWrapper").length && !clicked.parent().is("#popupContentWrapper")) ? 1 : 0;
-                    //console.log("pHeaderLen: " + popupContentLen);
                     var isListener = clicked.parents(".popupListener").length + clicked.is(".popupListener") ? 1 : 0;
-                    //console.log("pHeaderLen: " + isListener);
                     if (popupHeaderLen === 0 && popupContentLen === 0 && isListener === 0) {
                         thisPopup.closePopup();
                     }
                 }
             );
-
-            $(document)
-                .on('touchstart mousedown', '#popup a',
-                function () {
-                    $(this).css({backgroundColor: "#488FCD"});
-                })
-                .on('touchend mouseup mouseout', '#popup a',
-                function () {
-                    $(this).css({backgroundColor: ""});
-                })
-                .on('click', '.popupContentRow',
-                function () {
-                    var newId = $(this).attr('id');
-
-                    //TODO: Refactor
-                    if ($(this).hasClass("popupEvent")) {
-                        $(this).trigger("popupEvent", $(this));
-                    }
-
-                    var keepOpen = thisPopup.populate(newId);
-                    if (!keepOpen) thisPopup.closePopup();
-                });
 
             var popupContentWrapperDiv = $("#popupContentWrapper");
             var throttleTimeout;
@@ -322,54 +311,6 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
             $("#popupWrapper").css("visibility", "hidden");
         };
 
-        //Public void function that populates setTitle and setContent with data found by id passed.
-        this.populate = function (id) {
-            var newMenu = this.getMenu(id);
-            if (newMenu === null) {
-                //TODO: Possibly add a boolean to pass to indicate link or end of menu action.
-                //console.log("ID not found.");
-                return false;
-            }
-            history.push(newMenu);
-            this.setData(newMenu);
-            return true;
-        };
-
-        //Links are given the popupEvent class if no url passed. If link has popupEvent,
-        // event is fired based on currentPopupAction.
-        this.setData = function (data) {
-            var contArray = data.contents;
-            var c = "";
-            var i;
-            //popupContentDiv.html('');
-            for (i = 0; i < contArray.length; i++) {
-                var lastElement = "";
-                var popupEvent = "";
-                var menuId = "";
-                var menuUrl = "";
-                if (i === contArray.length - 1) {
-                    lastElement = " last";
-                }
-
-                if (typeof(contArray[i].id) !== 'undefined') {
-                    menuId = " id='" + contArray[i].id + "'";
-                }
-
-                if (typeof(contArray[i].url) !== 'undefined') {
-                    menuUrl = " href='" + contArray[i].url + "'";
-                } else {
-                    popupEvent = " popupEvent";
-                }
-
-                c += "<a" + menuUrl + menuId + " class='popupContentRow" + popupEvent + lastElement + "'>" +
-                    contArray[i].name +
-                    "</a>";
-            }
-            this.setAction(data.id);
-            this.setTitle(data.title);
-            this.setContent(c);
-        };
-
         this.getAction = function () {
             return $("#currentPopupAction").html();
         };
@@ -387,12 +328,11 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         //Public setter function for private var content and sets content of the html popup element.
         this.setContent = function (cont) {
             content = cont;
-            var popupContentWrapperDiv = $("#popupContentWrapper");
             //popupContentDiv.data('jsp').getContentPane().find("#popupContent").html(content);
             //TODO: Is setting the content w/o using the jScrollPane api safe to do?
             $("#popupContent").html(content);
             //TODO: Change event namespace.
-            popupContentWrapperDiv.trigger("popup.setContent", $(this));
+            $("#popupContentWrapper").trigger("popup.setContent", $(this));
         };
 
         // Public getter function that returns a popup data object.
@@ -402,7 +342,6 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         //      title: Display text for popup header
         //      contents: Array of objects, included identifiers below
         //          name: Display text for links
-        //TODO: Refactor
         this.getMenu = function (id) {
             //Searches for a popup data object by the id passed, returns data object if found.
             var i;
@@ -415,6 +354,93 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
             //Null result returned if popup data object is not found.
             //console.log("No data found, returning null.");
             return null;
+        };
+
+        this.addMenu = function (id, title, contents) {
+            menus.push({'id': id, 'title': title, 'contents': contents});
+        };
+
+        //Public void function that populates setTitle and setContent with data found by id passed.
+        this.populate = function (id) {
+            var newMenu = this.getMenu(id);
+            if (newMenu === null) {
+                //TODO: Possibly add a boolean to pass to indicate link or end of menu action.
+                //console.log("ID not found.");
+                return false;
+            }
+            history.push(newMenu);
+            this.setData(newMenu);
+            return true;
+        };
+
+        this.setData = function (data) {
+            this.setAction(data.id);
+            this.setTitle(data.title);
+            this.setContent(data.contents);
+        }
+    }
+
+    function OptionsPopup(popupListener){
+        Popup.apply(this, [popupListener]);
+        //this.prototype = new Popup(popupListener);
+        //Popup.call(this, popupListener);
+        var thisOptionsPopup = this;
+
+        $(document)
+            .on('touchstart mousedown', '#popup a',
+            function () {
+                $(this).css({backgroundColor: "#488FCD"});
+            })
+            .on('touchend mouseup mouseout', '#popup a',
+            function () {
+                $(this).css({backgroundColor: ""});
+            })
+            .on('click', '.popupContentRow',
+            function () {
+                var newId = $(this).attr('id');
+
+                //TODO: Prefix all events triggered
+                if ($(this).hasClass("popupEvent")) {
+                    $(this).trigger("popupEvent", $(this));
+                }
+
+                var keepOpen = thisOptionsPopup.populate(newId);
+                if (!keepOpen) thisOptionsPopup.closePopup();
+            });
+
+        this.setData = function (data) {
+            var contArray = data.contents;
+            var c = "";
+            var i;
+            //popupContentDiv.html('');
+            for (i = 0; i < contArray.length; i++) {
+                var lastElement = "";
+                var popupEvent = "";
+                var menuId = "";
+                var menuUrl = "";
+                if (i === contArray.length - 1) {
+                    lastElement = " last";
+                }
+
+                //Links are given the popupEvent class if no url passed. If link has popupEvent,
+                // event is fired based on currentPopupAction.
+                if (typeof(contArray[i].id) !== 'undefined') {
+                    menuId = " id='" + contArray[i].id + "'";
+                }
+
+                if (typeof(contArray[i].url) !== 'undefined') {
+                    menuUrl = " href='" + contArray[i].url + "'";
+                } else {
+                    popupEvent = " popupEvent";
+                }
+
+                c += "<a" + menuUrl + menuId + " class='popupContentRow" + popupEvent + lastElement + "'>" +
+                    contArray[i].name +
+                    "</a>";
+            }
+            this.setAction(data.id);
+            this.setTitle(data.title);
+            this.setContent(c);
         };
     }
 

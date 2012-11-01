@@ -585,7 +585,7 @@ define(["jquery", "ui/popup", "lib/doT.min", "jmousewheel", "jscrollpane"], func
         var initPopup = function () {
             //var popup = new Popup(config, ".navElement");
 
-            $("#navClient").popup({
+            $("#navClient").optionsPopup({
                 id: "navClient",
                 title: name,
                 contents: [
@@ -600,7 +600,7 @@ define(["jquery", "ui/popup", "lib/doT.min", "jmousewheel", "jscrollpane"], func
                 title: "Businesses",
                 contents: roles
             };
-            $("#navClient").popup('addMenu', changeBusinessMenu);
+            $("#navClient").optionsPopup('addMenu', changeBusinessMenu);
 
             $(document).on("popup.created", function () {
                 $("#popupContentWrapper").jScrollPane({
@@ -697,7 +697,7 @@ define(["jquery", "ui/popup", "lib/doT.min", "jmousewheel", "jscrollpane"], func
 
         this.showBusinessLogo = function(){
             $('#clientLogo').show();
-        }
+        };
 
         this.coverWindow = function () {
             var sideBarDiv = $("#sideBar");
