@@ -1,0 +1,44 @@
+<div data-init="importerUpload.initialize" data-role="view" data-title="Upload File" id="importerUpload">
+    <ul class="crumbs">
+        <li class="active" onclick="window.viewImporterUpload()"><a>Upload File</a></li>
+        <li><a>Select Fields</a></li>
+        <li><a>Review Data</a></li>
+    </ul>
+    <img class="cover" width="10" height="25" src="../img/cover.png" alt="" />
+    <div class="help">
+        <ol>
+            <div class="arrowA"></div>
+            <li>Select your data file. Make sure it's in .csv format.</li>
+            <div class="arrowA low"></div>
+            <li>Select the type of service.</li>
+            <div class="arrowA extraLow"></div>
+            <li>Click "Upload".</li>
+        </ol>
+    </div>
+    <div class="wrap">
+        <div id="hints">
+            <fieldset>
+                <legend>Helpful Hints</legend>
+                <ul>
+                    <li>If you are unsure how to format your .CSV sheet, try downloading this
+                        <a href="../lib/example.xlsx">sample file</a>.</li>
+                    <li>If you run into any difficulties during the process, feel free to contact support,
+                        either <a href="javascript:void(0)" onclick="UserVoice.showPopupWidget()">online</a>, or by calling (347)460-4004.</li>
+                </ul>
+            </fieldset>
+        </div>
+        <div id="main">
+            <label for="fileUpload">Data Sheet: <span id="fileName"></span></label><br />
+            <input id="fileUpload" name="fileUpload" type="file" />
+            <br />
+            <br />
+            <br />
+            <label for="serviceType">Service Type:</label><br />
+            <div id="serviceType" class="styled-select"></div>
+            <br />
+            <br />
+            <br />
+            <button class="k-button k-button-icontext saveBtn" id="uploadBtn" onclick="window.viewImporterSelect()" disabled="disabled">Upload</button>
+        </div>
+    </div>
+</div>
