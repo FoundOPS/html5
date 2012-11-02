@@ -5,13 +5,14 @@
 //need to require kendo so it is loaded before this widget, otherwise funky stuff happens
 define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tools/analytics", "select2", "kendo"], function ($, _, generalTools, parserTools, analytics) {
     //region Locals
-    var sampleContacts = [
-            {Entity: "Burger King", Data: "765-494-2786", Type: "Phone Number", Label: "Mobile"},
-            {Entity: "Burger King", Data: "bk47906@gmail.com", Type: "Email Address", Label: "Personal"},
-            {Entity: "Mary Lou's", Data: "http://www.marylousdonuts.com", Type: "Website", Label: "Business"}
-        ],
+//   var sampleContacts = [
+//            {Entity: "Burger King", Data: "765-494-2786", Type: "Phone Number", Label: "Mobile"},
+//            {Entity: "Burger King", Data: "bk47906@gmail.com", Type: "Email Address", Label: "Personal"},
+//            {Entity: "Mary Lou's", Data: "http://www.marylousdonuts.com", Type: "Website", Label: "Business"}
+//        ];
+
     //labels for each category
-        phoneLabels = [
+    var phoneLabels = [
             {value: "Mobile"},
             {value: "Work"},
             {value: "Home"},
@@ -91,6 +92,8 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
                 that._isNew = true;
             });
             $(that.element).find(".delete").live("click", function () {
+                var id = that.contacts[that._editIndex].Id;
+
                 //remove the selected contact from the list
                 that.contacts.splice(that._editIndex, 1);
                 //refresh the list of contacts
@@ -98,7 +101,7 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
                 //show the list of contacts
                 that._changePane("list");
                 //submit the change
-                that.options.update(that.contacts);
+                that.options.entity.destroy(id);
             });
             $(that.element).find(".save").live("click", function () {
                 //save the old value to be used to check for changes
@@ -127,12 +130,12 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
                 }
                 //save changes
                 if (that._isNew) {
-                    that.options.create(that.contacts);
+                    that.options.entity.create(that.contacts[that._editIndex]);
                 } else {
                     //check if contact changed
                     var newContact = generalTools.deepClone(that.contacts[that._editIndex]);
                     if (!_.isEqual(newContact, oldContact)) {
-                        that.options.update(that.contacts);
+                        that.options.entity.update(newContact);
                     }
                 }
                 that._isNew = false;

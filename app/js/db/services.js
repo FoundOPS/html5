@@ -196,6 +196,12 @@ define(["developer", "tools/dateTools", "db/saveHistory", "tools/parameters", "t
             read: {},
             update: {}
         },
+        contactInfo: {
+            create: {},
+            read: {},
+            update: {},
+            destroy: {}
+        },
         employees: {},
         errors: {
             create: {}
