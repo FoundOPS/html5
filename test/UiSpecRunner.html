@@ -7,7 +7,8 @@
 
     <script>
         jasmineuiConfig = {
-            logEnabled: true
+            logEnabled: true,
+            asyncSensors: ["load", "timeout", "xhr", "$animationComplete", "$transitionComplete"]
 //          , scripts: [
 //                {position: 'end', url: '/jasmine/jasmine-jquery.js'}
 //            ]
@@ -27,7 +28,7 @@
 <script>
     var reporter = new jasmine.TrivialReporter();
     jasmine.getEnv().addReporter(reporter);
-    jasmine.getEnv().specFilter = function(spec) {
+    jasmine.getEnv().specFilter = function (spec) {
         return reporter.specFilter(spec);
     };
     jasmine.getEnv().execute();
