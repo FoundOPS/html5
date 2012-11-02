@@ -15,9 +15,12 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
         addNewService: function () {
             dbServices.services.read({
                 params: {
-                    serviceTemplateId: vm.get("serviceType.Id"),
-                    serviceDate: dateTools.stripDate(vm.get("startDate"))
+                    serviceDate: dateTools.stripDate(vm.get("startDate")),
+                    serviceTemplateId: vm.get("serviceType.Id")
                 }}).done(function (services) {
+                    //disable undo for new entities
+                    saveHistory.setUndoEnabled(false);
+
                     var service = services[0];
                     //add a new service holder
                     selectedServiceHolder = serviceHoldersDataSource.add();
@@ -106,20 +109,29 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
         //fixes a problem when the state is stored bc it is converted to json and back
         dbServices.services.parse(state);
         vm.set("selectedService", state);
-        services.save();
+        //skip validation because the location combobox will be null initially, not validate, and not save
+        services.save(true);
     };
 
-    services.save = function () {
+    /**
+     * Save the selected service
+     * @param skipValidation Skip validation
+     */
+    services.save = function (skipValidation) {
         var service = vm.get("selectedService");
 
-        if (services.validator.validate()) {
+        if (skipValidation || services.validator.validate()) {
             dbServices.services.update({body: service}).done(function () {
                 vm.syncServiceHolder();
+                //re-enable undo after a service is saved (in case it was disabled for a new service)
+                saveHistory.setUndoEnabled(true);
             });
         } else {
-            //force validate clients
+            //force validate clients and locations
             var clientInput = $("#serviceDetails").find(".client input:not(.select2-input)");
+            var locationInput = $("#serviceDetails").find(".location input:not(.select2-input)");
             services.validator.validateInput(clientInput);
+            services.validator.validateInput(locationInput);
         }
     };
 
@@ -507,11 +519,11 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
 
             //make sure dropdownlist has service type selected
             var i, options = $("#serviceTypes > .selectBox").children("*");
-            for(i=0; i<options.length; i++) {
-                if(options[i].dataset.value === serviceTypeId) {
+            for (i = 0; i < options.length; i++) {
+                if (options[i].dataset.value === serviceTypeId) {
                     options[i].selected = true;
                 }
-            };
+            }
         }
         //reload the services whenever the start or end date changes
         else if (e.field === "startDate" || e.field === "endDate") {
@@ -536,32 +548,29 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
 
         vm.bind("change", _.debounce(vmChanged, 200));
 
-        var formatserviceName = function (service) {
-            return service.Name;
-        };
-
         //load the current business account's service types then
         //1) setup the service types drop down
         //2) choose the first service+ type
         dbServices.serviceTemplates.read().done(function (serviceTypes) {
             services.serviceTypes = serviceTypes;
 
-            //Callback for selectBox.
-            var save = function (selectedOption) {
-                vm.set("serviceType", {Id: selectedOption.value, Name: selectedOption.name});
-
-                //disable the delete button and hide the service details
-                $('#services .k-grid-delete').attr("disabled", "disabled");
-                    //hide the serviceDetails
-                $("#serviceDetails").attr("style", "display:none");
-            };
-
             //Setup selectBox.
             var i, options = [];
-            for(i = 0; i<serviceTypes.length; i++) {
+            for (i = 0; i < serviceTypes.length; i++) {
                 options[i] = {name: serviceTypes[i].Name, value: serviceTypes[i].Id};
             }
-            $("#serviceTypes").selectBox({options: options, onSelect: save});
+            $("#serviceTypes").selectBox({
+                options: options,
+                onSelect: function (selectedOption) {
+                    vm.set("serviceType", {Id: selectedOption.value, Name: selectedOption.name});
+
+                    //disable the delete button and hide the service details
+                    $('#services .k-grid-delete').attr("disabled", "disabled");
+
+                    //hide the serviceDetails
+                    $("#serviceDetails").attr("style", "display:none");
+                }
+            });
 
             //now that the service types are loaded,
             //setup the grid by reparsing the hash

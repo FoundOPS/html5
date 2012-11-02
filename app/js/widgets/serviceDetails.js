@@ -32,7 +32,7 @@ define(["jquery", "db/services", "db/session", "db/models", "widgets/selectBox",
          * @private
          */
         _createClientLocation: function (service) {
-            var that = this, clientSelector, locationSelector;
+            var that = this, clientSelector, locationSelector, locationSelected;
 
             var formatClientName = function (client) {
                 return client.Name;
@@ -40,7 +40,7 @@ define(["jquery", "db/services", "db/session", "db/models", "widgets/selectBox",
 
             //updates the location's comboBox to the current client's locations
             var updateLocations = function (client) {
-                //clear & disable the locations comboxbox
+                //clear & disable the locations combobox
                 if (locationSelector) {
                     locationSelector.select2("data", {AddressLineOne: "", AddressLineTwo: ""});
                     locationSelector.select2("disable");
@@ -57,14 +57,16 @@ define(["jquery", "db/services", "db/session", "db/models", "widgets/selectBox",
                             var destination = models.firstFromId(locations, destinationField.LocationId);
                             if (destination) {
                                 locationSelector.select2("data", destination);
-                                //for updating the services grid
-                                destinationField.Value = destination;
+
+                                //trigger location selected because it does not happen by default
+                                locationSelected();
                             } else {
                                 //set the destination to the first location
                                 //in serviceDetails
                                 locationSelector.select2("data", locations[0]);
-                                //in grid
-                                destinationField.Value = locations[0];
+
+                                //trigger location selected because it does not happen by default
+                                locationSelected();
                             }
 
                             locationSelector.select2("enable");
@@ -74,7 +76,10 @@ define(["jquery", "db/services", "db/session", "db/models", "widgets/selectBox",
             };
 
             //Add the Client selector w auto-complete and infinite scrolling
-            clientSelector = $(inputTemplate).attr("type", "hidden").attr("required", "required").appendTo(that.element).wrap("<label class='client'>Client</label>");
+            clientSelector = $(inputTemplate).attr("type", "hidden")
+                //For validation message
+                .attr("name", "Client").attr("required", "required")
+                .appendTo(that.element).wrap("<label class='client'>Client</label>");
             clientSelector.select2({
                 placeholder: "Choose a client",
                 minimumInputLength: 1,
@@ -118,7 +123,19 @@ define(["jquery", "db/services", "db/session", "db/models", "widgets/selectBox",
             var formatLocationName = function (location) {
                 return location.AddressLineOne + " " + location.AddressLineTwo;
             };
-            locationSelector = $(inputTemplate).attr("type", "hidden").appendTo(that.element).wrap("<label class='location'>Location</label>");
+
+            locationSelected = function () {
+                var location = locationSelector.select2("data");
+                var destinationField = models.getDestinationField(service);
+                //Used for updating the grid
+                destinationField.Value = location;
+                destinationField.set("LocationId", location.Id);
+            };
+
+            locationSelector = $(inputTemplate).attr("type", "hidden")
+                //For validation message
+                .attr("name", "Location").attr("required", "required")
+                .appendTo(that.element).wrap("<label class='location'>Location</label>");
             locationSelector.select2({
                 placeholder: "Choose a location",
                 id: function (location) {
@@ -134,13 +151,7 @@ define(["jquery", "db/services", "db/session", "db/models", "widgets/selectBox",
                 formatSelection: formatLocationName,
                 formatResult: formatLocationName,
                 dropdownCssClass: "bigdrop"
-            }).on("change", function () {
-                    var location = locationSelector.select2("data");
-                    var destinationField = models.getDestinationField(service);
-                    //Used for updating the grid
-                    destinationField.Value = location;
-                    destinationField.set("LocationId", location.Id);
-                });
+            }).on("change", locationSelected);
         },
 
         //region Field Factories
@@ -207,22 +218,21 @@ define(["jquery", "db/services", "db/session", "db/models", "widgets/selectBox",
                 return fieldElement;
             },
             "OptionsField": function (field, fieldIndex, elementToAppendTo) {
-                var fieldElement, options = [], i;
+                var fieldElement, i;
                 if (field.TypeInt === 0) {
-                    var save = function (selectedOption) {
-                        //Clear previous selections.
-                        for (i = 0; i < field.Options.length; i++) {
-                            field.Options[i].IsChecked = false;
-                        }
-                        field.set('Options[' + selectedOption.index + '].IsChecked', selectedOption.selected);
-                    };
-
                     //Select Dropdown
-                    fieldElement = $('<div class="styled-select"></div>')
-                        .selectBox({data: field.Options, dataTextField: "Name", dataSelectedField: "IsChecked", onSelect: save})
-                        .appendTo(elementToAppendTo)
-                        .wrap("<li><label>" + field.Name + "<br/></label></li>");
-
+                    fieldElement = $('<div class="styled-select"></div>').selectBox({
+                        data: field.Options,
+                        dataTextField: "Name",
+                        dataSelectedField: "IsChecked",
+                        onSelect: function (selectedOption) {
+                            //Clear previous selections.
+                            for (i = 0; i < field.Options.length; i++) {
+                                field.Options[i].IsChecked = false;
+                            }
+                            field.set('Options[' + selectedOption.index + '].IsChecked', selectedOption.selected);
+                        }
+                    }).appendTo(elementToAppendTo).wrap("<li><label>" + field.Name + "<br/></label></li>");
                 } else {
                     //Checkbox (1) or checklist (2)
                     fieldElement = $('<ul data-role="listview" data-style="inset">' + field.Name + '</ul>').appendTo(elementToAppendTo);

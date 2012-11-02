@@ -7,7 +7,7 @@
 'use strict';
 
 define(["sections/linkedEntitySection", "sections/routeDetails", "tools/parameters", "developer", "tools/analytics",
-    "lib/platform", "underscore", "underscore.string", "widgets/contactInfo"], function (createBase, routeDetails, parameters, developer, analytics, platform, _, _s) {
+    "lib/platform", "db/services", "underscore", "underscore.string", "widgets/contactInfo"], function (createBase, routeDetails, parameters, developer, analytics, platform, dbServices, _, _s) {
     var vm, contacts,
     //true if on an Android device with cordova
         androidCordova = window.cordova && _s.include(platform.os, "Android"),
@@ -36,14 +36,17 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "tools/paramete
                 //initiate the contactInfo widget
                 $("#routeDestinationDetails .contactInfo").contactInfo({
                     contacts: contacts,
-                    create: function (contactInfo) {
-                        //TODO
-                    },
-                    update: function (contactInfo) {
-                        //TODO
-                    },
-                    destroy: function (contactInfo) {
-                        //TODO
+                    entity: {
+                        create: function (contactInfo) {
+                            contactInfo.ClientId = vm.get("selectedEntity.Client.Id");
+                            dbServices.contactInfo.create({body: contactInfo});
+                        },
+                        update: function (contactInfo) {
+                            dbServices.contactInfo.update({body: contactInfo});
+                        },
+                        destroy: function (id) {
+                            dbServices.contactInfo.destroy({params: {contactInfoId: id}});
+                        }
                     }
                 });
 

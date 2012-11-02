@@ -7,7 +7,7 @@
 "use strict";
 
 define(['underscore', 'tools/generalTools', 'noty'], function (_, generalTools) {
-    var saveHistory = {}, successText = "Your Changes Have Been Saved.", errorText = "Error - Your Changes May Not Have Been Saved";
+    var saveHistory = {}, successText = "Your Changes Have Been Saved.", errorText = "Error - Your Changes May Not Have Been Saved", undoEnabled = true;
 
     //Stores the states of the current section
     //the first state is the initial state
@@ -27,6 +27,19 @@ define(['underscore', 'tools/generalTools', 'noty'], function (_, generalTools) 
         saveHistory.resetHistory();
     };
 
+    /**
+     * Enable or disable undo functionality
+     * @param isEnabled
+     */
+    saveHistory.setUndoEnabled = function (isEnabled) {
+        //if it just became enabled, reset the undo history
+        if (!undoEnabled && isEnabled) {
+            saveHistory.resetHistory();
+        }
+
+        undoEnabled = isEnabled;
+    };
+
     //opens a save changes notification with undo links
     saveHistory.success = function (text) {
         if (!text) {
@@ -36,7 +49,7 @@ define(['underscore', 'tools/generalTools', 'noty'], function (_, generalTools) 
         var timeout = 0;
 
         //if there are changes to undo
-        if (saveHistory.states.length > 1) {
+        if (undoEnabled && saveHistory.states.length > 1) {
             var numChanges = saveHistory.states.length - 1;
 
             if (numChanges > 1) {

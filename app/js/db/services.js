@@ -6,7 +6,7 @@
 
 'use strict';
 
-define(["developer", "tools/dateTools", "db/saveHistory", "tools/parameters"], function (developer, dateTools, saveHistory, parameters) {
+define(["developer", "tools/dateTools", "db/saveHistory", "tools/parameters", "tools/generalTools"], function (developer, dateTools, saveHistory, parameters, generalTools) {
     var rootApiUrl, apiUrl, dbServices;
 
     //constructor
@@ -114,17 +114,19 @@ define(["developer", "tools/dateTools", "db/saveHistory", "tools/parameters"], f
          * excludeRoleId For overwriting the default property
          */
         return function (optional) {
-            config.params = config.params || {};
+            //clone the config so it is not polluted every time it is used
+            var configCopy = generalTools.deepClone(config);
+            configCopy.params = configCopy.params || {};
             //add any additional parameters
             if (optional) {
                 if (optional.params) {
-                    config.params = _.extend(config.params, optional.params);
+                    configCopy.params = _.extend(configCopy.params, optional.params);
                 }
                 if (optional.excludeRoleId) {
-                    config.excludeRoleId = optional.excludeRoleId
+                    configCopy.excludeRoleId = optional.excludeRoleId
                 }
                 if (optional.body) {
-                    config.body = optional.body;
+                    configCopy.body = optional.body;
                 }
             }
 
@@ -165,23 +167,23 @@ define(["developer", "tools/dateTools", "db/saveHistory", "tools/parameters"], f
             });
 
             //if opt_excludeRoleId was not set add it as a parameter
-            if (!config.excludeRoleId) {
+            if (!configCopy.excludeRoleId) {
                 //if the roleId is not loaded yet, add it to the roleId function queue
                 var roleId = parameters.get().roleId;
 
                 if (!roleId) {
                     parameters.roleId.changed.add(function (roleId) {
-                        config.params.roleId = roleId;
-                        deferredRequest.resolve(config);
+                        configCopy.params.roleId = roleId;
+                        deferredRequest.resolve(configCopy);
                     });
 
                     return promise;
                 }
 
-                config.params.roleId = roleId;
+                configCopy.params.roleId = roleId;
             }
 
-            deferredRequest.resolve(config);
+            deferredRequest.resolve(configCopy);
 
             return promise;
         };
@@ -193,6 +195,12 @@ define(["developer", "tools/dateTools", "db/saveHistory", "tools/parameters"], f
             //used in business settings
             read: {},
             update: {}
+        },
+        contactInfo: {
+            create: {},
+            read: {},
+            update: {},
+            destroy: {}
         },
         employees: {},
         errors: {
