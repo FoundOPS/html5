@@ -9,8 +9,32 @@
 define(['jquery', "developer", 'moment'], function ($, developer) {
     var generalTools = {};
 
+    $.fn.delayKeyup = function (callback, ms) {
+        var timer = 0;
+        var el = $(this);
+        $(this).keyup(function () {
+            clearTimeout(timer);
+            timer = setTimeout(function () {
+                callback(el);
+            }, ms);
+        });
+        return $(this);
+    };
+
     generalTools.deepClone = function(obj){
         return JSON.parse(JSON.stringify(obj));
+    };
+
+    //disable the save and cancel buttons
+    generalTools.disableButtons = function (page) {
+        $(page + " .cancelBtn").attr("disabled", "disabled");
+        $(page + " .saveBtn").attr("disabled", "disabled");
+    };
+
+    //enable the save and cancel buttons
+    generalTools.enableButtons = function (page) {
+        $(page + " .cancelBtn").removeAttr("disabled");
+        $(page + " .saveBtn").removeAttr("disabled");
     };
 
     /**
@@ -68,6 +92,18 @@ define(['jquery', "developer", 'moment'], function ($, developer) {
         return dir;
     };
 
+    generalTools.goToUrl = function(url) {
+        var androidDevice = developer.CURRENT_FRAME === developer.Frame.MOBILE_APP && kendo.support.detectOS(navigator.userAgent).device === "android";
+        if (url.substr(0, 7) !== "http://" && url.substr(0, 8) !== "https://") {
+            url = "http://" + url;
+        }
+        if (androidDevice) {
+            window.plugins.childBrowser.showWebPage(url);
+        } else {
+            window.open(url, "_blank");
+        }
+    };
+
     /**
      * Create a new unique Guid.
      * @return {string}
@@ -79,6 +115,62 @@ define(['jquery', "developer", 'moment'], function ($, developer) {
         });
 
         return newGuidString;
+    };
+
+    /**
+     * watches all input elements in the given div for value change
+     * @param {string} element the selector to observe ex: "#personalSettings input" or "#contactInfo #value"
+     * @param callback
+     * @param [delay] Defaults to 1000 milliseconds
+     */
+    generalTools.observeInput = function (element, callback, delay) {
+        if (!delay) {
+            delay = 1000;
+        }
+
+        element.each(function () {
+            // Save current value of element
+            $(this).data('oldVal', $(this).val());
+            // Look for changes in the value
+            $(this).delayKeyup(function (e) {
+                // If value has changed...
+                if (e.data('oldVal') !== e.val()) {
+                    // Updated stored value
+                    e.data('oldVal', e.val());
+                    //call the callback function
+                    if (callback)
+                        callback(e.val());
+                }
+            }, delay);
+        });
+    };
+
+    /**
+     * Resize an image using the proper ratio to have no dimension larger than maxSize
+     * Then center the image based on the parent container's width
+     * @param element The jQuery element selector
+     * @param {number} maxSize
+     * @param {number} containerWidth
+     */
+    generalTools.resizeImage = function (element, maxSize, containerWidth) {
+        //get the original dimensions of the image
+        var width = element[0].width;
+        var height = element[0].height;
+        //get the ratio for each dimension
+        var w = maxSize / width;
+        var h = maxSize / height;
+        //find the lowest ratio(will be the shortest dimension)
+        var ratio = Math.min(w, h);
+        //use the ratio to set the new dimensions
+        var newW = ratio * width;
+        var newH = ratio * height;
+
+        //set the final sizes
+        element.css("width", newW + "px");
+        element.css("height", newH + "px");
+        //center the image
+        var margin = (containerWidth - newW) / 2;
+        element.css("marginLeft", margin + "px");
     };
 
     /**
@@ -116,98 +208,6 @@ define(['jquery', "developer", 'moment'], function ($, developer) {
         //the index of the value will be the index of the key % values.count()
         var valueIndex = index % this.values.length;
         return this.values[valueIndex];
-    };
-
-    /**
-     * Resize an image using the proper ratio to have no dimension larger than maxSize
-     * Then center the image based on the parent container's width
-     * @param element The jQuery element selector
-     * @param {number} maxSize
-     * @param {number} containerWidth
-     */
-    generalTools.resizeImage = function (element, maxSize, containerWidth) {
-        //get the original dimensions of the image
-        var width = element[0].width;
-        var height = element[0].height;
-        //get the ratio for each dimension
-        var w = maxSize / width;
-        var h = maxSize / height;
-        //find the lowest ratio(will be the shortest dimension)
-        var ratio = Math.min(w, h);
-        //use the ratio to set the new dimensions
-        var newW = ratio * width;
-        var newH = ratio * height;
-
-        //set the final sizes
-        element.css("width", newW + "px");
-        element.css("height", newH + "px");
-        //center the image
-        var margin = (containerWidth - newW) / 2;
-        element.css("marginLeft", margin + "px");
-    };
-
-    //enable the save and cancel buttons
-    generalTools.enableButtons = function (page) {
-        $(page + " .cancelBtn").removeAttr("disabled");
-        $(page + " .saveBtn").removeAttr("disabled");
-    };
-
-    //disable the save and cancel buttons
-    generalTools.disableButtons = function (page) {
-        $(page + " .cancelBtn").attr("disabled", "disabled");
-        $(page + " .saveBtn").attr("disabled", "disabled");
-    };
-
-    $.fn.delayKeyup = function (callback, ms) {
-        var timer = 0;
-        var el = $(this);
-        $(this).keyup(function () {
-            clearTimeout(timer);
-            timer = setTimeout(function () {
-                callback(el);
-            }, ms);
-        });
-        return $(this);
-    };
-
-    /**
-     * watches all input elements in the given div for value change
-     * @param {string} element the selector to observe ex: "#personalSettings input" or "#contactInfo #value"
-     * @param callback
-     * @param [delay] Defaults to 1000 milliseconds
-     */
-    generalTools.observeInput = function (element, callback, delay) {
-        if (!delay) {
-            delay = 1000;
-        }
-
-        element.each(function () {
-            // Save current value of element
-            $(this).data('oldVal', $(this).val());
-            // Look for changes in the value
-            $(this).delayKeyup(function (e) {
-                // If value has changed...
-                if (e.data('oldVal') !== e.val()) {
-                    // Updated stored value
-                    e.data('oldVal', e.val());
-                    //call the callback function
-                    if (callback)
-                        callback(e.val());
-                }
-            }, delay);
-        });
-    };
-
-    generalTools.goToUrl = function(url) {
-        var androidDevice = developer.CURRENT_FRAME === developer.Frame.MOBILE_APP && kendo.support.detectOS(navigator.userAgent).device === "android";
-        if (url.substr(0, 7) !== "http://" && url.substr(0, 8) !== "https://") {
-            url = "http://" + url;
-        }
-        if (androidDevice) {
-            window.plugins.childBrowser.showWebPage(url);
-        } else {
-            window.open(url, "_blank");
-        }
     };
 
     return generalTools;

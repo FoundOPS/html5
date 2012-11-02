@@ -1,22 +1,31 @@
 'use strict';
 
-define(["jquery", "sections/importerUpload", "sections/importerSelect", "db/services"], function ($, importerUpload, importerSelect, dbServices) {
-    var importerReview = {}, dataSource, grid, columns = [
+define(["jquery", "underscore", "sections/importerUpload", "sections/importerSelect", "db/services", "widgets/location",
+    "ui/popup", "widgets/selectBox"], function ($, _, importerUpload, importerSelect, dbServices) {
+    var importerReview = {}, dataSource, grid, clients = {}, locations = {}, repeats = {}, columns = [
         {
-            field: "Client",
-            template: "<div class='client #= Client #'>#= Client #</div>"
+            field: "Client"//,
+            //template: "<div class='Client #= Client #'>#= Client #</div>"//,
+//            editor: function (container, options) {
+//                $('<div class="styled-select"></div>').appendTo(container)
+//                    .selectBox({data: importerSelect.gridData.Suggestions.Clients, dataTextField: "Name"});
+//            }
         },
         {
-            field: "Location",
-            attributes: {
-                "class": "locationCell"
-            }
+            field: "Location"//,
+            //template: "<div class='Location #= Location #'>#= Location #</div>"//,
+//            editor: function (container, options) {
+//                // create a KendoUI AutoComplete widget as column editor
+//                $('<div class="locationWidget"></div>').appendTo(container).location();
+//            }
         },
         {
-            field: "Repeat",
-            attributes: {
-                "class": "repeatCell"
-            }
+            field: "ContactInfo"//,
+            //template: "<div class='ContactInfo #= ContactInfo #'>#= ContactInfo #</div>"
+        },
+        {
+            field: "Repeat"//,
+            //template: "<div class='Repeat #= Repeat #'>#= Repeat #</div>"
         }
     ];
 
@@ -27,15 +36,41 @@ define(["jquery", "sections/importerUpload", "sections/importerSelect", "db/serv
     var formatDataForGrid = function (data) {
         var newData = [], newRow, row;
         for (var i in data) {
+            var client = {}, location = {}, repeat, contactInfo = [], contactData, contactString = "";
             row = data[i];
             newRow = [];
+
             for (var j in row) {
                 if (j === "0") {
-                    newRow["Client"] = row[j];
+                    client = clients[row[j]];
+                    newRow["Client"] = client.Name;
                 } else if (j === "1") {
-                    newRow["Location"] = row[j];
+                    location = locations[row[j]];
+                    newRow["Location"] = location.AddressLineOne + ", " + location.AddressLineTwo + ", " + location.City + ", " + location.State + " " + location.Zipcode;
                 } else if (j === "2") {
-                    newRow["Repeat"] = row[j];
+                    if (client && client.ContactInfo) {
+                        contactInfo = client.ContactInfo;
+                    }
+                    if (location && location.ContactInfo) {
+                        for (var i in location.ContactInfo) {
+                            contactInfo.push(location.ContactInfo[i]);
+                        }
+                    }
+
+                    if (contactInfo.length !== 0) {
+                        contactData = contactInfo[0].Data.replace("http://", "");
+                        contactData = contactData.replace("https://", "");
+
+                        contactString = contactData + "(" + contactInfo[0].Label + ")";
+                        if (contactInfo.length > 1) {
+                            contactString = contactString.concat(" +", contactInfo.length - 1, " more");
+                        }
+                    }
+
+                    newRow["ContactInfo"] = contactString;
+                } else if (j === "3") {
+                    repeat = repeats[row[j]];
+                    newRow["Repeat"] = repeat.Name;
                 }
             }
             newData.push(newRow);
@@ -87,11 +122,13 @@ define(["jquery", "sections/importerUpload", "sections/importerSelect", "db/serv
 
         dataSource = new kendo.data.DataSource({
             data: data,
+            batch: true,
             schema: {
                 model: {
                     fields: {
                         Client: { type: "string" },
                         Location: { type: "string" },
+                        ContactInfo: { type: "string" },
                         Repeat: { type: "string" }
                     }
                 }
@@ -101,7 +138,7 @@ define(["jquery", "sections/importerUpload", "sections/importerSelect", "db/serv
         grid = $("#importerReview").find(".grid").kendoGrid({
             columns: columns,
             dataSource: dataSource,
-            editable: false,
+            editable: true,
             resizable: true,
             scrollable: true
         }).data("kendoGrid");
@@ -140,6 +177,21 @@ define(["jquery", "sections/importerUpload", "sections/importerSelect", "db/serv
             //redirect to last page
             window.viewImporterSelect();
             return;
+        }
+
+        //create arrays for clients, locations, and repeats that match the guid with the object
+        var entity;
+        for (var i in importerSelect.gridData.Suggestions.Clients) {
+            entity = importerSelect.gridData.Suggestions.Clients[i];
+            clients[entity.Id] = entity;
+        }
+        for (var j in importerSelect.gridData.Suggestions.Locations) {
+            entity = importerSelect.gridData.Suggestions.Locations[j];
+            locations[entity.Id] = entity;
+        }
+        for (var k in importerSelect.gridData.Suggestions.Repeats) {
+            entity = importerSelect.gridData.Suggestions.Repeats[k];
+            repeats[entity.Id] = entity;
         }
 
         if (grid) {

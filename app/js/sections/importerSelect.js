@@ -12,6 +12,10 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore"], funct
             "Country Code"
         ];
 
+    var onDropdownSelect = function () {
+
+    };
+
     var formatDataForValidation = function (data) {
         var selectedFields = [], fieldsToValidate;
         //create an array of the fields to be used(based on the dropdowns)
@@ -104,12 +108,23 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore"], funct
             //dbServices.validateData(dataToValidate, function (data) {
             var data = {
                 RowSuggestions : [
-                    ["25892e17", "80f6", "7395632f0223"], ["a53e98e4", "0197", "49836e406aaa"]
+                    ["25892e17", "80f6", "395632", "7395632f0223"], ["a53e98e4", "0197", "06aaa", "49836e406aaa"]
                 ],
                 Suggestions: {
-                    Clients: [{Id: "25892e17", Name: "BK"}, {Id: "a53e98e4", Name: "Subway"}],
-                    Locations: [{Id: "80f6", Name: "One"}, {Id: "0197", Name: "Two"}],
-                    Repeat: [{Id: "7395632f0223", Name: "11/05/2012"}, {Id: "49836e406aaa", Name: "Weekly on Tue"}]
+                    Clients: [
+                        {Id: "25892e17", Name: "BK",
+                            ContactInfo: [{Id: "395632", Label: "Jimbo", Data: "http://www.jimbosblog.biz", Type: "Website"}]},
+                        {Id: "a53e98e4", Name: "Subway"}
+                    ],
+                    Locations: [
+                        {Id: "80f6", AddressLineOne: "1305 Cumberland Ave", AddressLineTwo: "Suite 205", City: "West Lafayette", State: "IN", Zipcode: "47906",
+                            ContactInfo: [{Id: "06aaa", Label: "Secretary", Data: "765-494-4509", Type: "Phone Number"}]},
+                        {Id: "0197", AddressLineOne: "508 S 4th St", AddressLineTwo: "", City: "Lafayette", State: "IN", Zipcode: "47901"}
+                    ],
+                    Repeats: [
+                        {Id: "7395632f0223", Name: "11/05/2012"},
+                        {Id: "49836e406aaa", Name: "Weekly on Tue"}
+                    ]
                 }
             };
 
@@ -135,7 +150,7 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore"], funct
 
                 //combine the fields in fieldList with newFields
                 var allFields = fieldList.concat(newFields);
-                $("#importerSelect").find(".styled-select").selectBox({data: allFields, dataTextField: "Name"});
+                $("#importerSelect").find(".styled-select").selectBox({data: allFields, dataTextField: "Name", onSelect: onDropdownSelect});
 
                 //automatically select fields if there is a matching header
                 var dropdown, headers = importerUpload.oldData[0];
