@@ -15,6 +15,10 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
                     popup.setBorderColor(options.borderColor);
                 }
 
+                if(typeof(options.disableHeader) !== 'undefined'){
+                    popup.disableHeader();
+                }
+
                 popup.addMenu(options.id, options.title, options.contents);
             },
             popupInit: function(options) {
@@ -35,6 +39,9 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
             },
             unlockPopup: function() {
                 popup.unlockPopup();
+            },
+            disableHeader: function() {
+                popup.disableHeader();
             },
             addMenu: function (menu) {
                 if (popup === null)return;
@@ -95,6 +102,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         var offScreen = false;
 
         var isLocked = false;
+        var isHeaderDisabled = false;
 
         //Note: Making history a global broke on Android 2.3
         var history = [];
@@ -131,6 +139,19 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
 
         this.unlockPopup = function(){
             isLocked = false;
+        };
+
+        this.disableHeader = function() {
+            $("#popupHeader").hide();
+
+            //TODO: Move into navigator? Shouldn't rely on jscrollpane.
+            $("#popupContentWrapper").css("padding-top", "0px");
+
+            $("#popupContent").css("border-top-right-radius", "5px")
+                              .css("border-top-left-radius", "5px")
+                              .css("border-top", "2px solid #CCC")
+                              .css("border-right", "2px solid #CCC")
+                              .css("border-left", "2px solid #CCC");
         };
 
         this.toggleVisible = function (e, clicked) {
@@ -437,7 +458,6 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
                 if (!keepOpen) thisOptionsPopup.closePopup();
             })
             .on('popup.created', function(){
-                console.log("Caught created.")
                 createBackButton();
             })
         ;
