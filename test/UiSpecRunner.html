@@ -8,10 +8,10 @@
     <script>
         jasmineuiConfig = {
             logEnabled: true,
+            closeTestWindow: false,
+            //exclude the interval sensor because
+            //some functions infinitely use setInterval (i think debounce on underscore) (todo try and reduce this)
             asyncSensors: ["load", "timeout", "xhr", "$animationComplete", "$transitionComplete"]
-//          , scripts: [
-//                {position: 'end', url: '/jasmine/jasmine-jquery.js'}
-//            ]
         };
     </script>
 
