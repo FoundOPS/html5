@@ -10,14 +10,17 @@
  2. grunt-contrib
  2. grunt-replace
  2. underscore
- 2. grunt-jasmine-runner (for testing) 
+ 2. grunt-jasmine-runner (for testing)
+<br/> *Note: Installing packages with a URL requires a tarball URL (Github Repo -> Downloads -> Right click Download as tar.gz -> Copy link address).
 3. Install PhantomJS - [Troubleshooting](https://github.com/gruntjs/grunt/blob/master/docs/faq.md#why-does-grunt-complain-that-phantomjs-isnt-installed)
 - Download from [here](http://phantomjs.org/download.html).
 - Place files anywhere locally.
 - Add phantomjs to system Path.
 4. Modify jasmine.js
-- html5/build/grunt/node_modules/grunt-jasmine-runner/tasks/lib/jasmine.js
-- In "`getRelativeFileList()`" add "`.replace(/\\/g,'/')`" to the end of "`path.resolve(file).replace(base,'')`" for windows compatibility.
+- In html5/build/grunt/node_modules/grunt-jasmine-runner/tasks/lib/jasmine.js
+- Find "`getRelativeFileList`" function and replace the `return` statement with 
+> `var finalPath = path.resolve(file).replace(base,'').replace(/\\/g,'/');` <br/>
+>  `return finalPath.charAt(0) === "/" ? finalPath.substring(1) : finalPath;`
 
 ## Building
 
@@ -26,7 +29,9 @@
 
 Run test cases
 
-	grunt.cmd jasmine
+	grunt.cmd jasmine-server
+
+* Note: After copying files to grunt directory you must remove require.config from the copied main.js
 
 ## Organization
 
