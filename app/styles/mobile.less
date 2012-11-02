@@ -185,7 +185,7 @@ footer {
   margin: 10px auto;
 }
 /* Signature Field Styling */
-.sigBox {
+.sigWrapper {
   width: 95%;
   max-width: 950px;
   max-height: 620px;
@@ -197,23 +197,29 @@ footer {
   background-color: #eee;
   visibility: hidden;
   canvas {
-    margin: 7px auto !important;
+    color: #222222;
+    background-color: #fff;
+  }
+  #sigCancel {
+    color: #222222;
+    float: left;
+    padding:3px;
+    margin:0 4px 7px 0;
     background-color: #fff;
   }
   #sigClear {
+    color: #222222;
     float: left;
     padding: 3px;
+    margin:0 0 7px 4px;
     background-color: #fff;
   }
   #sigSave {
+    color: #222222;
     float: right;
     padding: 3px;
+    margin:0 0 7px 0;
     background-color: #fff;
-  }
-}
-#signature-listview {
-  img {
-    height: 100%;
   }
 }
 .fieldLabel {

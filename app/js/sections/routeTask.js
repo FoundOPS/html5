@@ -44,7 +44,6 @@ define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "to
                 saveHistory.save();
             }
         });
-        $(".sigBox").jSignature();
 
     };
 
@@ -148,16 +147,23 @@ define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "to
         this.closeTaskStatuses();
     };
     vm.statusUpdated = false;
-    vm.openSigBox = function () {
+    vm.openSigPad = function () {
         $("#background-dimmer").css("visibility", "visible").css("z-index", "1000").fadeTo(400, 0.8);
-        $(".sigBox").css("visibility", "visible").css("z-index", "10000").animate({left: '10%'}, 500);
+        $(".sigWrapper").css("visibility", "visible").css("z-index", "10000").animate({left: '10%'}, 500);
     };
-    vm.saveSig = function () {
-        console.log($('.sigBox').jSignature('getData'));
+    vm.closeSigPad = function () {
         $("#background-dimmer").animate({opacity: "0"}, 400, function () {
             $("#background-dimmer").css("z-index", "-1").css("visibility", "hidden");
         });
-        $(".sigBox").animate({left: '100%'}, 500, function () {$(".sigBox").css("z-index", "-10").css("visibility", "hidden")});
+        $(".sigWrapper").animate({left: '100%'}, 500, function () {$(".sigWrapper").css("z-index", "-10").css("visibility", "hidden")});
+    }
+    vm.saveSig = function () {
+        if($('.sigPad').jSignature('getData', 'native').length !== 0) {
+            console.log($('.sigPad').jSignature('getData', 'native'));
+            vm.closeSigPad();
+        } else {
+            alert("Please sign before you save or hit the cancel button to go back.");
+        }
     };
 
     return section;
