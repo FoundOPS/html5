@@ -1,0 +1,83 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Popup Test</title>
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+    <!-- userScalable=no gives odd bug in android 2.3 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0"/>
+    <link rel="stylesheet" type="text/css" href="../../app/styles/jquery.jscrollpane.css" media="all"/>
+
+    <link rel="stylesheet" type="text/css" href="../../app/styles/popup.css">
+    <style type="text/css">
+        html, body{
+            padding:0;
+            margin:0;
+            text-align: center;
+        }
+        .center{
+            margin: 0 auto;
+        }
+        #box{
+            margin: 0 auto;
+            margin-top: 50px;
+            width: 50px;
+            height: 50px;
+            background: red;
+        }
+    </style>
+</head>
+<body>
+    <div id="box" class='popup'></div>
+    <div>
+        test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content test content
+    </div>
+    <script type="text/javascript" src="../../app/lib/jquery.js"></script>
+    <script type="text/javascript" src="../../app/lib/jquery.jScrollPane.js"></script>
+    
+    <script type="text/javascript" src="../../app/lib/jquery.mousewheel.js"></script>
+    <script type="text/javascript" src="../../app/lib/popup.js"></script>
+    <script>
+        var p = $("#box").popup();
+
+        $(document).on("popup.created", function(){
+            $("#popupContentWrapper").jScrollPane({
+                horizontalGutter: 0,
+                verticalGutter: 0,
+                showArrows: false
+            });
+        });
+
+        $(document).on('popup.setContent popup.visible popup.resize', function(e){
+            $("#popupContentWrapper").data('jsp').reinitialise();
+        });
+
+        p.addMenu("box", 'Pick a box',
+            [
+                    {name: "Widgets", id: "chooseWidget"},
+                    {name: "Change Business", id: "changeBusiness"},
+                    {name: "Log Out", url: '#box2'}
+            ]
+        );
+        p.addMenu('changeBusiness', "Change Businesses",
+                [
+                    {name: "Company 1", url: '#c1'},
+                    {name: "Company 3", url: '#c3'},
+                    {name: "Company 2", url: '#c2'}
+                ]
+        );
+
+        p.addMenu('chooseWidget', "Choose a widget",
+                [
+                    {name: "Foo", url: '#w1'},
+                    {name: "Bar", url: '#w2'},
+                    {name: "Baz", url: '#w3'},
+                    {name: "Widget 4", url: '#w4'},
+                    {name: "Hello", url: '#w5'},
+                    {name: "World", url: '#w6'}
+                ]
+        );
+    </script>
+</body>
+</html>

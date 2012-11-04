@@ -1,0 +1,96 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Jasmine Spec Runner</title>
+    <!--link rel="shortcut icon" type="image/png" href="../lib/jasmine-1.2.0/jasmine_favicon.png"-->
+    <link rel="stylesheet" type="text/css" href="../lib/jasmine-1.2.0/jasmine.css">
+    <link rel="stylesheet" type="text/less" href="/app/styles/main.css">
+    
+    <style>
+        #nav, #sideBar, #sideBarWrapper, #popup, #popupWrapper, #popupHeader, #popupContentWrapper, #popupContent{
+            visibility: hidden !important;
+        }
+    </style>
+</head>
+
+<body>
+
+
+    <script type="text/javascript" src="/app/lib/require-jquery.js"></script>
+    <script type="text/javascript" src="../lib/jasmine-1.2.0/jasmine.js"></script>
+    <script type="text/javascript" src="../lib/jasmine-1.2.0/jasmine-html.js"></script>
+    <script type="text/javascript">
+        require.config({
+            baseUrl: '/app/js',
+            paths: {
+                lib: "/app/lib",
+                underscore: "/app/lib/underscore",
+                ui: "/app/js/ui",
+                widgets: "/app/js/widgets",
+                js: "/app/js",
+                spec: "/test/navigator/spec"
+            },
+            shim: {
+                underscore: {
+                    exports: '_'
+                }
+            }
+        });
+        require(["spec/navTests"], function () {
+            (function() {
+                var jasmineEnv = jasmine.getEnv();
+                jasmineEnv.updateInterval = 1000;
+
+                var htmlReporter = new jasmine.HtmlReporter();
+                jasmineEnv.addReporter(htmlReporter);
+
+                jasmineEnv.specFilter = function(spec) {
+                    return htmlReporter.specFilter(spec);
+                };
+
+                var currentWindowOnload = window.onload;
+
+                window.onload = function() {
+                    if (currentWindowOnload) {
+                        currentWindowOnload();
+                    }
+                    execJasmine();
+                };
+
+                function execJasmine() {
+                    jasmineEnv.execute();
+                }
+
+            })();
+        });
+    </script>
+    <script id="navTemplate" type="text/x-kendo-template">
+        <div id='navContainer'>
+            <div id='navSearch' class='navElement'><input name='search' type='text' placeholder='Search...'/>
+                <a><img src='/app/img/Search.png'/></a>
+            </div>
+            <div id='navClient' class='navElement last'>
+                <a><img class='navIcon profile' src='#= data[0] #'/><img id='clientLogo' src='#= data[1] #'/></a>
+            </div>
+        </div>
+        <img id='logo' src='/app/img/Logo.png' alt='FoundOPS'/>
+    </script>
+    <script id="expandTemplate" type="text/x-kendo-template">
+        <a id="expandMenuButton">
+            <div id='slideMenu'><img class='iconExpand' src='/app/img/Expand.png'/></div>
+        </a>
+    </script>
+    <script id="showMenuTemplate" type="text/x-kendo-template">
+        <div id="showMenu">
+            <a><img class='iconShow' src='/app/img/Expand.png'/></a>
+        </div>
+    </script>
+    <script id="sideBarElementTemplate" type="text/x-kendo-template">
+        <a #= href # class='sideBarElement' data-color='#= color #' data-iconUrl='#= iconUrl #' data-hoverIconUrl='#=
+        hoverIconUrl #'>
+        <span class='icon' style="background: url('#= iconUrl #') #= bgX # #= bgY # no-repeat"></span>
+        <span class='sectionName'>#= name #</span>
+        </a>
+    </script>
+</body>
+</html>
