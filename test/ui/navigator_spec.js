@@ -6,9 +6,7 @@ jasmineui.loadUi("/app/navigator-test.html", function () {
                 jasmineui.simulate(button, 'click');
             });
             runs(function () {
-                setTimeout(function () {
-                    expect(document.getElementById("popupWrapper")).toBeVisible();
-                }, 1500);
+                expect(document.getElementById("popupWrapper")).toBeVisible();
             });
         });
     });
