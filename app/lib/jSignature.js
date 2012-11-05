@@ -748,23 +748,23 @@ function jSignatureClass(parent, options, instanceExtensions) {
 	this.events.publish(apinamespace+'.initializing')
 
 	// these, when enabled, will hover above the sig area. Hence we append them to DOM before canvas.
-//	this.$controlbarUpper = (function(){
-//		var controlbarstyle = 'padding:0 !important;margin:0 !important;'+
-//			'width: 100% !important; height: 0 !important;'+
-//			'margin-top:-1em !important;margin-bottom:1em !important;'
-//		return $('<div style="'+controlbarstyle+'"></div>').appendTo($parent)
-//	})();
+	this.$controlbarUpper = (function(){
+		var controlbarstyle = 'padding:0 !important;margin:0 !important;'+
+			'width: 100% !important; height: 0 !important;'+
+			'margin-top:-1em !important;margin-bottom:1em !important;'
+		return $('<div style="'+controlbarstyle+'"></div>').appendTo($parent)
+	})();
 
 	this.isCanvasEmulator = false // will be flipped by initializer when needed.
 	var canvas = this.canvas = this.initializeCanvas(settings)
 	, $canvas = $(canvas)
 
-//	this.$controlbarLower = (function(){
-//		var controlbarstyle = 'padding:0 !important;margin:0 !important;'+
-//			'width: 100% !important; height: 0 !important;'+
-//			'margin-top:-1.5em !important;margin-bottom:1.5em !important;'
-//		return $('<div style="'+controlbarstyle+'"></div>').appendTo($parent)
-//	})();
+	this.$controlbarLower = (function(){
+		var controlbarstyle = 'padding:0 !important;margin:0 !important;'+
+			'width: 100% !important; height: 0 !important;'+
+			'margin-top:-1.5em !important;margin-bottom:1.5em !important;'
+		return $('<div style="'+controlbarstyle+'"></div>').appendTo($parent)
+	})();
 
 	this.canvasContext = canvas.getContext("2d")
 

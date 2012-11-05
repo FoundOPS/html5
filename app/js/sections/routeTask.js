@@ -104,7 +104,7 @@ define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "to
         });
 
         //Ensure dimmer is hidden and behind other elements.
-        $("#background-dimmer").css("z-index", -1).css("opacity", "0").css("visibility", "hidden").css("height", $("#routeTask").height());
+        $("#background-dimmer").css("z-index", -1).css("opacity", "0").css("visibility", "hidden");
     };
 
     section.save = function () {
@@ -151,8 +151,11 @@ define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "to
     };
     vm.statusUpdated = false;
     vm.openSigPad = function () {
+        var width = $("#routeTask").width();
+        var left = width > 1055 ? ((width - 950)/2) : (width*.1)/2;
+        left = left-($(".sigWrapper").css("padding").split("px")[0]);
         $("#background-dimmer").css("visibility", "visible").css("z-index", "1000").fadeTo(400, 0.8);
-        $(".sigWrapper").css("visibility", "visible").css("z-index", "10000").animate({left: '10%'}, 500);
+        $(".sigWrapper").css("visibility", "visible").css("z-index", "10000").animate({left: "0%", "margin-left": left, "width": width *.9}, 500);
     };
     vm.closeSigPad = function () {
         $("#background-dimmer").animate({opacity: "0"}, 400, function () {
