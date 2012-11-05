@@ -6,8 +6,8 @@
 
 'use strict';
 
-define(["sections/linkedEntitySection", "sections/routeDetails", "tools/parameters", "developer", "tools/analytics",
-    "lib/platform", "db/services", "underscore", "underscore.string", "widgets/contactInfo"], function (createBase, routeDetails, parameters, developer, analytics, platform, dbServices, _, _s) {
+define(["sections/linkedEntitySection", "sections/routeDetails", "tools/parameters", "developer", "tools/generalTools", "tools/analytics",
+    "lib/platform", "db/services", "underscore", "underscore.string", "widgets/contactInfo"], function (createBase, routeDetails, parameters, developer, generalTools, analytics, platform, dbServices, _, _s) {
     var vm, contacts,
     //true if on an Android device with cordova
         androidCordova = window.cordova && _s.include(platform.os, "Android"),
@@ -39,6 +39,7 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "tools/paramete
                     entity: {
                         create: function (contactInfo) {
                             contactInfo.ClientId = vm.get("selectedEntity.Client.Id");
+                            contactInfo.Id = generalTools.newGuid();
                             dbServices.contactInfo.create({body: contactInfo});
                         },
                         update: function (contactInfo) {

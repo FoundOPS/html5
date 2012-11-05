@@ -52,7 +52,7 @@ define(['lib/platform', "underscore", 'underscore.string'], function (platform, 
     /**
      * The current silverlight version
      */
-    developer.CURRENT_SILVERLIGHT_VERSION = 0.23;
+    developer.CURRENT_SILVERLIGHT_VERSION = 0.24;
 
     /**
      * Set to true if deploying
