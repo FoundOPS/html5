@@ -267,7 +267,7 @@ define(["jquery", "db/services", "db/session", "db/models", "widgets/selectBox",
                     '<a class="sigButton" id="sigClear" onclick="$(\'.sigPad\').jSignature(\'reset\');">Clear</a>' +
                     '<a class="sigButton" id="sigSave" onclick="routeTask.vm.saveSig()">Save</a>' +
                     '<div class="sigPad"></div>' +
-                '</div>').appendTo(document.body);
+                '</div>').appendTo($(elementToAppendTo));
 
                 $(".sigPad").jSignature({width: "100%", height: "auto", sizeRatio: 2});
                 var fieldElement = $('<ul data-role="listview" data-style="inset">'

@@ -102,6 +102,9 @@ define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "to
                 return vm.get("selectedService");
             }
         });
+
+        //Ensure dimmer is hidden and behind other elements.
+        $("#background-dimmer").css("z-index", -1).css("opacity", "0").css("visibility", "hidden").css("height", $("#routeTask").height());
     };
 
     section.save = function () {
