@@ -52,14 +52,14 @@ define(['lib/platform', "underscore", 'underscore.string'], function (platform, 
     /**
      * The current silverlight version
      */
-    developer.CURRENT_SILVERLIGHT_VERSION = 0.23;
+    developer.CURRENT_SILVERLIGHT_VERSION = 0.24;
 
     /**
      * Set to true if deploying
      * This will cause CURRENT_FRAME and CURRENT_DATA_SOURCE to be overridden
      * @type {boolean}
      */
-    developer.DEPLOY = false;
+    developer.DEPLOY = true;
     if (developer.DEPLOY) {
         developer.CURRENT_DATA_SOURCE = developer.DataSource.LIVE;
         developer.CURRENT_FRAME = developer.Frame.DEFAULT;

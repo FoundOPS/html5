@@ -6,8 +6,8 @@
 
 'use strict';
 
-define(["sections/linkedEntitySection", "sections/routeDetails", "tools/parameters", "developer", "tools/analytics",
-    "lib/platform", "underscore", "underscore.string", "widgets/contactInfo"], function (createBase, routeDetails, parameters, developer, analytics, platform, _, _s) {
+define(["sections/linkedEntitySection", "sections/routeDetails", "tools/parameters", "developer", "tools/generalTools", "tools/analytics",
+    "lib/platform", "db/services", "underscore", "underscore.string", "widgets/contactInfo"], function (createBase, routeDetails, parameters, developer, generalTools, analytics, platform, dbServices, _, _s) {
     var vm, contacts,
     //true if on an Android device with cordova
         androidCordova = window.cordova && _s.include(platform.os, "Android"),
@@ -36,14 +36,18 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "tools/paramete
                 //initiate the contactInfo widget
                 $("#routeDestinationDetails .contactInfo").contactInfo({
                     contacts: contacts,
-                    create: function (contactInfo) {
-                        //TODO
-                    },
-                    update: function (contactInfo) {
-                        //TODO
-                    },
-                    destroy: function (contactInfo) {
-                        //TODO
+                    entity: {
+                        create: function (contactInfo) {
+                            contactInfo.ClientId = vm.get("selectedEntity.Client.Id");
+                            contactInfo.Id = generalTools.newGuid();
+                            dbServices.contactInfo.create({body: contactInfo});
+                        },
+                        update: function (contactInfo) {
+                            dbServices.contactInfo.update({body: contactInfo});
+                        },
+                        destroy: function (id) {
+                            dbServices.contactInfo.destroy({params: {contactInfoId: id}});
+                        }
                     }
                 });
 
@@ -79,25 +83,28 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "tools/paramete
             destination = vm.get("selectedEntity.Location.Latitude") + "," + vm.get("selectedEntity.Location.Longitude");
 
         var navigateTo = function (destination, currentPosition) {
-            if (androidCordova) {
-                window.location.href = "geo:0,0?q=" + destination; //Opens google navigation on Android phones
-            } else if (currentPosition) {
+            if (currentPosition) {
                 window.open("http://maps.google.com/maps?saddr=" + currentPosition + "&daddr=" + destination);
             } else {
                 window.open("http://maps.google.com/maps?q=" + destination);
             }
         };
-        //Attempt to get the user's current location.
-        navigator.geolocation.getCurrentPosition(
-            function (position) { // If geolocation is successful get directions. This is success function of geolocation API.
-                currentPosition = position.coords.latitude + "," + position.coords.longitude;
-                navigateTo(destination, currentPosition);
-            },
-            function () { // If geolocation is NOT successful find business location. This is error function of geolocation API.
-                navigateTo(destination, false);
-            },
-            {timeout: 10000, enableHighAccuracy: true} //Options for geolocation API.
-        );
+
+        if (androidCordova) {
+            window.location.href = "geo:0,0?q=" + destination; //Opens google navigation on Android phones
+        } else {
+            //Attempt to get the user's current location.
+            navigator.geolocation.getCurrentPosition(
+                function (position) { // If geolocation is successful get directions. This is success function of geolocation API.
+                    currentPosition = position.coords.latitude + "," + position.coords.longitude;
+                    navigateTo(destination, currentPosition);
+                },
+                function () { // If geolocation is NOT successful find business location. This is error function of geolocation API.
+                    navigateTo(destination, false);
+                },
+                {timeout: 10000, enableHighAccuracy: true} //Options for geolocation API.
+            );
+        }
     };
 
     return section;

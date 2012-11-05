@@ -43,8 +43,8 @@ html{
     left: 0;
     .borderBox;
     z-index: 10;
-    //pointer-events allows click-throughs to popup.
-    //pointer-events: none;
+    //pointer-events allows click-throughs to popup. Possibly find better fix in the future.
+    pointer-events: none;
     -webkit-transform: translateZ(0);
 }
 
@@ -56,7 +56,6 @@ html{
     color: @charcoal;
     visibility: visible !important;
     z-index: 10;
-
     -webkit-transform: translateZ(0);
 
     a {
@@ -83,6 +82,7 @@ html{
     border-right: 2px solid @darkGrey;
     border-left: 2px solid @darkGrey;
     height: 49px;
+    pointer-events: auto;
 }
 
 #popupArrow {
@@ -143,6 +143,7 @@ html{
     height: 100%;
     width: 100%;
     .borderBox;
+    pointer-events: auto;
 }
 
 #popupContent {

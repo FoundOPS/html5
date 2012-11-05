@@ -1,0 +1,43 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>Jasmine Test Runner</title>
+    <link rel="stylesheet" href="lib/jasmine.css">
+
+    <script>
+        jasmineuiConfig = {
+            //loadMode: 'popup',
+            //closeTestWindow: false,
+            logEnabled: true,
+            //exclude the interval sensor because
+            //some functions infinitely use setInterval (i think debounce on underscore) (todo try and reduce this)
+            asyncSensors: ["load", "timeout", "xhr", "$animationComplete", "$transitionComplete"],
+            scripts: [
+                {position: 'end', url: '/test/lib/jasmine-jquery.js'}
+            ]
+        };
+    </script>
+
+
+    <!-- Libraries -->
+    <script src="lib/jasmine-ui.js"></script>
+    <script src="lib/jasmine-html.js"></script>
+
+    <!-- Tests -->
+    <script src="ui/navigator_spec.js"></script>
+    <script src="ui/routes_spec.js"></script>
+</head>
+<body>
+<!-- execute jasmine tests -->
+<script>
+    var reporter = new jasmine.TrivialReporter();
+    jasmine.getEnv().addReporter(reporter);
+    jasmine.getEnv().specFilter = function (spec) {
+        return reporter.specFilter(spec);
+    };
+    jasmine.getEnv().execute();
+</script>
+
+</body>
+</html>
