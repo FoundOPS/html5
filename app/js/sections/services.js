@@ -3,7 +3,7 @@
 'use strict';
 
 require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateTools", "db/saveHistory", "tools/kendoTools", "widgets/serviceDetails",
-    "jform", "select2", "widgets/selectBox"], function ($, session, dbServices, parameters, dateTools, saveHistory, kendoTools) {
+    "jform", "widgets/selectBox"], function ($, session, dbServices, parameters, dateTools, saveHistory, kendoTools) {
     var services = {}, serviceHoldersDataSource, grid, handleChange, selectedServiceHolder, vm;
 
     //region Public
