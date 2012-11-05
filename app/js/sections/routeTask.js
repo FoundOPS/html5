@@ -151,21 +151,26 @@ define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "to
     };
     vm.statusUpdated = false;
     vm.openSigPad = function () {
+        navigator.screenOrientation.set("landscape");
         var width = $("#routeTask").width();
         var left = width > 1055 ? ((width - 950)/2) : (width*.1)/2;
         left = left-($(".sigWrapper").css("padding").split("px")[0]);
+        $("html, body").css("overflow", "hidden");
         $("#background-dimmer").css("visibility", "visible").css("z-index", "1000").fadeTo(400, 0.8);
-        $(".sigWrapper").css("visibility", "visible").css("z-index", "10000").animate({left: "0%", "margin-left": left, "width": width *.9}, 500);
+        $(".sigWrapper").css("margin-left", left).css("width", width *.9).css("visibility", "visible").css("z-index", "10000").animate({"top": "20%"}, 500);
     };
     vm.closeSigPad = function () {
+        $("html, body").css("overflow", "visible");
         $("#background-dimmer").animate({opacity: "0"}, 400, function () {
             $("#background-dimmer").css("z-index", "-1").css("visibility", "hidden");
         });
-        $(".sigWrapper").animate({left: '100%'}, 500, function () {$(".sigWrapper").css("z-index", "-10").css("visibility", "hidden")});
+        $(".sigWrapper").animate({"top": "-50%"}, 500, function () {$(".sigWrapper").css("z-index", "-10").css("visibility", "hidden")});
+        navigator.screenOrientation.set("fullSensor");
     }
     vm.saveSig = function () {
         if($('.sigPad').jSignature('getData', 'native').length !== 0) {
             console.log($('.sigPad').jSignature('getData', 'native'));
+            vm.set()
             vm.closeSigPad();
         } else {
             alert("Please sign before you save or hit the cancel button to go back.");
