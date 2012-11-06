@@ -6,9 +6,9 @@
 
 'use strict';
 
-define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "tools/parameters", "underscore", "widgets/serviceDetails",
-    "../../lib/jSignature"],
-    function (routeDestinationDetails, dbServices, saveHistory, parameters, _) {
+define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "tools/parameters", "underscore", "underscore.string",
+    "lib/platform", "widgets/serviceDetails", "../../lib/jSignature"],
+    function (routeDestinationDetails, dbServices, saveHistory, parameters, _, _s, platform) {
     /**
      * routeTask = wrapper for all service objects
      * vm = viewModel
@@ -151,13 +151,21 @@ define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "to
     };
     vm.statusUpdated = false;
     vm.openSigPad = function () {
-        navigator.screenOrientation.set("landscape");
-        var width = $("#routeTask").width();
-        var left = width > 1055 ? ((width - 950)/2) : (width*.1)/2;
-        left = left-($(".sigWrapper").css("padding").split("px")[0]);
-        $("html, body").css("overflow", "hidden");
-        $("#background-dimmer").css("visibility", "visible").css("z-index", "1000").fadeTo(400, 0.8);
-        $(".sigWrapper").css("margin-left", left).css("width", width *.9).css("visibility", "visible").css("z-index", "10000").animate({"top": "20%"}, 500);
+        console.log(kendo.support.detectOS(navigator.userAgent).name === "android");
+        if (kendo.support.detectOS(navigator.userAgent).name === "android") {
+            navigator.screenOrientation.set("landscape");
+        } else if (kendo.support.detectOS(navigator.userAgent).name === "ios") {
+            window.plugins.orientation.setAllowed([{pp:false, pd:false, ll:true, lr:true}]);
+        }
+        //Wait until screen is in landscape orientation to call out the sig pad.
+        setTimeout( function() {
+            var width = $("#routeTask").width();
+            var left = width > 1055 ? ((width - 950)/2) : (width*.1)/2;
+            left = left-($(".sigWrapper").css("padding").split("px")[0]);
+            $("html, body").css("overflow", "hidden");
+            $("#background-dimmer").css("visibility", "visible").css("z-index", "1000").fadeTo(400, 0.8);
+            $(".sigWrapper").css("margin-left", left).css("width", width *.9).css("visibility", "visible").css("z-index", "10000").animate({"top": "20%"}, 500);
+        }, 200);
     };
     vm.closeSigPad = function () {
         $("html, body").css("overflow", "visible");
@@ -165,7 +173,12 @@ define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "to
             $("#background-dimmer").css("z-index", "-1").css("visibility", "hidden");
         });
         $(".sigWrapper").animate({"top": "-50%"}, 500, function () {$(".sigWrapper").css("z-index", "-10").css("visibility", "hidden")});
-        navigator.screenOrientation.set("fullSensor");
+        if (kendo.support.detectOS(navigator.userAgent).name === "android") {
+            navigator.screenOrientation.set("fullSensor");
+        } else if (kendo.support.detectOS(navigator.userAgent).name === "ios") {
+            window.plugins.orientation.setAllowed([{pp:true, pd:true, ll:true, lr:true}]);
+        }
+
     }
     vm.saveSig = function () {
         if($('.sigPad').jSignature('getData', 'native').length !== 0) {
