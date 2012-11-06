@@ -263,13 +263,19 @@ define(["jquery", "db/services", "db/session", "db/models", "widgets/selectBox",
             },
             "SignatureField": function (field, fieldIndex, elementToAppendTo) {
                 $('<div class="sigWrapper">' +
-                    '<a class="sigButton" id="sigCancel" onclick="routeTask.vm.closeSigPad()">Cancel</a>' +
-                    '<a class="sigButton" id="sigClear" onclick="$(\'.sigPad\').jSignature(\'reset\');">Clear</a>' +
-                    '<a class="sigButton" id="sigSave" onclick="routeTask.vm.saveSig()">Save</a>' +
-                    '<div class="sigPad"></div>' +
+                    '<div id="vertCenterUpper" style="#position: relative;">                     <!--Used to-->' +
+                        '<div id="vertCenterMiddle" style=" #position: absolute; #top: 50%;">    <!--place content-->' +
+                            '<div id="vertCenterLower" style=" #position: relative; #top: -50%"> <!--in middle of page-->' +
+                                '<a class="sigButton" id="sigCancel" onclick="routeTask.vm.closeSigPad()">Cancel</a>' +
+                                '<a class="sigButton" id="sigClear" onclick="$(\'.sigPad\').jSignature(\'reset\');">Clear</a>' +
+                                '<a class="sigButton" id="sigSave" onclick="routeTask.vm.saveSig()">Save</a>' +
+                                '<div class="sigPad"></div>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
                 '</div>').appendTo($(elementToAppendTo));
 
-                $(".sigPad").jSignature({width: "100%", height: "auto", sizeRatio: 2});
+                $(".sigPad").jSignature({width: "100%"});
                 var fieldElement = $('<ul data-role="listview" data-style="inset">'
                                         + field.Name +
                                         '<li>' +
