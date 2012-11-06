@@ -83,25 +83,28 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "tools/paramete
             destination = vm.get("selectedEntity.Location.Latitude") + "," + vm.get("selectedEntity.Location.Longitude");
 
         var navigateTo = function (destination, currentPosition) {
-            if (androidCordova) {
-                window.location.href = "geo:0,0?q=" + destination; //Opens google navigation on Android phones
-            } else if (currentPosition) {
+            if (currentPosition) {
                 window.open("http://maps.google.com/maps?saddr=" + currentPosition + "&daddr=" + destination);
             } else {
                 window.open("http://maps.google.com/maps?q=" + destination);
             }
         };
-        //Attempt to get the user's current location.
-        navigator.geolocation.getCurrentPosition(
-            function (position) { // If geolocation is successful get directions. This is success function of geolocation API.
-                currentPosition = position.coords.latitude + "," + position.coords.longitude;
-                navigateTo(destination, currentPosition);
-            },
-            function () { // If geolocation is NOT successful find business location. This is error function of geolocation API.
-                navigateTo(destination, false);
-            },
-            {timeout: 10000, enableHighAccuracy: true} //Options for geolocation API.
-        );
+
+        if (androidCordova) {
+            window.location.href = "geo:0,0?q=" + destination; //Opens google navigation on Android phones
+        } else {
+            //Attempt to get the user's current location.
+            navigator.geolocation.getCurrentPosition(
+                function (position) { // If geolocation is successful get directions. This is success function of geolocation API.
+                    currentPosition = position.coords.latitude + "," + position.coords.longitude;
+                    navigateTo(destination, currentPosition);
+                },
+                function () { // If geolocation is NOT successful find business location. This is error function of geolocation API.
+                    navigateTo(destination, false);
+                },
+                {timeout: 10000, enableHighAccuracy: true} //Options for geolocation API.
+            );
+        }
     };
 
     return section;
