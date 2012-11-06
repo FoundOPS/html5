@@ -1,23 +1,11 @@
 'use strict';
 
 define(["jquery", "sections/importerUpload", "db/services", "underscore"], function ($, importerUpload, dbServices, _) {
-    var importerSelect = {},
-        requiredFields = [
-            "Client Name",
-            "Address Line One",
-            "Address Line Two",
-            "City",
-            "State",
-            "Zipcode",
-            "Country Code"
-        ];
-
-    var onDropdownSelect = function () {
-
-    };
+    var importerSelect = {}
 
     var formatDataForValidation = function (data) {
-        var selectedFields = [], fieldsToValidate;
+        var headersIncluded = $("#importerSelect").find("#headersIncluded")[0].checked;
+        var selectedFields = [];
         //create an array of the fields to be used(based on the dropdowns)
         $("#importerSelect").find(".selectBox").each(function () {
             if (this.value !== "Do not Import") {
@@ -26,21 +14,6 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore"], funct
                 selectedFields.push(false);
             }
         });
-
-        var fieldsToAdd = [];
-
-        //make sure the required fields are included
-        for (var i in requiredFields) {
-            var included = false, field = requiredFields[i];
-            for (var j in selectedFields) {
-                if (selectedFields[j] && selectedFields[j].name === field) {
-                    included = true;
-                }
-            }
-            if (!included) {
-                fieldsToAdd.push(field);
-            }
-        }
 
         var dataToValidate = [], row;
         //iterate through each row of the data
@@ -54,21 +27,14 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore"], funct
                     newArray.push(row[c]);
                 }
             }
-            for (var f in fieldsToAdd) {
-                if (r === "0") {
-                    newArray.push(fieldsToAdd[f]);
-                } else {
-                    if (fieldsToAdd[f] === "Country Code") {
-                        newArray.push("US");
-                    } else {
-                        newArray.push("");
-                    }
-                }
-            }
 
             dataToValidate.push(newArray);
         }
         return dataToValidate;
+    };
+
+    var onDropdownSelect = function () {
+
     };
 
     importerSelect.initialize = function () {
@@ -91,9 +57,10 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore"], funct
             {Name: 'Zipcode'},
             {Name: 'Region Name'},
             {Name: 'Frequency'},
-            {Name: 'Repeat On'},
+            {Name: 'Frequency Detail'},
             {Name: 'Repeat Every'},
-            {Name: 'Repeat Start Date'}
+            {Name: 'Start Date'},
+            {Name: 'End Date'}
         ];
 
         $("#listView").kendoListView({
@@ -103,9 +70,12 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore"], funct
         });
 
         $("#importerSelect").find(".saveBtn").on("click", function () {
-            //var dataToValidate = formatDataForValidation(importerUpload.oldData);
+            var dataToValidate = formatDataForValidation(importerUpload.oldData);
 
-            //dbServices.validateData(dataToValidate, function (data) {
+//            dbServices.suggestions.update({body: {rowsWithHeaders: dataToValidate}}).done(function (suggestions) {
+//                importerSelect.gridData = suggestions;
+//                window.viewImporterReview();
+//            });
             var data = {
                 RowSuggestions : [
                     ["25892e17", "80f6", "395632", "7395632f0223"], ["a53e98e4", "0197", "06aaa", "49836e406aaa"]
@@ -133,7 +103,7 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore"], funct
             //});
         });
 
-        //get the list of fields for the selected service
+        //get the list of fields for the selected service(for the dropdowns)
         if (importerUpload.selectedService) {
             dbServices.services.read({params: {serviceTemplateId: importerUpload.selectedService.Id}}).done(function (service) {
                 var newFields = [], name;

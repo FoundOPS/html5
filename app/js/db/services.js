@@ -232,6 +232,7 @@ define(["developer", "tools/dateTools", "db/saveHistory", "tools/parameters", "t
             excludeRoleId: true,
             headers: {"ops-details": "true"}
         },
+        suggestions: {update: {}},
         taskStatuses: {},
         trackPoints: {
             read: {},

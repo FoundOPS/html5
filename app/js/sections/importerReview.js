@@ -1,6 +1,6 @@
 'use strict';
 
-define(["jquery", "underscore", "sections/importerUpload", "sections/importerSelect", "db/services", "widgets/location",
+define(["jquery", "underscore", "sections/importerUpload", "sections/importerSelect", "db/services", "widgets/location", "widgets/contactInfo",
     "ui/popup", "widgets/selectBox"], function ($, _, importerUpload, importerSelect, dbServices) {
     var importerReview = {}, dataSource, grid, clients = {}, locations = {}, repeats = {}, columns = [
         {
@@ -12,20 +12,20 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
 //            }
         },
         {
-            field: "Location"//,
-            //template: "<div class='Location #= Location #'>#= Location #</div>"//,
+            field: "Location",
+            template: "<div class='Location #= Location #'>#= Location #</div>"//,
 //            editor: function (container, options) {
 //                // create a KendoUI AutoComplete widget as column editor
 //                $('<div class="locationWidget"></div>').appendTo(container).location();
 //            }
         },
         {
-            field: "ContactInfo"//,
-            //template: "<div class='ContactInfo #= ContactInfo #'>#= ContactInfo #</div>"
+            field: "ContactInfo",
+            template: "<div class='ContactInfo #= ContactInfo #'>#= ContactInfo #</div>"
         },
         {
-            field: "Repeat"//,
-            //template: "<div class='Repeat #= Repeat #'>#= Repeat #</div>"
+            field: "Repeat",
+            template: "<div class='Repeat #= Repeat #'>#= Repeat #</div>"
         }
     ];
 
@@ -46,6 +46,7 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
                     newRow["Client"] = client.Name;
                 } else if (j === "1") {
                     location = locations[row[j]];
+                    //TODO: only add commas if each part exists
                     newRow["Location"] = location.AddressLineOne + ", " + location.AddressLineTwo + ", " + location.City + ", " + location.State + " " + location.Zipcode;
                 } else if (j === "2") {
                     if (client && client.ContactInfo) {
@@ -199,7 +200,24 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
         }
         setupGrid();
         resizeGrid();
-        //validateData();
+
+        var locationPopup = $("#importerReview").find(".Location");
+        locationPopup.popup({contents: $("<div class='locationWidget'></div>")});
+        var contactInfoPopup = $("#importerReview").find(".ContactInfo");
+        contactInfoPopup.popup({contents: $("<div class='contactInfoWidget'></div>")});
+        $(document).on('popup.setContent', function (e) {
+            $(e.target).find(".contactInfoWidget").contactInfo();
+        });
+//        $(document).on('popup.setContent', function (e) {
+//            $(e.target).find(".locationWidget").location();
+//            var locationWidget = $(e.target).find(".locationWidget").data("location");
+//            locationWidget.renderMap(null, false);
+//        });
+        $(document).on('popup.closing', function (e) {
+//            if($(e.target).find(".locationWidget").data("location")){
+//                $(e.target).find(".locationWidget").data("location").removeMap();
+//            }
+        });
     };
 
     window.importerReview = importerReview;

@@ -12,8 +12,6 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "developer", "ke
         renderMap: function (location, shouldAddMarker) {
             var that = this;
 
-            that._updateNavigateLink(location, true);
-
             that._location = $('<h3>Location</h3>' +
                 '<div id="locationWidgetMap">' +
                 '</div>' +
@@ -31,10 +29,20 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "developer", "ke
 
             var widgetElement = $(that.element);
 
+            var center, zoom;
+
+            if (location) {
+                center = [location.Latitude, location.Longitude];
+                zoom = 15;
+            } else {
+                center = [40, -89];
+                zoom = 4;
+            }
+
             //initialize the map on the "locationWidgetMap" div with a given center and zoom
             that._map = L.map('locationWidgetMap', {
-                center: [location.Latitude, location.Longitude],
-                zoom: 15,
+                center: center,
+                zoom: zoom,
                 attributionControl: false,
                 zoomControl: false
             });
@@ -105,7 +113,7 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "developer", "ke
             });
 
             //update search after 1 second of input edit
-            generalTools.observeInput(widgetElement.find("#editPane"), function (searchText) {
+            generalTools.observeInput(widgetElement.find("#editPane input"), function (searchText) {
                 //get the list of location matches
                 dbServices.locations.read({params: {search: searchText}}).done(function (locations) {
                     that._updateLocationList(locations);
@@ -118,6 +126,8 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "developer", "ke
             } else {
                 //if there is a location, show the navigate(with google) button
                 widgetElement.find("navigateBtn").css("display", "block");
+
+                that._updateNavigateLink(location, true);
             }
         },
 
@@ -133,7 +143,7 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "developer", "ke
             //animation
             widgetElement.find("#buttonPane").switchClass("shown", "hidden", 500, 'swing');
             widgetElement.find("#editPane").switchClass("hidden", "shown", 500, 'swing');
-            widgetElement.find("locationWidgetMap").switchClass("shown", "hidden", 500);
+            widgetElement.find("#locationWidgetMap").switchClass("shown", "hidden", 500);
         },
 
 //remove all traces of the map

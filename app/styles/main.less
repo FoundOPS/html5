@@ -1398,7 +1398,7 @@ div.k-window-content {
 }
 /*endregion*/
 /*region Widgets */
-.contactInfo {
+.contactInfoWidget {
     margin: 1em;
     color: @textColor;
     font-size: 12px;
@@ -1415,7 +1415,7 @@ div.k-window-content {
         margin: 0 auto;
     }
     .saveDeleteButtonWrapper{
-        width: 140px;
+        width: 150px;
         margin: 0 auto;
     }
     .contactList {
@@ -1490,7 +1490,7 @@ div.k-window-content {
         }
     }
     .add {
-        width: 85px;
+        width: 95px;
         font-size: 14px;
         color: @green;
         span{
@@ -1689,11 +1689,8 @@ div.k-window-content {
     }
 }
 
-#locationWidget{
-    display: none;
-    position: absolute;
-    top: 54px;
-    right: 30px;
+.locationWidget{
+    position: relative;
     width: 250px;
     height: 285px;
     overflow: hidden;
@@ -2334,6 +2331,7 @@ ul.noty_cont.noty_layout_topRight li {
     border-top: none;
     margin-top: 0;
     margin-left: -1px;
+    z-index: 11;
 }
 .iconContainer {
     .select2-choice {
