@@ -477,12 +477,12 @@
     border-radius: 0;
 }
 
-.doubleDigit .number {
+#mapView #map .doubleDigit .number {
     top: -4px;
-    left: 1px;
+    left: 2px;
 }
 
-.tripleDigit .number {
+#mapView #map .tripleDigit .number {
     top: -5px;
     left: 0;
     font-size: 8px;
