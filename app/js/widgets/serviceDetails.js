@@ -219,7 +219,7 @@ define(["jquery", "db/services", "db/session", "db/models", "widgets/selectBox",
             },
             "OptionsField": function (field, fieldIndex, elementToAppendTo) {
                 var fieldElement, i;
-                if (field.TypeInt === 0 || field.TypeInt === undefined) {
+                if (field.TypeInt === 0) {
                     //Select Dropdown
                     fieldElement = $('<div class="styled-select"></div>').selectBox({
                         data: field.Options,
