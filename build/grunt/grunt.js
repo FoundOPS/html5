@@ -185,7 +185,7 @@ module.exports = function (grunt) {
                         JSblobRoot: "js/main-built.js",
                         cordova: '<script type="text/javascript" charset="utf-8" src="cordova-2.1.0.js"></script>\n' +
                             '<script type="text/javascript" charset="utf-8" src="statusbarnotification.js"></script>\n' +
-                            '<script type="text/javascript" charset="utf-8" src="childbrowser.js"></script>' +
+                            '<script type="text/javascript" charset="utf-8" src="childbrowser.js"></script>\n' +
                             '<script type="text/javascript" charset="utf-8" src="pg-plugin-screen-orientation.js"></script>',
                         appLocation: '"navigator.html"'
                     }

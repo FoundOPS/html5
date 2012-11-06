@@ -54,6 +54,7 @@
 	    <plugin name="Echo" value="org.apache.cordova.Echo" />
 		<plugin name="StatusBarNotification" value="com.phonegap.plugins.statusBarNotification.StatusBarNotification"/>
 		<plugin name="ChildBrowser" value="com.phonegap.plugins.childBrowser.ChildBrowser"/>
+		<plugin name="ScreenOrientation" value="com.phonegap.plugins.ScreenOrientation.ScreenOrientation" />
 	</plugins>
 </cordova>
 
