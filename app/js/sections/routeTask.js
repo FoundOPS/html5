@@ -6,7 +6,8 @@
 
 'use strict';
 
-define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "tools/parameters", "underscore", "../tools/kendoTools", "widgets/serviceDetails", "jsignature"],
+define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "tools/parameters", "underscore", "../tools/kendoTools",
+    "widgets/serviceDetails", "jsignature", "jsigbase30"],
     function (routeDestinationDetails, dbServices, saveHistory, parameters, _, kendoTools) {
     /**
      * routeTask = wrapper for all service objects
@@ -150,37 +151,40 @@ define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "to
     };
     vm.statusUpdated = false;
     vm.openSigPad = function () {
-        if (kendo.support.detectOS(navigator.userAgent).name === "android") {
+        if (kendo.support.detectOS(navigator.userAgent).name === "android" && window.cordova) {
             navigator.screenOrientation.set("landscape");
-        } else if (kendo.support.detectOS(navigator.userAgent).name === "ios") {
+        } else if (kendo.support.detectOS(navigator.userAgent).name === "ios"  && window.cordova) {
             window.plugins.orientation.setAllowed([{pp:false, pd:false, ll:true, lr:true}]);
         }
         //Wait until screen is in landscape orientation to call out the sig pad.
         setTimeout( function() {
             var width = $("#routeTask").width();
-            var left = ($("#sideBarWrapper").width()) / 2;
-            $(".sigWrapper canvas").css("left", left);
-            $(".sigWrapper").css("margin-left", 0).css("width", width).css("visibility", "visible").css("z-index", "10000").animate({"opacity": 1}, 300);
-            $("#nav").animate({"opacity": 0}, 300);
-            $("#sideBarWrapper").animate({"opacity": 0}, 300);
+            var margin = width > 800 ? ($("#sideBarWrapper").width()) / 2 : 0;
+            $(".sigWrapper").css("visibility", "visible").css("width", width).css("z-index", "10000").animate({"opacity": 1}, 300);
+            $("#fields, #checkLists").animate({"opacity": 0}, 300, function () {
+                $("#fields, #checkLists").css("visibility", "hidden");
+            });
             kendoTools.disableScroll("#routeTask");
-        }, 0);
+            $("#routeTask .km-scroll-container").css("-webkit-transform", "");
+        }, 500);
     };
     vm.closeSigPad = function () {
-        $("#nav").animate({"opacity": 1}, 300);
-        $("#sideBarWrapper").animate({"opacity": 1}, 300);
-        $(".sigWrapper").animate({"opacity": 0}, 300, function () {$(".sigWrapper").css("width", 0).css("z-index", "-10").css("visibility", "hidden")});
+        $("#fields, #checkLists").animate({"opacity": 1}, 300, function () {
+            $("#fields, #checkLists").css("visibility", "visible")
+        });
+        $(".sigWrapper").animate({"opacity": 0}, 300, function () {
+            $(".sigWrapper").css("visibility", "hidden").css("width", 0).css("z-index", "-10");
+        });
         kendoTools.re_enableScroll("#routeTask");
-        if (kendo.support.detectOS(navigator.userAgent).name === "android") {
+        if (kendo.support.detectOS(navigator.userAgent).name === "android" && window.cordova) {
             navigator.screenOrientation.set("fullSensor");
-        } else if (kendo.support.detectOS(navigator.userAgent).name === "ios") {
+        } else if (kendo.support.detectOS(navigator.userAgent).name === "ios" && window.cordova) {
             window.plugins.orientation.setAllowed([{pp:true, pd:true, ll:true, lr:true}]);
         }
     }
     vm.saveSig = function () {
-        if($('.sigPad').jSignature('getData', 'native').length !== 0) {
-            console.log($('.sigPad').jSignature('getData', 'native'));
-            vm.set()
+        if($('.sigPad').jSignature("getData","native").length !== 0) {
+            console.log($('.sigPad').jSignature("getData","base30"));
             vm.closeSigPad();
         } else {
             alert("Please sign before you save or hit the cancel button to go back.");

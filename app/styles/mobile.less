@@ -66,7 +66,7 @@ ul[data-role="listview"] {
     webkit-border-radius: 0 !important;
     moz-border-radius: 0 !important;
     border: none !important;
-    background-color: #fff;
+    background-color: #fff !important;
     box-shadow: none !important;
     -webkit-box-shadow: none !important;
     border-bottom: 1px solid #F2F2F2 !important;
@@ -205,12 +205,10 @@ ul[data-role="listview"] {
   left: 0;
   opacity: 0;
   z-index:-10;
-  padding: 0;
   background-color: #eee;
   visibility: hidden;
   canvas {
-    margin: 0 5% !important;
-    width:100%;
+    position: relative;
     color: #222222;
     background-color: #fff;
   }
@@ -221,15 +219,15 @@ ul[data-role="listview"] {
   }
   #sigCancel {
     float: left;
-    margin:0 4px 7px 5%;
+    margin:55px 4px 7px 10px;
   }
   #sigClear {
     float: left;
-    margin:0 0 7px 4px;
+    margin:55px 0 7px 4px;
   }
   #sigSave {
     float: right;
-    margin:0 0 7px 0;
+    margin:55px 10px 7px 0;
   }
 }
 .fieldLabel {

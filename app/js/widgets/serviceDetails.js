@@ -224,7 +224,7 @@ define(["jquery", "db/services", "db/session", "db/models", "widgets/selectBox",
                     fieldElement = $('<div class="styled-select"></div>').selectBox({
                         data: field.Options,
                         dataTextField: "Name",
-                        dataSelectedField: "IsChecked",
+                        dataSelectedIdentifier: "IsChecked",
                         onSelect: function (selectedOption) {
                             //Clear previous selections.
                             for (i = 0; i < field.Options.length; i++) {
@@ -232,7 +232,7 @@ define(["jquery", "db/services", "db/session", "db/models", "widgets/selectBox",
                             }
                             field.set('Options[' + selectedOption.index + '].IsChecked', selectedOption.selected);
                         }
-                    }).appendTo(elementToAppendTo).wrap("<li><label>" + field.Name + "<br/></label></li>");
+                    }).appendTo(elementToAppendTo).wrap("<li>" + field.Name + "<br/></li>");
                 } else {
                     //Checkbox (1) or checklist (2)
                     fieldElement = $('<ul data-role="listview" data-style="inset">' + field.Name + '</ul>').appendTo(elementToAppendTo);
@@ -263,12 +263,12 @@ define(["jquery", "db/services", "db/session", "db/models", "widgets/selectBox",
             },
             "SignatureField": function (field, fieldIndex, elementToAppendTo) {
                 $('<div class="sigWrapper">' +
+                    '<a class="sigButton" id="sigCancel" onclick="routeTask.vm.closeSigPad()">Cancel</a>' +
+                    '<a class="sigButton" id="sigClear" onclick="$(\'.sigPad\').jSignature(\'reset\');">Clear</a>' +
+                    '<a class="sigButton" id="sigSave" onclick="routeTask.vm.saveSig()">Save</a>' +
                     '<div id="vertCenterUpper" style="#position: relative;">                     <!--Used to-->' +
                         '<div id="vertCenterMiddle" style=" #position: absolute; #top: 50%;">    <!--place content-->' +
                             '<div id="vertCenterLower" style=" #position: relative; #top: -50%"> <!--in middle of page-->' +
-                                '<a class="sigButton" id="sigCancel" onclick="routeTask.vm.closeSigPad()">Cancel</a>' +
-                                '<a class="sigButton" id="sigClear" onclick="$(\'.sigPad\').jSignature(\'reset\');">Clear</a>' +
-                                '<a class="sigButton" id="sigSave" onclick="routeTask.vm.saveSig()">Save</a>' +
                                 '<div class="sigPad"></div>' +
                             '</div>' +
                         '</div>' +
