@@ -34,7 +34,7 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "tools/paramete
                 }
 
                 //initiate the contactInfo widget
-                $("#routeDestinationDetails .contactInfo").contactInfo({
+                $("#routeDestinationDetails .contactInfoWidget").contactInfo({
                     contacts: contacts,
                     entity: {
                         create: function (contactInfo) {

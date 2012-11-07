@@ -1,6 +1,6 @@
 'use strict';
 
-define(["jquery", "underscore", "sections/importerUpload", "sections/importerSelect", "db/services", "widgets/location", "widgets/contactInfo",
+define(["jquery", "underscore", "sections/importerUpload", "sections/importerSelect", "db/services", "widgets/location", "widgets/contactInfo", "widgets/repeat",
     "ui/popup", "widgets/selectBox"], function ($, _, importerUpload, importerSelect, dbServices) {
     var importerReview = {}, dataSource, grid, clients = {}, locations = {}, repeats = {}, columns = [
         {
@@ -201,22 +201,41 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
         setupGrid();
         resizeGrid();
 
-        var locationPopup = $("#importerReview").find(".Location");
-        locationPopup.popup({contents: $("<div class='locationWidget'></div>")});
+        //add popups to the location, contactInfo, and repeat cells
         var contactInfoPopup = $("#importerReview").find(".ContactInfo");
         contactInfoPopup.popup({contents: $("<div class='contactInfoWidget'></div>")});
+
+        var locationPopup = $("#importerReview").find(".Location");
+        locationPopup.popup({contents: $("<div class='locationWidget'></div>")});
+
+        var repeatPopup = $("#importerReview").find(".Repeat");
+        repeatPopup.popup({contents: $("<div class='repeatWidget'></div>")});
+
+        //create the correct widget inside the popup
         $(document).on('popup.setContent', function (e) {
-            $(e.target).find(".contactInfoWidget").contactInfo();
+            if ($(e.target).find(".repeatWidget")[0]) {
+                $(e.target).find(".repeatWidget").repeat();
+            } else if ($(e.target).find(".locationWidget")[0]) {
+                $(e.target).find(".locationWidget").location();
+                var locationWidget = $(e.target).find(".locationWidget").data("location");
+                locationWidget.renderMap(null, false);
+            } else if ($(e.target).find(".contactInfoWidget")[0]) {
+                $(e.target).find(".contactInfoWidget").contactInfo();
+            }
         });
-//        $(document).on('popup.setContent', function (e) {
-//            $(e.target).find(".locationWidget").location();
-//            var locationWidget = $(e.target).find(".locationWidget").data("location");
-//            locationWidget.renderMap(null, false);
-//        });
+
+        //on popup close event
         $(document).on('popup.closing', function (e) {
-//            if($(e.target).find(".locationWidget").data("location")){
-//                $(e.target).find(".locationWidget").data("location").removeMap();
-//            }
+            //remove the location widget, if it exists
+            if($(e.target).find(".locationWidget").data("location")){
+                $(e.target).find(".locationWidget").data("location").removeWidget();
+            //remove the repeat widget, if it exists
+            } else if ($(e.target).find(".repeatWidget").data("repeat")){
+                $(e.target).find(".repeatWidget").data("repeat").removeWidget();
+            //remove the repeat widget, if it exists
+            } else if ($(e.target).find(".contactInfoWidget").data("contactInfo")){
+                $(e.target).find(".contactInfoWidget").data("contactInfo").removeWidget();
+            }
         });
     };
 

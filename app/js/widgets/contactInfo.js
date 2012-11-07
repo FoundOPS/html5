@@ -101,7 +101,10 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
                 //show the list of contacts
                 that._changePane("list");
                 //submit the change
-                that.options.entity.destroy(id);
+                //TODO
+                if (that.options.entity) {
+                    that.options.entity.destroy(id);
+                }
             });
             $(that.element).find(".save").live("click", function () {
                 //save the old value to be used to check for changes
@@ -129,12 +132,13 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
                     that._currentLabels.push({value: selectedLabel});
                 }
                 //save changes
-                if (that._isNew) {
+                //TODO
+                if (that._isNew && that.options.entity) {
                     that.options.entity.create(that.contacts[that._editIndex]);
                 } else {
                     //check if contact changed
                     var newContact = generalTools.deepClone(that.contacts[that._editIndex]);
-                    if (!_.isEqual(newContact, oldContact)) {
+                    if (!_.isEqual(newContact, oldContact) && that.options.entity) {
                         that.options.entity.update(newContact);
                     }
                 }
@@ -356,6 +360,12 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
             var that = this;
             var containerWidth = $(that.element).find(guideElement).width();
             $(that.element).find(".editWrapper .label").width(containerWidth - 28);
+        },
+
+        //remove the widget
+        removeWidget: function () {
+            var that = this;
+            $(that.element)[0].innerHTML = "";
         }
     });
 });

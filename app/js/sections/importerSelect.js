@@ -4,7 +4,7 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore"], funct
     var importerSelect = {}
 
     var formatDataForValidation = function (data) {
-        var headersIncluded = $("#importerSelect").find("#headersIncluded")[0].checked;
+        var headersIncluded = $("#importerSelect").find(".switch .on").hasClass("active");
         var selectedFields = [];
         //create an array of the fields to be used(based on the dropdowns)
         $("#importerSelect").find(".selectBox").each(function () {
@@ -67,6 +67,20 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore"], funct
             //setup the template to only include the header and the first row of data
             template: "<li><div class='header'>#=data[0]#</div><div class='value'>#=data[1]#</div><div class='styled-select'></div></li>",
             dataSource: importerUpload.data
+        });
+
+        //setup toggle switch states
+        var on = $("#importerSelect").find(".switch .on");
+        var off = $("#importerSelect").find(".switch .off");
+        on.on("click", function () {
+            off.removeClass("active");
+            on.addClass("active");
+            $("#importerSelect").find("#dynamicHeader")[0].innerText = "Row 1";
+        });
+        off.on("click", function () {
+            on.removeClass("active");
+            off.addClass("active");
+            $("#importerSelect").find("#dynamicHeader")[0].innerText = "Row 2";
         });
 
         $("#importerSelect").find(".saveBtn").on("click", function () {

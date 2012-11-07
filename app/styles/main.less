@@ -918,6 +918,7 @@ div.k-window-content {
         margin-top: 40px;
         margin-left: 320px;
         min-width: 300px;
+        padding: 15px 20px;
         background-color: @grey;
         -webkit-box-shadow: none;
         -moz-box-shadow: none;
@@ -1015,6 +1016,30 @@ div.k-window-content {
     #fileName{
         color: green;
     }
+    .buttonWrapper{
+        margin: 0 auto;
+        width: 170px;
+    }
+    .saveBtn, .cancelBtn{
+        border-radius: 0;
+        border: none;
+        background: @white;
+        color: @green;
+        span{
+            background-image: url(http://localhost:8000/img/sprite.png);
+        }
+    }
+    .saveBtn{
+        span{
+            background-position: -114px -157px;
+        }
+        &:disabled{
+            background-color: #ddd;
+        }
+    }
+    .cancelBtn{
+        color: @red;
+    }
 }
 #importerUpload .wrap, #importerSelect .wrap{
     width: 620px;
@@ -1024,8 +1049,11 @@ div.k-window-content {
     .help{
         margin-top:170px;
     }
-    .saveBtn{
-        margin-left: 0;
+    .buttonWrapper{
+        width: 80px;
+        .saveBtn{
+            margin-left:0;
+        }
     }
 }
 /*endregion*/
@@ -1039,50 +1067,52 @@ div.k-window-content {
         padding-left: 3px;
         margin-top: 5px;
     }
-    #listView{
-    }
-    #topHeader{
-        margin: 0 3px 0 0;
+    #topHeader {
+        margin: 0 0 20px 0;
         li{
             display: inline;
-            font-size: 18px;
-            margin-left: 2px;
+            margin-top: 5px;
+            font-size: 16px;
         }
         li:first-child{
-            margin-left: 110px;
-            margin-right: 295px;
+            position: relative;
+            top: 9px;
+            margin: 0 88px 0 30px;
         }
-    }
-    #bottomHeader {
-        margin: 5px 0 10px 4px;
-        padding: 3px 0;
-        border-top: 1px solid #ccc;
-        border-bottom: 1px solid #ccc;
-        li{
-            display: inline;
-            margin-right: 128px;
-            font-size: 12px;
+        li:nth-child(2){
+            margin-right: 150px;
         }
-    }
-    .header{
-        padding: 5px 0;
-        float: left;
-        width: 200px;
-    }
-    .value{
-        padding: 5px;
-        white-space: nowrap;
-        min-height: 20px;
+        li:nth-child(2), li:nth-child(3){
+            padding: 4px 8px;
+            color: @white;
+            background: @blue;
+        }
     }
     #listView{
-        margin-bottom: 15px;
+        margin: 0 0 15px 0;
         li{
-             margin-bottom: 3px;
-        }
-        input.field{
-            width: 185px;
-            border: 1px solid #c5c5c5;
-            border-radius: 4px;
+             margin-bottom: 5px;
+            .header{
+                color: #777;
+                width: 200px;
+                float: left;
+                padding: 5px 0 5px 5px;
+                background: @white;
+            }
+            .value{
+                color: #777;
+                width: 200px;
+                min-height: 18px;
+                overflow: hidden;
+                padding: 5px;
+                white-space: nowrap;
+                background: white;
+            }
+            .styled-select{
+                float: right;
+                width: 205px;
+                margin: -28px 0 0 0;
+            }
         }
     }
     .wrap li{
@@ -1573,23 +1603,19 @@ div.k-window-content {
     }
 }
 
-#repeat{
-    display: none;
-    position: absolute;
-    top: 54px;
-    right: 30px;
+.repeatWidget{
+    position: relative;
     width: 250px;
     padding: 10px 20px;
     font-size: 15px;
-    background-color:#fff;
     h3{
         font-size: 20px;
         margin: 0 0 5px 0;
     }
-    label:not(#weeklyRepeatOn label){
+    label:not(.weeklyRepeatOn label){
         line-height: 1.5em;
     }
-    #weeklyRepeatOn{
+    .weeklyRepeatOn{
         display: none;
         position: relative;
         top:5px;
@@ -1597,13 +1623,13 @@ div.k-window-content {
             float: left;
         }
     }
-    #monthlyRepeatOn {
+    .monthlyRepeatOn {
         display:none;
         label{
             vertical-align: middle;
         }
     }
-    #weekdayWrapper{
+    .weekdayWrapper{
         width: 225px;
         margin: 0 auto;
     }
@@ -1649,12 +1675,12 @@ div.k-window-content {
             .bgGradient(#44AFE4, #0067A0);
         }
     }
-    #repeatLabel{
+    .repeatLabel{
         position: relative;
         top: 2px;
         left: 2px;
     }
-    #startDate .k-datepicker, .k-dropdown, #repeatEvery .k-numerictextbox{
+    .startDate .k-datepicker, .k-dropdown, .repeatEvery .k-numerictextbox{
         width: 100%;
         font-size: 1em;
     }
@@ -1664,7 +1690,7 @@ div.k-window-content {
             padding-top: 5px;
         }
     }
-    #endDate{
+    .endDate{
         label{
             padding-left: 2px;
             vertical-align: text-bottom;
@@ -1681,7 +1707,7 @@ div.k-window-content {
              display: inline-block !important;
          }
     }
-    .k-dropdown, #startDate, #repeatEvery, #weeklyRepeatOn, #monthlyRepeatOn, .select2-container{
+    .k-dropdown, .startDate, .repeatEvery, .weeklyRepeatOn, .monthlyRepeatOn, .select2-container{
         margin-bottom: 10px;
     }
     .k-input{
@@ -1696,7 +1722,6 @@ div.k-window-content {
     overflow: hidden;
     padding: 15px 20px;
     font-size: 15px;
-    background-color:@white;
     h3{
         font-size: 20px;
         margin: 0 0 5px 0;
@@ -1717,7 +1742,7 @@ div.k-window-content {
     #locationWidgetMap.hidden {
       opacity: .3;
     }
-    #buttonPane{
+    .buttonPane{
         position: relative;
         top: -250px;
         left: 0;
@@ -1725,7 +1750,7 @@ div.k-window-content {
         height: 2px;
         background:none;
         border: 1px solid transparent;
-        #navigateBtn{
+        .navigateBtn{
           display: none;
             position: absolute;
             top:5px;
@@ -1746,83 +1771,84 @@ div.k-window-content {
             }
         }
     }
-    #buttonPane.shown{
+    .buttonPane.shown{
       left: 0;
     }
-    #buttonPane.hidden{
+    .buttonPane.hidden{
       left: 300px;
     }
-    #editPane{
+    .editPane{
         position: relative;
         top: -250px;
         left: -300px;
         width: 250px;
-        min-height: 35px;
+        min-height: 20px;
         border: 1px solid #aaaaaa;
         background-color: @white;
         input{
             width: 213px;
             margin: 3px 0 3px 3px;
             padding: 2px 25px 2px 4px;
-            border: 1px solid #AAA;
-            border-radius: 4px;
+            border: none;
             font-family: PTSans;
             background: url("../img/smallSearch.png") no-repeat right center;
         }
         ul{
             width: 250px;
             max-height: 215px;
-            border-top: 1px solid #aaaaaa;
             overflow-y: auto;
-        }
-        li{
-            height: 36px;
-            padding: 5px 4px 5px 4px;
-            font-size: 14px;
-            background-color: #efefef;
-            cursor: pointer;
-            &:hover{
-              .rowGradient;
-              color: @white;
+            li{
+                height: 36px;
+                padding: 5px 4px 5px 4px;
+                font-size: 14px;
+                background-color: #efefef;
+                cursor: pointer;
+                &:hover{
+                    .rowGradient;
+                    color: @white;
+                }
+                &:not(:last-child){
+                    border-bottom: 1px solid #aaaaaa;
+                }
+                span{
+                    display: table-cell;
+                }
+                span.name{
+                    height: 36px;
+                    vertical-align: middle;
+                }
+                .fromWeb, #previousLocation, #currentLocation, #manuallyDropPin{
+                    width: 20px;
+                    height: 36px;
+                    vertical-align: middle;
+                    padding-right: 4px;
+                    background: url("../img/previousLocation.png") no-repeat left center;
+                }
+                #currentLocation{
+                    background: url("../img/currentLocation.png") no-repeat left center;
+                }
+                #manuallyDropPin{
+                    background: url("../img/markerIcon.png") no-repeat left center;
+                }
+                .fromWeb{
+                    background: url("../img/webIcon.png") no-repeat left center;
+                }
             }
-            &:not(:last-child){
-                border-bottom: 1px solid #aaaaaa;
+            li:first-child{
+                border-top: 1px solid #aaaaaa;
             }
-            span{
-              display: table-cell;
+            li.singleLine .name{
+                padding-top: 9px;
             }
-            span.name{
-              height: 36px;
-              vertical-align: middle;
+            li.tripleLine .name{
+                font-size: 11px;
             }
-            .fromWeb, #previousLocation, #currentLocation, #manuallyDropPin{
-              width: 20px;
-              height: 36px;
-              vertical-align: middle;
-              padding-right: 4px;
-              background: url("../img/previousLocation.png") no-repeat left center;
-            }
-            #currentLocation{
-              background: url("../img/currentLocation.png") no-repeat left center;
-            }
-            #manuallyDropPin{
-              background: url("../img/markerIcon.png") no-repeat left center;
-            }
-            .fromWeb{
-              background: url("../img/webIcon.png") no-repeat left center;
-            }
-        }
-        li.singleLine .name{
-            padding-top: 9px;
-        }
-        li.tripleLine .name{
-            font-size: 11px;
         }
     }
-    #editPane.shown{
+    .editPane.shown{
         left: 0px;
     }
-    #editPane.hidden{
+    .editPane.hidden{
        left: -300px;
     }
 }
@@ -2333,6 +2359,9 @@ ul.noty_cont.noty_layout_topRight li {
     margin-left: -1px;
     z-index: 11;
 }
+.endDateDropdown, .frequencyDropdown{
+    z-index: 11;
+}
 .iconContainer {
     .select2-choice {
         background-color: transparent;
@@ -2405,11 +2434,38 @@ ul.noty_cont.noty_layout_topRight li {
         width: 200px;
     }
 }
-#importerSelect{
-    .styled-select{
-        float: right;
-        width: 200px;
-        margin: -27px 0 0 0;
+/*endregion*/
+/*region Toggle Switch*/
+#toggleLabel{
+    float: left;
+    margin: 4px 10px 0 0;
+    font-size: 14px;
+}
+.switch {
+    display: inline-block;
+    height: 29px;
+    width: 136px;
+    cursor: pointer;
+    line-height: 1.8em;
+    background: @white;
+    a {
+        display: block;
+        float: left;
+        height: 23px;
+        width: 58px;
+        line-height: 1.3em;
+        color: #ccc;
+        text-align: center;
+        font-size: 1em;
+        padding: 2px 3px 0 4px;
+        margin: 2px 0 0 2px;
+    }
+    a:not(.active):hover{
+        background: #f1f1f1;
+    }
+    a.active {
+        color: @white;
+        background: @blue;
     }
 }
 /*endregion*/
