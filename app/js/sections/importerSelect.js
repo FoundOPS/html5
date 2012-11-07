@@ -86,10 +86,10 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore"], funct
         $("#importerSelect").find(".saveBtn").on("click", function () {
             var dataToValidate = formatDataForValidation(importerUpload.oldData);
 
-//            dbServices.suggestions.update({body: {rowsWithHeaders: dataToValidate}}).done(function (suggestions) {
-//                importerSelect.gridData = suggestions;
-//                window.viewImporterReview();
-//            });
+            dbServices.suggestions.update({body: {rowsWithHeaders: dataToValidate}}).done(function (suggestions) {
+                importerSelect.gridData = suggestions;
+                window.viewImporterReview();
+            });
             var data = {
                 RowSuggestions : [
                     ["25892e17", "80f6", "395632", "7395632f0223"], ["a53e98e4", "0197", "06aaa", "49836e406aaa"]
@@ -112,8 +112,8 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore"], funct
                 }
             };
 
-            importerSelect.gridData = data;
-            window.viewImporterReview();
+//            importerSelect.gridData = data;
+//            window.viewImporterReview();
             //});
         });
 

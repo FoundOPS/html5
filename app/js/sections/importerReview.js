@@ -1,11 +1,11 @@
 'use strict';
 
-define(["jquery", "underscore", "sections/importerUpload", "sections/importerSelect", "db/services", "widgets/location", "widgets/contactInfo", "widgets/repeat",
-    "ui/popup", "widgets/selectBox"], function ($, _, importerUpload, importerSelect, dbServices) {
+define(["jquery", "underscore", "sections/importerUpload", "sections/importerSelect", "db/services", "tools/generalTools", "widgets/location", "widgets/contactInfo", "widgets/repeat",
+    "ui/popup", "widgets/selectBox"], function ($, _, importerUpload, importerSelect, dbServices, generalTools) {
     var importerReview = {}, dataSource, grid, clients = {}, locations = {}, repeats = {}, columns = [
         {
-            field: "Client"//,
-            //template: "<div class='Client #= Client #'>#= Client #</div>"//,
+            field: "Client",
+            template: "<div class='Client #= Client #'>#= Client #</div>"//,
 //            editor: function (container, options) {
 //                $('<div class="styled-select"></div>').appendTo(container)
 //                    .selectBox({data: importerSelect.gridData.Suggestions.Clients, dataTextField: "Name"});
@@ -13,7 +13,7 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
         },
         {
             field: "Location",
-            template: "<div class='Location #= Location #'>#= Location #</div>"//,
+            template: "<div class='Location'>#= Location #</div>"//,
 //            editor: function (container, options) {
 //                // create a KendoUI AutoComplete widget as column editor
 //                $('<div class="locationWidget"></div>').appendTo(container).location();
@@ -21,11 +21,11 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
         },
         {
             field: "ContactInfo",
-            template: "<div class='ContactInfo #= ContactInfo #'>#= ContactInfo #</div>"
+            template: "<div class='ContactInfo'>#= ContactInfo #</div>"
         },
         {
             field: "Repeat",
-            template: "<div class='Repeat #= Repeat #'>#= Repeat #</div>"
+            template: "<div class='Repeat'>#= Repeat #</div>"
         }
     ];
 
@@ -40,40 +40,52 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
             row = data[i];
             newRow = [];
 
-            for (var j in row) {
-                if (j === "0") {
-                    client = clients[row[j]];
-                    newRow["Client"] = client.Name;
-                } else if (j === "1") {
-                    location = locations[row[j]];
-                    //TODO: only add commas if each part exists
-                    newRow["Location"] = location.AddressLineOne + ", " + location.AddressLineTwo + ", " + location.City + ", " + location.State + " " + location.Zipcode;
-                } else if (j === "2") {
-                    if (client && client.ContactInfo) {
-                        contactInfo = client.ContactInfo;
-                    }
-                    if (location && location.ContactInfo) {
-                        for (var i in location.ContactInfo) {
-                            contactInfo.push(location.ContactInfo[i]);
-                        }
-                    }
+            newRow["Id"] = generalTools.newGuid();
 
-                    if (contactInfo.length !== 0) {
-                        contactData = contactInfo[0].Data.replace("http://", "");
-                        contactData = contactData.replace("https://", "");
+            newRow["Client"] = "todo";
 
-                        contactString = contactData + "(" + contactInfo[0].Label + ")";
-                        if (contactInfo.length > 1) {
-                            contactString = contactString.concat(" +", contactInfo.length - 1, " more");
-                        }
-                    }
+            location = locations[row.LocationSuggestions[0]];
+            //TODO: only add each part(and comma) if it exists
+            newRow["Location"] = location.AddressLineOne + ", " + location.AddressLineTwo + ", " + location.City + ", " + location.State + " " + location.Zipcode;
 
-                    newRow["ContactInfo"] = contactString;
-                } else if (j === "3") {
-                    repeat = repeats[row[j]];
-                    newRow["Repeat"] = repeat.Name;
-                }
-            }
+            newRow["ContactInfo"] = "todo";
+
+            newRow["Repeat"] = row.Repeat.StartDate;
+
+
+//            for (var j in row) {
+//                if (j === "0") {
+//                    client = clients[row[j]];
+//                    newRow["Client"] = client.Name;
+//                } else if (j === "1") {
+//                    location = locations[row[j]];
+//                    newRow["Location"] = location.AddressLineOne + ", " + location.AddressLineTwo + ", " + location.City + ", " + location.State + " " + location.Zipcode;
+//                } else if (j === "2") {
+//                    if (client && client.ContactInfo) {
+//                        contactInfo = client.ContactInfo;
+//                    }
+//                    if (location && location.ContactInfo) {
+//                        for (var i in location.ContactInfo) {
+//                            contactInfo.push(location.ContactInfo[i]);
+//                        }
+//                    }
+//
+//                    if (contactInfo.length !== 0) {
+//                        contactData = contactInfo[0].Data.replace("http://", "");
+//                        contactData = contactData.replace("https://", "");
+//
+//                        contactString = contactData + "(" + contactInfo[0].Label + ")";
+//                        if (contactInfo.length > 1) {
+//                            contactString = contactString.concat(" +", contactInfo.length - 1, " more");
+//                        }
+//                    }
+//
+//                    newRow["ContactInfo"] = contactString;
+//                } else if (j === "3") {
+//                    repeat = repeats[row[j]];
+//                    newRow["Repeat"] = repeat.Name;
+//                }
+//            }
             newData.push(newRow);
         }
         return newData;
@@ -126,6 +138,7 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
             batch: true,
             schema: {
                 model: {
+                    id: "Id",
                     fields: {
                         Client: { type: "string" },
                         Location: { type: "string" },
@@ -182,17 +195,13 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
 
         //create arrays for clients, locations, and repeats that match the guid with the object
         var entity;
-        for (var i in importerSelect.gridData.Suggestions.Clients) {
-            entity = importerSelect.gridData.Suggestions.Clients[i];
+        for (var i in importerSelect.gridData.Clients) {
+            entity = importerSelect.gridData.Clients[i];
             clients[entity.Id] = entity;
         }
-        for (var j in importerSelect.gridData.Suggestions.Locations) {
-            entity = importerSelect.gridData.Suggestions.Locations[j];
+        for (var j in importerSelect.gridData.Locations) {
+            entity = importerSelect.gridData.Locations[j];
             locations[entity.Id] = entity;
-        }
-        for (var k in importerSelect.gridData.Suggestions.Repeats) {
-            entity = importerSelect.gridData.Suggestions.Repeats[k];
-            repeats[entity.Id] = entity;
         }
 
         if (grid) {
@@ -201,39 +210,43 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
         setupGrid();
         resizeGrid();
 
+        var reviewElement = $("#importerReview");
         //add popups to the location, contactInfo, and repeat cells
-        var contactInfoPopup = $("#importerReview").find(".ContactInfo");
+        var contactInfoPopup = reviewElement.find(".ContactInfo");
         contactInfoPopup.popup({contents: $("<div class='contactInfoWidget'></div>")});
 
-        var locationPopup = $("#importerReview").find(".Location");
+        var locationPopup = reviewElement.find(".Location");
         locationPopup.popup({contents: $("<div class='locationWidget'></div>")});
 
-        var repeatPopup = $("#importerReview").find(".Repeat");
+        var repeatPopup = reviewElement.find(".Repeat");
         repeatPopup.popup({contents: $("<div class='repeatWidget'></div>")});
 
         //create the correct widget inside the popup
-        $(document).on('popup.setContent', function (e) {
-            if ($(e.target).find(".repeatWidget")[0]) {
-                $(e.target).find(".repeatWidget").repeat();
-            } else if ($(e.target).find(".locationWidget")[0]) {
-                $(e.target).find(".locationWidget").location();
-                var locationWidget = $(e.target).find(".locationWidget").data("location");
-                locationWidget.renderMap(null, false);
-            } else if ($(e.target).find(".contactInfoWidget")[0]) {
-                $(e.target).find(".contactInfoWidget").contactInfo();
-            }
+        contactInfoPopup.on("click", function (e) {
+            $("#popupContent").find(".contactInfoWidget").contactInfo();
+        });
+
+        locationPopup.on("click", function (e) {
+            var popupElement = $("#popupContent");
+            popupElement.find(".locationWidget").location();
+            var locationWidget = popupElement.find(".locationWidget").data("location");
+            locationWidget.renderMap(null, false);
+        });
+
+        repeatPopup.on("click", function (e) {
+            $("#popupContent").find(".repeatWidget").repeat();
         });
 
         //on popup close event
         $(document).on('popup.closing', function (e) {
             //remove the location widget, if it exists
-            if($(e.target).find(".locationWidget").data("location")){
+            if ($(e.target).find(".locationWidget").data("location")) {
                 $(e.target).find(".locationWidget").data("location").removeWidget();
-            //remove the repeat widget, if it exists
-            } else if ($(e.target).find(".repeatWidget").data("repeat")){
+                //remove the repeat widget, if it exists
+            } else if ($(e.target).find(".repeatWidget").data("repeat")) {
                 $(e.target).find(".repeatWidget").data("repeat").removeWidget();
-            //remove the repeat widget, if it exists
-            } else if ($(e.target).find(".contactInfoWidget").data("contactInfo")){
+                //remove the contactInfo widget, if it exists
+            } else if ($(e.target).find(".contactInfoWidget").data("contactInfo")) {
                 $(e.target).find(".contactInfoWidget").data("contactInfo").removeWidget();
             }
         });

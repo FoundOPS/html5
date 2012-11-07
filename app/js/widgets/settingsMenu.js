@@ -20,7 +20,7 @@ define(["jquery", "db/session", "kendo"], function ($, session) {
                 '<li><a>Business</a></li>' +
                 '<li><a>Users</a></li>' +
                 '<li><a>Dispatcher</a></li>' +
-                '<li><a>Importer</a></li>' +
+                '<li><a>Import</a></li>' +
                 '</ul>');
 
             var personalLi = _menu.find("li:nth-child(1)");
