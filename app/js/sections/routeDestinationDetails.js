@@ -46,7 +46,7 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "tools/paramete
                             dbServices.contactInfo.update({body: contactInfo});
                         },
                         destroy: function (id) {
-                            dbServices.contactInfo.destroy({params: {contactInfoId: id}});
+                            dbServices.contactInfo.destroy({params: {id: id}});
                         }
                     }
                 });
