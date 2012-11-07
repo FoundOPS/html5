@@ -49,7 +49,7 @@ jasmine.DEFAULT_UPDATE_INTERVAL = 250;
 /**
  * Default timeout interval in milliseconds for waitsFor() blocks.
  */
-jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 15000;
 
 jasmine.getGlobal = function() {
   function getGlobal() {
