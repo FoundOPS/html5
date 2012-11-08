@@ -2,14 +2,14 @@
 
 define(["jquery", "underscore", "sections/importerUpload", "sections/importerSelect", "db/services", "tools/generalTools", "widgets/location", "widgets/contactInfo", "widgets/repeat",
     "ui/popup", "widgets/selectBox"], function ($, _, importerUpload, importerSelect, dbServices, generalTools) {
-    var importerReview = {}, dataSource, grid, clients = {}, locations = {}, repeats = {}, columns = [
+    var importerReview = {}, dataSource, grid, clients = {}, locations = {}, columns = [
         {
             field: "Client",
-            template: "<div class='Client #= Client #'>#= Client #</div>"//,
-//            editor: function (container, options) {
-//                $('<div class="styled-select"></div>').appendTo(container)
-//                    .selectBox({data: importerSelect.gridData.Suggestions.Clients, dataTextField: "Name"});
-//            }
+            template: "<div class='Client'>#= Client #</div>",
+            editor: function (container, options) {
+                $('<div class="styled-select"></div>').appendTo(container)
+                    .selectBox({data: [{Name: "BK"}, {Name: "Subway"}], dataTextField: "Name"});
+            }
         },
         {
             field: "Location",
@@ -36,17 +36,15 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
     var formatDataForGrid = function (data) {
         var newData = [], newRow, row;
         for (var i in data) {
-            var client = {}, location = {}, repeat, contactInfo = [], contactData, contactString = "";
+            var location = {}, contactInfo = [], contactData, contactString = "", locationString = "";
             row = data[i];
             newRow = [];
-
-            newRow["Id"] = generalTools.newGuid();
 
             newRow["Client"] = "todo";
 
             location = locations[row.LocationSuggestions[0]];
-            //TODO: only add each part(and comma) if it exists
-            newRow["Location"] = location.AddressLineOne + ", " + location.AddressLineTwo + ", " + location.City + ", " + location.State + " " + location.Zipcode;
+
+            newRow["Location"] = generalTools.locationDisplayString(location);
 
             newRow["ContactInfo"] = "todo";
 
@@ -138,7 +136,6 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
             batch: true,
             schema: {
                 model: {
-                    id: "Id",
                     fields: {
                         Client: { type: "string" },
                         Location: { type: "string" },

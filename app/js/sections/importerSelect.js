@@ -1,15 +1,31 @@
 'use strict';
 
 define(["jquery", "sections/importerUpload", "db/services", "underscore"], function ($, importerUpload, dbServices, _) {
-    var importerSelect = {}
+    var importerSelect = {};
 
     var formatDataForValidation = function (data) {
-        var headersIncluded = $("#importerSelect").find(".switch .on").hasClass("active");
+        var selectPage = $("#importerSelect");
+        var headersIncluded = selectPage.find(".switch .on").hasClass("active");
         var selectedFields = [];
         //create an array of the fields to be used(based on the dropdowns)
-        $("#importerSelect").find(".selectBox").each(function () {
-            if (this.value !== "Do not Import") {
-                selectedFields.push({name: this.value, selected: true});
+        selectPage.find(".select2-container").each(function () {
+            var value = $(this).select2("val"), name;
+            //change to the names needed for the API
+            if (value === "Address Line 1") {
+                name = "Address Line One";
+            } else if (value === "Address Line 2") {
+                name = "Address Line Two";
+            } else if (value === "City") {
+                name = "AdminDistrictTwo";
+            } else if (value === "State") {
+                name = "AdminDistrictOne";
+            } else if (value === "Zipcode") {
+                name = "PostalCode";
+            } else {
+                name = value;
+            }
+            if (value !== "Do not Import") {
+                selectedFields.push({name: name, selected: true});
             } else {
                 selectedFields.push(false);
             }
@@ -24,12 +40,29 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore"], funct
             for (var c in row) {
                 //if the field is to be imported(if "Do not Import" wasn't selected for this row)
                 if (selectedFields[c]) {
-                    newArray.push(row[c]);
+                    //use the header from the dropdown instead of their header
+                    if (r == 0 && headersIncluded) {
+                        newArray.push(selectedFields[c].name);
+                    } else {
+                        newArray.push(row[c]);
+                    }
                 }
             }
 
             dataToValidate.push(newArray);
         }
+
+        //if headers are not included, add an extra row for the headers
+        if (!headersIncluded) {
+            var length = selectedFields.length, headerRow = [];
+            for (var i = 0; i < length; i++) {
+                if (selectedFields[i]) {
+                    headerRow.push(selectedFields[i].name);
+                }
+            }
+            dataToValidate.unshift(headerRow);
+        }
+
         return dataToValidate;
     };
 
@@ -41,26 +74,38 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore"], funct
         //make sure there is a selected service type
         if (!importerUpload.selectedService) {
             window.viewImporterUpload();
-            return;
         }
+
+        $("#importerSelect").find(".saveBtn").on("click", function () {
+            var dataToValidate = formatDataForValidation(importerUpload.oldData);
+
+            dbServices.suggestions.update({body: {rowsWithHeaders: dataToValidate}}).done(function (suggestions) {
+                importerSelect.gridData = suggestions;
+                window.viewImporterReview();
+            });
+        });
     };
 
     importerSelect.show = function () {
         //setup the default fields
         var fieldList = [
-            {Name: "Do not Import"},
-            {Name: 'Client Name'},
-            {Name: 'Address Line One'},
-            {Name: 'Address Line Two'},
-            {Name: 'City'},
-            {Name: 'State'},
-            {Name: 'Zipcode'},
-            {Name: 'Region Name'},
-            {Name: 'Frequency'},
-            {Name: 'Frequency Detail'},
-            {Name: 'Repeat Every'},
-            {Name: 'Start Date'},
-            {Name: 'End Date'}
+            {id: "Do not Import"},
+            {id: 'Client Name'},
+            {text: "Location", children: [
+                {id: 'Address Line 1'},
+                {id: 'Address Line 2'},
+                {id: 'City'},
+                {id: 'State'},
+                {id: 'Zipcode'}
+            ]},
+            {id: 'Region Name'},
+            {text: "Service", children: [
+                {id: 'Frequency'},
+                {id: 'Frequency Detail'},
+                {id: 'Repeat Every'},
+                {id: 'Start Date'},
+                {id: 'End Date'}
+            ]}
         ];
 
         $("#listView").kendoListView({
@@ -70,8 +115,9 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore"], funct
         });
 
         //setup toggle switch states
-        var on = $("#importerSelect").find(".switch .on");
-        var off = $("#importerSelect").find(".switch .off");
+        var selectPage = $("#importerSelect");
+        var on = selectPage.find(".switch .on");
+        var off = selectPage.find(".switch .off");
         on.on("click", function () {
             off.removeClass("active");
             on.addClass("active");
@@ -81,40 +127,6 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore"], funct
             on.removeClass("active");
             off.addClass("active");
             $("#importerSelect").find("#dynamicHeader")[0].innerText = "Row 2";
-        });
-
-        $("#importerSelect").find(".saveBtn").on("click", function () {
-            var dataToValidate = formatDataForValidation(importerUpload.oldData);
-
-            dbServices.suggestions.update({body: {rowsWithHeaders: dataToValidate}}).done(function (suggestions) {
-                importerSelect.gridData = suggestions;
-                window.viewImporterReview();
-            });
-            var data = {
-                RowSuggestions : [
-                    ["25892e17", "80f6", "395632", "7395632f0223"], ["a53e98e4", "0197", "06aaa", "49836e406aaa"]
-                ],
-                Suggestions: {
-                    Clients: [
-                        {Id: "25892e17", Name: "BK",
-                            ContactInfo: [{Id: "395632", Label: "Jimbo", Data: "http://www.jimbosblog.biz", Type: "Website"}]},
-                        {Id: "a53e98e4", Name: "Subway"}
-                    ],
-                    Locations: [
-                        {Id: "80f6", AddressLineOne: "1305 Cumberland Ave", AddressLineTwo: "Suite 205", City: "West Lafayette", State: "IN", Zipcode: "47906",
-                            ContactInfo: [{Id: "06aaa", Label: "Secretary", Data: "765-494-4509", Type: "Phone Number"}]},
-                        {Id: "0197", AddressLineOne: "508 S 4th St", AddressLineTwo: "", City: "Lafayette", State: "IN", Zipcode: "47901"}
-                    ],
-                    Repeats: [
-                        {Id: "7395632f0223", Name: "11/05/2012"},
-                        {Id: "49836e406aaa", Name: "Weekly on Tue"}
-                    ]
-                }
-            };
-
-//            importerSelect.gridData = data;
-//            window.viewImporterReview();
-            //});
         });
 
         //get the list of fields for the selected service(for the dropdowns)
@@ -128,20 +140,80 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore"], funct
                     //don't add if type is guid or if name is ClientName or OccurDate
                     if (name !== "ClientName" && name !== "OccurDate") {
                         //add field to list
-                        newFields.push({Name: name.replace(/_/g, ' ')}); //replace "_" with " "
+                        newFields.push({id: name.replace(/_/g, ' ')}); //replace "_" with " "
                     }
                 }
 
                 //combine the fields in fieldList with newFields
-                var allFields = fieldList.concat(newFields);
-                $("#importerSelect").find(".styled-select").selectBox({data: allFields, dataTextField: "Name", onSelect: onDropdownSelect});
+                importerSelect.allFields = importerSelect.currentFields = fieldList.concat({text: "Fields", children: newFields});
+
+                //function to format the option names of the frequency and end Date dropdowns
+                var formatItemName = function (item) {
+                    if (item.text) {
+                        return item.text;
+                    }
+
+                    return item.id;
+                };
+
+                //$("#importerSelect").find(".styled-select").selectBox({data: importerSelect.allFields, dataTextField: "Name", onSelect: onDropdownSelect});
+                $("#importerSelect").find(".styled-select").select2({
+                    placeholder: "",
+                    minimumResultsForSearch: 200,
+                    width: "205px",
+                    query: function (query) {
+                        if (!importerSelect.currentFields) {
+                            importerSelect.currentFields = [];
+                        }
+                        var data = {results: importerSelect.currentFields};
+                        query.callback(data);
+                    },
+                    formatSelection: formatItemName,
+                    formatResult: formatItemName,
+                    dropdownCssClass: "bigdrop"
+                }).on("open", function () {
+                        //force rerender
+                        setTimeout(function () {
+                            $(".select2-drop-active").find(".select2-results")[0].style.overflowY = "scroll";
+                            setTimeout(function () {
+                                $(".select2-drop-active").find(".select2-results")[0].style.overflowY = "auto";
+                            }, 100);
+                        }, 100);
+                    }).on("change", function (e) {
+                        var fieldToRemove = _.indexOf(importerSelect.currentFields, {id: e.val});
+                        importerSelect.currentFields.splice(fieldToRemove, 1);
+                        console.log(fieldToRemove);
+                        console.log(importerSelect.currentFields);
+                    });
+                var findMatch = function (header) {
+                    var match1 = _.find(importerSelect.allFields, function (field) {
+                        return field.id === header;
+                    });
+                    var match2 = _.find(importerSelect.allFields[2].children, function (field) {
+                        return field.id === header;
+                    });
+                    var match3 = _.find(importerSelect.allFields[4].children, function (field) {
+                        return field.id === header;
+                    });
+                    var match4 = _.find(importerSelect.allFields[5].children, function (field) {
+                        return field.id === header;
+                    });
+
+                    return match1 || match2 || match3 || match4;
+                };
+
 
                 //automatically select fields if there is a matching header
                 var dropdown, headers = importerUpload.oldData[0];
                 for (var h in headers) {
-                    dropdown = $("#importerSelect .selectBox:eq(" + h + ")");
-                    //try to select a matching item
-                    dropdown.val(headers[h]);
+                    dropdown = $("#importerSelect .select2-container:eq(" + h + ")");
+                    //select if text matches corresponding header
+
+                    if (findMatch(headers[h])) {
+                        dropdown.select2("data", {id: headers[h]});
+                    } else {
+                        dropdown.select2("data", {id: "Do not Import"});
+                    }
                 }
             });
         }

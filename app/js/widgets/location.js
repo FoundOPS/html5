@@ -115,9 +115,11 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
             //update search after 1 second of input edit
             generalTools.observeInput(widgetElement.find(".editPane input"), function (searchText) {
                 //get the list of location matches
-                dbServices.locations.read({params: {search: searchText}}).done(function (locations) {
-                    that._updateLocationList(locations);
-                });
+                if (searchText) {
+                    dbServices.locations.read({params: {search: searchText}}).done(function (locations) {
+                        that._updateLocationList(locations);
+                    });
+                }
             }, 750);
 
             //if there is no location on initialization, go directly to the edit pane
@@ -196,13 +198,7 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
          * @private
          */
         _getLocationString: function (location) {
-            var lineOne = location.AddressLineOne ? location.AddressLineOne + " " : "";
-            var lineTwo = location.AddressLineTwo ? location.AddressLineTwo + ", " : "";
-            var adminDistrictTwo = location.AdminDistrictTwo ? location.AdminDistrictTwo + ", " : "";
-            var adminDistrictOne = location.AdminDistrictOne ? location.AdminDistrictOne + " " : "";
-            var postalCode = location.PostalCode ? location.PostalCode : "";
-            //display any parts of the location that exist
-            var returnString = lineOne + lineTwo + adminDistrictTwo + adminDistrictOne + postalCode;
+            var returnString = generalTools.locationDisplayString(location);
             if (returnString) {
                 return returnString;
                 //if none do, display the latitude and longitude

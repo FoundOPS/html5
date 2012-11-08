@@ -37,6 +37,17 @@ define(['jquery', "developer", 'moment'], function ($, developer) {
         $(page + " .saveBtn").removeAttr("disabled");
     };
 
+    //create a display string from a location object
+    generalTools.locationDisplayString = function (location) {
+        var lineOne = location.AddressLineOne ? location.AddressLineOne + " " : "";
+        var lineTwo = location.AddressLineTwo ? location.AddressLineTwo + ", " : "";
+        var adminDistrictTwo = location.AdminDistrictTwo ? location.AdminDistrictTwo + ", " : "";
+        var adminDistrictOne = location.AdminDistrictOne ? location.AdminDistrictOne + " " : "";
+        var postalCode = location.PostalCode ? location.PostalCode : "";
+        //display any parts of the location that exist
+        return lineOne + lineTwo + adminDistrictTwo + adminDistrictOne + postalCode;
+    };
+
     /**
      * Generates a compass direction from rotation degrees.
      * Example: NW, or NNW.
