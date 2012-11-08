@@ -150,6 +150,7 @@ define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "to
         this.closeTaskStatuses();
     };
     vm.statusUpdated = false;
+    var detachedElements;
     vm.openSigPad = function () {
         if (kendo.support.detectOS(navigator.userAgent).name === "android" && window.cordova) {
             navigator.screenOrientation.set("landscape");
@@ -160,27 +161,35 @@ define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "to
         setTimeout( function() {
             var width = $("#routeTask").width();
             var margin = width > 800 ? ($("#sideBarWrapper").width()) / 2 : 0;
-            $(".sigWrapper").css("visibility", "visible").css("width", width).css("z-index", "10000").animate({"opacity": 1}, 300);
-            $("#fields, #checkLists").animate({"opacity": 0}, 300, function () {
-                $("#fields, #checkLists").css("visibility", "hidden");
+            $("#content").css("padding", "0");
+            $(".sigWrapper").css("visibility", "visible").css("width", width).css("z-index", "10000").css("margin", "0 "+margin+"px 0"+margin+"px").animate({"opacity": 1}, 300);
+            $("#sigListView ul, #routeStatus-listview, .fieldLabel").css("visibility", "hidden");
+            $("#nav, #sideBarWrapper").animate({"opacity": 0}, 300, function () {
+                $("#nav, #sideBarWrapper").css("visibility", "hidden");
             });
+            detachedElements = $("#fields, #checkLists").detach();
             kendoTools.disableScroll("#routeTask");
+            //Reset scroll to top.
             $("#routeTask .km-scroll-container").css("-webkit-transform", "");
         }, 500);
     };
     vm.closeSigPad = function () {
-        $("#fields, #checkLists").animate({"opacity": 1}, 300, function () {
-            $("#fields, #checkLists").css("visibility", "visible")
-        });
         $(".sigWrapper").animate({"opacity": 0}, 300, function () {
             $(".sigWrapper").css("visibility", "hidden").css("width", 0).css("z-index", "-10");
+            $("#content").css("padding", "");
+            $("#sigListView ul, #routeStatus-listview, .fieldLabel").css("visibility", "");
         });
-        kendoTools.re_enableScroll("#routeTask");
+        $("#nav, #sideBarWrapper").css("visibility", "").animate({"opacity": 1}, 300, function () {
+            detachedElements.insertBefore("#sigListView");
+        });
         if (kendo.support.detectOS(navigator.userAgent).name === "android" && window.cordova) {
             navigator.screenOrientation.set("fullSensor");
         } else if (kendo.support.detectOS(navigator.userAgent).name === "ios" && window.cordova) {
             window.plugins.orientation.setAllowed([{pp:true, pd:true, ll:true, lr:true}]);
         }
+        kendoTools.re_enableScroll("#routeTask");
+        //Reset scroll to top.
+        $("#routeTask .km-scroll-container").css("-webkit-transform", "");
     }
     vm.saveSig = function () {
         if($('.sigPad').jSignature("getData","native").length !== 0) {

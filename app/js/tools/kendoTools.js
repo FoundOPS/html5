@@ -374,6 +374,7 @@ define(['db/session', 'db/services', 'tools/parameters'], function (session, dbS
         $(view + " .km-scroll-container").children("*").unwrap();
         $(view + " .km-scroll-header").remove();
         $(view + " .km-scroll-container").remove();
+        $(view + " .km-touch-scrollbar").remove();
     };
     kendoTools.re_enableScroll = function (view) {
         $(view).data("kendoMobileView").content.kendoMobileScroller();
