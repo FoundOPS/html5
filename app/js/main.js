@@ -49,7 +49,7 @@ require.config({
         jmousewheel: ['jquery'],
         jscrollpane: ['jquery'],
         jsignature: ['jquery'],
-        jsigbase30: ['jquery'],
+        jsigbase30: ['jquery', 'jsignature'],
         jtooltip: ['jquery'],
         jui: ['jquery'],
         kendo: ['jquery'],
