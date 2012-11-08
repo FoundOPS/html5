@@ -8,16 +8,15 @@
     <script>
         jasmineuiConfig = {
             //loadMode: 'popup',
-            //TODO get this to work
             waitsForAsyncTimeout: 10000,
             //closeTestWindow: false,
             //logEnabled: true,
             //exclude the interval sensor because
             //some functions infinitely use setInterval (i think debounce on underscore) (todo try and reduce this)
-            asyncSensors: ["load", "timeout", "xhr", "pageChanged", "$animationComplete", "$transitionComplete"],
+            asyncSensors: ["load", "timeout", "xhr", "$animationComplete", "$transitionComplete"],
             scripts: [
                 {position: 'end', url: '/test/lib/jasmine-jquery.js'},
-                {position: 'end', url: '/test/ui/sensors.js'}
+                {position: 'end', url: '/test/ui/TestTools.js'}
             ]
         };
     </script>

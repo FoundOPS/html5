@@ -3,12 +3,12 @@
 'use strict';
 
 //need to require kendo so it is loaded before this widget, otherwise funky stuff happens
-define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tools/analytics", "select2", "kendo"], function ($, _, generalTools, parserTools, analytics) {
+define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "db/models", "tools/analytics", "select2", "kendo"], function ($, _, generalTools, parserTools, models, analytics) {
     //region Locals
 //   var sampleContacts = [
-//            {Entity: "Burger King", Data: "765-494-2786", Type: "Phone Number", Label: "Mobile"},
-//            {Entity: "Burger King", Data: "bk47906@gmail.com", Type: "Email Address", Label: "Personal"},
-//            {Entity: "Mary Lou's", Data: "http://www.marylousdonuts.com", Type: "Website", Label: "Business"}
+//            {Entity: "Burger King", Data: "765-494-2786", Type: models.InfoType.PHONE, Label: "Mobile"},
+//            {Entity: "Burger King", Data: "bk47906@gmail.com", Type: models.InfoType.EMAIL, Label: "Personal"},
+//            {Entity: "Mary Lou's", Data: "http://www.marylousdonuts.com", Type: models.InfoType.WEBSITE, Label: "Business"}
 //        ];
 
     //labels for each category
@@ -50,9 +50,9 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
                 '<input class="value" type="text"/><br />' +
                 '<label>Label</label><br />' +
                 '<select class="labelIcon">' +
-                '<option class="EmailAddressSmall" value="Email Address">&nbsp;</option>' +
+                '<option class="EmailSmall" value="Email">&nbsp;</option>' +
                 '<option class="WebsiteSmall" value="Website">&nbsp;</option>' +
-                '<option class="PhoneNumberSmall" value="Phone Number">&nbsp;</option>' +
+                '<option class="PhoneSmall" value="Phone">&nbsp;</option>' +
                 '<option class="OtherSmall" value="Other">&nbsp;</option>' +
                 '</select>​' +
                 '<input class="label" /><br />' +
@@ -146,13 +146,13 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
                 var category;
                 //check what the value is(phone, email, website, or other)
                 if (parserTools.isEmail(string)) {
-                    category = "Email Address";
+                    category = models.InfoType.EMAIL;
                 } else if (parserTools.isUrl(string)) {
-                    category = "Website";
+                    category = models.InfoType.WEBSITE;
                 } else if (parserTools.isPhone(string)) {
-                    category = "Phone Number";
+                    category = models.InfoType.PHONE;
                 } else {
-                    category = "Other";
+                    category = models.InfoType.OTHER;
                 }
 
                 //set the category
@@ -194,13 +194,13 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
             }
 
             $(that.element).find(".contactList a").on("click", function (e) {
-                if (e.currentTarget.children[0].className === "Phone Number") {
+                if (e.currentTarget.children[0].className === models.InfoType.PHONE) {
                     analytics.track("Phone Contact Click");
                     window.location.href = "tel:" + e.currentTarget.children[2].innerText;
-                } else if (e.currentTarget.children[0].className === "Email Address") {
+                } else if (e.currentTarget.children[0].className === models.InfoType.EMAIL) {
                     analytics.track("Email Contact Click");
                     window.open("mailto:" + e.currentTarget.children[2].innerText, "_blank");
-                } else if (e.currentTarget.children[0].className === "Website") {
+                } else if (e.currentTarget.children[0].className === models.InfoType.WEBSITE) {
                     analytics.track("Website Contact Click");
                     generalTools.goToUrl(e.currentTarget.children[2].innerText);
                 }
@@ -283,11 +283,11 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
             //remove the select2 from the label dropdown
             $(that.element).find(".editWrapper .label").select2("destroy");
             //set the correct label list based on the category
-            if (category === "Phone Number") {
+            if (category === models.InfoType.PHONE) {
                 labels = phoneLabels;
-            } else if (category === "Email Address") {
+            } else if (category === models.InfoType.EMAIL) {
                 labels = emailLabels;
-            } else if (category === "Website") {
+            } else if (category === models.InfoType.WEBSITE) {
                 labels = websiteLabels;
             } else {
                 labels = otherLabels;

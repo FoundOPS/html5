@@ -4,6 +4,19 @@
 
 define(function () {
     var models = {};
+
+    /**
+     * Enum for info types.
+     * @enum {string}
+     */
+    models.InfoType = {
+        PHONE: "Phone",
+        EMAIL: "Email",
+        FAX: "Fax",
+        WEBSITE: "Website",
+        OTHER: "Other"
+    };
+
     /**
      * Enum for device platforms.
      * @enum {string}
@@ -23,20 +36,8 @@ define(function () {
     };
 
     /**
-     * Enum for info types.
-     * @enum {string}
-     */
-    models.InfoType = {
-        PHONE: "Phone Number",
-        EMAIL: "Email Address",
-        FAX: "Fax Number",
-        WEBSITE: "Website",
-        OTHER: "Other"
-    };
-
-    /**
      * Creates a TrackPoint to send to the API server.
-     * @param {Number} Accuracy In meters.
+     * @param {Number} accuracy In meters.
      * @param {Date} date
      * @param {Number} heading An angle that dictates the direction the phone is facing.
      * @param {Number} latitude
@@ -80,7 +81,6 @@ define(function () {
 
     //constructor
     (function () {
-
 
     })();
 

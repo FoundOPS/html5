@@ -1,23 +1,34 @@
-/**
- * Generates test tools in the context of a function
- * @return {Object}
- * @constructor
- */
-function TestTools() {
+var TestTools = function () {
     /**
-     * Click the first element a selector returns
-     * @param selector
+     * Select a section by clicking on the navigator
+     * @param section
      */
-    this.click = function (selector) {
-        var button = $(selector).get(0);
+    var selectSection = function (section) {
+        var button = $('#sideBarSections a[href$="' + section + '.html"]').get(0);
         jasmineui.simulate(button, 'click');
     };
 
     /**
-     * Choose a section by clicking on the navigator
-     * @param section
+     * Simulate a mouseup on an item in a jquery selector
+     * @param selector The jquery selector
+     * @param [index] Defaults to 0
      */
-    this.choose = function (section) {
-        this.click('#sideBarSections a[href$="' + section + '.html"]');
+    var selectItem = function (selector, index) {
+        var link = $(selector).get(0);
+        jasmineui.simulate(link, 'mouseup');
     };
-};
+
+    /**
+     * Checks there is at least one item inside a selector
+     * @param selector
+     */
+    var expectItem = function (selector) {
+        expect($(selector).size()).toBeGreaterThan(1);
+    };
+
+    return {
+        selectSection: selectSection,
+        selectItem: selectItem,
+        expectItem: expectItem
+    };
+}();

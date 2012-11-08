@@ -1,85 +1,69 @@
-//jasmineui.require(['asyncSensor'], function (asyncSensor) {
-//    setInterval(function () {
-//        asyncSensor.updateSensor('pageChanged', false);
-//    }, 3000);
-//});
-
 jasmineui.loadUi("/app/navigator-test.html", function () {
     describe('Routes section', function () {
         var routeLinks = "#routes-listview li a", destinationLinks = "#routeDestinations-listview li a";
 
         beforeEach(function () {
-            var button = $('#sideBarSections a[href$="routes.html"]').get(0);
-            jasmineui.simulate(button, 'click');
+            TestTools.selectSection("routes");
+        });
+
+        it("lists routes", function () {
+            runs(function () {
+                TestTools.expectItem(routeLinks);
+            });
         });
 
         describe("after choosing a route", function () {
-            it("lists routes", function () {
-                //check there is at least one route that showed up
-                expect($(routeLinks).size() > 0).toBeGreaterThan(0);
-//                console.log($(routeLinks).size());
+            beforeEach(function () {
+                runs(function () {
+                    TestTools.selectItem(routeLinks);
+                });
             });
 
-//            it("lists route destinations", function () {
-//            waitsFor(function () {
-//                return false;
-//            }, 3000);
+            it("lists destinations", function () {
+                runs(function () {
+                    TestTools.expectItem(destinationLinks);
+                });
+            });
 
-//            runs(function () {
-//                var button = $(routeLinks).get(0);
-//                jasmineui.simulate(button, 'click');
-//
-//                _.delay(function () {
-//                    console.log($(destinationLinks));
-//                }, 2000);
-//            });
-//
-//            runs(function () {
-//                //check there is at least one destination that showed up
-//                //expect($(destinationLinks).size()).toBeGreaterThan(0);
-//            });
-//            });
+            //it("shows status colors", function () {
+            //check there is a color element equal to the status color
+            //});
+        });
 
-//            it("shows status colors", function () {
-//                var tools = new TestTools();
-//
-//                runs(function () {
-//                    tools.choose("routes");
-//                });
-//
-//                runs(function () {
-//                    tools.click(routeLinks);
-//                });
-//
-//                runs(function () {
-//                    tools.click(destinationLinks);
-//                });
-//
-//                runs(function () {
-////                    //check there is a color element equal to the status color
-////                    _.delay(function () {
-////                        debugger;
-////                    }, 1000);
+        describe("after choosing a destination", function () {
+            beforeEach(function () {
+                runs(function () {
+                    TestTools.selectItem(routeLinks);
+
+                    setTimeout(function () {
+                        TestTools.selectItem(destinationLinks);
+                    }, 1500);
+                });
+            });
+
+            it("shows contact info", function () {
+                runs(function () {
+                    //check the location has a header and paragraph with text
+//                    expect($(".locationInfo h1")).not.toHaveText(/^$/);
+//                    expect($(".locationInfo p")).not.toHaveText(/^$/);
+
+                    var contacts = ".contactList li span";
+
+                    //check there is a Phone Number, Email Address, and Website
+                    expect($(contacts + ".Phone")).toExist();
+                    expect($(contacts + ".Email")).toExist();
+                    expect($(contacts + ".Website")).toExist();
+
+                    //TODO make sure when you click on each of these it opens up respective links
+                });
+            });
+
+//            describe("after clicking navigate", function () {
+//                it("opens google maps", function () {
+//                    //TODO
+//                    debugger;
 //                });
 //            });
         });
-//
-//
-//       describe("after choosing a route destination", function () {
-//            it("shows route details", function () {
-//
-//            });
-//
-//            it("shows contact info", function () {
-//                //expect a phone link
-//                //expect a email link
-        //           });
-//
-//            describe("after clicking navigate", function () {
-//                it("opens google maps", function () {
-//
-//                });
-//            });
-        //       });
     });
 });
