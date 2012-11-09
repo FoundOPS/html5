@@ -44,6 +44,9 @@
 		BA5585F71612421500D20553 /* icon.png in Resources */ = {isa = PBXBuildFile; fileRef = BA5585F31612421500D20553 /* icon.png */; };
 		BA5585F81612421500D20553 /* Icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = BA5585F41612421500D20553 /* Icon@2x.png */; };
 		BA5585FA1612426400D20553 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = BA5585F91612426400D20553 /* Default-568h@2x.png */; };
+		BA6D7F2B1639B57F00C003B5 /* icon.png in Resources */ = {isa = PBXBuildFile; fileRef = BA6D7F2A1639B57F00C003B5 /* icon.png */; };
+		BA6D7F2D1639B58700C003B5 /* Icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = BA6D7F2C1639B58700C003B5 /* Icon@2x.png */; };
+		BA6D7F2F1639B58F00C003B5 /* Icon-72.png in Resources */ = {isa = PBXBuildFile; fileRef = BA6D7F2E1639B58F00C003B5 /* Icon-72.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -107,6 +110,9 @@
 		BA5585F31612421500D20553 /* icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon.png; sourceTree = "<group>"; };
 		BA5585F41612421500D20553 /* Icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon@2x.png"; sourceTree = "<group>"; };
 		BA5585F91612426400D20553 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
+		BA6D7F2A1639B57F00C003B5 /* icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon.png; sourceTree = "<group>"; };
+		BA6D7F2C1639B58700C003B5 /* Icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon@2x.png"; sourceTree = "<group>"; };
+		BA6D7F2E1639B58F00C003B5 /* Icon-72.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-72.png"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -175,6 +181,9 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
+				BA6D7F2E1639B58F00C003B5 /* Icon-72.png */,
+				BA6D7F2C1639B58700C003B5 /* Icon@2x.png */,
+				BA6D7F2A1639B57F00C003B5 /* icon.png */,
 				301BF56E109A69640062928A /* www */,
 				301BF52D109A57CC0062928A /* CordovaLib.xcodeproj */,
 				080E96DDFE201D6D7F000001 /* Classes */,
@@ -386,6 +395,9 @@
 				BA5585F71612421500D20553 /* icon.png in Resources */,
 				BA5585F81612421500D20553 /* Icon@2x.png in Resources */,
 				BA5585FA1612426400D20553 /* Default-568h@2x.png in Resources */,
+				BA6D7F2B1639B57F00C003B5 /* icon.png in Resources */,
+				BA6D7F2D1639B58700C003B5 /* Icon@2x.png in Resources */,
+				BA6D7F2F1639B58F00C003B5 /* Icon-72.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
