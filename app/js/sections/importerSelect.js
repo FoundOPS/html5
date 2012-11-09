@@ -66,8 +66,57 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore"], funct
         return dataToValidate;
     };
 
-    var onDropdownSelect = function () {
+    var findField = function (list, name) {
+        return _.find(list, function (field) {
+            return field.id === name;
+        });
+    };
 
+    var removeSelectedFields = function () {
+        importerSelect.currentFields = importerSelect.allFields.slice();
+        var selectedFields = [];
+        //create a list of the already selected fields
+        $("#importerSelect").find(".select2-container").each(function () {
+            var value = $(this).select2("val");
+            if (value !== "Do not Import") {
+                selectedFields.push(value);
+            }
+        });
+
+        //remove the selected fields from importerSelect.currentFields
+        var field,
+            mainGroup = importerSelect.currentFields[0].children,
+            locationGroup = importerSelect.currentFields[1].children,
+            contactInfoGroup = importerSelect.currentFields[2].children,
+            serviceGroup = importerSelect.currentFields[3].children,
+            fieldsGroup = importerSelect.currentFields[4].children;
+
+        for (var i in selectedFields) {
+            field = selectedFields[i];
+            //find which group the selected field is in, and remove it from that group
+            if (findField(mainGroup, field)) {
+                mainGroup = _(mainGroup).reject(function(el) { return el.id === field; });
+            } else if (findField(locationGroup, field)) {
+                locationGroup = _(locationGroup).reject(function(el) { return el.id === field; });
+            } else if (findField(contactInfoGroup, field)) {
+                //add an additional option for the type
+
+                contactInfoGroup = _(contactInfoGroup).reject(function(el) { return el.id === field; });
+
+            } else if (findField(serviceGroup, field)) {
+                serviceGroup = _(serviceGroup).reject(function(el) { return el.id === field; });
+            } else if (findField(fieldsGroup, field)) {
+                fieldsGroup = _(fieldsGroup).reject(function(el) { return el.id === field; });
+            }
+        }
+        importerSelect.currentFields = [
+            {text: "", children: mainGroup},
+            {text: "Location", children: locationGroup},
+            {text: "Contact Info", children: contactInfoGroup},
+            {text: "Service", children: serviceGroup},
+            {text: "Fields", children: fieldsGroup}
+        ];
+        console.log(importerSelect.currentFields);
     };
 
     importerSelect.initialize = function () {
@@ -89,16 +138,28 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore"], funct
     importerSelect.show = function () {
         //setup the default fields
         var fieldList = [
-            {id: "Do not Import"},
-            {id: 'Client Name'},
+            {text: "", children: [
+                {id: "Do not Import"},
+                {id: 'Client Name'}
+            ]},
             {text: "Location", children: [
                 {id: 'Address Line 1'},
                 {id: 'Address Line 2'},
                 {id: 'City'},
                 {id: 'State'},
-                {id: 'Zipcode'}
+                {id: 'Zipcode'},
+                {id: 'Region Name'}
             ]},
-            {id: 'Region Name'},
+            {text: "Contact Info", children: [
+                {id: 'Phone Label 1'},
+                {id: 'Phone Value 1'},
+                {id: 'Email Label 1'},
+                {id: 'Email Value 1'},
+                {id: 'Website Label 1'},
+                {id: 'Website Value 1'},
+                {id: 'Other Label 1'},
+                {id: 'Other Value 1'}
+            ]},
             {text: "Service", children: [
                 {id: 'Frequency'},
                 {id: 'Frequency Detail'},
@@ -156,11 +217,9 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore"], funct
                     return item.id;
                 };
 
-                //$("#importerSelect").find(".styled-select").selectBox({data: importerSelect.allFields, dataTextField: "Name", onSelect: onDropdownSelect});
                 $("#importerSelect").find(".styled-select").select2({
                     placeholder: "",
                     minimumResultsForSearch: 200,
-                    width: "205px",
                     query: function (query) {
                         if (!importerSelect.currentFields) {
                             importerSelect.currentFields = [];
@@ -179,27 +238,17 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore"], funct
                                 $(".select2-drop-active").find(".select2-results")[0].style.overflowY = "auto";
                             }, 100);
                         }, 100);
-                    }).on("change", function (e) {
-                        var fieldToRemove = _.indexOf(importerSelect.currentFields, {id: e.val});
-                        importerSelect.currentFields.splice(fieldToRemove, 1);
-                        console.log(fieldToRemove);
-                        console.log(importerSelect.currentFields);
+                    }).on("change", function () {
+                        removeSelectedFields();
                     });
                 var findMatch = function (header) {
-                    var match1 = _.find(importerSelect.allFields, function (field) {
-                        return field.id === header;
-                    });
-                    var match2 = _.find(importerSelect.allFields[2].children, function (field) {
-                        return field.id === header;
-                    });
-                    var match3 = _.find(importerSelect.allFields[4].children, function (field) {
-                        return field.id === header;
-                    });
-                    var match4 = _.find(importerSelect.allFields[5].children, function (field) {
-                        return field.id === header;
-                    });
+                    var match1 = findField(importerSelect.allFields[0].children, header);
+                    var match2 = findField(importerSelect.allFields[1].children, header);
+                    var match3 = findField(importerSelect.allFields[2].children, header);
+                    var match4 = findField(importerSelect.allFields[3].children, header);
+                    var match5 = findField(importerSelect.allFields[4].children, header);
 
-                    return match1 || match2 || match3 || match4;
+                    return match1 || match2 || match3 || match4 || match5;
                 };
 
 

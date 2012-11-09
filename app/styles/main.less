@@ -916,8 +916,7 @@ div.k-window-content {
     background-color: #fff;
     background-image: url("../img/background-tile.png");
     .wrap{
-        margin: 40px auto 0 auto;
-        margin-top: 40px;
+        margin: 30px auto 0 auto;
         min-width: 300px;
         padding: 15px 20px;
         background-color: @grey;
@@ -1015,7 +1014,11 @@ div.k-window-content {
     }
 }
 #importerUpload .wrap, #importerSelect .wrap{
-    width: 620px;
+    position: relative;
+    left:20px;
+    right:75px;
+    min-width: 550px;
+    max-width: 800px;
 }
 /* region Upload */
 #importerUpload{
@@ -1043,15 +1046,16 @@ div.k-window-content {
     }
     #topHeader {
         margin: 0 0 20px 0;
+        width:100%;
         li{
             display: inline;
+            margin-left: 15%;
             margin-top: 5px;
             font-size: 16px;
         }
         li:first-child{
             position: relative;
             top: 11px;
-            margin: 0 80px 0 30px;
         }
         li:nth-child(2), li:nth-child(3){
             display: inline-block;
@@ -1061,9 +1065,6 @@ div.k-window-content {
             color: @white;
             background: @blue;
         }
-        li#dynamicHeader{
-            margin-right: 120px;
-        }
     }
     #listView{
         margin: 0 0 15px 0;
@@ -1071,14 +1072,14 @@ div.k-window-content {
              margin-bottom: 4px;
             .header{
                 color: #777;
-                width: 200px;
+                width: 30%;
                 float: left;
                 padding: 5px 0 5px 5px;
                 background: @white;
             }
             .value{
                 color: #777;
-                width: 200px;
+                width: 30%;
                 min-height: 18px;
                 overflow: hidden;
                 padding: 5px;
@@ -1087,7 +1088,7 @@ div.k-window-content {
             }
             .styled-select{
                 float: right;
-                width: 205px;
+                width: 40%;
                 margin: -28px 0 0 0;
             }
         }
@@ -1155,56 +1156,68 @@ div.k-window-content {
 /*endregion*/
 /*region Breadcrumbs*/
 /*--------------- Simple scalable breadcrumb by Veerle Pieters --------------*/
+.breadcrumbsWrapper{
+    display: none;
+    position: relative;
+    top: 15px;
+    width: 660px;
+    height: 50px;
+    margin: 0 auto;
+    border: 2px solid #f2f2f2;
+    background: #f2f2f2;
+}
+#importerUpload, #importerSelect,#importerReview{
+    .crumbs{
+        li:nth-child(1){
+            width: 189px;
+            background: url("../img/breadcrumb1a.png") no-repeat;
+        }
+        li:nth-child(2){
+            width: 203px;
+            margin-right: -23px;
+            margin-left: -23px;
+            background: url("../img/breadcrumb2.png") no-repeat;
+        }
+        li:nth-child(3){
+             width: 201px;
+             background: url("../img/breadcrumb3.png") no-repeat;
+         }
+    }
+}
+#importerSelect{
+    .crumbs{
+        li:nth-child(1){
+            background-image: url("../img/breadcrumb1.png");
+        }
+        li:nth-child(2){
+            background-image: url("../img/breadcrumb2a.png");
+        }
+    }
+}
+#importerReview{
+    .crumbs{
+        li:nth-child(1){
+            background-image: url("../img/breadcrumb1.png");
+        }
+        li:nth-child(3){
+            background-image: url("../img/breadcrumb3a.png");
+        }
+    }
+}
+#importerReview .breadcrumbsWrapper{
+    margin: 0 20px;
+}
 .crumbs {
     position: relative;
-    top:20px;
     margin: 0 auto;
-    width: 660px;
-    font:71%/165% "Lucida Grande", Lucida, Verdana, sans-serif;
-    height:2.3em;
-    padding: 0;
-}
-#importerReview .crumbs{
-    margin: 0 20px;
+    width: 593px;
 }
 .crumbs ul, .crumbs li {
     list-style-type:none;
-    padding:0;
-    margin:0;
 }
 .crumbs li {
     float:left;
-    line-height:2.3em;
-    color:#777;
-    padding-left: 0;
-    border-top:1px solid #dedede;
-    border-bottom:1px solid #dedede;
-    background-color: #fff;
-}
-.crumbs li a {
-    background:url(../img/crumbs.png) no-repeat right center;
-    display:block;
-    padding:0 15px 0 10px;
-    color: #777;
-    z-index: 100;
-}
-.crumbs li a:link,
-.crumbs li a:visited {
-    color:#777;
-    text-decoration:none;
-}
-.crumbs a:link, .crumbs a:visited,
-.crumbs li a:hover,
-.crumbs li a:focus {
-    cursor: default;
-}
-.crumbs li.active a{
-    background:url(../img/crumbsActive.png) no-repeat right center;
-}
-.cover{
-    position: absolute;
-    top: 20px;
-    left: 588px;
+    height: 50px;
 }
 /*endregion*/
 /*endregion*/
@@ -1321,6 +1334,9 @@ div.k-window-content {
         border: none;
         outline: none;
         padding: 0;
+        &:checked {
+            background-color: #488FCD;
+        }
     }
     .k-numeric-wrap .k-input {
         width: 100%;
@@ -2310,8 +2326,13 @@ ul.noty_cont.noty_layout_topRight li {
 .select2-dropdown-open .select2-choice div b {
     background-position: 1px 8px;
 }
+.select2-drop-active{
+    border: 1px solid #ddd;
+    border-top: none;
+}
 .select2-results {
     min-height: 18px;
+    max-height: 250px;
     display: block;
     li{
         display: block;
