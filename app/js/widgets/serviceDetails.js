@@ -267,9 +267,9 @@ define(["jquery", "db/services", "db/session", "db/models", "tools/kendoTools", 
                 var detachedElements,
                     resetSigPad = function () {$(".sigPad").jSignature("reset")},
                     openSigPad = function () {
-                        if ((kendo.support.detectOS(navigator.userAgent).name === 'ios' || kendo.support.detectOS(navigator.userAgent).name === 'android') && window.cordova) {
-                            navigator.screenOrientation.set('landscape');
-                        }
+//                        if ((kendo.support.detectOS(navigator.userAgent).name === 'ios' || kendo.support.detectOS(navigator.userAgent).name === 'android') && window.cordova) {
+//                            navigator.screenOrientation.set('landscape');
+//                        }
                         resetSigPad();
                         //Wait until screen is in landscape orientation to call out the sig pad.
                         setTimeout( function() {
@@ -302,10 +302,11 @@ define(["jquery", "db/services", "db/session", "db/models", "tools/kendoTools", 
                             resetSigPad();
                             detachedElements.insertBefore("#sigListView");
                         });
-                        if ((kendo.support.detectOS(navigator.userAgent).name === "ios" || kendo.support.detectOS(navigator.userAgent).name === "android") && window.cordova) {
-                            navigator.screenOrientation.set("fullSensor");
-                        }
+//                        if ((kendo.support.detectOS(navigator.userAgent).name === "ios" || kendo.support.detectOS(navigator.userAgent).name === "android") && window.cordova) {
+//                            navigator.screenOrientation.set("fullSensor");
+//                        }
                         kendoTools.re_enableScroll("#routeTask");
+
                         //Reset scroll to top.
                         $("#routeTask .km-scroll-container").css("-webkit-transform", "");
                     },
