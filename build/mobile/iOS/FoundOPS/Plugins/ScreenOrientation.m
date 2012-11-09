@@ -7,6 +7,7 @@
 #import "ScreenOrientation.h"
 
 @implementation ScreenOrientation
+@synthesize allowedOrientations;
 
 - (void)set:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options
 {
@@ -18,7 +19,8 @@
     int statusBarWidth = [[UIApplication sharedApplication] statusBarFrame].size.width;
     if([targetOrientation isEqualToString:@"landscape"]) {
         [allowed addObject:[NSNumber numberWithInt:UIDeviceOrientationLandscapeRight]];
-        appDelegate.viewController.allowedOrientations = allowed;
+        self.allowedOrientations = allowed; //Changed from orignial plugin
+//        appDelegate.viewController.allowedOrientations = allowed;
         [[UIApplication sharedApplication] setStatusBarOrientation:UIDeviceOrientationLandscapeRight animated:YES];
         [appDelegate.viewController.view setTransform: CGAffineTransformMakeRotation(M_PI * 1.5)];
         [appDelegate.viewController.view setFrame:CGRectMake(statusBarHeight, 0, appDelegate.viewController.view.frame.size.height-statusBarHeight, appDelegate.viewController.view.frame.size.width+statusBarHeight)];
@@ -26,9 +28,11 @@
         [UIView commitAnimations];
     }
     if([targetOrientation isEqualToString:@"portrait"]) {
-        if (![appDelegate.viewController.allowedOrientations containsObject:[NSNumber numberWithInt:UIDeviceOrientationPortrait]]) {
+        if(![self.allowedOrientations containsObject:[NSNumber numberWithInt:UIDeviceOrientationPortrait]]) { //Changed from original plugin
+//        if (![appDelegate.viewController.allowedOrientations containsObject:[NSNumber numberWithInt:UIDeviceOrientationPortrait]]) {
             [allowed addObject:[NSNumber numberWithInt:UIDeviceOrientationPortrait]];
-            appDelegate.viewController.allowedOrientations = allowed;
+            self.allowedOrientations = allowed; //Changed from original plugin.
+//            appDelegate.viewController.allowedOrientations = allowed;
             [[UIApplication sharedApplication] setStatusBarOrientation:UIDeviceOrientationPortrait animated:YES];
             [appDelegate.viewController.view setTransform: CGAffineTransformMakeRotation(0)];
             [appDelegate.viewController.view setFrame:CGRectMake(0, statusBarWidth, appDelegate.viewController.view.frame.size.height+statusBarWidth, appDelegate.viewController.view.frame.size.width-statusBarWidth)];

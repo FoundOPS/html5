@@ -9,7 +9,10 @@
 
 #import <Cordova/CDVPlugin.h>
 
-@interface ScreenOrientation : CDVPlugin
+@interface ScreenOrientation : CDVPlugin {
+    NSMutableArray* allowedOrientations;
+}
+@property (nonatomic, retain)NSMutableArray* allowedOrientations;
 
 -	(void) set:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options;
 
