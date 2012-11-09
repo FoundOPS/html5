@@ -270,7 +270,7 @@ define(["jquery", "db/services", "db/session", "db/models", "tools/kendoTools", 
                         if (kendo.support.detectOS(navigator.userAgent).name === 'android' && window.cordova) {
                             navigator.screenOrientation.set('landscape');
                         } else if (kendo.support.detectOS(navigator.userAgent).name === 'ios'  && window.cordova) {
-                            window.plugins.orientation.setAllowed([{pp:false, pd:false, ll:true, lr:true}]);
+                            navigator.screenOrientation.set('landscape');
                         }
                         resetSigPad();
                         //Wait until screen is in landscape orientation to call out the sig pad.
