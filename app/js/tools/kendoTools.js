@@ -370,6 +370,15 @@ define(['db/session', 'db/services', 'tools/parameters'], function (session, dbS
             dataSource.filter(filterSet);
         }
     };
+    kendoTools.disableScroll = function (view) {
+        $(view + " .km-scroll-container").children("*").unwrap();
+        $(view + " .km-scroll-header").remove();
+        $(view + " .km-scroll-container").remove();
+        $(view + " .km-touch-scrollbar").remove();
+    };
+    kendoTools.re_enableScroll = function (view) {
+        $(view).data("kendoMobileView").content.kendoMobileScroller();
+    };
 
     //endregion
 

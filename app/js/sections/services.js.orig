@@ -15,8 +15,8 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
         addNewService: function () {
             dbServices.services.read({
                 params: {
-                    serviceTemplateId: vm.get("serviceType.Id"),
-                    serviceDate: dateTools.stripDate(vm.get("startDate"))
+                    serviceDate: dateTools.stripDate(vm.get("startDate")),
+                    serviceTemplateId: vm.get("serviceType.Id")
                 }}).done(function (services) {
                     //disable undo for new entities
                     saveHistory.setUndoEnabled(false);
@@ -555,6 +555,9 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
             services.serviceTypes = serviceTypes;
 
             //Setup selectBox.
+<<<<<<< HEAD
+            $("#serviceTypes").selectBox({data: serviceTypes, dataTextField: "Name", onSelect: save});
+=======
             var i, options = [];
             for (i = 0; i < serviceTypes.length; i++) {
                 options[i] = {name: serviceTypes[i].Name, value: serviceTypes[i].Id};
@@ -571,6 +574,7 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
                     $("#serviceDetails").attr("style", "display:none");
                 }
             });
+>>>>>>> publishable
 
             //now that the service types are loaded,
             //setup the grid by reparsing the hash

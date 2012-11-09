@@ -43,6 +43,7 @@ define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "to
                 saveHistory.save();
             }
         });
+
     };
 
     /**
@@ -100,6 +101,9 @@ define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "to
                 return vm.get("selectedService");
             }
         });
+
+        //Ensure dimmer is hidden and behind other elements.
+        $("#background-dimmer").css("z-index", -1).css("opacity", "0").css("visibility", "hidden");
     };
 
     section.save = function () {
@@ -116,23 +120,17 @@ define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "to
 //vm methods
 
     vm.openTaskStatuses = function (originator) {
-        $("#taskStatuses-dimmer").css("visibility", "visible");
-        $("#taskStatuses").css("visibility", "visible");
-        $("#taskStatuses-dimmer").css("z-index", "1000");
-        $("#taskStatuses-dimmer").fadeTo(400, 0.8);
-        $("#taskStatuses").css("z-index", "10000");
-        $("#taskStatuses").fadeTo(400, 1);
+        $("#background-dimmer").css("visibility", "visible").css("z-index", "1000").fadeTo(400, 0.8);
+        $("#taskStatuses").css("visibility", "visible").css("z-index", "10000").fadeTo(400, 1);
         popupCaller = originator;
     };
     vm.closeTaskStatuses = function (e) {
-        $("#taskStatuses-dimmer").fadeTo(400, 0);
-        $("#taskStatuses").fadeTo(400, 0);
-        setTimeout(function () {
-            $("#taskStatuses-dimmer").css("z-index", "-1");
-            $("#taskStatuses").css("z-index", "-10");
-            $("#taskStatuses-dimmer").css("visibility", "hidden");
-            $("#taskStatuses").css("visibility", "hidden");
-        }, 400);
+        $("#background-dimmer").animate({opacity: "0"}, 400, function () {
+            $("#background-dimmer").css("z-index", "-1").css("visibility", "hidden");
+        });
+        $("#taskStatuses").animate({opacity: "0"}, 400, function () {
+            $("#taskStatuses").css("z-index", "-10").css("visibility", "hidden");
+        });
         // If popup was opened by clicking backButton go back if and only if user selects status.
         if (popupCaller === "backButton" /*&& !e*/) { // Comment forces user to select status before going back.
             section.onBack(true);

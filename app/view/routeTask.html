@@ -3,7 +3,7 @@
 
     <div id="taskServiceDetails" data-role="kendoServiceDetails" data-bind="service: selectedService"></div>
 
-    <div class="statusLabel"><span>Status</span></div>
+    <div class="fieldLabel"><span>Status</span></div>
     <ul id="routeStatus-listview" data-role="listview" data-style="inset" data-bind="click: openTaskStatuses" style="margin-top:0;">
         <li>
             <a class="km-button" data-bind="style: { backgroundColor: selectedTaskStatus.Color}">
@@ -12,7 +12,7 @@
         </li>
     </ul>
 
-    <div id="taskStatuses-dimmer"></div>
+    <div id="background-dimmer"></div>
 
     <div id="taskStatuses">
         <p id="taskStatusesTitle">Mark Task As:</p>
