@@ -8,7 +8,7 @@ define(['jquery', 'underscore'], function ($, _) {
      *              Unformatted data for use in selectBox, if non-existent will use config.options.
      *          dataTextField: string,
      *              The key in data who's value will be displayed as an option.
-     *          dataSelectedField: string,
+     *          dataSelectedIdentifier: string,
      *              The key in data who's value determines the selected status of an option.
      *          options: {name: string, value: string, selected: boolean},
      *              Preformatted data for use in the selectBox.
@@ -24,8 +24,8 @@ define(['jquery', 'underscore'], function ($, _) {
                 for (i=0; i<config.data.length; i++) {
                     optionsArray[i] = {
                         name: config.data[i][textField],
-                        value: _.values(_.omit(config.data[i], textField, config.dataSelectedField)),
-                        selected: config.data[i][config.dataSelectedField]
+                        value: _.values(_.omit(config.data[i], textField, config.dataSelectedIdentifier)),
+                        selected: config.data[i][config.dataSelectedIdentifier]
                     };
                 }
             } else if (config.options) {

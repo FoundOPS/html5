@@ -98,6 +98,9 @@ module.exports = function (grunt) {
                     jmousewheel: "../lib/jquery.mousewheel",
                     jquery: "../lib/jquery",
                     jscrollpane: "../lib/jquery.jScrollPane",
+                    jsignature: "../lib/jSignature",
+                    jsigbase30: "../lib/jSignature.CompressorBase30",
+                    jsigSVG: "../lib/jSignature.CompressorSVG",
                     jtooltip: "../lib/jquery.tooltip.min",
                     jui: "../lib/jquery-ui-1.8.21.core.min",
                     moment: "../lib/moment",
@@ -121,6 +124,9 @@ module.exports = function (grunt) {
                     jmaskmoney: ['jquery'],
                     jmousewheel: ['jquery'],
                     jscrollpane: ['jquery'],
+                    jsignature: ['jquery'],
+                    jsigbase30: ['jquery', 'jsignature'],
+                    jsigSVG: ['jquery', 'jsignature'],
                     jtooltip: ['jquery'],
                     jui: ['jquery'],
                     kendo: ['jquery'],
@@ -185,7 +191,8 @@ module.exports = function (grunt) {
                         JSblobRoot: "js/main-built.js",
                         cordova: '<script type="text/javascript" charset="utf-8" src="cordova-2.1.0.js"></script>\n' +
                             '<script type="text/javascript" charset="utf-8" src="statusbarnotification.js"></script>\n' +
-                            '<script type="text/javascript" charset="utf-8" src="childbrowser.js"></script>',
+                            '<script type="text/javascript" charset="utf-8" src="childbrowser.js"></script>\n' +
+                            '<script type="text/javascript" charset="utf-8" src="pg-plugin-screen-orientation.js"></script>',
                         appLocation: '"navigator.html"'
                     }
                 }
@@ -201,7 +208,8 @@ module.exports = function (grunt) {
                         blobRoot: "",
                         CSSblobRoot: "styles/main-built.css",
                         JSblobRoot: "js/main-built.js",
-                        cordova: '<script type="text/javascript" charset="utf-8" src="cordova-2.1.0.js"></script>',
+                        cordova: '<script type="text/javascript" charset="utf-8" src="cordova-2.1.0.js"></script>\n' +
+                            '<script type="text/javascript" charset="utf-8" src="ScreenOrientation.js"></script>',
                         appLocation: '"navigator.html"'
                     }
                 }

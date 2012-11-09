@@ -27,6 +27,10 @@
 
 #import <Cordova/CDVViewController.h>
 
-@interface MainViewController : CDVViewController
+@interface MainViewController : CDVViewController {
+    NSMutableArray *allowedOrientations;
+}
+
+@property (nonatomic, retain) NSMutableArray *allowedOrienations;
 
 @end

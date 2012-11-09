@@ -1,5 +1,7 @@
 'use strict';
-define(["jquery", "db/services", "db/session", "db/models", "widgets/selectBox", "select2", "kendo", "jmaskmoney", "jautosize", "jtooltip"], function ($, dbServices, session, models) {
+define(["jquery", "db/services", "db/session", "db/models", "tools/kendoTools", "tools/generalTools", "widgets/selectBox", "select2", "kendo", "jmaskmoney",
+    "jautosize", "jtooltip", "jsignature", "jsigbase30", "jsigSVG"],
+    function ($, dbServices, session, models, kendoTools, generalTools) {
 
     var kendo = window.kendo,
         ui = kendo.ui,
@@ -219,12 +221,12 @@ define(["jquery", "db/services", "db/session", "db/models", "widgets/selectBox",
             },
             "OptionsField": function (field, fieldIndex, elementToAppendTo) {
                 var fieldElement, i;
-                if (field.TypeInt === 0) {
+                if (field.TypeInt === 0 || field.TypeInt === undefined) {
                     //Select Dropdown
                     fieldElement = $('<div class="styled-select"></div>').selectBox({
                         data: field.Options,
                         dataTextField: "Name",
-                        dataSelectedField: "IsChecked",
+                        dataSelectedIdentifier: "IsChecked",
                         onSelect: function (selectedOption) {
                             //Clear previous selections.
                             for (i = 0; i < field.Options.length; i++) {
@@ -232,7 +234,7 @@ define(["jquery", "db/services", "db/session", "db/models", "widgets/selectBox",
                             }
                             field.set('Options[' + selectedOption.index + '].IsChecked', selectedOption.selected);
                         }
-                    }).appendTo(elementToAppendTo).wrap("<li><label>" + field.Name + "<br/></label></li>");
+                    }).appendTo(elementToAppendTo).wrap("<li>" + field.Name + "<br/></li>");
                 } else {
                     //Checkbox (1) or checklist (2)
                     fieldElement = $('<ul data-role="listview" data-style="inset">' + field.Name + '</ul>').appendTo(elementToAppendTo);
@@ -260,6 +262,100 @@ define(["jquery", "db/services", "db/session", "db/models", "widgets/selectBox",
                 }
 
                 return fieldElement;
+            },
+            "SignatureField": function (field, fieldIndex, elementToAppendTo) {
+                var detachedElements,
+                    resetSigPad = function () {$(".sigPad").jSignature("reset")},
+                    openSigPad = function () {
+//                        if ((generalTools.checkPlatform.isiOS() || generalTools.checkPlatform.isAndroid()) && generalTools.checkPlatform.isCordova()) {
+//                            navigator.screenOrientation.set('landscape');
+//                        }
+                        resetSigPad();
+                        //Wait until screen is in landscape orientation to call out the sig pad.
+                        setTimeout( function() {
+                            var width = $('#routeTask').width();
+                            var margin = width > 800 ? ($('#sideBarWrapper').width()) / 2 : 0;
+                            var canvasMargin = width > 800 ? (width-800)/2 : 0;
+                            $('#content').css('padding', '0');
+                            $('.sigWrapper canvas').css('margin', '0 '+canvasMargin+'px 0'+canvasMargin+'px')
+                            $('.sigWrapper').css('visibility', 'visible').css('width', width).css('z-index', '10000').css('margin', '0 '+margin+'px 0'+margin+'px').animate({'opacity': 1}, 300);
+                            $('#sigListView ul, #routeStatus-listview, .fieldLabel').css('visibility', 'hidden');
+                            $('#nav, #sideBarWrapper').animate({'opacity': 0}, 300, function () {
+                                $('#nav, #sideBarWrapper').css('visibility', 'hidden');
+                            });
+                            detachedElements = $('#fields, #checkLists').detach();
+                            kendoTools.disableScroll('#routeTask');
+                            //Reset scroll to top.
+                            $('#routeTask .km-scroll-container').css('-webkit-transform', '');
+                        }, 500);
+                    },
+                    closeSigPad = function () {
+                        if (field.Value) {
+                            $("#sigDisplay").jSignature("setData", "data:image/jsignature;base30,"+field.Value);
+                        }
+                        $(".sigWrapper").animate({"opacity": 0}, 300, function () {
+                            $(".sigWrapper").css("visibility", "hidden").css("width", 0).css("z-index", "-10");
+                            $("#content").css("padding", "");
+                            $("#sigListView ul, #routeStatus-listview, .fieldLabel").css("visibility", "");
+                        });
+                        $("#nav, #sideBarWrapper").css("visibility", "").animate({"opacity": 1}, 300, function () {
+                            resetSigPad();
+                            detachedElements.insertBefore("#sigListView");
+                        });
+//                        if ((generalTools.checkPlatform.isiOS() || generalTools.checkPlatform.isAndroid()) && generalTools.checkPlatform.isCordova()) {
+//                            navigator.screenOrientation.set("fullSensor");
+//                        }
+                        kendoTools.re_enableScroll("#routeTask");
+
+                        //Reset scroll to top.
+                        $("#routeTask .km-scroll-container").css("-webkit-transform", "");
+                    },
+                    saveSig = function () {
+                        if($('.sigPad').jSignature("getData","base30")[1] !== "") {
+                            field.set('Value', $('.sigPad').jSignature("getData","base30")[1]);
+                            closeSigPad();
+                            displaySig();
+                        } else {
+                            alert("Please sign before you save or hit the cancel button to go back.");
+                        }
+                    },
+                    displaySig = function () {
+                        $(".sigPad").jSignature("setData", "data:image/jsignature;base30,"+field.Value);
+                        var svgString = $('.sigPad').jSignature("getData","svgbase64").join(",");
+                        $("#sigDisplay").attr("src", "data:"+svgString);
+                    }
+
+                $('<div class="sigWrapper">' +
+                    '<a class="sigButton" id="sigCancel">Cancel</a>' +
+                    '<a class="sigButton" id="sigClear">Clear</a>' +
+                    '<a class="sigButton" id="sigSave">Save</a>' +
+                    '<div id="vertCenterUpper" style="#position: relative;">         <!--Used to-->' +
+                        '<div id="vertCenterMiddle" style=" #position: absolute; #top: 50%;">    <!--place content-->' +
+                            '<div id="vertCenterLower" style=" #position: relative; #top: -50%"> <!--in middle of page-->' +
+                                '<div class="sigPad"></div>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>').appendTo($(elementToAppendTo));
+                $("#sigCancel").live('click', closeSigPad);
+                $("#sigClear").live('click', resetSigPad);
+                $("#sigSave").live('click', saveSig);
+
+                $(".sigPad").jSignature({width: "100%"});
+                var fieldElement = $('<ul data-role="listview" data-style="inset">'
+                                        + field.Name +
+                                        '<li id="sigPadOpener" style="text-align: center">' +
+                                            '<a>' +
+                                                '<img id="sigDisplay" style="min-height:45px; max-height: 60px; width: auto"/>' +
+                                            '</a>' +
+                                        '</li>' +
+                                    '</ul>').appendTo(elementToAppendTo);
+                if (field.Value) {
+                    displaySig();
+                }
+                $("#sigPadOpener").live('click', openSigPad);
+
+                return fieldElement;
             }
         },
 
@@ -283,6 +379,7 @@ define(["jquery", "db/services", "db/session", "db/models", "widgets/selectBox",
             //Add all the fields
             var fieldsListView = $('<ul id="fields"></ul>').appendTo(that.element);
             var checkLists = $('<ul id="checkLists"></ul>').appendTo(that.element);
+            var sigListView = $('<ul id="sigListView"></ul>').appendTo(that.element);
 
             var fieldIndex;
             for (fieldIndex = 0; fieldIndex < service.Fields.length; fieldIndex++) {
@@ -296,7 +393,14 @@ define(["jquery", "db/services", "db/session", "db/models", "widgets/selectBox",
                 //Checkbox (1) or checklist (2)
                 var checkField = field.Type === "OptionsField" && (field.TypeInt === 1 || field.TypeInt === 2);
 
-                var elementToAppendTo = checkField ? checkLists : fieldsListView;
+                var elementToAppendTo;
+                if(checkField) {
+                    elementToAppendTo= checkLists;
+                } else if(field.Type === "SignatureField") {
+                    elementToAppendTo = sigListView;
+                } else {
+                    elementToAppendTo = fieldsListView;
+                };
 
                 var factory = that._fieldFactories[field.Type];
 
