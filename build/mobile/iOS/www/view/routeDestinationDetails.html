@@ -1,17 +1,9 @@
 <div id="routeDestinationDetails" data-role="view" data-show="routeDestinationDetails.show" data-title="Destination Info">
-
-    <div id="locationInfo" data-bind="source: this" data-template="locationTemplate" style="margin-bottom:10px"></div>
-
+    <div class="locationInfo" data-bind="source: this" data-template="locationTemplate" style="margin-bottom:10px"></div>
     <div>
-    <p style="top:10px; margin-bottom: -5px;">Contacts</p>
-    <hr/>
     </div>
-    <ul id="contacts-listview" data-bind="source:contacts, click: contactClick"
-        data-role="listview" data-style="inset" data-template="contactsTemplate">
-    </ul>
-
-    <p style="top:10px; margin-bottom: -5px;">Tasks</p>
-    <hr/>
+    <div class="contactInfo"></div>
+    <p style="top:10px; margin-bottom: -5px; font-size:20px;">Tasks</p>
     <ul id="routeTasksListView" data-bind="source: dataSource, click: select"
         data-role="listview" data-style="inset" data-template="routeTasksTemplate">
     </ul>
@@ -20,29 +12,16 @@
 <script type="text/x-kendo-template" id="locationTemplate">
     # if (selectedEntity.Location) { #
     <h1>${selectedEntity.Location.Name}</h1>
-    <hr id="topHR"/>
     <p>${selectedEntity.Location.AddressLineOne}</p>
     <p>${selectedEntity.Location.AddressLineTwo}</p>
-    <p>${selectedEntity.Location.City}, ${selectedEntity.Location.State}<br/>
+    <p>${selectedEntity.Location.AdminDistrictTwo}, ${selectedEntity.Location.AdminDistrictOne}<br/>
         ${selectedEntity.Location.ZipCode}</p>
     <a id="directionsButton" data-bind="click: getDirections">Directions</a>
     # } else { #
     <h1>${selectedEntity.Client.Name}</h1>
-    <hr id="topHR"/>
     <p style="color:red"> No<br/>Location<br/>Information<br/>Available</p>
     # } #
 </script>
-<script type="text/x-kendo-template" id="contactsTemplate">
-    # if (Type === "Phone Number") { #
-        <a>Call ${Label}<p class="contactData">${Data}</p></a>
-    # } else if (Type === "Email Address") { #
-        <a>E-mail ${Label}<p class="contactData">${Data}</p></a>
-    # } else if (Type === "Website") { #
-        <a>Visit Website<p class="contactData">${Data}</p></a>
-    # } else { #
-        <a>${Label} - ${Data}</a>
-    # } #
-</script>
 <script type="text/x-kendo-template" id="routeTasksTemplate">
-    <a>${Name}</a>
+    <a><span>${Name}</span></a>
 </script>
