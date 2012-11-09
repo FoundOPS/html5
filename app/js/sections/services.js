@@ -555,12 +555,9 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
             services.serviceTypes = serviceTypes;
 
             //Setup selectBox.
-            var i, options = [];
-            for (i = 0; i < serviceTypes.length; i++) {
-                options[i] = {name: serviceTypes[i].Name, value: serviceTypes[i].Id};
-            }
             $("#serviceTypes").selectBox({
-                options: options,
+                data: serviceTypes,
+                dataTextField: "Name",
                 onSelect: function (selectedOption) {
                     vm.set("serviceType", {Id: selectedOption.value, Name: selectedOption.name});
 
