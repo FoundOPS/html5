@@ -9,8 +9,23 @@
 define(['jquery', "developer", 'moment'], function ($, developer) {
     var generalTools = {};
 
-    generalTools.deepClone = function(obj){
+    generalTools.deepClone = function (obj) {
         return JSON.parse(JSON.stringify(obj));
+    };
+
+    /**
+     * Finds the index based on a filter function
+     * @param collection
+     * @param filter {Function([element], [index], [collection]}
+     * @return {Number} The index
+     */
+    generalTools.findIndex = function (collection, filter) {
+        for (var i = 0; i < filter.length; i++) {
+            if (filter(collection[i], i, collection)) {
+                return i;
+            }
+        }
+        return -1;
     };
 
     /**
@@ -198,7 +213,7 @@ define(['jquery', "developer", 'moment'], function ($, developer) {
         });
     };
 
-    generalTools.goToUrl = function(url) {
+    generalTools.goToUrl = function (url) {
         var androidDevice = developer.IS_MOBILE && kendo.support.detectOS(navigator.userAgent).name === "android";
         if (url.substr(0, 7) !== "http://" && url.substr(0, 8) !== "https://") {
             url = "http://" + url;
