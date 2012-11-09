@@ -58,8 +58,8 @@
 		<string>CDVSound</string>
 		<key>Capture</key>
 		<string>CDVCapture</string>
-		<key>SplashScreen</key>
-		<string>CDVSplashScreen</string>
+		<key>ScreenOrientation</key>
+		<string>ScreenOrientation</string>
 		<key>Battery</key>
 		<string>CDVBattery</string>
 	</dict>
