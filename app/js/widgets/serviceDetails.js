@@ -267,9 +267,7 @@ define(["jquery", "db/services", "db/session", "db/models", "tools/kendoTools", 
                 var detachedElements,
                     resetSigPad = function () {$(".sigPad").jSignature("reset")},
                     openSigPad = function () {
-                        if (kendo.support.detectOS(navigator.userAgent).name === 'android' && window.cordova) {
-                            navigator.screenOrientation.set('landscape');
-                        } else if (kendo.support.detectOS(navigator.userAgent).name === 'ios'  && window.cordova) {
+                        if ((kendo.support.detectOS(navigator.userAgent).name === 'ios' || kendo.support.detectOS(navigator.userAgent).name === 'android') && window.cordova) {
                             navigator.screenOrientation.set('landscape');
                         }
                         resetSigPad();
@@ -304,10 +302,8 @@ define(["jquery", "db/services", "db/session", "db/models", "tools/kendoTools", 
                             resetSigPad();
                             detachedElements.insertBefore("#sigListView");
                         });
-                        if (kendo.support.detectOS(navigator.userAgent).name === "android" && window.cordova) {
+                        if ((kendo.support.detectOS(navigator.userAgent).name === "ios" || kendo.support.detectOS(navigator.userAgent).name === "android") && window.cordova) {
                             navigator.screenOrientation.set("fullSensor");
-                        } else if (kendo.support.detectOS(navigator.userAgent).name === "ios" && window.cordova) {
-                            window.plugins.orientation.setAllowed([{pp:true, pd:true, ll:true, lr:true}]);
                         }
                         kendoTools.re_enableScroll("#routeTask");
                         //Reset scroll to top.
