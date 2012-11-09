@@ -1,7 +1,7 @@
 'use strict';
-define(["jquery", "db/services", "db/session", "db/models", "tools/kendoTools", "widgets/selectBox", "select2", "kendo", "jmaskmoney",
+define(["jquery", "db/services", "db/session", "db/models", "tools/kendoTools", "tools/generalTools", "widgets/selectBox", "select2", "kendo", "jmaskmoney",
     "jautosize", "jtooltip", "jsignature", "jsigbase30", "jsigSVG"],
-    function ($, dbServices, session, models, kendoTools) {
+    function ($, dbServices, session, models, kendoTools, generalTools) {
 
     var kendo = window.kendo,
         ui = kendo.ui,
@@ -267,7 +267,7 @@ define(["jquery", "db/services", "db/session", "db/models", "tools/kendoTools", 
                 var detachedElements,
                     resetSigPad = function () {$(".sigPad").jSignature("reset")},
                     openSigPad = function () {
-//                        if ((kendo.support.detectOS(navigator.userAgent).name === 'ios' || kendo.support.detectOS(navigator.userAgent).name === 'android') && window.cordova) {
+//                        if ((generalTools.checkPlatform.isiOS() || generalTools.checkPlatform.isAndroid()) && generalTools.checkPlatform.isCordova()) {
 //                            navigator.screenOrientation.set('landscape');
 //                        }
                         resetSigPad();
@@ -302,7 +302,7 @@ define(["jquery", "db/services", "db/session", "db/models", "tools/kendoTools", 
                             resetSigPad();
                             detachedElements.insertBefore("#sigListView");
                         });
-//                        if ((kendo.support.detectOS(navigator.userAgent).name === "ios" || kendo.support.detectOS(navigator.userAgent).name === "android") && window.cordova) {
+//                        if ((generalTools.checkPlatform.isiOS() || generalTools.checkPlatform.isAndroid()) && generalTools.checkPlatform.isCordova()) {
 //                            navigator.screenOrientation.set("fullSensor");
 //                        }
                         kendoTools.re_enableScroll("#routeTask");

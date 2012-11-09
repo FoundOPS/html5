@@ -10,7 +10,6 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "tools/paramete
     "lib/platform", "db/services", "underscore", "underscore.string", "widgets/contactInfo"], function (createBase, routeDetails, parameters, developer, generalTools, analytics, platform, dbServices, _, _s) {
     var vm, contacts,
     //true if on an Android device with cordova
-        androidCordova = window.cordova && _s.include(platform.os, "Android"),
         section = createBase("routeTask", "routeTaskId",
             //on show
             function () {
@@ -90,7 +89,7 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "tools/paramete
             }
         };
 
-        if (androidCordova) {
+        if (generalTools.isAndroid() && generalTools.isCordova()) {
             window.location.href = "geo:0,0?q=" + destination; //Opens google navigation on Android phones
         } else {
             //Attempt to get the user's current location.

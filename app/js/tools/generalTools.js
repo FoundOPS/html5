@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(['jquery', "developer", 'moment'], function ($, developer) {
+define(['jquery', "developer", '../lib/platform', 'moment'], function ($, developer, platform) {
     var generalTools = {};
 
     generalTools.deepClone = function(obj){
@@ -198,17 +198,30 @@ define(['jquery', "developer", 'moment'], function ($, developer) {
         });
     };
 
+    generalTools.checkPlatform = {
+        isAndroid: function () {
+            return platform.os === "Android";
+        },
+        isiOS: function () {
+            return platform.os === "iOS";
+        },
+        isCordova: function () {
+            return (window.cordova ? true : false);
+        }
+    }
+
     generalTools.goToUrl = function(url) {
-        var androidDevice = developer.IS_MOBILE && kendo.support.detectOS(navigator.userAgent).name === "android";
         if (url.substr(0, 7) !== "http://" && url.substr(0, 8) !== "https://") {
             url = "http://" + url;
         }
-        if (androidDevice) {
+        if (generalTools.checkPlatform.isAndroid() && generalTools.checkPlatform.isCordova()) {
             window.plugins.childBrowser.showWebPage(url);
         } else {
             window.open(url, "_blank");
         }
     };
+
+
 
     return generalTools;
 });

@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(['lib/platform', "underscore", 'underscore.string'], function (platform, _, _s) {
+define(['lib/platform', "underscore", 'underscore.string', "generalTools"], function (platform, _, _s, generalTools) {
     var developer = {};
 
     /**
@@ -69,7 +69,7 @@ define(['lib/platform', "underscore", 'underscore.string'], function (platform, 
      * Set to true if this is a mobile platform
      * @type {Boolean}
      */
-    developer.IS_MOBILE = _s.include(platform.product, "iPhone") || _s.include(platform.product, "iPad") || _s.include(platform.os, "Android");
+    developer.IS_MOBILE = generalTools.checkPlatform.isAndroid() || generalTools.checkPlatform.isiOS();
 
     return developer;
 });
