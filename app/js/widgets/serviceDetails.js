@@ -265,17 +265,21 @@ define(["jquery", "db/services", "db/session", "db/models", "tools/kendoTools", 
             },
             "SignatureField": function (field, fieldIndex, elementToAppendTo) {
                 var detachedElements,
+                    resetSigPad = function () {$(".sigPad").jSignature("reset")},
                     openSigPad = function () {
                         if (kendo.support.detectOS(navigator.userAgent).name === 'android' && window.cordova) {
                             navigator.screenOrientation.set('landscape');
                         } else if (kendo.support.detectOS(navigator.userAgent).name === 'ios'  && window.cordova) {
                             window.plugins.orientation.setAllowed([{pp:false, pd:false, ll:true, lr:true}]);
                         }
+                        resetSigPad();
                         //Wait until screen is in landscape orientation to call out the sig pad.
                         setTimeout( function() {
                             var width = $('#routeTask').width();
                             var margin = width > 800 ? ($('#sideBarWrapper').width()) / 2 : 0;
+                            var canvasMargin = width > 800 ? (width-800)/2 : 0;
                             $('#content').css('padding', '0');
+                            $('.sigWrapper canvas').css('margin', '0 '+canvasMargin+'px 0'+canvasMargin+'px')
                             $('.sigWrapper').css('visibility', 'visible').css('width', width).css('z-index', '10000').css('margin', '0 '+margin+'px 0'+margin+'px').animate({'opacity': 1}, 300);
                             $('#sigListView ul, #routeStatus-listview, .fieldLabel').css('visibility', 'hidden');
                             $('#nav, #sideBarWrapper').animate({'opacity': 0}, 300, function () {
@@ -287,7 +291,6 @@ define(["jquery", "db/services", "db/session", "db/models", "tools/kendoTools", 
                             $('#routeTask .km-scroll-container').css('-webkit-transform', '');
                         }, 500);
                     },
-                    resetSigPad = function () {$(".sigPad").jSignature("reset")},
                     closeSigPad = function () {
                         if (field.Value) {
                             $("#sigDisplay").jSignature("setData", "data:image/jsignature;base30,"+field.Value);
@@ -311,7 +314,7 @@ define(["jquery", "db/services", "db/session", "db/models", "tools/kendoTools", 
                         $("#routeTask .km-scroll-container").css("-webkit-transform", "");
                     },
                     saveSig = function () {
-                        if($('.sigPad').jSignature("getData","native").length !== 0) {
+                        if($('.sigPad').jSignature("getData","base30")[1] !== "") {
                             field.set('Value', $('.sigPad').jSignature("getData","base30")[1]);
                             closeSigPad();
                             displaySig();
@@ -344,9 +347,9 @@ define(["jquery", "db/services", "db/session", "db/models", "tools/kendoTools", 
                 $(".sigPad").jSignature({width: "100%"});
                 var fieldElement = $('<ul data-role="listview" data-style="inset">'
                                         + field.Name +
-                                        '<li style="text-align: center">' +
-                                            '<a id="sigPadOpener">' +
-                                                '<img id="sigDisplay" style="max-height:45px"/>' +
+                                        '<li id="sigPadOpener" style="text-align: center">' +
+                                            '<a>' +
+                                                '<img id="sigDisplay" style="min-height:45px; max-height: 60px; width: auto"/>' +
                                             '</a>' +
                                         '</li>' +
                                     '</ul>').appendTo(elementToAppendTo);
