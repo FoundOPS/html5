@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(['lib/platform', "underscore", 'underscore.string', "generalTools"], function (platform, _, _s, generalTools) {
+define(['lib/platform', "underscore", 'underscore.string', "tools/generalTools"], function (platform, _, _s, generalTools) {
     var developer = {};
 
     /**

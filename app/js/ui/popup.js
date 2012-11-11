@@ -103,8 +103,6 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
 
         var isLocked = false;
         var isHeaderDisabled = false;
-
-        //Note: Making history a global broke on Android 2.3
         var history = [];
 
         if ((typeof(popupListener) === 'undefined') || popupListener === null) {
