@@ -86,8 +86,10 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
     })(jQuery);
 
     /** Popup Constructor **/
+
+    var lastElementClick = null;
+    var history = [];
     function Popup(popupListener) {
-        var lastElementClick = null;
         var currentTarget = null;
 
         var thisPopup = this;
@@ -103,7 +105,6 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
 
         var isLocked = false;
         var isHeaderDisabled = false;
-        var history = [];
 
         if ((typeof(popupListener) === 'undefined') || popupListener === null) {
             console.log("ERROR: No listener passed!");
@@ -175,6 +176,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
             if ($("#popup").is(":visible") && lastElementClick !== null) {
                 if (clickedDiv.is("#" + lastElementClick)) {
                     console.log("Clicked on same element!");
+                    console.log("Last clicked: " + lastElementClick);
                     this.closePopup();
                     //lastElementClick = clickedDiv.attr("id");
                     return;
@@ -340,6 +342,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         //Closes the popup
         this.closePopup = function () {
             if(isLocked)return;
+            lastElementClick = null;
 
             $(document).trigger("popup.closing");
             history = [];
