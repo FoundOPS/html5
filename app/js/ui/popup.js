@@ -49,6 +49,10 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
             },
             closePopup: function () {
                 popup.closePopup();
+            },
+            test: function() {
+                console.log(Popup.title);
+                console.log(Popup.menus);
             }
         };
 
@@ -87,24 +91,24 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
 
     /** Popup Constructor **/
 
-    var lastElementClick = null;
-    var history = [];
+
     function Popup(popupListener) {
-        var currentTarget = null;
+        //Static popup variables
+        Popup.lastElementClick = null;
+        Popup.currentTarget = null;
+        Popup.title = "";
+        Popup.content = "";
+        Popup.menus = [];
+        Popup.history = [];
+        Popup.backgroundColor = null;
+        Popup.fontColor = null;
+        Popup.borderColor = null;
+        Popup.padding = 3;
+        Popup.offScreen = false;
+        Popup.isLocked = false;
+        Popup.isHeaderDisabled = false;
 
         var thisPopup = this;
-        var title = "";
-        var content = "";
-        var menus = [];
-        var backgroundColor = null;
-        var fontColor = null;
-        var borderColor = null;
-
-        var padding = 3;
-        var offScreen = false;
-
-        var isLocked = false;
-        var isHeaderDisabled = false;
 
         if ((typeof(popupListener) === 'undefined') || popupListener === null) {
             console.log("ERROR: No listener passed!");
@@ -121,23 +125,23 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         });
 
         this.setBackgroundColor = function(color){
-            backgroundColor = color;
+            Popup.backgroundColor = color;
         };
 
         this.setFontColor = function(color){
-            fontColor = color;
+            Popup.fontColor = color;
         };
 
         this.setBorderColor = function(color){
-            borderColor = color;
+            Popup.borderColor = color;
         };
 
         this.lockPopup = function(){
-            isLocked = true;
+            Popup.isLocked = true;
         };
 
         this.unlockPopup = function(){
-            isLocked = false;
+            Popup.isLocked = false;
         };
 
         this.disableHeader = function() {
@@ -147,10 +151,10 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
             $("#popupContentWrapper").css("padding-top", "0px");
 
             $("#popupContent").css("border-top-right-radius", "5px")
-                              .css("border-top-left-radius", "5px")
-                              .css("border-top", "2px solid #CCC")
-                              .css("border-right", "2px solid #CCC")
-                              .css("border-left", "2px solid #CCC");
+                .css("border-top-left-radius", "5px")
+                .css("border-top", "2px solid #CCC")
+                .css("border-right", "2px solid #CCC")
+                .css("border-left", "2px solid #CCC");
         };
 
         this.toggleVisible = function (e, clicked) {
@@ -173,10 +177,10 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
             //TODO: Possibly change this to a data-* field.
             var id = clickedDiv.attr("id");
             //TODO: Fix repetition.
-            if ($("#popup").is(":visible") && lastElementClick !== null) {
-                if (clickedDiv.is("#" + lastElementClick)) {
+            if ($("#popup").is(":visible") && Popup.lastElementClick !== null) {
+                if (clickedDiv.is("#" + Popup.lastElementClick)) {
                     console.log("Clicked on same element!");
-                    console.log("Last clicked: " + lastElementClick);
+                    console.log("Last clicked: " + Popup.lastElementClick);
                     this.closePopup();
                     //lastElementClick = clickedDiv.attr("id");
                     return;
@@ -188,7 +192,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
             //Blocking statement that waits until popup closing animation is complete.
             $("#popup").promise().done(function () {});
 
-            if(isLocked)return;
+            if(Popup.isLocked)return;
 
             this.updateLeftPosition(clickedDiv);
 
@@ -199,44 +203,44 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
 
             clickedDiv.trigger("popupEvent", clickedDiv);
 
-            if(backgroundColor!==null){
-                $("#popupHeader").css("backgroundColor", backgroundColor);
-                $("#popupContent").css("backgroundColor", backgroundColor);
+            if(Popup.backgroundColor!==null){
+                $("#popupHeader").css("backgroundColor", Popup.backgroundColor);
+                $("#popupContent").css("backgroundColor", Popup.backgroundColor);
             }
 
-            if(fontColor!==null){
-                $("#popup").css("color", fontColor);
+            if(Popup.fontColor!==null){
+                $("#popup").css("color", Popup.fontColor);
                 //TODO: OPTIONSPOPUP REFACTOR: Possibly push this into new optionsPopup.
-                $("#popup a").css("color", fontColor);
+                $("#popup a").css("color", Popup.fontColor);
             }
 
-            if(borderColor!==null){
-                $("#popupHeader").css("border-color", borderColor);
-                $("#popupContent").css("border-color", borderColor);
-                $(".popupContentRow").css("border-color", borderColor);
+            if(Popup.borderColor!==null){
+                $("#popupHeader").css("border-color", Popup.borderColor);
+                $("#popupContent").css("border-color", Popup.borderColor);
+                $(".popupContentRow").css("border-color", Popup.borderColor);
             }
 
             $("#popup").stop(false, true).fadeIn('fast');
             $("#popupWrapper").css("visibility", "visible");
             //TODO: Change namespace.
             popupWrapperDiv.trigger("popup.visible");
-            lastElementClick = clickedDiv.attr("id");
+            Popup.lastElementClick = clickedDiv.attr("id");
         };
 
         //Function returns the left offset of the popup and target element.
         this.getLeft = function (target, popupDiv) {
-            currentTarget = target;
+            Popup.currentTarget = target;
             var targetOffset = target.offset().left + target.outerWidth() / 2;
             var rightOffset = targetOffset + popupDiv.outerWidth() / 2;
-            var offset = targetOffset - popupDiv.outerWidth() / 2 + padding + 1; //TODO: Figure out where the 1 extra pixel is.. could just be rounding.
+            var offset = targetOffset - popupDiv.outerWidth() / 2 + Popup.padding + 1; //TODO: Figure out where the 1 extra pixel is.. could just be rounding.
             var windowWidth = $(window).width();
 
-            offScreen = false;
+            Popup.offScreen = false;
             if (offset < 0) {
-                offScreen = true;
-                offset = padding;
+                Popup.offScreen = true;
+                offset = Popup.padding;
             } else if (rightOffset > windowWidth) {
-                offScreen = true;
+                Popup.offScreen = true;
                 offset = windowWidth - popupDiv.outerWidth();
             }
 
@@ -247,8 +251,8 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         this.setCaretPosition = function(targetOffset, outerOffset){
             var caretPos = "50%";
             var caret = $("#popupArrow");
-            if (offScreen) {
-                caretPos = (targetOffset - outerOffset + padding);
+            if (Popup.offScreen) {
+                caretPos = (targetOffset - outerOffset + Popup.padding);
             }
             //Moves carrot on popup div.
             caret.css("left", caretPos);
@@ -294,8 +298,8 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
             $(window).on('resize', function () {
                     var popupWrapperDiv = $("#popupWrapper");
                     if ($("#popup").is(":visible")) {
-                        thisPopup.updateLeftPosition(currentTarget);
-                        var top = $(currentTarget).outerHeight() + $(currentTarget).offset().top - $(window).scrollTop() + (-1 * parseInt($("#popupArrow").css("margin-top"), 10)); //popupArrow is offset over the border, so this gives easier measurements.
+                        thisPopup.updateLeftPosition(Popup.currentTarget);
+                        var top = $(Popup.currentTarget).outerHeight() + $(Popup.currentTarget).offset().top - $(window).scrollTop() + (-1 * parseInt($("#popupArrow").css("margin-top"), 10)); //popupArrow is offset over the border, so this gives easier measurements.
                         popupWrapperDiv.css("padding-top", top + "px");
                     }
                 }
@@ -341,11 +345,11 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
 
         //Closes the popup
         this.closePopup = function () {
-            if(isLocked)return;
-            lastElementClick = null;
+            if(Popup.isLocked)return;
+            Popup.lastElementClick = null;
 
             $(document).trigger("popup.closing");
-            history = [];
+            Popup.history = [];
             $("#popup").stop(false, true).fadeOut('fast');
             $("#popupWrapper").css("visibility", "hidden");
         };
@@ -359,26 +363,26 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         };
 
         this.previousPopup = function(){
-            history.pop();
-            if (history.length <= 0) {
+            Popup.history.pop();
+            if (Popup.history.length <= 0) {
                 thisPopup.closePopup();
                 return;
             }
-            thisPopup.setData(history[history.length - 1]);
+            thisPopup.setData(Popup.history[Popup.history.length - 1]);
         };
 
         //Public setter function for private var title and sets title of the html popup element.
         this.setTitle = function (t) {
-            title = t;
-            $("#popupTitle").html(title);
+            Popup.title = t;
+            $("#popupTitle").html(t);
         };
 
         //Public setter function for private var content and sets content of the html popup element.
         this.setContent = function (cont) {
-            content = cont;
+            Popup.content = cont;
             //popupContentDiv.data('jsp').getContentPane().find("#popupContent").html(content);
             //TODO: Is setting the content w/o using the jScrollPane api safe to do?
-            $("#popupContent").html(content);
+            $("#popupContent").html(cont);
             //TODO: Change event namespace.
             $("#popupContentWrapper").trigger("popup.setContent", $(this));
         };
@@ -393,9 +397,9 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         this.getMenu = function (id) {
             //Searches for a popup data object by the id passed, returns data object if found.
             var i;
-            for (i = 0; i < menus.length; i += 1) {
-                if (menus[i].id === id) {
-                    return menus[i];
+            for (i = 0; i < Popup.menus.length; i += 1) {
+                if (Popup.menus[i].id === id) {
+                    return Popup.menus[i];
                 }
             }
 
@@ -405,7 +409,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         };
 
         this.addMenu = function (id, title, contents) {
-            menus.push({'id': id, 'title': title, 'contents': contents});
+            Popup.menus.push({'id': id, 'title': title, 'contents': contents});
         };
 
         //Public void function that populates setTitle and setContent with data found by id passed.
@@ -417,7 +421,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
                 return false;
             }
             $(document).trigger('popup.populating');
-            history.push(newMenu);
+            Popup.history.push(newMenu);
             this.setData(newMenu);
             return true;
         };
@@ -512,6 +516,5 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
             this.setContent(c);
         };
     }
-
     return Popup;
 });
