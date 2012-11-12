@@ -182,12 +182,12 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore"], funct
         on.on("click", function () {
             off.removeClass("active");
             on.addClass("active");
-            $("#importerSelect").find("#dynamicHeader")[0].innerText = "Row 1";
+            $("#importerSelect").find("#dynamicHeader span")[0].innerText = "Row 1";
         });
         off.on("click", function () {
             on.removeClass("active");
             off.addClass("active");
-            $("#importerSelect").find("#dynamicHeader")[0].innerText = "Row 2";
+            $("#importerSelect").find("#dynamicHeader span")[0].innerText = "Row 2";
         });
 
         //get the list of fields for the selected service(for the dropdowns)

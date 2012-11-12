@@ -48,7 +48,7 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
 
             newRow["ContactInfo"] = "todo";
 
-            newRow["Repeat"] = row.Repeat.StartDate;
+            newRow["Repeat"] = row.Repeat;
 
 
 //            for (var j in row) {
@@ -162,7 +162,7 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
 
     //resize the grid based on the current window's height
     var resizeGrid = function () {
-        var extraMargin = 230;
+        var extraMargin = 250;
         var windowHeight = $(window).height();
         var contentHeight = windowHeight - extraMargin;
         $("#importerReview").find('.k-grid-content').css("height", contentHeight + 'px');

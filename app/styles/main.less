@@ -908,16 +908,16 @@ div.k-window-content {
 }
 /*endregion*/
 /*region Importer*/
-#importerUpload .k-input, #importerSelect .k-input{
-    color: #000;
-}
 #importerUpload, #importerSelect, #importerReview{
-    min-width: 600px;
+    min-width: 500px;
     background-color: #fff;
     background-image: url("../img/background-tile.png");
+    .wrapper{
+        min-width: 460px;
+        margin: 0 auto;
+    }
     .wrap{
-        margin: 30px auto 0 auto;
-        min-width: 300px;
+        margin: 30px 20px 0 20px;
         padding: 15px 20px;
         background-color: @grey;
         -webkit-box-shadow: none;
@@ -958,19 +958,20 @@ div.k-window-content {
     .saveBtn{
         margin-left: 5px;
     }
+    fieldset{
+        padding: 0;
+        border: none;
+    }
+    legend{
+        margin-bottom: 5px;
+        font-size: 18px;
+    }
     #hints{
         margin-bottom: 10px;
         padding: 10px;
-        background-color: #ffffAA;
-        fieldset{
-            padding: 0;
-            border: none;
-        }
-        legend{
-            font-size: 18px;
-        }
+        background-color: #fff;
         ul{
-            padding: 10px 0 0 20px;
+            padding: 0 0 0 20px;
             li{
                 list-style: disc;
                 a{
@@ -983,6 +984,7 @@ div.k-window-content {
         margin-top: 5px;
     }
     #fileUpload{
+        width: 104px;
         margin: 5px 0 0 0;
     }
     #fileName{
@@ -1013,15 +1015,18 @@ div.k-window-content {
         color: @red;
     }
 }
-#importerUpload .wrap, #importerSelect .wrap{
-    position: relative;
-    left:20px;
-    right:75px;
-    min-width: 550px;
-    max-width: 800px;
+#importerUpload .wrapper, #importerSelect .wrapper{
+    max-width: 795px;
 }
 /* region Upload */
 #importerUpload{
+    .wrap:last-child{
+        margin-top: 20px;
+    }
+    .main{
+        width: 205px;
+        margin: 0 auto;
+    }
     label{
         display: inline-block;
         margin-bottom: 4px;
@@ -1048,9 +1053,10 @@ div.k-window-content {
         margin: 0 0 20px 0;
         width:100%;
         li{
-            display: inline;
-            margin-left: 15%;
+            display: inline-block;
+            width: 30%;
             margin-top: 5px;
+            text-align: center;
             font-size: 16px;
         }
         li:first-child{
@@ -1058,12 +1064,17 @@ div.k-window-content {
             top: 11px;
         }
         li:nth-child(2), li:nth-child(3){
-            display: inline-block;
-            width: 80px;
-            padding: 4px 6px 5px 6px;
-            text-align: center;
-            color: @white;
-            background: @blue;
+            span{
+                display: inline-block;
+                width: 80px;
+                padding: 4px 6px 5px 6px;
+                text-align: center;
+                color: @white;
+                background: @blue;
+            }
+        }
+        li:nth-child(3){
+            width: 38%;
         }
     }
     #listView{
@@ -1072,14 +1083,14 @@ div.k-window-content {
              margin-bottom: 4px;
             .header{
                 color: #777;
-                width: 30%;
+                width: 33%;
                 float: left;
                 padding: 5px 0 5px 5px;
                 background: @white;
             }
             .value{
                 color: #777;
-                width: 30%;
+                width: 33%;
                 min-height: 18px;
                 overflow: hidden;
                 padding: 5px;
@@ -1088,7 +1099,7 @@ div.k-window-content {
             }
             .styled-select{
                 float: right;
-                width: 40%;
+                width: 34%;
                 margin: -28px 0 0 0;
             }
         }
@@ -1101,7 +1112,7 @@ div.k-window-content {
 /* region Review*/
 #importerReview{
     .wrap{
-        margin: 40px 20px 30px 20px;
+        margin: 30px 20px 30px 20px;
     }
     .grid{
         margin-bottom: 15px;
@@ -1156,68 +1167,148 @@ div.k-window-content {
 /*endregion*/
 /*region Breadcrumbs*/
 /*--------------- Simple scalable breadcrumb by Veerle Pieters --------------*/
-.breadcrumbsWrapper{
-    display: none;
-    position: relative;
-    top: 15px;
-    width: 660px;
-    height: 50px;
-    margin: 0 auto;
-    border: 2px solid #f2f2f2;
-    background: #f2f2f2;
-}
 #importerUpload, #importerSelect,#importerReview{
     .crumbs{
+        position: relative;
+        top: 15px;
+        height: 50px;
+        margin: 0 20px;
+        border: 2px solid #f2f2f2;
+        background: #f2f2f2;
+        li {
+            float:left;
+            height: 50px;
+            list-style-type:none;
+        }
+        li{
+            &.active{
+                background: @white;
+            }
+            span{
+                display: block;
+                width: 32px;
+                height: 32px;
+                float: left;
+                margin: 10px;
+                background-repeat: no-repeat;
+            }
+            p{
+                margin-top: 15px;
+                font-size: 16px;
+                margin-right: 0;
+            }
+        }
         li:nth-child(1){
-            width: 189px;
-            background: url("../img/breadcrumb1a.png") no-repeat;
+            width: 31%;
+            span{
+                background-image: url("../img/circle1a.png");
+            }
         }
         li:nth-child(2){
-            width: 203px;
-            margin-right: -23px;
-            margin-left: -23px;
-            background: url("../img/breadcrumb2.png") no-repeat;
+            display: inline-block;
+            width: 22px;
+            background-image: url("../img/arrowPoint.png");
+            background-repeat: no-repeat;
+            background-position: left;
         }
         li:nth-child(3){
-             width: 201px;
-             background: url("../img/breadcrumb3.png") no-repeat;
+            width: 32%;
+            span{
+                background-image: url("../img/circle2.png");
+            }
+        }
+        li:nth-child(4){
+             width: 32%;
+            span{
+                background-image: url("../img/circle3.png");
+            }
          }
     }
 }
 #importerSelect{
+    min-width: 510px;
+    .wrapper{
+        min-width: 480px;
+    }
     .crumbs{
         li:nth-child(1){
-            background-image: url("../img/breadcrumb1.png");
+            width: 30%;
+            cursor: pointer;
+            p{
+                cursor: pointer;
+            }
+            span{
+                background-image: url("../img/circle1.png");
+            }
         }
         li:nth-child(2){
-            background-image: url("../img/breadcrumb2a.png");
+            display: inline-block;
+            width: 22px;
+            background-image: url("../img/arrowEnd.png");
+            background-repeat: no-repeat;
+            background-position: right;
+        }
+        li:nth-child(3){
+            width: 30%;
+            span{
+                background-image: url("../img/circle2a.png");
+            }
+        }
+        li:nth-child(4){
+            display: inline-block;
+            width: 22px;
+            background-image: url("../img/arrowPoint.png");
+            background-repeat: no-repeat;
+            background-position: left;
+        }
+        li:nth-child(5){
+            width: 30%;
+            span{
+                background-image: url("../img/circle3.png");
+            }
         }
     }
 }
 #importerReview{
     .crumbs{
         li:nth-child(1){
-            background-image: url("../img/breadcrumb1.png");
+            width: 31%;
+            cursor: pointer;
+            p{
+                cursor: pointer;
+            }
+            span{
+                background-image: url("../img/circle1.png");
+            }
+        }
+        li:nth-child(2){
+            width: 31%;
+            cursor: pointer;
+            background:none;
+            p{
+                cursor: pointer;
+            }
+            span{
+                background-image: url("../img/circle2.png");
+            }
+        }
+
+        li:nth-child(4){
+            display: inline-block;
+            float: right;
+            width: 22px;
+            background-image: url("../img/arrowEnd.png");
+            background-repeat: no-repeat;
+            background-position: right;
         }
         li:nth-child(3){
-            background-image: url("../img/breadcrumb3a.png");
+            float: right;
+            width: 31%;
+            span{
+                background-image: url("../img/circle3a.png");
+            }
         }
     }
-}
-#importerReview .breadcrumbsWrapper{
-    margin: 0 20px;
-}
-.crumbs {
-    position: relative;
-    margin: 0 auto;
-    width: 593px;
-}
-.crumbs ul, .crumbs li {
-    list-style-type:none;
-}
-.crumbs li {
-    float:left;
-    height: 50px;
 }
 /*endregion*/
 /*endregion*/
