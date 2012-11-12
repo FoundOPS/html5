@@ -208,7 +208,8 @@ module.exports = function (grunt) {
                         blobRoot: "",
                         CSSblobRoot: "styles/main-built.css",
                         JSblobRoot: "js/main-built.js",
-                        cordova: '<script type="text/javascript" charset="utf-8" src="cordova-2.1.0.js"></script>',
+                        cordova: '<script type="text/javascript" charset="utf-8" src="cordova-2.1.0.js"></script>\n' +
+                            '<script type="text/javascript" charset="utf-8" src="ScreenOrientation.js"></script>',
                         appLocation: '"navigator.html"'
                     }
                 }

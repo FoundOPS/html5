@@ -47,6 +47,7 @@
 		BA6D7F2B1639B57F00C003B5 /* icon.png in Resources */ = {isa = PBXBuildFile; fileRef = BA6D7F2A1639B57F00C003B5 /* icon.png */; };
 		BA6D7F2D1639B58700C003B5 /* Icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = BA6D7F2C1639B58700C003B5 /* Icon@2x.png */; };
 		BA6D7F2F1639B58F00C003B5 /* Icon-72.png in Resources */ = {isa = PBXBuildFile; fileRef = BA6D7F2E1639B58F00C003B5 /* Icon-72.png */; };
+		BA969508164D8F1F00B964D1 /* ScreenOrientation.m in Sources */ = {isa = PBXBuildFile; fileRef = BA969507164D8F1F00B964D1 /* ScreenOrientation.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -113,6 +114,8 @@
 		BA6D7F2A1639B57F00C003B5 /* icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon.png; sourceTree = "<group>"; };
 		BA6D7F2C1639B58700C003B5 /* Icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon@2x.png"; sourceTree = "<group>"; };
 		BA6D7F2E1639B58F00C003B5 /* Icon-72.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-72.png"; sourceTree = "<group>"; };
+		BA969506164D8F1200B964D1 /* ScreenOrientation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScreenOrientation.h; sourceTree = "<group>"; };
+		BA969507164D8F1F00B964D1 /* ScreenOrientation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ScreenOrientation.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -256,6 +259,8 @@
 		307C750510C5A3420062BCA9 /* Plugins */ = {
 			isa = PBXGroup;
 			children = (
+				BA969507164D8F1F00B964D1 /* ScreenOrientation.m */,
+				BA969506164D8F1200B964D1 /* ScreenOrientation.h */,
 			);
 			name = Plugins;
 			path = FoundOPS/Plugins;
@@ -428,6 +433,7 @@
 				1D60589B0D05DD56006BFB54 /* main.m in Sources */,
 				1D3623260D0F684500981E51 /* AppDelegate.m in Sources */,
 				302D95F114D2391D003F00A1 /* MainViewController.m in Sources */,
+				BA969508164D8F1F00B964D1 /* ScreenOrientation.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

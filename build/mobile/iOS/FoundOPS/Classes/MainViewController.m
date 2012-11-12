@@ -29,6 +29,8 @@
 
 @implementation MainViewController
 
+@synthesize allowedOrienations;
+
 - (id) initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -60,6 +62,8 @@
 - (void) viewDidLoad
 {
     [super viewDidLoad];
+    self.allowedOrienations = [NSMutableArray array];
+    [self.allowedOrienations addObject:[NSNumber numberWithInt:UIDeviceOrientationPortrait]];
     // Do any additional setup after loading the view from its nib.
 }
 
@@ -73,6 +77,7 @@
 - (BOOL) shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
     // Return YES for supported orientations
+//    return [allowedOrienations containsObject:[NSNumber numberWithInt:interfaceOrientation]];
     return [super shouldAutorotateToInterfaceOrientation:interfaceOrientation];
 }
 

@@ -98,12 +98,11 @@ define(["db/services", "db/saveHistory", "tools/dateTools", "underscore", "tools
                     personalSettings.save();
                 }
 
-                //Setup the timezone dropdown - format options.
-                var i, options = []
-                for (i = 0; i < timeZones.length; i++) {
-                    options[i] = {name: timeZones[i].DisplayName, value: timeZones[i].Id, selected: false};
-                }
-                $("#TimeZone").selectBox({options: options, onSelect: save});
+                //Setup the timezone dropdown
+                $("#TimeZone").selectBox({
+                    data: timeZones,
+                    dataTextField: "DisplayName",
+                    onSelect: save});
 
                 if (!vm.get("userAccount.TimeZone")) {
                     var timezone = dateTools.getLocalTimeZone().Id;

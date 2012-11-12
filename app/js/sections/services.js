@@ -147,9 +147,10 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
         form[0].action = dbServices.ROOT_API_URL + "serviceHolders/GetCsv";
         form.submit();
     };
+
     //endregion
 
-    //region DataSource
+    //region Data/DataSource
 
     /**
      * Converts the types returned in the first row of the data returned from
@@ -302,67 +303,36 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
         }
     };
 
-    /*
-     * Create a data source and grid.
-     * This is called whenever the service is changed because the data schema is dynamic
-     * and kendo datasource does not allow you to change the schema.
+    /**
+     * Reload the services
      */
-    var createDataSourceAndGrid = function () {
-        var serviceType = vm.get("serviceType.Name");
+    var reloadServices = _.debounce(function () {
+        serviceHoldersDataSource.options.transport.read.data.startDate = dateTools.stripDate(vm.get("startDate"));
+        serviceHoldersDataSource.options.transport.read.data.endDate = dateTools.stripDate(vm.get("endDate"));
+        serviceHoldersDataSource.read();
+    }, 250);
 
-        var baseParams = {
-            startDate: dateTools.stripDate(vm.get("startDate")),
-            endDate: dateTools.stripDate(vm.get("endDate")),
-            serviceType: serviceType
-        };
-
-        //for loading the field types
-        var singleParams = _.extend({single: true}, baseParams);
-
-        //for loading set of service holders
-        var setParams = _.extend({roleId: parameters.get().roleId}, baseParams);
-
-        //load the fields types
-        //then create the datasource
-        //then create the grid
-        dbServices.serviceHolders.read({params: singleParams}).done(function (data) {
-            var fields = getFields(data);
-            serviceHoldersDataSource = new kendo.data.DataSource({
-                schema: {
-                    model: {
-                        id: "ServiceId",
-                        fields: fields
-                    },
-                    parse: function (response) {
-                        return formatData(response);
-                    }
-                },
-                sort: { field: "OccurDate", dir: "asc" },
-                transport: {
-                    read: {
-                        url: dbServices.API_URL + "serviceHolders/Get",
-                        data: setParams
-                    }
-                },
-                pageSize: 50
-            });
-
-            //create the grid
-            setupGrid(fields);
-
-            //whenever the grid is filtered, update the URL parameters
-            kendoTools.addFilterEvent(serviceHoldersDataSource);
-            serviceHoldersDataSource.bind("filtered", function () {
-                kendoTools.updateHashToFilters({name: "services"}, serviceHoldersDataSource);
-            });
-
-            //force reparse, to fix start/end date filters
-            parameters.parse();
-        });
-    };
-//endregion
+    //endregion
 
     //region Grid
+
+    /**
+     * Disable the filter's: and/or, before/after/equal to... drop downs, and clear button
+     * @param columnIndex Index of the column
+     */
+    var limitFilter = function (columnIndex) {
+        //find the parent div of the filter window
+        var filterWindow = $($('select[data-bind^="value: filters"]').closest('div')[columnIndex]);
+
+        //disable the drop drowns
+        filterWindow.find("select").each(function () {
+            $(this).data("kendoDropDownList").enable(false);
+        });
+
+        //disabled the Clear filter button
+        filterWindow.find("button[type='reset']")
+            .attr("disabled", "disabled").addClass('k-state-disabled');
+    };
 
     //resize the grid based on the current window's height
     var resizeGrid = function () {
@@ -483,6 +453,25 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
             selectable: true
         }).data("kendoGrid");
 
+        //find the Occur Date column index
+        var visibleIndex = 0;
+        for (var columnIndex = 0; columnIndex < columns.length; columnIndex++) {
+            var column = columns[columnIndex];
+
+            //only consider visible columns
+            if (column.hidden) {
+                continue;
+            }
+
+            if (column.field === "OccurDate") {
+                //limit the available filters on OccurDate
+                limitFilter(visibleIndex);
+                break;
+            }
+
+            visibleIndex++;
+        }
+
         //Keep track of any changes to the columns, and store the configuration
         kendoTools.storeConfiguration(grid, vm.get("serviceType.Id"));
 
@@ -491,12 +480,150 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
 
     //endregion
 
-    var reloadServices = _.debounce(function () {
-        serviceHoldersDataSource.options.transport.read.data.startDate = dateTools.stripDate(vm.get("startDate"));
-        serviceHoldersDataSource.options.transport.read.data.endDate = dateTools.stripDate(vm.get("endDate"));
-        serviceHoldersDataSource.read();
-    }, 250);
+    //region Constructor
 
+    /*
+     * Create a data source and grid.
+     * This is called whenever the service is changed because the data schema is dynamic
+     * and kendo datasource does not allow you to change the schema.
+     */
+    var createDataSourceAndGrid = function () {
+        var serviceType = vm.get("serviceType.Name");
+
+        var baseParams = {
+            startDate: dateTools.stripDate(vm.get("startDate")),
+            endDate: dateTools.stripDate(vm.get("endDate")),
+            serviceType: serviceType
+        };
+
+        //for loading the field types
+        var singleParams = _.extend({single: true}, baseParams);
+
+        //for loading set of service holders
+        var setParams = _.extend({roleId: parameters.get().roleId}, baseParams);
+
+        //load the fields types
+        //then create the datasource
+        //then create the grid
+        dbServices.serviceHolders.read({params: singleParams}).done(function (data) {
+            var fields = getFields(data);
+            serviceHoldersDataSource = new kendo.data.DataSource({
+                schema: {
+                    model: {
+                        id: "ServiceId",
+                        fields: fields
+                    },
+                    parse: function (response) {
+                        return formatData(response);
+                    }
+                },
+                sort: { field: "OccurDate", dir: "asc" },
+                transport: {
+                    read: {
+                        url: dbServices.API_URL + "serviceHolders/Get",
+                        data: setParams
+                    }
+                },
+                pageSize: 50
+            });
+
+            //create the grid
+            setupGrid(fields);
+
+            //whenever the grid is filtered, update the URL parameters
+            kendoTools.addFilterEvent(serviceHoldersDataSource);
+            serviceHoldersDataSource.bind("filtered", function () {
+                kendoTools.updateHashToFilters({name: "services"}, serviceHoldersDataSource);
+            });
+
+            //force reparse, to fix start/end date filters
+            parameters.parse();
+        });
+    };
+
+    /**
+     * Handle parameter changes:
+     * whenever the url parameters change:
+     * 1) update the service type (if it changed)
+     * 2) update the grid's filters (if they changed)
+     */
+    var handleParameterChanges = function(){
+        parameters.changed.add(function (section, query) {
+            if (!section || section.name !== "services" || !services.serviceTypes) {
+                return;
+            }
+
+            if (!query) {
+                query = {};
+            }
+
+            var serviceType = vm.get("serviceType");
+
+            //1) update the service type (if it changed)
+
+            //if there is none, choose the vm's selected service
+            if (!query.service) {
+                //if it is not chosen choose the first one
+                if (!serviceType) {
+                    serviceType = services.serviceTypes[0];
+                }
+
+                query.service = serviceType.Name;
+
+                //update the query parameters
+                parameters.set({params: query, replace: true});
+                return;
+            }
+            //if it changed, update it
+            else if (!serviceType || query.service !== serviceType.Name) {
+                serviceType = _.find(services.serviceTypes, function (st) {
+                    return st.Name === query.service;
+                });
+                vm.set("serviceType", serviceType);
+            }
+
+            //update the filters based on the hash
+            kendoTools.updateFiltersToHash(serviceHoldersDataSource, query, processFilters);
+        });
+    }
+
+    /**
+     * Setup the service types drop down
+     */
+    var setupServiceSelector = function(){
+        //load the current business account's service types
+        dbServices.serviceTemplates.read().done(function (serviceTypes) {
+            services.serviceTypes = serviceTypes;
+
+            //Setup selectBox
+            $("#serviceTypes").selectBox({
+                data: serviceTypes,
+                dataTextField: "Name",
+                onSelect: function (selectedOption) {
+                    vm.set("serviceType", {Id: selectedOption.value, Name: selectedOption.name});
+
+                    //disable the delete button and hide the service details
+                    $('#services .k-grid-delete').attr("disabled", "disabled");
+
+                    //hide the serviceDetails
+                    $("#serviceDetails").attr("style", "display:none");
+                }
+            });
+
+            //now that the service types are loaded,
+            //setup the grid by reparsing the hash
+            parameters.parse();
+        });
+        $("#serviceDetails").kendoServiceDetails();
+    };
+
+    /**
+     * Handle all view model changes:
+     * 1) Save changes whenever the selected service has a change
+     * 2) Re-setup the data source/grid whenever the service type changes
+     * 3) Reload the services whenever the start or end date changes
+     * @param e
+     */
     var vmChanged = function (e) {
         //save changes whenever the selected service has a change
         if (e.field.indexOf("selectedService.") > -1) {
@@ -548,36 +675,7 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
 
         vm.bind("change", _.debounce(vmChanged, 200));
 
-        //load the current business account's service types then
-        //1) setup the service types drop down
-        //2) choose the first service+ type
-        dbServices.serviceTemplates.read().done(function (serviceTypes) {
-            services.serviceTypes = serviceTypes;
-
-            //Setup selectBox.
-            var i, options = [];
-            for (i = 0; i < serviceTypes.length; i++) {
-                options[i] = {name: serviceTypes[i].Name, value: serviceTypes[i].Id};
-            }
-            $("#serviceTypes").selectBox({
-                options: options,
-                onSelect: function (selectedOption) {
-                    vm.set("serviceType", {Id: selectedOption.value, Name: selectedOption.name});
-
-                    //disable the delete button and hide the service details
-                    $('#services .k-grid-delete').attr("disabled", "disabled");
-
-                    //hide the serviceDetails
-                    $("#serviceDetails").attr("style", "display:none");
-                }
-            });
-
-            //now that the service types are loaded,
-            //setup the grid by reparsing the hash
-            parameters.parse();
-        });
-
-        $("#serviceDetails").kendoServiceDetails();
+        setupServiceSelector();
 
         //hookup the add & delete buttons
         $("#services").find(".addDeleteBtns .k-grid-add").on("click", function () {
@@ -593,46 +691,7 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
         });
         resizeGrid();
 
-        //whenever the url parameters change:
-        //1) update the service type (if it changed)
-        //2) update the grid's filters (if they changed)
-        parameters.changed.add(function (section, query) {
-            if (!section || section.name !== "services" || !services.serviceTypes) {
-                return;
-            }
-
-            if (!query) {
-                query = {};
-            }
-
-            var serviceType = vm.get("serviceType");
-
-            //1) update the service type (if it changed)
-
-            //if there is none, choose the vm's selected service
-            if (!query.service) {
-                //if it is not chosen choose the first one
-                if (!serviceType) {
-                    serviceType = services.serviceTypes[0];
-                }
-
-                query.service = serviceType.Name;
-
-                //update the query parameters
-                parameters.set({params: query, replace: true});
-                return;
-            }
-            //if it changed, update it
-            else if (!serviceType || query.service !== serviceType.Name) {
-                serviceType = _.find(services.serviceTypes, function (st) {
-                    return st.Name === query.service;
-                });
-                vm.set("serviceType", serviceType);
-            }
-
-            //update the filters based on the hash
-            kendoTools.updateFiltersToHash(serviceHoldersDataSource, query, processFilters);
-        });
+        handleParameterChanges();
     };
 
     services.show = function () {
@@ -646,6 +705,8 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
             }
         });
     };
+
+    //endregion
 
     //set services to a global function, so the functions are accessible from the HTML element
     window.services = services;

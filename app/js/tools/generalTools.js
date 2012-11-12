@@ -6,11 +6,26 @@
 
 "use strict";
 
-define(['jquery', "developer", 'moment'], function ($, developer) {
+define(['jquery', "developer", '../lib/platform', 'moment'], function ($, developer, platform) {
     var generalTools = {};
 
-    generalTools.deepClone = function(obj){
+    generalTools.deepClone = function (obj) {
         return JSON.parse(JSON.stringify(obj));
+    };
+
+    /**
+     * Finds the index based on a filter function
+     * @param collection
+     * @param filter {Function([element], [index], [collection]}
+     * @return {Number} The index
+     */
+    generalTools.findIndex = function (collection, filter) {
+        for (var i = 0; i < filter.length; i++) {
+            if (filter(collection[i], i, collection)) {
+                return i;
+            }
+        }
+        return -1;
     };
 
     /**
@@ -198,12 +213,23 @@ define(['jquery', "developer", 'moment'], function ($, developer) {
         });
     };
 
-    generalTools.goToUrl = function(url) {
-        var androidDevice = developer.IS_MOBILE && kendo.support.detectOS(navigator.userAgent).name === "android";
+    generalTools.checkPlatform = {
+        isAndroid: function () {
+            return platform.os === "Android";
+        },
+        isiOS: function () {
+            return platform.os === "iOS";
+        },
+        isCordova: function () {
+            return (window.cordova ? true : false);
+        }
+    }
+
+    generalTools.goToUrl = function (url) {
         if (url.substr(0, 7) !== "http://" && url.substr(0, 8) !== "https://") {
             url = "http://" + url;
         }
-        if (androidDevice) {
+        if (generalTools.checkPlatform.isAndroid() && generalTools.checkPlatform.isCordova()) {
             window.plugins.childBrowser.showWebPage(url);
         } else {
             window.open(url, "_blank");
