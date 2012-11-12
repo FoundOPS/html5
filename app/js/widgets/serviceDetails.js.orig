@@ -1,7 +1,13 @@
 'use strict';
+<<<<<<< HEAD
+define(["jquery", "db/services", "db/session", "db/models", "tools/kendoTools", "widgets/selectBox", "select2", "kendo", "jmaskmoney",
+    "jautosize", "jtooltip", "jsignature", "jsigbase30", "jsigSVG"],
+    function ($, dbServices, session, models, kendoTools) {
+=======
 define(["jquery", "db/services", "db/session", "db/models", "tools/kendoTools", "tools/generalTools", "widgets/selectBox", "select2", "kendo", "jmaskmoney",
     "jautosize", "jtooltip", "jsignature", "jsigbase30", "jsigSVG"],
     function ($, dbServices, session, models, kendoTools, generalTools) {
+>>>>>>> publishable
 
     var kendo = window.kendo,
         ui = kendo.ui,
@@ -267,9 +273,17 @@ define(["jquery", "db/services", "db/session", "db/models", "tools/kendoTools", 
                 var detachedElements,
                     resetSigPad = function () {$(".sigPad").jSignature("reset")},
                     openSigPad = function () {
+<<<<<<< HEAD
+                        if (kendo.support.detectOS(navigator.userAgent).name === 'android' && window.cordova) {
+                            navigator.screenOrientation.set('landscape');
+                        } else if (kendo.support.detectOS(navigator.userAgent).name === 'ios'  && window.cordova) {
+                            window.plugins.orientation.setAllowed([{pp:false, pd:false, ll:true, lr:true}]);
+                        }
+=======
 //                        if ((generalTools.checkPlatform.isiOS() || generalTools.checkPlatform.isAndroid()) && generalTools.checkPlatform.isCordova()) {
 //                            navigator.screenOrientation.set('landscape');
 //                        }
+>>>>>>> publishable
                         resetSigPad();
                         //Wait until screen is in landscape orientation to call out the sig pad.
                         setTimeout( function() {
@@ -302,11 +316,20 @@ define(["jquery", "db/services", "db/session", "db/models", "tools/kendoTools", 
                             resetSigPad();
                             detachedElements.insertBefore("#sigListView");
                         });
+<<<<<<< HEAD
+                        if (kendo.support.detectOS(navigator.userAgent).name === "android" && window.cordova) {
+                            navigator.screenOrientation.set("fullSensor");
+                        } else if (kendo.support.detectOS(navigator.userAgent).name === "ios" && window.cordova) {
+                            window.plugins.orientation.setAllowed([{pp:true, pd:true, ll:true, lr:true}]);
+                        }
+                        kendoTools.re_enableScroll("#routeTask");
+=======
 //                        if ((generalTools.checkPlatform.isiOS() || generalTools.checkPlatform.isAndroid()) && generalTools.checkPlatform.isCordova()) {
 //                            navigator.screenOrientation.set("fullSensor");
 //                        }
                         kendoTools.re_enableScroll("#routeTask");
 
+>>>>>>> publishable
                         //Reset scroll to top.
                         $("#routeTask .km-scroll-container").css("-webkit-transform", "");
                     },
@@ -353,9 +376,6 @@ define(["jquery", "db/services", "db/session", "db/models", "tools/kendoTools", 
                 if (field.Value) {
                     displaySig();
                 }
-                $("#sigPadOpener").live('click', openSigPad);
-
-                return fieldElement;
                 $("#sigPadOpener").live('click', openSigPad);
 
                 return fieldElement;

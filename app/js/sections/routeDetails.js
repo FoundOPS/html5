@@ -6,7 +6,8 @@
 
 'use strict';
 
-define(["sections/linkedEntitySection", "sections/routes", "tools/parameters", "db/services", "db/models", "tools/analytics", "underscore"], function (createBase, routes, parameters, dbServices, models, analytics, _) {
+define(["sections/linkedEntitySection", "sections/routes", "tools/parameters", "db/services", "db/models", "tools/analytics", "underscore", "tools/generalTools"],
+    function (createBase, routes, parameters, dbServices, models, analytics, _, generalTools) {
     var vm, section = createBase("routeDestinationDetails", "routeDestinationId",
         //on show
         function () {
@@ -146,7 +147,7 @@ define(["sections/linkedEntitySection", "sections/routes", "tools/parameters", "
         vm.set("startVisible", false);
         vm.set("endVisible", true);
 
-        if (kendo.support.detectOS(navigator.userAgent).device === "android") {
+        if (generalTools.checkPlatform.isAndroid()) {
             window.plugins.statusBarNotification.notify("Tracking...", "FoundOPS is tracking your location.");
         }
 

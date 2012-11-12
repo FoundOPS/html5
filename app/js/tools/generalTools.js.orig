@@ -225,7 +225,11 @@ define(['jquery', "developer", '../lib/platform', 'moment'], function ($, develo
         }
     }
 
+<<<<<<< HEAD
+    generalTools.goToUrl = function(url) {
+=======
     generalTools.goToUrl = function (url) {
+>>>>>>> SignaturePad
         if (url.substr(0, 7) !== "http://" && url.substr(0, 8) !== "https://") {
             url = "http://" + url;
         }
@@ -235,6 +239,8 @@ define(['jquery', "developer", '../lib/platform', 'moment'], function ($, develo
             window.open(url, "_blank");
         }
     };
+
+
 
     return generalTools;
 });
