@@ -162,9 +162,8 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
 
         var fieldTypes = {
             "number": {type: "number"},
-            "dateTime": {type: "date", detail: "datetime"},
-            "time": {type: "string", detail: "time"},
             "date": {type: "date", detail: "date"},
+            "signature": {type: "signature"},
             "string": {type: "string"},
             "guid": {type: "guid"}
         };
@@ -216,7 +215,7 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
                     convertedValue = "";
                 } else if (value.type === "number") {
                     convertedValue = parseFloat(originalValue);
-                } else if (value.detail === "date" || value.detail === "datetime" || value.detail === "time") {
+                } else if (value.detail === "date") {
                     convertedValue = moment(originalValue).toDate();
                 } else if (value.type === "string") {
                     if (originalValue) {
@@ -363,13 +362,12 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
             if (column.type === "number") {
                 column.template = "#= (" + key + "== null) ? ' ' : " + key + " #";
             }
-            //TODO: Adjust below, show time zone
             else if (value.detail === "date") {
                 column.template = "#= (" + key + "== null) ? ' ' : moment.utc(" + key + ").format('LL') #";
-            } else if (value.detail === "datetime") {
-                column.template = "#= (" + key + "== null) ? ' ' : moment.utc(" + key + ").format('LLL') #";
-            } else if (value.detail === "time") {
-                column.template = "#= (" + key + "== null) ? ' ' : moment.utc(" + key + ").format('LT') #";
+            }
+            else if (column.type === "signature") {
+                column.template = "# if (" + key + "== null) { # #= '' # # } else { # "
+                    + "<a href='#=" + key + "#' target='_blank'><img src='img/JohnHancock.png' width='90'></a># } #";
             }
 
             //calculate the width based on number off characters
@@ -547,7 +545,7 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
      * 1) update the service type (if it changed)
      * 2) update the grid's filters (if they changed)
      */
-    var handleParameterChanges = function(){
+    var handleParameterChanges = function () {
         parameters.changed.add(function (section, query) {
             if (!section || section.name !== "services" || !services.serviceTypes) {
                 return;
@@ -590,7 +588,7 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
     /**
      * Setup the service types drop down
      */
-    var setupServiceSelector = function(){
+    var setupServiceSelector = function () {
         //load the current business account's service types
         dbServices.serviceTemplates.read().done(function (serviceTypes) {
             services.serviceTypes = serviceTypes;
