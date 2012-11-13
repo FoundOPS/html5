@@ -43,8 +43,8 @@ define(["sections/routeTask", "db/services", "db/saveHistory", "tools/parameters
         vm.openSigPad = function () {
             vm.resetSigPad();
             var width = $(window).width();
-            var margin = width > 800 ? (width - 800)/ 2 : 0;
-            var top = ($('.sigWrapper').height()/2) - ($('.sigPad').height()/2);
+            var margin = width > 800 ? (width - 800) / 2 : 0;
+            var top = ($('.sigWrapper').height() / 2) - ($('.sigPad').height() / 2);
             $('#content').css('padding', '0');
             $('.sigPad').css("top", top).css('margin', '0 ' + margin + 'px');
             $('.sigWrapper').animate({'opacity': 1}, 300);
@@ -63,22 +63,22 @@ define(["sections/routeTask", "db/services", "db/saveHistory", "tools/parameters
         };
         vm.saveSig = function () {
             if ($('.sigPad').jSignature("getData", "base30")[1] !== "") {
-                vm.displaySig();
+                //TODO: Use field ID, not Type.
+                var sigField = _.find(routeTask.vm.selectedService.Fields, function (field) {
+                    return field.Type === "SignatureField";
+                });
+                sigField.set("Value", $('.sigPad').jSignature("getData", "base30")[1]);
                 section.onBack();
             } else {
                 alert("Please sign before you save or press the cancel button to go back.");
             }
         };
-        vm.displaySig = function () {
-            var svgString = $('.sigPad').jSignature("getData", "svgbase64").join(",");
-            console.log(svgString);
-            $("#sigDisplay").attr("src", "data:" + svgString);
-        };
+
         //Handle css upon device rotation.
         //Detect whether device supports orientationchange event, otherwise fall back to the resize event.
         var supportsOrientationChange = "onorientationchange" in window,
             orientationEvent = supportsOrientationChange ? "orientationchange" : "resize";
-        window.addEventListener(orientationEvent, function() {
+        window.addEventListener(orientationEvent, function () {
             if (parameters.get().signatureId) {
                 vm.openSigPad();
             }
