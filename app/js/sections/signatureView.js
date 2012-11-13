@@ -1,7 +1,7 @@
 // Copyright 2012 FoundOPS LLC. All Rights Reserved.
 
 /**
- * @fileoverview Class to hold the selected route task's logic.
+ * @fileoverview Class to hold the selected route task signature's logic.
  */
 
 'use strict';
@@ -9,19 +9,19 @@
 define(["sections/routeTask", "db/services", "db/saveHistory", "tools/parameters", "underscore", "tools/kendoTools", "jsignature", "jsigbase30", "jsigSVG"],
     function (routeTask, dbServices, saveHistory, parameters, _, kendoTools) {
         /**
-         * routeTask = wrapper for all service objects
+         * signatureView = wrapper for all service objects
          * vm = viewModel
          * popupCaller = the button who's click opened the popup.
          */
         var section = {}, vm = kendo.observable(), popupCaller;
-        window.routeTask = section;
+        window.signatureView = section;
 
         section.vm = vm;
 
 //public methods
 
         section.initialize = function () {
-            console.log("Hello, this is sigView");
+            console.log("Hello, this is sigView.");
             $(".sigPad").jSignature();
         };
         section.onBack = function () {

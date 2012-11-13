@@ -77,6 +77,13 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "tools/paramete
     window.routeDestinationDetails = section;
     vm = section.vm;
 
+    section.onBack = function () {
+        var query = parameters.get();
+        //remove the routeId so it does not jump back here
+        delete query.routeI;
+        parameters.set({params: query, replace: true, section: {name: "routes"}});
+    };
+
     vm.getDirections = function () {
         var currentPosition,
             destination = vm.get("selectedEntity.Location.Latitude") + "," + vm.get("selectedEntity.Location.Longitude");

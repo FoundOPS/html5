@@ -345,7 +345,7 @@ define(["jquery", "db/services", "db/session", "db/models", "tools/kendoTools", 
 //                $("#sigSave").live('click', saveSig);
 
 //                $(".sigPad").jSignature();
-                var fieldElement = $('<ul data-role="listview" data-style="inset">'
+                var fieldElement = $('<ul data-role="listview" data-style="inset" data-bind="click: select">'
                                         + field.Name +
                                         '<li id="sigPadOpener" style="text-align: center">' +
                                             '<a>' +
@@ -356,7 +356,6 @@ define(["jquery", "db/services", "db/session", "db/models", "tools/kendoTools", 
 //                if (field.Value) {
 //                    displaySig();
 //                }
-                $("#sigPadOpener").live('click', function () { application.navigate("#signatureView", "slide") });
 
                 return fieldElement;
             }
