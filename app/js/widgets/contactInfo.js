@@ -131,6 +131,7 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "db/m
                 //save changes
                 if (that._isNew) {
                     that.options.entity.create(that.contacts[that._editIndex]);
+                    analytics.track("Add ContactInfo");
                 } else {
                     //check if contact changed
                     var newContact = generalTools.deepClone(that.contacts[that._editIndex]);
@@ -195,13 +196,11 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "db/m
 
             $(that.element).find(".contactList a").on("click", function (e) {
                 if (e.currentTarget.children[0].className === models.InfoType.PHONE) {
-                    analytics.track("Phone Contact Click");
+                    analytics.track("Click Phone Contact");
                     window.location.href = "tel:" + e.currentTarget.children[2].innerText;
                 } else if (e.currentTarget.children[0].className === models.InfoType.EMAIL) {
-                    analytics.track("Email Contact Click");
                     window.open("mailto:" + e.currentTarget.children[2].innerText, "_blank");
                 } else if (e.currentTarget.children[0].className === models.InfoType.WEBSITE) {
-                    analytics.track("Website Contact Click");
                     generalTools.goToUrl(e.currentTarget.children[2].innerText);
                 }
             });

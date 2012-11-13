@@ -2,8 +2,8 @@
 
 'use strict';
 
-require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateTools", "db/saveHistory", "tools/kendoTools", "widgets/serviceDetails",
-    "jform", "select2", "widgets/selectBox"], function ($, session, dbServices, parameters, dateTools, saveHistory, kendoTools) {
+require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateTools", "db/saveHistory", "tools/kendoTools", "tools/analytics", "widgets/serviceDetails",
+    "jform", "select2", "widgets/selectBox"], function ($, session, dbServices, parameters, dateTools, saveHistory, kendoTools, analytics) {
     var services = {}, serviceHoldersDataSource, grid, handleChange, selectedServiceHolder, vm;
 
     //region Public
@@ -34,6 +34,8 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
 
                     //this will trigger validation
                     saveHistory.save();
+
+                    analytics.track("Add Service");
                 });
         },
         setSelectedService: function (service) {
@@ -54,6 +56,8 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
                 dbServices.services.destroy({body: this.get("selectedService")});
                 //hide the serviceDetails
                 $("#serviceDetails").attr("style", "display:none");
+
+                analytics.track("Delete Service");
             }
         },
         /**
@@ -125,6 +129,8 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
                 vm.syncServiceHolder();
                 //re-enable undo after a service is saved (in case it was disabled for a new service)
                 saveHistory.setUndoEnabled(true);
+
+                analytics.track("Update Field");
             });
         } else {
             //force validate clients and locations
@@ -146,6 +152,7 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
 
         form[0].action = dbServices.ROOT_API_URL + "serviceHolders/GetCsv";
         form.submit();
+        analytics.track("Export CSV");
     };
 
     //endregion

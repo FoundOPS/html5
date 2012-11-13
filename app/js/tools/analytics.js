@@ -29,33 +29,40 @@ define(['jquery', 'containers/silverlight', 'developer', 'tools/parameters', 'db
         };
     }
 
-    analytics.track = function (activity, section) {
+    /**
+     * Track an activity in totango (for engagement)
+     * @param activity {string} The action performed ex. Opened
+     */
+    analytics.track = function (activity) {
         var user = session.get("user");
+
         var organization = session.get("role.name");
         var email = session.get("email");
-
         //don't include foundops emails
         if (email && _s.include(email, "foundops.com")) {
             return;
         }
 
-        if (!section) {
-            section = _s.capitalize(parameters.getSection().name);
-        }
+        var section = _s.capitalize(parameters.getSection().name);
 
-        //triggered before session loaded
-        if (!organization || !user) {
+        //triggered before session loaded or not in a section
+        if (!organization || !user || !section) {
             return;
         }
 
         totango.track(activity, section, organization, user);
     };
 
-    //track whenever the section changes
+    //track whenever a section is opened
     parameters.section.changed.add(function (section) {
-        //section.name
-        analytics.track(_s.capitalize(section.name), "navigator");
+        if (!section) {
+            return;
+        }
+
+        analytics.track("Open");
     });
+
+    window.analytics = analytics;
 
     return analytics;
 });

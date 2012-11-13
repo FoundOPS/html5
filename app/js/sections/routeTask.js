@@ -6,8 +6,8 @@
 
 'use strict';
 
-define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "tools/parameters", "underscore", "widgets/serviceDetails"],
-    function (routeDestinationDetails, dbServices, saveHistory, parameters, _) {
+define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "tools/parameters", "tools/analytics", "underscore", "widgets/serviceDetails"],
+    function (routeDestinationDetails, dbServices, saveHistory, parameters, analytics, _) {
     /**
      * routeTask = wrapper for all service objects
      * vm = viewModel
@@ -41,6 +41,7 @@ define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "to
         vm.bind("change", function (e) {
             if (e.field.indexOf("selectedService.") > -1) {
                 saveHistory.save();
+                analytics.track("Update Field")
             }
         });
 
