@@ -89,7 +89,7 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "tools/paramete
             }
         };
 
-        if (generalTools.isAndroid() && generalTools.isCordova()) {
+        if (generalTools.checkPlatform.isAndroid() && generalTools.checkPlatform.isCordova()) {
             window.location.href = "geo:0,0?q=" + destination; //Opens google navigation on Android phones
         } else {
             //Attempt to get the user's current location.

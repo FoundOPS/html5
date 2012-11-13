@@ -9,12 +9,30 @@ var TestTools = function () {
     };
 
     /**
+     * Simulate a click on an item in a jquery selector
+     * @param selector The jquery selector
+     * @param [index] Defaults to 0
+     */
+    var clickItem = function (selector, index) {
+        if (!index) {
+            index = 0;
+        }
+
+        var link = $(selector).get(index);
+        jasmineui.simulate(link, 'click');
+    };
+
+    /**
      * Simulate a mouseup on an item in a jquery selector
      * @param selector The jquery selector
      * @param [index] Defaults to 0
      */
     var selectItem = function (selector, index) {
-        var link = $(selector).get(0);
+        if (!index) {
+            index = 0;
+        }
+
+        var link = $(selector).get(index);
         jasmineui.simulate(link, 'mouseup');
     };
 
@@ -27,6 +45,7 @@ var TestTools = function () {
     };
 
     return {
+        clickItem: clickItem,
         selectSection: selectSection,
         selectItem: selectItem,
         expectItem: expectItem

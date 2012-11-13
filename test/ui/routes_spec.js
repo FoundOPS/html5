@@ -25,9 +25,19 @@ jasmineui.loadUi("/app/navigator-test.html", function () {
                 });
             });
 
-            //it("shows status colors", function () {
-            //check there is a color element equal to the status color
-            //});
+            it("shows status colors", function () {
+                //check there is a color element equal to the status color
+                runs(function () {
+                    var colorDivs = destinationLinks + " .taskStatusColorImg";
+                    TestTools.expectItem(colorDivs);
+
+                    var backgroundColors = $.makeArray($(colorDivs).map(function () {
+                        return $(this).css("background-color");
+                    }));
+
+                    expect(backgroundColors.length > 0).toBeTruthy();
+                });
+            });
         });
 
         describe("after choosing a destination", function () {
@@ -37,15 +47,15 @@ jasmineui.loadUi("/app/navigator-test.html", function () {
 
                     setTimeout(function () {
                         TestTools.selectItem(destinationLinks);
-                    }, 1500);
+                    }, 750);
                 });
             });
 
             it("shows contact info", function () {
                 runs(function () {
                     //check the location has a header and paragraph with text
-//                    expect($(".locationInfo h1")).not.toHaveText(/^$/);
-//                    expect($(".locationInfo p")).not.toHaveText(/^$/);
+                    expect($(".locationInfo h1")).not.toHaveText(/^$/);
+                    expect($(".locationInfo p")).not.toHaveText(/^$/);
 
                     var contacts = ".contactList li span";
 
@@ -53,17 +63,18 @@ jasmineui.loadUi("/app/navigator-test.html", function () {
                     expect($(contacts + ".Phone")).toExist();
                     expect($(contacts + ".Email")).toExist();
                     expect($(contacts + ".Website")).toExist();
-
-                    //TODO make sure when you click on each of these it opens up respective links
                 });
             });
 
-//            describe("after clicking navigate", function () {
-//                it("opens google maps", function () {
-//                    //TODO
-//                    debugger;
-//                });
-//            });
+            describe("after clicking navigate", function () {
+                it("opens google maps", function () {
+                    runs(function () {
+                        TestTools.clickItem("#directionsButton");
+
+                        //TODO figure out how to check if a window opened
+                    });
+                });
+            });
         });
     });
 });

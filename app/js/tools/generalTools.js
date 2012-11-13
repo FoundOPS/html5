@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(['jquery', "developer", '../lib/platform', 'moment'], function ($, developer, platform) {
+define(['jquery', "developer", 'lib/platform', 'moment'], function ($, developer, platform) {
     var generalTools = {};
 
     generalTools.deepClone = function (obj) {
