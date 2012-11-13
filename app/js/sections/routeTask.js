@@ -6,65 +6,17 @@
 
 'use strict';
 
-define(["sections/linkedEntitySection", "sections/routeDestinationDetails", "db/services", "db/saveHistory", "tools/parameters", "underscore", "tools/kendoTools", "widgets/serviceDetails"],
-    function (createBase, routeDestinationDetails, dbServices, saveHistory, parameters, _, kendoTools) {
+define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "tools/parameters", "underscore", "widgets/serviceDetails"],
+    function (routeDestinationDetails, dbServices, saveHistory, parameters, _) {
     /**
      * routeTask = wrapper for all service objects
      * vm = viewModel
      * popupCaller = the button who's click opened the popup.
      */
-    var vm = kendo.observable(), popupCaller,
-        section = createBase("signatureView", "routeTaskId",
-            //on show
-            function () {
-                saveHistory.close();
-                var routeTask = routeDestinationDetails.vm.get("nextEntity");
-                if (!routeTask) {
-                    section.onBack(true);
-                    return;
-                }
-
-                vm.set("selectedTask", routeTask);
-
-                vm.set("taskStatusesSource", routes.vm.get("taskStatusesSource"));
-                updateSelectedStatus();
-
-                //clear statusUpdated
-                vm.statusUpdated = false;
-
-                var params = {
-                    serviceId: vm.get("selectedTask.ServiceId"),
-                    serviceDate: vm.get("selectedTask.Date"),
-                    recurringServiceId: vm.get("selectedTask.RecurringServiceId"),
-                    serviceTemplateId: vm.get("selectedTask.ServiceTemplateId")
-                };
-
-                dbServices.services.read({params: params}).done(function (services) {
-                    if (services && services[0]) {
-                        vm.set("selectedService", services[0]);
-                        //update the ServiceId so the correct service is requested next time
-                        vm.set("selectedTask.ServiceId", services[0].Id);
-                    }
-
-                    saveHistory.close();
-                    saveHistory.resetHistory();
-                });
-
-                saveHistory.setCurrentSection({
-                    page: "Route Task",
-                    save: section.save,
-                    undo: section.undo,
-                    state: function () {
-                        return vm.get("selectedService");
-                    }
-                });
-
-                //Ensure dimmer is hidden and behind other elements.
-                $("#background-dimmer").css("z-index", -1).css("opacity", "0").css("visibility", "hidden");
-        });
+    var section = {}, vm = kendo.observable(), popupCaller;
     window.routeTask = section;
 
-    vm = section.vm ;
+    section.vm = vm;
 
     var updateSelectedStatus = function () {
         var taskStatusSource = vm.get("taskStatusesSource");
@@ -91,6 +43,7 @@ define(["sections/linkedEntitySection", "sections/routeDestinationDetails", "db/
                 saveHistory.save();
             }
         });
+
     };
 
     /**
@@ -105,6 +58,52 @@ define(["sections/linkedEntitySection", "sections/routeDestinationDetails", "db/
         } else {
             vm.openTaskStatuses("backButton");
         }
+    };
+    section.show = function () {
+        saveHistory.close();
+        var routeTask = routeDestinationDetails.vm.get("nextEntity");
+        if (!routeTask) {
+            section.onBack(true);
+            return;
+        }
+
+        vm.set("selectedTask", routeTask);
+
+        vm.set("taskStatusesSource", routes.vm.get("taskStatusesSource"));
+        updateSelectedStatus();
+
+        //clear statusUpdated
+        vm.statusUpdated = false;
+
+        var params = {
+            serviceId: vm.get("selectedTask.ServiceId"),
+            serviceDate: vm.get("selectedTask.Date"),
+            recurringServiceId: vm.get("selectedTask.RecurringServiceId"),
+            serviceTemplateId: vm.get("selectedTask.ServiceTemplateId")
+        };
+
+        dbServices.services.read({params: params}).done(function (services) {
+            if (services && services[0]) {
+                vm.set("selectedService", services[0]);
+                //update the ServiceId so the correct service is requested next time
+                vm.set("selectedTask.ServiceId", services[0].Id);
+            }
+
+            saveHistory.close();
+            saveHistory.resetHistory();
+        });
+
+        saveHistory.setCurrentSection({
+            page: "Route Task",
+            save: section.save,
+            undo: section.undo,
+            state: function () {
+                return vm.get("selectedService");
+            }
+        });
+
+        //Ensure dimmer is hidden and behind other elements.
+        $("#background-dimmer").css("z-index", -1).css("opacity", "0").css("visibility", "hidden");
     };
 
     section.save = function () {
