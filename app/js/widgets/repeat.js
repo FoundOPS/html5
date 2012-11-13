@@ -12,10 +12,10 @@ define(["jquery", "kendo", "select2"], function ($) {
             var _repeat, that = this, widgetElement = $(that.element);
 
             _repeat = $('<h3>Repeat</h3>' +
-                '<label>Frequency</label><br />' +
+                '<label>Frequency</label>' +
                 '<input class="frequency" />' +
                 '<div class="startDate">' +
-                '<label>Start Date</label><br />' +
+                '<label>Start Date</label>' +
                 '<input class="startDatePicker" /></div>' +
                 '<div class="repeatEvery">' +
                 '<label>Repeat Every</label>' +
@@ -34,10 +34,10 @@ define(["jquery", "kendo", "select2"], function ($) {
                 '</div>' +
                 '<br /><br /></div>' +
                 '<div class="monthlyRepeatOn">' +
-                '<label>Repeat On</label><br />' + this.getMonthlyRepeatOptions(service.StartDate) +
+                '<label>Repeat On</label>' + this.getMonthlyRepeatOptions(service.StartDate) +
                 '</div>' +
                 '<div class="endDate">' +
-                '<label>End Date</label><br />' +
+                '<label>End Date</label>' +
                 '<input class="endDropdown" />' +
                 '<input class="endAfterNum" type="number" />' +
                 '<input class="endDatePicker" />' +
@@ -354,15 +354,15 @@ define(["jquery", "kendo", "select2"], function ($) {
         getMonthlyRepeatOptions: function (startDate) {
             var dayOfMonth = startDate.getDate();
             //add the first two options
-            var htmlString = '<input type="radio" name="repeatOnGroup" class="option0" /><label>The ' + this.getDateWithSuffix(dayOfMonth) + ' of the month</label><br />' +
-                '<input type="radio" name="repeatOnGroup" class="option1" /><label>The ' + this.getWeekAndDay(startDate) + ' of the month</label><br />';
+            var htmlString = '<input type="radio" name="repeatOnGroup" class="option0" /><label class="inline">The ' + this.getDateWithSuffix(dayOfMonth) + ' of the month</label><br />' +
+                '<input type="radio" name="repeatOnGroup" class="option1" /><label class="inline">The ' + this.getWeekAndDay(startDate) + ' of the month</label><br />';
 
             //check if startDate is the last day of the month
             var lastDay = new Date(startDate.getTime() + 86400000).getDate() === 1;
             //if it is the last day of the month
             if (lastDay) {
                 //add option for the last day of the month
-                htmlString += '<input type="radio" name="repeatOnGroup" class="option2" /><label>The last day of the month</label>';
+                htmlString += '<input type="radio" name="repeatOnGroup" class="option2" /><label class="inline">The last day of the month</label>';
             }
             return htmlString;
         },

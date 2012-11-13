@@ -99,9 +99,24 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore"], funct
             } else if (findField(locationGroup, field)) {
                 locationGroup = _(locationGroup).reject(function(el) { return el.id === field; });
             } else if (findField(contactInfoGroup, field)) {
-                //add an additional option for the type
-
+                //remove the selected field from the list
                 contactInfoGroup = _(contactInfoGroup).reject(function(el) { return el.id === field; });
+                //add additional options base on the field selected
+                //ex. if "Phone Label 1" was selected, add "Phone Label 2" and "Phone Value 2"
+                var oldNum = parseInt(field.charAt( field.length - 1 ));
+                //get the new number to use
+                var newNum = oldNum + 1;
+                //get the label that was selected(ex. "Phone")
+                var label = field.match(/^(.*?)\s/)[1];
+                //check if this was the first option of it's pair to be selected
+                var labelToCheck = label + " Label " + oldNum;
+                var valueToCheck = label + " Value " + oldNum;
+                var labelExists = findField(contactInfoGroup, labelToCheck);
+                var valueExists = findField(contactInfoGroup, valueToCheck);
+                //if so, add the new options
+                if (labelExists || valueExists) {
+                    contactInfoGroup.push({id: label + " Label " + newNum}, {id: label + " Value " + newNum});
+                }
 
             } else if (findField(serviceGroup, field)) {
                 serviceGroup = _(serviceGroup).reject(function(el) { return el.id === field; });
@@ -264,6 +279,7 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore"], funct
                         dropdown.select2("data", {id: "Do not Import"});
                     }
                 }
+                removeSelectedFields();
             });
         }
     };

@@ -29,14 +29,14 @@ define(["jquery", "lib/csv", "db/services", "widgets/selectBox", "jui", "jfilere
     importerUpload.initialize = function () {
         //setup the FileReader on the fileUpload button
         //this will enable the flash FileReader polyfill from https://github.com/Jahdrien/FileReader
-        $("#importerUpload #fileUpload").fileReader({
+        $("#importerUpload #styledUploadBtn").fileReader({
             id: "fileReaderSWFObject",
             filereader: "../../lib/filereader.swf",
             debugMode: false,
             multiple: false
         });
 
-        $("#importerUpload #fileUpload").on('change', function (evt) {
+        $("#importerUpload #styledUploadBtn").on('change', function (evt) {
             var csvFile = evt.target.files[0];
             //if file is a .csv
             if(checkFileType(csvFile)){
@@ -52,6 +52,10 @@ define(["jquery", "lib/csv", "db/services", "widgets/selectBox", "jui", "jfilere
             $('#importerUpload #fileName').text(csvFile.name);
             $('#importerUpload #uploadBtn').removeAttr('disabled');
         });
+
+//        $("#importerUpload #styledUploadBtn").on("click", function () {
+//            $("#importerUpload #fileUpload").fileReader().start();
+//        });
 
         //listen to change event of the serviceType dropdown
         var onSelect = function (selectedService) {
