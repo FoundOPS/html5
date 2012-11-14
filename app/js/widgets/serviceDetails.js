@@ -271,16 +271,6 @@ define(["jquery", "db/services", "db/session", "db/models", "tools/parameters", 
                                                 '</li>' +
                                             '</ul>').appendTo(elementToAppendTo);
 
-                    var updateSvg = function(){
-                        var sig = $("<div></div>");
-                        sig.appendTo(elementToAppendTo);
-                        sig.jSignature();
-                        sig.jSignature("setData", "data:image/jsignature;base30," + field.Value);
-                        var svgString = sig.jSignature("getData", "svgbase64").join(",");
-                        fieldElement[1].firstChild.firstChild.setAttribute("src", "data:"+svgString);
-                        sig.remove();
-                    };
-
                     $("#sigPadOpener").live('click', function () {
                         var query = parameters.get();
                         //TODO Set signatureId with centralized access to loaded entities in new datamanager (current ID is temporary).
@@ -288,14 +278,18 @@ define(["jquery", "db/services", "db/session", "db/models", "tools/parameters", 
                         parameters.set({params: query, section: {name: "signature"}});
                     });
 
-                    field.bind("change", function (e) {
-                        updateSvg();
-                    });
-
-
-//                if (field.Value) {
-//                    displaySig();
-//                }
+                    //update the svg by creating a temp
+                    //jsignature to convert the data to an svg
+                    var signatureData = field.get("Value");
+                    if (signatureData) {
+                        var tempSig = $("<div></div>");
+                        tempSig.appendTo(elementToAppendTo);
+                        tempSig.jSignature();
+                        tempSig.jSignature("setData", "data:image/jsignature;base30," + signatureData);
+                        var svgString = tempSig.jSignature("getData", "svgbase64").join(",");
+                        fieldElement[1].firstChild.firstChild.setAttribute("src", "data:" + svgString);
+                        tempSig.remove();
+                    }
 
                     return fieldElement;
                 }

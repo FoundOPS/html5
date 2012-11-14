@@ -68,7 +68,10 @@ define(["sections/routeTask", "db/services", "db/saveHistory", "tools/parameters
                     return field.Type === "SignatureField";
                 });
                 sigField.set("Value", $('.sigPad').jSignature("getData", "base30")[1]);
-                section.onBack();
+                setTimeout(function () {
+                    //allow the value to propagate
+                    section.onBack();
+                }, 200);
             } else {
                 alert("Please sign before you save or press the cancel button to go back.");
             }
