@@ -1,7 +1,13 @@
 'use strict';
 
 define(["jquery", "sections/importerUpload", "db/services", "underscore"], function ($, importerUpload, dbServices, _) {
-    var importerSelect = {};
+    var importerSelect = {}, previousSelectedFields,
+        SelectedFieldTracker = [
+            [[false, false]], //Phone
+            [[false, false]], //Email
+            [[false, false]], //Website
+            [[false, false]]  //Other
+        ];
 
     var formatDataForValidation = function (data) {
         var selectPage = $("#importerSelect");
@@ -66,24 +72,78 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore"], funct
         return dataToValidate;
     };
 
+    /**
+     * Checks if the passed field name is in the given list
+     * @param {array} list
+     * @param {string} name
+     */
     var findField = function (list, name) {
         return _.find(list, function (field) {
             return field.id === name;
         });
     };
 
-    var removeSelectedFields = function () {
+    /**
+     * Checks if the passed field is a contact info field
+     * @param {string} field
+     */
+    var isContactInfoField = function (field) {
+        return (field.indexOf("Value") != -1 || field.indexOf("Label") != -1) &&
+            (field.indexOf("Phone") != -1 || field.indexOf("Email") != -1 || field.indexOf("Website") != -1 || field.indexOf("Other") != -1);
+    };
+
+    /**
+     * Selects the array to use based on the type of contact info
+     * @param {string} label
+     * @return {array} selectedArray
+     */
+    var getSelectedContactInfoArray = function (label) {
+        var selectedArray;
+        if (label === "Phone") {
+            selectedArray = SelectedFieldTracker[0];
+        } else if (label === "Email") {
+            selectedArray = SelectedFieldTracker[1];
+        } else if (label === "Website") {
+            selectedArray = SelectedFieldTracker[2];
+        } else {
+            selectedArray = SelectedFieldTracker[3];
+        }
+        return selectedArray;
+    };
+
+    /**
+     * @param {string} field
+     * @param {boolean} value
+     */
+    var updateSelectedFieldTracker = function (field, value) {
+        var selectedArray,  selectedRow;
+        //get the number from the field(ex. if field is "Phone Label 1", oldNum is 1)
+        var oldNum = parseInt(field.match(/\s([0-9]*)$/));
+        //get the label(ex. "Phone")
+        var label = field.match(/^(.*?)\s/)[1];
+        //get the correct array to use
+        selectedArray = getSelectedContactInfoArray(label);
+        //get the appropriate row
+        selectedRow = selectedArray[oldNum - 1];
+        var indexToUpdate;
+        //check if the field is a label or a value
+        if (field.indexOf("Label") != -1) {
+            indexToUpdate = 0;
+        } else {
+            indexToUpdate = 1;
+        }
+        //update the associated SelectedFieldTracker value
+        selectedRow[indexToUpdate] = value;
+    };
+
+    var updateSelectedFields = function () {
         importerSelect.currentFields = importerSelect.allFields.slice();
-        var selectedFields = [];
+        var currentSelectedFields = [], dropdowns = $("#importerSelect").find(".select2-container");
         //create a list of the already selected fields
-        $("#importerSelect").find(".select2-container").each(function () {
-            var value = $(this).select2("val");
-            if (value !== "Do not Import") {
-                selectedFields.push(value);
-            }
+        dropdowns.each(function () {
+            currentSelectedFields.push($(this).select2("val"));
         });
 
-        //remove the selected fields from importerSelect.currentFields
         var field,
             mainGroup = importerSelect.currentFields[0].children,
             locationGroup = importerSelect.currentFields[1].children,
@@ -91,47 +151,91 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore"], funct
             serviceGroup = importerSelect.currentFields[3].children,
             fieldsGroup = importerSelect.currentFields[4].children;
 
-        for (var i in selectedFields) {
-            field = selectedFields[i];
-            //find which group the selected field is in, and remove it from that group
-            if (findField(mainGroup, field)) {
-                mainGroup = _(mainGroup).reject(function(el) { return el.id === field; });
-            } else if (findField(locationGroup, field)) {
-                locationGroup = _(locationGroup).reject(function(el) { return el.id === field; });
-            } else if (findField(contactInfoGroup, field)) {
-                //remove the selected field from the list
-                contactInfoGroup = _(contactInfoGroup).reject(function(el) { return el.id === field; });
-                //add additional options base on the field selected
-                //ex. if "Phone Label 1" was selected, add "Phone Label 2" and "Phone Value 2"
-                var oldNum = parseInt(field.charAt( field.length - 1 ));
-                //get the new number to use
-                var newNum = oldNum + 1;
-                //get the label that was selected(ex. "Phone")
-                var label = field.match(/^(.*?)\s/)[1];
-                //check if this was the first option of it's pair to be selected
-                var labelToCheck = label + " Label " + oldNum;
-                var valueToCheck = label + " Value " + oldNum;
-                var labelExists = findField(contactInfoGroup, labelToCheck);
-                var valueExists = findField(contactInfoGroup, valueToCheck);
-                //if so, add the new options
-                if (labelExists || valueExists) {
-                    contactInfoGroup.push({id: label + " Label " + newNum}, {id: label + " Value " + newNum});
+        for (var i in currentSelectedFields) {
+            if (currentSelectedFields[i] !== "Do not Import") {
+                field = currentSelectedFields[i];
+                //if last value was a contactInfo field
+                if (isContactInfoField(previousSelectedFields[i])&& (currentSelectedFields[i] !== previousSelectedFields[i])) {
+                    updateSelectedFieldTracker(field, false);
                 }
 
-            } else if (findField(serviceGroup, field)) {
-                serviceGroup = _(serviceGroup).reject(function(el) { return el.id === field; });
-            } else if (findField(fieldsGroup, field)) {
-                fieldsGroup = _(fieldsGroup).reject(function(el) { return el.id === field; });
+                //find which group the selected field is in, and remove it from that group
+                if (findField(mainGroup, field)) {
+                    mainGroup = _(mainGroup).reject(function(el) { return el.id === field; });
+                } else if (findField(locationGroup, field)) {
+                    locationGroup = _(locationGroup).reject(function(el) { return el.id === field; });
+                } else if (isContactInfoField(field)) {
+                    //remove the selected field from the list
+                    contactInfoGroup = _(contactInfoGroup).reject(function(el) { return el.id === field; });
+                    //Rule 1: Last row of array must be [false, false]
+                    //Rule 2: If there are any double falses other than the bottom row, remove it and decrement all greater indexes
+
+                    //check for empty rows([false, false])
+                    //iterate through each type
+                    var type;
+//                    for (var j in SelectedFieldTracker) {
+//                        type = SelectedFieldTracker[j];
+//                        var row;
+//                        //iterate through the rows
+//                        for (var k in type) {
+//                            row = type[k];
+//                            //if both values are false and this isn't the last row
+//                            if (!(row[0] || row[1]) && (k !== type.length - 1)) {
+//                                //remove it
+//                                type.splice(k, 1);
+//
+//                                //decremnt all greater indexes
+//
+//
+//                            }
+//                        }
+//                    }
+
+                    //find correct array to use(ex. "SelectedPhoneFields")
+                    var selectedArray, selectedRow;
+                    //get the label that was selected(ex. "Phone")
+                    var label = field.match(/^(.*?)\s/)[1];
+                    //get the number from the field(ex. if field is "Phone Label 1", oldNum is 1)
+                    var oldNum = parseInt(field.match(/\s([0-9]*)$/));
+
+                    selectedArray = getSelectedContactInfoArray(label);
+                    selectedRow = selectedArray[oldNum - 1];
+
+                    updateSelectedFieldTracker(field, true);
+
+                    //add additional options base on the field selected
+                    //ex. if "Phone Label 1" was selected, add "Phone Label 2" and "Phone Value 2"
+
+                    var newNum = oldNum + 1;
+                    //if so, add the new options
+                    if ((selectedRow[0] || selectedRow[1])) {
+                        //add the new options
+                        contactInfoGroup.push({id: label + " Label " + newNum}, {id: label + " Value " + newNum});
+                        //update the tracker with a new row
+                        selectedArray.push([false, false]);
+                    }
+
+
+                } else if (findField(serviceGroup, field)) {
+                    serviceGroup = _(serviceGroup).reject(function(el) { return el.id === field; });
+                } else if (findField(fieldsGroup, field)) {
+                    fieldsGroup = _(fieldsGroup).reject(function(el) { return el.id === field; });
+                }
             }
+            importerSelect.currentFields = [
+                {text: "", children: mainGroup},
+                {text: "Location", children: locationGroup},
+                {text: "Contact Info", children: contactInfoGroup},
+                {text: "Service", children: serviceGroup},
+                {text: "Fields", children: fieldsGroup}
+            ];
         }
-        importerSelect.currentFields = [
-            {text: "", children: mainGroup},
-            {text: "Location", children: locationGroup},
-            {text: "Contact Info", children: contactInfoGroup},
-            {text: "Service", children: serviceGroup},
-            {text: "Fields", children: fieldsGroup}
-        ];
-        console.log(importerSelect.currentFields);
+
+        //update the list of the currently selected fields
+        previousSelectedFields = [];
+        dropdowns.each(function () {
+            previousSelectedFields.push($(this).select2("val"));
+        });
     };
 
     importerSelect.initialize = function () {
@@ -254,7 +358,7 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore"], funct
                             }, 100);
                         }, 100);
                     }).on("change", function () {
-                        removeSelectedFields();
+                        updateSelectedFields();
                     });
                 var findMatch = function (header) {
                     var match1 = findField(importerSelect.allFields[0].children, header);
@@ -269,17 +373,20 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore"], funct
 
                 //automatically select fields if there is a matching header
                 var dropdown, headers = importerUpload.oldData[0];
+                previousSelectedFields = [];
                 for (var h in headers) {
                     dropdown = $("#importerSelect .select2-container:eq(" + h + ")");
                     //select if text matches corresponding header
 
                     if (findMatch(headers[h])) {
                         dropdown.select2("data", {id: headers[h]});
+                        previousSelectedFields.push(headers[h]);
                     } else {
                         dropdown.select2("data", {id: "Do not Import"});
+                        previousSelectedFields.push("Do not Import");
                     }
                 }
-                removeSelectedFields();
+                updateSelectedFields();
             });
         }
     };

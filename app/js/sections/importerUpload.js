@@ -31,7 +31,7 @@ define(["jquery", "lib/csv", "db/services", "widgets/selectBox", "jui", "jfilere
         //this will enable the flash FileReader polyfill from https://github.com/Jahdrien/FileReader
         $("#importerUpload #styledUploadBtn").fileReader({
             id: "fileReaderSWFObject",
-            filereader: "../../lib/filereader.swf",
+            filereader: "lib/filereader.swf",
             debugMode: false,
             multiple: false
         });
