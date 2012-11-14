@@ -64,8 +64,8 @@ define(["sections/routeTask", "db/services", "db/saveHistory", "tools/parameters
         vm.saveSig = function () {
             if ($('.sigPad').jSignature("getData", "base30")[1] !== "") {
                 //TODO: Use field ID, not Type.
-                var sigField = _.find(routeTask.vm.selectedService.Fields, function (field) {
-                    return field.Type === "SignatureField";
+                var sigField = _.find(routeTask.vm.get("selectedService.Fields"), function (field) {
+                    return field.Id === parameters.get().signatureId;
                 });
                 sigField.set("Value", $('.sigPad').jSignature("getData", "base30")[1]);
                 setTimeout(function () {

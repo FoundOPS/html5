@@ -273,8 +273,8 @@ define(["jquery", "db/services", "db/session", "db/models", "tools/parameters", 
 
                     $("#sigPadOpener").live('click', function () {
                         var query = parameters.get();
-                        //TODO Set signatureId with centralized access to loaded entities in new datamanager (current ID is temporary).
-                        query.signatureId = 979797979797;
+                        //TODO Set signatureId with centralized access to loaded entities in new datamanager
+                        query.signatureId = field.get("Id");
                         parameters.set({params: query, section: {name: "signature"}});
                     });
 
