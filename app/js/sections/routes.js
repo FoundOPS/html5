@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(["db/services", "sections/linkedEntitySection", "db/session"], function (dbServices, createBase, session) {
+define(["db/services", "sections/linkedEntitySection", "db/session", "widgets/location", "ui/popup"], function (dbServices, createBase, session) {
     var section = createBase("routeDetails", "routeId");
     window.routes = section;
 
@@ -15,6 +15,26 @@ define(["db/services", "sections/linkedEntitySection", "db/session"], function (
 //public methods
 
     section.initialize = function () {
+        $(".testLocationWidget").popup({contents: $("<div class='locationWidget'></div>")});
+        $(".testLocationWidget").on("click", function (e) {
+            var popupElement = $("#popupContent");
+            popupElement.find(".locationWidget").location();
+            var locationWidget = popupElement.find(".locationWidget").data("location");
+            locationWidget.renderMap(null, false);
+        });
+        $(document).on('popup.closing', function (e) {
+            //remove the location widget, if it exists
+            if ($(e.target).find(".locationWidget").data("location")) {
+                $(e.target).find(".locationWidget").data("location").removeWidget();
+                //remove the repeat widget, if it exists
+            } else if ($(e.target).find(".repeatWidget").data("repeat")) {
+                $(e.target).find(".repeatWidget").data("repeat").removeWidget();
+                //remove the contactInfo widget, if it exists
+            } else if ($(e.target).find(".contactInfoWidget").data("contactInfo")) {
+                $(e.target).find(".contactInfoWidget").data("contactInfo").removeWidget();
+            }
+        });
+
         kendo.bind($("#routes"), vm, kendo.mobile.ui);
     };
 
