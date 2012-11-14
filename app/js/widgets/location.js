@@ -294,10 +294,10 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
             navigator.geolocation.getCurrentPosition(function (position) {
                 // If geolocation is successful get directions to the location from current position.
                 currentPosition = position.coords.latitude + "," + position.coords.longitude;
-                generalTools.goToUrl("http://maps.google.com/maps?saddr=" + currentPosition + "&daddr=" + that._navigateQuery);
+                generalTools.goToExternalUrl("http://maps.google.com/maps?saddr=" + currentPosition + "&daddr=" + that._navigateQuery);
             }, function () {
                 // If geolocation is NOT successful just show the location.
-                generalTools.goToUrl("http://maps.google.com/maps?q=" + that._navigateQuery);
+                generalTools.goToExternalUrl("http://maps.google.com/maps?q=" + that._navigateQuery);
             }, {timeout: 10000, enableHighAccuracy: true});
         },
 

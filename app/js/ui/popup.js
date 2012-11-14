@@ -465,7 +465,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         var createBackButton = function(){
             //Don't create back button or listener if disabled.
             if(!isBackEnabled)return;
-            console.log("Creating back button.");
+//            console.log("Creating back button.");
             $("#popupHeader").prepend("<a id='popupBack'></a>");
             $("#popupBack").click(function () {
                 thisOptionsPopup.previousPopup();

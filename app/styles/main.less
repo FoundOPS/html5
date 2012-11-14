@@ -1952,6 +1952,69 @@ div.k-window-content {
        left: -300px;
     }
 }
+.searchSelectWidget {
+  width: 250px;
+  text-align: center;
+  min-height: 20px;
+  border: 1px solid #aaaaaa;
+  background-color: @white;
+  input{
+    width: 213px;
+    margin: 3px 0 3px 3px;
+    padding: 2px 25px 2px 4px;
+    border: none;
+    font-family: PTSans;
+    background: url("../img/smallSearch.png") no-repeat right center;
+  }
+  ul{
+    width: 250px;
+    max-height: 215px;
+    overflow-y: auto;
+    li{
+      height: 36px;
+      padding: 5px 4px 5px 4px;
+      font-size: 14px;
+      background-color: #efefef;
+      cursor: pointer;
+      &:hover{
+        .rowGradient;
+        color: @white;
+      }
+      &:not(:last-child){
+        border-bottom: 1px solid #aaaaaa;
+      }
+      span{
+        display: table-cell;
+      }
+      span.name{
+        height: 36px;
+        vertical-align: middle;
+      }
+      .selectSearchOptionIcon, #selectedItem, #customItem{
+        width: 20px;
+        height: 36px;
+        vertical-align: middle;
+        padding-right: 4px;
+        background: url("../img/previousLocation.png") no-repeat left center;
+      }
+      #customItem{
+        background: url("../img/markerIcon.png") no-repeat left center;
+      }
+      .selectSearchOptionIcon{
+        background: url("../img/webIcon.png") no-repeat left center;
+      }
+    }
+    li:first-child{
+      border-top: 1px solid #aaaaaa;
+    }
+    li.singleLine .name{
+      padding-top: 9px;
+    }
+    li.tripleLine .name{
+      font-size: 11px;
+    }
+  }
+}
 /*endregion*/
 /*region Tooltip */
 #tooltip {

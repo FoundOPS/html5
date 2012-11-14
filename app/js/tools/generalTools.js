@@ -103,7 +103,7 @@ define(['jquery', "developer", 'moment'], function ($, developer) {
         return dir;
     };
 
-    generalTools.goToUrl = function(url) {
+    generalTools.goToExternalUrl = function(url) {
         var androidDevice = developer.CURRENT_FRAME === developer.Frame.MOBILE_APP && kendo.support.detectOS(navigator.userAgent).device === "android";
         if (url.substr(0, 7) !== "http://" && url.substr(0, 8) !== "https://") {
             url = "http://" + url;

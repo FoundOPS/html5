@@ -2,15 +2,15 @@
 
 define(['jquery', 'underscore'], function ($, _) {
     /**
-     * A drop down list jquery widget.
+     * A dynamic drop down list jquery widget that uses a <select> element for mobile compatibility.
      * @param config - {
-     *          data: object,
+     *          data: array,
      *              Unformatted data for use in selectBox, if non-existent will use config.options.
      *          dataTextField: string,
      *              The key in data who's value will be displayed as an option.
      *          dataSelectedField: string,
      *              The key in data who's value determines the selected status of an option.
-     *          options: {name: string, value: string, selected: boolean},
+     *          options: [{name: string, value: string, selected: boolean}, ...],
      *              Preformatted data for use in the selectBox.
      *          onSelect: {function(number, string, string, boolean)}
      *              A callback function that gets sent the selected option upon selection.

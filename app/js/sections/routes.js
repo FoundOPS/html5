@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(["db/services", "sections/linkedEntitySection", "db/session", "widgets/location", "ui/popup"], function (dbServices, createBase, session) {
+define(["db/services", "sections/linkedEntitySection", "db/session", "widgets/location", "ui/popup", "widgets/searchSelect"], function (dbServices, createBase, session) {
     var section = createBase("routeDetails", "routeId");
     window.routes = section;
 
@@ -32,6 +32,13 @@ define(["db/services", "sections/linkedEntitySection", "db/session", "widgets/lo
                 //remove the contactInfo widget, if it exists
             } else if ($(e.target).find(".contactInfoWidget").data("contactInfo")) {
                 $(e.target).find(".contactInfoWidget").data("contactInfo").removeWidget();
+            }
+        });
+        $(".searchSelectWidget").searchSelect({
+            data: [{name: "Jon"}, {name: "Oren"}, {name: "Andrew"}, {name: "Zach"}, {name: "Patrick"}, {name: "Jordan"}, {name: "Denis"}, {name: "Rod"}],
+            dataTextField: "name",
+            onSelect: function (selectedItem) {
+                console.log(selectedItem);
             }
         });
 

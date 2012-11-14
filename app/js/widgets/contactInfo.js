@@ -206,7 +206,7 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
                     window.open("mailto:" + e.currentTarget.children[2].innerText, "_blank");
                 } else if (e.currentTarget.children[0].className === "Website") {
                     analytics.track("Website Contact Click");
-                    generalTools.goToUrl(e.currentTarget.children[2].innerText);
+                    generalTools.goToExternalUrl(e.currentTarget.children[2].innerText);
                 }
             });
 
