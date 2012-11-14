@@ -30,9 +30,12 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
 //                  <!--options are generated here-->
 //              </ul>
 //          </div>
-            searchSelect.appendChild(document.createElement("input"));
-            searchSelect.children[0].setAttribute("type", "text");
-            searchSelect.children[0].setAttribute("id", "selectSearchTextBox");
+            searchSelect.appendChild(document.createElement("div"));
+            searchSelect.children[0].appendChild(document.createElement("input"));
+            searchSelect.children[0].children[0].setAttribute("type", "text");
+            searchSelect.children[0].children[0].setAttribute("id", "selectSearchTextBox")
+            searchSelect.children[0].appendChild(document.createElement("span"));
+            searchSelect.children[0].children[1].setAttribute("class", "addItemIcon");
             searchSelect.appendChild(document.createElement("ul"));
             searchSelect.children[1].setAttribute("class", "generatedList");
 
@@ -49,16 +52,23 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                         }
                     }
                     searchSelect._updateGeneratedList(matches);
+                } else {
+                    searchSelect._clearList();
                 }
-            }, 750);
+            }, 0);
 
-            //Populates and edits the list of items that the user can select.
-            searchSelect._updateGeneratedList = function (options) {
+            searchSelect._clearList = function () {
                 var generatedList = $(searchSelect).find(".generatedList");
                 //Clear current list if there is one.
                 while (generatedList[0].hasChildNodes()) {
                     generatedList[0].removeChild(generatedList[0].lastChild);
                 }
+            };
+
+            //Populates and edits the list of items that the user can select.
+            searchSelect._updateGeneratedList = function (options) {
+                var generatedList = $(searchSelect).find(".generatedList");
+                searchSelect._clearList();
                 //add each returned item to the list
                 for (i = 0; i < options.length; i++) {
                     $('<li id="' + i + '"><span class="selectSearchOptionIcon"></span><span class="name">' + options[i] + '</span></li>').appendTo(generatedList);
@@ -71,7 +81,7 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
 
                 //TODO: add enter button to insert own custom item.
                 searchSelect._updateGeneratedList.addItem = function (itemText) {
-                    $('<li id="manual"><span id="customItem"></span><span class="name">' + itemText + '</span></li>').prepend(generatedList);
+
                 }
 
                 //adjust the text to make sure everything is vertically centered
@@ -89,6 +99,15 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                 searchSelect.selectedItem = e.target.textContent;
 
                 config.onSelect(searchSelect.selectedItem);
+            });
+            //Add new item to list and automatically select it.
+            $(".addItemIcon").live("click", function () {
+                var newItem = {};
+                newItem[config.dataTextField] =  $("#selectSearchTextBox")[0].value;
+                searchSelect.selectedItem = newItem[config.dataTextField];
+                config.onSelect(searchSelect.selectedItem);
+                config.data[config.data.length] = newItem;
+                $('<li id="manual"><span id="customItem"></span><span class="name">' + newItem[config.dataTextField] + '</span></li>').prependTo($(searchSelect).find(".generatedList"));
             });
 
         });
