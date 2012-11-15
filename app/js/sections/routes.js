@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(["db/services", "sections/linkedEntitySection", "db/session", "widgets/selector"], function (dbServices, createBase, session) {
+define(["db/services", "sections/linkedEntitySection", "db/session", "tools/generalTools", "widgets/location", "widgets/selector"], function (dbServices, createBase, session, generalTools, location) {
     var section = createBase("routeDetails", "routeId");
     window.routes = section;
 
@@ -15,10 +15,27 @@ define(["db/services", "sections/linkedEntitySection", "db/session", "widgets/se
 //public methods
 
     section.initialize = function () {
-        $(".selectorWidget").selector({
-            data: [{name: "Jon"}, {name: "Oren"}, {name: "Andrew"}, {name: "Zach"}, {name: "Patrick"}, {name: "Jordan"}, {name: "Denis"}, {name: "Rod"}],
-            onSelect: function (selectedItem) {
-                console.log(selectedItem);
+        $(".selectorWidget").searchSelect({
+//            query: function (options) {
+//                return dbServices.locations.read({params: {search: options.searchTerm}}).done(function (locations) {
+//                    options.render(locations);
+//                });
+//            },
+//            format: function (location) {
+//                var returnString = generalTools.locationDisplayString(location);
+//                if (returnString) {
+//                    return returnString;
+//                    //if none do, display the latitude and longitude
+//                } else {
+//                    return location.Latitude + "," + location.Longitude;
+//                }
+//            },
+            data: [{name: "Jon"}, {name: "Oren"}, {name: "Andrew"}, {name: "Zach"}, {name: "Patrick"}, {name: "Jordan"}, {name: "Dennis"}, {name: "Rod"}],
+            format: function (data) {
+                return data.name;
+            },
+            onSelect: function (selectedData) {
+                console.log(selectedData);
             }
         });
 

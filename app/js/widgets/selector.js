@@ -2,20 +2,20 @@
 
 'use strict';
 
-define(["jquery", "underscore", "db/services", "tools/generalTools", "kendo"], function ($, _, dbServices, generalTools) {
+define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "kendo"], function ($, _, dbServices, fui, generalTools) {
     /**
      * A jquery widget that uses a textbox input to search for options in a list that is automatically generated from developer defined data.
      * @param config - {
      *          query {function({term: string, render: function(Array.<*>)})}
      *              Used to query results for the search term
      *              Parameters
-     *                  term: the search term
+     *                  searchTerm: the search term
      *                  render: callback function to render the data
      *          data {Array.<*>}
      *              Used to define results immediately (independent of search term)
      *              array: data to display
      *          format {function(data)}
-     *              defaults to toString()
+     *              should return the value to display as an option (defaults to toString())
      *          onSelect {function(*)}
      *              A callback function triggered when an item is selected. The parameter is the selected data
      *          minimumInputLength {int}
@@ -23,10 +23,9 @@ define(["jquery", "underscore", "db/services", "tools/generalTools", "kendo"], f
      *        }
      * @return {*} Returns the jquery widget (allows widget to be chainable).
      */
-    $.fn.selector = function (config) {
+    $.fn.searchSelect = function (config) {
         return this.each(function () {
-            var selector = this, i,
-                matches = []; // Matches is an array that contains all the data that matches the search text.
+            var selector = this, i; // Matches is an array that contains all the data that matches the search text.
 
             if (!config.query && !config.data) {
                 throw "The selector widget did not recieve any data.";
@@ -59,21 +58,20 @@ define(["jquery", "underscore", "db/services", "tools/generalTools", "kendo"], f
             // Listen to input in search box and update the widget accordingly.
             generalTools.observeInput($(selector).find("input"), function (searchText) {
                 //get the list of location matches
-                if (searchText.length > config.minimumInputLength) {
+                if (searchText.length >= config.minimumInputLength) {
+                    var matches = [];
                     if (config.query) {
-                        var data = config.query({term: searchText, render: selector._updateOptionList});
-                        console.log(data);
+                        var data = config.query({searchTerm: searchText, render: selector._updateOptionList});
                     } else {
-                        var dataItemText;
+                        var dataItem;
                         for (i = 0; i < config.data.length; i++) {
-                            dataItemText = config.format(config.data[i]);
-                            if (dataItemText.indexOf(searchText) !== -1) {
-                                matches.push(dataItemText);
+                            dataItem = config.data[i];
+                            if (config.format(dataItem).indexOf(searchText) !== -1) {
+                                matches.push(dataItem);
                             }
                         }
                         selector._updateOptionList(matches);
                     }
-
                 } else {
                     selector._clearList();
                 }
@@ -93,7 +91,7 @@ define(["jquery", "underscore", "db/services", "tools/generalTools", "kendo"], f
                 selector._clearList();
                 //add each returned item to the list
                 for (i = 0; i < options.length; i++) {
-                    $('<li id="' + i + '"><span class="selectSearchOptionIcon"></span><span class="name">' + options[i] + '</span></li>').appendTo(optionList);
+                    $('<li id="' + i + '"><span class="selectSearchOptionIcon"></span><span class="name">' + config.format(options[i]) + '</span></li>').data("selectedData", options[i]).appendTo(optionList);
                 }
 
                 //add the current selected item to the list, if there is one
@@ -113,9 +111,9 @@ define(["jquery", "underscore", "db/services", "tools/generalTools", "kendo"], f
 
             $(selector).find(".optionList li").live("click", function (e) {
                 //TODO: match the selected item to an item in the data object
-                selector.selectedItem = e.target.textContent;
+                selector.selectedData = $(e.currentTarget).data().selectedData;
 
-                config.onSelect(selector.selectedItem);
+                config.onSelect(selector.selectedData);
             });
             //Add new item to list and automatically select it.
             $(".addItemIcon").live("click", function () {
