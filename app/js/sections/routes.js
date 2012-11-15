@@ -36,7 +36,9 @@ define(["db/services", "sections/linkedEntitySection", "db/session", "tools/gene
             },
             onSelect: function (selectedData) {
                 console.log(selectedData);
-            }
+            },
+            minimumInputLength: 2,
+            allowAddingItems: true
         });
 
         kendo.bind($("#routes"), vm, kendo.mobile.ui);

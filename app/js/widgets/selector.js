@@ -18,6 +18,8 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
      *              should return the value to display as an option (defaults to toString())
      *          onSelect {function(*)}
      *              A callback function triggered when an item is selected. The parameter is the selected data
+     *          allowAddingItems {boolean}
+     *              Dictates whether or not the user can add custom items through the search input box (defaults to false)
      *          minimumInputLength {int}
      *              number of characters necessary search box to start a search (defaults to 1)
      *        }
@@ -38,6 +40,9 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                     return data.toString();
                 };
             }
+            if (!config.allowAddingItems) {
+                config.allowAddingItems = false;
+            }
 
 //          Model for selectorWidget elements.
 //          <div class="selectSearch" style=" ">
@@ -50,8 +55,13 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
             selector.children[0].appendChild(document.createElement("input"));
             selector.children[0].children[0].setAttribute("type", "text");
             selector.children[0].children[0].setAttribute("id", "selectSearchTextBox");
-            selector.children[0].appendChild(document.createElement("span"));
-            selector.children[0].children[1].setAttribute("class", "addItemIcon");
+            if (config.allowAddingItems) {
+                selector.children[0].appendChild(document.createElement("span"));
+                selector.children[0].children[1].setAttribute("class", "addItemIcon");
+            } else {
+                selector.children[0].children[0].style.float = "";
+                selector.children[0].children[0].style.width = "220px";
+            }
             selector.appendChild(document.createElement("ul"));
             selector.children[1].setAttribute("class", "optionList");
 
@@ -95,8 +105,9 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                 }
 
                 //add the current selected item to the list, if there is one
-                if (selector.selectedItem) {
-                    $('<li id="previous"><span id="selectedItem"></span><span class="name">' + selector.selectedItem + '</span></li>').appendTo(optionList);
+                if (selector.selectedData) {
+                    var text = selector.selectedData.text || config.format(selector.selectedData);
+                    $('<li id="previous"><span id="selectedItem"></span><span class="name">' + text + '</span></li>').appendTo(optionList);
                 }
 
                 //adjust the text to make sure everything is vertically centered
@@ -116,13 +127,10 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                 config.onSelect(selector.selectedData);
             });
             //Add new item to list and automatically select it.
-            $(".addItemIcon").live("click", function () {
-                var newItem = {};
-                newItem[config.dataTextField] =  $("#selectSearchTextBox")[0].value;
-                selector.selectedItem = newItem[config.dataTextField];
-                config.onSelect(selector.selectedItem);
-                config.data[config.data.length] = newItem;
-                $('<li id="manual"><span id="customItem"></span><span class="name">' + newItem[config.dataTextField] + '</span></li>').prependTo($(selector).find(".optionList"));
+            $(".addItemIcon").live("click", function (e) {
+                var newItem = {text: e.target.previousSibling.value};
+                selector.selectedData = newItem;
+                $('<li class="manual"><span class="customItem"></span><span class="name">' + newItem.text + '</span></li>').data("selectedData", newItem).prependTo($(selector).find(".optionList"));
             });
         });
     };
