@@ -190,12 +190,8 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
                 currentFieldGroups[lastGroupName].splice(indexToInsert, 0, lastGroup[lastIndex]);
             }
 
-            //remove the new field from groups (except contact info)
+            //remove the new field from groups
             _.each(currentFieldGroups, function (group, key) {
-                if (key === "contactInfo") {
-                    return;
-                }
-
                 currentFieldGroups[key] = _.reject(group, function (el) {
                     return el.id === newField && newField !== "Do not Import";
                 });
@@ -208,6 +204,33 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
                 //update the trackers
                 if (isContactInfoField(lastField)) {
                     updateContactInfoTracking(lastField);
+
+                    //Rule 2: Remove any contact info without a label or value (except the last row)
+                    //code: any double falses in the tracker other than the bottom row, remove it and decrement all greater indexes
+
+                    //check for empty rows([false, false])
+                    for (var s in selectionTrackers) {
+                        var group = selectionTrackers[s];
+                        var row;
+                        for (var g in group) {
+                            row = group[g];
+                            //if both values are false and this isn't the last row
+                            if (!(row[0] || row[1]) && (g !== group.length - 1)) {
+                                //remove it from the tracker
+                                group.splice(g, 1);
+
+                                //decremnt all greater indexes
+                                //in currentFieldGroups
+                                for (var c in currentFieldGroups.contactInfo) {
+                                    if (currentFieldGroups.contactInfo[c].id === lastField) {
+                                        currentFieldGroups.contactInfo.splice(c, 1);
+                                    }
+                                }
+                                //in already selected dropdowns
+
+                            }
+                        }
+                    }
                 }
 
                 if (isContactInfoField(newField)) {
@@ -217,7 +240,7 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
                 //Rule 1: There must always be an available contact info
                 //so the last row of the tracker array must be [false, false]
 
-                //get the type that was selected(ex. "Phone")
+                //get the type that was selected(regex gets "Phone" from "Phone Label 1")
                 var type = newField.match(/^(.*?)\s/)[1];
                 var tracker = getContactInfoTracker(type);
 
@@ -231,32 +254,6 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
                         {id: type + " Value " + tracker.length, order: currentFieldGroups.contactInfo + 1, group: "contactInfo"}
                     );
                 }
-
-                //get the number from the field (ex. if field is "Phone Label 1", num is 1)
-                //var num = parseInt(newField.match(/\s([0-9]*)$/));
-
-                //Rule 2: Remove any contact info without a label or value (except the last row)
-                //code: any double falses in the tracker other than the bottom row, remove it and decrement all greater indexes
-
-                //check if the last row
-
-                //check for empty rows([false, false])
-                //iterate through each type
-//                    for (var j in SelectedFieldTracker) {
-//                        type = SelectedFieldTracker[j];
-//                        var row;
-//                        //iterate through the rows
-//                        for (var k in type) {
-//                            row = type[k];
-//                            //if both values are false and this isn't the last row
-//                            if (!(row[0] || row[1]) && (k !== type.length - 1)) {
-//                                //remove it
-//                                type.splice(k, 1);
-//
-//                                //decremnt all greater indexes
-//                           }
-//                        }
-//                    }
             }
             //endregion
         }
