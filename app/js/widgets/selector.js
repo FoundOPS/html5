@@ -18,8 +18,6 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
      *              should return the value to display as an option (defaults to toString())
      *          onSelect {function(*)}
      *              A callback function triggered when an item is selected. The parameter is the selected data
-     *          allowAddingItems {boolean}
-     *              Dictates whether or not the user can add custom items through the search input box (defaults to false)
      *          minimumInputLength {int}
      *              number of characters necessary search box to start a search (defaults to 1)
      *        }
@@ -37,11 +35,8 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
             }
             if (!config.format) {
                 config.format = function (data) {
-                    return data.toString();
+                    return JSON.stringify(data);
                 };
-            }
-            if (!config.allowAddingItems) {
-                config.allowAddingItems = false;
             }
 
 //          Model for selectorWidget elements.
@@ -55,13 +50,6 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
             selector.children[0].appendChild(document.createElement("input"));
             selector.children[0].children[0].setAttribute("type", "text");
             selector.children[0].children[0].setAttribute("id", "selectSearchTextBox");
-            if (config.allowAddingItems) {
-                selector.children[0].appendChild(document.createElement("span"));
-                selector.children[0].children[1].setAttribute("class", "addItemIcon");
-            } else {
-                selector.children[0].children[0].style.float = "";
-                selector.children[0].children[0].style.width = "220px";
-            }
             selector.appendChild(document.createElement("ul"));
             selector.children[1].setAttribute("class", "optionList");
 
@@ -101,20 +89,20 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                 selector._clearList();
                 //add each returned item to the list
                 for (i = 0; i < options.length; i++) {
-                    $('<li id="' + i + '"><span class="selectSearchOptionIcon"></span><span class="name">' + config.format(options[i]) + '</span></li>').data("selectedData", options[i]).appendTo(optionList);
+                    $('<li id="' + i + '"><div class="name">' + config.format(options[i]) + '</div></li>').data("selectedData", options[i]).appendTo(optionList);
                 }
 
-                //add the current selected item to the list, if there is one
-                if (selector.selectedData) {
-                    var text = selector.selectedData.text || config.format(selector.selectedData);
-                    $('<li id="previous"><span id="selectedItem"></span><span class="name">' + text + '</span></li>').appendTo(optionList);
-                }
+//                //add the current selected item to the list, if there is one
+//                if (selector.selectedData) {
+//                    var text = selector.selectedData.text || config.format(selector.selectedData);
+//                    $('<li id="previous"><span id="selectedItem"></span><span class="name">' + text + '</span></li>').appendTo(optionList);
+//                }
 
                 //adjust the text to make sure everything is vertically centered
                 $(selector).find(".optionList li").each(function () {
-                    if ($(this)[0].childNodes[1].clientHeight < 25) {
+                    if ($(this)[0].childNodes[0].clientHeight < 25) {
                         $(this).addClass("singleLine");
-                    } else if ($(this)[0].childNodes[1].clientHeight > 50) {
+                    } else if ($(this)[0].childNodes[0].clientHeight > 50) {
                         $(this).addClass("tripleLine");
                     }
                 });
@@ -126,12 +114,12 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
 
                 config.onSelect(selector.selectedData);
             });
-            //Add new item to list and automatically select it.
-            $(".addItemIcon").live("click", function (e) {
-                var newItem = {text: e.target.previousSibling.value};
-                selector.selectedData = newItem;
-                $('<li class="manual"><span class="customItem"></span><span class="name">' + newItem.text + '</span></li>').data("selectedData", newItem).prependTo($(selector).find(".optionList"));
-            });
+//            //Add new item to list and automatically select it.
+//            $(".addItemIcon").live("click", function (e) {
+//                var newItem = {text: e.target.previousSibling.value};
+//                selector.selectedData = newItem;
+//                $('<li class="manual"><span class="customItem"></span><span class="name">' + newItem.text + '</span></li>').data("selectedData", newItem).prependTo($(selector).find(".optionList"));
+//            });
         });
     };
 });

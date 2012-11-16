@@ -16,24 +16,24 @@ define(["db/services", "sections/linkedEntitySection", "db/session", "tools/gene
 
     section.initialize = function () {
         $(".selectorWidget").searchSelect({
-//            query: function (options) {
-//                return dbServices.locations.read({params: {search: options.searchTerm}}).done(function (locations) {
-//                    options.render(locations);
-//                });
-//            },
-//            format: function (location) {
-//                var returnString = generalTools.locationDisplayString(location);
-//                if (returnString) {
-//                    return returnString;
-//                    //if none do, display the latitude and longitude
-//                } else {
-//                    return location.Latitude + "," + location.Longitude;
-//                }
-//            },
-            data: [{name: "Jon"}, {name: "Oren"}, {name: "Andrew"}, {name: "Zach"}, {name: "Patrick"}, {name: "Jordan"}, {name: "Dennis"}, {name: "Rod"}],
-            format: function (data) {
-                return data.name;
+            query: function (options) {
+                return dbServices.locations.read({params: {search: options.searchTerm}}).done(function (locations) {
+                    options.render(locations);
+                });
             },
+            format: function (location) {
+                var returnString = generalTools.locationDisplayString(location);
+                if (returnString) {
+                    return returnString;
+                    //if none do, display the latitude and longitude
+                } else {
+                    return location.Latitude + "," + location.Longitude;
+                }
+            },
+//            data: [{name: "Jon"}, {name: "Oren"}, {name: "Andrew"}, {name: "Zach"}, {name: "Patrick"}, {name: "Jordan"}, {name: "Dennis"}, {name: "Rod"}],
+//            format: function (data) {
+//                return data.name;
+//            },
             onSelect: function (selectedData) {
                 console.log(selectedData);
             },

@@ -1960,28 +1960,19 @@ div.k-window-content {
   border: 1px solid #aaaaaa;
   background-color: @white;
   input{
-    float: left;
+    width: 220px;
     margin: 3px 0 3px 3px;
     padding: 2px 4px 2px 25px;
     border: none;
     font-family: PTSans;
     background: url("../img/smallSearchSquare.png") no-repeat left center;
   }
-  .addItemIcon {
-    display: block;
-    position: relative;
-    left: 225px;
-    top: 4px;
-    height: 22px;
-    width: 22px;
-    cursor: pointer;
-    background: url('http://localhost:8000/app/styles/../img/btnSprite.png') no-repeat;
-  }
   ul{
     width: 250px;
     max-height: 215px;
     overflow-y: auto;
     li{
+      text-align:center;
       height: 36px;
       padding: 5px 4px 5px 4px;
       font-size: 14px;
@@ -1999,21 +1990,7 @@ div.k-window-content {
       }
       span.name{
         height: 36px;
-        padding-left: 3px;
         vertical-align: middle;
-      }
-      .selectSearchOptionIcon, #selectedItem, .customItem{
-        width: 20px;
-        height: 36px;
-        vertical-align: middle;
-        padding-right: 4px;
-        background: url("../img/previousLocation.png") no-repeat left center;
-      }
-      #customItem{
-        background: url("../img/markerIcon.png") no-repeat left center;
-      }
-      .selectSearchOptionIcon{
-        background: url("../img/webIcon.png") no-repeat left center;
       }
     }
     li:first-child{
