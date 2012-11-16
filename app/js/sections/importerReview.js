@@ -184,7 +184,7 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
         //check if importerUpload exists
         //if not, then no data has been loaded
         //TODO:
-        if (!importerUpload.oldData) {
+        if (!importerUpload.uploadedData) {
             //redirect to last page
             window.viewImporterSelect();
             return;
