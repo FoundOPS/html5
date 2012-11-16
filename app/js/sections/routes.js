@@ -22,9 +22,9 @@ define(["db/services", "sections/linkedEntitySection", "db/session", "tools/gene
                 });
             },
             format: function (location) {
-                var returnString = generalTools.locationDisplayString(location);
-                if (returnString) {
-                    return returnString;
+                var dataString = generalTools.locationDisplayString(location);
+                if (dataString) {
+                    return '<span class="selectSearchOptionIcon" style="height: 18px;width: 22px;float: left;background: url(\'img/webIcon.png\') no-repeat left center;"></span>' + dataString;
                     //if none do, display the latitude and longitude
                 } else {
                     return location.Latitude + "," + location.Longitude;

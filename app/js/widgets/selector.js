@@ -41,7 +41,9 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
 
 //          Model for selectorWidget elements.
 //          <div class="selectSearch" style=" ">
-//              <input id="selectSearchTextBox" type="text" />
+//              <div>
+//                  <input id="selectSearchTextBox" type="text" />
+//              </div>
 //              <ul class="optionList">
 //                  <!--options are generated here-->
 //              </ul>
@@ -53,8 +55,32 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
             selector.appendChild(document.createElement("ul"));
             selector.children[1].setAttribute("class", "optionList");
 
-            // Listen to input in search box and update the widget accordingly.
-            generalTools.observeInput($(selector).find("input"), function (searchText) {
+            var isTouchDevice = function() {
+                try{
+                    document.createEvent("TouchEvent");
+                    return true;
+                }catch(e){
+                    return false;
+                }
+            };
+            var touchScroll = function(element) {
+                if(isTouchDevice()){ //if touch events exist...
+                    var scrollStartPos=0;
+
+                    element.addEventListener("touchstart", function(event) {
+                        scrollStartPos=this.scrollTop+event.touches[0].pageY;
+                        event.preventDefault();
+                    },false);
+
+                    element.addEventListener("touchmove", function(event) {
+                        this.scrollTop=scrollStartPos-event.touches[0].pageY;
+                        event.preventDefault();
+                    },false);
+                }
+            };
+            touchScroll(selector.children[1]);
+
+            var getOptions = function (searchText) {
                 //get the list of location matches
                 if (searchText.length >= config.minimumInputLength) {
                     var matches = [];
@@ -73,7 +99,10 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                 } else {
                     selector._clearList();
                 }
-            }, config.query ? 0 : 1);
+            }
+
+            // Listen to input in search box and update the widget accordingly.
+            generalTools.observeInput($(selector).find("input"), getOptions, config.query ? 0 : 1);
 
             selector._clearList = function () {
                 var optionList = $(selector).find(".optionList");
@@ -89,14 +118,8 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                 selector._clearList();
                 //add each returned item to the list
                 for (i = 0; i < options.length; i++) {
-                    $('<li id="' + i + '"><div class="name">' + config.format(options[i]) + '</div></li>').data("selectedData", options[i]).appendTo(optionList);
+                    $('<li id="' + i + '"><span class="name">' + config.format(options[i]) + '</div></li>').data("selectedData", options[i]).appendTo(optionList);
                 }
-
-//                //add the current selected item to the list, if there is one
-//                if (selector.selectedData) {
-//                    var text = selector.selectedData.text || config.format(selector.selectedData);
-//                    $('<li id="previous"><span id="selectedItem"></span><span class="name">' + text + '</span></li>').appendTo(optionList);
-//                }
 
                 //adjust the text to make sure everything is vertically centered
                 $(selector).find(".optionList li").each(function () {
@@ -108,18 +131,21 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                 });
             };
 
-            $(selector).find(".optionList li").live("click", function (e) {
-                //TODO: match the selected item to an item in the data object
-                selector.selectedData = $(e.currentTarget).data().selectedData;
+            var _onSelect = function (e) {
 
-                config.onSelect(selector.selectedData);
+            }
+
+            $(selector.children[0].children[0]).on("click touchend", selector.children[0].children[0], function(e) {
+                $(selector.children[0].children[0]).select();
+                getOptions(selector.children[0].children[0].value);
             });
-//            //Add new item to list and automatically select it.
-//            $(".addItemIcon").live("click", function (e) {
-//                var newItem = {text: e.target.previousSibling.value};
-//                selector.selectedData = newItem;
-//                $('<li class="manual"><span class="customItem"></span><span class="name">' + newItem.text + '</span></li>').data("selectedData", newItem).prependTo($(selector).find(".optionList"));
-//            });
+            $(selector).find(".optionList").on("click touchend", $(selector).find(".optionList li"), function(e) {
+                selector.selectedData = $(e.target).parent().data().selectedData;
+                selector.children[0].children[0].value = $(e.target).parent()[0].innerText;
+                selector._clearList();
+                config.onSelect(selector.selectedData);
+                $(".km-scroll-container").css("-webkit-transform", "")
+            });
         });
     };
 });

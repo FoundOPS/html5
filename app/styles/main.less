@@ -1960,19 +1960,18 @@ div.k-window-content {
   border: 1px solid #aaaaaa;
   background-color: @white;
   input{
-    width: 220px;
-    margin: 3px 0 3px 3px;
-    padding: 2px 4px 2px 25px;
+    width: 230px;
+    margin: 3px 3px 3px 0px;
+    padding: 2px 15px 2px 4px;
     border: none;
     font-family: PTSans;
-    background: url("../img/smallSearchSquare.png") no-repeat left center;
+    background: url("http://localhost:8000/app/styles/../img/select-closed.png") no-repeat right center;
   }
   ul{
     width: 250px;
     max-height: 215px;
     overflow-y: auto;
     li{
-      text-align:center;
       height: 36px;
       padding: 5px 4px 5px 4px;
       font-size: 14px;
@@ -1988,8 +1987,9 @@ div.k-window-content {
       span{
         display: table-cell;
       }
-      span.name{
+      .name{
         height: 36px;
+        padding-left: 3px;
         vertical-align: middle;
       }
     }
