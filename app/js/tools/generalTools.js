@@ -37,6 +37,24 @@ define(['jquery', "developer", 'moment'], function ($, developer) {
         $(page + " .saveBtn").removeAttr("disabled");
     };
 
+    generalTools.getWeekday = function (weekdayInt) {
+        if (weekdayInt === 1) {
+            return "Sunday";
+        } else if (weekdayInt === 2) {
+            return "Monday";
+        }else if (weekdayInt === 3) {
+            return "Tuesday";
+        }else if (weekdayInt === 4) {
+            return "Wednesday";
+        }else if (weekdayInt === 5) {
+            return "Thursday";
+        }else if (weekdayInt === 6) {
+            return "Friday";
+        }else {
+            return "Saturday";
+        }
+    };
+
     //create a display string from a location object
     generalTools.locationDisplayString = function (location) {
         var lineOne = location.AddressLineOne ? location.AddressLineOne + " " : "";

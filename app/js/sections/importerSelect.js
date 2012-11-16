@@ -2,11 +2,23 @@
 
 define(["jquery", "sections/importerUpload", "db/services", "underscore"], function ($, importerUpload, dbServices, _) {
     var importerSelect = {}, previousSelectedFields,
-        SelectedFieldTracker = [
-            [[false, false]], //Phone
-            [[false, false]], //Email
-            [[false, false]], //Website
-            [[false, false]]  //Other
+    //tracks the selected indexes of contact info types
+        selectionTrackers = [
+            [
+                [false, false]
+            ],
+            //Phone
+            [
+                [false, false]
+            ],
+            //Email
+            [
+                [false, false]
+            ],
+            //Website
+            [
+                [false, false]
+            ]  //Other
         ];
 
     var formatDataForValidation = function (data) {
@@ -76,6 +88,7 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore"], funct
      * Checks if the passed field name is in the given list
      * @param {array} list
      * @param {string} name
+     * @return the field
      */
     var findField = function (list, name) {
         return _.find(list, function (field) {
@@ -93,47 +106,52 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore"], funct
     };
 
     /**
-     * Selects the array to use based on the type of contact info
-     * @param {string} label
-     * @return {array} selectedArray
+     * Return the tracked contact info
+     * @param {string} type Ex. Phone
+     * @return {Array.<Array.<boolean>>} selectedTracker
      */
-    var getSelectedContactInfoArray = function (label) {
-        var selectedArray;
-        if (label === "Phone") {
-            selectedArray = SelectedFieldTracker[0];
-        } else if (label === "Email") {
-            selectedArray = SelectedFieldTracker[1];
-        } else if (label === "Website") {
-            selectedArray = SelectedFieldTracker[2];
+    var getContactInfoTracker = function (type) {
+        var selectionTracker;
+        if (type === "Phone") {
+            selectionTracker = selectionTrackers[0];
+        } else if (type === "Email") {
+            selectionTracker = selectionTrackers[1];
+        } else if (type === "Website") {
+            selectionTracker = selectionTrackers[2];
         } else {
-            selectedArray = SelectedFieldTracker[3];
+            selectionTracker = selectionTrackers[3];
         }
-        return selectedArray;
+        return selectionTracker;
     };
 
     /**
+     * This information is used to keep the contact info in order (Phone Label 1, Phone Label 2, etc)
      * @param {string} field
-     * @param {boolean} value
      */
-    var updateSelectedFieldTracker = function (field, value) {
-        var selectedArray,  selectedRow;
+    var updateContactInfoTracking = function (field) {
+        var tracker, trackerRow;
         //get the number from the field(ex. if field is "Phone Label 1", oldNum is 1)
         var oldNum = parseInt(field.match(/\s([0-9]*)$/));
-        //get the label(ex. "Phone")
-        var label = field.match(/^(.*?)\s/)[1];
+        //get the type(ex. "Phone")
+        var type = field.match(/^(.*?)\s/)[1];
+
         //get the correct array to use
-        selectedArray = getSelectedContactInfoArray(label);
+        tracker = getContactInfoTracker(type);
+
         //get the appropriate row
-        selectedRow = selectedArray[oldNum - 1];
+        trackerRow = tracker[oldNum - 1];
+
         var indexToUpdate;
+
         //check if the field is a label or a value
         if (field.indexOf("Label") != -1) {
             indexToUpdate = 0;
         } else {
             indexToUpdate = 1;
         }
-        //update the associated SelectedFieldTracker value
-        selectedRow[indexToUpdate] = value;
+
+        //update the associated tracker row
+        trackerRow[indexToUpdate] = !trackerRow[indexToUpdate];
     };
 
     var updateSelectedFields = function () {
@@ -144,35 +162,92 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore"], funct
             currentSelectedFields.push($(this).select2("val"));
         });
 
-        var field,
-            mainGroup = importerSelect.currentFields[0].children,
-            locationGroup = importerSelect.currentFields[1].children,
-            contactInfoGroup = importerSelect.currentFields[2].children,
-            serviceGroup = importerSelect.currentFields[3].children,
-            fieldsGroup = importerSelect.currentFields[4].children;
+        var groups = {
+            main: importerSelect.currentFields[0].children,
+            location: importerSelect.currentFields[1].children,
+            contactInfo: importerSelect.currentFields[2].children,
+            service: importerSelect.currentFields[3].children,
+            fields: importerSelect.currentFields[4].children
+        };
 
-        for (var i in currentSelectedFields) {
-            if (currentSelectedFields[i] !== "Do not Import") {
-                field = currentSelectedFields[i];
-                //if last value was a contactInfo field
-                if (isContactInfoField(previousSelectedFields[i])&& (currentSelectedFields[i] !== previousSelectedFields[i])) {
-                    updateSelectedFieldTracker(field, false);
+        //find the changed field
+        var fieldIndex = -1;
+        var newField = _.find(currentSelectedFields, function (field) {
+            fieldIndex++;
+            return field !== previousSelectedFields[fieldIndex];
+        });
+
+        //ignore the field if it is Do not Import
+        if (newField && newField !== "Do not Import") {
+            //remove the field from any group
+            _.each(groups, function (group, key) {
+                groups[key] = _.reject(group, function (el) {
+                    return el.id === newField;
+                });
+            });
+
+            var lastField = previousSelectedFields[fieldIndex];
+
+            //if the label was or is a contact info
+            if (isContactInfoField(lastField) || isContactInfoField(newField)) {
+                //update the trackers
+                if (isContactInfoField(lastField)) {
+                    updateContactInfoTracking(lastField);
                 }
 
-                //find which group the selected field is in, and remove it from that group
-                if (findField(mainGroup, field)) {
-                    mainGroup = _(mainGroup).reject(function(el) { return el.id === field; });
-                } else if (findField(locationGroup, field)) {
-                    locationGroup = _(locationGroup).reject(function(el) { return el.id === field; });
-                } else if (isContactInfoField(field)) {
-                    //remove the selected field from the list
-                    contactInfoGroup = _(contactInfoGroup).reject(function(el) { return el.id === field; });
-                    //Rule 1: Last row of array must be [false, false]
-                    //Rule 2: If there are any double falses other than the bottom row, remove it and decrement all greater indexes
+                if (isContactInfoField(newField)) {
+                    updateContactInfoTracking(newField);
+                }
 
-                    //check for empty rows([false, false])
-                    //iterate through each type
-                    var type;
+                //Rule 1: There must always be an available contact info
+                //code: the last row of the tracker array must be [false, false]
+
+                //get the label that was selected(ex. "Phone")
+                var type = newField.match(/^(.*?)\s/)[1];
+                var tracker = getContactInfoTracker(type);
+
+                //check the last row is available [false, false]
+                var lastSelection = tracker[tracker.length - 1];
+                //if not add a new option
+                if (lastSelection[0] || lastSelection[1]) {
+
+                }
+
+                //selectedRow = selectedArray[oldNum - 1];
+
+
+                //get the number from the field (ex. if field is "Phone Label 1", num is 1)
+                //var num = parseInt(newField.match(/\s([0-9]*)$/));
+
+//                //find correct array to use(ex. "SelectedPhoneFields")
+
+//
+//
+//                updateContactInfoSelections(field, true);
+//
+//                //add additional options base on the field selected
+//                //ex. if "Phone Label 1" was selected, add "Phone Label 2" and "Phone Value 2"
+//
+//                var newNum = oldNum + 1;
+//                //if only one of the values is selected
+//                //TODO: doesn't add when both are already selected(good luck!)
+//                if ((selectedRow[0] && !selectedRow[1]) || (!selectedRow[0] && selectedRow[1])) {
+//                    //add the new options
+//                    groups.contactInfo.push({id: label + " Label " + newNum}, {id: label + " Value " + newNum});
+//                    if (selectedArray.length < newNum) {
+//                        //update the tracker with a new row
+//                        selectedArray.push([false, false]);
+//                    }
+//                }
+
+
+                //Rule 2: Remove any contact info without a label or value (except the last row)
+                //code: any double falses in the tracker other than the bottom row, remove it and decrement all greater indexes
+
+                //check if the last row
+
+                //check for empty rows([false, false])
+                //iterate through each type
 //                    for (var j in SelectedFieldTracker) {
 //                        type = SelectedFieldTracker[j];
 //                        var row;
@@ -190,46 +265,16 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore"], funct
 //                            }
 //                        }
 //                    }
-
-                    //find correct array to use(ex. "SelectedPhoneFields")
-                    var selectedArray, selectedRow;
-                    //get the label that was selected(ex. "Phone")
-                    var label = field.match(/^(.*?)\s/)[1];
-                    //get the number from the field(ex. if field is "Phone Label 1", oldNum is 1)
-                    var oldNum = parseInt(field.match(/\s([0-9]*)$/));
-
-                    selectedArray = getSelectedContactInfoArray(label);
-                    selectedRow = selectedArray[oldNum - 1];
-
-                    updateSelectedFieldTracker(field, true);
-
-                    //add additional options base on the field selected
-                    //ex. if "Phone Label 1" was selected, add "Phone Label 2" and "Phone Value 2"
-
-                    var newNum = oldNum + 1;
-                    //if so, add the new options
-                    if ((selectedRow[0] || selectedRow[1])) {
-                        //add the new options
-                        contactInfoGroup.push({id: label + " Label " + newNum}, {id: label + " Value " + newNum});
-                        //update the tracker with a new row
-                        selectedArray.push([false, false]);
-                    }
-
-
-                } else if (findField(serviceGroup, field)) {
-                    serviceGroup = _(serviceGroup).reject(function(el) { return el.id === field; });
-                } else if (findField(fieldsGroup, field)) {
-                    fieldsGroup = _(fieldsGroup).reject(function(el) { return el.id === field; });
-                }
             }
-            importerSelect.currentFields = [
-                {text: "", children: mainGroup},
-                {text: "Location", children: locationGroup},
-                {text: "Contact Info", children: contactInfoGroup},
-                {text: "Service", children: serviceGroup},
-                {text: "Fields", children: fieldsGroup}
-            ];
         }
+
+        importerSelect.currentFields = [
+            {text: "", children: groups.main},
+            {text: "Location", children: groups.location},
+            {text: "Contact Info", children: groups.contactInfo},
+            {text: "Service", children: groups.service},
+            {text: "Fields", children: groups.fields}
+        ];
 
         //update the list of the currently selected fields
         previousSelectedFields = [];
@@ -349,7 +394,7 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore"], funct
                     formatSelection: formatItemName,
                     formatResult: formatItemName,
                     dropdownCssClass: "bigdrop"
-                }).on("open", function () {
+                }).on("open",function () {
                         //force rerender
                         setTimeout(function () {
                             $(".select2-drop-active").find(".select2-results")[0].style.overflowY = "scroll";
