@@ -45,7 +45,7 @@ define(['jquery', 'underscore'], function ($, _) {
             }
 
             $(this).live('change', function (e) {
-                var i, optionsHTML = e.srcElement.children;
+                var i, optionsHTML = e.target.children;
 
                 //call the onSelect function with the selected item
                 for (i = 0; i < optionsHTML.length; i++) {
