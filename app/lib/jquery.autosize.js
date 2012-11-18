@@ -108,7 +108,7 @@
 						ta.style.overflowY = overflow;
 
 						ta.style.height = height + boxOffset + 'px';
-						
+
 						// This small timeout gives IE a chance to draw it's scrollbar
 						// before adjust can be run again (prevents an infinite loop).
 						setTimeout(function () {
