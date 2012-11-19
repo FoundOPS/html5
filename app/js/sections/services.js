@@ -590,7 +590,7 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
             //update the filters based on the hash
             kendoTools.updateFiltersToHash(serviceHoldersDataSource, query, processFilters);
         });
-    }
+    };
 
     /**
      * Setup the service types drop down
@@ -619,7 +619,7 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
             //setup the grid by reparsing the hash
             parameters.parse();
         });
-        $("#serviceDetails").kendoServiceDetails();
+        $("#serviceDetails").kendoServiceDetails({signatureIsReadOnly: true});
     };
 
     /**
