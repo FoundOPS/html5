@@ -215,10 +215,10 @@ define(['jquery', "developer", 'lib/platform', 'moment'], function ($, developer
 
     generalTools.checkPlatform = {
         isAndroid: function () {
-            return platform.os === "Android";
+            return platform.os.family === "Android";
         },
         isiOS: function () {
-            return platform.os === "iOS";
+            return platform.product === "iPhone" || platform.product === "iPod" || platform.product === "iPad";
         },
         isCordova: function () {
             return (window.cordova ? true : false);
