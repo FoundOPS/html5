@@ -263,7 +263,7 @@ define(["jquery", "db/services", "db/session", "db/models", "tools/parameters", 
 
                     return fieldElement;
                 },
-                "SignatureField": function (field, fieldIndex, elementToAppendTo) {
+                "SignatureField": function (field, fieldIndex, elementToAppendTo, options) {
                     var fieldElement = $('<div class="fieldLabel" style="margin-left:0"><span>' + field.Name + '</span></div>' +
                                             '<ul data-role="listview" data-style="inset">' +
                                                 '<li id="sigPadOpener">' +
@@ -271,12 +271,14 @@ define(["jquery", "db/services", "db/session", "db/models", "tools/parameters", 
                                                 '</li>' +
                                             '</ul>').appendTo(elementToAppendTo);
 
-                    $("#sigPadOpener").live('click', function () {
-                        var query = parameters.get();
-                        //TODO Set signatureId with centralized access to loaded entities in new datamanager
-                        query.signatureId = field.get("Id");
-                        parameters.set({params: query, section: {name: "signature"}});
-                    });
+                    if (!options.signatureIsReadOnly) {
+                        $("#sigPadOpener").live('click', function () {
+                            //TODO Set signatureId with centralized access to loaded entities in new datamanager
+                            var query = parameters.get();
+                            query.signatureId = field.get("Id");
+                            parameters.set({params: query, section: {name: "signature"}});
+                        });
+                    }
 
                     //update the svg by creating a temp
                     //jsignature to convert the data to an svg
@@ -344,7 +346,7 @@ define(["jquery", "db/services", "db/session", "db/models", "tools/parameters", 
                         continue;
                     }
 
-                    var fieldElement = factory(field, fieldIndex, elementToAppendTo);
+                    var fieldElement = factory(field, fieldIndex, elementToAppendTo, that.options);
 
                     //setup the tooltip
                     if (field.ToolTip) {
@@ -389,7 +391,8 @@ define(["jquery", "db/services", "db/session", "db/models", "tools/parameters", 
             },
             options: new kendo.data.ObservableObject({
                 name: "ServiceDetails",
-                clientIsReadOnly: false
+                clientIsReadOnly: false,
+                signatureIsReadOnly: false
             })
         });
 

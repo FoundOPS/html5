@@ -25,39 +25,47 @@ define(["sections/routeTask", "db/services", "db/saveHistory", "tools/parameters
 
         section.onBack = function () {
             closeSigPad();
-            var query = parameters.get();
-            delete query.signatureId;
-            parameters.set({params: query, replace: true, section: {name: "routeTask"}});
+            //go to the previous page that opened the signature
+            history.go(-1);
         };
 
         section.show = function () {
-            openSigPad();
+            setupSigPad();
         };
 
 //signature pad methods
-        var openSigPad = function () {
-            vm.resetSigPad();
+        var setupSigPad = _.debounce(function () {
             var width = $(window).width();
             var margin = width > 800 ? (width - 800) / 2 : 0;
             var top = ($('.sigWrapper').height() / 2) - ($('.sigPad').height() / 2);
             $('#content').css('padding', '0');
+
             $('.sigPad').css("top", top).css('margin', '0 ' + margin + 'px');
             $('.sigWrapper').animate({'opacity': 1}, 300);
+
             $('#nav, #sideBarWrapper').animate({'opacity': 0}, 300, function () {
                 $('#nav, #sideBarWrapper').css('visibility', 'hidden');
             });
-        };
+
+            //reset the canvas, fixes drawing bug
+            var canvas = $(".sigPad canvas")[0];
+            canvas.width = canvas.width;
+
+            //reset sig pad to redraw sig line
+            vm.clearSigPad();
+        }, 250);
+
         var closeSigPad = function () {
             $(".sigWrapper").animate({"opacity": 0}, 300, function () {
                 $("#content").css("padding", "");
             });
             $("#nav").css("visibility", "").animate({"opacity": 1}, 300);
             $("#sideBarWrapper").css("visibility", "").animate({"opacity": 1}, 300, function () {
-                vm.resetSigPad();
+                vm.clearSigPad();
             });
         };
 
-        vm.resetSigPad = function () {
+        vm.clearSigPad = function () {
             $(".sigPad").jSignature("reset");
         };
 
@@ -77,16 +85,12 @@ define(["sections/routeTask", "db/services", "db/saveHistory", "tools/parameters
             }
         };
 
-        //Detect whether device supports orientation change event, otherwise fall back to the resize event
-        var supportsOrientationChange = "onorientationchange" in window,
-            orientationEvent = supportsOrientationChange ? "orientationchange" : "resize";
-
-        //Reset css upon device rotation
-        window.addEventListener(orientationEvent, function () {
+        //Reset css upon resize
+        $(window).resize(function () {
             if (parameters.getSection().name === "signature") {
-                openSigPad();
+                setupSigPad();
             }
-        }, false);
+        });
 
         return section;
     });
