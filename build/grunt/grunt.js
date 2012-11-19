@@ -6,7 +6,7 @@ module.exports = function (grunt) {
     //increment b every publish with new features (and clear c)
     //increment c on publishes with only fixes
     //aiming to hit v1 with internet distribution, full user case coverage, and no sl sections
-    var version = "0.33",
+    var version = "0.34",
         mobileOptimizationTags = '<meta name="HandheldFriendly" content="True">\n\t<meta name="MobileOptimized" content="320">\n\t<meta ' +
             'name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>\n\t<link ' +
             'rel="apple-touch-icon-precomposed" sizes="114x114" href="@@blobRootimg/Icon-96x96.png">\n\t<link rel="apple-touch-icon-precomposed" ' +
@@ -22,13 +22,13 @@ module.exports = function (grunt) {
         mainPath = "C:/FoundOPS/html5/",
         androidPath = mainPath + "build/mobile/Android/assets/www/",
         iOSPath = mainPath + "build/mobile/iOS/www/",
-    //11 common destinations (iOS & android)
+    //12 common destinations (iOS & android)
         destinationPaths = ["js/main-built.js", "styles/main-built.css", "styles/PTS55F.ttf", "styles/styles.less", "styles/jquery-mobile.less", "lib/",
-            "img/", "view/", "styles/images/", "styles/textures/", "navigator.html", "index.html"],
-    //11 common sources (iOS & android)
+            "img/", "img/services/", "view/", "styles/images/", "styles/textures/", "navigator.html", "index.html"],
+    //12 common sources (iOS & android)
         sourcePaths = ["build/main/main-built.js", "build/main/main-built.css",
             "app/styles/PTS55F.ttf", "login/styles/styles.less", "login/styles/jquery-mobile.less", "login/lib/*",
-            "app/img/*", "app/view/*", "app/styles/kendo/images/*",
+            "app/img/*", "app/img/services/*", "app/view/*", "app/styles/kendo/images/*",
             "app/styles/kendo/textures/*", "app/navigator-build.html",
             "login/login.html"],
         i = 0;
@@ -150,6 +150,7 @@ module.exports = function (grunt) {
                     // Browser files
                     "C:/FoundOPS/html5/build/main/login/": "../../login/**",
                     "C:/FoundOPS/html5/build/main/img/": "C:/FoundOPS/html5/app/img/*",
+                    "C:/FoundOPS/html5/build/main/img/services/": "C:/FoundOPS/html5/app/img/services/*",
                     "C:/FoundOPS/html5/build/main/navigator.html": "../../app/navigator-build.html",
                     "C:/FoundOPS/html5/build/main/map.css": "../../app/styles/map.css"
                 }

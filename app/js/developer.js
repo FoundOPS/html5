@@ -41,7 +41,7 @@ define(['lib/platform', "underscore", 'underscore.string', "tools/generalTools"]
      * The current web service source. Used when running local server for debugging
      * @type {developer.DataSource}
      */
-    developer.CURRENT_DATA_SOURCE = developer.DataSource.BROWSER_LOCALAPI;
+    developer.CURRENT_DATA_SOURCE = developer.DataSource.LIVE;
 
     /**
      * This is for sections that are in the Silverlight application and is used for debugging
@@ -52,14 +52,14 @@ define(['lib/platform', "underscore", 'underscore.string', "tools/generalTools"]
     /**
      * The current silverlight version
      */
-    developer.CURRENT_SILVERLIGHT_VERSION = 0.24;
+    developer.CURRENT_SILVERLIGHT_VERSION = 0.25;
 
     /**
      * Set to true if deploying
      * This will cause CURRENT_FRAME and CURRENT_DATA_SOURCE to be overridden
      * @type {boolean}
      */
-    developer.DEPLOY = false;
+    developer.DEPLOY = true;
     if (developer.DEPLOY) {
         developer.CURRENT_DATA_SOURCE = developer.DataSource.LIVE;
         developer.CURRENT_FRAME = developer.Frame.DEFAULT;
