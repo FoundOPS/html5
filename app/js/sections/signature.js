@@ -25,9 +25,8 @@ define(["sections/routeTask", "db/services", "db/saveHistory", "tools/parameters
 
         section.onBack = function () {
             closeSigPad();
-            var query = parameters.get();
-            delete query.signatureId;
-            parameters.set({params: query, replace: true, section: {name: "routeTask"}});
+            //go to the previous page that opened the signature
+            history.go(-1);
         };
 
         section.show = function () {
