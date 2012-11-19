@@ -97,7 +97,13 @@ html{
     height: @popupCarrotHeight;
     width: @popupCarrotWidth;
 
-    background: url('../img/popupArrow.png') no-repeat;
+    background: url('../img/popupArrowTop.png') no-repeat;
+}
+
+.flipArrow{
+    -webkit-transform: rotate(180deg);
+    -moz-transform: rotate(180deg);
+    filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=2);
 }
 
 .hover(){
