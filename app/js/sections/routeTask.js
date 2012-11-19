@@ -124,6 +124,7 @@ define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "to
         vm.openTaskStatuses = function (originator) {
             $("#background-dimmer").css("visibility", "visible").css("z-index", "1000").fadeTo(400, 0.8);
             $("#taskStatuses").css("visibility", "visible").css("z-index", "10000").fadeTo(400, 1);
+            $('#routeTask .km-scroll-container').css('-webkit-transform', '');
             popupCaller = originator;
         };
 

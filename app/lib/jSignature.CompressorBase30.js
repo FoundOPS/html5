@@ -93,10 +93,15 @@ MIT License <http://www.opensource.org/licenses/mit-license.php>
 		//   resurrected number is the diff between this point and prior coord.
 		// - running polaritiy is attached to the number.
 		// - we undiff (signed number + prior coord) the number.
-		// - if char 'm','p', flip running polarity 
+		// - if char 'm','p', flip running polarity
+        //FOUNDOPS CHANGE
+        if (datastring) {
+            var chars = datastring.split('')
+                , l = chars.length
+        } else {
+            return;
+        }
 		var answer = []
-		, chars = datastring.split('')
-		, l = chars.length
 		, ch
 		, polarity = 1
 		, partial = []
@@ -156,9 +161,14 @@ MIT License <http://www.opensource.org/licenses/mit-license.php>
 		return answer.join(chunkSeparator)
 	}
 	, uncompressstrokes = function(datastring){
-		var data = []
-		, chunks = datastring.split(chunkSeparator)
-		, l = chunks.length / 2
+        //FOUNDOPS CHANGE
+        if (datastring) {
+            var chunks = datastring.split(chunkSeparator)
+                , l = chunks.length / 2
+        } else {
+            return;
+        }
+        var data = []
 		for (var i = 0; i < l; i++){
 			data.push({
 				'x':uncompressstrokeleg(chunks[i*2])

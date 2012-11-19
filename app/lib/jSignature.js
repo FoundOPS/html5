@@ -66,7 +66,8 @@ var PubSubClass = function(context){
 			, i, l
 			, pair
 
-			for (i = 0, l = currentTopic.length; i < l; i++) {
+            //FOUNDOPS CHANGE
+			for (i = 0; i < currentTopic.length; i++) {
 				pair = currentTopic[i] // this is a [function, once_flag] array
 				fn = pair[0] 
 				if (pair[1] /* 'run once' flag set */){
@@ -75,7 +76,8 @@ var PubSubClass = function(context){
 				}
 			   	fn.apply(this.context, args)
 			}
-			for (i = 0, l = toremove.length; i < l; i++) {
+            //FOUNDOPS CHANGE
+			for (i = 0;i < toremove.length; i++) {
 			  currentTopic.splice(toremove[i], 1)
 			}
 		}
@@ -110,8 +112,9 @@ var PubSubClass = function(context){
 	this.unsubscribe = function(token) {
 		if (this.topics[token.topic]) {
 			var currentTopic = this.topics[token.topic]
-			
-			for (var i = 0, l = currentTopic.length; i < l; i++) {
+
+            //FOUNDOPS CHANGE
+			for (var i = 0; i < currentTopic.length; i++) {
 				if (currentTopic[i][0] === token.callback) {
 					currentTopic.splice(i, 1)
 				}
@@ -681,13 +684,15 @@ function conditionallyLinkCanvasResizeToWindowResize(jSignatureInstance, setting
 						// scale data to new signature pad size
 						settings.data = (function(data, scale){
 							var newData = []
-							var o, i, l, j, m, stroke
-							for ( i = 0, l = data.length; i < l; i++) {
+                            //FOUNDOPS CHANGE
+							var o, i, j, stroke
+							for ( i = 0; i < data.length; i++) {
                             	stroke = data[i]
                             	
                             	o = {'x':[],'y':[]}
-                            	
-                            	for ( j = 0, m = stroke.x.length; j < m; j++) {
+
+                                //FOUNDOPS CHANGE
+                            	for ( j = 0; j < stroke.x.length; j++) {
                                 	o.x.push(stroke.x[j] * scale)
                                 	o.y.push(stroke.y[j] * scale)
                                 }
