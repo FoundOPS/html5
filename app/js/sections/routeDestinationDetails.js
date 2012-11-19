@@ -10,13 +10,13 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "tools/paramete
     "lib/platform", "db/services", "underscore", "underscore.string", "widgets/contactInfo"], function (createBase, routeDetails, parameters, developer, generalTools, analytics, platform, dbServices, _, _s) {
     var vm, contacts,
     //true if on an Android device with cordova
-        section = createBase("routeTask", "routeTaskId",
+        section = createBase("routeDestinationDetails", "routeTask", "routeTaskId",
             //on show
             function () {
                 var routeDestination = routeDetails.vm.get("nextEntity");
 
                 if (!routeDestination || !routeDestination.RouteTasks) {
-                    parameters.set({section: {name: "routeDetails"}});
+                    parameters.set({section: {name: "routeDetails"}, replace: true});
                     return;
                 }
 

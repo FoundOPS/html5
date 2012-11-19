@@ -41,7 +41,7 @@ define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "to
             vm.bind("change", function (e) {
                 if (e.field.indexOf("selectedService.") > -1) {
                     saveHistory.save();
-                analytics.track("Update Field")
+                    analytics.track("Update Field")
                 }
             });
 
@@ -108,7 +108,7 @@ define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "to
         };
 
         section.save = function (callback) {
-            dbServices.services.update({body: vm.get("selectedService")}).done(callback);
+            dbServices.services.update({body: vm.get("selectedService"), params: {routeTaskId: vm.get("selectedTask.Id")}}).done(callback);
             vm.statusUpdated = false;
         };
 
@@ -126,6 +126,7 @@ define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "to
             $("#taskStatuses").css("visibility", "visible").css("z-index", "10000").fadeTo(400, 1);
             popupCaller = originator;
         };
+
         vm.closeTaskStatuses = function (e) {
             $("#background-dimmer").animate({opacity: "0"}, 400, function () {
                 $("#background-dimmer").css("z-index", "-1").css("visibility", "hidden");
@@ -138,6 +139,7 @@ define(["sections/routeDestinationDetails", "db/services", "db/saveHistory", "to
                 section.onBack(true);
             }
         };
+
         vm.selectStatus = function (e) {
             var statusId = e.dataItem.Id;
 

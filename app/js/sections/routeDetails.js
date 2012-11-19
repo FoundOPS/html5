@@ -8,13 +8,13 @@
 
 define(["sections/linkedEntitySection", "sections/routes", "tools/parameters", "db/services", "db/models", "tools/analytics", "underscore", "tools/generalTools"],
     function (createBase, routes, parameters, dbServices, models, analytics, _, generalTools) {
-    var vm, section = createBase("routeDestinationDetails", "routeDestinationId",
+    var vm, section = createBase("routeDetails", "routeDestinationDetails", "routeDestinationId",
         //on show
         function () {
             var routeDestinations = routes.vm.get("nextEntity.RouteDestinations");
 
             if (!routeDestinations) {
-                parameters.set({section: {name: "routes"}});
+                parameters.set({section: {name: "routes"}, replace: true});
                 return;
             }
 

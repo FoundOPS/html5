@@ -7,7 +7,7 @@
 "use strict";
 
 define(["db/services", "sections/linkedEntitySection", "db/session"], function (dbServices, createBase, session) {
-    var section = createBase("routeDetails", "routeId");
+    var section = createBase("routes", "routeDetails", "routeId");
     window.routes = section;
 
     var vm = section.vm;

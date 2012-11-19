@@ -373,7 +373,7 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
                 column.template = "#= (" + key + "== null) ? ' ' : moment.utc(" + key + ").format('LL') #";
             }
             else if (column.type === "signature") {
-                column.template = "# if (" + key + "== null) { # #= '' # # } else { # "
+                column.template = "# if (!" + key + ") { # #= '' # # } else { # "
                     + "<a href='#=" + key + "#' target='_blank'><img src='img/JohnHancock.png' width='90'></a># } #";
             }
 
