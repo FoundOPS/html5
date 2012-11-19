@@ -18,29 +18,54 @@ define(["sections/routeTask", "db/services", "db/saveHistory", "tools/parameters
         window.signature = section;
 
 //public methods
-
         section.initialize = function () {
-            $(".sigPad").jSignature();
+            $("#sigPad").jSignature();
         };
-
         section.onBack = function () {
             closeSigPad();
             //go to the previous page that opened the signature
             history.go(-1);
         };
-
         section.show = function () {
             setupSigPad();
+
+            var sigPad = document.getElementById("sigPad");
+            $(sigPad).on("change", sigPad, function(e) {
+                if ($('#sigPad').jSignature("getData", "base30")[1]) {
+                    $("#sigClear, #sigSave").css("display", "");
+                    $("#sigCancel").css("display", "none");
+                } else {
+                    $("#sigClear, #sigSave").css("display", "none");
+                    $("#sigCancel").css("display", "");
+                }
+            });
         };
+
+//        #sigCancel {
+//            float: left;
+//            top:10px;
+//            left: 10px;
+//            margin-right: 8px;
+//        }
+//        #sigClear {
+//            float: left;
+//            top:10px;
+//            margin-left: 8px;
+//        }
+//        #sigSave {
+//            float: right;
+//            top:10px;
+//            right: 10px;
+//        }
 
 //signature pad methods
         var setupSigPad = _.debounce(function () {
             var width = $(window).width();
             var margin = width > 800 ? (width - 800) / 2 : 0;
-            var top = ($('.sigWrapper').height() / 2) - ($('.sigPad').height() / 2);
+            var top = ($('.sigWrapper').height() / 2) - ($('#sigPad').height() / 2);
             $('#content').css('padding', '0');
 
-            $('.sigPad').css("top", top).css('margin', '0 ' + margin + 'px');
+            $('#sigPad').css("top", top).css('margin', '0 ' + margin + 'px');
             $('.sigWrapper').animate({'opacity': 1}, 300);
 
             $('#nav, #sideBarWrapper').animate({'opacity': 0}, 300, function () {
@@ -48,7 +73,7 @@ define(["sections/routeTask", "db/services", "db/saveHistory", "tools/parameters
             });
 
             //reset the canvas, fixes drawing bug
-            var canvas = $(".sigPad canvas")[0];
+            var canvas = $("#sigPad canvas")[0];
             canvas.width = canvas.width;
 
             //reset sig pad to redraw sig line
@@ -66,16 +91,16 @@ define(["sections/routeTask", "db/services", "db/saveHistory", "tools/parameters
         };
 
         vm.clearSigPad = function () {
-            $(".sigPad").jSignature("reset");
+            $("#sigPad").jSignature("reset");
         };
 
         vm.saveSig = function () {
             //check there is a signature
-            if ($('.sigPad').jSignature("getData", "base30")[1]) {
+            if ($('#sigPad').jSignature("getData", "base30")[1]) {
                 var sigField = _.find(routeTask.vm.get("selectedService.Fields"), function (field) {
                     return field.Id === parameters.get().signatureId;
                 });
-                sigField.set("Value", $('.sigPad').jSignature("getData", "base30")[1]);
+                sigField.set("Value", $('#sigPad').jSignature("getData", "base30")[1]);
                 routeTask.save(function () {
                     //allow the value to propagate
                     section.onBack();

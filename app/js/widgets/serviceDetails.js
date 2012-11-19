@@ -272,11 +272,21 @@ define(["jquery", "db/services", "db/session", "db/models", "tools/parameters", 
                                             '</ul>').appendTo(elementToAppendTo);
 
                     if (!options.signatureIsReadOnly) {
-                        $("#sigPadOpener").live('click', function () {
+                        var query, goToSigPad = function () {
                             //TODO Set signatureId with centralized access to loaded entities in new datamanager
-                            var query = parameters.get();
+                            query = parameters.get();
                             query.signatureId = field.get("Id");
                             parameters.set({params: query, section: {name: "signature"}});
+                        };
+                        $("#sigPadOpener").on('click', document.getElementById("sigPadOpener"), function () {
+                            if (field.Value) {
+                                var r = confirm("Are you sure you would like to overwrite the signature for the current service?");
+                                if (r) {
+                                    goToSigPad();
+                                }
+                            } else {
+                                goToSigPad();
+                            }
                         });
                     }
 
