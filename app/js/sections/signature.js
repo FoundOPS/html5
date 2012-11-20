@@ -12,7 +12,7 @@ define(["sections/routeTask", "db/services", "db/saveHistory", "tools/parameters
          * vm = viewModel
          * popupCaller = the button who's click opened the popup.
          */
-        var section = {}, vm = kendo.observable();
+        var section = {}, vm = kendo.observable(), resize;
         section.vm = vm;
 
         window.signature = section;
@@ -30,6 +30,7 @@ define(["sections/routeTask", "db/services", "db/saveHistory", "tools/parameters
             $(sigPad).off();
         };
         section.show = function () {
+            resize = true;
             setupSigPad();
 
             var sigPad = document.getElementById("sigPad");
@@ -84,9 +85,15 @@ define(["sections/routeTask", "db/services", "db/saveHistory", "tools/parameters
         vm.clearSigPad = function () {
             //reset the canvas, fixes drawing bug
             var canvas = $("#sigPad canvas")[0];
-            canvas.width = canvas.width;
+            canvas.width = $("#sigPad").width();
 
             $("#sigPad").jSignature("reset");
+
+            //Fire resize event when view shows to avoid sizing and offset bug.
+            if (resize) {
+                $(window).resize();
+                resize = false;
+            }
         };
 
         vm.saveSig = function () {
