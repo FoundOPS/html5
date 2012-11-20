@@ -2,23 +2,26 @@
 
 define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools/generalTools"], function ($, importerUpload, dbServices, _, generalTools) {
     var importerSelect = {}, previousSelectedFields, originalFieldGroups, currentFieldGroups,
+        trackerTypes = {
+            Phone: "Phone",
+            Email: "Email",
+            Website: "Website",
+            Other: "Other"
+        },
     //tracks the selected indexes of contact info types
         selectionTrackers = [
             [
-                [false, false]
+                [false, false, trackerTypes.Phone]
             ],
-            //Phone
             [
-                [false, false]
+                [false, false, trackerTypes.Email]
             ],
-            //Email
             [
-                [false, false]
+                [false, false, trackerTypes.Website]
             ],
-            //Website
             [
-                [false, false]
-            ]  //Other
+                [false, false, trackerTypes.Other]
+            ]
         ];
 
     var formatDataForValidation = function (data) {
@@ -100,11 +103,11 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
      */
     var getContactInfoTracker = function (type) {
         var selectionTracker;
-        if (type === "Phone") {
+        if (type === trackerTypes.Phone) {
             selectionTracker = selectionTrackers[0];
-        } else if (type === "Email") {
+        } else if (type === trackerTypes.Email) {
             selectionTracker = selectionTrackers[1];
-        } else if (type === "Website") {
+        } else if (type === trackerTypes.Website) {
             selectionTracker = selectionTrackers[2];
         } else {
             selectionTracker = selectionTrackers[3];
@@ -119,7 +122,7 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
     var updateContactInfoTracking = function (field) {
         var tracker, trackerRow;
         //get the number from the field(ex. if field is "Phone Label 1", oldNum is 1)
-        var oldNum = parseInt(field.match(/\s([0-9]*)$/));
+        var oldNum = parseInt(field.match(/\s([0-9]*)$/)[1]);
         //get the type(ex. "Phone")
         var type = field.match(/^(.*?)\s/)[1];
 
@@ -127,6 +130,7 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
         tracker = getContactInfoTracker(type);
 
         //get the appropriate row
+        //TODO: doesn't work after Rule #2 has been invoked
         trackerRow = tracker[oldNum - 1];
 
         var indexToUpdate;
@@ -169,7 +173,7 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
                     //keep track of the index to use in order to get the entire field object
                     lastIndex = -1;
                     return _.find(group, function (el) {
-                        lastIndex ++;
+                        lastIndex++;
                         //get the group name
                         lastGroupName = el.group;
                         return el.id === lastField;
@@ -215,19 +219,25 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
                         for (var g in group) {
                             row = group[g];
                             //if both values are false and this isn't the last row
-                            if (!(row[0] || row[1]) && (g !== group.length - 1)) {
+                            if (!row[0] && !row[1] && g != group.length - 1) {
                                 //remove it from the tracker
                                 group.splice(g, 1);
+                                var infoType = row[2];
+                                var num = parseInt(g) + 1;
 
                                 //decremnt all greater indexes
                                 //in currentFieldGroups
                                 for (var c in currentFieldGroups.contactInfo) {
-                                    if (currentFieldGroups.contactInfo[c].id === lastField) {
-                                        currentFieldGroups.contactInfo.splice(c, 1);
+                                    //find the occurrences(2) that match the num and infoType
+                                    if (currentFieldGroups.contactInfo[c].id.indexOf(infoType) !== -1 && currentFieldGroups.contactInfo[c].id.match(/\s([0-9]*)$/)[1] === num.toString()) {
+                                        //remove it from the list
+                                        currentFieldGroups.contactInfo.splice(c, 2);
+                                        //decrement
+
+                                        //decrement already selected dropdowns that match the field
+
                                     }
                                 }
-                                //in already selected dropdowns
-
                             }
                         }
                     }
@@ -240,19 +250,22 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
                 //Rule 1: There must always be an available contact info
                 //so the last row of the tracker array must be [false, false]
 
-                //get the type that was selected(regex gets "Phone" from "Phone Label 1")
-                var type = newField.match(/^(.*?)\s/)[1];
-                var tracker = getContactInfoTracker(type);
+                //skip if changed to "Do not Import"
+                if (newField !== "Do not Import") {
+                    //get the type that was selected(regex gets "Phone" from "Phone Label 1")
+                    var type = newField.match(/^(.*?)\s/)[1];
+                    var tracker = getContactInfoTracker(type);
 
-                //check the last row is available [false, false], if not add a new option
-                //ex. if "Phone Label 1" was selected, add "Phone Label 2" and "Phone Value 2"
-                var lastSelection = tracker[tracker.length - 1];
-                if (lastSelection[0] || lastSelection[1]) {
-                    tracker.push([false, false]);
-                    currentFieldGroups.contactInfo.push(
-                        {id: type + " Label " + tracker.length, order: currentFieldGroups.contactInfo, group: "contactInfo"},
-                        {id: type + " Value " + tracker.length, order: currentFieldGroups.contactInfo + 1, group: "contactInfo"}
-                    );
+                    //check the last row is available [false, false], if not add a new option
+                    //ex. if "Phone Label 1" was selected, add "Phone Label 2" and "Phone Value 2"
+                    var lastSelection = tracker[tracker.length - 1];
+                    if (lastSelection[0] || lastSelection[1]) {
+                        tracker.push([false, false, type]);
+                        currentFieldGroups.contactInfo.push(
+                            {id: type + " Label " + tracker.length, order: currentFieldGroups.contactInfo, group: "contactInfo"},
+                            {id: type + " Value " + tracker.length, order: currentFieldGroups.contactInfo + 1, group: "contactInfo"}
+                        );
+                    }
                 }
             }
             //endregion
