@@ -109,6 +109,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         Popup.isLocked = false;
         Popup.isHeaderDisabled = false;
         Popup.above = false;
+        Popup.caretLeftOffset = "50%";
 
         var thisPopup = this;
 
@@ -226,10 +227,11 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
             $("#popupWrapper").css("visibility", "visible");
             $("#popup").promise().done(function () {});
 
-            //Update left, right and caret positions for popup.
-            updatePositions(clickedDiv);
-
             popupWrapperDiv.trigger("popup.visible");
+
+            //Update left, right and caret positions for popup.
+            //NOTE: Must be called after popup.visible event, in order to trigger jspScrollPane update.
+            updatePositions(clickedDiv);
 
             Popup.lastElementClick = clickedDiv.attr("id");
         };
@@ -257,52 +259,55 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         };
 
         this.getTop = function(target){
-            console.log("\n");
-            var caretHeight =  $("#popupArrow").height();//(-1 * parseInt($("#popupArrow").css("margin-top"), 10));
+            var caretHeight =  $("#popupArrow").height();
             var targetTop = target.offset().top;
             var targetBottom = targetTop + target.outerHeight() - $(window).scrollTop();
             var popupTop = targetBottom + caretHeight;
             var windowHeight = $(window).height();
-
-            //TODO: FIX THIS PROBLEM.
-            var popupContentHeight = $("#popupContentWrapper .jspPane").outerHeight(true);
-
+            var popupContentHeight = $("#popupContent").height();
             var popupHeight = popupContentHeight + $("#popupHeader").outerHeight() + caretHeight;
+
             Popup.above = false;
             Popup.offScreenY = false;
+
             if (windowHeight < targetBottom + popupHeight) {
                 Popup.offScreenY = true;
                 if(targetTop >= popupHeight){
                     popupTop = targetTop - popupHeight;
                     Popup.above = true;
-                    console.log("Case 2");
+                    //console.log("Case 2");
                 }else{
                     popupTop = windowHeight - popupHeight;
-                    console.log("Case 3");
+                    //console.log("Case 3");
                 }
             } else if (popupTop < 0) {
-                console.log("Case 4");
+                //console.log("Case 4");
                 Popup.offScreenY = true;
                 popupTop = Popup.padding + caretHeight;
             }else{
-                console.log("Case 1");
+                //console.log("Case 1");
             }
 
+            /*
             //Debug logs
             console.log("------------------------------------------------------------");
             console.log("Caret Height: " + caretHeight);
             console.log("TargetTop: " + targetTop);
-            console.log("Popup Cont Height" + popupContentHeight);
+            console.log("Popup Cont Height: " + popupContentHeight);
             console.log("Cont Height: " + $("#popupContent").height());
             console.log("Header Height: " + $("#popupHeader").outerHeight());
             console.log("targetBottom: " + targetBottom);
             console.log("popupHeight: " + popupHeight);
             console.log("popupBottom: " + (targetBottom + popupHeight));
+            console.log("Popup Height: " + $("#popup").height());
+            console.log("PopupWrapper Height: " + $("#popupWrapper").height());
+            console.log("PopupWrapper2 Height: " + $("#popupWrapper").height(true));
             console.log("popupTop: " + popupTop);
             console.log("windowHeight: " + windowHeight);
             console.log("offScreenY: " + Popup.offScreenY);
             console.log("Popup.above: " + Popup.above);
             console.log("\n");
+            */
 
             return popupTop;
         };
@@ -324,6 +329,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
                 $("#popupArrow").css("margin-top", "");
                 $("#popupArrow").removeClass("flipArrow");
             }
+            Popup.caretLeftOffset = caretPos;
         };
 
         this.updateLeftPosition = function(target){
@@ -491,8 +497,17 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
                 return false;
             }
             $(document).trigger('popup.populating');
+            var oldPopupTop = $("#popup").offset().top;
+            var oldPopupHeight = $("#popupArrow").height() + $("#popupContent").height() + $("#popupHeader").height();
             Popup.history.push(newMenu);
             this.setData(newMenu);
+            if(Popup.above){
+                var newPopupHeight = $("#popupArrow").height() + $("#popupContent").height() + $("#popupHeader").height();
+                var popupTop = oldPopupTop - (newPopupHeight - oldPopupHeight);
+                $("#popupWrapper").css("padding-top", popupTop + "px");
+                thisPopup.setCaretPosition(Popup.caretLeftOffset);
+            }
+
             return true;
         };
 
