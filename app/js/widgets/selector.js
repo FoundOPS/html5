@@ -5,6 +5,7 @@
 define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "kendo"], function ($, _, dbServices, fui, generalTools) {
     /**
      * A jquery widget that uses a textbox input to search for options in a list that is automatically generated from developer defined data.
+     * *****NOTE: Setting a max height for option list in order to enable scrolling will only work along side KendoUI Mobile.
      * @param config - {
      *          query {function({term: string, render: function(Array.<*>)})}
      *              Used to query results for the search term
@@ -44,16 +45,22 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
 //              <div>
 //                  <input id="selectSearchTextBox" type="text" />
 //              </div>
-//              <ul class="optionList">
-//                  <!--options are generated here-->
-//              </ul>
+//              <div data-role="scroller" class="scroller-content">
+//                  <ul class="optionList">
+//                      <!--options are generated here-->
+//                  </ul>
+//              </div">
 //          </div>
             selector.appendChild(document.createElement("div"));
             selector.children[0].appendChild(document.createElement("input"));
             selector.children[0].children[0].setAttribute("type", "text");
             selector.children[0].children[0].setAttribute("id", "selectSearchTextBox");
-            selector.appendChild(document.createElement("ul"));
-            selector.children[1].setAttribute("class", "optionList");
+            selector.appendChild(document.createElement("div"));
+            selector.children[1].setAttribute("id", "optionListScroller");
+            selector.children[1].setAttribute("data-role", "scroller");
+            selector.children[1].setAttribute("class", "scroller-content");
+            selector.children[1].appendChild(document.createElement("ul"));
+            selector.children[1].children[0].setAttribute("class", "optionList");
 
             var isTouchDevice = function() {
                 try{
@@ -78,7 +85,7 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                     },false);
                 }
             };
-            touchScroll(selector.children[1]);
+            touchScroll(selector.children[1].children[0]);
 
             var getOptions = function (searchText) {
                 //get the list of location matches
@@ -110,6 +117,7 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                 while (optionList[0].hasChildNodes()) {
                     optionList[0].removeChild(optionList[0].lastChild);
                 }
+                $("#optionListScroller").kendoMobileScroller("reset");
             };
 
             //Populates and edits the list of items that the user can select.
@@ -133,18 +141,30 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
 
             var _onSelect = function (e) {
 
-            }
+            };
 
-            $(selector.children[0].children[0]).on("click touchend", selector.children[0].children[0], function(e) {
+            var _preventTouchEnd;
+            // _.debounce is used to ignore double (multiple) clicks.
+            $(selector.children[0].children[0]).on("click touchstart", selector.children[0].children[0], _.debounce(function(e) {
                 $(selector.children[0].children[0]).select();
                 getOptions(selector.children[0].children[0].value);
-            });
+            }, 500));
             $(selector).find(".optionList").on("click touchend", $(selector).find(".optionList li"), function(e) {
-                selector.selectedData = $(e.target).parent().data().selectedData;
-                selector.children[0].children[0].value = $(e.target).parent()[0].innerText;
-                selector._clearList();
-                config.onSelect(selector.selectedData);
-                $(".km-scroll-container").css("-webkit-transform", "")
+                if (!_preventTouchEnd) {
+                    selector.selectedData = $(e.target).parent().data().selectedData || $(e.target).data().selectedData;
+                    if (e.target.nodeName === "SPAN") {
+                        selector.children[0].children[0].value = $(e.target).parent()[0].innerText;
+                    } else {
+                        selector.children[0].children[0].value = $(e.target)[0].innerText;
+                    }
+                    selector._clearList();
+                    config.onSelect(selector.selectedData);
+                    $(".km-scroll-container").css("-webkit-transform", "");
+                }
+                _preventTouchEnd = false;
+            });
+            $(selector).find(".optionList").on("touchmove", $(selector).find(".optionList li"), function(e) {
+                _preventTouchEnd = true;
             });
         });
     };
