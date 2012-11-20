@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(['jquery', "developer", 'moment'], function ($, developer) {
+define(['jquery', "developer", "tools/dateTools", 'moment'], function ($, developer, dateTools) {
     var generalTools = {};
 
     $.fn.delayKeyup = function (callback, ms) {
@@ -37,26 +37,17 @@ define(['jquery', "developer", 'moment'], function ($, developer) {
         $(page + " .saveBtn").removeAttr("disabled");
     };
 
-    generalTools.getWeekday = function (weekdayInt) {
-        if (weekdayInt === 1) {
-            return "Sunday";
-        } else if (weekdayInt === 2) {
-            return "Monday";
-        }else if (weekdayInt === 3) {
-            return "Tuesday";
-        }else if (weekdayInt === 4) {
-            return "Wednesday";
-        }else if (weekdayInt === 5) {
-            return "Thursday";
-        }else if (weekdayInt === 6) {
-            return "Friday";
-        }else {
-            return "Saturday";
-        }
+    generalTools.frequencyDetail = {
+        OnDayInMonth: 8, //Ex. The 3rd of the month. Cannot be greater than 28 days
+        LastOfMonth: 10, //Example Febuary 28th
+        FirstOfDayOfWeekInMonth: 11, //Ex. First Monday
+        SecondOfDayOfWeekInMonth: 12, //Ex. Second Monday
+        ThirdOfDayOfWeekInMonth: 13, //Ex. Third Monday
+        LastOfDayOfWeekInMonth: 14 //Ex. Last Monday
     };
 
     //create a display string from a location object
-    generalTools.locationDisplayString = function (location) {
+    generalTools.getLocationDisplayString = function (location) {
         var lineOne = location.AddressLineOne ? location.AddressLineOne + " " : "";
         var lineTwo = location.AddressLineTwo ? location.AddressLineTwo + ", " : "";
         var adminDistrictTwo = location.AdminDistrictTwo ? location.AdminDistrictTwo + ", " : "";
@@ -64,6 +55,55 @@ define(['jquery', "developer", 'moment'], function ($, developer) {
         var postalCode = location.PostalCode ? location.PostalCode : "";
         //display any parts of the location that exist
         return lineOne + lineTwo + adminDistrictTwo + adminDistrictOne + postalCode;
+    };
+
+    //create a display string from a repeat object
+    generalTools.getRepeatString = function (repeat) {
+        //use the frequency int to get the frequency name(ex. 2 -> "Day")
+        var frequencyName = generalTools.repeatFrequencies[repeat.Frequency];
+
+        if (repeat.Frequency >= 2 && repeat.RepeatEveryTimes === 1) {
+            //ex. "weekly"
+            if (repeat.Frequency === 2) {
+                frequencyName = "Daily";
+            } else {
+                frequencyName = frequencyName + "ly";
+            }
+        } else if (repeat.Frequency >= 2 && repeat.RepeatEveryTimes > 1) {
+            //ex. "Every 3 months"
+            frequencyName = "Every " + repeat.RepeatEveryTimes.toString() + " " + frequencyName.charAt(0).toLowerCase() + frequencyName.slice(1) + "s ";
+        } else {
+            return "";
+        }
+
+        //TODO: make monthly frequency detail separate function
+
+        var frequencyDetail = "";
+        var weeklyDetail = repeat.FrequencyDetailAsWeeklyFrequencyDetail;
+        var startDate = moment(repeat.StartDate).toDate();
+
+        //if monthly
+        if (repeat.FrequencyDetailAsMonthlyFrequencyDetail) {
+            if (repeat.FrequencyDetailInt === generalTools.frequencyDetail.OnDayInMonth || repeat.FrequencyDetailInt === generalTools.frequencyDetail.LastOfMonth) {
+                frequencyDetail = "on the " + dateTools.getDateWithSuffix(startDate);
+            } else if (repeat.FrequencyDetailInt === generalTools.frequencyDetail.FirstOfDayOfWeekInMonth) {
+                frequencyDetail = "on the 1st " + dateTools.days[startDate.getDay()];
+            } else if (repeat.FrequencyDetailInt === generalTools.frequencyDetail.SecondOfDayOfWeekInMonth) {
+                frequencyDetail = "on the 2nd " + dateTools.days[startDate.getDay()];
+            } else if (repeat.FrequencyDetailInt === generalTools.frequencyDetail.ThirdOfDayOfWeekInMonth) {
+                frequencyDetail = "on the 3rd " + dateTools.days[startDate.getDay()];
+            } else if (repeat.FrequencyDetailInt === generalTools.frequencyDetail.LastOfDayOfWeekInMonth) {
+                frequencyDetail = "on the last " + dateTools.days[startDate.getDay()];
+            }
+        } else if (weeklyDetail[0]) {
+            for (var d in weeklyDetail) {
+                frequencyDetail = frequencyDetail += dateTools.days[weeklyDetail[d]].substring(0, 3) + ", ";
+            }
+            var stringToRemove = /,\s$/;
+            frequencyDetail = "on " + frequencyDetail.replace(stringToRemove, "");
+        }
+
+        return frequencyName + " " + frequencyDetail;
     };
 
     /**
@@ -173,6 +213,15 @@ define(['jquery', "developer", 'moment'], function ($, developer) {
             }, delay);
         });
     };
+
+    generalTools.repeatFrequencies = [
+        "",
+        "",
+        "Day",
+        "Week",
+        "Month",
+        "Year"
+    ];
 
     /**
      * Resize an image using the proper ratio to have no dimension larger than maxSize

@@ -36,7 +36,7 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
     var formatDataForGrid = function (data) {
         var newData = [], newRow, row;
         for (var i in data) {
-            var location = {}, contactInfo = [], contactData, contactString = "", locationString = "";
+            var location = {}, contactInfo = [], contactData, contactString = "";
             row = data[i];
             newRow = [];
 
@@ -44,46 +44,12 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
 
             location = locations[row.LocationSuggestions[0]];
 
-            newRow["Location"] = generalTools.locationDisplayString(location);
+            newRow["Location"] = generalTools.getLocationDisplayString(location);
 
             newRow["ContactInfo"] = "todo";
 
-            newRow["Repeat"] = row.Repeat;
+            newRow["Repeat"] = generalTools.getRepeatString(row.Repeats[0]);
 
-
-//            for (var j in row) {
-//                if (j === "0") {
-//                    client = clients[row[j]];
-//                    newRow["Client"] = client.Name;
-//                } else if (j === "1") {
-//                    location = locations[row[j]];
-//                    newRow["Location"] = location.AddressLineOne + ", " + location.AddressLineTwo + ", " + location.City + ", " + location.State + " " + location.Zipcode;
-//                } else if (j === "2") {
-//                    if (client && client.ContactInfo) {
-//                        contactInfo = client.ContactInfo;
-//                    }
-//                    if (location && location.ContactInfo) {
-//                        for (var i in location.ContactInfo) {
-//                            contactInfo.push(location.ContactInfo[i]);
-//                        }
-//                    }
-//
-//                    if (contactInfo.length !== 0) {
-//                        contactData = contactInfo[0].Data.replace("http://", "");
-//                        contactData = contactData.replace("https://", "");
-//
-//                        contactString = contactData + "(" + contactInfo[0].Label + ")";
-//                        if (contactInfo.length > 1) {
-//                            contactString = contactString.concat(" +", contactInfo.length - 1, " more");
-//                        }
-//                    }
-//
-//                    newRow["ContactInfo"] = contactString;
-//                } else if (j === "3") {
-//                    repeat = repeats[row[j]];
-//                    newRow["Repeat"] = repeat.Name;
-//                }
-//            }
             newData.push(newRow);
         }
         return newData;

@@ -2,12 +2,12 @@
 
 'use strict';
 
-define(["jquery", "tools/generalTools", "kendo", "select2"], function ($, generalTools) {
+define(["jquery", "tools/generalTools", "tools/dateTools", "kendo", "select2"], function ($, generalTools, dateTools) {
     var serviceA = {Frequency: 3, StartDate: new Date(), RepeatEveryTimes: 3, RepeatOn: "Monday,Wednesday", EndDate: 4},
         serviceB = {Frequency: 4, StartDate: new Date(), RepeatEveryTimes: 1, RepeatOn: 1, EndDate: new Date()},
 
         serviceC = {Frequency: 4, StartDate: new Date(), RepeatEveryTimes: 2, EndDate: new Date(),
-            EndAfterTimes: null, FrequencyDetailAsWeeklyFrequencyDetail: 235, FrequencyDetailAsMonthlyFrequencyDetail: ["The 15th of the month", "The 3rd Thursday of the month"]};
+            EndAfterTimes: null, FrequencyDetailAsWeeklyFrequencyDetail: [2, 3, 5], FrequencyDetailAsMonthlyFrequencyDetail: [8, 13]};
     var service = serviceC;
 
     $.widget("ui.repeat", {
@@ -55,18 +55,9 @@ define(["jquery", "tools/generalTools", "kendo", "select2"], function ($, genera
                 format: "dddd, MMMM dd, yyyy"
             });
 
+            //use the frequency int to get the frequency name(ex. 2 -> "Day")
+            var frequencyName = generalTools.repeatFrequencies[service.Frequency];
             //set the format of the Repeat Every text based on the frequency
-            var frequencyName;
-            //TODO: check if supposed to check against string or num
-            if (service.Frequency == 2) {
-                frequencyName = "Day";
-            } else if (service.Frequency == 3) {
-                frequencyName = "Week";
-            } else if (service.Frequency == 4) {
-                frequencyName = "Month";
-            } else if (service.Frequency == 5) {
-                frequencyName = "Year";
-            }
             if (service.RepeatEveryTimes > 1) {
                 frequencyName += "s";
             }
@@ -260,13 +251,12 @@ define(["jquery", "tools/generalTools", "kendo", "select2"], function ($, genera
         //region Functions
         //sets the initial selected days for a weekly repeat
         setRepeatDays: function () {
-            var that = this, frequencyDetailString = service.FrequencyDetailAsWeeklyFrequencyDetail.toString();
+            var that = this, frequencyDetail = service.FrequencyDetailAsWeeklyFrequencyDetail;
             //iterate through each weekday int
-            for (var d in frequencyDetailString) {
-                var dayString = frequencyDetailString[d];
-                var day = generalTools.getWeekday(parseInt(dayString));
+            for (var d in frequencyDetail) {
+                var dayInt = frequencyDetail[d];
                 //select the button with the id that matches the current day
-                $(that.element).find("." + day).addClass("selected");
+                $(that.element).find("." + dateTools.days[dayInt]).addClass("selected");
             }
         },
 
@@ -289,27 +279,25 @@ define(["jquery", "tools/generalTools", "kendo", "select2"], function ($, genera
             var repeat = widgetElement.find(".repeatEveryNum").val();
             //get a reference to the Repeat Every field
             var repeatEvery = widgetElement.find('.repeatEveryNum:not(.k-formatted-value)').data("kendoNumericTextBox");
-            var frequencyName;
             //show/hide the correct Repeat On field
             //TODO: check if supposed to check against string or num
             if (frequency == 2) {
                 weeklyElement.attr("style", "display:none");
                 monthlyElement.attr("style", "display:none");
-                frequencyName = "Day";
             } else if (frequency == 3) {
                 monthlyElement.attr("style", "display:none");
                 weeklyElement.attr("style", "display:block");
-                frequencyName = "Week";
                 that.setRepeatDays();
             } else if (frequency == 4) {
                 weeklyElement.attr("style", "display:none");
                 monthlyElement.attr("style", "display:block");
-                frequencyName = "Month";
             } else if (frequency == 5) {
                 weeklyElement.attr("style", "display:none");
                 monthlyElement.attr("style", "display:none");
-                frequencyName = "Year";
             }
+            //use the frequency int to get the frequency name(ex. 2 -> "Day")
+            var frequencyName = generalTools.repeatFrequencies[frequency];
+
             if (!skipSetRepeat) {
                 //add "s" to the frequency name if repeat number is mmore than one
                 if (repeat > 1) {
@@ -332,17 +320,8 @@ define(["jquery", "tools/generalTools", "kendo", "select2"], function ($, genera
             var repeat = $(that.element).find(".repeatEveryNum").val();
             //get a reference to the Repeat Every field
             var repeatEvery = $(that.element).find(".repeatEveryNum:not(.k-formatted-value)").data("kendoNumericTextBox");
-            var frequencyName;
-            //TODO: check if supposed to check against string or num
-            if (frequency == 2) {
-                frequencyName = "Day";
-            } else if (frequency == 3) {
-                frequencyName = "Week";
-            } else if (frequency == 4) {
-                frequencyName = "Month";
-            } else if (frequency == 5) {
-                frequencyName = "Year";
-            }
+            //use the frequency int to get the frequency name(ex. 2 -> "Day")
+            var frequencyName = generalTools.repeatFrequencies[frequency];
             //add "s" to the frequency name if repeat number is mmore than one
             if (repeat > 1) {
                 frequencyName += "s";
@@ -353,48 +332,15 @@ define(["jquery", "tools/generalTools", "kendo", "select2"], function ($, genera
             $(that.element).find(".startDate label").focus();
         },
 
-        //returns an input and a label for each available option
-        //ex. label text: "The 3rd Friday of the month" and "The 21st of the month"
-        getMonthlyRepeatOptions: function (startDate) {
-            var dayOfMonth = startDate.getDate();
-            //add the first two options
-            var htmlString = '<input type="radio" name="repeatOnGroup" class="option0" /><label class="inline">The ' + this.getDateWithSuffix(dayOfMonth) + ' of the month</label><br />' +
-                '<input type="radio" name="repeatOnGroup" class="option1" /><label class="inline">The ' + this.getWeekAndDay(startDate) + ' of the month</label><br />';
-
-            //check if startDate is the last day of the month
-            var lastDay = new Date(startDate.getTime() + 86400000).getDate() === 1;
-            //if it is the last day of the month
-            if (lastDay) {
-                //add option for the last day of the month
-                htmlString += '<input type="radio" name="repeatOnGroup" class="option2" /><label class="inline">The last day of the month</label>';
+        //returns an input and a label for each available monthly frequency option
+        getMonthlyRepeatOptions: function () {
+            //TODO: finish this
+            var htmlString = "", monthlyFrequency = service.FrequencyDetailAsMonthlyFrequencyDetail;
+            for (var i in monthlyFrequency) {
+                htmlString += '<input type="radio" name="repeatOnGroup" class="option0" /><label class="inline">The ' + "" + ' of the month</label><br />';
             }
+
             return htmlString;
-        },
-
-        //get day of the week and the nth occurrence of that day. ex. "Third Friday"
-        getWeekAndDay: function (date) {
-            var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-            var prefixes = ['1st', '2nd', '3rd', '4th', '5th'];
-            return prefixes[0 | (date.getDate() - 1) / 7] + ' ' + days[date.getDay()];
-        },
-
-        //adds a suffix to the date. ex. 21 -> 21st
-        getDateWithSuffix: function (dayOfMonth) {
-            var suffix, lastDigit;
-            dayOfMonth = dayOfMonth.toString();
-            //get the last digit of the date. ex. 21 -> 1
-            lastDigit = dayOfMonth.charAt(dayOfMonth.length - 1);
-            //TODO: check if supposed to check against string or num
-            if ((lastDigit > 3 && lastDigit <= 9) || (lastDigit >= 11 && lastDigit <= 13) || lastDigit == 0) {
-                suffix = "th";
-            } else if (lastDigit == 1) {
-                suffix = "st";
-            } else if (lastDigit == 2) {
-                suffix = "nd";
-            } else if (lastDigit == 3) {
-                suffix = "rd";
-            }
-            return dayOfMonth + suffix;
         },
 
         //remove the widget

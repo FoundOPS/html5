@@ -125,6 +125,7 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
                 vm.syncServiceHolder();
                 //re-enable undo after a service is saved (in case it was disabled for a new service)
                 saveHistory.setUndoEnabled(true);
+                saveHistory.setUndoEnabled(true);
             });
         } else {
             //force validate clients and locations

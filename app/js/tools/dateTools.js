@@ -31,6 +31,8 @@ define(['moment'], function () {
         return a.getUTCDate() === b.getUTCDate() && a.getUTCMonth() === b.getUTCMonth() && a.getUTCFullYear() === b.getUTCFullYear();
     };
 
+    dateTools.days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
     /**
      * This will return the date without the time
      * in a format consumable for the web api.
@@ -54,6 +56,25 @@ define(['moment'], function () {
             year = date.getFullYear();
         }
         return month + "-" + day + "-" + year;
+    };
+
+    //returns the day of month with appropriate suffix ex. 21st
+    dateTools.getDateWithSuffix = function (startDate) {
+        var suffix, lastDigit, dayOfMonth = startDate.getDate();
+        dayOfMonth = dayOfMonth.toString();
+        //get the last digit of the date. ex. 21 -> 1
+        lastDigit = dayOfMonth.charAt(dayOfMonth.length - 1);
+        //TODO: check if supposed to check against string or num
+        if ((lastDigit > 3 && lastDigit <= 9) || (lastDigit >= 11 && lastDigit <= 13) || lastDigit == 0) {
+            suffix = "th";
+        } else if (lastDigit == 1) {
+            suffix = "st";
+        } else if (lastDigit == 2) {
+            suffix = "nd";
+        } else if (lastDigit == 3) {
+            suffix = "rd";
+        }
+        return dayOfMonth + suffix;
     };
 
     dateTools.getLocalTimeZone = function () {
