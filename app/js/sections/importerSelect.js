@@ -220,24 +220,41 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
                             row = group[g];
                             //if both values are false and this isn't the last row
                             if (!row[0] && !row[1] && g != group.length - 1) {
-                                //remove it from the tracker
-                                group.splice(g, 1);
                                 var infoType = row[2];
                                 var num = parseInt(g) + 1;
 
-                                //decremnt all greater indexes
-                                //in currentFieldGroups
+                                var decrementStartIndex = -1;
+                                var typeToDecrement = "";
+                                //remove the unused set from currentFieldGroups.contactInfo
                                 for (var c in currentFieldGroups.contactInfo) {
                                     //find the occurrences(2) that match the num and infoType
                                     if (currentFieldGroups.contactInfo[c].id.indexOf(infoType) !== -1 && currentFieldGroups.contactInfo[c].id.match(/\s([0-9]*)$/)[1] === num.toString()) {
-                                        //remove it from the list
+                                        //remove them from the list
                                         currentFieldGroups.contactInfo.splice(c, 2);
-                                        //decrement
+                                        decrementStartIndex = c;
+                                        //get the type(ex. "Phone")
+                                        typeToDecrement = currentFieldGroups.contactInfo[c].id.match(/^(.*?)\s/)[1];
+                                        break;
+                                    }
+                                }
+                                for (var ci in currentFieldGroups.contactInfo) {
+                                    var fieldName = currentFieldGroups.contactInfo[ci].id;
+                                    //if the current index is at or above decrementStartIndex and this is the correct contactInfo type
+                                    if (ci >= decrementStartIndex && fieldName.match(/^(.*?)\s/)[1] === typeToDecrement) {
+                                        //decrement higher numbered fields in the contactInfo list
+                                        //get the number from the field(ex. if fieldName is "Phone Label 1", oldIndex is 1)
+                                        var oldIndex = fieldName.match(/\s([0-9]*)$/)[1];
+                                        //decrement the number
+                                        var newIndex = parseInt(oldIndex) - 1;
+                                        //replace the old name with the new name
+                                        currentFieldGroups.contactInfo[ci].id = fieldName.replace(oldIndex, newIndex.toString());
 
-                                        //decrement already selected dropdowns that match the field
+                                        //decrement already selected dropdown values that match the field
 
                                     }
                                 }
+                                //remove the corresponding row from the tracker
+                                group.splice(g, 1);
                             }
                         }
                     }
