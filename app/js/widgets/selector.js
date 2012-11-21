@@ -118,7 +118,7 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                 }
             };
 
-            // Listen to input in search box and update the widget accordingly.
+            //Listen to input in search box and update the widget accordingly.
             generalTools.observeInput($(selector).find("input"), getOptions, config.query ? 0 : 1);
 
             selector._clearList = function () {
@@ -152,7 +152,10 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                 });
             };
 
-            var _scrolling, _selecting;
+            //These variables act as flags in order to stop behavior from certain listeners when other listeners fire.
+            var _scrolling;
+
+            //Event Listeners
             $(selector.children[0].children[0]).on("click touchstart", selector.children[0].children[0], function(e) {
                 if (selector.selectedOptionTempText && !selector.selectedOptionText) {
                     this.value = selector.selectedOptionTempText || "";
@@ -161,8 +164,8 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                 }
                 getOptions(selector.children[0].children[0].value);
             });
+            //Select an option on click or touchend. Does not occur if user is scrolling instead of selecting.
             $(selector).find(".optionList").on("click touchend", $(selector).find(".optionList li"), function(e) {
-                //TODO: Make non-case specific.
                 if (!_scrolling) {
                     selector.selectedData = $(e.target).parent().data().selectedData || $(e.target).data().selectedData;
                     if (e.target.nodeName === "SPAN") {
@@ -177,10 +180,11 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                 }
                 _scrolling = false;
             });
+            //Set the scrolling flag to on.
             $(selector).find(".optionList").on("touchmove", $(selector).find(".optionList li"), function(e) {
                 _scrolling = true;
             });
-            //When clicking outside of the select widget, close the option list.
+            //When clicking outside of the select widget, close the option list and handle text inside the textbox.
             $(selector.children[0].children[0]).blur(function(e) {
                 //Wait until click/touchend listener on options list fires.
                 setTimeout(function () {
@@ -192,7 +196,6 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                             selector.selectedOptionTempText = selector.children[0].children[0].value;
                             selector.children[0].children[0].value = "";
                         }
-                        //TODO: Save previous text on no selection so it will come back it re-selected.
                     }
                 }, 200);
             });
