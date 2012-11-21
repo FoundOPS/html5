@@ -21,12 +21,15 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
      *              A callback function triggered when an item is selected. The parameter is the selected data
      *          minimumInputLength {int}
      *              number of characters necessary search box to start a search (defaults to 1)
+ *              showPreviousSelection {boolean}
+ *                  defines whether the previous selection should be attached at the end of the list or not (defaults to false)
+ *                  only works for predefined data, user must set this in their query function if they desire such behavior.
      *        }
      * @return {*} Returns the jquery widget (allows widget to be chainable).
      */
     $.fn.searchSelect = function (config) {
         return this.each(function () {
-            var selector = this, i; // Matches is an array that contains all the data that matches the search text.
+            var selector = this, i;
 
             if (!config.query && !config.data) {
                 throw "The selector widget did not recieve any data.";
@@ -40,17 +43,19 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                 };
             }
 
-//          Model for selectorWidget elements.
-//          <div class="selectSearch" style=" ">
-//              <div>
-//                  <input id="selectSearchTextBox" type="text" />
-//              </div>
-//              <div data-role="scroller" class="scroller-content">
-//                  <ul class="optionList">
-//                      <!--options are generated here-->
-//                  </ul>
-//              </div">
-//          </div>
+            /**
+             * Model for selectorWidget elements.
+             * <div class="selectSearch" style=" ">
+             *     <div>
+             *         <input id="selectSearchTextBox" type="text" />
+             *     </div>
+             *     <div data-role="scroller" class="scroller-content">
+             *         <ul class="optionList">
+             *             <!--options are generated here-->
+             *         </ul>
+             *     </div>
+             * </div>
+             */
             selector.appendChild(document.createElement("div"));
             selector.children[0].appendChild(document.createElement("input"));
             selector.children[0].children[0].setAttribute("type", "text");
@@ -62,6 +67,7 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
             selector.children[1].appendChild(document.createElement("ul"));
             selector.children[1].children[0].setAttribute("class", "optionList");
 
+            //The following two functions disable scrolling of the view when user is scrolling whatever element is passed.
             var isTouchDevice = function() {
                 try{
                     document.createEvent("TouchEvent");
@@ -71,42 +77,46 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                 }
             };
             var touchScroll = function(element) {
-                if(isTouchDevice()){ //if touch events exist...
-                    var scrollStartPos=0;
+                if(isTouchDevice()) { //If touch events exist...
+                    var scrollStartPos = 0;
 
                     element.addEventListener("touchstart", function(event) {
-                        scrollStartPos=this.scrollTop+event.touches[0].pageY;
+                        scrollStartPos = this.scrollTop + event.touches[0].pageY;
                         event.preventDefault();
-                    },false);
-
+                    }, false);
                     element.addEventListener("touchmove", function(event) {
-                        this.scrollTop=scrollStartPos-event.touches[0].pageY;
+                        this.scrollTop = scrollStartPos - event.touches[0].pageY;
                         event.preventDefault();
-                    },false);
+                    }, false);
                 }
             };
             touchScroll(selector.children[1].children[0]);
 
+            //Fetches the options to display for selection based on the user's provided data source and his/her search term.
             var getOptions = function (searchText) {
+                var matches = [];
                 //get the list of location matches
-                if (searchText.length >= config.minimumInputLength) {
-                    var matches = [];
-                    if (config.query) {
+                if (config.query) {
+                    if (searchText.length >= config.minimumInputLength) {
                         var data = config.query({searchTerm: searchText, render: selector._updateOptionList});
                     } else {
-                        var dataItem;
+                        selector._clearList();
+                    }
+                } else {
+                    var dataItem;
+                    if (searchText.length) {
                         for (i = 0; i < config.data.length; i++) {
                             dataItem = config.data[i];
-                            if (config.format(dataItem).indexOf(searchText) !== -1) {
+                            if (config.format(dataItem).toLowerCase().indexOf(searchText.toLowerCase()) !== -1) {
                                 matches.push(dataItem);
                             }
                         }
-                        selector._updateOptionList(matches);
+                    } else {
+                        matches = config.data;
                     }
-                } else {
-                    selector._clearList();
+                    selector._updateOptionList(matches);
                 }
-            }
+            };
 
             // Listen to input in search box and update the widget accordingly.
             generalTools.observeInput($(selector).find("input"), getOptions, config.query ? 0 : 1);
@@ -129,6 +139,9 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                     $('<li id="' + i + '"><span class="name">' + config.format(options[i]) + '</div></li>').data("selectedData", options[i]).appendTo(optionList);
                 }
 
+                if (config.showPreviousSelection && selector.selectedData && config.data) {
+                    $('<li id="' + i + '"><span id="prevoiusSelection" class="name">' + config.format(selector.selectedData) + '</div></li>').data("selectedData", selector.selectedData).appendTo(optionList);
+                }
                 //adjust the text to make sure everything is vertically centered
                 $(selector).find(".optionList li").each(function () {
                     if ($(this)[0].childNodes[0].clientHeight < 25) {
@@ -139,32 +152,49 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                 });
             };
 
-            var _onSelect = function (e) {
-
-            };
-
-            var _preventTouchEnd;
-            // _.debounce is used to ignore double (multiple) clicks.
-            $(selector.children[0].children[0]).on("click touchstart", selector.children[0].children[0], _.debounce(function(e) {
-                $(selector.children[0].children[0]).select();
+            var _scrolling, _selecting;
+            $(selector.children[0].children[0]).on("click touchstart", selector.children[0].children[0], function(e) {
+                if (selector.selectedOptionTempText && !selector.selectedOptionText) {
+                    this.value = selector.selectedOptionTempText || "";
+                } else {
+                    this.value = "";
+                }
                 getOptions(selector.children[0].children[0].value);
-            }, 500));
+            });
             $(selector).find(".optionList").on("click touchend", $(selector).find(".optionList li"), function(e) {
-                if (!_preventTouchEnd) {
+                //TODO: Make non-case specific.
+                if (!_scrolling) {
                     selector.selectedData = $(e.target).parent().data().selectedData || $(e.target).data().selectedData;
                     if (e.target.nodeName === "SPAN") {
-                        selector.children[0].children[0].value = $(e.target).parent()[0].innerText;
+                        selector.selectedOptionText = $(e.target).parent()[0].innerText
                     } else {
-                        selector.children[0].children[0].value = $(e.target)[0].innerText;
+                        selector.selectedOptionText = $(e.target)[0].innerText;
                     }
+                    selector.children[0].children[0].value = selector.selectedOptionText;
                     selector._clearList();
                     config.onSelect(selector.selectedData);
                     $(".km-scroll-container").css("-webkit-transform", "");
                 }
-                _preventTouchEnd = false;
+                _scrolling = false;
             });
             $(selector).find(".optionList").on("touchmove", $(selector).find(".optionList li"), function(e) {
-                _preventTouchEnd = true;
+                _scrolling = true;
+            });
+            //When clicking outside of the select widget, close the option list.
+            $(selector.children[0].children[0]).blur(function(e) {
+                //Wait until click/touchend listener on options list fires.
+                setTimeout(function () {
+                    if (!_scrolling) {
+                        selector._clearList();
+                        if (selector.selectedOptionText) {
+                            selector.children[0].children[0].value = selector.selectedOptionText;
+                        } else {
+                            selector.selectedOptionTempText = selector.children[0].children[0].value;
+                            selector.children[0].children[0].value = "";
+                        }
+                        //TODO: Save previous text on no selection so it will come back it re-selected.
+                    }
+                }, 200);
             });
         });
     };
