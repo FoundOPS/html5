@@ -7,12 +7,13 @@ define(["jquery", "tools/generalTools", "tools/dateTools", "kendo", "select2"], 
         serviceB = {Frequency: 4, StartDate: new Date(), RepeatEveryTimes: 1, RepeatOn: 1, EndDate: new Date()},
 
         serviceC = {Frequency: 4, StartDate: new Date(), RepeatEveryTimes: 2, EndDate: new Date(),
-            EndAfterTimes: null, FrequencyDetailAsWeeklyFrequencyDetail: [2, 3, 5], FrequencyDetailAsMonthlyFrequencyDetail: [8, 13]};
-    var service = serviceC;
+            EndAfterTimes: null, FrequencyDetailAsWeeklyFrequencyDetail: [2, 3, 5], AvailableMonthlyFrequencyDetailTypes: [8, 14], FrequencyDetailAsMonthlyFrequencyDetail: 14};
+    var service = serviceC, widgetElement;
 
     $.widget("ui.repeat", {
         _create: function () {
-            var _repeat, that = this, widgetElement = $(that.element);
+            var _repeat, that = this;
+            widgetElement = $(that.element);
 
             _repeat = $('<h3>Repeat</h3>' +
                 '<label>Frequency</label>' +
@@ -37,7 +38,7 @@ define(["jquery", "tools/generalTools", "tools/dateTools", "kendo", "select2"], 
                 '</div>' +
                 '<br /><br /></div>' +
                 '<div class="monthlyRepeatOn">' +
-                '<label>Repeat On</label>' + this.getMonthlyRepeatOptions(service.StartDate) +
+                '<label>Repeat On</label>' + this.getMonthlyRepeatOptions() +
                 '</div>' +
                 '<div class="endDate">' +
                 '<label>End Date</label>' +
@@ -71,15 +72,8 @@ define(["jquery", "tools/generalTools", "tools/dateTools", "kendo", "select2"], 
                 value: service.RepeatEveryTimes,
                 decimals: 0,
                 format: that._repeatFormat,
-                change: that.repeatEveryChanged
+                spin: that.repeatEveryChanged
             });
-
-            //if frequency is monthly
-            if (service.Frequency === 4) {
-                //TODO
-                //set the correct monthly repeat option
-                $(widgetElement.find(".option" + service.RepeatOn.toString())).attr("checked", "checked");
-            }
 
             //set the endDate value only for the correct endDate field and
             //determine which item in the endDate dropdown should be selected
@@ -106,7 +100,7 @@ define(["jquery", "tools/generalTools", "tools/dateTools", "kendo", "select2"], 
                 value: that._endAfterValue,
                 decimals: 0,
                 format: that._endAfterFormat,
-                change: function (e) {
+                spin: function (e) {
                     //set the text based on the value
                     if (e.sender._value > 1) {
                         endAfter.options.format = "# Occurrences";
@@ -115,7 +109,7 @@ define(["jquery", "tools/generalTools", "tools/dateTools", "kendo", "select2"], 
                     }
                     //reset focus to refresh the input, in order to get the new format
                     endAfter.focus();
-                    widgetElement.find(".startDate label").focus();
+                    endAfter.blur();
                 }
             }).data("kendoNumericTextBox");
 
@@ -163,7 +157,7 @@ define(["jquery", "tools/generalTools", "tools/dateTools", "kendo", "select2"], 
                 formatResult: formatItemName,
                 dropdownCssClass: "bigdrop frequencyDropdown"
             }).on("change", function () {
-                that.frequencyChanged(widgetElement.find('.frequency').select2("data").value, false);
+                that.frequencyChanged(widgetElement.find('.frequency').select2("data").value);
             });
 
             //initially set the correct frequency
@@ -239,7 +233,7 @@ define(["jquery", "tools/generalTools", "tools/dateTools", "kendo", "select2"], 
                 widgetElement.find(".workday").addClass("selected");
             });
 
-            that.frequencyChanged(service.Frequency, true);
+            that.frequencyChanged(service.Frequency);
 
             //check if weekly
             if (service.Frequency == 3) {
@@ -263,9 +257,8 @@ define(["jquery", "tools/generalTools", "tools/dateTools", "kendo", "select2"], 
         /**
          * Shows and hides the correct fields based on the frequency and sets the text in Repeat Every
          * @param {string} frequency ex. "Weekly"
-         * @param {boolean} skipSetRepeat If it should not set RepeatEveryTimes(only true on initial load)
          */
-        frequencyChanged: function (frequency, skipSetRepeat) {
+        frequencyChanged: function (frequency) {
             var that = this;
             var widgetElement = $(that.element);
             var monthlyElement = widgetElement.find(".monthlyRepeatOn");
@@ -298,46 +291,48 @@ define(["jquery", "tools/generalTools", "tools/dateTools", "kendo", "select2"], 
             //use the frequency int to get the frequency name(ex. 2 -> "Day")
             var frequencyName = generalTools.repeatFrequencies[frequency];
 
-            if (!skipSetRepeat) {
-                //add "s" to the frequency name if repeat number is mmore than one
-                if (repeat > 1) {
-                    frequencyName += "s";
-                }
-                //set the format. ex. "# Weeks"
-                repeatEvery.options.format = "# " + frequencyName;
-                //reset focus to refresh the input, in order to get the new format
-                repeatEvery.focus();
-                widgetElement.find(".startDate label").focus();
+            //add "s" to the frequency name if repeat number is more than one
+            if (repeat > 1) {
+                frequencyName += "s";
             }
+            //set the format. ex. "# Weeks"
+            repeatEvery.options.format = "# " + frequencyName;
+            //reset focus to refresh the input, in order to get the new format
+            that.repeatEveryChanged();
+            repeatEvery.focus();
+            widgetElement.find('.repeatEveryNum:not(.k-formatted-value)').blur();
 
         },
 
         //updates the Repeat Every text when the value changes
         repeatEveryChanged: function () {
             var that = this;
-            var frequency = $(that.element).find(".frequency").val();
+            var frequency = widgetElement.find(".frequency:not(.select2-container)").val();
             //get the value of the Repeat Every field
-            var repeat = $(that.element).find(".repeatEveryNum").val();
+            var repeat = widgetElement.find(".repeatEveryNum").val();
             //get a reference to the Repeat Every field
-            var repeatEvery = $(that.element).find(".repeatEveryNum:not(.k-formatted-value)").data("kendoNumericTextBox");
+            var repeatEvery = widgetElement.find(".repeatEveryNum:not(.k-formatted-value)").data("kendoNumericTextBox");
             //use the frequency int to get the frequency name(ex. 2 -> "Day")
             var frequencyName = generalTools.repeatFrequencies[frequency];
             //add "s" to the frequency name if repeat number is mmore than one
-            if (repeat > 1) {
+            if (repeat.match(/^([0-9]*)\s/)[1] > 1) {
                 frequencyName += "s";
             }
             repeatEvery.options.format = "# " + frequencyName;
-            //reset focus to refresh the input, in order to get the new format
-            repeatEvery.focus();
-            $(that.element).find(".startDate label").focus();
         },
 
         //returns an input and a label for each available monthly frequency option
         getMonthlyRepeatOptions: function () {
             //TODO: finish this
-            var htmlString = "", monthlyFrequency = service.FrequencyDetailAsMonthlyFrequencyDetail;
-            for (var i in monthlyFrequency) {
-                htmlString += '<input type="radio" name="repeatOnGroup" class="option0" /><label class="inline">The ' + "" + ' of the month</label><br />';
+            var htmlString = "", monthlyOptions = service.AvailableMonthlyFrequencyDetailTypes;
+            for (var mo in monthlyOptions) {
+                if (monthlyOptions[mo] === service.FrequencyDetailAsMonthlyFrequencyDetail) {
+                    htmlString += '<input type="radio" name="repeatOnGroup" checked="checked" class="option'+ monthlyOptions[mo] + '" />' +
+                        '<label class="inline">' + generalTools.getFrequencyDetailString(monthlyOptions[mo], service.StartDate, true) + '</label><br />';
+                } else {
+                    htmlString += '<input type="radio" name="repeatOnGroup" class="option'+ monthlyOptions[mo] + '" />' +
+                        '<label class="inline">' + generalTools.getFrequencyDetailString(monthlyOptions[mo], service.StartDate, true) + '</label><br />';
+                }
             }
 
             return htmlString;

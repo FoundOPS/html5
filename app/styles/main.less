@@ -2559,11 +2559,12 @@ ul.noty_cont.noty_layout_topRight li {
 .switch {
     display: inline-block;
     height: 33px;
-    width: 140px;
+    width: 145px;
     cursor: pointer;
     line-height: 1.8em;
     background: @white;
     a {
+        position: relative;
         display: block;
         float: left;
         height: 25px;
@@ -2572,18 +2573,30 @@ ul.noty_cont.noty_layout_topRight li {
         color: #ccc;
         text-align: center;
         font-size: 1em;
-        padding: 4px 3px 0 4px;
+        padding: 4px 6px 0 7px;
         margin: 2px 0 0 2px;
+        z-index: 2;
     }
-    a.on{
-        width: 64px;
+    .toggle{
+        display: block;
+        position: absolute;
+        top: 2px;
+        left: 37px;
+        width: 63px;
+        height: 25px;
+        background: @blue;
+        padding: 4px 3px 0 4px;
+        z-index: 1;
+    }
+    a.off{
+        padding: 4px 6px 0 7px;
+        margin-left: 3px;
     }
     a:not(.active):hover{
         background: #f1f1f1;
     }
     a.active {
         color: @white;
-        background: @blue;
     }
 }
 /*endregion*/

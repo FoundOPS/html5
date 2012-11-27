@@ -69,7 +69,8 @@ define(['jquery', "developer", "tools/dateTools", 'moment'], function ($, develo
             } else {
                 frequencyName = frequencyName + "ly";
             }
-        } else if (repeat.Frequency >= 2 && repeat.RepeatEveryTimes > 1) {
+        //if frequency is not daily
+        } else if (repeat.Frequency > 1 && repeat.RepeatEveryTimes > 1) {
             //ex. "Every 3 months"
             frequencyName = "Every " + repeat.RepeatEveryTimes.toString() + " " + frequencyName.charAt(0).toLowerCase() + frequencyName.slice(1) + "s ";
         } else {
@@ -84,17 +85,7 @@ define(['jquery', "developer", "tools/dateTools", 'moment'], function ($, develo
 
         //if monthly
         if (repeat.FrequencyDetailAsMonthlyFrequencyDetail) {
-            if (repeat.FrequencyDetailInt === generalTools.frequencyDetail.OnDayInMonth || repeat.FrequencyDetailInt === generalTools.frequencyDetail.LastOfMonth) {
-                frequencyDetail = "on the " + dateTools.getDateWithSuffix(startDate);
-            } else if (repeat.FrequencyDetailInt === generalTools.frequencyDetail.FirstOfDayOfWeekInMonth) {
-                frequencyDetail = "on the 1st " + dateTools.days[startDate.getDay()];
-            } else if (repeat.FrequencyDetailInt === generalTools.frequencyDetail.SecondOfDayOfWeekInMonth) {
-                frequencyDetail = "on the 2nd " + dateTools.days[startDate.getDay()];
-            } else if (repeat.FrequencyDetailInt === generalTools.frequencyDetail.ThirdOfDayOfWeekInMonth) {
-                frequencyDetail = "on the 3rd " + dateTools.days[startDate.getDay()];
-            } else if (repeat.FrequencyDetailInt === generalTools.frequencyDetail.LastOfDayOfWeekInMonth) {
-                frequencyDetail = "on the last " + dateTools.days[startDate.getDay()];
-            }
+            frequencyDetail = generalTools.getFrequencyDetailString(repeat.FrequencyDetailInt, startDate, false);
         } else if (weeklyDetail[0]) {
             for (var d in weeklyDetail) {
                 frequencyDetail = frequencyDetail += dateTools.days[weeklyDetail[d]].substring(0, 3) + ", ";
@@ -104,6 +95,32 @@ define(['jquery', "developer", "tools/dateTools", 'moment'], function ($, develo
         }
 
         return frequencyName + " " + frequencyDetail;
+    };
+
+    /**
+     * Creates the string for monthly frequency detail
+     * @param {number} detailInt
+     * @param startDate
+     * @param {boolean} beginWithCapital If the first character "O" should be capitalized
+     * @return {String}
+     */
+    generalTools.getFrequencyDetailString = function (detailInt, startDate, beginWithCapital) {
+        var frequencyDetail = "";
+        if (detailInt === generalTools.frequencyDetail.OnDayInMonth || detailInt === generalTools.frequencyDetail.LastOfMonth) {
+            frequencyDetail = "on the " + dateTools.getDateWithSuffix(startDate);
+        } else if (detailInt === generalTools.frequencyDetail.FirstOfDayOfWeekInMonth) {
+            frequencyDetail = "on the 1st " + dateTools.days[startDate.getDay()];
+        } else if (detailInt === generalTools.frequencyDetail.SecondOfDayOfWeekInMonth) {
+            frequencyDetail = "on the 2nd " + dateTools.days[startDate.getDay()];
+        } else if (detailInt === generalTools.frequencyDetail.ThirdOfDayOfWeekInMonth) {
+            frequencyDetail = "on the 3rd " + dateTools.days[startDate.getDay()];
+        } else if (detailInt === generalTools.frequencyDetail.LastOfDayOfWeekInMonth) {
+            frequencyDetail = "on the last " + dateTools.days[startDate.getDay()];
+        }
+        if (beginWithCapital) {
+            frequencyDetail = frequencyDetail.charAt(0).toUpperCase() + frequencyDetail.slice(1);
+        }
+        return frequencyDetail;
     };
 
     /**
