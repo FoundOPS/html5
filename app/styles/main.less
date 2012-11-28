@@ -136,7 +136,6 @@ table {
     box-sizing: border-box;
     display: block;
 }
-
 //firefox workaround(otherwise settings pages don't show up)
 @-moz-document
 url-prefix
@@ -146,7 +145,9 @@ url-prefix
 .km-view {
     display: -moz-box;
 }
-
+.km-content, .km-scroll-container, .km-scrollview {
+    width: auto;
+}
 }
 input[type="button"], button {
     color: #111;
@@ -924,6 +925,15 @@ div.k-window-content {
         -moz-box-shadow: none;
         -o-box-shadow: none;
         box-shadow: none;
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track{
+            background-color: #ccc;
+        }
+        ::-webkit-scrollbar-thumb{
+            background-color: #488fcd;
+        }
     }
     .border{
         border: 1px solid #ccc;
@@ -966,20 +976,6 @@ div.k-window-content {
         margin-bottom: 5px;
         font-size: 18px;
     }
-    #hints{
-        margin-bottom: 10px;
-        padding: 10px;
-        background-color: #fff;
-        ul{
-            padding: 0 0 0 20px;
-            li{
-                list-style: disc;
-                a{
-                    color: @blue;
-                }
-            }
-        }
-    }
     #importerUpload .k-dropdown{
         margin-top: 5px;
     }
@@ -998,6 +994,7 @@ div.k-window-content {
         span{
             background-image: url("../img/sprite.png");
         }
+        filter: none;
     }
     .saveBtn{
         span{
@@ -1016,6 +1013,20 @@ div.k-window-content {
 }
 /* region Upload */
 #importerUpload{
+    #hints{
+        margin-bottom: 5px;
+        padding: 10px;
+        background-color: #fff;
+        ul{
+            padding: 0 0 0 20px;
+            li{
+                list-style: disc;
+                a{
+                    color: @blue;
+                }
+            }
+        }
+    }
     .wrap:last-child{
         margin-top: 20px;
     }
@@ -1062,7 +1073,7 @@ div.k-window-content {
         li{
             display: inline-block;
             width: 30%;
-            margin-top: 5px;
+            margin-top: -5px;
             text-align: center;
             font-size: 16px;
         }
@@ -1086,8 +1097,9 @@ div.k-window-content {
     }
     #listView{
         margin: 0 0 15px 0;
+        overflow: auto;
         li{
-             margin-bottom: 4px;
+            margin: 0 5px 4px 0;
             .header{
                 color: #777;
                 width: 33%;
@@ -1110,6 +1122,9 @@ div.k-window-content {
                 margin: -28px 0 0 0;
             }
         }
+        li:last-child{
+            margin: 0 5px 0 0;
+        }
     }
     .wrap li{
          list-style: none;
@@ -1123,9 +1138,35 @@ div.k-window-content {
     }
     .grid{
         margin-bottom: 15px;
+        border: none;
+        .k-grid-header-wrap{
+            border: none;
+        }
+        table{
+            padding-right: 5px;
+        }
+        .k-grid-header{
+            margin-top: -5px;
+            border: none;
+            background: none;
+            .k-header {
+                padding: 0 .6em .4em 2px;
+                border: none;
+                background: #f2f2f2;
+                font-size: 16px;
+            }
+        }
+        tr{
+            background-color: @white;
+        }
         td {
             height: 100%;
-            padding: 0 0 0 3px;
+            padding: 0 7px 0 3px;
+            border: none;
+            border-bottom: 4px solid #f2f2f2;
+        }
+        tr:last-child td{
+            border: none;
         }
         .Client, .Location, .Repeat {
             width: 100%;
@@ -2581,7 +2622,7 @@ ul.noty_cont.noty_layout_topRight li {
         display: block;
         position: absolute;
         top: 2px;
-        left: 37px;
+        left: 36px;
         width: 63px;
         height: 25px;
         background: @blue;

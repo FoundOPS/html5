@@ -46,8 +46,25 @@ define(['jquery', "developer", "tools/dateTools", 'moment'], function ($, develo
         LastOfDayOfWeekInMonth: 14 //Ex. Last Monday
     };
 
+    generalTools.getContactInfoDisplayString = function (contactInfo) {
+        if (!contactInfo[0]) {
+            return "";
+        }
+        var contactData = contactInfo[0].Data.replace("http://", "");
+        contactData = contactData.replace("https://", "");
+
+        var contactString = contactData + "(" + contactInfo[0].Label + ")";
+        if (contactInfo.length > 1) {
+            contactString = contactString.concat(" +", contactInfo.length - 1, " more");
+        }
+        return contactString;
+    };
+
     //create a display string from a location object
     generalTools.getLocationDisplayString = function (location) {
+        if (!location) {
+            return "";
+        }
         var lineOne = location.AddressLineOne ? location.AddressLineOne + " " : "";
         var lineTwo = location.AddressLineTwo ? location.AddressLineTwo + ", " : "";
         var adminDistrictTwo = location.AdminDistrictTwo ? location.AdminDistrictTwo + ", " : "";
@@ -59,6 +76,9 @@ define(['jquery', "developer", "tools/dateTools", 'moment'], function ($, develo
 
     //create a display string from a repeat object
     generalTools.getRepeatString = function (repeat) {
+        if (!repeat) {
+            return "";
+        }
         //use the frequency int to get the frequency name(ex. 2 -> "Day")
         var frequencyName = generalTools.repeatFrequencies[repeat.Frequency];
 

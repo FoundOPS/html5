@@ -303,6 +303,14 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
         });
     };
 
+    //resize the list based on the current window's height
+    var resizeGrid = function () {
+        var extraMargin = 275;
+        var windowHeight = $(window).height();
+        var contentHeight = windowHeight - extraMargin;
+        $("#importerSelect").find('#listView').css("height", contentHeight + 'px');
+    };
+
     importerSelect.initialize = function () {
         //make sure there is a selected service type
         if (!importerUpload.selectedService) {
@@ -316,6 +324,10 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
                 importerSelect.gridData = suggestions;
                 window.viewImporterReview();
             });
+        });
+
+        $(window).resize(function () {
+            resizeGrid();
         });
     };
 
@@ -359,6 +371,8 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
             dataSource: importerUpload.data
         });
 
+        resizeGrid();
+
         //setup toggle switch states
         var selectPage = $("#importerSelect");
         var on = selectPage.find(".switch .on");
@@ -366,13 +380,13 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
         on.on("click", function () {
             off.removeClass("active");
             on.addClass("active");
-            selectPage.find(".toggle").animate({left: "37px"}, 250, "easeInOutQuad");
+            selectPage.find(".toggle").animate({left: "36px"}, 250, "easeInOutQuad");
             selectPage.find("#dynamicHeader span")[0].innerText = "Row 1";
         });
         off.on("click", function () {
             on.removeClass("active");
             off.addClass("active");
-            selectPage.find(".toggle").animate({left: "108px"}, 250, "easeInOutQuad");
+            selectPage.find(".toggle").animate({left: "107px"}, 250, "easeInOutQuad");
             selectPage.find("#dynamicHeader span")[0].innerText = "Row 2";
         });
 

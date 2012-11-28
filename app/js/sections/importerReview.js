@@ -2,7 +2,7 @@
 
 define(["jquery", "underscore", "sections/importerUpload", "sections/importerSelect", "db/services", "tools/generalTools", "widgets/location", "widgets/contactInfo", "widgets/repeat",
     "ui/popup", "widgets/selectBox"], function ($, _, importerUpload, importerSelect, dbServices, generalTools) {
-    var importerReview = {}, dataSource, grid, clients = {}, locations = {}, columns = [
+    var importerReview = {}, dataSource, grid, clients = {}, locations = {}, contactInfoSets = {}, columns = [
         {
             field: "Client",
             template: "<div class='Client'>#= Client #</div>",
@@ -21,6 +21,7 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
         },
         {
             field: "ContactInfo",
+            title: "Contact Info",
             template: "<div class='ContactInfo'>#= ContactInfo #</div>"
         },
         {
@@ -36,18 +37,21 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
     var formatDataForGrid = function (data) {
         var newData = [], newRow, row;
         for (var i in data) {
-            var location = {}, contactInfo = [], contactData, contactString = "";
+            var location = {}, contactInfo = [];
             row = data[i];
             newRow = [];
 
-            newRow["Client"] = "todo";
+            newRow["Client"] = clients[row.ClientSuggestions[0]].Name;
 
             location = locations[row.LocationSuggestions[0]];
 
+            //create the list of contact info sets from the suggestions
+            for (var j in row.ContactInfoSuggestions) {
+                contactInfo.push(contactInfoSets[row.ContactInfoSuggestions[j]]);
+            }
+
             newRow["Location"] = generalTools.getLocationDisplayString(location);
-
-            newRow["ContactInfo"] = "todo";
-
+            newRow["ContactInfo"] = generalTools.getContactInfoDisplayString(contactInfo);
             newRow["Repeat"] = generalTools.getRepeatString(row.Repeats[0]);
 
             newData.push(newRow);
@@ -103,7 +107,7 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
             schema: {
                 model: {
                     fields: {
-                        Client: { type: "string" },
+                        Client: { type: "string", editable: true },
                         Location: { type: "string" },
                         ContactInfo: { type: "string" },
                         Repeat: { type: "string" }
@@ -128,7 +132,7 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
 
     //resize the grid based on the current window's height
     var resizeGrid = function () {
-        var extraMargin = 250;
+        var extraMargin = 240;
         var windowHeight = $(window).height();
         var contentHeight = windowHeight - extraMargin;
         $("#importerReview").find('.k-grid-content').css("height", contentHeight + 'px');
@@ -166,6 +170,10 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
             entity = importerSelect.gridData.Locations[j];
             locations[entity.Id] = entity;
         }
+        for (var k in importerSelect.gridData.ContactInfoSet) {
+            entity = importerSelect.gridData.ContactInfoSet[k];
+            contactInfoSets[entity.Id] = entity;
+        }
 
         if (grid) {
             removeGrid();
@@ -191,9 +199,10 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
 
         locationPopup.on("click", function (e) {
             var popupElement = $("#popupContent");
+            var location = importerSelect.gridData.Locations[e.currentTarget.parentElement.parentElement.rowIndex];
             popupElement.find(".locationWidget").location();
             var locationWidget = popupElement.find(".locationWidget").data("location");
-            locationWidget.renderMap(null, false);
+            locationWidget.renderMap(location, true);
         });
 
         repeatPopup.on("click", function (e) {
