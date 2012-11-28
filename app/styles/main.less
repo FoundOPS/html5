@@ -917,6 +917,18 @@ div.k-window-content {
         min-width: 460px;
         margin: 0 auto;
     }
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+    ::-webkit-scrollbar-track{
+        background-color: #fff;
+    }
+    ::-webkit-scrollbar-thumb{
+        background-color: #57B0F2;
+    }
+    ::-webkit-scrollbar-thumb:hover{
+        background-color: #488fcd;
+    }
     .wrap{
         margin: 30px 20px 0 20px;
         padding: 15px 20px;
@@ -925,15 +937,6 @@ div.k-window-content {
         -moz-box-shadow: none;
         -o-box-shadow: none;
         box-shadow: none;
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track{
-            background-color: #ccc;
-        }
-        ::-webkit-scrollbar-thumb{
-            background-color: #488fcd;
-        }
     }
     .border{
         border: 1px solid #ccc;
@@ -1143,17 +1146,38 @@ div.k-window-content {
             border: none;
         }
         table{
-            padding-right: 5px;
+            padding-right: 3px;
         }
         .k-grid-header{
-            margin-top: -5px;
+            margin-top: 5px;
+            margin-bottom: 3px;
+            padding-right: 0 !important;
             border: none;
             background: none;
+            table{
+                padding-right: 13px;
+            }
             .k-header {
-                padding: 0 .6em .4em 2px;
                 border: none;
-                background: #f2f2f2;
                 font-size: 16px;
+                background: #488fcd;
+                border-bottom: 2px solid #f2f2f2;
+                border-right: 1px solid #f2f2f2;
+                border-left: 1px solid #f2f2f2;
+                color: #fff;
+                padding: 3px 0 4px 4px;
+                a{
+                    color: #fff;
+                    span{
+                        vertical-align: middle;
+                    }
+                }
+            }
+            .k-header:first-child {
+                border-left: none;
+            }
+            .k-header:last-child {
+                border-right: none;
             }
         }
         tr{
@@ -1163,7 +1187,8 @@ div.k-window-content {
             height: 100%;
             padding: 0 7px 0 3px;
             border: none;
-            border-bottom: 4px solid #f2f2f2;
+            border-bottom: 2px solid #f2f2f2;
+            border-right: 2px solid #f2f2f2;
         }
         tr:last-child td{
             border: none;

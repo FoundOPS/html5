@@ -5,11 +5,11 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
     var importerReview = {}, dataSource, grid, clients = {}, locations = {}, contactInfoSets = {}, columns = [
         {
             field: "Client",
-            template: "<div class='Client'>#= Client #</div>",
-            editor: function (container, options) {
-                $('<div class="styled-select"></div>').appendTo(container)
-                    .selectBox({data: [{Name: "BK"}, {Name: "Subway"}], dataTextField: "Name"});
-            }
+            template: "<div class='Client'>#= Client #</div>"//,
+//            editor: function (container, options) {
+//                $('<div class="styled-select"></div>').appendTo(container)
+//                    .selectBox({data: [{Name: "BK"}, {Name: "Subway"}], dataTextField: "Name"});
+//            }
         },
         {
             field: "Location",
@@ -41,6 +41,7 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
             row = data[i];
             newRow = [];
 
+            //newRow["ClientId"] = row.ClientSuggestions[0];
             newRow["Client"] = clients[row.ClientSuggestions[0]].Name;
 
             location = locations[row.LocationSuggestions[0]];
@@ -106,7 +107,9 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
             batch: true,
             schema: {
                 model: {
+                    //id: "ClientId",
                     fields: {
+                        //ClientId: { editable: false, nullable: true },
                         Client: { type: "string", editable: true },
                         Location: { type: "string" },
                         ContactInfo: { type: "string" },
@@ -121,7 +124,8 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
             dataSource: dataSource,
             editable: true,
             resizable: true,
-            scrollable: true
+            scrollable: true,
+            sortable: true
         }).data("kendoGrid");
     };
 
@@ -135,7 +139,7 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
         var extraMargin = 240;
         var windowHeight = $(window).height();
         var contentHeight = windowHeight - extraMargin;
-        $("#importerReview").find('.k-grid-content').css("height", contentHeight + 'px');
+        $("#importerReview").find('.k-grid-content').css("maxHeight", contentHeight + 'px');
     };
     //endregion
 
@@ -199,14 +203,17 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
 
         locationPopup.on("click", function (e) {
             var popupElement = $("#popupContent");
-            var location = importerSelect.gridData.Locations[e.currentTarget.parentElement.parentElement.rowIndex];
+            var index = e.currentTarget.parentElement.parentElement.rowIndex;
+            var location = locations[importerSelect.gridData.RowSuggestions[index].LocationSuggestions[0]];
             popupElement.find(".locationWidget").location();
             var locationWidget = popupElement.find(".locationWidget").data("location");
             locationWidget.renderMap(location, true);
         });
 
         repeatPopup.on("click", function (e) {
-            $("#popupContent").find(".repeatWidget").repeat();
+            var index = e.currentTarget.parentElement.parentElement.rowIndex;
+            var repeat = importerSelect.gridData.RowSuggestions[index].Repeats[0];
+            $("#popupContent").find(".repeatWidget").repeat({repeat: repeat});
         });
 
         //on popup close event

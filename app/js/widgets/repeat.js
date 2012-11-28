@@ -3,14 +3,15 @@
 'use strict';
 
 define(["jquery", "tools/generalTools", "tools/dateTools", "kendo", "select2"], function ($, generalTools, dateTools) {
-    var serviceA = {Frequency: 3, StartDate: new Date(), RepeatEveryTimes: 3, RepeatOn: "Monday,Wednesday", EndDate: 4},
-        serviceB = {Frequency: 4, StartDate: new Date(), RepeatEveryTimes: 1, RepeatOn: 1, EndDate: new Date()},
-
-        serviceC = {Frequency: 4, StartDate: new Date(), RepeatEveryTimes: 2, EndDate: new Date(),
-            EndAfterTimes: null, FrequencyDetailAsWeeklyFrequencyDetail: [2, 3, 5], AvailableMonthlyFrequencyDetailTypes: [8, 14], FrequencyDetailAsMonthlyFrequencyDetail: 14};
-    var service = serviceC, widgetElement;
+    var service = {Frequency: 4, StartDate: new Date(), RepeatEveryTimes: 2, EndDate: new Date(),
+            EndAfterTimes: null, FrequencyDetailAsWeeklyFrequencyDetail: [2, 3, 5], AvailableMonthlyFrequencyDetailTypes: [8, 14], FrequencyDetailAsMonthlyFrequencyDetail: 14},
+    widgetElement;
 
     $.widget("ui.repeat", {
+        options: {
+            repeat: {Blank: true, Frequency: 2, StartDate: new Date(), RepeatEveryTimes: 1, EndDate: new Date(),
+                EndAfterTimes: 1, FrequencyDetailAsWeeklyFrequencyDetail: [], AvailableMonthlyFrequencyDetailTypes: []}
+        },
         _create: function () {
             var _repeat, that = this;
             widgetElement = $(that.element);
@@ -49,6 +50,8 @@ define(["jquery", "tools/generalTools", "tools/dateTools", "kendo", "select2"], 
 
             that.element.append(_repeat);
 
+            service = that.options.repeat;
+
             //region SetupFields
             //setup the startdate datepicker
             widgetElement.find('.startDatePicker').kendoDatePicker({
@@ -80,7 +83,7 @@ define(["jquery", "tools/generalTools", "tools/dateTools", "kendo", "select2"], 
             if (service.EndAfterTimes) {
                 that._endSelection = 1;
                 that._endAfterValue = service.EndAfterTimes;
-                if (service.EndDate > 1) {
+                if (service.EndAfterTimes > 1) {
                     that._endAfterFormat = "# Occurrences";
                 } else {
                     that._endAfterFormat = "# Occurrence";
@@ -284,6 +287,8 @@ define(["jquery", "tools/generalTools", "tools/dateTools", "kendo", "select2"], 
             } else if (frequency == 4) {
                 weeklyElement.attr("style", "display:none");
                 monthlyElement.attr("style", "display:block");
+                //create monthly options if none exist
+
             } else if (frequency == 5) {
                 weeklyElement.attr("style", "display:none");
                 monthlyElement.attr("style", "display:none");
@@ -323,19 +328,41 @@ define(["jquery", "tools/generalTools", "tools/dateTools", "kendo", "select2"], 
 
         //returns an input and a label for each available monthly frequency option
         getMonthlyRepeatOptions: function () {
-            //TODO: finish this
             var htmlString = "", monthlyOptions = service.AvailableMonthlyFrequencyDetailTypes;
-            for (var mo in monthlyOptions) {
-                if (monthlyOptions[mo] === service.FrequencyDetailAsMonthlyFrequencyDetail) {
-                    htmlString += '<input type="radio" name="repeatOnGroup" checked="checked" class="option'+ monthlyOptions[mo] + '" />' +
-                        '<label class="inline">' + generalTools.getFrequencyDetailString(monthlyOptions[mo], service.StartDate, true) + '</label><br />';
-                } else {
-                    htmlString += '<input type="radio" name="repeatOnGroup" class="option'+ monthlyOptions[mo] + '" />' +
-                        '<label class="inline">' + generalTools.getFrequencyDetailString(monthlyOptions[mo], service.StartDate, true) + '</label><br />';
+            //if no repeat was passed to the widget, manually generate the options
+            if (!service.Blank) {
+                //add the first two options
+                //TODO: set class name dynamically for second option (11-14)
+                htmlString = '<input type="radio" name="repeatOnGroup" class="option8" /><label class="inline">On the ' + dateTools.getDateWithSuffix(service.StartDate) + '</label><br />' +
+                    '<input type="radio" name="repeatOnGroup" class="option" /><label class="inline">On the ' + this.getWeekAndDay(service.StartDate) + '</label><br />';
+
+                //check if startDate is the last day of the month
+                var lastDay = new Date(service.StartDate.getTime() + 86400000).getDate() === 1;
+                //if it is the last day of the month
+                if (lastDay) {
+                    //add option for the last day of the month
+                    htmlString += '<input type="radio" name="repeatOnGroup" class="option10" /><label class="inline">The last day of the month</label>';
+                }
+            } else {
+                for (var mo in monthlyOptions) {
+                    if (monthlyOptions[mo] === service.FrequencyDetailAsMonthlyFrequencyDetail) {
+                        htmlString += '<input type="radio" name="repeatOnGroup" checked="checked" class="option'+ monthlyOptions[mo] + '" />' +
+                            '<label class="inline">' + generalTools.getFrequencyDetailString(monthlyOptions[mo], service.StartDate, true) + '</label><br />';
+                    } else {
+                        htmlString += '<input type="radio" name="repeatOnGroup" class="option'+ monthlyOptions[mo] + '" />' +
+                            '<label class="inline">' + generalTools.getFrequencyDetailString(monthlyOptions[mo], service.StartDate, true) + '</label><br />';
+                    }
                 }
             }
 
             return htmlString;
+        },
+
+        //get day of the week and the nth occurrence of that day. ex. "3rd Friday"
+        getWeekAndDay: function (date) {
+            var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            var prefixes = ['1st', '2nd', '3rd', 'Last'];
+            return prefixes[0 | (date.getDate() - 1) / 7] + ' ' + days[date.getDay()];
         },
 
         //remove the widget

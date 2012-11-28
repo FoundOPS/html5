@@ -33,6 +33,13 @@ define(['moment'], function () {
 
     dateTools.days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
+    // parse a date in yyyy-mm-dd format
+    dateTools.parseDate = function (date) {
+        var parts = date.match(/(\d+)/g);
+        // new Date(year, month [, date [, hours[, minutes[, seconds[, ms]]]]])
+        return new Date(parts[0], parts[1]-1, parts[2]); // months are 0-based
+    };
+
     /**
      * This will return the date without the time
      * in a format consumable for the web api.
@@ -60,8 +67,17 @@ define(['moment'], function () {
 
     //returns the day of month with appropriate suffix ex. 21st
     dateTools.getDateWithSuffix = function (startDate) {
-        var suffix, lastDigit, dayOfMonth = startDate.getDate();
-        dayOfMonth = dayOfMonth.toString();
+        var suffix, lastDigit, date = startDate;
+        if (!startDate.getDate) {
+            date = dateTools.parseDate(startDate);
+        }
+
+//        if (startDate.getDate) {
+//            dayOfMonth = startDate.getDate();
+//        } else {
+//            dayOfMonth = startDate.match(/[0-9]*\-[0-9]*\-([1-9]*)/)[1];
+//        }
+        var dayOfMonth = date.getDate().toString();
         //get the last digit of the date. ex. 21 -> 1
         lastDigit = dayOfMonth.charAt(dayOfMonth.length - 1);
         //TODO: check if supposed to check against string or num

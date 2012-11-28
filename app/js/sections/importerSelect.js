@@ -308,7 +308,7 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
         var extraMargin = 275;
         var windowHeight = $(window).height();
         var contentHeight = windowHeight - extraMargin;
-        $("#importerSelect").find('#listView').css("height", contentHeight + 'px');
+        $("#importerSelect").find('#listView').css("maxHeight", contentHeight + 'px');
     };
 
     importerSelect.initialize = function () {

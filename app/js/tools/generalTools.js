@@ -50,10 +50,22 @@ define(['jquery', "developer", "tools/dateTools", 'moment'], function ($, develo
         if (!contactInfo[0]) {
             return "";
         }
-        var contactData = contactInfo[0].Data.replace("http://", "");
-        contactData = contactData.replace("https://", "");
 
-        var contactString = contactData + "(" + contactInfo[0].Label + ")";
+        var contactData = "";
+        if (contactInfo[0].Data) {
+            contactData = contactInfo[0].Data.replace("http://", "");
+            contactData = contactData.replace("https://", "");
+            contactData += " ";
+        }
+
+        var contactLabel = "";
+        if (contactInfo[0].Label) {
+            contactLabel = "(" + contactInfo[0].Label + ")";
+        }
+
+        var contactString = contactData + contactLabel;
+
+        //add text to the end to show haow many more sets of contact info there are (ex. "+ 3 more")
         if (contactInfo.length > 1) {
             contactString = contactString.concat(" +", contactInfo.length - 1, " more");
         }
@@ -101,7 +113,7 @@ define(['jquery', "developer", "tools/dateTools", 'moment'], function ($, develo
 
         var frequencyDetail = "";
         var weeklyDetail = repeat.FrequencyDetailAsWeeklyFrequencyDetail;
-        var startDate = moment(repeat.StartDate).toDate();
+        var startDate = dateTools.parseDate(repeat.StartDate);
 
         //if monthly
         if (repeat.FrequencyDetailAsMonthlyFrequencyDetail) {
@@ -125,17 +137,20 @@ define(['jquery', "developer", "tools/dateTools", 'moment'], function ($, develo
      * @return {String}
      */
     generalTools.getFrequencyDetailString = function (detailInt, startDate, beginWithCapital) {
-        var frequencyDetail = "";
+        var frequencyDetail = "", date = startDate;
+        if (!startDate.getDate) {
+            date = dateTools.parseDate(startDate);
+        }
         if (detailInt === generalTools.frequencyDetail.OnDayInMonth || detailInt === generalTools.frequencyDetail.LastOfMonth) {
-            frequencyDetail = "on the " + dateTools.getDateWithSuffix(startDate);
+            frequencyDetail = "on the " + dateTools.getDateWithSuffix(date);
         } else if (detailInt === generalTools.frequencyDetail.FirstOfDayOfWeekInMonth) {
-            frequencyDetail = "on the 1st " + dateTools.days[startDate.getDay()];
+            frequencyDetail = "on the 1st " + dateTools.days[date.getDay()];
         } else if (detailInt === generalTools.frequencyDetail.SecondOfDayOfWeekInMonth) {
-            frequencyDetail = "on the 2nd " + dateTools.days[startDate.getDay()];
+            frequencyDetail = "on the 2nd " + dateTools.days[date.getDay()];
         } else if (detailInt === generalTools.frequencyDetail.ThirdOfDayOfWeekInMonth) {
-            frequencyDetail = "on the 3rd " + dateTools.days[startDate.getDay()];
+            frequencyDetail = "on the 3rd " + dateTools.days[date.getDay()];
         } else if (detailInt === generalTools.frequencyDetail.LastOfDayOfWeekInMonth) {
-            frequencyDetail = "on the last " + dateTools.days[startDate.getDay()];
+            frequencyDetail = "on the last " + dateTools.days[date.getDay()];
         }
         if (beginWithCapital) {
             frequencyDetail = frequencyDetail.charAt(0).toUpperCase() + frequencyDetail.slice(1);
