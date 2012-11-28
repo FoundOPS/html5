@@ -75,7 +75,7 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
             selector.children[1].appendChild(document.createElement("ul"));
             selector.children[1].children[0].setAttribute("class", "optionList");
             if (!isTouchDevice()) {
-                selector.children[1].children[0].setAttribute("style", "overflow-y: scroll");
+//                selector.children[1].children[0].setAttribute("style", "overflow-y: auto");
             }
 
             //Disable touch scrolling of the view when user is scrolling whatever element is passed.
@@ -116,6 +116,9 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                     }
                     selector._updateOptionList(matches);
                 }
+                $(".km-scroll-wrapper").kendoMobileScroller("scrollTo", 0, -($('.selectorWidget').height()));
+                $(".optionList").css("-webkit-transform", "translate3d(0px, "+$('.selectorWidget').height()+"px, 0)");
+//                $(".km-scroll-container").css("position", "relative").css("top", -$('.selectorWidget').height());
             };
 
             //Listen to input in search box and update the widget accordingly.
@@ -127,7 +130,6 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                 while (optionList[0].hasChildNodes()) {
                     optionList[0].removeChild(optionList[0].lastChild);
                 }
-                $("#optionListScroller").kendoMobileScroller("reset");
             };
 
             //Populates and edits the list of items that the user can select.
@@ -176,7 +178,7 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                     selector.children[0].children[0].value = selector.selectedOptionText;
                     selector._clearList();
                     config.onSelect(selector.selectedData);
-                    $(".km-scroll-container").css("-webkit-transform", "");
+                    $(".km-scroll-wrapper").kendoMobileScroller("reset");
                 }
                 _scrolling = false;
             });
@@ -196,6 +198,7 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                             selector.selectedOptionTempText = selector.children[0].children[0].value;
                             selector.children[0].children[0].value = "";
                         }
+                        $(".km-scroll-wrapper").kendoMobileScroller("reset");
                     }
                 }, 200);
             });
