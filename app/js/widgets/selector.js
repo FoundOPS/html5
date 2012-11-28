@@ -42,6 +42,14 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                     return JSON.stringify(data);
                 };
             }
+            var isTouchDevice = function() {
+                try{
+                    document.createEvent("TouchEvent");
+                    return true;
+                }catch(e){
+                    return false;
+                }
+            };
 
             /**
              * Model for selectorWidget elements.
@@ -66,20 +74,13 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
             selector.children[1].setAttribute("class", "scroller-content");
             selector.children[1].appendChild(document.createElement("ul"));
             selector.children[1].children[0].setAttribute("class", "optionList");
+            if (!isTouchDevice()) {
+                selector.children[1].children[0].setAttribute("style", "overflow-y: scroll");
+            }
 
-            //The following two functions disable scrolling of the view when user is scrolling whatever element is passed.
-            var isTouchDevice = function() {
-                try{
-                    document.createEvent("TouchEvent");
-                    return true;
-                }catch(e){
-                    return false;
-                }
-            };
+            //Disable touch scrolling of the view when user is scrolling whatever element is passed.
             var touchScroll = function(element) {
-                if(isTouchDevice()) { //If touch events exist...
                     var scrollStartPos = 0;
-
                     element.addEventListener("touchstart", function(event) {
                         scrollStartPos = this.scrollTop + event.touches[0].pageY;
                         event.preventDefault();
@@ -88,7 +89,6 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                         this.scrollTop = scrollStartPos - event.touches[0].pageY;
                         event.preventDefault();
                     }, false);
-                }
             };
             touchScroll(selector.children[1].children[0]);
 
@@ -181,7 +181,7 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                 _scrolling = false;
             });
             //Set the scrolling flag to on.
-            $(selector).find(".optionList").on("touchmove", $(selector).find(".optionList li"), function(e) {
+            $(selector).find(".optionList").on("touchmove", $(selector).find(".optionList"), function(e) {
                 _scrolling = true;
             });
             //When clicking outside of the select widget, close the option list and handle text inside the textbox.
