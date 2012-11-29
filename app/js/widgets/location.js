@@ -76,8 +76,8 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
                     }
 
                     //animate back to map from edit screen
+                    widgetElement.find(".editPane").switchClass("shown", "hidden", 500, 'swing');
                     widgetElement.find(".buttonPane").switchClass("hidden", "shown", 500, 'swing');
-                    widgetElement.find("#editPane").switchClass("shown", "hidden", 500, 'swing');
                     widgetElement.find("#locationWidgetMap").switchClass("hidden", "shown", 500);
                 },
                 minimumInputLength: 2,

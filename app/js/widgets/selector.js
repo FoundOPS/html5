@@ -178,7 +178,10 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                     }
                     selector.children[0].children[0].value = selector.selectedOptionText;
                     config.onSelect(e, selector.selectedData);
-                    selector._clearList();
+                    //Wait for listeners from other widgets to use the selected option before removing it from the DOM.
+                    setTimeout(function () {
+                        selector._clearList();
+                    }, 200);
                     if (isTouchDevice()) {
                         $(".km-scroll-wrapper").kendoMobileScroller("reset");
                     }
