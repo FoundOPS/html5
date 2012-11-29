@@ -15,7 +15,7 @@ define(["db/services", "sections/linkedEntitySection", "db/session", "tools/gene
 //public methods
 
     section.initialize = function () {
-        $(".selectorWidget").selectorWidget({
+        $("#selectorWidget").selectorWidget({
 //            query: function (options) {
 //                return dbServices.locations.read({params: {search: options.searchTerm}}).done(function (locations) {
 //                    options.render(locations);

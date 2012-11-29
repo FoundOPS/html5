@@ -18,7 +18,7 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
      *          format {function(data)}
      *              should return the value to display as an option (defaults to toString())
      *          onSelect {function(*)}
-     *              A callback function triggered when an item is selected. The parameter is the selected data
+     *              A callback function triggered when an item is selected. The parameters are the triggered jQuery event and the selected data.
      *          minimumInputLength {int}
      *              number of characters necessary search box to start a search (defaults to 1)
  *              showPreviousSelection {boolean}
@@ -94,7 +94,6 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
 
             //Fetches the options to display for selection based on the user's provided data source and his/her search term.
             var getOptions = function (searchText) {
-                var matches = [];
                 //get the list of location matches
                 if (config.query) {
                     if (searchText.length >= config.minimumInputLength) {
@@ -103,7 +102,7 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                         selector._clearList();
                     }
                 } else {
-                    var dataItem;
+                    var dataItem, matches = [];
                     if (searchText.length) {
                         for (i = 0; i < config.data.length; i++) {
                             dataItem = config.data[i];
@@ -178,7 +177,7 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                         selector.selectedOptionText = $(e.target)[0].innerText;
                     }
                     selector.children[0].children[0].value = selector.selectedOptionText;
-                    config.onSelect(e);
+                    config.onSelect(e, selector.selectedData);
                     selector._clearList();
                     if (isTouchDevice()) {
                         $(".km-scroll-wrapper").kendoMobileScroller("reset");

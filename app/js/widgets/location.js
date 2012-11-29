@@ -19,10 +19,11 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
                 '<a class="k-button k-button-icontext k-grid-edit" href="javascript:void(0)"></a>' +
                 '<a class="navigateBtn" href="javascript:void(0)"></a>' +
                 '</div>' +
+                '<div class="editPane hidden">' +
                 '<div id="selectorWidget">' +
-                '<input type="text" />' +
-                '<ul class="locationList"></ul>' +
+                '</div>' +
                 '</div>'
+
             );
 
             that.element.append(that._location);
@@ -49,18 +50,19 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
                 format: function (location) {
                     var dataString = generalTools.locationDisplayString(location);
                     if (dataString) {
-                        return '</span><span class="name">' + dataString;
+                        return dataString;
 //                        '<span class="selectSearchOptionIcon" style="height: 18px;width: 22px;float: left;background: url(\'img/webIcon.png\') no-repeat left center;"></span>' + dataString;
                         //if none do, display the latitude and longitude
                     } else {
                         return location.Latitude + "," + location.Longitude;
                     }
                 },
-                onSelect: function (e) {
+                onSelect: function (e, selectedData) {
+                    var $target = $(e.target)[0].nodeName === "SPAN" ? $(e.target) : $(e.target).children();
                     //match the index of the selected item to the index of locationList
-                    var id = e.currentTarget.id;
+                    var id = $target[0].id;
                     //if the previous location was selected
-                    if (id == "previous") {
+                    if (id == "previousSelection") {
                         that._changeMarkerLocation(that._currentLocation, false);
                         //if "Manually Drop Pin" was selected
                     } else if (id == "manual") {
@@ -69,12 +71,13 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
                         that._allowMapClick = true;
                         //if a new location was selected
                     } else {
-                        that._changeMarkerLocation(that._locationList[id], false);
-                        that._updateCurrentLocation(that._locationList[id], true);
+                        that._changeMarkerLocation(selectedData, false);
+                        that._updateCurrentLocation(selectedData, true);
                     }
 
                     //animate back to map from edit screen
                     widgetElement.find(".buttonPane").switchClass("hidden", "shown", 500, 'swing');
+                    widgetElement.find("#editPane").switchClass("shown", "hidden", 500, 'swing');
                     widgetElement.find("#locationWidgetMap").switchClass("hidden", "shown", 500);
                 },
                 minimumInputLength: 2,
@@ -198,7 +201,7 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
 
             //animation
             widgetElement.find(".buttonPane").switchClass("shown", "hidden", 500, 'swing');
-            widgetElement.find("#selectorWidget").switchClass("hidden", "shown", 500, 'swing');
+            widgetElement.find(".editPane").switchClass("hidden", "shown", 500, 'swing');
             widgetElement.find("#locationWidgetMap").switchClass("shown", "hidden", 500);
         },
 
