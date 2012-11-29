@@ -53,6 +53,7 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
 
             newRow["LocationId"] = row.LocationSuggestions[0];
             newRow["Location"] = generalTools.getLocationDisplayString(location);
+            newRow["ContactInfoData"] = contactInfo;
             newRow["ContactInfo"] = generalTools.getContactInfoDisplayString(contactInfo);
             newRow["RepeatData"] = row.Repeats[0];
             newRow["Repeat"] = generalTools.getRepeatString(row.Repeats[0]);
@@ -101,6 +102,7 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
 //    };
 
     //region Grid Methods
+    //(called on show and on sort)
     var dataBound = function () {
         var reviewElement = $("#importerReview");
         //add popups to the location, contactInfo, and repeat cells
@@ -115,27 +117,34 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
 
         //create the correct widget inside the popup
         contactInfoPopup.on("click", function (e) {
-            $("#popupContent").find(".contactInfoWidget").contactInfo();
+            importerReview.editIndex = e.currentTarget.parentElement.parentElement.rowIndex;
+            importerReview.editedCell = e.currentTarget;
+            var contacts = dataSource._view[importerReview.editIndex].ContactInfoData;
+            $("#popupContent").find(".contactInfoWidget").contactInfo({contacts: contacts});
+            importerReview.contactInfoWidget = $("#popupContent").find(".contactInfoWidget").data("contactInfo");
         });
 
         locationPopup.on("click", function (e) {
             var popupElement = $("#popupContent");
-            var index = e.currentTarget.parentElement.parentElement.rowIndex;
-            //var location = locations[importerSelect.gridData.RowSuggestions[index].LocationSuggestions[0]];
-            var location = locations[dataSource._view[index].LocationId];
+            importerReview.editIndex = e.currentTarget.parentElement.parentElement.rowIndex;
+            var location = locations[dataSource._view[importerReview.editIndex].LocationId];
             popupElement.find(".locationWidget").location();
             var locationWidget = popupElement.find(".locationWidget").data("location");
             locationWidget.renderMap(location, true);
         });
 
         repeatPopup.on("click", function (e) {
-            var index = e.currentTarget.parentElement.parentElement.rowIndex;
-            var repeat = dataSource._view[index].RepeatData;
+            importerReview.editIndex = e.currentTarget.parentElement.parentElement.rowIndex;
+            var repeat = dataSource._view[importerReview.editIndex].RepeatData;
             $("#popupContent").find(".repeatWidget").repeat({repeat: repeat});
         });
 
         //on popup close event
         $(document).on('popup.closing', function (e) {
+            // get a reference to the grid widget
+            var grid = $("#importerReview .grid").data("kendoGrid");
+            // returns the data item for first row
+            //grid.dataItem(grid.tbody.find(">tr:first"));
             //remove the location widget, if it exists
             if ($(e.target).find(".locationWidget").data("location")) {
                 $(e.target).find(".locationWidget").data("location").removeWidget();
@@ -144,6 +153,11 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
                 $(e.target).find(".repeatWidget").data("repeat").removeWidget();
                 //remove the contactInfo widget, if it exists
             } else if ($(e.target).find(".contactInfoWidget").data("contactInfo")) {
+                //save contactInfo widget data to the grid dataSource
+                grid.dataSource._data[importerReview.editIndex].ContactInfoData = importerReview.contactInfoWidget.contacts;
+                //update the grid display string
+                //importerReview.editedCell.innerHtml = generalTools.getContactInfoDisplayString(importerReview.contactInfoWidget.contacts);
+                //grid.refresh();
                 $(e.target).find(".contactInfoWidget").data("contactInfo").removeWidget();
             }
         });

@@ -71,12 +71,6 @@ define(['moment'], function () {
         if (!startDate.getDate) {
             date = dateTools.parseDate(startDate);
         }
-
-//        if (startDate.getDate) {
-//            dayOfMonth = startDate.getDate();
-//        } else {
-//            dayOfMonth = startDate.match(/[0-9]*\-[0-9]*\-([1-9]*)/)[1];
-//        }
         var dayOfMonth = date.getDate().toString();
         //get the last digit of the date. ex. 21 -> 1
         lastDigit = dayOfMonth.charAt(dayOfMonth.length - 1);

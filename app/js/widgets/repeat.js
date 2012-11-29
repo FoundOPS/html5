@@ -9,12 +9,14 @@ define(["jquery", "tools/generalTools", "tools/dateTools", "kendo", "select2"], 
 
     $.widget("ui.repeat", {
         options: {
-            repeat: {Blank: true, Frequency: 2, StartDate: new Date(), RepeatEveryTimes: 1, EndDate: new Date(),
+            repeat: {Frequency: 2, StartDate: new Date(), RepeatEveryTimes: 1, EndDate: new Date(),
                 EndAfterTimes: 1, FrequencyDetailAsWeeklyFrequencyDetail: [], AvailableMonthlyFrequencyDetailTypes: []}
         },
         _create: function () {
             var _repeat, that = this;
             widgetElement = $(that.element);
+
+            service = that.options.repeat;
 
             _repeat = $('<h3>Repeat</h3>' +
                 '<label>Frequency</label>' +
@@ -39,7 +41,7 @@ define(["jquery", "tools/generalTools", "tools/dateTools", "kendo", "select2"], 
                 '</div>' +
                 '<br /><br /></div>' +
                 '<div class="monthlyRepeatOn">' +
-                '<label>Repeat On</label>' + this.getMonthlyRepeatOptions() +
+                '<label>Repeat On</label>' + that.getMonthlyRepeatOptions() +
                 '</div>' +
                 '<div class="endDate">' +
                 '<label>End Date</label>' +
@@ -50,12 +52,10 @@ define(["jquery", "tools/generalTools", "tools/dateTools", "kendo", "select2"], 
 
             that.element.append(_repeat);
 
-            service = that.options.repeat;
-
             //region SetupFields
             //setup the startdate datepicker
             widgetElement.find('.startDatePicker').kendoDatePicker({
-                value: new Date(service.StartDate),
+                value: dateTools.parseDate(service.StartDate),
                 format: "dddd, MMMM dd, yyyy"
             });
 
@@ -90,7 +90,7 @@ define(["jquery", "tools/generalTools", "tools/dateTools", "kendo", "select2"], 
                 }
             } else if (service.EndDate) {
                 that._endSelection = 2;
-                that._endOnValue = new Date(service.EndDate);
+                that._endOnValue = dateTools.parseDate(service.EndDate);
             } else {
                 that._endSelection = 0;
             }
@@ -287,7 +287,11 @@ define(["jquery", "tools/generalTools", "tools/dateTools", "kendo", "select2"], 
             } else if (frequency == 4) {
                 weeklyElement.attr("style", "display:none");
                 monthlyElement.attr("style", "display:block");
-                //create monthly options if none exist
+                //manually add monthly options if none exist
+                if (widgetElement.find(".monthlyRepeatOn")[0].innerHTML.indexOf("On the") === -1) {
+                    var options = that.getMonthlyRepeatOptions();
+                    widgetElement.find(".monthlyRepeatOn")[0].innerHTML = '<label>Repeat On</label>' + options;
+                }
 
             } else if (frequency == 5) {
                 weeklyElement.attr("style", "display:none");
@@ -330,14 +334,14 @@ define(["jquery", "tools/generalTools", "tools/dateTools", "kendo", "select2"], 
         getMonthlyRepeatOptions: function () {
             var htmlString = "", monthlyOptions = service.AvailableMonthlyFrequencyDetailTypes;
             //if no repeat was passed to the widget, manually generate the options
-            if (!service.Blank) {
+            if (!service.StatusInt || monthlyOptions.length == 0) {
                 //add the first two options
                 //TODO: set class name dynamically for second option (11-14)
                 htmlString = '<input type="radio" name="repeatOnGroup" class="option8" /><label class="inline">On the ' + dateTools.getDateWithSuffix(service.StartDate) + '</label><br />' +
                     '<input type="radio" name="repeatOnGroup" class="option" /><label class="inline">On the ' + this.getWeekAndDay(service.StartDate) + '</label><br />';
 
                 //check if startDate is the last day of the month
-                var lastDay = new Date(service.StartDate.getTime() + 86400000).getDate() === 1;
+                var lastDay = new Date(dateTools.parseDate(service.StartDate).getTime() + 86400000).getDate() === 1;
                 //if it is the last day of the month
                 if (lastDay) {
                     //add option for the last day of the month
@@ -354,12 +358,13 @@ define(["jquery", "tools/generalTools", "tools/dateTools", "kendo", "select2"], 
                     }
                 }
             }
-
             return htmlString;
+
         },
 
         //get day of the week and the nth occurrence of that day. ex. "3rd Friday"
         getWeekAndDay: function (date) {
+            date = dateTools.parseDate(date);
             var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
             var prefixes = ['1st', '2nd', '3rd', 'Last'];
             return prefixes[0 | (date.getDate() - 1) / 7] + ' ' + days[date.getDay()];
