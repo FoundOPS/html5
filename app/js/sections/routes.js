@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(["db/services", "sections/linkedEntitySection", "db/session", "tools/generalTools", "widgets/location", "widgets/selector"], function (dbServices, createBase, session, generalTools, location) {
+define(["db/services", "sections/linkedEntitySection", "db/session", "tools/generalTools", "widgets/selector"], function (dbServices, createBase, session) {
     var section = createBase("routeDetails", "routeId");
     window.routes = section;
 
@@ -15,7 +15,7 @@ define(["db/services", "sections/linkedEntitySection", "db/session", "tools/gene
 //public methods
 
     section.initialize = function () {
-        $(".selectorWidget").searchSelect({
+        $(".selectorWidget").selectorWidget({
 //            query: function (options) {
 //                return dbServices.locations.read({params: {search: options.searchTerm}}).done(function (locations) {
 //                    options.render(locations);

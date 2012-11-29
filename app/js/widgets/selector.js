@@ -27,7 +27,7 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
      *        }
      * @return {*} Returns the jquery widget (allows widget to be chainable).
      */
-    $.fn.searchSelect = function (config) {
+    $.fn.selectorWidget = function (config) {
         return this.each(function () {
             var selector = this, i;
 
@@ -124,7 +124,7 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
             };
 
             //Listen to input in search box and update the widget accordingly.
-            generalTools.observeInput($(selector).find("input"), getOptions, config.query ? 0 : 1);
+            generalTools.observeInput($(selector).find("input"), getOptions, config.query ? 0 : 750);
 
             selector._clearList = function () {
                 var optionList = $(selector).find(".optionList");
@@ -178,7 +178,7 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                         selector.selectedOptionText = $(e.target)[0].innerText;
                     }
                     selector.children[0].children[0].value = selector.selectedOptionText;
-                    config.onSelect(selector.selectedData);
+                    config.onSelect(e);
                     selector._clearList();
                     if (isTouchDevice()) {
                         $(".km-scroll-wrapper").kendoMobileScroller("reset");
