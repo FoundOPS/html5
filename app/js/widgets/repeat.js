@@ -55,7 +55,7 @@ define(["jquery", "tools/generalTools", "tools/dateTools", "kendo", "select2"], 
             //region SetupFields
             //setup the startdate datepicker
             widgetElement.find('.startDatePicker').kendoDatePicker({
-                value: new Date(),
+                value: new Date(service.StartDate),
                 format: "dddd, MMMM dd, yyyy"
             });
 
@@ -88,9 +88,9 @@ define(["jquery", "tools/generalTools", "tools/dateTools", "kendo", "select2"], 
                 } else {
                     that._endAfterFormat = "# Occurrence";
                 }
-            } else if (service.EndDate && service.EndDate.getMonth) {
+            } else if (service.EndDate) {
                 that._endSelection = 2;
-                that._endOnValue = service.EndDate;
+                that._endOnValue = new Date(service.EndDate);
             } else {
                 that._endSelection = 0;
             }
@@ -124,7 +124,7 @@ define(["jquery", "tools/generalTools", "tools/dateTools", "kendo", "select2"], 
             //initially show the correct endDate field based on whether EndDate or EndAfterTimes exists
             if (service.EndAfterTimes) {
                 widgetElement.find(".endDate .k-numerictextbox").addClass("showInput");
-            } else if (service.EndDate && service.EndDate.getMonth) {
+            } else if (service.EndDate) {
                 widgetElement.find(".endDate .k-datepicker").addClass("showInput");
             }
 
@@ -319,7 +319,7 @@ define(["jquery", "tools/generalTools", "tools/dateTools", "kendo", "select2"], 
             var repeatEvery = widgetElement.find(".repeatEveryNum:not(.k-formatted-value)").data("kendoNumericTextBox");
             //use the frequency int to get the frequency name(ex. 2 -> "Day")
             var frequencyName = generalTools.repeatFrequencies[frequency];
-            //add "s" to the frequency name if repeat number is mmore than one
+            //add "s" to the frequency name if repeat number is more than one
             if (repeat.match(/^([0-9]*)\s/)[1] > 1) {
                 frequencyName += "s";
             }

@@ -51,8 +51,10 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
                 contactInfo.push(contactInfoSets[row.ContactInfoSuggestions[j]]);
             }
 
+            newRow["LocationId"] = row.LocationSuggestions[0];
             newRow["Location"] = generalTools.getLocationDisplayString(location);
             newRow["ContactInfo"] = generalTools.getContactInfoDisplayString(contactInfo);
+            newRow["RepeatData"] = row.Repeats[0];
             newRow["Repeat"] = generalTools.getRepeatString(row.Repeats[0]);
 
             newData.push(newRow);
@@ -99,6 +101,54 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
 //    };
 
     //region Grid Methods
+    var dataBound = function () {
+        var reviewElement = $("#importerReview");
+        //add popups to the location, contactInfo, and repeat cells
+        var contactInfoPopup = reviewElement.find(".ContactInfo");
+        contactInfoPopup.popup({contents: $("<div class='contactInfoWidget'></div>")});
+
+        var locationPopup = reviewElement.find(".Location");
+        locationPopup.popup({contents: $("<div class='locationWidget'></div>")});
+
+        var repeatPopup = reviewElement.find(".Repeat");
+        repeatPopup.popup({contents: $("<div class='repeatWidget'></div>")});
+
+        //create the correct widget inside the popup
+        contactInfoPopup.on("click", function (e) {
+            $("#popupContent").find(".contactInfoWidget").contactInfo();
+        });
+
+        locationPopup.on("click", function (e) {
+            var popupElement = $("#popupContent");
+            var index = e.currentTarget.parentElement.parentElement.rowIndex;
+            //var location = locations[importerSelect.gridData.RowSuggestions[index].LocationSuggestions[0]];
+            var location = locations[dataSource._view[index].LocationId];
+            popupElement.find(".locationWidget").location();
+            var locationWidget = popupElement.find(".locationWidget").data("location");
+            locationWidget.renderMap(location, true);
+        });
+
+        repeatPopup.on("click", function (e) {
+            var index = e.currentTarget.parentElement.parentElement.rowIndex;
+            var repeat = dataSource._view[index].RepeatData;
+            $("#popupContent").find(".repeatWidget").repeat({repeat: repeat});
+        });
+
+        //on popup close event
+        $(document).on('popup.closing', function (e) {
+            //remove the location widget, if it exists
+            if ($(e.target).find(".locationWidget").data("location")) {
+                $(e.target).find(".locationWidget").data("location").removeWidget();
+                //remove the repeat widget, if it exists
+            } else if ($(e.target).find(".repeatWidget").data("repeat")) {
+                $(e.target).find(".repeatWidget").data("repeat").removeWidget();
+                //remove the contactInfo widget, if it exists
+            } else if ($(e.target).find(".contactInfoWidget").data("contactInfo")) {
+                $(e.target).find(".contactInfoWidget").data("contactInfo").removeWidget();
+            }
+        });
+    };
+
     var setupGrid = function () {
         var data = formatDataForGrid(importerSelect.gridData.RowSuggestions);
 
@@ -125,7 +175,8 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
             editable: true,
             resizable: true,
             scrollable: true,
-            sortable: true
+            sortable: true,
+            dataBound: dataBound
         }).data("kendoGrid");
     };
 
@@ -184,51 +235,6 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
         }
         setupGrid();
         resizeGrid();
-
-        var reviewElement = $("#importerReview");
-        //add popups to the location, contactInfo, and repeat cells
-        var contactInfoPopup = reviewElement.find(".ContactInfo");
-        contactInfoPopup.popup({contents: $("<div class='contactInfoWidget'></div>")});
-
-        var locationPopup = reviewElement.find(".Location");
-        locationPopup.popup({contents: $("<div class='locationWidget'></div>")});
-
-        var repeatPopup = reviewElement.find(".Repeat");
-        repeatPopup.popup({contents: $("<div class='repeatWidget'></div>")});
-
-        //create the correct widget inside the popup
-        contactInfoPopup.on("click", function (e) {
-            $("#popupContent").find(".contactInfoWidget").contactInfo();
-        });
-
-        locationPopup.on("click", function (e) {
-            var popupElement = $("#popupContent");
-            var index = e.currentTarget.parentElement.parentElement.rowIndex;
-            var location = locations[importerSelect.gridData.RowSuggestions[index].LocationSuggestions[0]];
-            popupElement.find(".locationWidget").location();
-            var locationWidget = popupElement.find(".locationWidget").data("location");
-            locationWidget.renderMap(location, true);
-        });
-
-        repeatPopup.on("click", function (e) {
-            var index = e.currentTarget.parentElement.parentElement.rowIndex;
-            var repeat = importerSelect.gridData.RowSuggestions[index].Repeats[0];
-            $("#popupContent").find(".repeatWidget").repeat({repeat: repeat});
-        });
-
-        //on popup close event
-        $(document).on('popup.closing', function (e) {
-            //remove the location widget, if it exists
-            if ($(e.target).find(".locationWidget").data("location")) {
-                $(e.target).find(".locationWidget").data("location").removeWidget();
-                //remove the repeat widget, if it exists
-            } else if ($(e.target).find(".repeatWidget").data("repeat")) {
-                $(e.target).find(".repeatWidget").data("repeat").removeWidget();
-                //remove the contactInfo widget, if it exists
-            } else if ($(e.target).find(".contactInfoWidget").data("contactInfo")) {
-                $(e.target).find(".contactInfoWidget").data("contactInfo").removeWidget();
-            }
-        });
     };
 
     window.importerReview = importerReview;

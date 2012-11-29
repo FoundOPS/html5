@@ -81,7 +81,7 @@ define(['moment'], function () {
         //get the last digit of the date. ex. 21 -> 1
         lastDigit = dayOfMonth.charAt(dayOfMonth.length - 1);
         //TODO: check if supposed to check against string or num
-        if ((lastDigit > 3 && lastDigit <= 9) || (lastDigit >= 11 && lastDigit <= 13) || lastDigit == 0) {
+        if ((lastDigit > 3 && lastDigit <= 9) || (dayOfMonth >= 11 && dayOfMonth <= 13) || lastDigit == 0) {
             suffix = "th";
         } else if (lastDigit == 1) {
             suffix = "st";
