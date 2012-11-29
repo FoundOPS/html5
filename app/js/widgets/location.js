@@ -255,7 +255,7 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
          * @private
          */
         _getLocationString: function (location) {
-            var returnString = generalTools.locationDisplayString(location);
+            var returnString = generalTools.getLocationDisplayString(location);
             if (returnString) {
                 return returnString;
                 //if none do, display the latitude and longitude

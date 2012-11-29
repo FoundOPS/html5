@@ -15,7 +15,8 @@ define(["jquery", "lib/csv", "db/services", "widgets/selectBox", "jui", "jfilere
     var parse = function (file) {
         var data = csv.parseRows(file);
         //save this data for later use
-        importerUpload.oldData = data;
+        importerUpload.uploadedData = data;
+
         //turn the array sideways, ex [{1,2,3}, {4,5,6}] becomes [{1,4}, {2,5}, {3,6}]
         //this is all under assumption that all the arrays are the same size
         //http://stackoverflow.com/questions/5971389/convert-array-of-rows-to-array-of-columns

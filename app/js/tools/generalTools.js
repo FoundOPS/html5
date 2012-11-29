@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(['jquery', "developer", 'moment'], function ($, developer) {
+define(['jquery', "developer", "tools/dateTools", 'moment'], function ($, developer, dateTools) {
     var generalTools = {};
 
     $.fn.delayKeyup = function (callback, ms) {
@@ -37,8 +37,46 @@ define(['jquery', "developer", 'moment'], function ($, developer) {
         $(page + " .saveBtn").removeAttr("disabled");
     };
 
+    generalTools.frequencyDetail = {
+        OnDayInMonth: 8, //Ex. The 3rd of the month. Cannot be greater than 28 days
+        LastOfMonth: 10, //Example Febuary 28th
+        FirstOfDayOfWeekInMonth: 11, //Ex. First Monday
+        SecondOfDayOfWeekInMonth: 12, //Ex. Second Monday
+        ThirdOfDayOfWeekInMonth: 13, //Ex. Third Monday
+        LastOfDayOfWeekInMonth: 14 //Ex. Last Monday
+    };
+
+    generalTools.getContactInfoDisplayString = function (contactInfo) {
+        if (!contactInfo[0]) {
+            return "";
+        }
+
+        var contactData = "";
+        if (contactInfo[0].Data) {
+            contactData = contactInfo[0].Data.replace("http://", "");
+            contactData = contactData.replace("https://", "");
+            contactData += " ";
+        }
+
+        var contactLabel = "";
+        if (contactInfo[0].Label) {
+            contactLabel = "(" + contactInfo[0].Label + ")";
+        }
+
+        var contactString = contactData + contactLabel;
+
+        //add text to the end to show haow many more sets of contact info there are (ex. "+ 3 more")
+        if (contactInfo.length > 1) {
+            contactString = contactString.concat(" +", contactInfo.length - 1, " more");
+        }
+        return contactString;
+    };
+
     //create a display string from a location object
-    generalTools.locationDisplayString = function (location) {
+    generalTools.getLocationDisplayString = function (location) {
+        if (!location) {
+            return "";
+        }
         var lineOne = location.AddressLineOne ? location.AddressLineOne + " " : "";
         var lineTwo = location.AddressLineTwo ? location.AddressLineTwo + ", " : "";
         var adminDistrictTwo = location.AdminDistrictTwo ? location.AdminDistrictTwo + ", " : "";
@@ -46,6 +84,78 @@ define(['jquery', "developer", 'moment'], function ($, developer) {
         var postalCode = location.PostalCode ? location.PostalCode : "";
         //display any parts of the location that exist
         return lineOne + lineTwo + adminDistrictTwo + adminDistrictOne + postalCode;
+    };
+
+    //create a display string from a repeat object
+    generalTools.getRepeatString = function (repeat) {
+        if (!repeat) {
+            return "";
+        }
+        //use the frequency int to get the frequency name(ex. 2 -> "Day")
+        var frequencyName = generalTools.repeatFrequencies[repeat.Frequency];
+
+        if (repeat.Frequency >= 2 && repeat.RepeatEveryTimes === 1) {
+            //ex. "weekly"
+            if (repeat.Frequency === 2) {
+                frequencyName = "Daily";
+            } else {
+                frequencyName = frequencyName + "ly";
+            }
+        //if frequency is not daily
+        } else if (repeat.Frequency > 1 && repeat.RepeatEveryTimes > 1) {
+            //ex. "Every 3 months"
+            frequencyName = "Every " + repeat.RepeatEveryTimes.toString() + " " + frequencyName.charAt(0).toLowerCase() + frequencyName.slice(1) + "s ";
+        } else {
+            return "";
+        }
+
+        //TODO: make monthly frequency detail separate function
+
+        var frequencyDetail = "";
+        var weeklyDetail = repeat.FrequencyDetailAsWeeklyFrequencyDetail;
+        var startDate = dateTools.parseDate(repeat.StartDate);
+
+        //if monthly
+        if (repeat.FrequencyDetailAsMonthlyFrequencyDetail) {
+            frequencyDetail = generalTools.getFrequencyDetailString(repeat.FrequencyDetailInt, startDate, false);
+        } else if (weeklyDetail[0]) {
+            for (var d in weeklyDetail) {
+                frequencyDetail = frequencyDetail += dateTools.days[weeklyDetail[d]].substring(0, 3) + ", ";
+            }
+            var stringToRemove = /,\s$/;
+            frequencyDetail = "on " + frequencyDetail.replace(stringToRemove, "");
+        }
+
+        return frequencyName + " " + frequencyDetail;
+    };
+
+    /**
+     * Creates the string for monthly frequency detail
+     * @param {number} detailInt
+     * @param startDate
+     * @param {boolean} beginWithCapital If the first character "O" should be capitalized
+     * @return {String}
+     */
+    generalTools.getFrequencyDetailString = function (detailInt, startDate, beginWithCapital) {
+        var frequencyDetail = "", date = startDate;
+        if (!startDate.getDate) {
+            date = dateTools.parseDate(startDate);
+        }
+        if (detailInt === generalTools.frequencyDetail.OnDayInMonth || detailInt === generalTools.frequencyDetail.LastOfMonth) {
+            frequencyDetail = "on the " + dateTools.getDateWithSuffix(date);
+        } else if (detailInt === generalTools.frequencyDetail.FirstOfDayOfWeekInMonth) {
+            frequencyDetail = "on the 1st " + dateTools.days[date.getDay()];
+        } else if (detailInt === generalTools.frequencyDetail.SecondOfDayOfWeekInMonth) {
+            frequencyDetail = "on the 2nd " + dateTools.days[date.getDay()];
+        } else if (detailInt === generalTools.frequencyDetail.ThirdOfDayOfWeekInMonth) {
+            frequencyDetail = "on the 3rd " + dateTools.days[date.getDay()];
+        } else if (detailInt === generalTools.frequencyDetail.LastOfDayOfWeekInMonth) {
+            frequencyDetail = "on the last " + dateTools.days[date.getDay()];
+        }
+        if (beginWithCapital) {
+            frequencyDetail = frequencyDetail.charAt(0).toUpperCase() + frequencyDetail.slice(1);
+        }
+        return frequencyDetail;
     };
 
     /**
@@ -155,6 +265,15 @@ define(['jquery', "developer", 'moment'], function ($, developer) {
             }, delay);
         });
     };
+
+    generalTools.repeatFrequencies = [
+        "",
+        "",
+        "Day",
+        "Week",
+        "Month",
+        "Year"
+    ];
 
     /**
      * Resize an image using the proper ratio to have no dimension larger than maxSize
