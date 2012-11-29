@@ -117,8 +117,8 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                     selector._updateOptionList(matches);
                 }
                 $(".km-scroll-wrapper").kendoMobileScroller("scrollTo", 0, -($('.selectorWidget').height()));
-                $(".optionList").css("-webkit-transform", "translate3d(0px, "+$('.selectorWidget').height()+"px, 0)");
-//                $(".km-scroll-container").css("position", "relative").css("top", -$('.selectorWidget').height());
+                $(".selectorWidget .optionList").css("-webkit-transform", "translate3d(0px, "+($('.selectorWidget').height())+"px, 0)").css("position", "relative").css("top", -$('.selectorWidget').height());
+                $(".km-scroll-container").css("-webkit-transform", "translate3d(0px, 1px, 0)");
             };
 
             //Listen to input in search box and update the widget accordingly.
