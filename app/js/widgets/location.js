@@ -48,7 +48,7 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
                     }
                 },
                 format: function (location) {
-                    var dataString = generalTools.locationDisplayString(location);
+                    var dataString = generalTools.getLocationDisplayString(location);
                     if (dataString) {
                         return dataString;
 //                        '<span class="selectSearchOptionIcon" style="height: 18px;width: 22px;float: left;background: url(\'img/webIcon.png\') no-repeat left center;"></span>' + dataString;
@@ -194,10 +194,10 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
         _showEditScreen: function () {
             var that = this, widgetElement = $(that.element);
             //if there has been a location saved
-            if (that._currentLocation) {
-                //update the location list to include the current(aka previous) location
-                that._updateLocationList(that._locationList);
-            }
+//            if (that._currentLocation) {
+//                //update the location list to include the current(aka previous) location
+//                that._updateLocationList(that._locationList);
+//            }
 
             //animation
             widgetElement.find(".buttonPane").switchClass("shown", "hidden", 500, 'swing');
@@ -268,38 +268,38 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
          * @param locations The locations returned from the search
          * @private
          */
-        _updateLocationList: function (locations) {
-            var that = this;
-            that._locationList = locations;
-            var list = "", thisLocation;
-            //clear the current list
-            $(that.element).find(".locationList")[0].innerHTML = "";
-            //add each returned location to the list
-            for (var i in locations) {
-                thisLocation = locations[i];
-                list += '<li id="' + i + '"><span class="fromWeb"></span><span class="name">' + that._getLocationString(locations[i]) + '</span></li>';
-            }
-
-            //add the current saved location to the list, if there is one
-            if (that._currentLocation) {
-                list += '<li id="previous"><span id="previousLocation"></span><span class="name">' + that._getLocationString(that._currentLocation) + '</span></li>';
-            }
-
-            //add option for "Manually Drop Pin"
-            list += //'<li id="current"><span id="currentLocation"></span><span class="name">Use Current Location</span></li>' +
-                '<li id="manual"><span id="manuallyDropPin"></span><span class="name">Manually Drop Pin</span></li>';
-
-            $(list).appendTo($(that.element).find(".locationList"));
-
-            //adjust the text to make sure everything is vertically centered
-            $(that.element).find(".locationList li").each(function () {
-                if ($(this)[0].childNodes[1].clientHeight < 25) {
-                    $(this).addClass("singleLine");
-                } else if ($(this)[0].childNodes[1].clientHeight > 50) {
-                    $(this).addClass("tripleLine");
-                }
-            });
-        },
+//        _updateLocationList: function (locations) {
+//            var that = this;
+//            that._locationList = locations;
+//            var list = "", thisLocation;
+//            //clear the current list
+//            $(that.element).find(".locationList")[0].innerHTML = "";
+//            //add each returned location to the list
+//            for (var i in locations) {
+//                thisLocation = locations[i];
+//                list += '<li id="' + i + '"><span class="fromWeb"></span><span class="name">' + that._getLocationString(locations[i]) + '</span></li>';
+//            }
+//
+//            //add the current saved location to the list, if there is one
+//            if (that._currentLocation) {
+//                list += '<li id="previous"><span id="previousLocation"></span><span class="name">' + that._getLocationString(that._currentLocation) + '</span></li>';
+//            }
+//
+//            //add option for "Manually Drop Pin"
+//            list += //'<li id="current"><span id="currentLocation"></span><span class="name">Use Current Location</span></li>' +
+//                '<li id="manual"><span id="manuallyDropPin"></span><span class="name">Manually Drop Pin</span></li>';
+//
+//            $(list).appendTo($(that.element).find(".locationList"));
+//
+//            //adjust the text to make sure everything is vertically centered
+//            $(that.element).find(".locationList li").each(function () {
+//                if ($(this)[0].childNodes[1].clientHeight < 25) {
+//                    $(this).addClass("singleLine");
+//                } else if ($(this)[0].childNodes[1].clientHeight > 50) {
+//                    $(this).addClass("tripleLine");
+//                }
+//            });
+//        },
 
         /**
          * Update and (conditionally) save the currently selected location
