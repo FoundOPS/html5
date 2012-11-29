@@ -118,7 +118,7 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                 }
                 $(".km-scroll-wrapper").kendoMobileScroller("scrollTo", 0, -($('.selectorWidget').height()));
                 $(".selectorWidget .optionList").css("-webkit-transform", "translate3d(0px, "+($('.selectorWidget').height())+"px, 0)").css("position", "relative").css("top", -$('.selectorWidget').height());
-                $(".km-scroll-container").css("-webkit-transform", "translate3d(0px, 1px, 0)");
+                $(".km-scroll-container").css("-webkit-transform", "translate3d(0px, -1px, 0)");
             };
 
             //Listen to input in search box and update the widget accordingly.
@@ -176,8 +176,8 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                         selector.selectedOptionText = $(e.target)[0].innerText;
                     }
                     selector.children[0].children[0].value = selector.selectedOptionText;
-                    selector._clearList();
                     config.onSelect(selector.selectedData);
+                    selector._clearList();
                     $(".km-scroll-wrapper").kendoMobileScroller("reset");
                 }
                 _scrolling = false;
@@ -191,13 +191,13 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                 //Wait until click/touchend listener on options list fires.
                 setTimeout(function () {
                     if (!_scrolling) {
-                        selector._clearList();
                         if (selector.selectedOptionText) {
                             selector.children[0].children[0].value = selector.selectedOptionText;
                         } else {
                             selector.selectedOptionTempText = selector.children[0].children[0].value;
                             selector.children[0].children[0].value = "";
                         }
+                        selector._clearList();
                         $(".km-scroll-wrapper").kendoMobileScroller("reset");
                     }
                 }, 200);
