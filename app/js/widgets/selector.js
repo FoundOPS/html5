@@ -75,7 +75,7 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
             selector.children[1].appendChild(document.createElement("ul"));
             selector.children[1].children[0].setAttribute("class", "optionList");
             if (!isTouchDevice()) {
-//                selector.children[1].children[0].setAttribute("style", "overflow-y: auto");
+                selector.children[1].children[0].setAttribute("style", "overflow-y: auto");
             }
 
             //Disable touch scrolling of the view when user is scrolling whatever element is passed.
@@ -116,9 +116,11 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                     }
                     selector._updateOptionList(matches);
                 }
-                $(".km-scroll-wrapper").kendoMobileScroller("scrollTo", 0, -($('.selectorWidget').height()));
-                $(".selectorWidget .optionList").css("-webkit-transform", "translate3d(0px, "+($('.selectorWidget').height())+"px, 0)").css("position", "relative").css("top", -$('.selectorWidget').height());
-                $(".km-scroll-container").css("-webkit-transform", "translate3d(0px, -1px, 0)");
+                if (isTouchDevice()) {
+                    $(".km-scroll-wrapper").kendoMobileScroller("scrollTo", 0, -($('.selectorWidget').height()));
+                    $(".selectorWidget .optionList").css("-webkit-transform", "translate3d(0px, "+($('.selectorWidget').height())+"px, 0)").css("position", "relative").css("top", -$('.selectorWidget').height());
+                    $(".km-scroll-container").css("-webkit-transform", "translate3d(0px, -1px, 0)");
+                }
             };
 
             //Listen to input in search box and update the widget accordingly.
@@ -178,7 +180,9 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                     selector.children[0].children[0].value = selector.selectedOptionText;
                     config.onSelect(selector.selectedData);
                     selector._clearList();
-                    $(".km-scroll-wrapper").kendoMobileScroller("reset");
+                    if (isTouchDevice()) {
+                        $(".km-scroll-wrapper").kendoMobileScroller("reset");
+                    }
                 }
                 _scrolling = false;
             });
@@ -198,7 +202,9 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                             selector.children[0].children[0].value = "";
                         }
                         selector._clearList();
-                        $(".km-scroll-wrapper").kendoMobileScroller("reset");
+                        if (isTouchDevice()) {
+                            $(".km-scroll-wrapper").kendoMobileScroller("reset");
+                        }
                     }
                 }, 200);
             });
