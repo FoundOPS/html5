@@ -1946,74 +1946,24 @@ div.k-window-content {
     .buttonPane.hidden{
       left: 300px;
     }
-    #selectorWidget {
-//      position: relative;
-//      top: -250px;
-    }
     .editPane{
         position: relative;
         top: -250px;
         left: -300px;
-        width: 250px;
-        min-height: 20px;
-        background-color: @white;
-        input{
-            width: 213px;
-            margin: 3px 0 3px 3px;
-            padding: 2px 25px 2px 4px;
-            border: none;
-            font-family: PTSans;
-            background: url("../img/smallSearch.png") no-repeat right center;
-        }
         ul{
-            width: 250px;
-            max-height: 215px;
-            overflow-y: auto;
             li{
-                height: 36px;
-                padding: 5px 4px 5px 4px;
-                font-size: 14px;
-                background-color: #efefef;
-                cursor: pointer;
-                &:hover{
-                    .rowGradient;
-                    color: @white;
-                }
-                &:not(:last-child){
-                    border-bottom: 1px solid #aaaaaa;
-                }
-                span{
-                    display: table-cell;
-                }
-                span.name{
-                    height: 36px;
-                    vertical-align: middle;
-                }
-                .fromWeb, #previousLocation, #currentLocation, #manuallyDropPin{
-                    width: 20px;
-                    height: 36px;
-                    vertical-align: middle;
-                    padding-right: 4px;
+                #previousLocation {
+                    height: 18px;
+                    width: 22px;
+                    float: left;
                     background: url("../img/previousLocation.png") no-repeat left center;
                 }
-                #currentLocation{
-                    background: url("../img/currentLocation.png") no-repeat left center;
-                }
-                #manuallyDropPin{
+                #manuallyDropPin {
+                    height: 18px;
+                    width: 22px;
+                    float: left;
                     background: url("../img/markerIcon.png") no-repeat left center;
                 }
-                .fromWeb{
-                    background: url("../img/webIcon.png") no-repeat left center;
-                }
-            }
-            li:first-child{
-                border-top: 1px solid #aaaaaa;
-            }
-            li.singleLine .name{
-                padding-top: 9px;
-            }
-            li.tripleLine .name{
-                font-size: 11px;
             }
         }
     }
@@ -2045,8 +1995,15 @@ div.k-window-content {
     #optionListScroller {
       max-height: 215px;
     }
-    li{
+    span{
+      display: table-cell;
+    }
+    span.name{
       height: 36px;
+      vertical-align: middle;
+    }
+    li{
+//      height: 36px;
       padding: 5px 4px 5px 4px;
       font-size: 14px;
       background-color: #efefef;
@@ -2066,7 +2023,7 @@ div.k-window-content {
         padding-left: 3px;
         vertical-align: middle;
       }
-      #prevoiusSelection {
+      #previousSelection {
         width: 20px;
         vertical-align: middle;
         padding-left: 25px;

@@ -31,9 +31,9 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
         return this.each(function () {
             var selector = this, i;
 
-            if (!config.query && !config.data) {
-                throw "The selector widget did not recieve any data.";
-            }
+//            if (!config.query && !config.data) {
+//                throw "The selector widget did not recieve any data.";
+//            }
             if (!config.minimumInputLength) {
                 config.minimumInputLength = 1;
             }
@@ -97,7 +97,7 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                 //get the list of location matches
                 if (config.query) {
                     if (searchText.length >= config.minimumInputLength) {
-                        var data = config.query({searchTerm: searchText, render: selector._updateOptionList});
+                        var data = config.query({searchTerm: searchText, render: selector.updateOptionList});
                     } else {
                         selector._clearList();
                     }
@@ -113,7 +113,7 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                     } else {
                         matches = config.data;
                     }
-                    selector._updateOptionList(matches);
+                    selector.updateOptionList(matches);
                 }
                 if (isTouchDevice()) {
                     $(".km-scroll-wrapper").kendoMobileScroller("scrollTo", 0, -($('.selectorWidget').height()));
@@ -134,7 +134,7 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
             };
 
             //Populates and edits the list of items that the user can select.
-            selector._updateOptionList = function (options) {
+            selector.updateOptionList = function (options) {
                 var optionList = $(selector).find(".optionList");
                 selector._clearList();
                 //add each returned item to the list
@@ -143,7 +143,7 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                 }
 
                 if (config.showPreviousSelection && selector.selectedData && config.data) {
-                    $('<li id="' + i + '"><span id="prevoiusSelection" class="name">' + config.format(selector.selectedData) + '</div></li>').data("selectedData", selector.selectedData).appendTo(optionList);
+                    $('<li id="' + i + '"><span id="previousSelection" class="name">' + config.format(selector.selectedData) + '</div></li>').data("selectedData", selector.selectedData).appendTo(optionList);
                 }
                 //adjust the text to make sure everything is vertically centered
                 $(selector).find(".optionList li").each(function () {

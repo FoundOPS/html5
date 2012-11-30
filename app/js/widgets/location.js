@@ -33,25 +33,25 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
                     //get the list of location matches
                     if (options) {
                         dbServices.locations.read({params: {search: options.searchTerm}}).done(function (locations) {
-
-//                            //add the current saved location to the list, if there is one
-//                            if (that._currentLocation) {
-//                                list += '<li id="previous"><span id="previousLocation"></span><span class="name">' + that._getLocationString(that._currentLocation) + '</span></li>';
-//                            }
-//
-//                            //add option for "Manually Drop Pin"
-//                            list += //'<li id="current"><span id="currentLocation"></span><span class="name">Use Current Location</span></li>' +
-//                                '<li id="manual"><span id="manuallyDropPin"></span><span class="name">Manually Drop Pin</span></li>';
-
+                            if(that._currentLocation) {
+                                that._currentLocation.pastSelection = true;
+                                locations.push(that._currentLocation);
+                            }
+                            locations.push({Name: "Manually Drop Pin"});
                             options.render(locations);
                         });
                     }
                 },
                 format: function (location) {
-                    var dataString = generalTools.getLocationDisplayString(location);
+                    var dataString = that._getLocationString(location);
                     if (dataString) {
-                        return dataString;
-//                        '<span class="selectSearchOptionIcon" style="height: 18px;width: 22px;float: left;background: url(\'img/webIcon.png\') no-repeat left center;"></span>' + dataString;
+                        if (location.pastSelection) {
+                            return '<span id="previousLocation"></span>' + dataString;
+                        } else if (location.Name === "Manually Drop Pin") {
+                            return '<span id="manuallyDropPin"></span>Manually Drop Pin';
+                        } else {
+                            return '<span class="option" style="height: 18px;width: 22px;float: left;background: url(\'img/webIcon.png\') no-repeat left center;"></span>' + dataString;
+                        }
                         //if none do, display the latitude and longitude
                     } else {
                         return location.Latitude + "," + location.Longitude;
@@ -60,12 +60,12 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
                 onSelect: function (e, selectedData) {
                     var $target = $(e.target)[0].nodeName === "SPAN" ? $(e.target) : $(e.target).children();
                     //match the index of the selected item to the index of locationList
-                    var id = $target[0].id;
+                    var id = $target.children()[0].id;
                     //if the previous location was selected
-                    if (id == "previousSelection") {
+                    if (id == "previousLocation") {
                         that._changeMarkerLocation(that._currentLocation, false);
                         //if "Manually Drop Pin" was selected
-                    } else if (id == "manual") {
+                    } else if (id == "manuallyDropPin") {
                         that._changeMarkerLocation(null, false);
                         //allow the marker to move on map click
                         that._allowMapClick = true;
@@ -121,30 +121,6 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
                 that._showEditScreen();
             });
 
-            //when an option is selected from the list
-//            widgetElement.find(".editPane li").live("click", function (e) {
-//                //match the index of the selected item to the index of locationList
-//                var id = e.currentTarget.id;
-//                //if the previous location was selected
-//                if (id == "previous") {
-//                    that._changeMarkerLocation(that._currentLocation, false);
-//                    //if "Manually Drop Pin" was selected
-//                } else if (id == "manual") {
-//                    that._changeMarkerLocation(null, false);
-//                    //allow the marker to move on map click
-//                    that._allowMapClick = true;
-//                    //if a new location was selected
-//                } else {
-//                    that._changeMarkerLocation(that._locationList[id], false);
-//                    that._updateCurrentLocation(that._locationList[id], true);
-//                }
-//
-//                //animate back to map from edit screen
-//                widgetElement.find(".buttonPane").switchClass("hidden", "shown", 500, 'swing');
-//                widgetElement.find(".editPane").switchClass("shown", "hidden", 500, 'swing');
-//                widgetElement.find("#locationWidgetMap").switchClass("hidden", "shown", 500);
-//            });
-
             //(in "Manually Drop Pin" mode) move the marker on map click
             that._map.on('click', function (e) {
                 //check if in "Manually Drop Pin" mode
@@ -193,11 +169,11 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
         //animate to the edit screen
         _showEditScreen: function () {
             var that = this, widgetElement = $(that.element);
-            //if there has been a location saved
-//            if (that._currentLocation) {
-//                //update the location list to include the current(aka previous) location
+//            if there has been a location saved
+            if (that._currentLocation) {
+                //update the location list to include the current(aka previous) location
 //                that._updateLocationList(that._locationList);
-//            }
+            }
 
             //animation
             widgetElement.find(".buttonPane").switchClass("shown", "hidden", 500, 'swing');
