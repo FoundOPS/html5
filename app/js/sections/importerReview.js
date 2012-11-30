@@ -3,14 +3,13 @@
 define(["jquery", "underscore", "sections/importerUpload", "sections/importerSelect", "db/services", "tools/generalTools", "widgets/location", "widgets/contactInfo", "widgets/repeat",
     "ui/popup", "widgets/selectBox"], function ($, _, importerUpload, importerSelect, dbServices, generalTools) {
     var importerReview = {}, dataSource, grid, clients = {}, locations = {}, contactInfoSets = {}, columns = [
-        {
-            field: "Client",
-            template: "<div class='Client'>#= Client #</div>"//,
+        "Client"//,
+//            template: "<div class='Client'>#= Client #</div>",
 //            editor: function (container, options) {
 //                $('<div class="styled-select"></div>').appendTo(container)
 //                    .selectBox({data: [{Name: "BK"}, {Name: "Subway"}], dataTextField: "Name"});
 //            }
-        },
+        ,
         {
             field: "Location",
             template: "<div class='Location'>#= Location #</div>"//,
@@ -41,8 +40,8 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
             row = data[i];
             newRow = [];
 
-            //newRow["ClientId"] = row.ClientSuggestions[0];
-            newRow["Client"] = clients[row.ClientSuggestions[0]].Name;
+            newRow["id"] = i;
+            newRow["Client"] = clients[row.ClientSuggestions[0]]? clients[row.ClientSuggestions[0]].Name : "";
 
             location = locations[row.LocationSuggestions[0]];
 
@@ -51,7 +50,7 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
                 contactInfo.push(contactInfoSets[row.ContactInfoSuggestions[j]]);
             }
 
-            newRow["LocationId"] = row.LocationSuggestions[0];
+            newRow["LocationData"] = location;
             newRow["Location"] = generalTools.getLocationDisplayString(location);
             newRow["ContactInfoData"] = contactInfo;
             newRow["ContactInfo"] = generalTools.getContactInfoDisplayString(contactInfo);
@@ -120,46 +119,29 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
             importerReview.editIndex = e.currentTarget.parentElement.parentElement.rowIndex;
             importerReview.editedCell = e.currentTarget;
             var contacts = dataSource._view[importerReview.editIndex].ContactInfoData;
-            $("#popupContent").find(".contactInfoWidget").contactInfo({contacts: contacts});
-            importerReview.contactInfoWidget = $("#popupContent").find(".contactInfoWidget").data("contactInfo");
+            var widget = $("#popupContent").find(".contactInfoWidget");
+            widget.contactInfo({contacts: contacts});
+            importerReview.contactInfoWidget = widget.data("contactInfo");
         });
 
         locationPopup.on("click", function (e) {
             var popupElement = $("#popupContent");
             importerReview.editIndex = e.currentTarget.parentElement.parentElement.rowIndex;
-            var location = locations[dataSource._view[importerReview.editIndex].LocationId];
+            var location = dataSource._view[importerReview.editIndex].LocationData;
             popupElement.find(".locationWidget").location();
-            var locationWidget = popupElement.find(".locationWidget").data("location");
-            locationWidget.renderMap(location, true);
+            importerReview.locationWidget = popupElement.find(".locationWidget").data("location");
+            if (location) {
+                importerReview.locationWidget.renderMap(location, true);
+            } else {
+                importerReview.locationWidget.renderMap(location, false);
+            }
+
         });
 
         repeatPopup.on("click", function (e) {
             importerReview.editIndex = e.currentTarget.parentElement.parentElement.rowIndex;
             var repeat = dataSource._view[importerReview.editIndex].RepeatData;
             $("#popupContent").find(".repeatWidget").repeat({repeat: repeat});
-        });
-
-        //on popup close event
-        $(document).on('popup.closing', function (e) {
-            // get a reference to the grid widget
-            var grid = $("#importerReview .grid").data("kendoGrid");
-            // returns the data item for first row
-            //grid.dataItem(grid.tbody.find(">tr:first"));
-            //remove the location widget, if it exists
-            if ($(e.target).find(".locationWidget").data("location")) {
-                $(e.target).find(".locationWidget").data("location").removeWidget();
-                //remove the repeat widget, if it exists
-            } else if ($(e.target).find(".repeatWidget").data("repeat")) {
-                $(e.target).find(".repeatWidget").data("repeat").removeWidget();
-                //remove the contactInfo widget, if it exists
-            } else if ($(e.target).find(".contactInfoWidget").data("contactInfo")) {
-                //save contactInfo widget data to the grid dataSource
-                grid.dataSource._data[importerReview.editIndex].ContactInfoData = importerReview.contactInfoWidget.contacts;
-                //update the grid display string
-                //importerReview.editedCell.innerHtml = generalTools.getContactInfoDisplayString(importerReview.contactInfoWidget.contacts);
-                //grid.refresh();
-                $(e.target).find(".contactInfoWidget").data("contactInfo").removeWidget();
-            }
         });
     };
 
@@ -171,13 +153,13 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
             batch: true,
             schema: {
                 model: {
-                    //id: "ClientId",
+                    id: "id",
                     fields: {
-                        //ClientId: { editable: false, nullable: true },
-                        Client: { type: "string", editable: true },
-                        Location: { type: "string" },
-                        ContactInfo: { type: "string" },
-                        Repeat: { type: "string" }
+                        id: { editable: false, nullable: true },
+                        Client: {validation: { required: true }},
+                        Location: {editable: false },
+                        ContactInfo: {editable: false },
+                        Repeat: {editable: false }
                     }
                 }
             }
@@ -185,12 +167,12 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
 
         grid = $("#importerReview").find(".grid").kendoGrid({
             columns: columns,
-            dataSource: dataSource,
             editable: true,
+            dataBound: dataBound,
+            dataSource: dataSource,
             resizable: true,
             scrollable: true,
-            sortable: true,
-            dataBound: dataBound
+            sortable: true
         }).data("kendoGrid");
     };
 
@@ -249,6 +231,36 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
         }
         setupGrid();
         resizeGrid();
+
+        //on popup close event
+        $(document).on('popup.closing', function (e) {
+            // get a reference to the grid widget
+            var grid = $("#importerReview").find(".grid").data("kendoGrid");
+            var row = grid.dataSource._data[importerReview.editIndex];
+            if ($(e.target).find(".locationWidget").data("location")) {
+                row.LocationData = importerReview.locationWidget.currentLocation;
+
+                //remove the location widget
+                $(e.target).find(".locationWidget").data("location").removeWidget();
+            } else if ($(e.target).find(".repeatWidget").data("repeat")) {
+                var repeat = $(e.target).find(".repeatWidget").data("repeat");
+                row.RepeatData = repeat.options.repeat;
+                //remove the repeat widget
+                repeat.removeWidget();
+            } else if ($(e.target).find(".contactInfoWidget").data("contactInfo")) {
+                //save contactInfo widget data to the grid dataSource
+                row.ContactInfoData = importerReview.contactInfoWidget.contacts;
+                //update the grid display string
+                //importerReview.editedCell.innerHtml = generalTools.getContactInfoDisplayString(importerReview.contactInfoWidget.contacts);
+//                grid.dataSource = new kendo.data.DataSource({
+//                    data: grid.dataSource._data
+//                });
+//                grid.dataSource.read();
+//                grid.refresh();
+                //remove the contactInfo widget
+                $(e.target).find(".contactInfoWidget").data("contactInfo").removeWidget();
+            }
+        });
     };
 
     window.importerReview = importerReview;

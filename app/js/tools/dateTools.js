@@ -33,11 +33,15 @@ define(['moment'], function () {
 
     dateTools.days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-    // parse a date in yyyy-mm-dd format
+    // parse a date in string format
     dateTools.parseDate = function (date) {
-        var parts = date.match(/(\d+)/g);
-        // new Date(year, month [, date [, hours[, minutes[, seconds[, ms]]]]])
-        return new Date(parts[0], parts[1]-1, parts[2]); // months are 0-based
+        if (!date.getDay) {
+            var parts = date.match(/(\d+)/g);
+            // new Date(year, month [, date [, hours[, minutes[, seconds[, ms]]]]])
+            return new Date(parts[0], parts[1]-1, parts[2]); // months are 0-based
+        } else {
+            return date;
+        }
     };
 
     /**

@@ -70,7 +70,7 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
                 var id = e.currentTarget.id;
                 //if the previous location was selected
                 if (id == "previous") {
-                    that._changeMarkerLocation(that._currentLocation, false);
+                    that._changeMarkerLocation(that.currentLocation, false);
                     //if "Manually Drop Pin" was selected
                 } else if (id == "manual") {
                     that._changeMarkerLocation(null, false);
@@ -137,7 +137,7 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
         _showEditScreen: function () {
             var that = this, widgetElement = $(that.element);
             //if there has been a location saved
-            if (that._currentLocation) {
+            if (that.currentLocation) {
                 //update the location list to include the current(aka previous) location
                 that._updateLocationList(that._locationList);
             }
@@ -201,7 +201,7 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
             var returnString = generalTools.getLocationDisplayString(location);
             if (returnString) {
                 return returnString;
-                //if none do, display the latitude and longitude
+            //if there is no address, display the latitude and longitude
             } else {
                 return location.Latitude + "," + location.Longitude;
             }
@@ -224,8 +224,8 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
             }
 
             //add the current saved location to the list, if there is one
-            if (that._currentLocation) {
-                list += '<li id="previous"><span id="previousLocation"></span><span class="name">' + that._getLocationString(that._currentLocation) + '</span></li>';
+            if (that.currentLocation) {
+                list += '<li id="previous"><span id="previousLocation"></span><span class="name">' + that._getLocationString(that.currentLocation) + '</span></li>';
             }
 
             //add option for "Manually Drop Pin"
@@ -253,7 +253,7 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
         _updateCurrentLocation: function (location, shouldSave) {
             var that = this;
 
-            that._currentLocation = location;
+            that.currentLocation = location;
 
             if (shouldSave) {
                 //TODO: save here
