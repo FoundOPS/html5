@@ -367,12 +367,12 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
 
     //resize the grid based on the current window's height
     var resizeGrid = function () {
-        var extraMargin = 85;
+        var extraMargin = 115;
         var windowHeight = $(window).height();
         var topHeight = $('#top').outerHeight(true);
         var contentHeight = windowHeight - topHeight - extraMargin;
         $('#grid').css("height", contentHeight + 24 + 'px');
-        $('#grid .k-grid-content').css("height", contentHeight - 41 + 'px');
+        $('#grid .k-grid-content').css("height", contentHeight - 47 + 'px');
         $("#serviceDetails").css("max-height", contentHeight + 5 + 'px');
     };
 
@@ -404,7 +404,7 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
             }
 
             //calculate the width based on number off characters
-            var titleLength = column.title.length * 7.5 + 35;
+            var titleLength = Math.round(column.title.length * 7.5) + 45;
             column.width = titleLength + "px";
 
             columns.push(column);
@@ -472,6 +472,7 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
             },
             columns: columns,
             columnMenu: true,
+            dataBound: resizeGrid,
             dataSource: serviceHoldersDataSource,
             filterable: true,
             pageable: true,
@@ -592,7 +593,6 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
         $(window).resize(function () {
             resizeGrid();
         });
-        resizeGrid();
 
         //whenever the url parameters change:
         //1) update the service type (if it changed)

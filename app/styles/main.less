@@ -52,6 +52,9 @@ table {
 @charcoal: #333335;
 @white:#ffffff;
 @grey: rgb(242,242,242); //inner background
+.hoverColor (@color: #fff, @strength: 10%){
+    background-color: darken(@color, @strength);
+}
 @darkBlue: #36C3E3;
 @buttonLight: #a7ff6c;
 @buttonDark: #8dd85b;
@@ -95,33 +98,39 @@ table {
 @import url("kendo/kendo.default.less");
 
 /****** Kendo overrides ******/
-.k-header, .k-grid-header, .k-toolbar, .k-dropdown-wrap, .k-picker-wrap, .k-grouping-header, .k-tooltip, .k-pager-wrap, .k-button, .k-draghandle, .k-tile,
+.k-header:not(.k-menu, .k-dropdown), .k-grid-header, .k-toolbar, .k-dropdown-wrap, .k-picker-wrap, .k-grouping-header, .k-tooltip, .k-draghandle, .k-tile,
 .k-textbox, .k-autocomplete, .k-state-hover, .k-state-selected, .k-state-focused, .k-tabstrip-items .k-item, .cancelBtn {
-    background-image: url("../img/highlight.png")
+    background:none;
+    background-color: @blue;
+}
+
+.k-menu .k-state-selected{
+    background:none;
+    background-color: @blue;
 }
 
 .k-icon, .k-tool-icon, .k-grouping-dropclue, .k-drop-hint, .k-callout, .k-progress, .k-progress-status, .k-column-menu .k-sprite {
-    background-image: url('../img/sprite.png')
+    background-image: url('../img/sprite.png');
 }
 
 .k-loading {
-    background-image: url('../img/loading.gif')
+    background-image: url('../img/loading.gif');
 }
 
 .k-loading-image {
-    background-image: url('../img/loading-image.gif')
+    background-image: url('../img/loading-image.gif');
 }
 
 .k-slider-horizontal .k-tick {
-    background-image: url('../img/slider-h.gif')
+    background-image: url('../img/slider-h.gif');
 }
 
 .k-slider-vertical .k-tick {
-    background-image: url('../img/slider-v.gif')
+    background-image: url('../img/slider-v.gif');
 }
 
 .k-tile .k-folder {
-    background-image: url('../img/imagebrowser.png')
+    background-image: url('../img/imagebrowser.png');
 }
 
 @font-face {
@@ -239,12 +248,112 @@ span.k-tooltip {
 }
 
 //override the orange selected row highlight with blue
-.k-state-selected, .k-list > .k-state-selected, .k-list > .k-state-focused,
-.k-panelbar > .k-state-selected, .k-panel > .k-state-selected,
+.k-grid .k-state-selected, .k-list > .k-grid .k-state-selected, .k-list > .k-state-focused,
+.k-panelbar > .k-grid .k-state-selected, .k-panel > .k-grid .k-state-selected,
 .k-button:active, .k-ghost-splitbar-vertical, .k-ghost-splitbar-horizontal,
 .k-draghandle.k-state-selected:hover {
-    .rowGradient;
+    background: none;
+    background-color: @blue;
     border-color: #488FCD;
+}
+
+//make alternate grid rows background color white instead of transparent
+.k-grid tbody tr:not(.k-state-selected) {
+    background-color: #fff;
+    &:hover{
+        background-color: #ddd;
+    }
+}
+.k-grid tbody tr.k-state-selected:hover{
+    .hoverColor(@blue);
+}
+
+.k-grid{
+    margin-bottom: 15px;
+    border: none;
+    .k-grid-header-wrap{
+        border: none;
+    }
+    table{
+        padding-right: 3px;
+    }
+    .k-grid-header{
+        margin-top: 5px;
+        margin-bottom: 3px;
+        padding-right: 0 !important;
+        border: none;
+        background: none;
+        table{
+            padding-right: 13px;
+        }
+        .k-header {
+            border: none;
+            font-size: 16px;
+            background: #488fcd;
+            border-bottom: 2px solid #f2f2f2;
+            border-right: 1px solid #f2f2f2;
+            border-left: 1px solid #f2f2f2;
+            color: #fff;
+            padding: 5px 0 6px 4px;
+            a{
+                color: #fff;
+                span{
+                    vertical-align: middle;
+                }
+            }
+            &:hover{
+                .hoverColor (@blue, 8%);
+            }
+            span.k-i-arrow-n, span.k-i-arrow-s{
+                float: right;
+                margin-right: 15px;
+                margin-top: 7px;
+                width: 11px;
+                height: 8px;
+                background-position: -118px -200px;
+                opacity: 1;
+            }
+            span.k-i-arrow-s{
+                background-position: -118px -214px;
+            }
+            .k-header-column-menu{
+                margin-right: 0;
+                padding-left:8px;
+                padding-right:8px;
+                .k-icon{
+                    width: 11px;
+                    height: 10px;
+                    opacity: 1;
+                    background-position: -118px -231px;
+                }
+                &:hover{
+                    .hoverColor (@blue, 15%);
+                }
+            }
+        }
+        .k-header:first-child {
+            border-left: none;
+        }
+        .k-header:last-child {
+            border-right: none;
+        }
+    }
+    tr{
+        background-color: @white;
+        &:hover{
+            .hoverColor (#ddd);
+            cursor: pointer;
+        }
+    }
+    td {
+        height: 100%;
+        padding: 0 7px 0 3px;
+        border: none;
+        border-bottom: 2px solid #f2f2f2;
+    }
+    tr:last-child td{
+        border: none;
+    }
 }
 
 /*region Overrides for kendo mobile*/
@@ -288,11 +397,6 @@ span.k-tooltip {
 .km-ios, .km-ios .km-list > li {
     font-weight: normal;
     font-family: PTSans;
-}
-
-//make alternate grid rows background color white instead of transparent
-.k-grid tbody tr:not(.k-alt):not(.k-state-selected) {
-    background-color: #fff;
 }
 
 /*endregion*/
@@ -1140,58 +1244,10 @@ div.k-window-content {
         margin: 30px 20px 30px 20px;
     }
     .grid{
-        margin-bottom: 15px;
-        border: none;
-        .k-grid-header-wrap{
-            border: none;
-        }
-        span.k-i-arrow-n, span.k-i-arrow-s{
-            width: 11px;
-            height: 8px;
-            margin-left: 10px;
-            background-position: -118px -200px;
-            opacity: 1;
-        }
-        span.k-i-arrow-s{
-            background-position: -118px -214px;
-        }
-        table{
-            padding-right: 3px;
-        }
-        .k-grid-header{
-            margin-top: 5px;
-            margin-bottom: 3px;
-            padding-right: 0 !important;
-            border: none;
-            background: none;
-            table{
-                padding-right: 13px;
-            }
-            .k-header {
-                border: none;
-                font-size: 16px;
-                background: #488fcd;
-                border-bottom: 2px solid #f2f2f2;
-                border-right: 1px solid #f2f2f2;
-                border-left: 1px solid #f2f2f2;
-                color: #fff;
-                padding: 3px 0 4px 4px;
-                a{
-                    color: #fff;
-                    span{
-                        vertical-align: middle;
-                    }
-                }
-            }
-            .k-header:first-child {
-                border-left: none;
-            }
-            .k-header:last-child {
-                border-right: none;
-            }
-        }
         tr{
-            background-color: @white;
+            &:hover{
+                background-color: @white;
+            }
         }
         td {
             height: 100%;
@@ -1200,11 +1256,8 @@ div.k-window-content {
             border-bottom: 2px solid #f2f2f2;
             border-right: 2px solid #f2f2f2;
             &:hover{
-                background-color: #eee;
+                .hoverColor (#eee);
             }
-        }
-        tr:last-child td{
-            border: none;
         }
         .Client, .Location, .Repeat {
             width: 100%;
@@ -1415,9 +1468,13 @@ div.k-window-content {
             background-position: 0 -154px;
         }
     }
-    .k-grid td {
-        line-height: 1.3em;
-        font-size: 14px;
+    .k-grid{
+        padding: 10px 20px 15px 20px;
+        background: @grey;
+        td {
+            line-height: 1.3em;
+            font-size: 14px;
+        }
     }
     input[type="checkbox"] {
         vertical-align: middle;
