@@ -1974,7 +1974,7 @@ div.k-window-content {
        left: -300px;
     }
 }
-#selectorWidget {
+.searchSelect {
   margin: 0 auto;
   width: 250px;
   text-align: center;
@@ -1983,18 +1983,19 @@ div.k-window-content {
   background-color: @white;
   input{
     width: 230px;
-    margin: 3px 3px 3px 0px;
-    padding: 2px 15px 2px 4px;
+    margin: 3px;
+    padding: 2px 10px 2px 4px;
     border: none;
     font-family: PTSans;
     background: url("../img/smallSearch.png") no-repeat right center;
   }
+  #optionListScroller {
+    position: absolute !important;
+    max-height: 215px;
+  }
   ul{
     width: 250px;
     max-height: 215px;
-    #optionListScroller {
-      max-height: 215px;
-    }
     span{
       display: table-cell;
     }
@@ -2008,12 +2009,13 @@ div.k-window-content {
       font-size: 14px;
       background-color: #efefef;
       cursor: pointer;
+      border: 1px solid #aaaaaa;
       &:hover{
         .rowGradient;
         color: @white;
       }
       &:not(:last-child){
-        border-bottom: 1px solid #aaaaaa;
+        border-bottom: 0;
       }
       span{
         display: table-cell;
@@ -2029,9 +2031,6 @@ div.k-window-content {
         padding-left: 25px;
         background: url("../img/previousLocation.png") no-repeat left center;
       }
-    }
-    li:first-child{
-      border-top: 1px solid #aaaaaa;
     }
     li.singleLine .name{
       padding-top: 9px;
