@@ -21,9 +21,9 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
      *              A callback function triggered when an item is selected. The parameters are the triggered jQuery event and the selected data.
      *          minimumInputLength {int}
      *              number of characters necessary search box to start a search (defaults to 1)
- *              showPreviousSelection {boolean}
- *                  defines whether the previous selection should be attached at the end of the list or not (defaults to false)
- *                  only works for predefined data, user must set this in their query function if they desire such behavior.
+     *          showPreviousSelection {boolean}
+     *              defines whether the previous selection should be attached at the end of the list or not (defaults to false)
+     *              only works for predefined data, user must set this in their query function if they desire such behavior.
      *        }
      * @return {*} Returns the jquery widget (allows widget to be chainable).
      */

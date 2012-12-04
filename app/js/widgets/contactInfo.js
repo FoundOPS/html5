@@ -3,7 +3,7 @@
 'use strict';
 
 //need to require kendo so it is loaded before this widget, otherwise funky stuff happens
-define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tools/analytics", "select2", "kendo"], function ($, _, generalTools, parserTools, analytics) {
+define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tools/analytics", "select2", "kendo", "widgets/selector"], function ($, _, generalTools, parserTools, analytics) {
     //region Locals
 //   var sampleContacts = [
 //            {Entity: "Burger King", Data: "765-494-2786", Type: "Phone Number", Label: "Mobile"},
@@ -42,41 +42,42 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
                 //list pane(first view)
                 '<ul class="contactList"></ul>' +
                 '<div class="addButtonWrapper">' +
-                '<button class="k-button k-button-icontext add"><span class="k-icon k-add"></span>Add New</button>' +
+                    '<button class="k-button k-button-icontext add"><span class="k-icon k-add"></span>Add New</button>' +
                 '</div>' +
                 //edit pane
                 '<div class="editWrapper">' +
-                '<label>Value</label><br />' +
-                '<input class="value" type="text"/><br />' +
-                '<label>Label</label><br />' +
-                '<select class="labelIcon">' +
-                '<option class="EmailAddressSmall" value="Email Address">&nbsp;</option>' +
-                '<option class="WebsiteSmall" value="Website">&nbsp;</option>' +
-                '<option class="PhoneNumberSmall" value="Phone Number">&nbsp;</option>' +
-                '<option class="OtherSmall" value="Other">&nbsp;</option>' +
-                '</select>​' +
-                '<input class="label" /><br />' +
+                    '<label>Value</label><br />' +
+                    '<input class="value" type="text"/><br />' +
+                    '<label>Label</label><br />' +
+                    '<div class="label" id="#labelSelector"></div>' +
+//                    '<select class="labelIcon">' +
+//                        '<option class="EmailAddressSmall" value="Email Address">&nbsp;</option>' +
+//                        '<option class="WebsiteSmall" value="Website">&nbsp;</option>' +
+//                        '<option class="PhoneNumberSmall" value="Phone Number">&nbsp;</option>' +
+//                        '<option class="OtherSmall" value="Other">&nbsp;</option>' +
+//                    '</select>​' +
+//                    '<input class="label" /><br />' +
                 '</div>' +
                 '<div class="saveDeleteButtonWrapper">' +
-                '<button class="k-button k-button-icontext save"><span class="k-icon k-update"></span>Save</button>' +
-                '<button class="k-button k-button-icontext delete"><span class="k-icon k-delete"></span>Delete</button>' +
+                    '<button class="k-button k-button-icontext save"><span class="k-icon k-update"></span>Save</button>' +
+                    '<button class="k-button k-button-icontext delete"><span class="k-icon k-delete"></span>Delete</button>' +
                 '</div>');
 
             that.element.append(_contactInfo);
 
             that._renderContactList(that.contacts);
 
-            //setup the dropdown of category icons
-            $(that.element).find(".labelIcon").select2({
-                placeholder: "",
-                width: "28px",
-                containerCssClass: "iconContainer OtherSmall",
-                minimumResultsForSearch: 15,
-                dropdownCssClass: "bigdrop iconDropdown"
-            }).on("change", function (e) {
-                    //change the label icon
-                    that._changeType(e.val, false);
-                });
+//            //setup the dropdown of category icons
+//            $(that.element).find(".labelIcon").select2({
+//                placeholder: "",
+//                width: "28px",
+//                containerCssClass: "iconContainer OtherSmall",
+//                minimumResultsForSearch: 15,
+//                dropdownCssClass: "bigdrop iconDropdown"
+//            }).on("change", function (e) {
+//                //change the label icon
+//                that._changeType(e.val, false);
+//            });
 
             that._setupLabelDropdown();
 
@@ -110,13 +111,13 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
                 //save the old value to be used to check for changes
                 var oldContact = generalTools.deepClone(that.contacts[that._editIndex]);
                 //get the value of the selected label
-                var selectedLabel = $(that.element).find(".editWrapper .label").select2("val");
+                //TODO: Implement this for selector - var selectedLabel = $(that.element).find(".editWrapper .label").select2("val");
                 //set the value
                 that.contacts[that._editIndex].Data = $(that.element).find(".editWrapper .value").val();
                 //set the label
                 that.contacts[that._editIndex].Label = selectedLabel;
                 //set the category
-                that.contacts[that._editIndex].Type = $(that.element).find(".labelIcon").select2("val");
+                //TODO: Implement this for selector - that.contacts[that._editIndex].Type = $(that.element).find(".labelIcon").select2("val");
                 //refresh the list with the new values
                 that._renderContactList(that.contacts);
                 //show the list
@@ -230,32 +231,53 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
         _setupLabelDropdown: function () {
             var that = this;
 
-            //function to format the option names of the dropdown
-            var formatItemName = function (item) {
-                return item.value;
-            };
+//            //function to format the option names of the dropdown
+//            var formatItemName = function (item) {
+//                return item.value;
+//            };
 
-            $(that.element).find(".editWrapper .label").select2({
-                id: function (item) {
-                    return item.value;
-                },
+//            $(that.element).find(".editWrapper .label").select2({
+//                id: function (item) {
+//                    return item.value;
+//                },
+//                query: function (query) {
+//                    var data = {
+//                        results: that._currentLabels.slice() //clone the phone labels
+//                    };
+//
+//                    if (query.term !== "") {
+//                        data.results.unshift({value: query.term});
+//                    }
+//
+//                    query.callback(data);
+//                },
+//                initSelection: function () {
+//                },
+//                formatSelection: formatItemName,
+//                formatResult: formatItemName,
+//                containerCssClass: "labelContainer",
+//                dropdownCssClass: "bigdrop labelDropdown"
+//            });
+
+            $(that.element).find(".editWrapper .label").selectorWidget({
                 query: function (query) {
                     var data = {
                         results: that._currentLabels.slice() //clone the phone labels
                     };
 
-                    if (query.term !== "") {
-                        data.results.unshift({value: query.term});
+                    if (query.searchTerm !== "") {
+                        data.results.unshift({value: query.searchTerm});
                     }
 
-                    query.callback(data);
+                    query.render(data);
                 },
-                initSelection: function () {
+                format: function (item) {
+                    return item.value;
                 },
-                formatSelection: formatItemName,
-                formatResult: formatItemName,
-                containerCssClass: "labelContainer",
-                dropdownCssClass: "bigdrop labelDropdown"
+                onSelect: function (e, selectedData) {
+                    console.log(e);
+                    console.log(selectedData);
+                }
             });
         },
 
@@ -271,7 +293,7 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
             //set the category
             that._changeType(contact.Type, true);
             //set the label
-            $(that.element).find(".editWrapper .label").select2("data", {value: contact.Label});
+            //TODO: Implement this for selector - $(that.element).find(".editWrapper .label").select2("data", {value: contact.Label});
             //show the edit pane
             that._changePane("edit");
         },
@@ -284,8 +306,12 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
          */
         _changeType: function (category, manuallySelect) {
             var that = this, labels = [];
-            //remove the select2 from the label dropdown
-            $(that.element).find(".editWrapper .label").select2("destroy");
+//            //remove the select2 from the label dropdown
+//            $(that.element).find(".editWrapper .label").select2("destroy");
+            //remove the selector from the contacts widget
+            while ($(that.element).find(".editWrapper .label").children().length !== 0) {
+                $(that.element).find(".editWrapper .label")[0].removeChild($(that.element).find(".editWrapper .label")[0].lastChild);
+            }
             //set the correct label list based on the category
             if (category === "Phone Number") {
                 labels = phoneLabels;
@@ -298,7 +324,7 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
             }
 
             //get the selected label
-            var label = $(that.element).find(".editWrapper .label").select2("val").val();
+            //TODO: Implement this for selector - var label = $(that.element).find(".editWrapper .label").select2("val").val();
             var sameLabels;
             if (that._currentLabels === labels) {
                 sameLabels = true;
@@ -309,18 +335,18 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
             that._setupLabelDropdown();
             //if the labels are the same as before, reset to the original selected label
             if (sameLabels) {
-                $(that.element).find(".editWrapper .label").select2("data", {value: label});
+                //TODO: Implement this for selector - $(that.element).find(".editWrapper .label").select2("data", {value: label});
             }
 
             //change the selected category icon
             //get reference to the icon category dropdown
-            var container = $(that.element).find(".iconContainer")[0];
+            //TODO: Implement this for selector - var container = $(that.element).find(".iconContainer")[0];
             //replace the select2 container's class name with the new class
-            $(container)[0].className = "select2-container iconContainer " + category.replace(/\s/g, "") + "Small";
+            //TODO: Implement this for selector - $(container)[0].className = "select2-container iconContainer " + category.replace(/\s/g, "") + "Small";
 
             //set the category in the icon dropdown
             if (manuallySelect) {
-                $(that.element).find(".labelIcon").select2("val", category);
+                //TODO: Implement this for selector - $(that.element).find(".labelIcon").select2("val", category);
             }
         },
 
