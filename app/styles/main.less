@@ -103,15 +103,135 @@ table {
     background:none;
     background-color: @blue;
 }
-
-.k-menu .k-state-selected{
-    background:none;
-    background-color: @blue;
-}
-
 .k-icon, .k-tool-icon, .k-grouping-dropclue, .k-drop-hint, .k-callout, .k-progress, .k-progress-status, .k-column-menu .k-sprite {
     background-image: url('../img/sprite.png');
 }
+/*region grid filters*/
+.k-group.k-popup{
+    box-shadow: none;
+    -webkit-box-shadow: none;
+}
+.k-menu{
+    background:@white;
+    border-color: #ccc;
+    border-width: 0;
+    li:hover{
+        background: none;
+        .hoverColor;
+    }
+    .k-state-selected{
+        background:none;
+        background-color: @blue;
+    }
+    .k-columns-item .k-state-active, .k-filter-item .k-state-active{
+        .hoverColor;
+    }
+    .k-filter-menu .k-filter-and{
+        margin-top: 6px;
+    }
+    .k-filter-item{
+        .k-datepicker, .k-dropdown{
+            width: 100%;
+            font-size: 1em;
+        }
+        .k-dropdown{
+            height: 25px;
+        }
+        .k-picker-wrap, .k-widget, .k-input, .k-state-focused:hover{
+            border: none;
+            background: none;
+        }
+        .k-widget, .k-state-focused:hover{
+            background-color: @white;
+        }
+        .k-dropdown{
+            margin-bottom: 7px;
+            padding-top: 0;
+        }
+        .k-dropdown-wrap{
+            border: none;
+            border-radius: 0;
+            background-color: @white;
+        }
+        .k-input{
+            font-size: 15px;
+            height: 17px;
+            box-shadow: none;
+            -webkit-box-shadow: none;
+            box-shadow: none;
+            -webkit-box-shadow: none;
+            box-shadow: none;
+            -webkit-box-shadow: none;
+        }
+        .k-numeric-wrap, input[type="text"]{
+            border: none;
+            border-radius: 0;
+            background-color: #fff;
+        }
+        input[type="number"], input[type="text"] {
+            height: 25px;
+            padding-left: 2px;
+            font-family: "PTSans";
+        }
+        .k-datepicker input[type="text"]{
+            height: 17px;
+        }
+    }
+    .k-group{
+        background-color: @grey;
+        .k-item{
+            border: none;
+            border-radius: 0;
+            padding: 0 4px;
+            &:hover{
+                background-color: @grey;
+            }
+            .k-list-container{
+                background-color: @white;
+            }
+        }
+    }
+    .k-list .k-item:hover{
+        .hoverColor;
+    }
+    .k-list .k-state-selected:hover{
+        .hoverColor(@blue);
+        color: @white;
+    }
+    .k-i-sort-asc, .k-i-sort-desc{
+        background: url('../img/sprite.png') left center;
+        width: 11px;
+        height: 8px;
+        background-position: -118px -248px;
+        opacity: 1;
+    }
+    .k-i-sort-desc{
+        background-position: -118px -262px;
+    }
+    .k-state-selected:not(.k-state-hover) .k-i-sort-asc{
+        background-position: -118px -200px;
+    }
+    .k-state-selected:not(.k-state-hover) .k-i-sort-desc{
+        background-position: -118px -214px;
+    }
+    button{
+        width: 80px;
+        height: 27px;
+        padding: 0 8px 3px;
+        border-radius: 0;
+        border: none;
+        background: @white;
+        color: @green;
+        &:hover{
+            border: none;
+            background: @white;
+        }
+    }
+    button[type="reset"]{
+        color: @red;
+    }
+}
+/*endregion*/
 
 .k-loading {
     background-image: url('../img/loading.gif');
@@ -275,7 +395,7 @@ span.k-tooltip {
         border: none;
     }
     table{
-        padding-right: 3px;
+        padding-right: 2px;
     }
     .k-grid-header{
         margin-top: 5px;
@@ -349,10 +469,17 @@ span.k-tooltip {
         height: 100%;
         padding: 0 7px 0 3px;
         border: none;
+        border-left: 1px solid #f2f2f2;
+        border-right: 1px solid #f2f2f2;
         border-bottom: 2px solid #f2f2f2;
     }
-    tr:last-child td{
-        border: none;
+    td:first-child{
+        border-letf: none;
+        border-right: 1px solid #f2f2f2;
+    }
+    td:last-child{
+        border-right: none;
+        border-left: 1px solid #f2f2f2;
     }
 }
 
@@ -476,6 +603,19 @@ hr {
     -webkit-box-shadow: 0 5px 8px #aaa;
     box-shadow: 0 5px 8px #aaa;
     background-color: #fff;
+}
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track{
+    background-color: #fff;
+}
+::-webkit-scrollbar-thumb{
+    background-color: #57B0F2;
+}
+::-webkit-scrollbar-thumb:hover{
+    background-color: #488fcd;
 }
 #dispatcher .addDeleteBtns {
     float: right;
@@ -646,6 +786,7 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover {
 }
 
 #users tbody a {
+    margin: 1px 0 2px 0;
     color: #0055cc;
     text-decoration: underline;
 }
@@ -995,6 +1136,7 @@ div.k-window-content {
     width: 26px;
     height: 26px;
     margin-right: 0;
+    cursor: pointer;
 }
 
 #dispatcher .colorInput {
@@ -1020,18 +1162,6 @@ div.k-window-content {
     .wrapper{
         min-width: 460px;
         margin: 0 auto;
-    }
-    ::-webkit-scrollbar {
-        width: 8px;
-    }
-    ::-webkit-scrollbar-track{
-        background-color: #fff;
-    }
-    ::-webkit-scrollbar-thumb{
-        background-color: #57B0F2;
-    }
-    ::-webkit-scrollbar-thumb:hover{
-        background-color: #488fcd;
     }
     .wrap{
         margin: 30px 20px 0 20px;
@@ -1257,6 +1387,12 @@ div.k-window-content {
             border-right: 2px solid #f2f2f2;
             &:hover{
                 .hoverColor (#eee);
+            }
+        }
+        td.status3{
+            background-color: #ff0000;
+            &:hover{
+                .hoverColor(#ff0000);
             }
         }
         .Client, .Location, .Repeat {

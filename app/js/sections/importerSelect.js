@@ -292,8 +292,8 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
             {text: "", children: currentFieldGroups.main},
             {text: "Location", children: currentFieldGroups.location},
             {text: "Contact Info", children: currentFieldGroups.contactInfo},
-            {text: "Service", children: currentFieldGroups.service},
-            {text: "Fields", children: currentFieldGroups.fields}
+            {text: "Service Schedule", children: currentFieldGroups.service},
+            {text: "Service Fields", children: currentFieldGroups.fields}
         ];
 
         //update the list of the currently selected fields
@@ -318,9 +318,9 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
         }
 
         $("#importerSelect").find(".saveBtn").on("click", function () {
-            var dataToValidate = formatDataForValidation(importerUpload.uploadedData);
+            importerSelect.dataToValidate = formatDataForValidation(importerUpload.uploadedData);
 
-            dbServices.suggestions.update({body: {rowsWithHeaders: dataToValidate}}).done(function (suggestions) {
+            dbServices.suggestions.update({body: {rowsWithHeaders: importerSelect.dataToValidate}}).done(function (suggestions) {
                 importerSelect.gridData = suggestions;
                 window.viewImporterReview();
             });
@@ -356,7 +356,7 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
                 {id: 'Other Label 1', order: 6, group: "contactInfo"},
                 {id: 'Other Value 1', order: 7, group: "contactInfo"}
             ]},
-            {text: "Service", children: [
+            {text: "Service Schedule", children: [
                 {id: 'Frequency', order: 0, group: "service"},
                 {id: 'Frequency Detail', order: 1, group: "service"},
                 {id: 'Repeat Every', order: 2, group: "service"},
@@ -406,7 +406,7 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
                 }
 
                 //reset the fields list
-                importerSelect.allFields = importerSelect.currentFields = defaultFields.concat({text: "Fields", children: serviceFields});
+                importerSelect.allFields = importerSelect.currentFields = defaultFields.concat({text: "Service Fields", children: serviceFields});
 
                 //function to format the option names of the frequency and end Date dropdowns
                 var formatItemName = function (item) {

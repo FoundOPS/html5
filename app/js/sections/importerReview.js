@@ -25,7 +25,10 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
         },
         {
             field: "Repeat",
-            template: "<div class='Repeat'>#= Repeat #</div>"
+            template: "<div class='Repeat'>#= Repeat #</div>",
+            attributes: {
+                "class": "status#= RepeatStatus #"
+            }
         }
     ];
 
@@ -35,6 +38,24 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
      */
     var formatDataForGrid = function (data) {
         var newData = [], newRow, row;
+
+        //find the indexes of the repeat columns to reference for errors
+        var startDateIndex = "", frequencyIndex = "", repeatEveryIndex = "", frequencyDetailIndex = "", endDateIndex = "", index = 0;
+        _.find(importerSelect.dataToValidate[0], function(name){
+            if (name === "Start Date") {
+                startDateIndex = index;
+            } else if (name === "Frequency") {
+                frequencyIndex = index;
+            } else if (name === "Repeat Every") {
+                repeatEveryIndex = index;
+            } else if (name === "Frequency Detail") {
+                frequencyDetailIndex = index;
+            } else if (name === "End Date") {
+                endDateIndex = index;
+            }
+            index ++;
+        });
+
         for (var i in data) {
             var location = {}, contactInfo = [];
             row = data[i];
@@ -55,7 +76,16 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
             newRow["ContactInfoData"] = contactInfo;
             newRow["ContactInfo"] = generalTools.getContactInfoDisplayString(contactInfo);
             newRow["RepeatData"] = row.Repeats[0];
-            newRow["Repeat"] = generalTools.getRepeatString(row.Repeats[0]);
+            var repeatString = generalTools.getRepeatString(row.Repeats[0]);
+            if (repeatString !== "") {
+                newRow["Repeat"] = repeatString;
+            } else {
+                var originalRow = importerSelect.dataToValidate[parseInt(i) + 1];
+                newRow["Repeat"] = originalRow[frequencyIndex] + ", " + originalRow[frequencyDetailIndex] + ", " +
+                    originalRow[repeatEveryIndex] + ", " + originalRow[startDateIndex] + ", " + originalRow[endDateIndex];
+            }
+
+            newRow["RepeatStatus"] = row.Repeats[0].StatusInt;
 
             newData.push(newRow);
         }

@@ -98,7 +98,7 @@ define(["tools/generalTools", "db/services", "db/session", "db/saveHistory", "to
                     title: "Name"
                 },
                 {
-                    width: 55,
+                    width: 75,
                     field: "Color",
                     title: "Color",
                     // The template for the color picker
