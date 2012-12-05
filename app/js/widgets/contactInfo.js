@@ -80,6 +80,7 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
 
             that._setupLabelDropdown();
 
+            //add button click
             $(that.element).find(".add").on("click", function () {
                 //add an empty contact to the list
                 that.contacts.unshift({Entity: "New", Data: "", Type: "Other", Label: ""});
@@ -91,6 +92,8 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
                 that._edit(that.contacts[that._editIndex]);
                 that._isNew = true;
             });
+
+            //delete button click
             $(that.element).find(".delete").live("click", function () {
                 var id = that.contacts[that._editIndex].Id;
 
@@ -106,6 +109,8 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
                     that.options.entity.destroy(id);
                 }
             });
+
+            //save button click
             $(that.element).find(".save").live("click", function () {
                 //save the old value to be used to check for changes
                 var oldContact = generalTools.deepClone(that.contacts[that._editIndex]);
@@ -197,7 +202,9 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
                 list.append(element);
             }
 
+            //on contact info list item click
             $(that.element).find(".contactList a").on("click", function (e) {
+                //check what kind of contact info it is
                 if (e.currentTarget.children[0].className === "Phone Number") {
                     analytics.track("Phone Contact Click");
                     window.location.href = "tel:" + e.currentTarget.children[2].innerText;

@@ -26,6 +26,7 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
 
     var formatDataForValidation = function (data) {
         var selectPage = $("#importerSelect");
+        //check value of toggle switch to know if headers should be included
         var headersIncluded = selectPage.find(".switch .on").hasClass("active");
         var selectedFields = [];
         //create an array of the fields to be used(based on the dropdowns)
@@ -317,9 +318,11 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
             window.viewImporterUpload();
         }
 
+        //on save button click
         $("#importerSelect").find(".saveBtn").on("click", function () {
             importerSelect.dataToValidate = formatDataForValidation(importerUpload.uploadedData);
 
+            //submit data to be validated, then redirect to review page
             dbServices.suggestions.update({body: {rowsWithHeaders: importerSelect.dataToValidate}}).done(function (suggestions) {
                 importerSelect.gridData = suggestions;
                 window.viewImporterReview();
@@ -365,6 +368,7 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
             ]}
         ];
 
+        //setup the listview
         $("#listView").kendoListView({
             //setup the template to only include the header and the first row of data
             template: "<li><div class='header'>#=data[0]#</div><div class='value'>#=data[1]#</div><div class='styled-select'></div></li>",

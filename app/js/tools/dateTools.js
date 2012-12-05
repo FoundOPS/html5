@@ -33,7 +33,7 @@ define(['moment'], function () {
 
     dateTools.days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-    // parse a date in string format
+    //parse a date that's in a string
     dateTools.parseDate = function (date) {
         if (!date.getDay) {
             var parts = date.match(/(\d+)/g);
@@ -78,7 +78,6 @@ define(['moment'], function () {
         var dayOfMonth = date.getDate().toString();
         //get the last digit of the date. ex. 21 -> 1
         lastDigit = dayOfMonth.charAt(dayOfMonth.length - 1);
-        //TODO: check if supposed to check against string or num
         if ((lastDigit > 3 && lastDigit <= 9) || (dayOfMonth >= 11 && dayOfMonth <= 13) || lastDigit == 0) {
             suffix = "th";
         } else if (lastDigit == 1) {

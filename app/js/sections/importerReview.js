@@ -26,6 +26,7 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
         {
             field: "Repeat",
             template: "<div class='Repeat'>#= Repeat #</div>",
+            //set the status as the class name so it can be colored red if there's an error
             attributes: {
                 "class": "status#= RepeatStatus #"
             }
@@ -37,21 +38,12 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
      * @return {Array} newData
      */
     var formatDataForGrid = function (data) {
-        var newData = [], newRow, row;
+        var newData = [], newRow, row, indexes = [], index = 0;
 
-        //find the indexes of the repeat columns to reference for errors
-        var startDateIndex = "", frequencyIndex = "", repeatEveryIndex = "", frequencyDetailIndex = "", endDateIndex = "", index = 0;
+        //find the indexes of the repeat columns to reference for displaying error text
         _.find(importerSelect.dataToValidate[0], function(name){
-            if (name === "Start Date") {
-                startDateIndex = index;
-            } else if (name === "Frequency") {
-                frequencyIndex = index;
-            } else if (name === "Repeat Every") {
-                repeatEveryIndex = index;
-            } else if (name === "Frequency Detail") {
-                frequencyDetailIndex = index;
-            } else if (name === "End Date") {
-                endDateIndex = index;
+            if (name === "Start Date" || name === "Frequency" || name === "Repeat Every" || name === "Frequency Detail" || name === "End Date") {
+                indexes.push(index);
             }
             index ++;
         });
@@ -61,9 +53,12 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
             row = data[i];
             newRow = [];
 
+            //id to use for editing
             newRow["id"] = i;
+            //client name string
             newRow["Client"] = clients[row.ClientSuggestions[0]]? clients[row.ClientSuggestions[0]].Name : "";
 
+            //location object
             location = locations[row.LocationSuggestions[0]];
 
             //create the list of contact info sets from the suggestions
@@ -71,20 +66,37 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
                 contactInfo.push(contactInfoSets[row.ContactInfoSuggestions[j]]);
             }
 
+            //location id
             newRow["LocationData"] = location;
+            //location display string
             newRow["Location"] = generalTools.getLocationDisplayString(location);
+            //contact info id
             newRow["ContactInfoData"] = contactInfo;
+            //contact info display string
             newRow["ContactInfo"] = generalTools.getContactInfoDisplayString(contactInfo);
+            //repeat object
             newRow["RepeatData"] = row.Repeats[0];
+            //repeat display string
             var repeatString = generalTools.getRepeatString(row.Repeats[0]);
             if (repeatString !== "") {
                 newRow["Repeat"] = repeatString;
             } else {
+                //get a reference to the original uploaded data
                 var originalRow = importerSelect.dataToValidate[parseInt(i) + 1];
-                newRow["Repeat"] = originalRow[frequencyIndex] + ", " + originalRow[frequencyDetailIndex] + ", " +
-                    originalRow[repeatEveryIndex] + ", " + originalRow[startDateIndex] + ", " + originalRow[endDateIndex];
+                //sort indexes in ascending order
+                indexes = indexes.sort(function(a,b){return a-b});
+
+                newRow["Repeat"] = "";
+
+                //
+                for (var k in indexes) {
+                    newRow["Repeat"] += originalRow[indexes[k]] + ", ";
+                }
+                //remove the trailing ", "
+                newRow["Repeat"] = newRow["Repeat"].substring(0, newRow["Repeat"].length - 2);
             }
 
+            //repeat status
             newRow["RepeatStatus"] = row.Repeats[0].StatusInt;
 
             newData.push(newRow);
@@ -144,33 +156,46 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
         var repeatPopup = reviewElement.find(".Repeat");
         repeatPopup.popup({contents: $("<div class='repeatWidget'></div>")});
 
-        //create the correct widget inside the popup
+        //create the correct widget inside each popup
         contactInfoPopup.on("click", function (e) {
+            //get the row index that was clicked on
             importerReview.editIndex = e.currentTarget.parentElement.parentElement.rowIndex;
-            importerReview.editedCell = e.currentTarget;
+            //get the data from the grid dataSource that corresponds to that row
             var contacts = dataSource._view[importerReview.editIndex].ContactInfoData;
             var widget = $("#popupContent").find(".contactInfoWidget");
+            //initialize the contact info widget with the data
             widget.contactInfo({contacts: contacts});
+            //set a reference to the contact info widget
             importerReview.contactInfoWidget = widget.data("contactInfo");
         });
 
         locationPopup.on("click", function (e) {
             var popupElement = $("#popupContent");
+            //get the row index that was clicked on
             importerReview.editIndex = e.currentTarget.parentElement.parentElement.rowIndex;
+            //get the data from the grid dataSource that corresponds to that row
             var location = dataSource._view[importerReview.editIndex].LocationData;
+            //initialize the location widget
             popupElement.find(".locationWidget").location();
+            //set a reference to the location info widget
             importerReview.locationWidget = popupElement.find(".locationWidget").data("location");
+            //check for a location
             if (location) {
+                //set the location
                 importerReview.locationWidget.renderMap(location, true);
             } else {
+                //start at edit screen
                 importerReview.locationWidget.renderMap(location, false);
             }
 
         });
 
         repeatPopup.on("click", function (e) {
+            //get the row index that was clicked on
             importerReview.editIndex = e.currentTarget.parentElement.parentElement.rowIndex;
+            //get the data from the grid dataSource that corresponds to that row
             var repeat = dataSource._view[importerReview.editIndex].RepeatData;
+            //initialize the repeat widget with the data
             $("#popupContent").find(".repeatWidget").repeat({repeat: repeat});
         });
     };
@@ -207,6 +232,7 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
     };
 
     var removeGrid = function () {
+        //clear the grid element and the dataSource
         $("#importerReview").find(".grid").empty();
         dataSource = "";
     };
@@ -225,7 +251,7 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
             resizeGrid();
         });
 
-        //import on button click
+        //import button click
         $("#importBtn").on("click", function () {
             submitData();
         });
@@ -234,14 +260,14 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
     importerReview.show = function () {
         //check if importerUpload exists
         //if not, then no data has been loaded
-        //TODO:
+        //TODO: ask if sure to reload page?
         if (!importerUpload.uploadedData) {
             //redirect to last page
             window.viewImporterSelect();
             return;
         }
 
-        //create arrays for clients, locations, and repeats that match the guid with the object
+        //create arrays for clients, locations, and contact info that match each id to the object
         var entity;
         for (var i in importerSelect.gridData.Clients) {
             entity = importerSelect.gridData.Clients[i];
@@ -256,6 +282,7 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
             contactInfoSets[entity.Id] = entity;
         }
 
+        //remove and re-create the grid
         if (grid) {
             removeGrid();
         }
@@ -264,16 +291,21 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
 
         //on popup close event
         $(document).on('popup.closing', function (e) {
-            // get a reference to the grid widget
+            // get a reference to the grid
             var grid = $("#importerReview").find(".grid").data("kendoGrid");
+            //get a reference to the data row
             var row = grid.dataSource._data[importerReview.editIndex];
+            //check which widget is active
             if ($(e.target).find(".locationWidget").data("location")) {
+                //update the dataSource with the new data
                 row.LocationData = importerReview.locationWidget.currentLocation;
 
                 //remove the location widget
                 $(e.target).find(".locationWidget").data("location").removeWidget();
             } else if ($(e.target).find(".repeatWidget").data("repeat")) {
+                //get a reference to the repeat widget
                 var repeat = $(e.target).find(".repeatWidget").data("repeat");
+                //update the dataSource with the new data
                 row.RepeatData = repeat.options.repeat;
                 //remove the repeat widget
                 repeat.removeWidget();

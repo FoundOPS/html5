@@ -31,9 +31,11 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
 
             var center, zoom;
 
+            //center the map at the location
             if (location) {
                 center = [location.Latitude, location.Longitude];
                 zoom = 15;
+            //if no location exists, center on 'merica!
             } else {
                 center = [40, -89];
                 zoom = 4;
@@ -55,7 +57,7 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
             if (shouldAddMarker) {
                 //move the marker to the new location
                 that._changeMarkerLocation(location, false);
-                //set/save the current selected location
+                //set the current selected location
                 that._updateCurrentLocation(location, false);
             }
 
@@ -126,7 +128,7 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
             if (!shouldAddMarker) {
                 that._showEditScreen();
             } else {
-                //if there is a location, show the navigate(with google) button
+                //if there is a location, show the navigate(with google maps) button
                 widgetElement.find(".navigateBtn").css("display", "block");
 
                 that._updateNavigateLink(location, true);
@@ -192,40 +194,23 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
         },
 
         /**
-         * Creates a string with the available location data
-         * @param location
-         * @return {String} The text to show in the location list
-         * @private
-         */
-        _getLocationString: function (location) {
-            var returnString = generalTools.getLocationDisplayString(location);
-            if (returnString) {
-                return returnString;
-            //if there is no address, display the latitude and longitude
-            } else {
-                return location.Latitude + "," + location.Longitude;
-            }
-        },
-
-        /**
          * @param locations The locations returned from the search
          * @private
          */
         _updateLocationList: function (locations) {
             var that = this;
             that._locationList = locations;
-            var list = "", thisLocation;
+            var list = "";
             //clear the current list
             $(that.element).find(".locationList")[0].innerHTML = "";
             //add each returned location to the list
             for (var i in locations) {
-                thisLocation = locations[i];
-                list += '<li id="' + i + '"><span class="fromWeb"></span><span class="name">' + that._getLocationString(locations[i]) + '</span></li>';
+                list += '<li id="' + i + '"><span class="fromWeb"></span><span class="name">' + generalTools.getLocationDisplayString(locations[i]) + '</span></li>';
             }
 
             //add the current saved location to the list, if there is one
             if (that.currentLocation) {
-                list += '<li id="previous"><span id="previousLocation"></span><span class="name">' + that._getLocationString(that.currentLocation) + '</span></li>';
+                list += '<li id="previous"><span id="previousLocation"></span><span class="name">' + generalTools.getLocationDisplayString(that.currentLocation) + '</span></li>';
             }
 
             //add option for "Manually Drop Pin"
@@ -256,7 +241,7 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
             that.currentLocation = location;
 
             if (shouldSave) {
-                //TODO: save here
+                //TODO: save here(not necessary for use in popup)
             }
         },
 

@@ -47,25 +47,29 @@ define(['jquery', "developer", "tools/dateTools", 'moment'], function ($, develo
     };
 
     generalTools.getContactInfoDisplayString = function (contactInfo) {
+        //check if there's no contact info
         if (!contactInfo[0]) {
             return "";
         }
 
         var contactData = "";
+        //add the data string if it exists
         if (contactInfo[0].Data) {
+            //remove the "http://" or "https://" from the beginning if it's a link
             contactData = contactInfo[0].Data.replace("http://", "");
             contactData = contactData.replace("https://", "");
             contactData += " ";
         }
 
         var contactLabel = "";
+        //add the label if it exists
         if (contactInfo[0].Label) {
             contactLabel = "(" + contactInfo[0].Label + ")";
         }
 
         var contactString = contactData + contactLabel;
 
-        //add text to the end to show haow many more sets of contact info there are (ex. "+ 3 more")
+        //add text to the end to show how many more sets of contact info there are (ex. "+ 3 more")
         if (contactInfo.length > 1) {
             contactString = contactString.concat(" +", contactInfo.length - 1, " more");
         }
@@ -83,17 +87,24 @@ define(['jquery', "developer", "tools/dateTools", 'moment'], function ($, develo
         var adminDistrictOne = location.AdminDistrictOne ? location.AdminDistrictOne + " " : "";
         var postalCode = location.PostalCode ? location.PostalCode : "";
         //display any parts of the location that exist
-        return lineOne + lineTwo + adminDistrictTwo + adminDistrictOne + postalCode;
+        var displayString = lineOne + lineTwo + adminDistrictTwo + adminDistrictOne + postalCode;
+        if (displayString !== "") {
+            return displayString;
+        } else {
+            return location.Latitude + ", " + location.Longitude;
+        }
     };
 
     //create a display string from a repeat object
     generalTools.getRepeatString = function (repeat) {
+        //check if there is a repeat
         if (!repeat) {
             return "";
         }
         //use the frequency int to get the frequency name(ex. 2 -> "Day")
         var frequencyName = generalTools.repeatFrequencies[repeat.Frequency];
 
+        //check if frequency if singular
         if (repeat.Frequency >= 2 && repeat.RepeatEveryTimes === 1) {
             //ex. "weekly"
             if (repeat.Frequency === 2) {
@@ -101,15 +112,13 @@ define(['jquery', "developer", "tools/dateTools", 'moment'], function ($, develo
             } else {
                 frequencyName = frequencyName + "ly";
             }
-        //if frequency is not daily
+        //if frequency is multiple
         } else if (repeat.Frequency > 1 && repeat.RepeatEveryTimes > 1) {
             //ex. "Every 3 months"
             frequencyName = "Every " + repeat.RepeatEveryTimes.toString() + " " + frequencyName.charAt(0).toLowerCase() + frequencyName.slice(1) + "s ";
         } else {
             return "";
         }
-
-        //TODO: make monthly frequency detail separate function
 
         var frequencyDetail = "";
         var weeklyDetail = repeat.FrequencyDetailAsWeeklyFrequencyDetail;
@@ -118,10 +127,13 @@ define(['jquery', "developer", "tools/dateTools", 'moment'], function ($, develo
         //if monthly
         if (repeat.FrequencyDetailAsMonthlyFrequencyDetail) {
             frequencyDetail = generalTools.getFrequencyDetailString(repeat.FrequencyDetailInt, startDate, false);
+        //if weekly
         } else if (weeklyDetail[0]) {
+            //get the list of day abbreviation strings, separated by commas
             for (var d in weeklyDetail) {
                 frequencyDetail = frequencyDetail += dateTools.days[weeklyDetail[d]].substring(0, 3) + ", ";
             }
+            //remove trailing ", "
             var stringToRemove = /,\s$/;
             frequencyDetail = "on " + frequencyDetail.replace(stringToRemove, "");
         }
@@ -138,9 +150,11 @@ define(['jquery', "developer", "tools/dateTools", 'moment'], function ($, develo
      */
     generalTools.getFrequencyDetailString = function (detailInt, startDate, beginWithCapital) {
         var frequencyDetail = "", date = startDate;
+        //if date is a string, change it to a date object
         if (!startDate.getDate) {
             date = dateTools.parseDate(startDate);
         }
+        //create a string based on the frequencyDetail (ex. "on the 2nd Wednesday")
         if (detailInt === generalTools.frequencyDetail.OnDayInMonth || detailInt === generalTools.frequencyDetail.LastOfMonth) {
             frequencyDetail = "on the " + dateTools.getDateWithSuffix(date);
         } else if (detailInt === generalTools.frequencyDetail.FirstOfDayOfWeekInMonth) {
@@ -152,6 +166,7 @@ define(['jquery', "developer", "tools/dateTools", 'moment'], function ($, develo
         } else if (detailInt === generalTools.frequencyDetail.LastOfDayOfWeekInMonth) {
             frequencyDetail = "on the last " + dateTools.days[date.getDay()];
         }
+        //optionally capitalize the "O" in "on"
         if (beginWithCapital) {
             frequencyDetail = frequencyDetail.charAt(0).toUpperCase() + frequencyDetail.slice(1);
         }
@@ -266,6 +281,7 @@ define(['jquery', "developer", "tools/dateTools", 'moment'], function ($, develo
         });
     };
 
+    //frequency names to be used in repeat string generation(first two blank because null and "Once" are not used)
     generalTools.repeatFrequencies = [
         "",
         "",

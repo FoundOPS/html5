@@ -12,6 +12,10 @@ define(["jquery", "lib/csv", "db/services", "widgets/selectBox", "jui", "jfilere
         return true;
     };
 
+    /**
+     * Converts the uploaded file to format needed for next page
+     * @param file
+     */
     var parse = function (file) {
         var data = csv.parseRows(file);
         //save this data for later use
@@ -30,14 +34,16 @@ define(["jquery", "lib/csv", "db/services", "widgets/selectBox", "jui", "jfilere
     importerUpload.initialize = function () {
         //setup the FileReader on the fileUpload button
         //this will enable the flash FileReader polyfill from https://github.com/Jahdrien/FileReader
-        $("#importerUpload #styledUploadBtn").fileReader({
+        var uploadButton = $("#importerUpload #styledUploadBtn");
+        uploadButton.fileReader({
             id: "fileReaderSWFObject",
             filereader: "lib/filereader.swf",
             debugMode: false,
             multiple: false
         });
 
-        $("#importerUpload #styledUploadBtn").on('change', function (evt) {
+        //when new file is selected
+        uploadButton.on('change', function (evt) {
             var csvFile = evt.target.files[0];
             //if file is a .csv
             if(checkFileType(csvFile)){
@@ -54,15 +60,12 @@ define(["jquery", "lib/csv", "db/services", "widgets/selectBox", "jui", "jfilere
             $('#importerUpload #uploadBtn').removeAttr('disabled');
         });
 
-//        $("#importerUpload #styledUploadBtn").on("click", function () {
-//            $("#importerUpload #fileUpload").fileReader().start();
-//        });
-
         //listen to change event of the serviceType dropdown
         var onSelect = function (selectedService) {
             importerUpload.selectedService = {Id: selectedService.value, Name: selectedService.name};
         };
 
+        //get the available service templates
         dbServices.serviceTemplates.read().done(function (serviceTypes) {
             //create the service types dropdown
             $("#importerUpload #serviceType").selectBox({data: serviceTypes, dataTextField: "Name", onSelect: onSelect});
