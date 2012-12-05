@@ -103,8 +103,6 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
                 that._renderContactList(that.contacts);
                 //show the list of contacts
                 that._changePane("list");
-                //submit the change
-                //TODO
                 if (that.options.entity) {
                     that.options.entity.destroy(id);
                 }
@@ -136,8 +134,6 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
                 if (!isOldLabel) {
                     that._currentLabels.push({value: selectedLabel});
                 }
-                //save changes
-                //TODO
                 if (that._isNew && that.options.entity) {
                     that.options.entity.create(that.contacts[that._editIndex]);
                 } else {
