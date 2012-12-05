@@ -88,16 +88,21 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
 
                 newRow["Repeat"] = "";
 
-                //
+                //iterate through each repeat column that was selected and the values(comma separated) that were passed
                 for (var k in indexes) {
-                    newRow["Repeat"] += originalRow[indexes[k]] + ", ";
+                    var string = originalRow[indexes[k]];
+                    newRow["Repeat"] += string ? string + ", " : "";
                 }
                 //remove the trailing ", "
                 newRow["Repeat"] = newRow["Repeat"].substring(0, newRow["Repeat"].length - 2);
             }
 
             //repeat status
-            newRow["RepeatStatus"] = row.Repeats[0].StatusInt;
+            if (row.Repeats[0]) {
+                newRow["RepeatStatus"] = row.Repeats[0].StatusInt;
+            } else {
+                newRow["RepeatStatus"] = "";
+            }
 
             newData.push(newRow);
         }

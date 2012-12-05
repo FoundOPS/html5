@@ -274,9 +274,9 @@ url-prefix
 .km-view {
     display: -moz-box;
 }
-.km-content, .km-scroll-container, .km-scrollview {
-    width: auto;
 }
+.km-content, .km-scroll-container, .km-scrollview {
+    width: inherit;
 }
 input[type="button"], button {
     color: #111;
@@ -1159,6 +1159,9 @@ div.k-window-content {
     min-width: 500px;
     background-color: #fff;
     background-image: url("../img/background-tile.png");
+    :-moz-any(.km-scroll-container) {
+        display: block;
+    }
     .wrapper{
         min-width: 460px;
         margin: 0 auto;

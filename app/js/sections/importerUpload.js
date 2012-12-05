@@ -34,8 +34,7 @@ define(["jquery", "lib/csv", "db/services", "widgets/selectBox", "jui", "jfilere
     importerUpload.initialize = function () {
         //setup the FileReader on the fileUpload button
         //this will enable the flash FileReader polyfill from https://github.com/Jahdrien/FileReader
-        var uploadButton = $("#importerUpload #styledUploadBtn");
-        uploadButton.fileReader({
+        $("#importerUpload #styledUploadBtn").fileReader({
             id: "fileReaderSWFObject",
             filereader: "lib/filereader.swf",
             debugMode: false,
@@ -43,7 +42,7 @@ define(["jquery", "lib/csv", "db/services", "widgets/selectBox", "jui", "jfilere
         });
 
         //when new file is selected
-        uploadButton.on('change', function (evt) {
+        $("#importerUpload #styledUploadBtn").on('change', function (evt) {
             var csvFile = evt.target.files[0];
             //if file is a .csv
             if(checkFileType(csvFile)){

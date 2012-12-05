@@ -5,14 +5,14 @@
 define(["jquery", "tools/generalTools", "tools/dateTools", "kendo", "select2", "moment"], function ($, generalTools, dateTools) {
 //    var testService = {Frequency: 4, StartDate: new Date(), RepeatEveryTimes: 2, EndDate: new Date(),
 //        EndAfterTimes: null, FrequencyDetailAsWeeklyFrequencyDetail: [2, 3, 5], AvailableMonthlyFrequencyDetailTypes: [8, 14], FrequencyDetailAsMonthlyFrequencyDetail: 14};
-    var service = {Frequency: 2, StartDate: new Date(), RepeatEveryTimes: 1, EndDate: new Date(),
-            EndAfterTimes: 1, FrequencyDetailAsWeeklyFrequencyDetail: [], AvailableMonthlyFrequencyDetailTypes: []},
+    var service = {Frequency: null, StartDate: null, RepeatEveryTimes: 1, EndDate: null,
+            EndAfterTimes: null, FrequencyDetailAsWeeklyFrequencyDetail: [], AvailableMonthlyFrequencyDetailTypes: []},
     widgetElement;
 
     $.widget("ui.repeat", {
         options: {
-            repeat: {Frequency: 2, StartDate: new Date(), RepeatEveryTimes: 1, EndDate: new Date(),
-                EndAfterTimes: 1, FrequencyDetailAsWeeklyFrequencyDetail: [], AvailableMonthlyFrequencyDetailTypes: []}
+            repeat: {Frequency: null, StartDate: null, RepeatEveryTimes: 1, EndDate: null,
+                EndAfterTimes: null, FrequencyDetailAsWeeklyFrequencyDetail: [], AvailableMonthlyFrequencyDetailTypes: []}
         },
         _create: function () {
             var _repeat, that = this;
@@ -218,16 +218,22 @@ define(["jquery", "tools/generalTools", "tools/dateTools", "kendo", "select2", "
                     var textBox = widgetElement.find(".endDate .k-numerictextbox");
                     var datepicker = widgetElement.find(".endDate .k-datepicker");
                     //show the correct field based on the end date option
-                    //TODO: remove old value from the service?
                     if (e.val == 0) {
                         textBox.removeClass("showInput");
                         datepicker.removeClass("showInput");
+                        //clear the values for endOn and endAfter
+                        service.EndDate = null;
+                        service.EndAfterTimes = null;
                     } else if (e.val == 1) {
                         textBox.addClass("showInput");
                         datepicker.removeClass("showInput");
+                        //clear the value for endOn
+                        service.EndDate = null;
                     } else if (e.val == 2) {
                         textBox.removeClass("showInput");
                         datepicker.addClass("showInput");
+                        //clear the value for endAfter
+                        service.EndAfterTimes = null;
                     }
                 });
 
@@ -235,10 +241,10 @@ define(["jquery", "tools/generalTools", "tools/dateTools", "kendo", "select2", "
             widgetElement.find('.endDropdown').select2("data", {value: that._endSelection, Name: endValues[that._endSelection].Name});
             //endregion
 
-            var weekdayElement = widgetElement.find(".weekdayWrapper div");
+            var weekdayElements = widgetElement.find(".weekdayWrapper div");
 
             //event for clicking on a day of the week
-            weekdayElement.on("click", function (e) {
+            weekdayElements.on("click", function (e) {
                 var element = e.srcElement;
                 //toggle between selected and unselected states
                 if ($(element).hasClass("selected")) {
@@ -249,14 +255,14 @@ define(["jquery", "tools/generalTools", "tools/dateTools", "kendo", "select2", "
                 that.saveRepeatDays();
             });
             //unselect all days when click on left weekday button
-            widgetElement.find(".weekday.left").on("click", function () {
-                weekdayElement.removeClass("selected");
+            widgetElement.find(".left").on("click", function () {
+                weekdayElements.removeClass("selected");
                 that.saveRepeatDays();
             });
             //select M-F when click on right weekday button
-            widgetElement.find(".weekday.right").on("click", function () {
+            widgetElement.find(".right").on("click", function () {
                 //unselect all first to remove Sat and Sun.
-                weekdayElement.removeClass("selected");
+                weekdayElements.removeClass("selected");
                 widgetElement.find(".workday").addClass("selected");
                 that.saveRepeatDays();
             });
@@ -327,11 +333,16 @@ define(["jquery", "tools/generalTools", "tools/dateTools", "kendo", "select2", "
             if (frequency == 2) {
                 weeklyElement.attr("style", "display:none");
                 monthlyElement.attr("style", "display:none");
+                //clear values for monthly and weekly
+                service.FrequencyDetailAsWeeklyFrequencyDetail = null;
+                service.FrequencyDetailAsMonthlyFrequencyDetail = null;
             //weekly
             } else if (frequency == 3) {
                 monthlyElement.attr("style", "display:none");
                 weeklyElement.attr("style", "display:block");
                 that.setRepeatDays();
+                //clear value for monthly
+                service.FrequencyDetailAsMonthlyFrequencyDetail = null;
                 //monthly
             } else if (frequency == 4) {
                 weeklyElement.attr("style", "display:none");
@@ -352,10 +363,15 @@ define(["jquery", "tools/generalTools", "tools/dateTools", "kendo", "select2", "
                         }
                     });
                 });
+                //clear value for weekly
+                service.FrequencyDetailAsWeeklyFrequencyDetail = null;
             //yearly
             } else if (frequency == 5) {
                 weeklyElement.attr("style", "display:none");
                 monthlyElement.attr("style", "display:none");
+                //clear values for monthly and weekly
+                service.FrequencyDetailAsWeeklyFrequencyDetail = null;
+                service.FrequencyDetailAsMonthlyFrequencyDetail = null;
             }
             //use the frequency int to get the frequency name(ex. 2 -> "Day")
             var frequencyName = generalTools.repeatFrequencies[frequency];
