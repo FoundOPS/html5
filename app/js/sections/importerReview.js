@@ -7,7 +7,10 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
 //            template: "<div class='Client'>#= Client #</div>",
             editor: function (container, options) {
                 $('<div class="styled-select"></div>').appendTo(container)
-                    .selectBox({data: [{Name: "BK"}, {Name: "Subway"}], dataTextField: "Name"});
+                    .selectBox({data: [
+                        {Name: "BK"},
+                        {Name: "Subway"}
+                    ], dataTextField: "Name"});
             }
         },
         {
@@ -78,7 +81,7 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
             } else {
                 frequencyName = frequencyName + "ly";
             }
-        //if frequency is multiple
+            //if frequency is multiple
         } else if (repeat.Frequency > 1 && repeat.RepeatEveryTimes > 1) {
             //ex. "Every 3 months"
             frequencyName = "Every " + repeat.RepeatEveryTimes.toString() + " " + frequencyName.charAt(0).toLowerCase() + frequencyName.slice(1) + "s ";
@@ -97,7 +100,7 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
         } else if (weeklyDetail[0]) {
             //get the list of day abbreviation strings, separated by commas
             for (var d in weeklyDetail) {
-                if(parseInt(d) || d === "0") {
+                if (parseInt(d) || d === "0") {
                     frequencyDetail = frequencyDetail += dateTools.days[weeklyDetail[d]].substring(0, 3) + ", ";
                 }
             }
@@ -193,62 +196,44 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
     var dataBound = function () {
         var reviewElement = $("#importerReview");
 
-        //TODO CR Remove the code duplication in this section
+        var contactInfoWidget = reviewElement.find(".ContactInfo");
+        var locationWidget = reviewElement.find(".Location");
+        var repeatWidget = reviewElement.find(".Repeat");
 
-        //add popups to the location, contactInfo, and repeat cells
-        var contactInfoPopup = reviewElement.find(".ContactInfo");
-        contactInfoPopup.popup({contents: $("<div class='contactInfoWidget'></div>")});
+        contactInfoWidget.popup({contents: $("<div class='contactInfoWidget'></div>")});
+        locationWidget.popup({contents: $("<div class='locationWidget'></div>")});
+        repeatWidget.popup({contents: $("<div class='repeatWidget'></div>")});
 
-        var locationPopup = reviewElement.find(".Location");
-        locationPopup.popup({contents: $("<div class='locationWidget'></div>")});
-
-        var repeatPopup = reviewElement.find(".Repeat");
-        repeatPopup.popup({contents: $("<div class='repeatWidget'></div>")});
-
-        //create the correct widget inside each popup
-        contactInfoPopup.on("click", function (e) {
+        /**
+         * Updates the row/cell index that was clicked on
+         * @param e
+         * @return Selected data row
+         */
+        var updateEditIndexes = function (e) {
             //get the row/cell index that was clicked on
-            //TODO CR Change editIndex to editRowIndex
-            importerReview.editIndex = e.currentTarget.parentElement.parentElement.rowIndex;
+            importerReview.editRowIndex = e.currentTarget.parentElement.parentElement.rowIndex;
             importerReview.editCellIndex = e.currentTarget.parentElement.cellIndex;
 
-            //get the data from the grid dataSource that corresponds to that row
-            var contacts = dataSource._view[importerReview.editIndex].ContactInfo;
-            var widget = $("#popupContent").find(".contactInfoWidget");
-            //initialize the contact info widget with the data
-            widget.contactInfo({contacts: contacts});
-            //set a reference to the contact info widget
-            importerReview.contactInfoWidget = widget.data("contactInfo");
+            return dataSource.view()[importerReview.editRowIndex];
+        };
+
+        //create the correct widget inside each popup
+        contactInfoWidget.on("click", function (e) {
+            //initialize the contact info widget with the data from the grid dataSource
+            var data = updateEditIndexes(e).ContactInfo;
+            $("#popupContent").find(".contactInfoWidget").contactInfo({contacts: data});
         });
 
-        locationPopup.on("click", function (e) {
-            var popupElement = $("#popupContent");
-            //get the row index that was clicked on
-            importerReview.editIndex = e.currentTarget.parentElement.parentElement.rowIndex;
-            //get the data from the grid dataSource that corresponds to that row
-            var location = dataSource._view[importerReview.editIndex].Location;
-            //initialize the location widget
-            popupElement.find(".locationWidget").location();
-            //set a reference to the location info widget
-            importerReview.locationWidget = popupElement.find(".locationWidget").data("location");
-            //check for a location
-            if (location) {
-                //set the location
-                importerReview.locationWidget.renderMap(location, true);
-            } else {
-                //start at edit screen
-                importerReview.locationWidget.renderMap(location, false);
-            }
-
+        locationWidget.on("click", function (e) {
+            //initialize the location widget with the data from the grid dataSource
+            var data = updateEditIndexes(e).Location;
+            $("#popupContent").find(".locationWidget").location({location: data});
         });
 
-        repeatPopup.on("click", function (e) {
-            //get the row index that was clicked on
-            importerReview.editIndex = e.currentTarget.parentElement.parentElement.rowIndex;
-            //get the data from the grid dataSource that corresponds to that row
-            var repeat = dataSource._view[importerReview.editIndex].Repeat;
-            //initialize the repeat widget with the data
-            $("#popupContent").find(".repeatWidget").repeat({repeat: repeat});
+        repeatWidget.on("click", function (e) {
+            //initialize the repeat widget with the data from the grid dataSource
+            var data = updateEditIndexes(e).Repeat;
+            $("#popupContent").find(".repeatWidget").repeat({repeat: data});
         });
     };
 
@@ -345,32 +330,28 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
         $(document).on('popup.closing', function (e) {
             // get a reference to the grid
             var grid = $("#importerReview").find(".grid").data("kendoGrid");
-            var dataItem = grid.dataSource.get(importerReview.editIndex);
+            var dataItem = grid.dataSource.get(importerReview.editRowIndex);
 
-            //TODO CR Make code below consistent. Also move widget vars here to prevent duplicate code
+            var locationWidget = $(e.target).find(".locationWidget").data("location");
+            var repeatWidget = $(e.target).find(".repeatWidget").data("repeat");
+            var contactInfoWidget = $(e.target).find(".locationWidget").data("location");
+
             //check which widget is active
-            if ($(e.target).find(".locationWidget").data("location")) {
-                //update the dataSource with the new data
-                dataItem.set("Location", importerReview.locationWidget.currentLocation);
-                //remove the location widget
-                $(e.target).find(".locationWidget").data("location").removeWidget();
-            } else if ($(e.target).find(".repeatWidget").data("repeat")) {
-                //get a reference to the repeat widget
-                var repeat = $(e.target).find(".repeatWidget").data("repeat");
-                //update the dataSource with the new data
-                dataItem.set("Repeat", repeat.options.repeat);
-                //remove the repeat widget
-                repeat.removeWidget();
-            } else if ($(e.target).find(".contactInfoWidget").data("contactInfo")) {
-                //save contactInfo widget data to the grid dataSource
-                dataItem.set("ContactInfo", importerReview.contactInfoWidget.contacts);
-
-                //remove the contactInfo widget
-                $(e.target).find(".contactInfoWidget").data("contactInfo").removeWidget();
+            //update the dataSource with the new data
+            //remove the widget
+            if (locationWidget) {
+                dataItem.set("Location", locationWidget.options.location);
+                locationWidget.removeWidget();
+            } else if (repeatWidget) {
+                dataItem.set("Repeat", repeatWidget.options.repeat);
+                repeatWidget.removeWidget();
+            } else if (contactInfoWidget) {
+                dataItem.set("ContactInfo", contactInfoWidget.options.contacts);
+                contactInfoWidget.removeWidget();
             }
 
             //force refresh cell text
-            var selectedCell = grid.tbody.find('tr:eq(' + importerReview.editIndex + ') td:eq(' + importerReview.editCellIndex +')');
+            var selectedCell = grid.tbody.find('tr:eq(' + importerReview.editRowIndex + ') td:eq(' + importerReview.editCellIndex + ')');
             var column = grid.columns[importerReview.editCellIndex];
             grid._displayCell(selectedCell, column, dataItem);
 

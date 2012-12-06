@@ -4,13 +4,20 @@
 
 define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/leaflet"], function ($, dbServices, fui, generalTools) {
     $.widget("ui.location", {
-        /**
-         * Initialize the map
-         * @param location
-         * @param {boolean} shouldAddMarker Whether or not a marker should be added(if anything but manually add was selected)
-         */
-        renderMap: function (location, shouldAddMarker) {
-            var that = this;
+        options: {
+            location: {}
+        },
+
+        _create: function () {
+            var that = this, shouldAddMarker = true;
+            //check for a location
+            if (!that.options.location) {
+                shouldAddMarker = false;
+                that._showEditScreen();
+                return;
+            }
+
+            var location = that.options.location;
 
             that._location = $('<h3>Location</h3>' +
                 '<div id="locationWidgetMap">' +
