@@ -1,19 +1,13 @@
 'use strict';
 
-define(["jquery", "underscore", "sections/importerUpload", "sections/importerSelect", "db/services", "tools/generalTools", "widgets/location", "widgets/contactInfo", "widgets/repeat",
-    "ui/popup", "widgets/selectBox"], function ($, _, importerUpload, importerSelect, dbServices, generalTools) {
+define(["jquery", "underscore", "sections/importerUpload", "sections/importerSelect", "db/services", "tools/generalTools", "tools/dateTools", "widgets/location", "widgets/contactInfo", "widgets/repeat",
+    "ui/popup", "widgets/selectBox"], function ($, _, importerUpload, importerSelect, dbServices, generalTools, dateTools) {
     var importerReview = {}, dataSource, grid, clients = {}, locations = {}, contactInfoSets = {}, columns = [
         {   field: "Client",
 //            template: "<div class='Client'>#= Client #</div>",
             editor: function (container, options) {
-                $('<input data-text-field="Client" data-value-field="Client" data-bind="value:' + options.field + '"/>')
-                    .appendTo(container)
-                    .kendoDropDownList({
-                        autoBind: false,
-                        dataSource: new kendo.data.DataSource({
-                            data: [{Client: "BK"}, {Client: "Subway"}]
-                        })
-                    });
+                $('<div class="styled-select"></div>').appendTo(container)
+                    .selectBox({data: [{Name: "BK"}, {Name: "Subway"}], dataTextField: "Name"});
             }
         },
         {
@@ -31,7 +25,7 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
         },
         {
             field: "Repeat",
-            template: "<div class='Repeat'>#= Repeat #</div>",
+            template: "<div class='Repeat'>#= importerReview.getRepeatString(Repeat, id) #</div>",
             //set the status as the class name so it can be colored red if there's an error
             attributes: {
                 "class": "status#= RepeatStatus #"
@@ -67,6 +61,54 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
         return repeatString.substring(0, repeatString.length - 2);
     };
 
+    //create a display string from a repeat object
+    importerReview.getRepeatString = function (repeat, index) {
+        //check if there is a repeat
+        if (!repeat) {
+            return getImportedRepeatData(index);
+        }
+        //use the frequency int to get the frequency name(ex. 2 -> "Day")
+        var frequencyName = generalTools.repeatFrequencies[repeat.Frequency];
+
+        //check if frequency if singular
+        if (repeat.Frequency >= 2 && repeat.RepeatEveryTimes === 1) {
+            //ex. "weekly"
+            if (repeat.Frequency === 2) {
+                frequencyName = "Daily";
+            } else {
+                frequencyName = frequencyName + "ly";
+            }
+        //if frequency is multiple
+        } else if (repeat.Frequency > 1 && repeat.RepeatEveryTimes > 1) {
+            //ex. "Every 3 months"
+            frequencyName = "Every " + repeat.RepeatEveryTimes.toString() + " " + frequencyName.charAt(0).toLowerCase() + frequencyName.slice(1) + "s ";
+        } else {
+            return getImportedRepeatData(index);
+        }
+
+        var frequencyDetail = "";
+        var weeklyDetail = repeat.FrequencyDetailAsWeeklyFrequencyDetail;
+        var startDate = dateTools.parseDate(repeat.StartDate);
+
+        //if monthly
+        if (repeat.FrequencyDetailAsMonthlyFrequencyDetail) {
+            frequencyDetail = generalTools.getFrequencyDetailString(repeat.FrequencyDetailInt, startDate, false);
+            //if weekly
+        } else if (weeklyDetail[0]) {
+            //get the list of day abbreviation strings, separated by commas
+            for (var d in weeklyDetail) {
+                if(parseInt(d) || d === "0") {
+                    frequencyDetail = frequencyDetail += dateTools.days[weeklyDetail[d]].substring(0, 3) + ", ";
+                }
+            }
+            //remove trailing ", "
+            var stringToRemove = /,\s$/;
+            frequencyDetail = "on " + frequencyDetail.replace(stringToRemove, "");
+        }
+
+        return frequencyName + " " + frequencyDetail;
+    };
+
     /**
      * @param data
      * @return {Array} newData
@@ -94,15 +136,7 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
 
             newRow["Location"] = location;
             newRow["ContactInfo"] = contactInfo;
-            newRow["RepeatData"] = row.Repeats[0];
-
-            //repeat display string
-            var repeatString = generalTools.getRepeatString(row.Repeats[0]);
-            if (repeatString !== "") {
-                newRow["Repeat"] = repeatString;
-            } else {
-                newRow["Repeat"] = getImportedRepeatData(i);
-            }
+            newRow["Repeat"] = row.Repeats[0];
 
             //repeat status
             if (row.Repeats[0]) {
@@ -206,7 +240,7 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
             //get the row index that was clicked on
             importerReview.editIndex = e.currentTarget.parentElement.parentElement.rowIndex;
             //get the data from the grid dataSource that corresponds to that row
-            var repeat = dataSource._view[importerReview.editIndex].RepeatData;
+            var repeat = dataSource._view[importerReview.editIndex].Repeat;
             //initialize the repeat widget with the data
             $("#popupContent").find(".repeatWidget").repeat({repeat: repeat});
         });
@@ -317,8 +351,7 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
                 //get a reference to the repeat widget
                 var repeat = $(e.target).find(".repeatWidget").data("repeat");
                 //update the dataSource with the new data
-                //row.RepeatData = repeat.options.repeat;
-                dataItem.set("RepeatData", repeat.options.repeat);
+                dataItem.set("Repeat", repeat.options.repeat);
                 //remove the repeat widget
                 repeat.removeWidget();
             } else if ($(e.target).find(".contactInfoWidget").data("contactInfo")) {

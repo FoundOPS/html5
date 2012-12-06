@@ -96,52 +96,6 @@ define(['jquery', "developer", "tools/dateTools", 'moment'], function ($, develo
         }
     };
 
-    //create a display string from a repeat object
-    generalTools.getRepeatString = function (repeat) {
-        //check if there is a repeat
-        if (!repeat) {
-            return "";
-        }
-        //use the frequency int to get the frequency name(ex. 2 -> "Day")
-        var frequencyName = generalTools.repeatFrequencies[repeat.Frequency];
-
-        //check if frequency if singular
-        if (repeat.Frequency >= 2 && repeat.RepeatEveryTimes === 1) {
-            //ex. "weekly"
-            if (repeat.Frequency === 2) {
-                frequencyName = "Daily";
-            } else {
-                frequencyName = frequencyName + "ly";
-            }
-        //if frequency is multiple
-        } else if (repeat.Frequency > 1 && repeat.RepeatEveryTimes > 1) {
-            //ex. "Every 3 months"
-            frequencyName = "Every " + repeat.RepeatEveryTimes.toString() + " " + frequencyName.charAt(0).toLowerCase() + frequencyName.slice(1) + "s ";
-        } else {
-            return "";
-        }
-
-        var frequencyDetail = "";
-        var weeklyDetail = repeat.FrequencyDetailAsWeeklyFrequencyDetail;
-        var startDate = dateTools.parseDate(repeat.StartDate);
-
-        //if monthly
-        if (repeat.FrequencyDetailAsMonthlyFrequencyDetail) {
-            frequencyDetail = generalTools.getFrequencyDetailString(repeat.FrequencyDetailInt, startDate, false);
-        //if weekly
-        } else if (weeklyDetail[0]) {
-            //get the list of day abbreviation strings, separated by commas
-            for (var d in weeklyDetail) {
-                frequencyDetail = frequencyDetail += dateTools.days[weeklyDetail[d]].substring(0, 3) + ", ";
-            }
-            //remove trailing ", "
-            var stringToRemove = /,\s$/;
-            frequencyDetail = "on " + frequencyDetail.replace(stringToRemove, "");
-        }
-
-        return frequencyName + " " + frequencyDetail;
-    };
-
     /**
      * Creates the string for monthly frequency detail
      * @param {number} detailInt
