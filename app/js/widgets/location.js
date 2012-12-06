@@ -2,7 +2,7 @@
 
 'use strict';
 
-define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/leaflet"], function ($, dbServices, fui, generalTools) {
+define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/leaflet", "widgets/searchSelect"], function ($, dbServices, fui, generalTools) {
     $.widget("ui.location", {
         /**
          * Initialize the map
@@ -20,7 +20,7 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
                 '<a class="navigateBtn" href="javascript:void(0)"></a>' +
                 '</div>' +
                 '<div class="editPane hidden">' +
-                '<div id="selectorWidget">' +
+                '<div class="searchSelect">' +
                 '</div>' +
                 '</div>'
 
@@ -28,17 +28,17 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
 
             that.element.append(that._location);
 
-            $("#selectorWidget").selectorWidget({
-                query: function (options) {
+            $(".searchSelect").searchSelect({
+                query: function (searchTerm, callback) {
                     //get the list of location matches
-                    if (options) {
-                        dbServices.locations.read({params: {search: options.searchTerm}}).done(function (locations) {
+                    if (searchTerm) {
+                        dbServices.locations.read({params: {search: searchTerm}}).done(function (locations) {
                             if(that._currentLocation) {
                                 that._currentLocation.pastSelection = true;
                                 locations.push(that._currentLocation);
                             }
                             locations.push({Name: "Manually Drop Pin"});
-                            options.render(locations);
+                            callback(locations);
                         });
                     }
                 },
@@ -80,6 +80,7 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
                     widgetElement.find(".buttonPane").switchClass("hidden", "shown", 500, 'swing');
                     widgetElement.find("#locationWidgetMap").switchClass("hidden", "shown", 500);
                 },
+                queryDelay: 200,
                 minimumInputLength: 2,
                 showPreviousSelection: true
             });
@@ -88,7 +89,7 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
 
             var center, zoom;
 
-            if (location) {
+            if (location && location.Latitude && location.Longitude) {
                 center = [location.Latitude, location.Longitude];
                 zoom = 15;
             } else {
