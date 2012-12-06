@@ -21,13 +21,17 @@ define(["jquery", "lib/csv", "db/services", "widgets/selectBox", "jui", "jfilere
         //save this data for later use
         importerUpload.uploadedData = data;
 
-        //turn the array sideways, ex [{1,2,3}, {4,5,6}] becomes [{1,4}, {2,5}, {3,6}]
-        //this is all under assumption that all the arrays are the same size
-        //http://stackoverflow.com/questions/5971389/convert-array-of-rows-to-array-of-columns
+        //TODO CR (CODE REVIEW) move this logic to importerSelect (getHeadersWithExample)
+        //turn the first two rows sideways for the next page's headers
+        //TODO CR (CODE REVIEW) better example (related to headers)
+        //ex [{1,2,3}, {4,5,6}] becomes [{1,4}, {2,5}, {3,6}]
+        //this is all under assumption that all the arrays are the same size, http://stackoverflow.com/questions/5971389/convert-array-of-rows-to-array-of-columns
+        //TODO CR only take first two rows
         var newData = [];
         for(var i = 0; i < data[0].length; i++){
             newData.push([data[0][i], data[1][i]]);
         }
+        //TODO CR remove
         importerUpload.data = newData;
     };
 

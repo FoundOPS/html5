@@ -40,6 +40,7 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
     var formatDataForGrid = function (data) {
         var newData = [], newRow, row, indexes = [], index = 0;
 
+        //TODO CR seperate this to seperate method getImportedRepeatData(index)
         //find the indexes of the repeat columns to reference for displaying error text
         _.find(importerSelect.dataToValidate[0], function (name) {
             if (name === "Start Date" || name === "Frequency" || name === "Repeat Every" || name === "Frequency Detail" || name === "End Date") {
@@ -69,6 +70,7 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
             newRow["Location"] = location;
             newRow["ContactInfo"] = contactInfo;
             newRow["RepeatData"] = row.Repeats[0];
+            //TODO CR seperate this to seperate method getImportedRepeatData(index)
             //repeat display string
             var repeatString = generalTools.getRepeatString(row.Repeats[0]);
             if (repeatString !== "") {
