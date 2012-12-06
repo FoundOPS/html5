@@ -5,14 +5,13 @@
 define(["jquery", "tools/generalTools", "tools/dateTools", "kendo", "select2", "moment"], function ($, generalTools, dateTools) {
 //    var testService = {Frequency: 4, StartDate: new Date(), RepeatEveryTimes: 2, EndDate: new Date(),
 //        EndAfterTimes: null, FrequencyDetailAsWeeklyFrequencyDetail: [2, 3, 5], AvailableMonthlyFrequencyDetailTypes: [8, 14], FrequencyDetailAsMonthlyFrequencyDetail: 14};
-    var service = {Frequency: null, StartDate: null, RepeatEveryTimes: 1, EndDate: null,
+    var service = {Frequency: null, StartDate: null, RepeatEveryTimes: null, EndDate: null,
             EndAfterTimes: null, FrequencyDetailAsWeeklyFrequencyDetail: [], AvailableMonthlyFrequencyDetailTypes: []},
     widgetElement;
 
     $.widget("ui.repeat", {
         options: {
-            repeat: {Frequency: null, StartDate: null, RepeatEveryTimes: 1, EndDate: null,
-                EndAfterTimes: null, FrequencyDetailAsWeeklyFrequencyDetail: [], AvailableMonthlyFrequencyDetailTypes: []}
+            repeat: service
         },
         _create: function () {
             var _repeat, that = this;
@@ -303,9 +302,12 @@ define(["jquery", "tools/generalTools", "tools/dateTools", "kendo", "select2", "
             var that = this, frequencyDetail = service.FrequencyDetailAsWeeklyFrequencyDetail;
             //iterate through each weekday int
             for (var d in frequencyDetail) {
-                var dayInt = frequencyDetail[d];
-                //select the button with the id that matches the current day
-                $(that.element).find("." + dateTools.days[dayInt]).addClass("selected");
+                //filter out properties
+                if(parseInt(d) || d === "0") {
+                    var dayInt = frequencyDetail[d];
+                    //select the button with the id that matches the current day
+                    $(that.element).find("." + dateTools.days[dayInt]).addClass("selected");
+                }
             }
         },
 
@@ -436,12 +438,15 @@ define(["jquery", "tools/generalTools", "tools/dateTools", "kendo", "select2", "
                 service.FrequencyDetailAsMonthlyFrequencyDetail = 8;
             } else {
                 for (var mo in monthlyOptions) {
-                    if (monthlyOptions[mo] === service.FrequencyDetailAsMonthlyFrequencyDetail) {
-                        htmlString += '<input type="radio" name="repeatOnGroup" checked="checked" class="option'+ monthlyOptions[mo] + '" />' +
-                            '<label class="inline">' + generalTools.getFrequencyDetailString(monthlyOptions[mo], service.StartDate, true) + '</label><br />';
-                    } else {
-                        htmlString += '<input type="radio" name="repeatOnGroup" class="option'+ monthlyOptions[mo] + '" />' +
-                            '<label class="inline">' + generalTools.getFrequencyDetailString(monthlyOptions[mo], service.StartDate, true) + '</label><br />';
+                    //filter out properties
+                    if(parseInt(mo) || mo === "0") {
+                        if (monthlyOptions[mo] === service.FrequencyDetailAsMonthlyFrequencyDetail) {
+                            htmlString += '<input type="radio" name="repeatOnGroup" checked="checked" class="option'+ monthlyOptions[mo] + '" />' +
+                                '<label class="inline">' + generalTools.getFrequencyDetailString(monthlyOptions[mo], service.StartDate, true) + '</label><br />';
+                        } else {
+                            htmlString += '<input type="radio" name="repeatOnGroup" class="option'+ monthlyOptions[mo] + '" />' +
+                                '<label class="inline">' + generalTools.getFrequencyDetailString(monthlyOptions[mo], service.StartDate, true) + '</label><br />';
+                        }
                     }
                 }
             }

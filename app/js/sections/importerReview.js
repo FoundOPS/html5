@@ -3,13 +3,19 @@
 define(["jquery", "underscore", "sections/importerUpload", "sections/importerSelect", "db/services", "tools/generalTools", "widgets/location", "widgets/contactInfo", "widgets/repeat",
     "ui/popup", "widgets/selectBox"], function ($, _, importerUpload, importerSelect, dbServices, generalTools) {
     var importerReview = {}, dataSource, grid, clients = {}, locations = {}, contactInfoSets = {}, columns = [
-        "Client"//,
+        {   field: "Client",
 //            template: "<div class='Client'>#= Client #</div>",
-//            editor: function (container, options) {
-//                $('<div class="styled-select"></div>').appendTo(container)
-//                    .selectBox({data: [{Name: "BK"}, {Name: "Subway"}], dataTextField: "Name"});
-//            }
-        ,
+            editor: function (container, options) {
+                $('<input data-text-field="Client" data-value-field="Client" data-bind="value:' + options.field + '"/>')
+                    .appendTo(container)
+                    .kendoDropDownList({
+                        autoBind: false,
+                        dataSource: new kendo.data.DataSource({
+                            data: [{Client: "BK"}, {Client: "Subway"}]
+                        })
+                    });
+            }
+        },
         {
             field: "Location",
             template: "<div class='Location'>#= generalTools.getLocationDisplayString(Location) #</div>"//,
@@ -33,14 +39,8 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
         }
     ];
 
-    /**
-     * @param data
-     * @return {Array} newData
-     */
-    var formatDataForGrid = function (data) {
-        var newData = [], newRow, row, indexes = [], index = 0;
-
-        //TODO CR seperate this to seperate method getImportedRepeatData(index)
+    var getImportedRepeatData = function (headerIndex) {
+        var indexes = [], index = 0, repeatString;
         //find the indexes of the repeat columns to reference for displaying error text
         _.find(importerSelect.dataToValidate[0], function (name) {
             if (name === "Start Date" || name === "Frequency" || name === "Repeat Every" || name === "Frequency Detail" || name === "End Date") {
@@ -48,6 +48,31 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
             }
             index++;
         });
+
+        //get a reference to the original uploaded data
+        var originalRow = importerSelect.dataToValidate[parseInt(headerIndex) + 1];
+        //sort indexes in ascending order
+        indexes = indexes.sort(function (a, b) {
+            return a - b;
+        });
+
+        repeatString = "";
+
+        //iterate through each repeat column that was selected and the values(comma separated) that were passed
+        for (var k in indexes) {
+            var string = originalRow[indexes[k]];
+            repeatString += string ? string + ", " : "";
+        }
+        //remove the trailing ", "
+        return repeatString.substring(0, repeatString.length - 2);
+    };
+
+    /**
+     * @param data
+     * @return {Array} newData
+     */
+    var formatDataForGrid = function (data) {
+        var newData = [], newRow, row;
 
         for (var i in data) {
             var location = {}, contactInfo = [];
@@ -70,28 +95,13 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
             newRow["Location"] = location;
             newRow["ContactInfo"] = contactInfo;
             newRow["RepeatData"] = row.Repeats[0];
-            //TODO CR seperate this to seperate method getImportedRepeatData(index)
+
             //repeat display string
             var repeatString = generalTools.getRepeatString(row.Repeats[0]);
             if (repeatString !== "") {
                 newRow["Repeat"] = repeatString;
             } else {
-                //get a reference to the original uploaded data
-                var originalRow = importerSelect.dataToValidate[parseInt(i) + 1];
-                //sort indexes in ascending order
-                indexes = indexes.sort(function (a, b) {
-                    return a - b;
-                });
-
-                newRow["Repeat"] = "";
-
-                //iterate through each repeat column that was selected and the values(comma separated) that were passed
-                for (var k in indexes) {
-                    var string = originalRow[indexes[k]];
-                    newRow["Repeat"] += string ? string + ", " : "";
-                }
-                //remove the trailing ", "
-                newRow["Repeat"] = newRow["Repeat"].substring(0, newRow["Repeat"].length - 2);
+                newRow["Repeat"] = getImportedRepeatData(i);
             }
 
             //repeat status

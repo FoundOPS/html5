@@ -12,29 +12,6 @@ define(["jquery", "lib/csv", "db/services", "widgets/selectBox", "jui", "jfilere
         return true;
     };
 
-    /**
-     * Converts the uploaded file to format needed for next page
-     * @param file
-     */
-    var parse = function (file) {
-        var data = csv.parseRows(file);
-        //save this data for later use
-        importerUpload.uploadedData = data;
-
-        //TODO CR (CODE REVIEW) move this logic to importerSelect (getHeadersWithExample)
-        //turn the first two rows sideways for the next page's headers
-        //TODO CR (CODE REVIEW) better example (related to headers)
-        //ex [{1,2,3}, {4,5,6}] becomes [{1,4}, {2,5}, {3,6}]
-        //this is all under assumption that all the arrays are the same size, http://stackoverflow.com/questions/5971389/convert-array-of-rows-to-array-of-columns
-        //TODO CR only take first two rows
-        var newData = [];
-        for(var i = 0; i < data[0].length; i++){
-            newData.push([data[0][i], data[1][i]]);
-        }
-        //TODO CR remove
-        importerUpload.data = newData;
-    };
-
     importerUpload.initialize = function () {
         //setup the FileReader on the fileUpload button
         //this will enable the flash FileReader polyfill from https://github.com/Jahdrien/FileReader
@@ -55,7 +32,7 @@ define(["jquery", "lib/csv", "db/services", "widgets/selectBox", "jui", "jfilere
                 reader.onload = function () {
                     //after the csv file has been loaded, parse it
                     //TODO error checking
-                    parse(reader.result);
+                    importerUpload.uploadedData = csv.parseRows(reader.result);
                 };
             }
             //since the csv file has been selected, read it as text

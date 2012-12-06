@@ -312,12 +312,19 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
         $("#importerSelect").find('#listView').css("maxHeight", contentHeight + 'px');
     };
 
-    importerSelect.initialize = function () {
-        //make sure there is a selected service type
-        if (!importerUpload.selectedService) {
-            window.viewImporterUpload();
+    //turn the first two rows sideways for the next page's headers
+    //ex. [{"Client Name", "City", "State"}, {"Burger King", "Lafeyette", "IN"}] becomes [{"Client Name", "Burger King"}, {"City", "Lafeyette"}, {"State", "IN"}]
+    //http://stackoverflow.com/questions/5971389/convert-array-of-rows-to-array-of-columns
+    var getHeadersWithExample = function (data) {
+        var newData = [];
+        data = data.slice(0, 2);
+        for(var i = 0; i < data[0].length; i++){
+            newData.push([data[0][i], data[1][i]]);
         }
+        return newData;
+    };
 
+    importerSelect.initialize = function () {
         //on save button click
         $("#importerSelect").find(".saveBtn").on("click", function () {
             importerSelect.dataToValidate = formatDataForValidation(importerUpload.uploadedData);
@@ -335,6 +342,12 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
     };
 
     importerSelect.show = function () {
+        //make sure there is a selected service type
+        if (!importerUpload.selectedService) {
+            window.viewImporterUpload();
+           return;
+        }
+
         //setup the default fields
         var defaultFields = [
             {text: "", children: [
@@ -372,7 +385,7 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
         $("#listView").kendoListView({
             //setup the template to only include the header and the first row of data
             template: "<li><div class='header'>#=data[0]#</div><div class='value'>#=data[1]#</div><div class='styled-select'></div></li>",
-            dataSource: importerUpload.data
+            dataSource: getHeadersWithExample(importerUpload.uploadedData)
         });
 
         resizeGrid();
