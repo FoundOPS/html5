@@ -12,7 +12,7 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
         ,
         {
             field: "Location",
-            template: "<div class='Location'>#= Location #</div>"//,
+            template: "<div class='Location'>#= generalTools.getLocationDisplayString(Location) #</div>"//,
 //            editor: function (container, options) {
 //                // create a KendoUI AutoComplete widget as column editor
 //                $('<div class="locationWidget"></div>').appendTo(container).location();
@@ -21,7 +21,7 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
         {
             field: "ContactInfo",
             title: "Contact Info",
-            template: "<div class='ContactInfo'>#= ContactInfo #</div>"
+            template: "<div class='ContactInfo'>#= generalTools.getContactInfoDisplayString(ContactInfo) #</div>"
         },
         {
             field: "Repeat",
@@ -41,22 +41,22 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
         var newData = [], newRow, row, indexes = [], index = 0;
 
         //find the indexes of the repeat columns to reference for displaying error text
-        _.find(importerSelect.dataToValidate[0], function(name){
+        _.find(importerSelect.dataToValidate[0], function (name) {
             if (name === "Start Date" || name === "Frequency" || name === "Repeat Every" || name === "Frequency Detail" || name === "End Date") {
                 indexes.push(index);
             }
-            index ++;
+            index++;
         });
 
         for (var i in data) {
             var location = {}, contactInfo = [];
             row = data[i];
-            newRow = [];
+            newRow = {};
 
             //id to use for editing
             newRow["id"] = i;
             //client name string
-            newRow["Client"] = clients[row.ClientSuggestions[0]]? clients[row.ClientSuggestions[0]].Name : "";
+            newRow["Client"] = clients[row.ClientSuggestions[0]] ? clients[row.ClientSuggestions[0]].Name : "";
 
             //location object
             location = locations[row.LocationSuggestions[0]];
@@ -66,15 +66,8 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
                 contactInfo.push(contactInfoSets[row.ContactInfoSuggestions[j]]);
             }
 
-            //location id
-            newRow["LocationData"] = location;
-            //location display string
-            newRow["Location"] = generalTools.getLocationDisplayString(location);
-            //contact info id
-            newRow["ContactInfoData"] = contactInfo;
-            //contact info display string
-            newRow["ContactInfo"] = generalTools.getContactInfoDisplayString(contactInfo);
-            //repeat object
+            newRow["Location"] = location;
+            newRow["ContactInfo"] = contactInfo;
             newRow["RepeatData"] = row.Repeats[0];
             //repeat display string
             var repeatString = generalTools.getRepeatString(row.Repeats[0]);
@@ -84,7 +77,9 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
                 //get a reference to the original uploaded data
                 var originalRow = importerSelect.dataToValidate[parseInt(i) + 1];
                 //sort indexes in ascending order
-                indexes = indexes.sort(function(a,b){return a-b});
+                indexes = indexes.sort(function (a, b) {
+                    return a - b;
+                });
 
                 newRow["Repeat"] = "";
 
@@ -166,7 +161,7 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
             //get the row index that was clicked on
             importerReview.editIndex = e.currentTarget.parentElement.parentElement.rowIndex;
             //get the data from the grid dataSource that corresponds to that row
-            var contacts = dataSource._view[importerReview.editIndex].ContactInfoData;
+            var contacts = dataSource._view[importerReview.editIndex].ContactInfo;
             var widget = $("#popupContent").find(".contactInfoWidget");
             //initialize the contact info widget with the data
             widget.contactInfo({contacts: contacts});
@@ -179,7 +174,7 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
             //get the row index that was clicked on
             importerReview.editIndex = e.currentTarget.parentElement.parentElement.rowIndex;
             //get the data from the grid dataSource that corresponds to that row
-            var location = dataSource._view[importerReview.editIndex].LocationData;
+            var location = dataSource._view[importerReview.editIndex].Location;
             //initialize the location widget
             popupElement.find(".locationWidget").location();
             //set a reference to the location info widget
@@ -217,9 +212,9 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
                     fields: {
                         id: { editable: false, nullable: true },
                         Client: {validation: { required: true }},
-                        Location: {editable: false },
-                        ContactInfo: {editable: false },
-                        Repeat: {editable: false }
+                        Location: { editable: false },
+                        ContactInfo: { editable: false },
+                        Repeat: { editable: false }
                     }
                 }
             }
@@ -298,27 +293,26 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
         $(document).on('popup.closing', function (e) {
             // get a reference to the grid
             var grid = $("#importerReview").find(".grid").data("kendoGrid");
-            //get a reference to the data row
-            var row = grid.dataSource._data[importerReview.editIndex];
+            var dataItem = grid.dataSource.get(importerReview.editIndex);
+
             //check which widget is active
             if ($(e.target).find(".locationWidget").data("location")) {
                 //update the dataSource with the new data
-                row.LocationData = importerReview.locationWidget.currentLocation;
-
+                dataItem.set("Location", importerReview.locationWidget.currentLocation);
                 //remove the location widget
                 $(e.target).find(".locationWidget").data("location").removeWidget();
             } else if ($(e.target).find(".repeatWidget").data("repeat")) {
                 //get a reference to the repeat widget
                 var repeat = $(e.target).find(".repeatWidget").data("repeat");
                 //update the dataSource with the new data
-                row.RepeatData = repeat.options.repeat;
+                //row.RepeatData = repeat.options.repeat;
+                dataItem.set("RepeatData", repeat.options.repeat);
                 //remove the repeat widget
                 repeat.removeWidget();
             } else if ($(e.target).find(".contactInfoWidget").data("contactInfo")) {
                 //save contactInfo widget data to the grid dataSource
-                row.ContactInfoData = importerReview.contactInfoWidget.contacts;
+                dataItem.set("ContactInfo", importerReview.contactInfoWidget.contacts);
                 //update the grid display string
-                //importerReview.editedCell.innerHtml = generalTools.getContactInfoDisplayString(importerReview.contactInfoWidget.contacts);
 //                grid.dataSource = new kendo.data.DataSource({
 //                    data: grid.dataSource._data
 //                });

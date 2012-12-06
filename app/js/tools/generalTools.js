@@ -8,6 +8,7 @@
 
 define(['jquery', "developer", "tools/dateTools", 'moment'], function ($, developer, dateTools) {
     var generalTools = {};
+    window.generalTools = generalTools;
 
     $.fn.delayKeyup = function (callback, ms) {
         var timer = 0;
