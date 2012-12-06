@@ -36,6 +36,7 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                 onSelect: function (event, selectedData) {
                     this._trigger("selected", event, selectedData);
                 },
+                queryDelay: null,
                 minimumInputLength: 2,
                 showPreviousSelection: false
             },
@@ -73,7 +74,7 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                 element.children[1].children[0].setAttribute("class", "optionList");
 
                 //Listen to input in search box and update the widget accordingly.
-                generalTools.observeInput(searchSelect.element.find("input"), $.proxy(searchSelect.updateOptionList, searchSelect), 0);
+                generalTools.observeInput(searchSelect.element.find("input"), $.proxy(searchSelect.updateOptionList, searchSelect), searchSelect.options.queryDelay || 1);
 
                 try {
                     document.createEvent("TouchEvent");
@@ -83,7 +84,7 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                 }
 
                 if (!searchSelect.isTouchDevice) {
-                    element.children[1].children[0].setAttribute("style", "overflow-y: auto");
+                    searchSelect.element.find(".optionList").css("overflow-y", "auto");
                 }
 
                 //These variables act as flags in order to stop behavior from certain listeners when other listeners fire.
@@ -113,7 +114,7 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                         //Wait for listeners from other widgets to use the selected option before removing it from the DOM.
                         setTimeout(function () {
                             searchSelect.clearList();
-                        }, 200);
+                        }, searchSelect.options.queryDelay ? searchSelect.options.queryDelay : 0);
                         if (searchSelect.isTouchDevice) {
                             $(".km-scroll-wrapper").kendoMobileScroller("reset");
                         }
@@ -128,8 +129,7 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                 //When clicking outside of the select widget, close the option list and handle text inside the textbox.
                 $(document.body).on('click touchend', function (e) {
                     if (!($(e.target).closest(searchSelect.element)[0] === searchSelect.element.context)) {
-//                        if (searchSelect.element.find(".optionList").children()[0]) {
-                            setTimeout(function () {
+//                            setTimeout(function () {
                                 if (!_scrolling) {
                                     if (searchSelect.selectedOptionText) {
                                         searchSelect.element.find("input")[0].value = searchSelect.selectedOptionText;
@@ -142,8 +142,7 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                                         $(".km-scroll-wrapper").kendoMobileScroller("reset");
                                     }
                                 }
-                            }, 200);
-//                        }
+//                            }, searchSelect.options.queryDelay ? searchSelect.options.queryDelay : 0);
                     }
                 });
             },
@@ -227,6 +226,7 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                 });
             }
         };
+
         $.widget("ui.searchSelect", searchSelect);
     })(jQuery, window);
 });
