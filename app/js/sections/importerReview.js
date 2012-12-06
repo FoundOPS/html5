@@ -11,7 +11,10 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
                     .kendoDropDownList({
                         autoBind: false,
                         dataSource: new kendo.data.DataSource({
-                            data: [{Client: "BK"}, {Client: "Subway"}]
+                            data: [
+                                {Client: "BK"},
+                                {Client: "Subway"}
+                            ]
                         })
                     });
             }
@@ -158,6 +161,9 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
     //(called on show and on sort)
     var dataBound = function () {
         var reviewElement = $("#importerReview");
+
+        //TODO CR Remove the code duplication in this section
+
         //add popups to the location, contactInfo, and repeat cells
         var contactInfoPopup = reviewElement.find(".ContactInfo");
         contactInfoPopup.popup({contents: $("<div class='contactInfoWidget'></div>")});
@@ -170,8 +176,11 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
 
         //create the correct widget inside each popup
         contactInfoPopup.on("click", function (e) {
-            //get the row index that was clicked on
+            //get the row/cell index that was clicked on
+            //TODO CR Change editIndex to editRowIndex
             importerReview.editIndex = e.currentTarget.parentElement.parentElement.rowIndex;
+            importerReview.editCellIndex = e.currentTarget.parentElement.cellIndex;
+
             //get the data from the grid dataSource that corresponds to that row
             var contacts = dataSource._view[importerReview.editIndex].ContactInfo;
             var widget = $("#popupContent").find(".contactInfoWidget");
@@ -307,6 +316,7 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
             var grid = $("#importerReview").find(".grid").data("kendoGrid");
             var dataItem = grid.dataSource.get(importerReview.editIndex);
 
+            //TODO CR Make code below consistent. Also move widget vars here to prevent duplicate code
             //check which widget is active
             if ($(e.target).find(".locationWidget").data("location")) {
                 //update the dataSource with the new data
@@ -324,15 +334,17 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
             } else if ($(e.target).find(".contactInfoWidget").data("contactInfo")) {
                 //save contactInfo widget data to the grid dataSource
                 dataItem.set("ContactInfo", importerReview.contactInfoWidget.contacts);
-                //update the grid display string
-//                grid.dataSource = new kendo.data.DataSource({
-//                    data: grid.dataSource._data
-//                });
-//                grid.dataSource.read();
-//                grid.refresh();
+
                 //remove the contactInfo widget
                 $(e.target).find(".contactInfoWidget").data("contactInfo").removeWidget();
             }
+
+            //force refresh cell text
+            var selectedCell = grid.tbody.find('tr:eq(' + importerReview.editIndex + ') td:eq(' + importerReview.editCellIndex +')');
+            var column = grid.columns[importerReview.editCellIndex];
+            grid._displayCell(selectedCell, column, dataItem);
+
+            //TODO add back popup listener, displayCell removes it (waiting on code cleanup)
         });
     };
 
