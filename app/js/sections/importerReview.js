@@ -214,9 +214,9 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
     var dataBound = function () {
         var reviewElement = $("#importerReview");
 
-        var contactInfoWidget = reviewElement.find(".ContactInfo");
-        var locationWidget = reviewElement.find(".Location");
-        var repeatWidget = reviewElement.find(".Repeat");
+        var contactInfoWidget = reviewElement.find(".ContactInfo::parent");
+        var locationWidget = reviewElement.find(".Location::parent");
+        var repeatWidget = reviewElement.find(".Repeat::parent");
 
         contactInfoWidget.popup({contents: $("<div class='contactInfoWidget'></div>")});
         locationWidget.popup({contents: $("<div class='locationWidget'></div>")});
@@ -367,7 +367,9 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
             //force refresh cell text
             var selectedCell = grid.tbody.find('tr:eq(' + importerReview.editRowIndex + ') td:eq(' + importerReview.editCellIndex + ')');
             grid.editCell(selectedCell);
-            grid.closeCell();
+            if (grid._editContainer) {
+                grid.closeCell();
+            }
 
             //TODO add back popup listener
         });
