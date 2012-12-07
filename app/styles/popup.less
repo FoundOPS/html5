@@ -2,6 +2,7 @@
 @lightCharcoal: #777779;
 @lighterGrey: #FAFAFA;
 @lightGrey: #F1F2F2;
+@grey: #EEEEEE;
 @darkGrey: #CCCCCC;
 @charcoal: #333335;
 @orange: #D9591E;
@@ -97,7 +98,13 @@ html{
     height: @popupCarrotHeight;
     width: @popupCarrotWidth;
 
-    background: url('../img/popupArrow.png') no-repeat;
+    background: url('../img/popupArrowTop.png') no-repeat;
+}
+
+.flipArrow{
+    -webkit-transform: rotate(180deg);
+    -moz-transform: rotate(180deg);
+    filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=2);
 }
 
 .hover(){
@@ -151,6 +158,7 @@ html{
     position: relative;
     overflow: auto;
 
+    min-height: 65px;
     max-height: 100%;
     width: 100%;
 
@@ -177,6 +185,10 @@ html{
     cursor: pointer;
     padding: 12px 23px;
     border-bottom: 1px solid @darkGrey;
+}
+
+.popupContentRow:hover{
+    background: @grey;
 }
 
 @media only screen and (max-width:800px) {

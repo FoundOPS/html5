@@ -104,10 +104,15 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         Popup.fontColor = null;
         Popup.borderColor = null;
         Popup.padding = 3;
-        Popup.offScreen = false;
+        Popup.offScreenX = false;
+        Popup.offScreenY = false;
         Popup.isLocked = false;
         Popup.isHeaderDisabled = false;
+        Popup.above = false;
+        Popup.caretLeftOffset = "50%";
+        Popup.popupNum = 0;
 
+        this.popupNum = 0;
         var thisPopup = this;
 
         if ((typeof(popupListener) === 'undefined') || popupListener === null) {
@@ -116,8 +121,11 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         }
         var listenerElements = $(popupListener);
 
+        Popup.popupNum++;
+        this.popupNum = Popup.popupNum;
         //Class added to detect clicks on primary buttons triggering popups.
-        listenerElements.addClass("popupListener");
+        var popupListenerID = "popupListener"+this.popupNum;
+        listenerElements.addClass(popupListenerID);
 
         listenerElements.css("cursor", "pointer");
         listenerElements.click(function (e) {
@@ -148,6 +156,8 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
             $("#popupHeader").hide();
 
             //TODO: Move into navigator? Shouldn't rely on jscrollpane.
+            $("#popup .jspPane").css("padding", "0");
+
             $("#popupContentWrapper").css("padding-top", "0px");
 
             $("#popupContent").css("border-top-right-radius", "5px")
@@ -192,13 +202,10 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
             //Blocking statement that waits until popup closing animation is complete.
             $("#popup").promise().done(function () {});
 
+            //If popup is locked, don't continue actions.
             if(Popup.isLocked)return;
 
-            this.updateLeftPosition(clickedDiv);
-
-            var top = clickedDiv.outerHeight() + clickedDiv.offset().top - $(window).scrollTop() + (-1 * parseInt($("#popupArrow").css("margin-top"), 10)); //popupArrow is offset over the border, so this gives easier measurements.
-            popupWrapperDiv.css("padding-top", top + "px");
-
+            //Update content
             this.populate(id);
 
             clickedDiv.trigger("popupEvent", clickedDiv);
@@ -220,49 +227,126 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
                 $(".popupContentRow").css("border-color", Popup.borderColor);
             }
 
+            //Make popup visible
             $("#popup").stop(false, true).fadeIn('fast');
             $("#popupWrapper").css("visibility", "visible");
-            //TODO: Change namespace.
+            $("#popup").promise().done(function () {});
+
             popupWrapperDiv.trigger("popup.visible");
+
+            //Update left, right and caret positions for popup.
+            //NOTE: Must be called after popup.visible event, in order to trigger jspScrollPane update.
+            updatePositions(clickedDiv);
+
             Popup.lastElementClick = clickedDiv.attr("id");
         };
 
         //Function returns the left offset of the popup and target element.
-        this.getLeft = function (target, popupDiv) {
+        this.getLeft = function (target) {
+            var popupWrapperDiv = $("#popupWrapper");
             Popup.currentTarget = target;
-            var targetOffset = target.offset().left + target.outerWidth() / 2;
-            var rightOffset = targetOffset + popupDiv.outerWidth() / 2;
-            var offset = targetOffset - popupDiv.outerWidth() / 2 + Popup.padding + 1; //TODO: Figure out where the 1 extra pixel is.. could just be rounding.
+            var targetLeft = target.offset().left + target.outerWidth() / 2;
+            var rightOffset = targetLeft + popupWrapperDiv.outerWidth() / 2;
+            var offset = targetLeft - popupWrapperDiv.outerWidth() / 2 + Popup.padding + 1; //TODO: Figure out where the 1 extra pixel is.. could just be rounding.
             var windowWidth = $(window).width();
 
-            Popup.offScreen = false;
+            Popup.offScreenX = false;
             if (offset < 0) {
-                Popup.offScreen = true;
+                Popup.offScreenX = true;
                 offset = Popup.padding;
             } else if (rightOffset > windowWidth) {
-                Popup.offScreen = true;
-                offset = windowWidth - popupDiv.outerWidth();
+                Popup.offScreenX = true;
+                offset = windowWidth - popupWrapperDiv.outerWidth();
             }
 
             //Returns left offset of popup from window.
-            return {targetOffset: targetOffset, offset: offset};
+            return {targetLeft: targetLeft, popupLeft: offset};
         };
 
-        this.setCaretPosition = function(targetOffset, outerOffset){
+        this.getTop = function(target){
+            var caretHeight =  $("#popupArrow").height();
+            var targetTop = target.offset().top;
+            var targetBottom = targetTop + target.outerHeight() - $(window).scrollTop();
+            var popupTop = targetBottom + caretHeight;
+            var windowHeight = $(window).height();
+            var popupContentHeight = $("#popupContent").height();
+            var popupHeight = popupContentHeight + $("#popupHeader").outerHeight() + caretHeight;
+
+            Popup.above = false;
+            Popup.offScreenY = false;
+
+            if (windowHeight < targetBottom + popupHeight) {
+                Popup.offScreenY = true;
+                if(targetTop >= popupHeight){
+                    popupTop = targetTop - popupHeight;
+                    Popup.above = true;
+                    //console.log("Case 2");
+                }else{
+                    popupTop = windowHeight - popupHeight;
+                    //console.log("Case 3");
+                }
+            } else if (popupTop < 0) {
+                //console.log("Case 4");
+                Popup.offScreenY = true;
+                popupTop = Popup.padding + caretHeight;
+            }else{
+                //console.log("Case 1");
+            }
+
+            /*
+            //Debug logs
+            console.log("------------------------------------------------------------");
+            console.log("Caret Height: " + caretHeight);
+            console.log("TargetTop: " + targetTop);
+            console.log("Popup Cont Height: " + popupContentHeight);
+            console.log("Cont Height: " + $("#popupContent").height());
+            console.log("Header Height: " + $("#popupHeader").outerHeight());
+            console.log("targetBottom: " + targetBottom);
+            console.log("popupHeight: " + popupHeight);
+            console.log("popupBottom: " + (targetBottom + popupHeight));
+            console.log("Popup Height: " + $("#popup").height());
+            console.log("PopupWrapper Height: " + $("#popupWrapper").height());
+            console.log("PopupWrapper2 Height: " + $("#popupWrapper").height(true));
+            console.log("popupTop: " + popupTop);
+            console.log("windowHeight: " + windowHeight);
+            console.log("offScreenY: " + Popup.offScreenY);
+            console.log("Popup.above: " + Popup.above);
+            console.log("\n");
+            */
+
+            return popupTop;
+        };
+
+        this.setCaretPosition = function(offset){
             var caretPos = "50%";
             var caret = $("#popupArrow");
-            if (Popup.offScreen) {
-                caretPos = (targetOffset - outerOffset + Popup.padding);
+            if (Popup.offScreenX) {
+                caretPos = offset;
             }
             //Moves carrot on popup div.
             caret.css("left", caretPos);
+
+            if(Popup.above){
+                var popupHeight = $("#popupHeader").outerHeight() + $("#popupContent").outerHeight() - 2;
+                $("#popupArrow").css("margin-top", popupHeight+"px");
+                $("#popupArrow").addClass("flipArrow");
+            }else{
+                $("#popupArrow").css("margin-top", "");
+                $("#popupArrow").removeClass("flipArrow");
+            }
+            Popup.caretLeftOffset = caretPos;
         };
 
         this.updateLeftPosition = function(target){
-            var popupWrapperDiv = $("#popupWrapper");
-            var offset = thisPopup.getLeft(target, popupWrapperDiv);
-            popupWrapperDiv.css("left", offset.offset);
-            this.setCaretPosition(offset.targetOffset, offset.offset);
+            var offset = thisPopup.getLeft(target);
+            $("#popupWrapper").css("left", offset.popupLeft);
+            this.setCaretPosition(offset.targetLeft - offset.popupLeft + Popup.padding);
+        };
+
+        var updatePositions = function(target){
+            thisPopup.updateLeftPosition(target);
+            var top = thisPopup.getTop(target);
+            $("#popupWrapper").css("padding-top", top + "px");
         };
 
         // createPopup: Prepends popup to dom
@@ -296,11 +380,8 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
 
             //Window resize listener to check if popup is off screen.
             $(window).on('resize', function () {
-                    var popupWrapperDiv = $("#popupWrapper");
                     if ($("#popup").is(":visible")) {
-                        thisPopup.updateLeftPosition(Popup.currentTarget);
-                        var top = $(Popup.currentTarget).outerHeight() + $(Popup.currentTarget).offset().top - $(window).scrollTop() + (-1 * parseInt($("#popupArrow").css("margin-top"), 10)); //popupArrow is offset over the border, so this gives easier measurements.
-                        popupWrapperDiv.css("padding-top", top + "px");
+                        updatePositions(Popup.currentTarget);
                     }
                 }
             );
@@ -313,7 +394,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
                     var popupHeaderLen = clicked.parents("#popupHeader").length + clicked.is("#popupHeader") ? 1 : 0;
                     //TODO: Find better listener for this.
                     var popupContentLen = (clicked.parents("#popupContentWrapper").length && !clicked.parent().is("#popupContentWrapper")) ? 1 : 0;
-                    var isListener = clicked.parents(".popupListener").length + clicked.is(".popupListener") ? 1 : 0;
+                    var isListener = clicked.parents("."+popupListenerID).length + clicked.is("."+popupListenerID) ? 1 : 0;
                     if (popupHeaderLen === 0 && popupContentLen === 0 && isListener === 0) {
                         thisPopup.closePopup();
                     }
@@ -368,7 +449,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
                 thisPopup.closePopup();
                 return;
             }
-            thisPopup.setData(Popup.history[Popup.history.length - 1]);
+            this.setData(Popup.history[Popup.history.length - 1]);
         };
 
         //Public setter function for private var title and sets title of the html popup element.
@@ -422,6 +503,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
             }
             $(document).trigger('popup.populating');
             Popup.history.push(newMenu);
+
             this.setData(newMenu);
             return true;
         };
@@ -511,9 +593,23 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
                     contArray[i].name +
                     "</a>";
             }
+
+            //TODO: Possibly move this into populate and call during back listener.
+            var oldPopupTop = $("#popup").offset().top;
+            console.log("Old top: "+oldPopupTop);
+            var oldPopupHeight = $("#popupArrow").height() + $("#popupContent").height() + $("#popupHeader").height();
+
             this.setAction(data.id);
             this.setTitle(data.title);
             this.setContent(c);
+
+            if(Popup.above){
+                var newPopupHeight = $("#popupArrow").height() + $("#popupContent").height() + $("#popupHeader").height();
+                var popupTop = oldPopupTop - (newPopupHeight - oldPopupHeight);
+                console.log("New top: "+popupTop);
+                $("#popupWrapper").css("padding-top", popupTop + "px");
+                this.setCaretPosition(Popup.caretLeftOffset);
+            }
         };
     }
     return Popup;
