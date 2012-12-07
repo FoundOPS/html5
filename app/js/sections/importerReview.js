@@ -71,18 +71,18 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
             return getImportedRepeatData(index);
         }
         //use the frequency int to get the frequency name(ex. 2 -> "Day")
-        var frequencyName = generalTools.repeatFrequencies[repeat.Frequency];
+        var frequencyName = generalTools.repeatFrequencies[repeat.FrequencyInt];
 
         //check if frequency if singular
-        if (repeat.Frequency >= 2 && repeat.RepeatEveryTimes === 1) {
+        if (repeat.FrequencyInt >= 2 && repeat.RepeatEveryTimes === 1) {
             //ex. "weekly"
-            if (repeat.Frequency === 2) {
+            if (repeat.FrequencyInt === 2) {
                 frequencyName = "Daily";
             } else {
                 frequencyName = frequencyName + "ly";
             }
             //if frequency is multiple
-        } else if (repeat.Frequency > 1 && repeat.RepeatEveryTimes > 1) {
+        } else if (repeat.FrequencyInt > 1 && repeat.RepeatEveryTimes > 1) {
             //ex. "Every 3 months"
             frequencyName = "Every " + repeat.RepeatEveryTimes.toString() + " " + frequencyName.charAt(0).toLowerCase() + frequencyName.slice(1) + "s ";
         } else {
@@ -90,14 +90,14 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
         }
 
         var frequencyDetail = "";
-        var weeklyDetail = repeat.FrequencyDetailAsWeeklyFrequencyDetail;
+        var weeklyDetail = repeat.FrequencyDetailInt;
         var startDate = dateTools.parseDate(repeat.StartDate);
 
         //if monthly
-        if (repeat.FrequencyDetailAsMonthlyFrequencyDetail) {
+        if (repeat.FrequencyInt === 4) {
             frequencyDetail = generalTools.getFrequencyDetailString(repeat.FrequencyDetailInt, startDate, false);
             //if weekly
-        } else if (weeklyDetail && weeklyDetail[0]) {
+        } else if (repeat.FrequencyInt === 3) {
             //get the list of day abbreviation strings, separated by commas
             for (var d in weeklyDetail) {
                 if (parseInt(d) || d === "0") {
@@ -220,20 +220,22 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
         //create the correct widget inside each popup
         contactInfoWidget.on("click", function (e) {
             //initialize the contact info widget with the data from the grid dataSource
-            var data = updateEditIndexes(e).ContactInfo;
-            $("#popupContent").find(".contactInfoWidget").contactInfo({contacts: data});
+            var data = updateEditIndexes(e);
+            $("#popupContent").find(".contactInfoWidget").contactInfo({contacts: data.get("ContactInfo")});
         });
 
         locationWidget.on("click", function (e) {
             //initialize the location widget with the data from the grid dataSource
-            var data = updateEditIndexes(e).Location;
-            $("#popupContent").find(".locationWidget").location({location: data});
+            var data = updateEditIndexes(e);
+            $("#popupContent").find(".locationWidget").location({initialLocation: data.get("Location"), change: function (location) {
+                data.set("Location", location);
+            }});
         });
 
         repeatWidget.on("click", function (e) {
             //initialize the repeat widget with the data from the grid dataSource
-            var data = updateEditIndexes(e).Repeat;
-            $("#popupContent").find(".repeatWidget").repeat({repeat: data});
+            var data = updateEditIndexes(e);
+            $("#popupContent").find(".repeatWidget").repeat({repeat: data.get("Repeat")});
         });
     };
 
@@ -248,10 +250,10 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
                     id: "id",
                     fields: {
                         id: { editable: false, nullable: true },
-                        Client: {validation: { required: true }},
-                        Location: { editable: false },
-                        ContactInfo: { editable: false },
-                        Repeat: { editable: false }
+                        Client: {validation: { required: true }, editable: true},
+                        Location: {},
+                        ContactInfo: {},
+                        Repeat: {}
                     }
                 }
             }
@@ -259,7 +261,6 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
 
         grid = $("#importerReview").find(".grid").kendoGrid({
             columns: columns,
-            editable: true,
             dataBound: dataBound,
             dataSource: dataSource,
             resizable: true,
@@ -336,17 +337,12 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
             var repeatWidget = $(e.target).find(".repeatWidget").data("repeat");
             var contactInfoWidget = $(e.target).find(".contactInfoWidget").data("contactInfo");
 
-            //check which widget is active
-            //update the dataSource with the new data
-            //remove the widget
+            //check which widget is active and remove it
             if (locationWidget) {
-                dataItem.set("Location", locationWidget.options.location);
                 locationWidget.removeWidget();
             } else if (repeatWidget) {
-                dataItem.set("Repeat", repeatWidget.options.repeat);
                 repeatWidget.removeWidget();
             } else if (contactInfoWidget) {
-                dataItem.set("ContactInfo", contactInfoWidget.options.contacts);
                 contactInfoWidget.removeWidget();
             }
 

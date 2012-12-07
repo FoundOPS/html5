@@ -5,19 +5,20 @@
 define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/leaflet"], function ($, dbServices, fui, generalTools) {
     $.widget("ui.location", {
         options: {
-            location: {}
+            initialLocation: {},
+            change: function (location) {}
         },
 
         _create: function () {
             var that = this, shouldAddMarker = true;
             //check for a location
-            if (!that.options.location) {
+            if (!that.options.initialLocation) {
                 shouldAddMarker = false;
                 that._showEditScreen();
                 return;
             }
 
-            var location = that.options.location;
+            var location = that.options.initialLocation;
 
             that._location = $('<h3>Location</h3>' +
                 '<div id="locationWidgetMap">' +
@@ -246,7 +247,7 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
             var that = this;
 
             that.currentLocation = location;
-            that.options.location = location;
+            that.options.change(location);
 
             if (shouldSave) {
                 //TODO: save here(not necessary for use in popup)
