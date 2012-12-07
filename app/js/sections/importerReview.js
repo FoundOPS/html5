@@ -2,7 +2,18 @@
 
 define(["jquery", "underscore", "sections/importerUpload", "sections/importerSelect", "db/services", "tools/generalTools", "tools/dateTools", "widgets/location", "widgets/contactInfo", "widgets/repeat",
     "ui/popup", "widgets/selectBox"], function ($, _, importerUpload, importerSelect, dbServices, generalTools, dateTools) {
-    var importerReview = {}, dataSource, grid, clients = {}, locations = {}, contactInfoSets = {}, columns = [
+    var importerReview = {}, dataSource, grid, clients = {}, locations = {}, contactInfoSets = {};
+
+    //an editor which automatically switches back to read view
+    var closeCurrentCell = function (container) {
+        $('<div></div>').appendTo(container);
+
+        if (grid._editContainer) {
+            grid.closeCell();
+        }
+    };
+
+    var columns = [
         {   field: "Client",
 //            template: "<div class='Client'>#= Client #</div>",
             editor: function (container, options) {
@@ -15,20 +26,22 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
         },
         {
             field: "Location",
-            template: "<div class='Location'>#= generalTools.getLocationDisplayString(Location) #</div>"//,
-//            editor: function (container, options) {
-//                // create a KendoUI AutoComplete widget as column editor
-//                $('<div class="locationWidget"></div>').appendTo(container).location();
-//            }
+            template: "<div class='Location'>#= generalTools.getLocationDisplayString(Location) #</div>",
+            //disable editing by having empty custom editor
+            editor: closeCurrentCell
         },
         {
             field: "ContactInfo",
             title: "Contact Info",
-            template: "<div class='ContactInfo'>#= generalTools.getContactInfoDisplayString(ContactInfo) #</div>"
+            template: "<div class='ContactInfo'>#= generalTools.getContactInfoDisplayString(ContactInfo) #</div>",
+            //disable editing by having empty custom editor
+            editor: closeCurrentCell
         },
         {
             field: "Repeat",
             template: "<div class='Repeat'>#= importerReview.getRepeatString(Repeat, id) #</div>",
+            //disable editing by having empty custom editor
+            editor: closeCurrentCell,
             //set the status as the class name so it can be colored red if there's an error
             attributes: {
                 "class": "status#= RepeatStatus #"
@@ -127,14 +140,19 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
             //id to use for editing
             newRow["id"] = i;
             //client name string
+            newRow["Clients"] = [];
+            for (var j in row.ClientSuggestions) {
+                newRow["Clients"].push(clients[row.ClientSuggestions[j]]);
+            }
+
             newRow["Client"] = clients[row.ClientSuggestions[0]] ? clients[row.ClientSuggestions[0]].Name : "";
 
             //location object
             location = locations[row.LocationSuggestions[0]];
 
             //create the list of contact info sets from the suggestions
-            for (var j in row.ContactInfoSuggestions) {
-                contactInfo.push(contactInfoSets[row.ContactInfoSuggestions[j]]);
+            for (var k in row.ContactInfoSuggestions) {
+                contactInfo.push(contactInfoSets[row.ContactInfoSuggestions[k]]);
             }
 
             newRow["Location"] = location;
@@ -250,7 +268,7 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
                     id: "id",
                     fields: {
                         id: { editable: false, nullable: true },
-                        Client: {validation: { required: true }, editable: true},
+                        Client: {validation: { required: true }},
                         Location: {},
                         ContactInfo: {},
                         Repeat: {}
@@ -263,6 +281,7 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
             columns: columns,
             dataBound: dataBound,
             dataSource: dataSource,
+            editable: true,
             resizable: true,
             scrollable: true,
             sortable: true
@@ -331,7 +350,6 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
         $(document).on('popup.closing', function (e) {
             // get a reference to the grid
             var grid = $("#importerReview").find(".grid").data("kendoGrid");
-            var dataItem = grid.dataSource.get(importerReview.editRowIndex);
 
             var locationWidget = $(e.target).find(".locationWidget").data("location");
             var repeatWidget = $(e.target).find(".repeatWidget").data("repeat");
@@ -348,10 +366,10 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
 
             //force refresh cell text
             var selectedCell = grid.tbody.find('tr:eq(' + importerReview.editRowIndex + ') td:eq(' + importerReview.editCellIndex + ')');
-            var column = grid.columns[importerReview.editCellIndex];
-            grid._displayCell(selectedCell, column, dataItem);
+            grid.editCell(selectedCell);
+            grid.closeCell();
 
-            //TODO add back popup listener, displayCell removes it (waiting on code cleanup)
+            //TODO add back popup listener
         });
     };
 
