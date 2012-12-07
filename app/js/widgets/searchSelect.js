@@ -224,6 +224,10 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                         }
                     }
                 });
+            },
+            selected: function () {
+                var searchSelect = this;
+                return searchSelect.selectedData;
             }
         };
 

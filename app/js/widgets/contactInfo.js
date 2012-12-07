@@ -259,17 +259,17 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
 //                dropdownCssClass: "bigdrop labelDropdown"
 //            });
 
-            $(that.element).find(".editWrapper .label").selectorWidget({
-                query: function (query) {
+            $(that.element).find(".editWrapper .label").searchSelect({
+                query: function (searchTerm, callback) {
                     var data = {
                         results: that._currentLabels.slice() //clone the phone labels
                     };
 
-                    if (query.searchTerm !== "") {
-                        data.results.unshift({value: query.searchTerm});
+                    if (searchTerm !== "") {
+                        data.results.unshift({value: searchTerm});
                     }
 
-                    query.render(data);
+                    callback(data);
                 },
                 format: function (item) {
                     return item.value;
@@ -308,10 +308,8 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
             var that = this, labels = [];
 //            //remove the select2 from the label dropdown
 //            $(that.element).find(".editWrapper .label").select2("destroy");
-            //remove the selector from the contacts widget
-            while ($(that.element).find(".editWrapper .label").children().length !== 0) {
-                $(that.element).find(".editWrapper .label")[0].removeChild($(that.element).find(".editWrapper .label")[0].lastChild);
-            }
+            //remove the searchSelect from the contacts widget
+            $(that.element).find(".editWrapper .label").searchSelect("destroy");
             //set the correct label list based on the category
             if (category === "Phone Number") {
                 labels = phoneLabels;
