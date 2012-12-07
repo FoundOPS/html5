@@ -39,7 +39,7 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
             var center, zoom;
 
             //center the map at the location
-            if (location) {
+            if (location && location.Latitude && location.Longitude) {
                 center = [location.Latitude, location.Longitude];
                 zoom = 15;
             //if no location exists, center on 'merica!
@@ -246,6 +246,7 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
             var that = this;
 
             that.currentLocation = location;
+            that.options.location = location;
 
             if (shouldSave) {
                 //TODO: save here(not necessary for use in popup)

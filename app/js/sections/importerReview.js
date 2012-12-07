@@ -97,7 +97,7 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
         if (repeat.FrequencyDetailAsMonthlyFrequencyDetail) {
             frequencyDetail = generalTools.getFrequencyDetailString(repeat.FrequencyDetailInt, startDate, false);
             //if weekly
-        } else if (weeklyDetail[0]) {
+        } else if (weeklyDetail && weeklyDetail[0]) {
             //get the list of day abbreviation strings, separated by commas
             for (var d in weeklyDetail) {
                 if (parseInt(d) || d === "0") {
@@ -334,7 +334,7 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
 
             var locationWidget = $(e.target).find(".locationWidget").data("location");
             var repeatWidget = $(e.target).find(".repeatWidget").data("repeat");
-            var contactInfoWidget = $(e.target).find(".locationWidget").data("location");
+            var contactInfoWidget = $(e.target).find(".contactInfoWidget").data("contactInfo");
 
             //check which widget is active
             //update the dataSource with the new data
