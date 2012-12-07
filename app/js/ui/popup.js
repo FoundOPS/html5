@@ -90,7 +90,6 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         }
     })(jQuery);
 
-
     //Static popup variables
     Popup.popupNum = 0;
     Popup.lastElementClick = null;
@@ -124,9 +123,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         var listenerElements = $(popupListener);
 
         Popup.popupNum++;
-        console.log("static popup num: "+Popup.popupNum);
         this.popupNumber = Popup.popupNum;
-        console.log("popup number: "+this.popupNumber);
         //Class added to detect clicks on primary buttons triggering popups.
         this.popupListenerID = "popupListener"+this.popupNumber;
         listenerElements.addClass(this.popupListenerID);
@@ -174,8 +171,6 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         this.toggleVisible = function (e, clicked) {
             Popup.lastPopupClicked = thisPopup;
             var clickedDiv = $(clicked);
-            //console.log("ID: "+this.popupListenerID);
-            this.popupListenerID = this.popupListenerID;
             if (clickedDiv === null) {
                 console.log("ERROR: No element clicked!");
                 return;
@@ -512,9 +507,14 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
             }
             $(document).trigger('popup.populating');
             Popup.history.push(newMenu);
-
+            this.clearData();
             this.setData(newMenu);
             return true;
+        };
+
+        this.clearData = function (){
+            $("#popupTitle").html("");
+            $("#popupContent").html("");
         };
 
         this.setData = function (data) {
@@ -561,7 +561,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         var createBackButton = function(){
             //Don't create back button or listener if disabled.
             if(!isBackEnabled)return;
-            console.log("Creating back button.");
+            //console.log("Creating back button.");
             $("#popupHeader").prepend("<a id='popupBack'></a>");
             $("#popupBack").click(function () {
                 thisOptionsPopup.previousPopup();
