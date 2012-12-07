@@ -110,7 +110,9 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         Popup.isHeaderDisabled = false;
         Popup.above = false;
         Popup.caretLeftOffset = "50%";
+        Popup.popupNum = 0;
 
+        this.popupNum = 0;
         var thisPopup = this;
 
         if ((typeof(popupListener) === 'undefined') || popupListener === null) {
@@ -119,8 +121,11 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         }
         var listenerElements = $(popupListener);
 
+        Popup.popupNum++;
+        this.popupNum = Popup.popupNum;
         //Class added to detect clicks on primary buttons triggering popups.
-        listenerElements.addClass("popupListener");
+        var popupListenerID = "popupListener"+this.popupNum;
+        listenerElements.addClass(popupListenerID);
 
         listenerElements.css("cursor", "pointer");
         listenerElements.click(function (e) {
@@ -389,7 +394,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
                     var popupHeaderLen = clicked.parents("#popupHeader").length + clicked.is("#popupHeader") ? 1 : 0;
                     //TODO: Find better listener for this.
                     var popupContentLen = (clicked.parents("#popupContentWrapper").length && !clicked.parent().is("#popupContentWrapper")) ? 1 : 0;
-                    var isListener = clicked.parents(".popupListener").length + clicked.is(".popupListener") ? 1 : 0;
+                    var isListener = clicked.parents("."+popupListenerID).length + clicked.is("."+popupListenerID) ? 1 : 0;
                     if (popupHeaderLen === 0 && popupContentLen === 0 && isListener === 0) {
                         thisPopup.closePopup();
                     }
