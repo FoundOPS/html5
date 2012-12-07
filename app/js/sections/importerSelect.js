@@ -99,7 +99,7 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
      * @param type Ex. Phone
      * @return {Array.<Array.<boolean>>}
      */
-    var getContactInfoTrackers = function (type){
+    var getContactInfoTrackers = function (type) {
         var typeTrackers;
 
         //get the correct array to use
@@ -161,29 +161,41 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
             //Make sure there is still an available contact info at the bottom. Otherwise insert one
             //(the last row of the tracker array should be [false, false])
 
-            var type = contactInfoType(newField);
-            var tracker = getContactInfoTrackers(type);
+            var newType = contactInfoType(newField);
+            var newFieldTrackers = getContactInfoTrackers(newType);
 
             //check the last row is available [false, false], if not add a new option
             //ex. if "Phone Label 1" was selected, add "Phone Label 2" and "Phone Value 2"
-            var lastSelection = tracker[tracker.length - 1];
+            var lastSelection = newFieldTrackers[newFieldTrackers.length - 1];
             if (lastSelection[0] || lastSelection[1]) {
-                tracker.push([false, false, type]);
+                newFieldTrackers.push([false, false, newType]);
                 currentFieldGroups.contactInfo.push(
-                    {id: type + " Label " + tracker.length, order: currentFieldGroups.contactInfo, group: "contactInfo"},
-                    {id: type + " Value " + tracker.length, order: currentFieldGroups.contactInfo + 1, group: "contactInfo"}
+                    {id: newType + " Label " + newFieldTrackers.length, order: currentFieldGroups.contactInfo, group: "contactInfo"},
+                    {id: newType + " Value " + newFieldTrackers.length, order: currentFieldGroups.contactInfo + 1, group: "contactInfo"}
                 );
             }
         }
 
         if (isContactInfoField(lastField)) {
-            //search the contact info group the lastField was removed from
-            //to see if there is no label or value selected
+            var lastFieldNum = contactInfoNumber(lastField);
+            var lastFieldType = contactInfoType(lastField);
 
-            //if neither are selected and it is not the last tracker:
+            //todo add old field back (in the right place)
+
+            //search the contact info group the lastField was removed from
+            //to see if a label or value is selected
+
+            var lastFieldTrackers = getContactInfoTrackers(lastFieldType);
+            var lastTracker = lastFieldTrackers[lastFieldNum - 1];
+
+            //if neither are selected and it is not the first or last tracker:
             //a) remove the selectedTracker
             //b) decrement any contact info of the same type that have a > index
-//
+
+            if (lastFieldNum > 1 && lastFieldNum < lastFieldTrackers.length && !lastTracker[0] && !lastTracker[1]) {
+                //TODO a & b
+            }
+
 //            //check for empty rows
 //            for (var s in selectionTrackers) {
 //                var group = selectionTrackers[s];
@@ -255,7 +267,9 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
         if (newField) {
             var lastField = previousSelectedFields[fieldIndex];
 
-            addBackUnselectedField(lastField);
+            if (!isContactInfoField(lastField)) {
+                addBackUnselectedField(lastField);
+            }
 
             //remove the new field from groups
             _.each(currentFieldGroups, function (group, key) {
@@ -287,7 +301,11 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
 
     //endregion
 
-    //TODO CR: Better explanation
+    /**
+     * Formats the data, with the selected headers in this section
+     * @param data
+     * @return {Array}
+     */
     var formatDataForValidation = function (data) {
         var selectPage = $("#importerSelect");
         //check value of toggle switch to know if headers should be included
