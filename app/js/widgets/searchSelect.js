@@ -44,7 +44,7 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                 var searchSelect = this;
                 /**
                  * Model for searchSelect widget elements.
-                 * <div class="searchSelect">
+                 * <div id="" class=""> <-- This is the element that searchSelect is created on (id/class can be whatever user desires).
                  *     <div>
                  *         <input type="text" />
                  *     </div>
@@ -225,9 +225,15 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                     }
                 });
             },
-            selected: function () {
+            //Returns the selected data TODO: Allow user to select item using this method.
+            dataSelection: function () {
                 var searchSelect = this;
                 return searchSelect.selectedData;
+            },
+            //Returns the current selected data's text
+            textSelection: function () {
+                var searchSelect = this;
+                return searchSelect.selectedOptionText ? searchSelect.selectedOptionText : "";
             }
         };
 
