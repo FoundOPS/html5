@@ -111,8 +111,6 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
     /** Popup Constructor **/
     Popup.lastPopupClicked = null;
     function Popup(popupListener) {
-
-
         this.popupNumber = 0;
         var thisPopup = this;
 
@@ -186,8 +184,15 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
                 }
             }
 
-            //TODO: Possibly change this to a data-* field.
+            //TODO: In the future, add passed id to selected div's data-* or add specific class.
             var id = clickedDiv.attr("id");
+            var identifierList = clickedDiv.attr('class').split(/\s+/);
+
+            //NOTE: identifierList contains the clicked element's id and class names. This is used to find its
+            //      associated menu. The next version will have a specialized field to indicate this.
+            identifierList.push(id);
+            //console.log("List: "+identifierList);
+
             //TODO: Fix repetition.
             if ($("#popup").is(":visible") && Popup.lastElementClick !== null) {
                 if (clickedDiv.is("#" + Popup.lastElementClick)) {
@@ -208,7 +213,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
             if(Popup.isLocked)return;
 
             //Update content
-            this.populate(id);
+            this.populate(identifierList);
 
             clickedDiv.trigger("popupEvent", clickedDiv);
 
@@ -498,11 +503,20 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         };
 
         //Public void function that populates setTitle and setContent with data found by id passed.
-        this.populate = function (id) {
-            var newMenu = this.getMenu(id);
+        this.populate = function (identifierList) {
+
+            var newMenu = null;
+            var i=0;
+            for(i; i<identifierList.length; i++){
+                newMenu = this.getMenu(identifierList[i]);
+                if(newMenu!==null){
+                    //console.log("Found menu! id: "+identifierList[i]);
+                    break;
+                }
+            }
+
             if (newMenu === null) {
-                //TODO: Possibly add a boolean to pass to indicate link or end of menu action.
-                //console.log("ID not found.");
+                console.log("ID not found.");
                 return false;
             }
             $(document).trigger('popup.populating');
@@ -543,7 +557,8 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
             })
             .on('click', '.popupContentRow',
             function () {
-                var newId = $(this).attr('id');
+                var newId = [];
+                newId.push($(this).attr('id'));
 
                 //TODO: Prefix all events triggered
                 if ($(this).hasClass("popupEvent")) {
