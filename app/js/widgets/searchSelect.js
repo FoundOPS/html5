@@ -176,7 +176,7 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                     if (searchTerm.length) {
                         for (i = 0; i < searchSelect.options.data.length; i++) {
                             dataItem = searchSelect.options.data[i];
-                            if (searchSelect.options.format(dataItem).toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1) {
+                            if (searchSelect.options.formatOption(dataItem).toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1) {
                                 matches.push(dataItem);
                             }
                         }
@@ -208,11 +208,11 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                 searchSelect.clearList();
                 //add each returned item to the list
                 for (i = 0; i < options.length; i++) {
-                    $('<li id="' + i + '"><span class="name">' + searchSelect.options.format(options[i]) + '</div></li>').data("selectedData", options[i]).appendTo(optionList);
+                    $('<li id="' + i + '"><span class="name">' + searchSelect.options.formatOption(options[i]) + '</div></li>').data("selectedData", options[i]).appendTo(optionList);
                 }
 
                 if (searchSelect.options.showPreviousSelection && searchSelect.selectedData && searchSelect.options.data) {
-                    $('<li id="' + i + '"><span id="previousSelection" class="name">' + searchSelect.options.format(searchSelect.selectedData) + '</div></li>').data("selectedData", searchSelect.selectedData).appendTo(optionList);
+                    $('<li id="' + i + '"><span id="previousSelection" class="name">' + searchSelect.options.formatOption(searchSelect.selectedData) + '</div></li>').data("selectedData", searchSelect.selectedData).appendTo(optionList);
                 }
                 //adjust the text to make sure everything is vertically centered
                 optionList.each(function () {
@@ -225,13 +225,23 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                     }
                 });
             },
-            //Returns the selected data TODO: Allow user to select item using this method.
-            dataSelection: function () {
+            //Returns the selected data. If a parameter is supplied it set the current selection to the corresponding data.
+            data: function (selectData) {
                 var searchSelect = this;
+
+                if (selectData) {
+                    searchSelect.selectedData = selectData;
+                    searchSelect.selectedOptionText = searchSelect.options.formatOption(selectData);
+                    searchSelect.element.find("input")[0].value = searchSelect.selectedOptionText;
+                    searchSelect.selectedOptionTempText = "";
+                    searchSelect.options.onSelect(null, searchSelect.selectedData);
+                    //Wait for listeners from other widgets to use the selected option before removing it from the DOM.
+                }
+
                 return searchSelect.selectedData;
             },
             //Returns the current selected data's text
-            textSelection: function () {
+            text: function () {
                 var searchSelect = this;
                 return searchSelect.selectedOptionText ? searchSelect.selectedOptionText : "";
             }

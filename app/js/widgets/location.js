@@ -20,7 +20,7 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
                 '<a class="navigateBtn" href="javascript:void(0)"></a>' +
                 '</div>' +
                 '<div class="editPane hidden">' +
-                '<div class="searchSelect">' +
+                '<div class="locationSearchSelect">' +
                 '</div>' +
                 '</div>'
 
@@ -28,7 +28,7 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
 
             that.element.append(that._location);
 
-            $(".searchSelect").searchSelect({
+            $(".locationSearchSelect").searchSelect({
                 query: function (searchTerm, callback) {
                     //get the list of location matches
                     if (searchTerm) {
@@ -42,7 +42,7 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
                         });
                     }
                 },
-                format: function (location) {
+                formatOption: function (location) {
                     var dataString = that._getLocationString(location);
                     if (dataString) {
                         if (location.pastSelection) {
@@ -54,7 +54,7 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
                         }
                         //if none do, display the latitude and longitude
                     } else {
-                        return location.Latitude + "," + location.Longitude;
+                        return location.Latitude + ", " + location.Longitude;
                     }
                 },
                 onSelect: function (e, selectedData) {
@@ -237,7 +237,7 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
                 return returnString;
                 //if none do, display the latitude and longitude
             } else {
-                return location.Latitude + "," + location.Longitude;
+                return location.Latitude + ", " + location.Longitude;
             }
         },
 

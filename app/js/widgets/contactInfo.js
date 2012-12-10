@@ -52,9 +52,9 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
                     '<input class="value" type="text"/><br />' +
                     '<label>Label</label><br />' +
                     '<select class="labelIcon">' +
-                        '<option class="EmailAddressSmall" value="Email Address">&nbsp;</option>' +
+                        '<option class="EmailSmall" value="Email">&nbsp;</option>' +
                         '<option class="WebsiteSmall" value="Website">&nbsp;</option>' +
-                        '<option class="PhoneNumberSmall" value="Phone Number">&nbsp;</option>' +
+                        '<option class="PhoneSmall" value="Phone">&nbsp;</option>' +
                         '<option class="OtherSmall" value="Other">&nbsp;</option>' +
                     '</select>' +
                     '<div class="contactInfoSearchSelect" /></div>' +
@@ -152,11 +152,11 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
                 var category;
                 //check what the value is(phone, email, website, or other)
                 if (parserTools.isEmail(string)) {
-                    category = "Email Address";
+                    category = "Email";
                 } else if (parserTools.isUrl(string)) {
                     category = "Website";
                 } else if (parserTools.isPhone(string)) {
-                    category = "Phone Number";
+                    category = "Phone";
                 } else {
                     category = "Other";
                 }
@@ -193,10 +193,10 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
             }
 
             $(contactInfo.element).find(".contactList a").on("click", function (e) {
-                if (e.currentTarget.children[0].className === "Phone Number") {
+                if (e.currentTarget.children[0].className === "Phone") {
                     analytics.track("Phone Contact Click");
                     window.location.href = "tel:" + e.currentTarget.children[2].innerText;
-                } else if (e.currentTarget.children[0].className === "Email Address") {
+                } else if (e.currentTarget.children[0].className === "Email") {
                     analytics.track("Email Contact Click");
                     window.open("mailto:" + e.currentTarget.children[2].innerText, "_blank");
                 } else if (e.currentTarget.children[0].className === "Website") {
@@ -235,11 +235,9 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
                     return item.value;
                 },
                 query: function (searchTerm, callback) {
-                    var data = {
-                        results: contactInfo._currentLabels.slice() //clone the phone labels
-                    };
+                    var data = contactInfo._currentLabels.slice() //clone the phone labels
                     if (searchTerm !== "") {
-                        data.results.unshift({value: searchTerm});
+                        data.unshift({value: searchTerm});
                     }
                     callback(data);
                 },
@@ -262,7 +260,7 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
             //set the category
             contactInfo._changeType(contact.Type, true);
             //set the label
-            $(contactInfo.element).find(".editWrapper .contactInfoSearchSelect").select2("data", {value: contact.Label});
+            $(contactInfo.element).find(".editWrapper .contactInfoSearchSelect").searchSelect("data", {value: contact.Label});
             //show the edit pane
             contactInfo._changePane("edit");
         },
@@ -277,9 +275,9 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
             //remove the select2 from the label dropdown
 //            $(contactInfo.element).find(".editWrapper .contactInfoSearchSelect").searchSelect("destroy");
             //set the correct label list based on the category
-            if (category === "Phone Number") {
+            if (category === "Phone") {
                 labels = phoneLabels;
-            } else if (category === "Email Address") {
+            } else if (category === "Email") {
                 labels = emailLabels;
             } else if (category === "Website") {
                 labels = websiteLabels;

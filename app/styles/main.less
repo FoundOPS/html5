@@ -1699,7 +1699,6 @@ div.k-window-content {
             -moz-box-sizing: border-box;
         }
         .select2-container{
-            margin-bottom: 10px;
             .select2-choices{
                 height: 26px !important;
                 border: none;
@@ -1947,6 +1946,7 @@ div.k-window-content {
       left: 300px;
     }
     .editPane{
+        text-align: center;
         position: relative;
         top: -250px;
         left: -300px;
@@ -1974,17 +1974,77 @@ div.k-window-content {
        left: -300px;
     }
 }
-.searchSelect {
+.contactInfoSearchSelect {
+  max-height:26px;
+  width:100%;
   margin: 0 auto;
-  width: 250px;
+  min-height: 20px;
+  background-color: @white;
+  display: inline-block;
+  input{
+    display:block;
+    width:100%;
+    padding: 2px 15px 2px 6px;
+    margin: 3px 3px 3px -1px;
+    border: none;
+    font-family: PTSans;
+    background: url("../img/select-closed.png") no-repeat right center;
+    //Allows true 100% width without overflowing due to margins, borders or padding.
+    box-sizing: border-box; /* css3 rec */
+    -moz-box-sizing: border-box; /* ff2 */
+    -ms-box-sizing: border-box; /* ie8 */
+    -webkit-box-sizing: border-box; /* safari3 */
+    -khtml-box-sizing: border-box; /* konqueror */
+  }
+  #optionListScroller {
+    position: absolute !important;
+    z-index:1;
+  }
+  ul{
+    li{
+      font-size: 14px;
+      background-color: @white;
+      cursor: pointer;
+      &:hover{
+        .rowGradient;
+        color: @white;
+      }
+      &:not(:last-child){
+        border-bottom: 0;
+      }
+      span{
+        padding: 5px;
+        display: table-cell;
+      }
+      .name{
+        vertical-align: middle;
+      }
+      #previousSelection {
+        width: 20px;
+        vertical-align: middle;
+        padding-left: 25px;
+        background: url("../img/previousLocation.png") no-repeat left center;
+      }
+    }
+    li.singleLine .name{
+      padding-top: 9px;
+    }
+    li.tripleLine .name{
+      font-size: 11px;
+    }
+  }
+}
+.locationSearchSelect {
+  margin: 0 auto;
+  width: 240px;
   text-align: center;
   min-height: 20px;
   border: 1px solid #aaaaaa;
   background-color: @white;
   input{
-    width: 230px;
-    margin: 3px;
-    padding: 2px 10px 2px 4px;
+    width: 215px;
+    margin: 3px 3px 3px 0px;
+    padding: 2px 21px 2px 2px;
     border: none;
     font-family: PTSans;
     background: url("../img/smallSearch.png") no-repeat right center;
@@ -1994,7 +2054,7 @@ div.k-window-content {
     max-height: 215px;
   }
   ul{
-    width: 250px;
+    width: 240px;
     max-height: 215px;
     span{
       display: table-cell;
@@ -2004,7 +2064,7 @@ div.k-window-content {
       vertical-align: middle;
     }
     li{
-//      height: 36px;
+      text-align: left;
       padding: 5px 4px 5px 4px;
       font-size: 14px;
       background-color: #efefef;
@@ -2584,28 +2644,28 @@ ul.noty_cont.noty_layout_topRight li {
         padding: 0;
     }
 }
-.EmailAddressSmall, .WebsiteSmall, .PhoneNumberSmall, .OtherSmall, .iconDropdown .select2-results .select2-highlighted{
+.EmailSmall, .WebsiteSmall, .PhoneSmall, .OtherSmall, .iconDropdown .select2-results .select2-highlighted{
     background: url("../img/contactInfoSmall.png") no-repeat 0 0;
 }
-.select2-results .EmailAddressSmall{
+.select2-results .EmailSmall{
     background-position: 0 -140px;
 }
 .select2-results .WebsiteSmall{
     background-position: 0 -175px;
 }
-.select2-results .PhoneNumberSmall{
+.select2-results .PhoneSmall{
     background-position: 0 -210px;
 }
 .select2-results .OtherSmall{
     background-position: 0 -245px;
 }
-.EmailAddressSmall, .select2-results .EmailAddressSmall.select2-highlighted{
+.EmailSmall, .select2-results .EmailSmall.select2-highlighted{
     background-position: 0 0;
 }
 .WebsiteSmall, .select2-results .WebsiteSmall.select2-highlighted{
     background-position: 0 -35px;
 }
-.PhoneNumberSmall, .select2-results .PhoneNumberSmall.select2-highlighted{
+.PhoneSmall, .select2-results .PhoneSmall.select2-highlighted{
     background-position: 0 -70px;
 }
 .OtherSmall, .select2-results .OtherSmall.select2-highlighted{
