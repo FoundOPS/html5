@@ -98,7 +98,7 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
                 //save the old value to be used to check for changes
                 var oldContact = generalTools.deepClone(contactInfo.contacts[contactInfo._editIndex]);
                 //get the value of the selected label
-                var selectedLabel = $(contactInfo.element).find(".editWrapper .contactInfoSearchSelect").select2("val");
+                var selectedLabel = $(contactInfo.element).find(".editWrapper .contactInfoSearchSelect").searchSelect("text");
                 //set the value
                 contactInfo.contacts[contactInfo._editIndex].Data = $(contactInfo.element).find(".editWrapper .value").val();
                 //set the label
@@ -239,13 +239,13 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
                     if (searchTerm !== "") {
                         data.unshift({value: searchTerm});
                     }
-                    callback(data);
+                    return data;
                 },
                 onSelect: function (e, selectedData) {
                     console.log(e);
                     console.log(selectedData);
                 },
-                queryDelay: 100
+                minimumInputLength: 0
             });
         },
         /**

@@ -74,7 +74,7 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                 element.children[1].children[0].setAttribute("class", "optionList");
 
                 //Listen to input in search box and update the widget accordingly.
-                generalTools.observeInput(searchSelect.element.find("input"), $.proxy(searchSelect.updateOptionList, searchSelect), searchSelect.options.queryDelay || 1);
+                generalTools.observeInput(searchSelect.element.find("input"), $.proxy(searchSelect.open, searchSelect), searchSelect.options.queryDelay || 1);
 
                 try {
                     document.createEvent("TouchEvent");
@@ -97,7 +97,7 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                     } else {
                         this.value = "";
                     }
-                    searchSelect.updateOptionList(this.value);
+                    searchSelect.open(this.value);
                 });
                 //Select an option on click or touchend. Does not occur if user is scrolling instead of selecting.
                 searchSelect.element.find(".optionList").on("click touchend", searchSelect.element.find(".optionList li"), function (e) {
@@ -162,16 +162,9 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                 }
             },
             // Public functions
-            getOptions: function (searchTerm) {
+            filter: function (searchTerm) {
                 var searchSelect = this, matches = [];
                 //get the list of location matches
-                if (searchSelect.options.query) {
-                    if (searchTerm.length >= searchSelect.options.minimumInputLength) {
-                        searchSelect.options.query(searchTerm, $.proxy(searchSelect.updateOptionList, searchSelect));
-                    } else {
-                        searchSelect.clearList();
-                    }
-                } else {
                     var dataItem, i;
                     if (searchTerm.length) {
                         for (i = 0; i < searchSelect.options.data.length; i++) {
@@ -183,7 +176,6 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                     } else {
                         matches = searchSelect.options.data;
                     }
-                }
                 return matches;
                 if (searchSelect.isTouchDevice) {
                     $(".km-scroll-wrapper").kendoMobileScroller("scrollTo", 0, -(searchSelect.element.height()));
@@ -198,19 +190,32 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                     optionList.removeChild(optionList.lastChild);
                 }
             },
+            /**
+             * Opens the list of items the user can select
+             * //TODO rename to openOptionList
+             */
             //Populates and edits the list of items that the user can select.
-            updateOptionList: function (data) {
+            open: function (searchTerm) {
                 var searchSelect = this,
                     optionList = searchSelect.element.find(".optionList"),
-                    options = $.isArray(data) ? data : searchSelect.getOptions(data),
-                    i;
+                    options, i;
+                if (searchSelect.options.query) {
+                    if (searchTerm.length >= searchSelect.options.minimumInputLength) {
+                        options = searchSelect.options.query(searchTerm, $.proxy(searchSelect.open, searchSelect));
+                    } else {
+                        searchSelect.clearList();
+                    }
+                } else {
+                    options = searchSelect.filter(searchTerm);
+                }
                 searchSelect.selectedOptionTempText = searchSelect.element.find("input").val();
                 searchSelect.clearList();
                 //add each returned item to the list
-                for (i = 0; i < options.length; i++) {
-                    $('<li id="' + i + '"><span class="name">' + searchSelect.options.formatOption(options[i]) + '</div></li>').data("selectedData", options[i]).appendTo(optionList);
+                if (options) {
+                    for (i = 0; i < options.length; i++) {
+                        $('<li id="' + i + '"><span class="name">' + searchSelect.options.formatOption(options[i]) + '</div></li>').data("selectedData", options[i]).appendTo(optionList);
+                    }
                 }
-
                 if (searchSelect.options.showPreviousSelection && searchSelect.selectedData && searchSelect.options.data) {
                     $('<li id="' + i + '"><span id="previousSelection" class="name">' + searchSelect.options.formatOption(searchSelect.selectedData) + '</div></li>').data("selectedData", searchSelect.selectedData).appendTo(optionList);
                 }
