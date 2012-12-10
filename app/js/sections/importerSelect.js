@@ -30,8 +30,9 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
     /**
      * Add the unselectedField back to the options (currentFieldGroups)
      * @param unselectedField
+     * @param [index] If provided, the field will be inserted at this index
      */
-    var addBackUnselectedField = function (unselectedField) {
+    var addBackUnselectedField = function (unselectedField, index) {
         //add back the option if it was unselected (except "Do not import" and on initial load)
         if (unselectedField !== "Do not Import" && unselectedField !== "") {
             var lastIndex = -1, lastGroupName = "";
@@ -48,14 +49,18 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
                 });
             });
 
-            var indexToInsert;
-            //determine the index in which to insert the field
-            for (var i in currentFieldGroups[lastGroupName]) {
-                var field = currentFieldGroups[lastGroupName][i];
-                //find the first field in the current group whos order is above lastIndex
-                if (field.order >= lastIndex) {
-                    indexToInsert = i;
-                    break;
+
+            var indexToInsert = index;
+
+            //if not provided, determine the index in which to insert the field
+            if (index === undefined) {
+                for (var i in currentFieldGroups[lastGroupName]) {
+                    var field = currentFieldGroups[lastGroupName][i];
+                    //find the first field in the current group whos order is above lastIndex
+                    if (field.order >= lastIndex) {
+                        indexToInsert = i;
+                        break;
+                    }
                 }
             }
 
@@ -63,6 +68,7 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
             currentFieldGroups[lastGroupName].splice(indexToInsert, 0, lastGroup[lastIndex]);
         }
     };
+
 
     //region Contact Info Methods
 
@@ -180,7 +186,11 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
             var lastFieldNum = contactInfoNumber(lastField);
             var lastFieldType = contactInfoType(lastField);
 
-            //todo add old field back (in the right place)
+            //add old field back (in the right place)
+
+            var index = 0;
+            //TODO find the right index to insert the field at
+            addBackUnselectedField(lastField, index);
 
             //search the contact info group the lastField was removed from
             //to see if a label or value is selected
