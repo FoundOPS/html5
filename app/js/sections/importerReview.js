@@ -296,7 +296,7 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
 
     //resize the grid based on the current window's height
     var resizeGrid = function () {
-        var extraMargin = 240;
+        var extraMargin = 255;
         var windowHeight = $(window).height();
         var contentHeight = windowHeight - extraMargin;
         $("#importerReview").find('.k-grid-content').css("maxHeight", contentHeight + 'px');

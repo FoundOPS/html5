@@ -18,7 +18,20 @@ define(["tools/generalTools", "db/services", "db/session", "db/saveHistory", "to
     //endregion
 
     //region Setup Grid
+    //
+    // //resize the grid based on the current window's height
+    var resizeGrid = function () {
+        var extraMargin = 207;
+        var windowHeight = $(window).height();
+        var contentHeight = windowHeight - extraMargin;
+        $("#dispatcherGrid").css("maxHeight", contentHeight + 'px');
+    };
+
     dispatcherSettings.initialize = function () {
+        $(window).resize(function () {
+            resizeGrid();
+        });
+
         //setup menu
         var menu = $("#dispatcher").find(".settingsMenu");
         kendo.bind(menu);
@@ -146,6 +159,7 @@ define(["tools/generalTools", "db/services", "db/session", "db/saveHistory", "to
         //wait to load until the roleId parameter is set
         _.delay(function () {
             dataSource.read();
+            resizeGrid();
         }, 250);
     };
 

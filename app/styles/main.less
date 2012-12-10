@@ -374,7 +374,7 @@ span.k-tooltip {
 .k-draghandle.k-state-selected:hover {
     background: none;
     background-color: @blue;
-    border-color: #488FCD;
+    border-color: @blue;
 }
 
 //make alternate grid rows background color white instead of transparent
@@ -386,101 +386,6 @@ span.k-tooltip {
 }
 .k-grid tbody tr.k-state-selected:hover{
     .hoverColor(@blue);
-}
-
-.k-grid{
-    margin-bottom: 15px;
-    border: none;
-    .k-grid-header-wrap{
-        border: none;
-    }
-    table{
-        padding-right: 2px;
-    }
-    .k-grid-header{
-        margin-top: 5px;
-        margin-bottom: 3px;
-        padding-right: 0 !important;
-        border: none;
-        background: none;
-        table{
-            padding-right: 13px;
-        }
-        .k-header {
-            border: none;
-            font-size: 16px;
-            background: #488fcd;
-            border-bottom: 2px solid #f2f2f2;
-            border-right: 1px solid #f2f2f2;
-            border-left: 1px solid #f2f2f2;
-            color: #fff;
-            padding: 5px 0 6px 4px;
-            a{
-                color: #fff;
-                span{
-                    vertical-align: middle;
-                }
-            }
-            &:hover{
-                .hoverColor (@blue, 8%);
-            }
-            span.k-i-arrow-n, span.k-i-arrow-s{
-                float: right;
-                margin-right: 15px;
-                margin-top: 7px;
-                width: 11px;
-                height: 8px;
-                background-position: -118px -200px;
-                opacity: 1;
-            }
-            span.k-i-arrow-s{
-                background-position: -118px -214px;
-            }
-            .k-header-column-menu{
-                margin-right: 0;
-                padding-left:8px;
-                padding-right:8px;
-                .k-icon{
-                    width: 11px;
-                    height: 10px;
-                    opacity: 1;
-                    background-position: -118px -231px;
-                }
-                &:hover{
-                    .hoverColor (@blue, 15%);
-                }
-            }
-        }
-        .k-header:first-child {
-            border-left: none;
-        }
-        .k-header:last-child {
-            border-right: none;
-        }
-    }
-    tr{
-        background-color: @white;
-        &:hover{
-            .hoverColor (#ddd);
-            cursor: pointer;
-        }
-    }
-    td {
-        height: 100%;
-        padding: 0 7px 0 3px;
-        border: none;
-        border-left: 1px solid #f2f2f2;
-        border-right: 1px solid #f2f2f2;
-        border-bottom: 2px solid #f2f2f2;
-    }
-    td:first-child{
-        border-letf: none;
-        border-right: 1px solid #f2f2f2;
-    }
-    td:last-child{
-        border-right: none;
-        border-left: 1px solid #f2f2f2;
-    }
 }
 
 /*region Overrides for kendo mobile*/
@@ -605,17 +510,29 @@ hr {
     background-color: #fff;
 }
 ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 12px;
+    height: 12px;
 }
 ::-webkit-scrollbar-track{
     background-color: #fff;
+    &:horizontal{
+        border-top: 4px solid @grey;
+    }
+    &:vertical{
+        border-left: 4px solid @grey;
+    }
 }
 ::-webkit-scrollbar-thumb{
-    background-color: #57B0F2;
+    background-color: @blue;
+    &:horizontal{
+        border-top: 4px solid @grey;
+    }
+    &:vertical{
+        border-left: 4px solid @grey;
+    }
 }
 ::-webkit-scrollbar-thumb:hover{
-    background-color: #488fcd;
+    .hoverColor(@blue);
 }
 #dispatcher .addDeleteBtns {
     float: right;
@@ -662,6 +579,114 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover {
     width: 22px;
     height: 22px;
     background-position: 0 -132px;
+}
+
+.k-grid{
+    border: none;
+    ::-webkit-resizer{
+        background: @grey;
+    }
+    .k-grid-header-wrap{
+        border: none;
+    }
+    .k-grid-header{
+        margin-top: 5px;
+        margin-bottom: 3px;
+        padding-right: 0 !important;
+        border: none;
+        background: none;
+        table{
+            padding-right: 13px;
+        }
+        .k-header {
+            border: none;
+            font-size: 16px;
+            background: @blue;
+            border-bottom: 2px solid #f2f2f2;
+            border-right: 1px solid #f2f2f2;
+            border-left: 1px solid #f2f2f2;
+            color: #fff;
+            padding: 5px 0 6px 4px;
+            a{
+                color: #fff;
+                span{
+                    vertical-align: middle;
+                }
+            }
+            &:hover{
+                .hoverColor (@blue, 8%);
+            }
+            span.k-i-arrow-n, span.k-i-arrow-s{
+                float: right;
+                margin-right: 15px;
+                margin-top: 7px;
+                width: 11px;
+                height: 8px;
+                background-position: -118px -200px;
+                opacity: 1;
+            }
+            span.k-i-arrow-s{
+                background-position: -118px -214px;
+            }
+            .k-header-column-menu{
+                margin-right: 0;
+                padding-left:8px;
+                padding-right:8px;
+                .k-icon{
+                    width: 11px;
+                    height: 10px;
+                    opacity: 1;
+                    background-position: -118px -231px;
+                }
+                &:hover{
+                    .hoverColor (@blue, 15%);
+                }
+            }
+        }
+        .k-header:first-child {
+            border-left: none;
+        }
+        .k-header:last-child {
+            border-right: none;
+        }
+    }
+    tr{
+        background-color: @white;
+        &:hover{
+            .hoverColor (#ddd);
+            cursor: pointer;
+        }
+    }
+    tr:last-child td{
+        border-bottom: none;
+    }
+    td {
+        height: 100%;
+        padding: 0 7px 0 3px;
+        border: none;
+        border-left: 1px solid #f2f2f2;
+        border-right: 1px solid #f2f2f2;
+        border-bottom: 2px solid #f2f2f2;
+    }
+    td:first-child{
+        border-left: none;
+        border-right: 1px solid #f2f2f2;
+    }
+    td:last-child{
+        border-right: none;
+        border-left: 1px solid #f2f2f2;
+    }
+    .k-grid-pager{
+        margin-top: 5px;
+        background: @grey;
+        border: none;
+        .k-link{
+            border-color: @grey;
+            &:hover{
+                .hoverColor(@grey);
+            }
+        }
+    }
 }
 /*endregion*/
 /*region ImageUploadButton */
@@ -779,6 +804,7 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover {
 
 #usersGrid {
     min-width: 675px;
+    overflow: auto;
 }
 
 #users tbody, #dispatcher tbody {
@@ -1150,6 +1176,7 @@ div.k-window-content {
 }
 
 #dispatcherGrid {
+    overflow: auto;
     min-width: 262px;
     font-size: 1.1em;
 }
@@ -1336,7 +1363,7 @@ div.k-window-content {
         margin: 0 0 15px 0;
         overflow: auto;
         li{
-            margin: 0 5px 4px 0;
+            margin: 0 0 4px 0;
             .header{
                 color: #777;
                 width: 33%;
@@ -1360,7 +1387,7 @@ div.k-window-content {
             }
         }
         li:last-child{
-            margin: 0 5px 0 0;
+            margin: 0;
         }
     }
     .wrap li{
@@ -1374,6 +1401,9 @@ div.k-window-content {
         margin: 30px 20px 30px 20px;
     }
     .grid{
+        .k-grid-content{
+            margin-bottom: 15px;
+        }
         tr{
             &:hover{
                 background-color: @white;
@@ -1428,7 +1458,7 @@ div.k-window-content {
         background-color: #659A41;
     }
     #autofilled{
-        background-color: #488FCD;
+        background-color: @blue;
     }
     #synced{
         background-color: #991A36;
@@ -1591,61 +1621,53 @@ div.k-window-content {
         min-width: 720px;
     }
     #left {
-        height: 100%;
+        position: relative;
+        top: 15px;
+        max-height: 100%;
         width: auto;
-        margin: 0 370px 15px 15px;
-    }
-    .addDeleteBtns {
-        position: absolute;
-        width: 80px;
-        right: 370px;
-        top: 22px;
-        .csvBtn {
-            background-position: 0 -176px;
-        }
-        .csvBtn:hover {
-            background-position: 0 -154px;
-        }
-    }
-    .k-grid{
-        padding: 10px 20px 15px 20px;
+        margin: 0 360px 15px 15px;
+        padding: 15px;
         background: @grey;
-        td {
-            line-height: 1.3em;
-            font-size: 14px;
-        }
-    }
-    input[type="checkbox"] {
-        vertical-align: middle;
-    }
-    .k-dropdown-wrap {
-        padding: 0 22px 0 0;
-        border-radius: 4px;
-    }
-    .k-grid-content {
-        overflow-x: scroll;
-    }
-    #top {
-        width: 680px;
-        padding: 10px 0;
         label {
             position: relative;
-            top: 3px;
+            top: -2px;
             margin-right: 5px;
-            padding-left: 20px;
+            padding-left: 6px;
             color: @textColor;
             font-size: 1.5em;
         }
-        .select2-container {
-            margin-top: 5px;
+        .addDeleteBtns {
+            position: absolute;
+            width: 80px;
+            right: 14px;
+            top: 20px;
+            .csvBtn {
+                background-position: 0 -176px;
+            }
+            .csvBtn:hover {
+                background-position: 0 -154px;
+            }
+        }
+        .k-grid{
+            background: @grey;
+            td {
+                line-height: 1.3em;
+                font-size: 14px;
+            }
+        }
+        input[type="checkbox"] {
+            vertical-align: middle;
+        }
+        .k-grid-content {
+            overflow: auto;
+        }
+        #serviceTypes {
+            display: inline-block;
+            width: 140px;
+            position: relative;
+            top: -4px;
         }
     }
-  #serviceDetails{
-    width: 270px;
-  }
-  #serviceTypes {
-    display: inline;
-  }
 }
 
 #serviceDetails, #taskServiceDetails {
@@ -1674,9 +1696,6 @@ div.k-window-content {
             margin-left: 2px;
         }
     }
-    .select2-container {
-        margin-bottom: 5px;
-    }
     li.textarea {
         vertical-align: top;
         margin-bottom: 0;
@@ -1701,7 +1720,7 @@ div.k-window-content {
         outline: none;
         padding: 0;
         &:checked {
-            background-color: #488FCD;
+            background-color: @blue;
         }
     }
     .k-numeric-wrap .k-input {
@@ -1766,13 +1785,17 @@ div.k-window-content {
   margin: auto;
 }
 
-#serviceDetails {
+#serviceDetailsWrapper{
     display: none;
     position: absolute;
-    top: 51px;
+    top: 15px;
     right: 30px;
+    width: 270px;
+    padding: 10px 15px;
     background-color: @grey;
-    padding: 10px 20px;
+}
+
+#serviceDetails {
     overflow-y: auto;
     label.client, label.location{
         line-height: 1.5em;
@@ -2024,7 +2047,7 @@ div.k-window-content {
         //don't make the ends blue when they're selected
         &.selected:not(.left):not(.right){
             color: #ffffff;
-            .bgGradient(#36C3E3, #488FCD);
+            .bgGradient(#36C3E3, @blue);
         }
         &.selected:hover:not(.left):not(.right){
             .bgGradient(#44AFE4, #0067A0);
@@ -2800,7 +2823,7 @@ ul.noty_cont.noty_layout_topRight li {
 }
 /*endregion*/
 /*region SelectBox*/
-#serviceDetails, #taskServiceDetails, #importerUpload, #importerSelect, #importerReview {
+#services, #taskServiceDetails, #importerUpload, #importerSelect, #importerReview {
     .styled-select{
         width: 100%;
         height: 28px;
@@ -2856,7 +2879,7 @@ ul.noty_cont.noty_layout_topRight li {
         display: block;
         position: absolute;
         top: 2px;
-        left: 36px;
+        left: 37px;
         width: 63px;
         height: 25px;
         background: @blue;

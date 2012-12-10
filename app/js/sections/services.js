@@ -43,8 +43,8 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
             saveHistory.resetHistory();
 
             if (service) {
-                //show the serviceDetails
-                $("#serviceDetails").attr("style", "display:block");
+                //show the serviceDetailsWrapper
+                $("#serviceDetailsWrapper").attr("style", "display:block");
             }
         },
         deleteSelectedService: function () {
@@ -52,8 +52,8 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
             if (answer) {
                 grid.dataSource.remove(selectedServiceHolder);
                 dbServices.services.destroy({body: this.get("selectedService")});
-                //hide the serviceDetails
-                $("#serviceDetails").attr("style", "display:none");
+                //hide the serviceDetailsWrapper
+                $("#serviceDetailsWrapper").attr("style", "display:none");
             }
         },
         /**
@@ -367,13 +367,12 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
 
     //resize the grid based on the current window's height
     var resizeGrid = function () {
-        var extraMargin = 115;
+        var extraMargin = 158;
         var windowHeight = $(window).height();
-        var topHeight = $('#top').outerHeight(true);
-        var contentHeight = windowHeight - topHeight - extraMargin;
-        $('#grid').css("height", contentHeight + 24 + 'px');
-        $('#grid .k-grid-content').css("height", contentHeight - 47 + 'px');
-        $("#serviceDetails").css("max-height", contentHeight + 5 + 'px');
+        var contentHeight = windowHeight - extraMargin;
+        $('#grid').css("max-height", contentHeight + 19 + 'px');
+        $('#grid .k-grid-content').css("max-height", contentHeight - 42 + 'px');
+        $("#serviceDetails").css("max-height", contentHeight + 63 + 'px');
     };
 
     var setupGrid = function (fields) {
@@ -569,8 +568,8 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
                     //disable the delete button and hide the service details
                     $('#services .k-grid-delete').attr("disabled", "disabled");
 
-                    //hide the serviceDetails
-                    $("#serviceDetails").attr("style", "display:none");
+                    //hide the serviceDetailsWrapper
+                    $("#serviceDetailsWrapper").attr("style", "display:none");
                 }
             });
 

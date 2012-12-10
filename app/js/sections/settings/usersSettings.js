@@ -199,7 +199,19 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
         }).data("kendoGrid");
     };
 
+    //resize the grid based on the current window's height
+    var resizeGrid = function () {
+        var extraMargin = 305;
+        var windowHeight = $(window).height();
+        var contentHeight = windowHeight - extraMargin;
+        $("#usersGrid").css("maxHeight", contentHeight + 'px');
+    };
+
     usersSettings.initialize = function () {
+        $(window).resize(function () {
+            resizeGrid();
+        });
+
         //setup menu
         var menu = $("#users").find(".settingsMenu");
         kendo.bind(menu);
@@ -231,6 +243,8 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
 
             usersSettings.availableEmployees = employees;
             usersDataSource.read();
+
+            resizeGrid();
         });
     };
 
