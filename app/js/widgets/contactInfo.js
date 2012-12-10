@@ -82,7 +82,7 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "db/m
 
             $(that.element).find(".add").on("click", function () {
                 //add an empty contact to the list
-                that.contacts.unshift({Entity: "New", Data: "", Type: "Other", Label: ""});
+                that.contacts.unshift({Entity: "New", Id: generalTools.newGuid(), Data: "", Type: "Other", Label: ""});
                 //refresh the list so it contains the new contact
                 that._renderContactList(that.contacts);
                 //set the edit index to the last item(the new item gets added to the end)
