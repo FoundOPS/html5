@@ -51,7 +51,7 @@ table {
 @orange: #D9591E;
 @charcoal: #333335;
 @white:#ffffff;
-@grey: rgb(242,242,242); //inner background
+@grey: rgb(230,230,230); //inner background
 .hoverColor (@color: #fff, @strength: 10%){
     background-color: darken(@color, @strength);
 }
@@ -486,7 +486,7 @@ span.k-tooltip {
 }
 
 /*endregion*/
-/*region Settings - All */
+/*region Genaral */
 h1, h2, h3, td, p {
     cursor: default;
 }
@@ -533,6 +533,9 @@ hr {
 }
 ::-webkit-scrollbar-thumb:hover{
     .hoverColor(@blue);
+}
+::-webkit-scrollbar-corner{
+    background: @grey;
 }
 #dispatcher .addDeleteBtns {
     float: right;
@@ -583,9 +586,6 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover {
 
 .k-grid{
     border: none;
-    ::-webkit-resizer{
-        background: @grey;
-    }
     .k-grid-header-wrap{
         border: none;
     }
@@ -602,9 +602,9 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover {
             border: none;
             font-size: 16px;
             background: @blue;
-            border-bottom: 2px solid #f2f2f2;
-            border-right: 1px solid #f2f2f2;
-            border-left: 1px solid #f2f2f2;
+            border-bottom: 2px solid @grey;
+            border-right: 1px solid @grey;
+            border-left: 1px solid @grey;
             color: #fff;
             padding: 5px 0 6px 4px;
             a{
@@ -664,17 +664,17 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover {
         height: 100%;
         padding: 0 7px 0 3px;
         border: none;
-        border-left: 1px solid #f2f2f2;
-        border-right: 1px solid #f2f2f2;
-        border-bottom: 2px solid #f2f2f2;
+        border-left: 1px solid @grey;
+        border-right: 1px solid @grey;
+        border-bottom: 2px solid @grey;
     }
     td:first-child{
         border-left: none;
-        border-right: 1px solid #f2f2f2;
+        border-right: 1px solid @grey;
     }
     td:last-child{
         border-right: none;
-        border-left: 1px solid #f2f2f2;
+        border-left: 1px solid @grey;
     }
     .k-grid-pager{
         margin-top: 5px;
@@ -1413,8 +1413,8 @@ div.k-window-content {
             height: 100%;
             padding: 0 7px 0 3px;
             border: none;
-            border-bottom: 2px solid #f2f2f2;
-            border-right: 2px solid #f2f2f2;
+            border-bottom: 2px solid @grey;
+            border-right: 2px solid @grey;
             &:hover{
                 .hoverColor (#eee);
             }
@@ -1481,8 +1481,8 @@ div.k-window-content {
         top: 15px;
         height: 50px;
         margin: 0 20px;
-        border: 2px solid #f2f2f2;
-        background: #f2f2f2;
+        border: 2px solid @grey;
+        background: @grey;
         li {
             float:left;
             height: 50px;
@@ -1505,6 +1505,7 @@ div.k-window-content {
                 margin-top: 15px;
                 font-size: 16px;
                 margin-right: 0;
+                color: @charcoal;
             }
         }
         li:nth-child(1){
@@ -2763,10 +2764,10 @@ ul.noty_cont.noty_layout_topRight li {
     font-size: 14px;
 }
 .select2-search input{
-    border: 1px solid #f2f2f2;
+    border: 1px solid @grey;
 }
 .labelDropdown, .iconDropdown{
-    border: 2px solid #F2F2F2;
+    border: 2px solid @grey;
     border-top: none;
     margin-top: 0;
     margin-left: -1px;
@@ -2857,44 +2858,48 @@ ul.noty_cont.noty_layout_topRight li {
 .switch {
     display: inline-block;
     height: 33px;
-    width: 145px;
+    width: 147px; //145px;
     cursor: pointer;
     line-height: 1.8em;
     background: @white;
     a {
-        position: relative;
+//        position: relative;
         display: block;
         float: left;
         height: 25px;
-        width: 56px;
+        width: 63px;
         line-height: 1.3em;
-        color: #ccc;
+        color: #aaa;
         text-align: center;
         font-size: 1em;
-        padding: 4px 6px 0 7px;
+        padding: 4px 3px 0 4px;//4px 6px 0 7px;
         margin: 2px 0 0 2px;
         z-index: 2;
     }
-    .toggle{
-        display: block;
-        position: absolute;
-        top: 2px;
-        left: 37px;
-        width: 63px;
-        height: 25px;
-        background: @blue;
-        padding: 4px 3px 0 4px;
-        z-index: 1;
+//    .toggle{
+//        display: block;
+//        position: absolute;
+//        top: 2px;
+//        left: 37px;
+//        width: 63px;
+//        height: 25px;
+//        background: @blue;
+//        padding: 4px 3px 0 4px;
+//        z-index: 1;
+//    }
+    a.on{
+        width: 64px;
     }
-    a.off{
-        padding: 4px 6px 0 7px;
-        margin-left: 3px;
-    }
+//    a.off{
+//        padding: 4px 6px 0 7px;
+//        margin-left: 3px;
+//    }
     a:not(.active):hover{
-        background: #f1f1f1;
+        background: @grey;
     }
     a.active {
         color: @white;
+        background: @blue;
     }
 }
 /*endregion*/
