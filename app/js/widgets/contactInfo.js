@@ -102,6 +102,8 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "db/m
                 that._changePane("list");
                 //submit the change
                 that.options.entity.destroy(id);
+
+                that._isNew = false;
             });
             $(that.element).find(".save").live("click", function () {
                 //save the old value to be used to check for changes
