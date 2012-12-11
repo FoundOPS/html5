@@ -1,7 +1,12 @@
 'use strict';
 
 define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools/generalTools"], function ($, importerUpload, dbServices, _, generalTools) {
-        var importerSelect = {}, availableFields, page,
+        var importerSelect = {},
+        //a jquery selector for this page
+            page,
+        //the currently selected fields
+            currentFields,
+        //the default fields
             defaultFields = [
                 {text: "Do not Import", group: 0},
                 {text: "Client Name", group: 0},
@@ -12,15 +17,9 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
                 {text: "State", group: 1},
                 {text: "Zipcode", group: 1},
                 {text: "Region Name", group: 1},
-                //Contact Info
-                {text: "Phone Label 1", group: 2, contactInfo: { category: 0, type: 0, number: 1 }},
-                {text: "Phone Value 1", group: 2, contactInfo: { category: 0, type: 1, number: 1 }},
-                {text: "Email Label 1", group: 2, contactInfo: { category: 1, type: 0, number: 1 }},
-                {text: "Email Value 1", group: 2, contactInfo: { category: 1, type: 1, number: 1 }},
-                {text: "Website Label 1", group: 2, contactInfo: { category: 2, type: 0, number: 1 }},
-                {text: "Website Value 1", group: 2, contactInfo: { category: 2, type: 1, number: 1 }},
-                {text: "Other Label 1", group: 2, contactInfo: { category: 3, type: 0, number: 1 }},
-                {text: "Other Value 1", group: 2, contactInfo: { category: 3, type: 1, number: 1 }},
+                //Contact Info will automatically be generated in setupFieldGroups, below is an example set
+                //{text: "Phone Label 2", group: 2, contactInfo: { category: 0, type: 0, number: 2 }},
+                //{text: "Phone Value 2", group: 2, contactInfo: { category: 0, type: 1, number: 2 }},
                 //Service Schedule
                 {text: "Frequency", group: 3},
                 {text: "Frequency Detail", group: 3},
@@ -36,7 +35,7 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
          * @param serviceFieldsToAdd The service's fields to add
          */
         var setupAvailableFields = function (serviceFieldsToAdd) {
-            var serviceFields = [], name, original;
+            var serviceFields = [], name;
 
             if (serviceFieldsToAdd) {
                 for (var i in serviceFieldsToAdd) {
@@ -52,7 +51,60 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
                 }
             }
 
-            availableFields = generalTools.deepClone(defaultFields).concat(serviceFields);
+            currentFields = generalTools.deepClone(defaultFields).concat(serviceFields);
+        };
+
+        /**
+         * Generates a contact info field based on the passed metadata
+         * @param category Ex. 0 = (Phone)
+         * @param type Ex. 0 (Label)
+         * @param number The number
+         * @return {Object}
+         */
+        var insertContactInfoField = function (category, type, number) {
+            var categories = { 0: "Phone", 1: "Email", 2: "Website", 3: "Other" };
+            var types = { 0: "Label", 1: "Value" };
+
+            var text = categories[category] + " " + types[type] + " " + number;
+
+            var fieldToInsert = {text: text, group: 2, contactInfo: {category: category, type: type, number: number}};
+
+            //find the right place to insert the contact info
+
+            var insertIndex;
+            for (insertIndex in currentFields) {
+                var nextField = currentFields[insertIndex];
+
+                //if the next field is a contact info field
+                if (nextField.group === 2) {
+                    //if it is the same category
+                    if (nextField.contactInfo.category === category) {
+                        //if it is the same number and this is a label, insert here
+                        if (nextField.contactInfo.number === number && type === 0) {
+                            break;
+                        }
+
+                        //if it is the next number, insert here
+                        if (nextField.contactInfo.number > number) {
+                            break;
+                        }
+                    }
+
+                    //if it is the next category, insert here
+                    if (nextField.contactInfo.category > category) {
+                        break;
+                    }
+                }
+
+                //if the next field is no longer contact info, insert here
+                if (nextField.group > 2) {
+                    break;
+                }
+
+                //otherwise move to the next entry
+            }
+
+            currentFields.splice(insertIndex, 0, fieldToInsert);
         };
 
         /**
@@ -67,12 +119,42 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
                 {text: "Service Fields", children: []}
             ];
 
-            //TODO Contact info stuff
+            //group the contact info fields by category
+            var contactInfoFields = _.filter(currentFields, function (field) {
+                return field.contactInfo;
+            });
+            contactInfoFields = _.groupBy(contactInfoFields, function (field) {
+                return field.contactInfo.category;
+            });
 
+            //for each contact info category make sure:
+            //a) there is an available set (label and value) at the end
+            //b) there are no extra available set in the middle
+            for (var c = 0; c < 4; c++) {
+                var categoryFields = contactInfoFields[c];
+
+                var indexed = _.groupBy(categoryFields, function (field) {
+                    return field.contactInfo.number;
+                });
+
+                var lastNumber = _.keys(indexed).length;
+                //a) make sure there is an available set at the end
+                if (//check there is an initial set
+                    !lastNumber ||
+                        //then check the last set is fully available
+                        indexed[lastNumber][0].selected || indexed[lastNumber][1].selected) {
+
+                    //if not add another contact info set
+                    insertContactInfoField(c, 0, lastNumber + 1);
+                    insertContactInfoField(c, 1, lastNumber + 1);
+                }
+
+                //check b) there are no extra available set in the middle
+            }
 
             //build the field groups from the available (not selected) fields
-            for (var i in availableFields) {
-                var field = availableFields[i];
+            for (var i in currentFields) {
+                var field = currentFields[i];
 
                 //exclude selected fields (except Do not Import)
                 if (field.selected && field.text !== "Do not Import") {
@@ -96,8 +178,8 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
                     match = false,
                     dropDown = page.find(".select2-container:eq(" + h + ")");
 
-                for (var i in availableFields) {
-                    var field = availableFields[i];
+                for (var i in currentFields) {
+                    var field = currentFields[i];
 
                     //cannot select already selected field
                     if (field.selected) {
@@ -117,11 +199,11 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
                     dropDown.select2("data", {id: "Do not Import", text: "Do not Import"});
                 }
             }
-
-            //update the field groups after matching
-            setupFieldGroups();
         };
 
+        /**
+         * Setup the header field selectors
+         */
         var setupSelectors = function () {
             var formatItemName = function (item) {
                 return item.text;
@@ -140,26 +222,34 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
                 formatSelection: formatItemName,
                 formatResult: formatItemName,
                 dropdownCssClass: "bigdrop"
-            }).on("open",function () {
-                    //store the currently selected field
+            })
+                //when a selector is opened
+                //a) store the selected field, to know if it changed later
+                //b) force re-render to get around scroll bug
+                .on("open", function () {
+                    //a) store the selected field, to know if it changed later
                     var currentSelection = $(this).select2("data");
                     if (currentSelection) {
                         this._originalField = currentSelection.text;
                     }
 
-                    //force re-render
+                    //b) force re-render to get around scroll bug
                     setTimeout(function () {
                         $(".select2-drop-active").find(".select2-results")[0].style.overflowY = "scroll";
                         setTimeout(function () {
                             $(".select2-drop-active").find(".select2-results")[0].style.overflowY = "auto";
                         }, 100);
                     }, 100);
-                }).on("change", function (e) {
+                })
+                //when a selector is changed
+                //a) un-select the old _originalField & select selectedField
+                //b) re-setup field groups after selection
+                .on("change", function (e) {
                     var selectedField = e.val;
-                    //un-select the old _originalField & select selectedField
                     if (selectedField !== this._originalField) {
-                        for (var i in availableFields) {
-                            var field = availableFields[i];
+                        for (var i in currentFields) {
+                            var field = currentFields[i];
+                            //a) un-select the old _originalField & select selectedField
                             if (field.text === selectedField) {
                                 field.selected = true;
                             } else if (field.text === this._originalField) {
@@ -167,13 +257,10 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
                             }
                         }
 
-                        //re-setup field groups after selection
+                        //b) re-setup field groups after selection
                         setupFieldGroups();
                     }
                 });
-
-            //setup initial field groups
-            setupFieldGroups();
         };
 
         //endregion
@@ -200,6 +287,7 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
         var formatDataForValidation = function (data) {
             //check value of toggle switch to know if headers should be included
             var headersIncluded = page.find(".switch .on").hasClass("active");
+
             var selectedFields = [];
 
             var apiNameMap = {
@@ -210,35 +298,48 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
                 "Zipcode": "PostalCode"
             };
 
-            //create an array of the fields to be used (based on the drop downs)
+            //create an array of the fields to be used (based on the selects)
             page.find(".select2-container").each(function () {
-                var name, value;
-                name = value = $(this).select2("val");
+                var name = $(this).select2("val");
 
                 //change to the names needed for the API
-                if (apiNameMap[value]) {
-                    name = apiNameMap[value];
+                if (apiNameMap[name]) {
+                    name = apiNameMap[name];
                 }
 
-                if (value !== "Do not Import") {
-                    selectedFields.push({name: name, selected: true});
+                if (name === "Do not Import") {
+                    selectedFields.push(null);
                 } else {
-                    selectedFields.push(false);
+                    selectedFields.push(name);
                 }
             });
 
-            var dataToValidate = [], row;
+            var dataToValidate = [], row, field;
+
+            //if the headers are not included, insert a row for the headers
+            if (!headersIncluded) {
+                var length = selectedFields.length, headerRow = [];
+                for (var i = 0; i < length; i++) {
+                    field = selectedFields[i];
+                    if (field) {
+                        headerRow.push(field);
+                    }
+                }
+                dataToValidate.unshift(headerRow);
+            }
+
             //iterate through each row of the data
             for (var r in data) {
                 row = data[r];
                 var newArray = [];
                 //iterate through each column of the current row
                 for (var c in row) {
-                    //if the field is to be imported ("Do not Import" wasn't selected for this row)
-                    if (selectedFields[c]) {
-                        //use the header from the dropdown instead of their header
+                    field = selectedFields[c];
+                    //check the field should be imported
+                    if (field) {
+                        //use the header from the select instead of their header
                         if (r == 0 && headersIncluded) {
-                            newArray.push(selectedFields[c].name);
+                            newArray.push(field);
                         } else {
                             newArray.push(row[c]);
                         }
@@ -246,17 +347,6 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
                 }
 
                 dataToValidate.push(newArray);
-            }
-
-            //if the headers are not included, insert an extra row for the headers
-            if (!headersIncluded) {
-                var length = selectedFields.length, headerRow = [];
-                for (var i = 0; i < length; i++) {
-                    if (selectedFields[i]) {
-                        headerRow.push(selectedFields[i].name);
-                    }
-                }
-                dataToValidate.unshift(headerRow);
             }
 
             return dataToValidate;
@@ -335,8 +425,14 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
             if (importerUpload.selectedService) {
                 dbServices.services.read({params: {serviceTemplateId: importerUpload.selectedService.Id}}).done(function (service) {
                     setupAvailableFields(service[0].Fields);
+
+                    //setup the initial field groups (need to do this to setup initial contact info)
+                    setupFieldGroups();
+
                     setupSelectors();
                     matchHeaders();
+                    //setup the initial field groups
+                    setupFieldGroups();
                 });
             }
         };
