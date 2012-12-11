@@ -36,10 +36,17 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
         options: {
             contacts: []
         },
-
+        _options: {
+            _isNew: null,
+            _editIndex: null,
+            _currentLabels: null
+        },
+        _init: function () {
+            var contactInfo = this;
+            contactInfo.renderContactList(contactInfo.options.contacts);
+        },
         _create: function () {
             var contactInfo = this;
-            contactInfo.contacts = contactInfo.options.contacts;
             var _contactInfo = $('<h3>Contact Info</h3>' +
                 //list pane(first view)
                 '<ul class="contactList"></ul>' +
@@ -67,8 +74,6 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
 
             contactInfo.element.append(_contactInfo);
 
-            contactInfo.renderContactList(contactInfo.contacts);
-
             //setup the dropdown of category icons
             $(contactInfo.element).find(".labelIcon").select2({
                 placeholder: "",
@@ -85,67 +90,64 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
 
             $(contactInfo.element).find(".add").on("click", function () {
                 //add an empty contact to the list
-                contactInfo.contacts.unshift({Entity: "New", Data: "", Type: "Other", Label: ""});
+                contactInfo.options.contacts.unshift({Entity: "New", Id: generalTools.newGuid(), Data: "", Type: "Other", Label: ""});
                 //refresh the list so it contains the new contact
-                contactInfo.renderContactList(contactInfo.contacts);
+                contactInfo.renderContactList(contactInfo.options.contacts);
                 //set the edit index to the last item(the new item gets added to the end)
-                contactInfo._editIndex = 0;
+                contactInfo._options._editIndex = 0;
                 //move to edit mode with the new contact
-                contactInfo._edit(contactInfo.contacts[contactInfo._editIndex]);
-                contactInfo._isNew = true;
+                contactInfo._edit(contactInfo.options.contacts[contactInfo._options._editIndex]);
+                contactInfo._options._isNew = true;
             });
             $(contactInfo.element).find(".save").on("click", $(contactInfo.element), function () {
                 //save the old value to be used to check for changes
-                var oldContact = generalTools.deepClone(contactInfo.contacts[contactInfo._editIndex]);
+                var oldContact = generalTools.deepClone(contactInfo.options.contacts[contactInfo._options._editIndex]);
                 //get the value of the selected label
                 var selectedLabel = $(contactInfo.element).find(".editWrapper .contactInfoSearchSelect").searchSelect("text");
                 //set the value
-                contactInfo.contacts[contactInfo._editIndex].Data = $(contactInfo.element).find(".editWrapper .value").val();
+                contactInfo.options.contacts[contactInfo._options._editIndex].Data = $(contactInfo.element).find(".editWrapper .value").val();
                 //set the label
-                contactInfo.contacts[contactInfo._editIndex].Label = selectedLabel;
+                contactInfo.options.contacts[contactInfo._options._editIndex].Label = selectedLabel;
                 //set the category
-                contactInfo.contacts[contactInfo._editIndex].Type = $(contactInfo.element).find(".labelIcon").select2("val");
+                contactInfo.options.contacts[contactInfo._options._editIndex].Type = $(contactInfo.element).find(".labelIcon").select2("val");
                 //refresh the list with the new values
-                contactInfo.renderContactList(contactInfo.contacts);
-                //show the list
-                contactInfo._changePane("list");
+                contactInfo.renderContactList(contactInfo.options.contacts);
 
                 //check if the label is one that was custon added
-                var isOldLabel = _.find(contactInfo._currentLabels, function (label) {
+                var isOldLabel = _.find(contactInfo._options._currentLabels, function (label) {
                     return label.value === selectedLabel;
                 });
 
                 //if custom label, save it to the corresponding list
                 if (!isOldLabel) {
-                    contactInfo._currentLabels.push({value: selectedLabel});
+                    contactInfo._options._currentLabels.push({value: selectedLabel});
                 }
                 //save changes
                 //TODO
-                if (contactInfo._isNew && contactInfo.options.entity) {
-                    contactInfo.options.entity.create(contactInfo.contacts[contactInfo._editIndex]);
+                if (contactInfo._options._isNew && contactInfo.options.entity) {
+                    contactInfo.options.entity.create(contactInfo.options.contacts[contactInfo._options._editIndex]);
                 } else {
                     //check if contact changed
-                    var newContact = generalTools.deepClone(contactInfo.contacts[contactInfo._editIndex]);
+                    var newContact = generalTools.deepClone(contactInfo.options.contacts[contactInfo._options._editIndex]);
                     if (!_.isEqual(newContact, oldContact) && contactInfo.options.entity) {
                         contactInfo.options.entity.update(newContact);
                     }
                 }
-                contactInfo._isNew = false;
+                contactInfo._options._isNew = false;
             });
             $(contactInfo.element).find(".delete").on("click", $(contactInfo.element), function () {
-                var id = contactInfo.contacts[contactInfo._editIndex].Id;
+                var id = contactInfo.options.contacts[contactInfo._options._editIndex].Id;
 
                 //remove the selected contact from the list
-                contactInfo.contacts.splice(contactInfo._editIndex, 1);
+                contactInfo.options.contacts.splice(contactInfo._options._editIndex, 1);
                 //refresh the list of contacts
-                contactInfo.renderContactList(contactInfo.contacts);
-                //show the list of contacts
-                contactInfo._changePane("list");
+                contactInfo.renderContactList(contactInfo.options.contacts);
                 //submit the change
-                //TODO
                 if (contactInfo.options.entity) {
                     contactInfo.options.entity.destroy(id);
                 }
+
+                contactInfo._options._isNew = false;
             });
             //automatically update the category as the value changes
             generalTools.observeInput($(contactInfo.element).find(".editWrapper .value"), function (string) {
@@ -195,6 +197,7 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
             $(contactInfo.element).find(".contactList a").on("click", function (e) {
                 if (e.currentTarget.children[0].className === "Phone") {
                     analytics.track("Phone Contact Click");
+                    //TODO remove any non-numbers
                     window.location.href = "tel:" + e.currentTarget.children[2].innerText;
                 } else if (e.currentTarget.children[0].className === "Email") {
                     analytics.track("Email Contact Click");
@@ -215,10 +218,12 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
                     index = e.target.parentNode.parentElement.id;
                 }
                 //set the edit index
-                contactInfo._editIndex = index;
+                contactInfo._options._editIndex = index;
                 //move to edit mode
-                contactInfo._edit(contactInfo.contacts[index]);
+                contactInfo._edit(contactInfo.options.contacts[index]);
             });
+
+            contactInfo._changePane();
         },
 
         //creates a select2 dropdown for the list of labels
@@ -235,7 +240,7 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
                     return item.value;
                 },
                 query: function (searchTerm, callback) {
-                    var data = contactInfo._currentLabels.slice() //clone the phone labels
+                    var data = contactInfo._options._currentLabels.slice() //clone the phone labels
                     if (searchTerm !== "") {
                         data.unshift({value: searchTerm});
                     }
@@ -254,11 +259,18 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
          * @private
          */
         _edit: function (contact) {
-            var contactInfo = this;
+            var contactInfo = this, type;
             //set the value in the textbox
             $(contactInfo.element).find(".editWrapper .value").val(contact.Data);
             //set the category
-            contactInfo._changeType(contact.Type, true);
+            if (contact.Type === "Phone Number") {
+                type = "Phone"
+            } else if (contact.Type === "Email Address") {
+                type = "Email"
+            } else {
+                type = contact.Type
+            }
+            contactInfo._changeType(type, true);
             //set the label
             $(contactInfo.element).find(".editWrapper .contactInfoSearchSelect").searchSelect("data", {value: contact.Label});
             //show the edit pane
@@ -288,10 +300,10 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
             //get the selected label
             var label = $(contactInfo.element).find(".editWrapper .contactInfoSearchSelect").searchSelect("textSelection");
             var sameLabels;
-            if (contactInfo._currentLabels === labels) {
+            if (contactInfo._options._currentLabels === labels) {
                 sameLabels = true;
             } else {
-                contactInfo._currentLabels = labels;
+                contactInfo._options._currentLabels = labels;
             }
             //set the correct list of labels
             contactInfo._setupLabelDropdown();

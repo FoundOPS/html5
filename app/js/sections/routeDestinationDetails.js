@@ -33,6 +33,8 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "tools/paramete
                     contacts = vm.get("selectedEntity.Client.ContactInfoSet").slice(0);
                 }
 
+//                $("#routeDestinationDetails .contactInfoWidget").contactInfo("destroy");
+
                 //initiate the contactInfo widget
                 $("#routeDestinationDetails .contactInfoWidget").contactInfo({
                     contacts: contacts,
@@ -46,7 +48,7 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "tools/paramete
                             dbServices.contactInfo.update({body: contactInfo});
                         },
                         destroy: function (id) {
-                            dbServices.contactInfo.destroy({params: {contactInfoId: id}});
+                            dbServices.contactInfo.destroy({params: {id: id}});
                         }
                     }
                 });

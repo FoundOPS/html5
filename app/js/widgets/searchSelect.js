@@ -126,10 +126,14 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                     console.log("Scrolling...");
                     _scrolling = true;
                 });
+                $(document.body).on('touchmove', function (e) {
+                    console.log("Scrolling...");
+                    _scrolling = true;
+                });
                 //When clicking outside of the select widget, close the option list and handle text inside the textbox.
                 $(document.body).on('click touchend', function (e) {
                     if (!($(e.target).closest(searchSelect.element)[0] === searchSelect.element.context)) {
-//                            setTimeout(function () {
+                            setTimeout(function () {
                                 if (!_scrolling) {
                                     if (searchSelect.selectedOptionText) {
                                         searchSelect.element.find("input")[0].value = searchSelect.selectedOptionText;
@@ -142,7 +146,7 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                                         $(".km-scroll-wrapper").kendoMobileScroller("reset");
                                     }
                                 }
-//                            }, searchSelect.options.queryDelay ? searchSelect.options.queryDelay : 0);
+                            }, 200);
                     }
                 });
             },
