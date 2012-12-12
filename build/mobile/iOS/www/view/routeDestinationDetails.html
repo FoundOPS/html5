@@ -1,0 +1,27 @@
+<div id="routeDestinationDetails" data-role="view" data-show="routeDestinationDetails.show" data-title="Destination Info">
+    <div class="locationInfo" data-bind="source: this" data-template="locationTemplate" style="margin-bottom:10px"></div>
+    <div>
+    </div>
+    <div class="contactInfo"></div>
+    <p style="top:10px; margin-bottom: -5px; font-size:20px;">Tasks</p>
+    <ul id="routeTasksListView" data-bind="source: dataSource, click: select"
+        data-role="listview" data-style="inset" data-template="routeTasksTemplate">
+    </ul>
+    <footer></footer>
+</div>
+<script type="text/x-kendo-template" id="locationTemplate">
+    # if (selectedEntity.Location) { #
+    <h1>${selectedEntity.Location.Name}</h1>
+    <p>${selectedEntity.Location.AddressLineOne}</p>
+    <p>${selectedEntity.Location.AddressLineTwo}</p>
+    <p>${selectedEntity.Location.AdminDistrictTwo}, ${selectedEntity.Location.AdminDistrictOne}<br/>
+        ${selectedEntity.Location.ZipCode}</p>
+    <a id="directionsButton" data-bind="click: getDirections">Directions</a>
+    # } else { #
+    <h1>${selectedEntity.Client.Name}</h1>
+    <p style="color:red"> No<br/>Location<br/>Information<br/>Available</p>
+    # } #
+</script>
+<script type="text/x-kendo-template" id="routeTasksTemplate">
+    <a><span>${Name}</span></a>
+</script>
