@@ -1,18 +1,19 @@
 define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
     (function ($) {
         var popup = null;
+        this.p = Popup;
         var methods = {
             init: function(options) {
                 if(typeof(options.backgroundColor) !== 'undefined'){
-                    popup.setBackgroundColor(options.backgroundColor);
+                    Popup.setBackgroundColor(options.backgroundColor);
                 }
 
                 if(typeof(options.fontColor) !== 'undefined'){
-                    popup.setFontColor(options.fontColor);
+                    Popup.setFontColor(options.fontColor);
                 }
 
                 if(typeof(options.borderColor) !== 'undefined'){
-                    popup.setBorderColor(options.borderColor);
+                    Popup.setBorderColor(options.borderColor);
                 }
 
                 if(typeof(options.disableHeader) !== 'undefined'){
@@ -35,10 +36,10 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
                 methods.init(options);
             },
             lockPopup: function() {
-                popup.lockPopup();
+                Popup.lockPopup();
             },
             unlockPopup: function() {
-                popup.unlockPopup();
+                Popup.unlockPopup();
             },
             disableHeader: function() {
                 popup.disableHeader();
@@ -89,28 +90,28 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         }
     })(jQuery);
 
+    //Static popup variables
+    Popup.popupNum = 0;
+    Popup.lastElementClick = null;
+    Popup.currentTarget = null;
+    Popup.title = "";
+    Popup.content = "";
+    Popup.menus = [];
+    Popup.history = [];
+    Popup.backgroundColor = null;
+    Popup.fontColor = null;
+    Popup.borderColor = null;
+    Popup.padding = 3;
+    Popup.offScreenX = false;
+    Popup.offScreenY = false;
+    Popup.isLocked = false;
+    Popup.isHeaderDisabled = false;
+    Popup.above = false;
+    Popup.caretLeftOffset = "50%";
     /** Popup Constructor **/
-
-
+    Popup.lastPopupClicked = null;
     function Popup(popupListener) {
-        //Static popup variables
-        Popup.lastElementClick = null;
-        Popup.currentTarget = null;
-        Popup.title = "";
-        Popup.content = "";
-        Popup.menus = [];
-        Popup.history = [];
-        Popup.backgroundColor = null;
-        Popup.fontColor = null;
-        Popup.borderColor = null;
-        Popup.padding = 3;
-        Popup.offScreenX = false;
-        Popup.offScreenY = false;
-        Popup.isLocked = false;
-        Popup.isHeaderDisabled = false;
-        Popup.above = false;
-        Popup.caretLeftOffset = "50%";
-
+        this.popupNumber = 0;
         var thisPopup = this;
 
         if ((typeof(popupListener) === 'undefined') || popupListener === null) {
@@ -119,31 +120,34 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         }
         var listenerElements = $(popupListener);
 
+        Popup.popupNum++;
+        this.popupNumber = Popup.popupNum;
         //Class added to detect clicks on primary buttons triggering popups.
-        listenerElements.addClass("popupListener");
+        this.popupListenerID = "popupListener"+this.popupNumber;
+        listenerElements.addClass(this.popupListenerID);
 
         listenerElements.css("cursor", "pointer");
         listenerElements.click(function (e) {
             thisPopup.toggleVisible(e, $(this));
         });
 
-        this.setBackgroundColor = function(color){
+        Popup.setBackgroundColor = function(color){
             Popup.backgroundColor = color;
         };
 
-        this.setFontColor = function(color){
+        Popup.setFontColor = function(color){
             Popup.fontColor = color;
         };
 
-        this.setBorderColor = function(color){
+        Popup.setBorderColor = function(color){
             Popup.borderColor = color;
         };
 
-        this.lockPopup = function(){
+        Popup.lockPopup = function(){
             Popup.isLocked = true;
         };
 
-        this.unlockPopup = function(){
+        Popup.unlockPopup = function(){
             Popup.isLocked = false;
         };
 
@@ -163,6 +167,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         };
 
         this.toggleVisible = function (e, clicked) {
+            Popup.lastPopupClicked = thisPopup;
             var clickedDiv = $(clicked);
             if (clickedDiv === null) {
                 console.log("ERROR: No element clicked!");
@@ -179,8 +184,15 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
                 }
             }
 
-            //TODO: Possibly change this to a data-* field.
+            //TODO: In the future, add passed id to selected div's data-* or add specific class.
             var id = clickedDiv.attr("id");
+            var identifierList = clickedDiv.attr('class').split(/\s+/);
+
+            //NOTE: identifierList contains the clicked element's id and class names. This is used to find its
+            //      associated menu. The next version will have a specialized field to indicate this.
+            identifierList.push(id);
+            //console.log("List: "+identifierList);
+
             //TODO: Fix repetition.
             if ($("#popup").is(":visible") && Popup.lastElementClick !== null) {
                 if (clickedDiv.is("#" + Popup.lastElementClick)) {
@@ -201,7 +213,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
             if(Popup.isLocked)return;
 
             //Update content
-            this.populate(id);
+            this.populate(identifierList);
 
             clickedDiv.trigger("popupEvent", clickedDiv);
 
@@ -389,7 +401,9 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
                     var popupHeaderLen = clicked.parents("#popupHeader").length + clicked.is("#popupHeader") ? 1 : 0;
                     //TODO: Find better listener for this.
                     var popupContentLen = (clicked.parents("#popupContentWrapper").length && !clicked.parent().is("#popupContentWrapper")) ? 1 : 0;
-                    var isListener = clicked.parents(".popupListener").length + clicked.is(".popupListener") ? 1 : 0;
+                    //console.log("popupListenerID: "+Popup.lastPopupClicked.popupListenerID);
+                    var isListener = clicked.parents("."+Popup.lastPopupClicked.popupListenerID).length + clicked.is("."+Popup.lastPopupClicked.popupListenerID) ? 1 : 0;
+                    //console.log("isListener: "+isListener);
                     if (popupHeaderLen === 0 && popupContentLen === 0 && isListener === 0) {
                         thisPopup.closePopup();
                     }
@@ -489,18 +503,32 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         };
 
         //Public void function that populates setTitle and setContent with data found by id passed.
-        this.populate = function (id) {
-            var newMenu = this.getMenu(id);
+        this.populate = function (identifierList) {
+
+            var newMenu = null;
+            var i=0;
+            for(i; i<identifierList.length; i++){
+                newMenu = this.getMenu(identifierList[i]);
+                if(newMenu!==null){
+                    //console.log("Found menu! id: "+identifierList[i]);
+                    break;
+                }
+            }
+
             if (newMenu === null) {
-                //TODO: Possibly add a boolean to pass to indicate link or end of menu action.
-                //console.log("ID not found.");
+                console.log("ID not found.");
                 return false;
             }
             $(document).trigger('popup.populating');
             Popup.history.push(newMenu);
-
+            this.clearData();
             this.setData(newMenu);
             return true;
+        };
+
+        this.clearData = function (){
+            $("#popupTitle").html("");
+            $("#popupContent").html("");
         };
 
         this.setData = function (data) {
@@ -529,7 +557,8 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
             })
             .on('click', '.popupContentRow',
             function () {
-                var newId = $(this).attr('id');
+                var newId = [];
+                newId.push($(this).attr('id'));
 
                 //TODO: Prefix all events triggered
                 if ($(this).hasClass("popupEvent")) {
@@ -547,7 +576,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         var createBackButton = function(){
             //Don't create back button or listener if disabled.
             if(!isBackEnabled)return;
-            console.log("Creating back button.");
+            //console.log("Creating back button.");
             $("#popupHeader").prepend("<a id='popupBack'></a>");
             $("#popupBack").click(function () {
                 thisOptionsPopup.previousPopup();
@@ -591,7 +620,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
 
             //TODO: Possibly move this into populate and call during back listener.
             var oldPopupTop = $("#popup").offset().top;
-            console.log("Old top: "+oldPopupTop);
+            //console.log("Old top: "+oldPopupTop);
             var oldPopupHeight = $("#popupArrow").height() + $("#popupContent").height() + $("#popupHeader").height();
 
             this.setAction(data.id);
@@ -601,7 +630,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
             if(Popup.above){
                 var newPopupHeight = $("#popupArrow").height() + $("#popupContent").height() + $("#popupHeader").height();
                 var popupTop = oldPopupTop - (newPopupHeight - oldPopupHeight);
-                console.log("New top: "+popupTop);
+                //console.log("New top: "+popupTop);
                 $("#popupWrapper").css("padding-top", popupTop + "px");
                 this.setCaretPosition(Popup.caretLeftOffset);
             }

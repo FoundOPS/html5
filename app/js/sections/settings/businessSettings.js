@@ -50,8 +50,7 @@ define(["db/services", "db/saveHistory", "tools/parameters", "widgets/imageUploa
         //setup image upload
         imageUpload = $("#businessImageUpload").kendoImageUpload({
             uploadUrl: dbServices.API_URL + "settings/UpdateBusinessImage",
-            imageWidth: 200,
-            containerWidth: 500
+            imageWidth: 200
         }).data("kendoImageUpload");
     };
 

@@ -46,7 +46,7 @@ table {
 /*endregion*/
 /*region Variables*/
 @blue: #488FCD;
-@green: #659A41;
+@green: #5aad52;
 @red: #991A36;
 @orange: #D9591E;
 @charcoal: #333335;
@@ -101,10 +101,13 @@ table {
 .k-header:not(.k-menu, .k-dropdown), .k-grid-header, .k-toolbar, .k-dropdown-wrap, .k-picker-wrap, .k-grouping-header, .k-tooltip, .k-draghandle, .k-tile,
 .k-textbox, .k-autocomplete, .k-state-hover, .k-state-selected, .k-state-focused, .k-tabstrip-items .k-item, .cancelBtn {
     background:none;
-    background-color: @blue;
+    background-color: @green;
 }
 .k-icon, .k-tool-icon, .k-grouping-dropclue, .k-drop-hint, .k-callout, .k-progress, .k-progress-status, .k-column-menu .k-sprite {
     background-image: url('../img/sprite.png');
+}
+.km-root select:not([multiple]){
+    font-size: 1em;
 }
 /*region grid filters*/
 .k-group.k-popup{
@@ -121,7 +124,7 @@ table {
     }
     .k-state-selected{
         background:none;
-        background-color: @blue;
+        background-color: @green;
     }
     .k-columns-item .k-state-active, .k-filter-item .k-state-active{
         .hoverColor;
@@ -195,7 +198,7 @@ table {
         .hoverColor;
     }
     .k-list .k-state-selected:hover{
-        .hoverColor(@blue);
+        .hoverColor(@green);
         color: @white;
     }
     .k-i-sort-asc, .k-i-sort-desc{
@@ -373,8 +376,9 @@ span.k-tooltip {
 .k-button:active, .k-ghost-splitbar-vertical, .k-ghost-splitbar-horizontal,
 .k-draghandle.k-state-selected:hover {
     background: none;
-    background-color: @blue;
-    border-color: @blue;
+    background-color: @grey;
+    border-color: @grey;
+    color: @black;
 }
 
 //make alternate grid rows background color white instead of transparent
@@ -385,21 +389,10 @@ span.k-tooltip {
     }
 }
 .k-grid tbody tr.k-state-selected:hover{
-    .hoverColor(@blue);
+    .hoverColor(@grey, 15%);
 }
 
 /*region Overrides for kendo mobile*/
-#personal, #business, #users, #dispatcher, #changePassword, #createPassword, #services {
-    h1, .km-content h1 {
-        font-size: 1.5em;
-        margin: 36px 0 15px 184px;
-    }
-    h2, .km-content h2 {
-        font-size: 1.2em;
-        border-bottom: 1px solid #666666;
-        margin: 0 0 15px 0;
-    }
-}
 
 .km-ios {
     font-weight: normal;
@@ -417,13 +410,23 @@ span.k-tooltip {
     font-family: PTSans;
 }
 
+.k-button{
+    background: @white;
+    border: none;
+    border-radius: 0;
+    &:hover{
+        background: none;
+        .hoverColor(@white, 15%);
+    }
+}
+
 .km-stretched-view, .km-root .k-dropdown select, .km-root .k-dropdown .k-select, .km-root .k-dropdown-wrap {
     display: block;
 }
 
 //this keeps the grey background
 .km-ios, .km-ios .km-content {
-    background: none;
+    background: @white;
 }
 
 .km-ios, .km-ios .km-list > li {
@@ -433,56 +436,64 @@ span.k-tooltip {
 
 /*endregion*/
 /*endregion*/
-/*region Settings - Menu*/
+/*region Settings Menu*/
 .settingsMenu {
     position: absolute;
-    width: 130px;
-    margin: 20px 0 10px 20px;
+    width: 250px;
+    height: 100%;
+    margin: 0 0 10px 0;
     padding-left: 0;
     font-size: 18px;
     z-index: 0;
-    -moz-box-shadow: 0 3px 5px #aaa;
-    -webkit-box-shadow: 0 3px 5px #aaa;
-    box-shadow: 0 3px 5px #aaa;
-    background-color: #fff;
-}
-
-.settingsMenu .active {
-    font-weight: bold;
-}
-
-.settingsMenu li {
-    list-style: none;
-    padding: 5px 0 5px 15px;
-    cursor: pointer;
-    border-bottom: 1px solid #ccc;
-}
-
-.settingsMenu li:last-child {
-    border-bottom: none;
-}
-
-.settingsMenu li a {
-    color: @charcoal;
-}
-.settingsMenu li:nth-child(2), .settingsMenu li:nth-child(3), .settingsMenu li:nth-child(4), .settingsMenu li:nth-child(5){
-    display: none;
-}
-.settingsMenu li:nth-child(1):hover a, .settingsMenu li:nth-child(1).active a,
-.settingsMenu li:nth-child(5):hover a, .settingsMenu li:nth-child(5).active a{
-    color: @green;
-}
-
-.settingsMenu li:nth-child(2):hover a, .settingsMenu li:nth-child(2).active a {
-    color: @red;
-}
-
-.settingsMenu li:nth-child(3):hover a, .settingsMenu li:nth-child(3).active a {
-    color: @blue;
-}
-
-.settingsMenu li:nth-child(4):hover a, .settingsMenu li:nth-child(4).active a {
-    color: @orange;
+    text-align: center;
+    background-color: @white;
+    h2{
+        margin-top: 10px;
+        margin-bottom: 10px;
+        font-size: 1.1em;
+        color: @green;
+    }
+    #settingsList{
+        text-align: left;
+    }
+    li {
+         list-style: none;
+         padding: 5px 0 5px 15px;
+         cursor: pointer;
+         //border-bottom: 1px solid @grey;
+        &:first-child{
+            //border-top: 3px solid @grey;
+        }
+        &:hover{
+            .hoverColor(@white);
+        }
+        a {
+            color: @charcoal;
+        }
+     }
+    li.active{
+        background-color: @green;
+        &:hover{
+            .hoverColor(@green);
+        }
+        a{
+            color: @white;
+        }
+    }
+    li:nth-child(2), li:nth-child(3), li:nth-child(4), li:nth-child(5){
+        display: none;
+    }
+    div{
+        position: absolute;
+        bottom: 10px;
+        width: 100%;
+        text-align: center;
+    }
+    div a, .km-root{
+        color: @green;
+        font-size: 12px;
+        text-decoration: underline;
+    }
 }
 
 /*endregion*/
@@ -492,23 +503,34 @@ h1, h2, h3, td, p {
 }
 h1.title {
     width: 500px;
+    color: @charcoal;
+}
+h2{
+    color: @charcoal;
 }
 body {
     font-family: PTSans;
-    background-color: #efefef;
+    background-color: @grey;
     color: @charcoal;
 }
 hr {
     border: 1px solid #666;
 }
 .wrap {
-    margin: 0 20px 10px 180px;
-    padding: 15px;
-    -moz-box-shadow: 0 5px 8px #aaa;
-    -webkit-box-shadow: 0 5px 8px #aaa;
-    box-shadow: 0 5px 8px #aaa;
-    background-color: #fff;
+    margin: 15px 40px 0 290px;
+    padding: 0 0 15px;
+    h1{
+        margin:20px 0 5px 0;
+        padding: 4px 0 3px 0;
+        font-size: 1.7em;
+        font-weight: normal;
+        color: @green;
+    }
 }
+.wrap.top{
+    margin-top: 25px;
+}
+
 ::-webkit-scrollbar {
     width: 12px;
     height: 12px;
@@ -523,7 +545,7 @@ hr {
     }
 }
 ::-webkit-scrollbar-thumb{
-    background-color: @blue;
+    background-color: @green;
     &:horizontal{
         border-top: 4px solid @grey;
     }
@@ -532,14 +554,10 @@ hr {
     }
 }
 ::-webkit-scrollbar-thumb:hover{
-    .hoverColor(@blue);
+    .hoverColor(@green);
 }
 ::-webkit-scrollbar-corner{
-    background: @grey;
-}
-#dispatcher .addDeleteBtns {
-    float: right;
-    margin: -8px 0 0 0;
+    background: @white;
 }
 .addDeleteBtns .k-grid-delete, .addDeleteBtns .k-grid-add {
     padding-right: 6px;
@@ -586,22 +604,23 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover {
 
 .k-grid{
     border: none;
+    border-left: 2px solid @grey;
     .k-grid-header-wrap{
         border: none;
     }
     .k-grid-header{
         margin-top: 5px;
         margin-bottom: 3px;
-        padding-right: 0 !important;
+        padding-right: 13px;
         border: none;
-        background: none;
+        background: @grey;
         table{
             padding-right: 13px;
         }
         .k-header {
             border: none;
             font-size: 16px;
-            background: @blue;
+            background: @green;
             border-bottom: 2px solid @grey;
             border-right: 1px solid @grey;
             border-left: 1px solid @grey;
@@ -614,7 +633,7 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover {
                 }
             }
             &:hover{
-                .hoverColor (@blue, 8%);
+                .hoverColor (@green, 8%);
             }
             span.k-i-arrow-n, span.k-i-arrow-s{
                 float: right;
@@ -639,7 +658,7 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover {
                     background-position: -118px -231px;
                 }
                 &:hover{
-                    .hoverColor (@blue, 15%);
+                    .hoverColor (@green, 15%);
                 }
             }
         }
@@ -651,18 +670,33 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover {
         }
     }
     tr{
-        background-color: @white;
+        background-color: @grey;
         &:hover{
-            .hoverColor (#ddd);
+            .hoverColor(@grey);
             cursor: pointer;
         }
+        &:last-child td{
+            border-bottom: none;
+        }
     }
-    tr:last-child td{
-        border-bottom: none;
+    tr.k-state-selected{
+        td{
+            border-left: 1px solid @white;
+            border-right: 1px solid @white;
+            border-bottom: 2px solid @white;
+        }
+        td:first-child{
+            border-left: none;
+            border-right: 1px solid @white;
+        }
+        td:last-child{
+            border-right: none;
+            border-left: 1px solid @white;
+        }
     }
     td {
         height: 100%;
-        padding: 0 7px 0 3px;
+        padding: 5px 7px 5px 3px;
         border: none;
         border-left: 1px solid @grey;
         border-right: 1px solid @grey;
@@ -686,36 +720,32 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover {
                 .hoverColor(@grey);
             }
         }
+        span.k-state-selected{
+            background: @green;
+            color: @white;
+        }
     }
 }
 /*endregion*/
 /*region ImageUploadButton */
-.imageupload-button {
-    margin-left: 192px;
-}
-
 .imageupload-button:hover {
     background-image: url("../img/highlight.png");
 }
-
 .imageupload-cropbox {
     margin-bottom: 10px;
 }
 
 /*endregion*/
 /*region Settings - Personal */
-#personal .wrap, #business .wrap, #changePassword .wrap, #createPassword .wrap { //display:block causes .wrap to bee too wide in Firefox
-    display: table;
-    width: 500px;
-    padding: 15px;
-}
-
-#personal h2.middle, #business h2.middle {
-    margin-top: 10px;
-}
-
-#personal table {
-    margin: 0 0 0 102px;
+#personal, #business, #changePassword, #createPassword{ //display:block causes .wrap to bee too wide in Firefox
+    .wrap{
+        display: block;
+        min-width: 250px;
+        max-width: 300px;
+        form, #usersGrid, #dispatcherGrid{
+            //margin: 0 15px;
+        }
+    }
 }
 
 #personal .k-dropdown {
@@ -733,20 +763,14 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover {
     margin: 0 0 5px 0;
 }
 
-#personal td.right, #business td.right, #changePassword td.right, #createPassword td.right {
-    text-align: left;
-}
-
-#personal td input, #business td input, #changePassword td input, #createPassword td input {
-    width: 190px;
-    height: 20px;
-    border: 1px inset #ccc;
-    font-size: 1em;
+#personal input, #business input, #changePassword input, #createPassword input {
+    width: 240px;
+    height: 28px;
+    margin-top: 2px;
+    margin-bottom: 7px;
     padding-left: 2px;
-}
-
-#personal .changePassword {
-    margin-left: 164px;
+    border: none;
+    font-size: 1em;
 }
 
 #personal .k-image, #business .k-image {
@@ -801,7 +825,6 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover {
 #users .wrap {
     min-width: 705px;
 }
-
 #usersGrid {
     min-width: 675px;
     overflow: auto;
@@ -825,7 +848,7 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover {
 
 #addUser {
     width: 120px;
-    margin: 0 0 25px 70px;
+    margin: 0 0 10px 70px;
     cursor: pointer;
     color: @blue;
     display: block;
@@ -921,6 +944,10 @@ div.k-window-content {
 /*region Settings - Dispatcher*/
 #dispatcher .wrap {
     min-width: 450px;
+}
+#dispatcher .addDeleteBtns {
+    float: right;
+    margin: 15px 3px 0 0;
 }
 #dispatcher .k-grid th {
     text-overflow: ellipsis;
@@ -1352,7 +1379,7 @@ div.k-window-content {
                 padding: 4px 6px 5px 6px;
                 text-align: center;
                 color: @white;
-                background: @blue;
+                background: @green;
             }
         }
         li:nth-child(3){
@@ -1401,6 +1428,11 @@ div.k-window-content {
         margin: 30px 20px 30px 20px;
     }
     .grid{
+        .k-grid-header{
+            table{
+                padding-right: 0;
+            }
+        }
         .k-grid-content{
             margin-bottom: 15px;
         }
@@ -1436,40 +1468,6 @@ div.k-window-content {
         .popupListener{
             min-height: 20px;
         }
-    }
-    ol{
-        button{
-            margin-top: 0;
-        }
-    }
-    .warning{
-        width: 16px;
-        height: 14px;
-        position: relative;
-        top: 2px;
-        background: url("../img/warning.png") no-repeat;
-    }
-    #exists, #autofilled, #synced{
-        width: 16px;
-        height: 16px;
-        border: 1px solid #000;
-    }
-    #exists{
-        background-color: #659A41;
-    }
-    #autofilled{
-        background-color: @blue;
-    }
-    #synced{
-        background-color: #991A36;
-    }
-    .cellError{
-        display: inline-block;
-        width: 16px;
-        height: 14px;
-        margin-right: 2px;
-        vertical-align: middle;
-        background: url("../img/warning.png") no-repeat;
     }
 }
 /*endregion*/
@@ -1616,32 +1614,29 @@ div.k-window-content {
 /*endregion*/
 /*region Services */
 #services {
-    background-color: #fff;
-    background-image: url("../img/background-tile.png");
     .km-content {
         min-width: 720px;
+        background: @grey;
     }
     #left {
         position: relative;
         top: 15px;
         max-height: 100%;
         width: auto;
-        margin: 0 360px 15px 15px;
-        padding: 15px;
-        background: @grey;
+        margin: 0 330px 15px 30px;
         label {
             position: relative;
             top: -2px;
             margin-right: 5px;
             padding-left: 6px;
-            color: @textColor;
-            font-size: 1.5em;
+            color: @green;
+            font-size: 1.7em;
         }
         .addDeleteBtns {
             position: absolute;
             width: 80px;
             right: 14px;
-            top: 20px;
+            top: 8px;
             .csvBtn {
                 background-position: 0 -176px;
             }
@@ -1675,6 +1670,16 @@ div.k-window-content {
     font-family: "PTSans";
     color: @textColor;
     width: 270px;
+    h1{
+        margin-left: 0;
+        margin-right: 0;
+        padding-bottom: 5px;
+        color: @green;
+        font-size: 1.7em;
+    }
+    h1.serviceFields{
+        padding-bottom: 0;
+    }
     input, label{
         color: @textColor;
     }
@@ -1721,7 +1726,7 @@ div.k-window-content {
         outline: none;
         padding: 0;
         &:checked {
-            background-color: @blue;
+            background-color: @green;
         }
     }
     .k-numeric-wrap .k-input {
@@ -1789,18 +1794,16 @@ div.k-window-content {
 #serviceDetailsWrapper{
     display: none;
     position: absolute;
-    top: 15px;
-    right: 30px;
+    top: 0;
+    right: 0;
     width: 270px;
-    padding: 10px 15px;
+    height: 100%;
+    padding: 20px 30px;
     background-color: @grey;
 }
 
 #serviceDetails {
     overflow-y: auto;
-    label.client, label.location{
-        line-height: 1.5em;
-    }
 }
 /*endregion*/
 /*region Widgets */
@@ -2824,24 +2827,22 @@ ul.noty_cont.noty_layout_topRight li {
 }
 /*endregion*/
 /*region SelectBox*/
-#services, #taskServiceDetails, #importerUpload, #importerSelect, #importerReview {
-    .styled-select{
-        width: 100%;
-        height: 28px;
-        overflow: hidden;
-        background: url("../img/select-closed.png") no-repeat right #fff;
-    }
-    .selectBox {
-        width: 100%;
-        height: 28px;
-        padding: 5px;
-        border: none;
-        cursor: pointer;
-        font-size: 14px;
-        font-family: PTSans;
-        -webkit-appearance: none;
-        background: transparent;
-    }
+.styled-select{
+    width: 100%;
+    height: 28px;
+    overflow: hidden;
+    background: url("../img/select-closed.png") no-repeat right #fff;
+}
+.selectBox {
+    width: 100%;
+    height: 28px;
+    padding: 5px 12px 5px 5px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-family: PTSans;
+    -webkit-appearance: none;
+    background: transparent;
 }
 #importerUpload{
     .styled-select{
@@ -2899,7 +2900,7 @@ ul.noty_cont.noty_layout_topRight li {
     }
     a.active {
         color: @white;
-        background: @blue;
+        background: @green;
     }
 }
 /*endregion*/

@@ -15,13 +15,17 @@ define(["jquery", "db/session", "kendo"], function ($, session) {
             options = this.options;
 
             // append the element that will be the menu
-            _menu = $('<ul id="settingsList"> ' +
+            _menu = $('<h2>Settings</h2>' +
+                '<ul id="settingsList"> ' +
                 '<li class="active"><a>Personal</a></li>' +
                 '<li><a>Business</a></li>' +
                 '<li><a>Users</a></li>' +
                 '<li><a>Dispatcher</a></li>' +
                 '<li><a>Import</a></li>' +
-                '</ul>');
+                '<li><a>Privacy Policy</a></li>' +
+                '<li><a>Terms of Service</a></li>' +
+                '</ul>' +
+                '<div><a href="http://indymade.com/" target="_blank">Made with Pride in Indiana</a></div>');
 
             var personalLi = _menu.find("li:nth-child(1)");
             var businessLi = _menu.find("li:nth-child(2)");
