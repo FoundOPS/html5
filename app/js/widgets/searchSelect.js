@@ -115,7 +115,7 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                         setTimeout(function () {
                             searchSelect.clearList();
                         }, searchSelect.options.queryDelay ? searchSelect.options.queryDelay : 0);
-                        if (searchSelect.isTouchDevice) {
+                        if (searchSelect.isTouchDevice && generalTools.checkPlatform.isAndroid()) {
                             $(".km-scroll-wrapper").kendoMobileScroller("reset");
                         }
                     }
@@ -142,7 +142,7 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                                         searchSelect.element.find("input")[0].value = "";
                                     }
                                     searchSelect.clearList();
-                                    if (searchSelect.isTouchDevice) {
+                                    if (searchSelect.isTouchDevice && generalTools.checkPlatform.isAndroid()) {
                                         $(".km-scroll-wrapper").kendoMobileScroller("reset");
                                     }
                                 }
