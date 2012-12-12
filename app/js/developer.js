@@ -59,7 +59,7 @@ define(['lib/platform', "underscore", 'underscore.string', "tools/generalTools"]
      * This will cause CURRENT_FRAME and CURRENT_DATA_SOURCE to be overridden
      * @type {boolean}
      */
-    developer.DEPLOY = false;
+    developer.DEPLOY = true;
     if (developer.DEPLOY) {
         developer.CURRENT_DATA_SOURCE = developer.DataSource.LIVE;
         developer.CURRENT_FRAME = developer.Frame.DEFAULT;
