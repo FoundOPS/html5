@@ -180,6 +180,11 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
                 //get the values for the contact
                 value = contacts[i].Data;
                 category = contacts[i].Type;
+                if (category === "Phone Number") {
+                    category = "Phone"
+                } else if (category === "Email Address") {
+                    category = "Email"
+                }
                 label = contacts[i].Label;
 
                 //remove the "http://" if website
