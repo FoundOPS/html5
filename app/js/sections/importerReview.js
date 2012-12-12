@@ -214,13 +214,13 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
     var dataBound = function () {
         var reviewElement = $("#importerReview");
 
-        var contactInfoWidget = reviewElement.find(".ContactInfo::parent");
-        var locationWidget = reviewElement.find(".Location::parent");
-        var repeatWidget = reviewElement.find(".Repeat::parent");
+        var contactInfoWidget = reviewElement.find(".ContactInfo");
+        var locationWidget = reviewElement.find(".Location");
+        var repeatWidget = reviewElement.find(".Repeat");
 
-        contactInfoWidget.popup({contents: $("<div class='contactInfoWidget'></div>")});
-        locationWidget.popup({contents: $("<div class='locationWidget'></div>")});
-        repeatWidget.popup({contents: $("<div class='repeatWidget'></div>")});
+        contactInfoWidget.popup({id: "contactInfoWidget", contents: $("<div class='contactInfoWidget'></div>")});
+        locationWidget.popup({id: "locationWidget", contents: $("<div class='locationWidget'></div>")});
+        repeatWidget.popup({id: "repeatWidget",contents: $("<div class='repeatWidget'></div>")});
 
         /**
          * Updates the row/cell index that was clicked on

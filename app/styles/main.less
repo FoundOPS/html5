@@ -426,7 +426,7 @@ span.k-tooltip {
 
 //this keeps the grey background
 .km-ios, .km-ios .km-content {
-    background: @grey;
+    background: @white;
 }
 
 .km-ios, .km-ios .km-list > li {
@@ -1428,6 +1428,11 @@ div.k-window-content {
         margin: 30px 20px 30px 20px;
     }
     .grid{
+        .k-grid-header{
+            table{
+                padding-right: 0;
+            }
+        }
         .k-grid-content{
             margin-bottom: 15px;
         }
@@ -1611,6 +1616,7 @@ div.k-window-content {
 #services {
     .km-content {
         min-width: 720px;
+        background: @grey;
     }
     #left {
         position: relative;
