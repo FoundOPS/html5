@@ -371,7 +371,7 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
         var windowHeight = $(window).height();
         var contentHeight = windowHeight - extraMargin;
         $('#grid').css("max-height", contentHeight + 19 + 'px');
-        $('#grid .k-grid-content').css("max-height", contentHeight - 42 + 'px');
+        $('#grid .k-grid-content').css("max-height", contentHeight - 15 + 'px');
         $("#serviceDetails").css("max-height", contentHeight + 63 + 'px');
     };
 

@@ -251,9 +251,8 @@ define(['jquery', "developer", "tools/dateTools", 'moment'], function ($, develo
      * Then center the image based on the parent container's width
      * @param element The jQuery element selector
      * @param {number} maxSize
-     * @param {number} containerWidth
      */
-    generalTools.resizeImage = function (element, maxSize, containerWidth) {
+    generalTools.resizeImage = function (element, maxSize) {
         //get the original dimensions of the image
         var width = element[0].width;
         var height = element[0].height;
@@ -269,9 +268,6 @@ define(['jquery', "developer", "tools/dateTools", 'moment'], function ($, develo
         //set the final sizes
         element.css("width", newW + "px");
         element.css("height", newH + "px");
-        //center the image
-        var margin = (containerWidth - newW) / 2;
-        element.css("marginLeft", margin + "px");
     };
 
     /**
