@@ -88,7 +88,7 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
 
             contactInfo._setupLabelDropdown();
 
-            $(contactInfo.element).find(".add").on("click", function () {
+            $(contactInfo.element).find(".add").on("click touchend", function () {
                 //add an empty contact to the list
                 contactInfo.options.contacts.unshift({Entity: "New", Id: generalTools.newGuid(), Data: "", Type: "Other", Label: ""});
                 //refresh the list so it contains the new contact
@@ -99,7 +99,7 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
                 contactInfo._edit(contactInfo.options.contacts[contactInfo._options._editIndex]);
                 contactInfo._options._isNew = true;
             });
-            $(contactInfo.element).find(".save").on("click", $(contactInfo.element), function () {
+            $(contactInfo.element).find(".save").on("click touchend", $(contactInfo.element), function () {
                 //save the old value to be used to check for changes
                 var oldContact = generalTools.deepClone(contactInfo.options.contacts[contactInfo._options._editIndex]);
                 //get the value of the selected label
@@ -135,7 +135,7 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
                 }
                 contactInfo._options._isNew = false;
             });
-            $(contactInfo.element).find(".delete").on("click", $(contactInfo.element), function () {
+            $(contactInfo.element).find(".delete").on("click touchend", $(contactInfo.element), function () {
                 var id = contactInfo.options.contacts[contactInfo._options._editIndex].Id;
 
                 //remove the selected contact from the list
@@ -194,7 +194,7 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
                 list.append(element);
             }
 
-            $(contactInfo.element).find(".contactList a").on("click", function (e) {
+            $(contactInfo.element).find(".contactList a").on("click touchend", function (e) {
                 if (e.currentTarget.children[0].className === "Phone") {
                     analytics.track("Phone Contact Click");
                     //TODO remove any non-numbers
@@ -209,7 +209,7 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tool
             });
 
             //on edit button click
-            $(contactInfo.element).find(".editBtn").on("click", function (e) {
+            $(contactInfo.element).find(".editBtn").on("click touchend", function (e) {
                 var index;
                 //get the id of the list item that was clicked on(need to check if the span or div element was clicked on)
                 if (e.target.className === "editBtn") {
