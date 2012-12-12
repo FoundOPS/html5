@@ -9,6 +9,18 @@
 define(['jquery', "developer", 'lib/platform', 'moment'], function ($, developer, platform) {
     var generalTools = {};
 
+    $.fn.delayKeyup = function (callback, ms) {
+        var timer = 0;
+        var el = $(this);
+        $(this).keyup(function () {
+            clearTimeout(timer);
+            timer = setTimeout(function () {
+                callback(el);
+            }, ms);
+        });
+        return $(this);
+    };
+
     generalTools.deepClone = function (obj) {
         return JSON.parse(JSON.stringify(obj));
     };

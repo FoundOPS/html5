@@ -56,7 +56,6 @@ define(["db/services", "sections/linkedEntitySection", "db/session"], function (
             taskStatuses.read();
             vm.set("taskStatusesSource", taskStatuses);
         });
-
         vm.get("dataSource").read();
     };
 

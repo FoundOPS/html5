@@ -1,14 +1,15 @@
+//OLD - importerV2
 // Copyright 2012 FoundOPS LLC. All Rights Reserved.
 
 'use strict';
 
 //need to require kendo so it is loaded before this widget, otherwise funky stuff happens
-define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "db/models", "tools/analytics", "select2", "kendo"], function ($, _, generalTools, parserTools, models, analytics) {
+define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tools/analytics", "select2", "widgets/searchSelect", "kendo"], function ($, _, generalTools, parserTools, analytics) {
     //region Locals
 //   var sampleContacts = [
-//            {Entity: "Burger King", Data: "765-494-2786", Type: models.InfoType.PHONE, Label: "Mobile"},
-//            {Entity: "Burger King", Data: "bk47906@gmail.com", Type: models.InfoType.EMAIL, Label: "Personal"},
-//            {Entity: "Mary Lou's", Data: "http://www.marylousdonuts.com", Type: models.InfoType.WEBSITE, Label: "Business"}
+//            {Entity: "Burger King", Data: "765-494-2786", Type: "Phone Number", Label: "Mobile"},
+//            {Entity: "Burger King", Data: "bk47906@gmail.com", Type: "Email Address", Label: "Personal"},
+//            {Entity: "Mary Lou's", Data: "http://www.marylousdonuts.com", Type: "Website", Label: "Business"}
 //        ];
 
     //labels for each category
@@ -30,152 +31,149 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "db/m
         otherLabels = [];
     //endregion
 
-    $.widget("ui.contactInfo", {
+    var contactInfo =  {
+        //Contacts is an array of the contacts for the widget to display.
         options: {
             contacts: []
         },
-
+        _options: {
+            _isNew: null,
+            _editIndex: null,
+            _currentLabels: null
+        },
+        _init: function () {
+            var contactInfo = this;
+            contactInfo.renderContactList(contactInfo.options.contacts);
+        },
         _create: function () {
-            var that = this;
-            that.contacts = that.options.contacts;
+            var contactInfo = this;
             var _contactInfo = $('<h3>Contact Info</h3>' +
                 //list pane(first view)
                 '<ul class="contactList"></ul>' +
                 '<div class="addButtonWrapper">' +
-                '<button class="k-button k-button-icontext add"><span class="k-icon k-add"></span>Add New</button>' +
+                    '<button class="k-button k-button-icontext add"><span class="k-icon k-add"></span>Add New</button>' +
                 '</div>' +
                 //edit pane
                 '<div class="editWrapper">' +
-                '<label>Value</label><br />' +
-                '<input class="value" type="text"/><br />' +
-                '<label>Label</label><br />' +
-                '<select class="labelIcon">' +
-                '<option class="EmailSmall" value="Email">&nbsp;</option>' +
-                '<option class="WebsiteSmall" value="Website">&nbsp;</option>' +
-                '<option class="PhoneSmall" value="Phone">&nbsp;</option>' +
-                '<option class="OtherSmall" value="Other">&nbsp;</option>' +
-                '</select>​' +
-                '<input class="label" /><br />' +
+                    '<label>Value</label><br />' +
+                    '<input class="value" type="text"/><br />' +
+                    '<label>Label</label><br />' +
+                    '<select class="labelIcon">' +
+                        '<option class="EmailSmall" value="Email">&nbsp;</option>' +
+                        '<option class="WebsiteSmall" value="Website">&nbsp;</option>' +
+                        '<option class="PhoneSmall" value="Phone">&nbsp;</option>' +
+                        '<option class="OtherSmall" value="Other">&nbsp;</option>' +
+                    '</select>' +
+                    '<div class="contactInfoSearchSelect" /></div>' +
+                    '<br />' +
                 '</div>' +
                 '<div class="saveDeleteButtonWrapper">' +
-                '<button class="k-button k-button-icontext save"><span class="k-icon k-update"></span>Save</button>' +
-                '<button class="k-button k-button-icontext delete"><span class="k-icon k-delete"></span>Delete</button>' +
+                    '<button class="k-button k-button-icontext save"><span class="k-icon k-update"></span>Save</button>' +
+                    '<button class="k-button k-button-icontext delete"><span class="k-icon k-delete"></span>Delete</button>' +
                 '</div>');
 
-            that.element.append(_contactInfo);
-
-            that._renderContactList(that.contacts);
+            contactInfo.element.append(_contactInfo);
 
             //setup the dropdown of category icons
-            $(that.element).find(".labelIcon").select2({
+            $(contactInfo.element).find(".labelIcon").select2({
                 placeholder: "",
                 width: "28px",
                 containerCssClass: "iconContainer OtherSmall",
                 minimumResultsForSearch: 15,
                 dropdownCssClass: "bigdrop iconDropdown"
             }).on("change", function (e) {
-                    //change the label icon
-                    that._changeType(e.val, false);
-                });
+                //change the label icon
+                contactInfo._changeType(e.val, false);
+            });
 
-            that._setupLabelDropdown();
+            contactInfo._setupLabelDropdown();
 
-            $(that.element).find(".add").on("click", function () {
+            $(contactInfo.element).find(".add").on("click", function () {
                 //add an empty contact to the list
-                that.contacts.unshift({Entity: "New", Id: generalTools.newGuid(), Data: "", Type: "Other", Label: ""});
+                contactInfo.options.contacts.unshift({Entity: "New", Id: generalTools.newGuid(), Data: "", Type: "Other", Label: ""});
                 //refresh the list so it contains the new contact
-                that._renderContactList(that.contacts);
+                contactInfo.renderContactList(contactInfo.options.contacts);
                 //set the edit index to the last item(the new item gets added to the end)
-                that._editIndex = 0;
+                contactInfo._options._editIndex = 0;
                 //move to edit mode with the new contact
-                that._edit(that.contacts[that._editIndex]);
-                that._isNew = true;
+                contactInfo._edit(contactInfo.options.contacts[contactInfo._options._editIndex]);
+                contactInfo._options._isNew = true;
             });
-            $(that.element).find(".delete").live("click", function () {
-                var id = that.contacts[that._editIndex].Id;
-
-                //remove the selected contact from the list
-                that.contacts.splice(that._editIndex, 1);
-                //refresh the list of contacts
-                that._renderContactList(that.contacts);
-                //show the list of contacts
-                that._changePane("list");
-                //submit the change
-                that.options.entity.destroy(id);
-
-                that._isNew = false;
-            });
-            $(that.element).find(".save").live("click", function () {
+            $(contactInfo.element).find(".save").on("click", $(contactInfo.element), function () {
                 //save the old value to be used to check for changes
-                var oldContact = generalTools.deepClone(that.contacts[that._editIndex]);
+                var oldContact = generalTools.deepClone(contactInfo.options.contacts[contactInfo._options._editIndex]);
                 //get the value of the selected label
-                var selectedLabel = $(that.element).find(".editWrapper .label").select2("val");
+                var selectedLabel = $(contactInfo.element).find(".editWrapper .contactInfoSearchSelect").searchSelect("text");
                 //set the value
-                that.contacts[that._editIndex].Data = $(that.element).find(".editWrapper .value").val();
+                contactInfo.options.contacts[contactInfo._options._editIndex].Data = $(contactInfo.element).find(".editWrapper .value").val();
                 //set the label
-                that.contacts[that._editIndex].Label = selectedLabel;
+                contactInfo.options.contacts[contactInfo._options._editIndex].Label = selectedLabel;
                 //set the category
-                that.contacts[that._editIndex].Type = $(that.element).find(".labelIcon").select2("val");
+                contactInfo.options.contacts[contactInfo._options._editIndex].Type = $(contactInfo.element).find(".labelIcon").select2("val");
                 //refresh the list with the new values
-                that._renderContactList(that.contacts);
-                //show the list
-                that._changePane("list");
+                contactInfo.renderContactList(contactInfo.options.contacts);
 
                 //check if the label is one that was custon added
-                var isOldLabel = _.find(that._currentLabels, function (label) {
+                var isOldLabel = _.find(contactInfo._options._currentLabels, function (label) {
                     return label.value === selectedLabel;
                 });
 
                 //if custom label, save it to the corresponding list
                 if (!isOldLabel) {
-                    that._currentLabels.push({value: selectedLabel});
+                    contactInfo._options._currentLabels.push({value: selectedLabel});
                 }
                 //save changes
-                if (that._isNew) {
-                    that.options.entity.create(that.contacts[that._editIndex]);
-                    analytics.track("Add ContactInfo");
+                //TODO
+                if (contactInfo._options._isNew && contactInfo.options.entity) {
+                    contactInfo.options.entity.create(contactInfo.options.contacts[contactInfo._options._editIndex]);
                 } else {
                     //check if contact changed
-                    var newContact = generalTools.deepClone(that.contacts[that._editIndex]);
-                    if (!_.isEqual(newContact, oldContact)) {
-                        that.options.entity.update(newContact);
+                    var newContact = generalTools.deepClone(contactInfo.options.contacts[contactInfo._options._editIndex]);
+                    if (!_.isEqual(newContact, oldContact) && contactInfo.options.entity) {
+                        contactInfo.options.entity.update(newContact);
                     }
                 }
-                that._isNew = false;
+                contactInfo._options._isNew = false;
             });
+            $(contactInfo.element).find(".delete").on("click", $(contactInfo.element), function () {
+                var id = contactInfo.options.contacts[contactInfo._options._editIndex].Id;
 
+                //remove the selected contact from the list
+                contactInfo.options.contacts.splice(contactInfo._options._editIndex, 1);
+                //refresh the list of contacts
+                contactInfo.renderContactList(contactInfo.options.contacts);
+                //submit the change
+                if (contactInfo.options.entity) {
+                    contactInfo.options.entity.destroy(id);
+                }
+
+                contactInfo._options._isNew = false;
+            });
             //automatically update the category as the value changes
-            generalTools.observeInput($(that.element).find(".editWrapper .value"), function (string) {
+            generalTools.observeInput($(contactInfo.element).find(".editWrapper .value"), function (string) {
                 var category;
                 //check what the value is(phone, email, website, or other)
                 if (parserTools.isEmail(string)) {
-                    category = models.InfoType.EMAIL;
+                    category = "Email";
                 } else if (parserTools.isUrl(string)) {
-                    category = models.InfoType.WEBSITE;
+                    category = "Website";
                 } else if (parserTools.isPhone(string)) {
-                    category = models.InfoType.PHONE;
+                    category = "Phone";
                 } else {
-                    category = models.InfoType.OTHER;
+                    category = "Other";
                 }
-
                 //set the category
-                that._changeType(category, true);
+                contactInfo._changeType(category, true);
             }, 250);
 
             $(window).resize(function () {
-                that._setLabelWidth(".editWrapper");
+                contactInfo._setLabelWidth(".editWrapper");
             });
         },
+        renderContactList: function (contacts) {
+            var contactInfo = this, list, category, label, value;
 
-        /**
-         * Creates the list of contact info
-         * @param {Array<Object>} contacts
-         * @private
-         */
-        _renderContactList: function (contacts) {
-            var that = this, list, category, label, value;
-
-            list = $(that.element).find(".contactList");
+            list = $(contactInfo.element).find(".contactList");
             list[0].innerHTML = "";
 
             for (var i = 0; i < contacts.length; i++) {
@@ -196,19 +194,22 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "db/m
                 list.append(element);
             }
 
-            $(that.element).find(".contactList a").on("click", function (e) {
-                if (e.currentTarget.children[0].className === models.InfoType.PHONE) {
-                    analytics.track("Click Phone Contact");
+            $(contactInfo.element).find(".contactList a").on("click", function (e) {
+                if (e.currentTarget.children[0].className === "Phone") {
+                    analytics.track("Phone Contact Click");
+                    //TODO remove any non-numbers
                     window.location.href = "tel:" + e.currentTarget.children[2].innerText;
-                } else if (e.currentTarget.children[0].className === models.InfoType.EMAIL) {
+                } else if (e.currentTarget.children[0].className === "Email") {
+                    analytics.track("Email Contact Click");
                     window.open("mailto:" + e.currentTarget.children[2].innerText, "_blank");
-                } else if (e.currentTarget.children[0].className === models.InfoType.WEBSITE) {
+                } else if (e.currentTarget.children[0].className === "Website") {
+                    analytics.track("Website Contact Click");
                     generalTools.goToUrl(e.currentTarget.children[2].innerText);
                 }
             });
 
             //on edit button click
-            $(that.element).find(".editBtn").on("click", function (e) {
+            $(contactInfo.element).find(".editBtn").on("click", function (e) {
                 var index;
                 //get the id of the list item that was clicked on(need to check if the span or div element was clicked on)
                 if (e.target.className === "editBtn") {
@@ -217,62 +218,64 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "db/m
                     index = e.target.parentNode.parentElement.id;
                 }
                 //set the edit index
-                that._editIndex = index;
+                contactInfo._options._editIndex = index;
                 //move to edit mode
-                that._edit(that.contacts[index]);
+                contactInfo._edit(contactInfo.options.contacts[index]);
             });
+
+            contactInfo._changePane();
         },
 
         //creates a select2 dropdown for the list of labels
         _setupLabelDropdown: function () {
-            var that = this;
+            var contactInfo = this;
 
             //function to format the option names of the dropdown
             var formatItemName = function (item) {
                 return item.value;
             };
 
-            $(that.element).find(".editWrapper .label").select2({
-                id: function (item) {
+            $(contactInfo.element).find(".editWrapper .contactInfoSearchSelect").searchSelect({
+                formatOption: function (item) {
                     return item.value;
                 },
-                query: function (query) {
-                    var data = {
-                        results: that._currentLabels.slice() //clone the phone labels
-                    };
-
-                    if (query.term !== "") {
-                        data.results.unshift({value: query.term});
+                query: function (searchTerm, callback) {
+                    var data = contactInfo._options._currentLabels.slice() //clone the phone labels
+                    if (searchTerm !== "") {
+                        data.unshift({value: searchTerm});
                     }
-
-                    query.callback(data);
+                    return data;
                 },
-                initSelection: function () {
+                onSelect: function (e, selectedData) {
+                    console.log(e);
+                    console.log(selectedData);
                 },
-                formatSelection: formatItemName,
-                formatResult: formatItemName,
-                containerCssClass: "labelContainer",
-                dropdownCssClass: "bigdrop labelDropdown"
+                minimumInputLength: 0
             });
         },
-
         /**
          * A function to setup edit mode
          * @param {object} contact
          * @private
          */
         _edit: function (contact) {
-            var that = this;
+            var contactInfo = this, type;
             //set the value in the textbox
-            $(that.element).find(".editWrapper .value").val(contact.Data);
+            $(contactInfo.element).find(".editWrapper .value").val(contact.Data);
             //set the category
-            that._changeType(contact.Type, true);
+            if (contact.Type === "Phone Number") {
+                type = "Phone"
+            } else if (contact.Type === "Email Address") {
+                type = "Email"
+            } else {
+                type = contact.Type
+            }
+            contactInfo._changeType(type, true);
             //set the label
-            $(that.element).find(".editWrapper .label").select2("data", {value: contact.Label});
+            $(contactInfo.element).find(".editWrapper .contactInfoSearchSelect").searchSelect("data", {value: contact.Label});
             //show the edit pane
-            that._changePane("edit");
+            contactInfo._changePane("edit");
         },
-
         /**
          * Changes the category dropdown and sets up the correct label dropdown list
          * @param {string} category
@@ -280,83 +283,88 @@ define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "db/m
          * @private
          */
         _changeType: function (category, manuallySelect) {
-            var that = this, labels = [];
+            var contactInfo = this, labels = [];
             //remove the select2 from the label dropdown
-            $(that.element).find(".editWrapper .label").select2("destroy");
+//            $(contactInfo.element).find(".editWrapper .contactInfoSearchSelect").searchSelect("destroy");
             //set the correct label list based on the category
-            if (category === models.InfoType.PHONE) {
+            if (category === "Phone") {
                 labels = phoneLabels;
-            } else if (category === models.InfoType.EMAIL) {
+            } else if (category === "Email") {
                 labels = emailLabels;
-            } else if (category === models.InfoType.WEBSITE) {
+            } else if (category === "Website") {
                 labels = websiteLabels;
             } else {
                 labels = otherLabels;
             }
 
             //get the selected label
-            var label = $(that.element).find(".editWrapper .label").select2("val").val();
+            var label = $(contactInfo.element).find(".editWrapper .contactInfoSearchSelect").searchSelect("textSelection");
             var sameLabels;
-            if (that._currentLabels === labels) {
+            if (contactInfo._options._currentLabels === labels) {
                 sameLabels = true;
             } else {
-                that._currentLabels = labels;
+                contactInfo._options._currentLabels = labels;
             }
             //set the correct list of labels
-            that._setupLabelDropdown();
+            contactInfo._setupLabelDropdown();
             //if the labels are the same as before, reset to the original selected label
             if (sameLabels) {
-                $(that.element).find(".editWrapper .label").select2("data", {value: label});
+                $(contactInfo.element).find(".editWrapper .contactInfoSearchSelect").searchSelect("dataSelected", label);
             }
 
             //change the selected category icon
             //get reference to the icon category dropdown
-            var container = $(that.element).find(".iconContainer")[0];
+            var container = $(contactInfo.element).find(".iconContainer")[0];
             //replace the select2 container's class name with the new class
             $(container)[0].className = "select2-container iconContainer " + category.replace(/\s/g, "") + "Small";
 
             //set the category in the icon dropdown
             if (manuallySelect) {
-                $(that.element).find(".labelIcon").select2("val", category);
+                $(contactInfo.element).find(".labelIcon").select2("val", category);
             }
         },
-
         _changePane: function (newPane) {
-            var that = this;
+            var contactInfo = this;
             //if moving to edit pane
             if (newPane === "edit") {
-                $(that.element).find(".contactList").animate({
+                $(contactInfo.element).find(".contactList").animate({
                     height: 'hide'
                 }, "swing", function () {
-                    $(that.element).find(".add").attr("style", "display:none");
-                    $(that.element).find(".save, .delete").attr("style", "display:block");
-                    $(that.element).find(".editWrapper").animate({
+                    $(contactInfo.element).find(".addButtonWrapper").attr("style", "display:none");
+                    $(contactInfo.element).find(".save, .delete").attr("style", "display:block");
+                    $(contactInfo.element).find(".editWrapper").animate({
                         height: 'show'
                     }, "swing");
                 });
                 //make sure the label dropdown is correct width
-                that._setLabelWidth(".contactList");
+                contactInfo._setLabelWidth(".contactList");
 
                 //if moving to list pane
             } else {
-                $(that.element).find(".editWrapper").animate({
+                $(contactInfo.element).find(".editWrapper").animate({
                     height: 'hide'
                 }, "swing", function () {
-                    $(that.element).find(".save, .delete").attr("style", "display:none");
-                    $(that.element).find(".add").attr("style", "display:block");
-                    $(that.element).find(".contactList").animate({
+                    $(contactInfo.element).find(".save, .delete").attr("style", "display:none");
+                    $(contactInfo.element).find(".addButtonWrapper").attr("style", "display:block");
+                    $(contactInfo.element).find(".contactList").animate({
                         height: 'show'
                     }, "swing");
                 });
 
             }
         },
-
         //make sure the label dropdown is correct width
         _setLabelWidth: function (guideElement) {
-            var that = this;
-            var containerWidth = $(that.element).find(guideElement).width();
-            $(that.element).find(".editWrapper .label").width(containerWidth - 28);
+            var contactInfo = this;
+            var containerWidth = $(contactInfo.element).find(guideElement).width();
+            $(contactInfo.element).find(".editWrapper .contactInfoSearchSelect").width(containerWidth - 28);
+        },
+        //remove the widget
+        removeWidget: function () {
+            var contactInfo = this;
+            $(contactInfo.element)[0].innerHTML = "";
         }
-    });
+    };
+
+    $.widget("ui.contactInfo", contactInfo);
 });

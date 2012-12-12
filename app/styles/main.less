@@ -51,6 +51,7 @@ table {
 @orange: #D9591E;
 @charcoal: #333335;
 @white:#ffffff;
+@grey: rgb(242,242,242); //inner background
 @darkBlue: #36C3E3;
 @buttonLight: #a7ff6c;
 @buttonDark: #8dd85b;
@@ -127,7 +128,6 @@ table {
     font-family: PTSans;
     src: url(PTS55F.ttf);  /* TTF file for CSS3 browsers */
 }
-
 .km-view {
     z-index: 1;
     -webkit-box-sizing: border-box;
@@ -136,7 +136,6 @@ table {
     box-sizing: border-box;
     display: block;
 }
-
 //firefox workaround(otherwise settings pages don't show up)
 @-moz-document
 url-prefix
@@ -146,9 +145,9 @@ url-prefix
 .km-view {
     display: -moz-box;
 }
-}
 .km-content, .km-scroll-container, .km-scrollview {
-    width: inherit;
+    width: auto;
+}
 }
 input[type="button"], button {
     color: #111;
@@ -1024,6 +1023,9 @@ div.k-window-content {
         border: none;
         outline: none;
         padding: 0;
+        &:checked {
+            background-color: #488FCD;
+        }
     }
     .k-numeric-wrap .k-input {
         width: 100%;
@@ -1080,25 +1082,6 @@ div.k-window-content {
         font-size: 1em;
         width: 100%;
     }
-    .styled-select{
-        width: 100%;
-        height: 28px;
-        overflow: hidden;
-        background: url("../img/select-closed.png") no-repeat right #fff;
-    }
-    .styled-select.open{
-        background: url("../img/select-open.png") no-repeat right #fff;
-    }
-    .selectBox {
-        width: 100%;
-        height: 28px;
-        padding: 5px;
-        border: none;
-        font-size: 14px;
-        font-family: PTSans;
-        -webkit-appearance: none;
-        background: transparent;
-    }
 }
 
 #taskServiceDetails{
@@ -1111,7 +1094,7 @@ div.k-window-content {
     position: absolute;
     top: 51px;
     right: 30px;
-    background-color: #F2F2F2;
+    background-color: @grey;
     padding: 10px 20px;
     overflow-y: auto;
     label.client, label.location{
@@ -1120,7 +1103,7 @@ div.k-window-content {
 }
 /*endregion*/
 /*region Widgets */
-.contactInfo {
+.contactInfoWidget {
     margin: 1em;
     color: @textColor;
     font-size: 12px;
@@ -1137,7 +1120,7 @@ div.k-window-content {
         margin: 0 auto;
     }
     .saveDeleteButtonWrapper{
-        width: 140px;
+        width: 150px;
         margin: 0 auto;
     }
     .contactList {
@@ -1145,7 +1128,7 @@ div.k-window-content {
         li {
             height: 60px;
             background-color: #fff;
-            border-bottom:1px solid #F2F2F2;
+            border-bottom:1px solid @grey;
             .info {
                 height: 45px;
                 overflow: hidden;
@@ -1173,7 +1156,7 @@ div.k-window-content {
                 .label{
                     font-size: 14px;
                     color: @blue;
-                    margin: 0;
+                    margin: 0 0 7px 0;
                 }
                 .value{
                     font-size: 16px;
@@ -1212,7 +1195,7 @@ div.k-window-content {
         }
     }
     .add {
-        width: 85px;
+        width: 95px;
         font-size: 14px;
         color: @green;
         span{
@@ -1245,7 +1228,6 @@ div.k-window-content {
             -moz-box-sizing: border-box;
         }
         .select2-container{
-            margin-bottom: 10px;
             .select2-choices{
                 height: 26px !important;
                 border: none;
@@ -1413,21 +1395,13 @@ div.k-window-content {
       height: 17px;
     }
 }
-
-#locationWidget{
-    display: none;
-    position: absolute;
-    top: 54px;
-    right: 30px;
+.locationWidget{
+    position: relative;
     width: 250px;
     height: 285px;
     overflow: hidden;
     padding: 15px 20px;
     font-size: 15px;
-    background-color:@white;
-    -moz-box-shadow: 0 5px 8px #aaa;
-    -webkit-box-shadow: 0 5px 8px #AAA;
-    box-shadow: 0 5px 8px #AAA;
     h3{
         font-size: 20px;
         margin: 0 0 5px 0;
@@ -1448,7 +1422,7 @@ div.k-window-content {
     #locationWidgetMap.hidden {
       opacity: .3;
     }
-    #buttonPane{
+    .buttonPane{
         position: relative;
         top: -250px;
         left: 0;
@@ -1456,7 +1430,7 @@ div.k-window-content {
         height: 2px;
         background:none;
         border: 1px solid transparent;
-        #navigateBtn{
+        .navigateBtn{
           display: none;
             position: absolute;
             top:5px;
@@ -1477,85 +1451,166 @@ div.k-window-content {
             }
         }
     }
-    #buttonPane.shown{
+    .buttonPane.shown{
       left: 0;
     }
-    #buttonPane.hidden{
+    .buttonPane.hidden{
       left: 300px;
     }
-    #editPane{
+    .editPane{
+        text-align: center;
         position: relative;
         top: -250px;
         left: -300px;
-        width: 250px;
-        min-height: 35px;
-        border: 1px solid #aaaaaa;
-        background-color: @white;
-        input{
-            width: 213px;
-            margin: 3px 0 3px 3px;
-            padding: 2px 25px 2px 4px;
-            border: 1px solid #AAA;
-            border-radius: 4px;
-            font-family: PTSans;
-            background: url("../img/smallSearch.png") no-repeat right center;
-        }
         ul{
-            width: 250px;
-            max-height: 215px;
-            border-top: 1px solid #aaaaaa;
-            overflow-y: auto;
-        }
-        li{
-            height: 36px;
-            padding: 5px 4px 5px 4px;
-            font-size: 14px;
-            background-color: #efefef;
-            cursor: pointer;
-            &:hover{
-              .rowGradient;
-              color: @white;
+            li{
+                #previousLocation {
+                    height: 18px;
+                    width: 22px;
+                    float: left;
+                    background: url("../img/previousLocation.png") no-repeat left center;
+                }
+                #manuallyDropPin {
+                    height: 18px;
+                    width: 22px;
+                    float: left;
+                    background: url("../img/markerIcon.png") no-repeat left center;
+                }
             }
-            &:not(:last-child){
-                border-bottom: 1px solid #aaaaaa;
-            }
-            span{
-              display: table-cell;
-            }
-            span.name{
-              height: 36px;
-              vertical-align: middle;
-            }
-            .fromWeb, #previousLocation, #currentLocation, #manuallyDropPin{
-              width: 20px;
-              height: 36px;
-              vertical-align: middle;
-              padding-right: 4px;
-              background: url("../img/previousLocation.png") no-repeat left center;
-            }
-            #currentLocation{
-              background: url("../img/currentLocation.png") no-repeat left center;
-            }
-            #manuallyDropPin{
-              background: url("../img/markerIcon.png") no-repeat left center;
-            }
-            .fromWeb{
-              background: url("../img/webIcon.png") no-repeat left center;
-            }
-        }
-        li.singleLine .name{
-            padding-top: 9px;
-        }
-        li.tripleLine .name{
-            font-size: 11px;
         }
     }
-    #editPane.shown{
+    .editPane.shown{
         left: 0px;
     }
-    #editPane.hidden{
+    .editPane.hidden{
        left: -300px;
     }
+}
+.contactInfoSearchSelect {
+  max-height:26px;
+  width:100%;
+  margin: 0 auto;
+  min-height: 20px;
+  background-color: @white;
+  display: inline-block;
+  input{
+    display:block;
+    width:100%;
+    padding: 2px 15px 2px 6px;
+    margin: 3px 3px 3px -1px;
+    border: none;
+    font-family: PTSans;
+    background: url("../img/select-closed.png") no-repeat right center;
+    //Allows true 100% width without overflowing due to margins, borders or padding.
+    box-sizing: border-box; /* css3 rec */
+    -moz-box-sizing: border-box; /* ff2 */
+    -ms-box-sizing: border-box; /* ie8 */
+    -webkit-box-sizing: border-box; /* safari3 */
+    -khtml-box-sizing: border-box; /* konqueror */
+  }
+  #optionListScroller {
+    position: absolute !important;
+    z-index:1;
+  }
+  ul{
+    li{
+      font-size: 14px;
+      background-color: @white;
+      cursor: pointer;
+      &:hover{
+        .rowGradient;
+        color: @white;
+      }
+      &:not(:last-child){
+        border-bottom: 0;
+      }
+      span{
+        padding: 5px;
+        display: table-cell;
+      }
+      .name{
+        vertical-align: middle;
+      }
+      #previousSelection {
+        width: 20px;
+        vertical-align: middle;
+        padding-left: 25px;
+        background: url("../img/previousLocation.png") no-repeat left center;
+      }
+    }
+    li.singleLine .name{
+      padding-top: 9px;
+    }
+    li.tripleLine .name{
+      font-size: 11px;
+    }
+  }
+}
+.locationSearchSelect {
+  margin: 0 auto;
+  width: 240px;
+  text-align: center;
+  min-height: 20px;
+  border: 1px solid #aaaaaa;
+  background-color: @white;
+  input{
+    width: 215px;
+    margin: 3px 3px 3px 0px;
+    padding: 2px 21px 2px 2px;
+    border: none;
+    font-family: PTSans;
+    background: url("../img/smallSearch.png") no-repeat right center;
+  }
+  #optionListScroller {
+    position: absolute !important;
+    max-height: 215px;
+  }
+  ul{
+    width: 240px;
+    max-height: 215px;
+    span{
+      display: table-cell;
+    }
+    span.name{
+      height: 36px;
+      vertical-align: middle;
+    }
+    li{
+      text-align: left;
+      padding: 5px 4px 5px 4px;
+      font-size: 14px;
+      background-color: #efefef;
+      cursor: pointer;
+      border: 1px solid #aaaaaa;
+      &:hover{
+        .rowGradient;
+        color: @white;
+      }
+      &:not(:last-child){
+        border-bottom: 0;
+      }
+      span{
+        display: table-cell;
+      }
+      .name{
+        height: 36px;
+        padding-left: 3px;
+        vertical-align: middle;
+      }
+      #previousSelection {
+        width: 20px;
+        vertical-align: middle;
+        padding-left: 25px;
+        background: url("../img/previousLocation.png") no-repeat left center;
+      }
+    }
+    li.singleLine .name{
+      padding-top: 9px;
+    }
+    li.tripleLine .name{
+      font-size: 11px;
+    }
+  }
 }
 /*endregion*/
 /*region Tooltip */
@@ -2045,8 +2100,23 @@ ul.noty_cont.noty_layout_topRight li {
 .select2-dropdown-open .select2-choice div b {
     background-position: 1px 8px;
 }
+.select2-drop-active{
+    border: 1px solid #ddd;
+    border-top: none;
+}
 .select2-results {
     min-height: 18px;
+    max-height: 250px;
+    display: block;
+    li{
+        display: block;
+    }
+}
+.select2-result-unselectable .select2-result-label{
+    font-weight: bold;
+}
+.select2-result-selectable .select2-result-label{
+    font-weight: normal;
 }
 .select2-results .select2-no-results, .select2-results .select2-searching, .select2-results .select2-selection-limit {
     background: #fff;
@@ -2062,6 +2132,10 @@ ul.noty_cont.noty_layout_topRight li {
     border-top: none;
     margin-top: 0;
     margin-left: -1px;
+    z-index: 11;
+}
+.endDateDropdown, .frequencyDropdown{
+    z-index: 11;
 }
 .iconContainer {
     .select2-choice {
@@ -2108,5 +2182,81 @@ ul.noty_cont.noty_layout_topRight li {
 }
 .OtherSmall, .select2-results .OtherSmall.select2-highlighted{
     background-position: 0 -105px;
+}
+/*endregion*/
+/*region SelectBox*/
+#serviceDetails, #taskServiceDetails, #importerUpload, #importerSelect, #importerReview {
+    .styled-select{
+        width: 100%;
+        height: 28px;
+        overflow: hidden;
+        background: url("../img/select-closed.png") no-repeat right #fff;
+    }
+    .selectBox {
+        width: 100%;
+        height: 28px;
+        padding: 5px;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+        font-family: PTSans;
+        -webkit-appearance: none;
+        background: transparent;
+    }
+}
+#importerUpload{
+    .styled-select{
+        width: 200px;
+    }
+}
+/*endregion*/
+/*region Toggle Switch*/
+#toggleLabel{
+    float: left;
+    margin: 4px 10px 0 0;
+    font-size: 14px;
+}
+.switch {
+    display: inline-block;
+    height: 33px;
+    width: 145px;
+    cursor: pointer;
+    line-height: 1.8em;
+    background: @white;
+    a {
+        position: relative;
+        display: block;
+        float: left;
+        height: 25px;
+        width: 56px;
+        line-height: 1.3em;
+        color: #ccc;
+        text-align: center;
+        font-size: 1em;
+        padding: 4px 6px 0 7px;
+        margin: 2px 0 0 2px;
+        z-index: 2;
+    }
+    .toggle{
+        display: block;
+        position: absolute;
+        top: 2px;
+        left: 36px;
+        width: 63px;
+        height: 25px;
+        background: @blue;
+        padding: 4px 3px 0 4px;
+        z-index: 1;
+    }
+    a.off{
+        padding: 4px 6px 0 7px;
+        margin-left: 3px;
+    }
+    a:not(.active):hover{
+        background: #f1f1f1;
+    }
+    a.active {
+        color: @white;
+    }
 }
 /*endregion*/

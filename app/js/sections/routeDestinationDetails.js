@@ -32,8 +32,10 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "tools/paramete
                     contacts = vm.get("selectedEntity.Client.ContactInfoSet").slice(0);
                 }
 
+//                $("#routeDestinationDetails .contactInfoWidget").contactInfo("destroy");
+
                 //initiate the contactInfo widget
-                $("#routeDestinationDetails .contactInfo").contactInfo({
+                $("#routeDestinationDetails .contactInfoWidget").contactInfo({
                     contacts: contacts,
                     entity: {
                         create: function (contactInfo) {

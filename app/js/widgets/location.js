@@ -2,7 +2,7 @@
 
 'use strict';
 
-define(["jquery", "db/services", "ui/ui", "tools/generalTools", "developer", "kendo", "lib/leaflet"], function ($, dbServices, fui, generalTools, developer) {
+define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/leaflet", "widgets/searchSelect"], function ($, dbServices, fui, generalTools) {
     $.widget("ui.location", {
         /**
          * Initialize the map
@@ -12,29 +12,95 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "developer", "ke
         renderMap: function (location, shouldAddMarker) {
             var that = this;
 
-            that._updateNavigateLink(location, true);
-
             that._location = $('<h3>Location</h3>' +
                 '<div id="locationWidgetMap">' +
                 '</div>' +
-                '<div id="buttonPane" class="shown">' +
+                '<div class="buttonPane shown">' +
                 '<a class="k-button k-button-icontext k-grid-edit" href="javascript:void(0)"></a>' +
-                '<a id="navigateBtn" href="javascript:void(0)"></a>' +
+                '<a class="navigateBtn" href="javascript:void(0)"></a>' +
                 '</div>' +
-                '<div id="editPane" class="hidden">' +
-                '<input type="text" />' +
-                '<ul id="locationList"></ul>' +
+                '<div class="editPane hidden">' +
+                '<div class="locationSearchSelect">' +
+                '</div>' +
                 '</div>'
+
             );
 
             that.element.append(that._location);
 
+            $(".locationSearchSelect").searchSelect({
+                query: function (searchTerm, callback) {
+                    //get the list of location matches
+                    if (searchTerm) {
+                        dbServices.locations.read({params: {search: searchTerm}}).done(function (locations) {
+                            if(that._currentLocation) {
+                                that._currentLocation.pastSelection = true;
+                                locations.push(that._currentLocation);
+                            }
+                            locations.push({Name: "Manually Drop Pin"});
+                            callback(locations);
+                        });
+                    }
+                },
+                formatOption: function (location) {
+                    var dataString = that._getLocationString(location);
+                    if (dataString) {
+                        if (location.pastSelection) {
+                            return '<span id="previousLocation"></span>' + dataString;
+                        } else if (location.Name === "Manually Drop Pin") {
+                            return '<span id="manuallyDropPin"></span>Manually Drop Pin';
+                        } else {
+                            return '<span class="option" style="height: 18px;width: 22px;float: left;background: url(\'img/webIcon.png\') no-repeat left center;"></span>' + dataString;
+                        }
+                        //if none do, display the latitude and longitude
+                    } else {
+                        return location.Latitude + ", " + location.Longitude;
+                    }
+                },
+                onSelect: function (e, selectedData) {
+                    var $target = $(e.target)[0].nodeName === "SPAN" ? $(e.target) : $(e.target).children();
+                    //match the index of the selected item to the index of locationList
+                    var id = $target.children()[0].id;
+                    //if the previous location was selected
+                    if (id == "previousLocation") {
+                        that._changeMarkerLocation(that._currentLocation, false);
+                        //if "Manually Drop Pin" was selected
+                    } else if (id == "manuallyDropPin") {
+                        that._changeMarkerLocation(null, false);
+                        //allow the marker to move on map click
+                        that._allowMapClick = true;
+                        //if a new location was selected
+                    } else {
+                        that._changeMarkerLocation(selectedData, false);
+                        that._updateCurrentLocation(selectedData, true);
+                    }
+
+                    //animate back to map from edit screen
+                    widgetElement.find(".editPane").switchClass("shown", "hidden", 500, 'swing');
+                    widgetElement.find(".buttonPane").switchClass("hidden", "shown", 500, 'swing');
+                    widgetElement.find("#locationWidgetMap").switchClass("hidden", "shown", 500);
+                },
+                queryDelay: 200,
+                minimumInputLength: 2,
+                showPreviousSelection: true
+            });
+
             var widgetElement = $(that.element);
+
+            var center, zoom;
+
+            if (location && location.Latitude && location.Longitude) {
+                center = [location.Latitude, location.Longitude];
+                zoom = 15;
+            } else {
+                center = [40, -89];
+                zoom = 4;
+            }
 
             //initialize the map on the "locationWidgetMap" div with a given center and zoom
             that._map = L.map('locationWidgetMap', {
-                center: [location.Latitude, location.Longitude],
-                zoom: 15,
+                center: center,
+                zoom: zoom,
                 attributionControl: false,
                 zoomControl: false
             });
@@ -52,32 +118,8 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "developer", "ke
             }
 
             //animate to edit screen on edit button click
-            widgetElement.find("#buttonPane .k-grid-edit").on("click", function () {
+            widgetElement.find(".buttonPane .k-grid-edit").on("click", function () {
                 that._showEditScreen();
-            });
-
-            //when an option is selected from the list
-            widgetElement.find("#editPane li").live("click", function (e) {
-                //match the index of the selected item to the index of locationList
-                var id = e.currentTarget.id;
-                //if the previous location was selected
-                if (id == "previous") {
-                    that._changeMarkerLocation(that._currentLocation, false);
-                    //if "Manually Drop Pin" was selected
-                } else if (id == "manual") {
-                    that._changeMarkerLocation(null, false);
-                    //allow the marker to move on map click
-                    that._allowMapClick = true;
-                    //if a new location was selected
-                } else {
-                    that._changeMarkerLocation(that._locationList[id], false);
-                    that._updateCurrentLocation(that._locationList[id], true);
-                }
-
-                //animate back to map from edit screen
-                widgetElement.find("#buttonPane").switchClass("hidden", "shown", 500, 'swing');
-                widgetElement.find("#editPane").switchClass("shown", "hidden", 500, 'swing');
-                widgetElement.find("#locationWidgetMap").switchClass("hidden", "shown", 500);
             });
 
             //(in "Manually Drop Pin" mode) move the marker on map click
@@ -88,7 +130,7 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "developer", "ke
                     that._marker.openPopup();
 
                     //click event of save button in marker popup
-                    $(that.element).find("#saveLocation").on("click", function (e) {
+                    $(that.element).find(".saveLocation").on("click", function (e) {
                         //set/save the current marker location
                         var markerPosition = that._marker.getLatLng();
                         that._updateCurrentLocation({Latitude: markerPosition.lat, Longitude: markerPosition.lng}, true);
@@ -100,51 +142,44 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "developer", "ke
                 }
             });
 
-            widgetElement.find("#navigateBtn").on("click", function () {
+            widgetElement.find(".navigateBtn").on("click", function () {
                 that._navigateToLink();
             });
 
             //update search after 1 second of input edit
-            generalTools.observeInput(widgetElement.find("#editPane"), function (searchText) {
-                //get the list of location matches
-                dbServices.locations.read({params: {search: searchText}}).done(function (locations) {
-                    that._updateLocationList(locations);
-                });
-            }, 750);
+//            generalTools.observeInput(widgetElement.find(".editPane input"), function (searchText) {
+//                //get the list of location matches
+//                if (searchText) {
+//                    dbServices.locations.read({params: {search: searchText}}).done(function (locations) {
+//                        that._updateLocationList(locations);
+//                    });
+//                }
+//            }, 750);
 
             //if there is no location on initialization, go directly to the edit pane
             if (!shouldAddMarker) {
                 that._showEditScreen();
             } else {
                 //if there is a location, show the navigate(with google) button
-                widgetElement.find("navigateBtn").css("display", "block");
+                widgetElement.find(".navigateBtn").css("display", "block");
+
+                that._updateNavigateLink(location, true);
             }
         },
 
         //animate to the edit screen
         _showEditScreen: function () {
             var that = this, widgetElement = $(that.element);
-            //if there has been a location saved
+//            if there has been a location saved
             if (that._currentLocation) {
                 //update the location list to include the current(aka previous) location
-                that._updateLocationList(that._locationList);
+//                that._updateLocationList(that._locationList);
             }
 
             //animation
-            widgetElement.find("#buttonPane").switchClass("shown", "hidden", 500, 'swing');
-            widgetElement.find("#editPane").switchClass("hidden", "shown", 500, 'swing');
-            widgetElement.find("locationWidgetMap").switchClass("shown", "hidden", 500);
-        },
-
-//remove all traces of the map
-        removeMap: function () {
-            var that = this;
-            if (that._map) {
-                that._map.closePopup();
-                that._map.removeLayer(that._cloudmade);
-                that._map = null;
-            }
-            $(that.element)[0].innerHTML = "";
+            widgetElement.find(".buttonPane").switchClass("shown", "hidden", 500, 'swing');
+            widgetElement.find(".editPane").switchClass("hidden", "shown", 500, 'swing');
+            widgetElement.find("#locationWidgetMap").switchClass("shown", "hidden", 500);
         },
 
         /**
@@ -171,7 +206,7 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "developer", "ke
                     icon: that._icon
                 });
                 if (addPopup) {
-                    that._marker.bindPopup('<button id="saveLocation" class="k-button k-button-icontext"><span class="k-icon k-update"></span>Save</button>', {
+                    that._marker.bindPopup('<button class="saveLocation k-button k-button-icontext"><span class="k-icon k-update"></span>Save</button>', {
                         closeButton: false
                     });
                 }
@@ -186,7 +221,7 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "developer", "ke
                 that._updateNavigateLink(location, false);
             } else {
                 //hide the navigate button if there is no location
-                $(that.element).find("#navigateBtn").css("display", "none");
+                $(that.element).find(".navigateBtn").css("display", "none");
             }
         },
 
@@ -197,18 +232,12 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "developer", "ke
          * @private
          */
         _getLocationString: function (location) {
-            var lineOne = location.AddressLineOne ? location.AddressLineOne + " " : "";
-            var lineTwo = location.AddressLineTwo ? location.AddressLineTwo + ", " : "";
-            var adminDistrictTwo = location.AdminDistrictTwo ? location.AdminDistrictTwo + ", " : "";
-            var adminDistrictOne = location.AdminDistrictOne ? location.AdminDistrictOne + " " : "";
-            var postalCode = location.PostalCode ? location.PostalCode : "";
-            //display any parts of the location that exist
-            var returnString = lineOne + lineTwo + adminDistrictTwo + adminDistrictOne + postalCode;
+            var returnString = generalTools.getLocationDisplayString(location);
             if (returnString) {
                 return returnString;
                 //if none do, display the latitude and longitude
             } else {
-                return location.Latitude + "," + location.Longitude;
+                return location.Latitude + ", " + location.Longitude;
             }
         },
 
@@ -216,38 +245,38 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "developer", "ke
          * @param locations The locations returned from the search
          * @private
          */
-        _updateLocationList: function (locations) {
-            var that = this;
-            that._locationList = locations;
-            var list = "", thisLocation;
-            //clear the current list
-            $(that.element).find("#locationList")[0].innerHTML = "";
-            //add each returned location to the list
-            for (var i in locations) {
-                thisLocation = locations[i];
-                list += '<li id="' + i + '"><span class="fromWeb"></span><span class="name">' + that._getLocationString(locations[i]) + '</span></li>';
-            }
-
-            //add the current saved location to the list, if there is one
-            if (that._currentLocation) {
-                list += '<li id="previous"><span id="previousLocation"></span><span class="name">' + that._getLocationString(that._currentLocation) + '</span></li>';
-            }
-
-            //add option for "Manually Drop Pin"
-            list += //'<li id="current"><span id="currentLocation"></span><span class="name">Use Current Location</span></li>' +
-                '<li id="manual"><span id="manuallyDropPin"></span><span class="name">Manually Drop Pin</span></li>';
-
-            $(list).appendTo($(that.element).find("#locationList"));
-
-            //adjust the text to make sure everything is vertically centered
-            $(that.element).find("#locationList li").each(function () {
-                if ($(this)[0].childNodes[1].clientHeight < 25) {
-                    $(this).addClass("singleLine");
-                } else if ($(this)[0].childNodes[1].clientHeight > 50) {
-                    $(this).addClass("tripleLine");
-                }
-            });
-        },
+//        _updateLocationList: function (locations) {
+//            var that = this;
+//            that._locationList = locations;
+//            var list = "", thisLocation;
+//            //clear the current list
+//            $(that.element).find(".locationList")[0].innerHTML = "";
+//            //add each returned location to the list
+//            for (var i in locations) {
+//                thisLocation = locations[i];
+//                list += '<li id="' + i + '"><span class="fromWeb"></span><span class="name">' + that._getLocationString(locations[i]) + '</span></li>';
+//            }
+//
+//            //add the current saved location to the list, if there is one
+//            if (that._currentLocation) {
+//                list += '<li id="previous"><span id="previousLocation"></span><span class="name">' + that._getLocationString(that._currentLocation) + '</span></li>';
+//            }
+//
+//            //add option for "Manually Drop Pin"
+//            list += //'<li id="current"><span id="currentLocation"></span><span class="name">Use Current Location</span></li>' +
+//                '<li id="manual"><span id="manuallyDropPin"></span><span class="name">Manually Drop Pin</span></li>';
+//
+//            $(list).appendTo($(that.element).find(".locationList"));
+//
+//            //adjust the text to make sure everything is vertically centered
+//            $(that.element).find(".locationList li").each(function () {
+//                if ($(this)[0].childNodes[1].clientHeight < 25) {
+//                    $(this).addClass("singleLine");
+//                } else if ($(this)[0].childNodes[1].clientHeight > 50) {
+//                    $(this).addClass("tripleLine");
+//                }
+//            });
+//        },
 
         /**
          * Update and (conditionally) save the currently selected location
@@ -288,24 +317,33 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "developer", "ke
 
             //show the navigate button if this is not the initial load
             if (!initial) {
-                $(that.element).find("#navigateBtn").attr("style", "display:block");
+                $(that.element).find(".navigateBtn").attr("style", "display:block");
             }
         },
 
-//open a new window with google maps directions to the current location
+        //open a new window with google maps directions to the current location
         _navigateToLink: function () {
             var currentPosition, that = this;
             //get the users location
             navigator.geolocation.getCurrentPosition(function (position) {
                 // If geolocation is successful get directions to the location from current position.
                 currentPosition = position.coords.latitude + "," + position.coords.longitude;
-                generalTools.goToUrl("http://maps.google.com/maps?saddr=" + currentPosition + "&daddr=" + that._navigateQuery);
+                generalTools.goToExternalUrl("http://maps.google.com/maps?saddr=" + currentPosition + "&daddr=" + that._navigateQuery);
             }, function () {
                 // If geolocation is NOT successful just show the location.
-                generalTools.goToUrl("http://maps.google.com/maps?q=" + that._navigateQuery);
+                generalTools.goToExternalUrl("http://maps.google.com/maps?q=" + that._navigateQuery);
             }, {timeout: 10000, enableHighAccuracy: true});
+        },
+
+        //remove all traces of the map
+        removeWidget: function () {
+            var that = this;
+            if (that._map) {
+                that._map.closePopup();
+                that._map.removeLayer(that._cloudmade);
+                that._map = null;
+            }
+            $(that.element)[0].innerHTML = "";
         }
-    })
-    ;
-})
-;
+    });
+});
