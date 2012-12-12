@@ -54,23 +54,46 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
             currentFields = generalTools.deepClone(defaultFields).concat(serviceFields);
         };
 
+        //region Contact info field logic
+
         /**
-         * Generates a contact info field based on the passed metadata
-         * @param category Ex. 0 = (Phone)
-         * @param type Ex. 0 (Label)
-         * @param number The number
-         * @return {Object}
+         * Returns the contact info fields for a category. Grouped by number
+         * @param category
          */
-        var insertContactInfoField = function (category, type, number) {
+        var contactInfoCategory = function (category) {
+            //group the contact info fields by category
+            var contactInfoFields = _.filter(currentFields, function (field) {
+                return field.contactInfo && field.contactInfo.category === category;
+            });
+
+            //then group them by their number
+            var indexed = _.groupBy(contactInfoFields, function (field) {
+                return field.contactInfo.number;
+            });
+
+            return indexed;
+        };
+
+        /**
+         * Generate the contact info field text
+         * @param options {{category: string, type: string, number: number}}
+         */
+        var contactInfoText = function (options) {
             var categories = { 0: "Phone", 1: "Email", 2: "Website", 3: "Other" };
             var types = { 0: "Label", 1: "Value" };
 
-            var text = categories[category] + " " + types[type] + " " + number;
+            var text = categories[options.category] + " " + types[options.type] + " " + options.number;
+            return text;
+        };
 
-            var fieldToInsert = {text: text, group: 2, contactInfo: {category: category, type: type, number: number}};
+        /**
+         * Inserts a contact info field based on the options
+         * @param options {{category: string, type: string, number: number}}
+         */
+        var insertContactInfo = function (options) {
+            var fieldToInsert = {text: contactInfoText(options), group: 2, contactInfo: options};
 
             //find the right place to insert the contact info
-
             var insertIndex;
             for (insertIndex in currentFields) {
                 var nextField = currentFields[insertIndex];
@@ -78,20 +101,20 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
                 //if the next field is a contact info field
                 if (nextField.group === 2) {
                     //if it is the same category
-                    if (nextField.contactInfo.category === category) {
+                    if (nextField.contactInfo.category === options.category) {
                         //if it is the same number and this is a label, insert here
-                        if (nextField.contactInfo.number === number && type === 0) {
+                        if (nextField.contactInfo.number === options.number && options.type === 0) {
                             break;
                         }
 
                         //if it is the next number, insert here
-                        if (nextField.contactInfo.number > number) {
+                        if (nextField.contactInfo.number > options.number) {
                             break;
                         }
                     }
 
                     //if it is the next category, insert here
-                    if (nextField.contactInfo.category > category) {
+                    if (nextField.contactInfo.category > options.category) {
                         break;
                     }
                 }
@@ -101,11 +124,111 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
                     break;
                 }
 
-                //otherwise move to the next entry
+                //continue moving to the next field
             }
 
+            //insert the field
             currentFields.splice(insertIndex, 0, fieldToInsert);
         };
+
+        /**
+         * Inserts a contact info field set (label & value) from the parameters
+         * @param category Ex. 0 = (Phone)
+         * @param number
+         */
+        var insertContactInfoSet = function (category, number) {
+            insertContactInfo({category: category, type: 0, number: number});
+            insertContactInfo({category: category, type: 1, number: number});
+        };
+
+        /**
+         * Removes a contact info set and
+         * decrements contact info of the same category greater than the number
+         * @param category Ex. 0 = (Phone)
+         * @param number
+         */
+        var removeContactInfoSet = function (category, number) {
+            var contactInfos = contactInfoCategory(category);
+            var length = _.keys(contactInfos).length;
+
+            //remove the label & value
+            for (var j = 0; j < currentFields.length; j++) {
+                var field = currentFields[j];
+                if (field.contactInfo && field.contactInfo.category === category
+                    && field.contactInfo.number === number) {
+                    currentFields.splice(j, 1);
+                    currentFields.splice(j, 1);
+                    break;
+                }
+            }
+
+            var selects = page.find(".select2-container");
+
+            //go through all greater indexes and decrement the fields
+            for (var i = number + 1; i <= length; i++) {
+                var fieldsToDecrement = contactInfos[i];
+
+                var labelField = fieldsToDecrement[0];
+                var valueField = fieldsToDecrement[1];
+
+                //change the currentFields numbers
+                labelField.contactInfo.number -= 1;
+                valueField.contactInfo.number -= 1;
+
+                var newLabel = contactInfoText(fieldsToDecrement[0].contactInfo);
+                var newValue = contactInfoText(fieldsToDecrement[1].contactInfo);
+
+                //change the selects values
+                selects.each(function () {
+                    var val = $(this).select2("val");
+                    if (val === labelField.text) {
+                        $(this).select2("data", {id: newLabel, text: newLabel});
+                    } else if (val === valueField.text) {
+                        $(this).select2("data", {id: newValue, text: newValue});
+                    }
+                });
+
+                //change the currentFields text
+                labelField.text = newLabel;
+                valueField.text = newValue;
+            }
+        };
+
+
+        /**
+         * For each contact info category make sure:
+         * a) there is an available set (label and value) at the end
+         * b) there are no extra available set in the middle
+         */
+        var updateContactInfoFields = function () {
+            for (var c = 0; c < 4; c++) {
+                var indexed = contactInfoCategory(c);
+
+                var lastNumber = _.keys(indexed).length;
+                //a) make sure there is an available set at the end
+                if (//check there is an initial set
+                    !lastNumber ||
+                        //then check the last set is fully available
+                        indexed[lastNumber][0].selected || indexed[lastNumber][1].selected) {
+
+                    //if not add another contact info set
+                    insertContactInfoSet(c, lastNumber + 1);
+                }
+
+                //reset indexed/lastNumber after inserts
+                indexed = contactInfoCategory(c);
+                lastNumber = _.keys(indexed).length;
+
+                //b) remove any extra available sets in the middle
+                for (var n = 1; n < lastNumber; n++) {
+                    if (!indexed[n][0].selected && !indexed[n][0].selected) {
+                        removeContactInfoSet(c, n);
+                    }
+                }
+            }
+        };
+
+        //endregion
 
         /**
          * Formats currentFields to field groups for the select2
@@ -119,38 +242,7 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
                 {text: "Service Fields", children: []}
             ];
 
-            //group the contact info fields by category
-            var contactInfoFields = _.filter(currentFields, function (field) {
-                return field.contactInfo;
-            });
-            contactInfoFields = _.groupBy(contactInfoFields, function (field) {
-                return field.contactInfo.category;
-            });
-
-            //for each contact info category make sure:
-            //a) there is an available set (label and value) at the end
-            //b) there are no extra available set in the middle
-            for (var c = 0; c < 4; c++) {
-                var categoryFields = contactInfoFields[c];
-
-                var indexed = _.groupBy(categoryFields, function (field) {
-                    return field.contactInfo.number;
-                });
-
-                var lastNumber = _.keys(indexed).length;
-                //a) make sure there is an available set at the end
-                if (//check there is an initial set
-                    !lastNumber ||
-                        //then check the last set is fully available
-                        indexed[lastNumber][0].selected || indexed[lastNumber][1].selected) {
-
-                    //if not add another contact info set
-                    insertContactInfoField(c, 0, lastNumber + 1);
-                    insertContactInfoField(c, 1, lastNumber + 1);
-                }
-
-                //check b) there are no extra available set in the middle
-            }
+            updateContactInfoFields();
 
             //build the field groups from the available (not selected) fields
             for (var i in currentFields) {
