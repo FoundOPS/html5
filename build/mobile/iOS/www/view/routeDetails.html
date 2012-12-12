@@ -20,7 +20,7 @@
     # if (data.Location) { #
         <a class="km-listview-link"><span>#= Location.Name #</span><div class="taskStatusColorImg" style="background-color:#=routeDetails.getTaskColor(data.Id)#"></div>
             <br/><label>#= Location.AddressLineOne #</label></a>
-    # } else { #
+    # } else if (data.Client) { #
         <a class="km-listview-link"><span>#= Client.Name #</span><div class="taskStatusColorImg" style="background-color:#=routeDetails.getTaskColor(data.Id)#"></div>
             <br/><label style="color:red">No Location Available</label></a>
     # } #
