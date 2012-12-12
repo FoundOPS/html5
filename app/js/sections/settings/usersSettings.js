@@ -114,6 +114,15 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
         //add a grid to the #usersGrid div element
         grid = $("#usersGrid").kendoGrid({
             autoBind: false,
+            change: function () {
+                //show the delete button only if a row is selected
+                var users = $("#users");
+                if (users.find("tr.k-state-selected")[0]) {
+                    users.find(".k-grid-delete").attr("style", "display:inline-block");
+                } else {
+                    users.find(".k-grid-delete").attr("style", "display:none");
+                }
+            },
             dataSource: usersDataSource,
             dataBound: function () {
                 //after the data is loaded, add tooltips to the edit and delete buttons
@@ -167,6 +176,7 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
             },
             scrollable: false,
             sortable: true,
+            selectable: true,
             columns: [
                 {
                     field: "FirstName",
@@ -190,10 +200,6 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
                     template: "# if (EmployeeId) {#" +
                         "#= usersSettings.getEmployeeName(EmployeeId) #" +
                         "# } #"
-                },
-                {
-                    command: ["edit", "destroy"],
-                    width: "87px"
                 }
             ]
         }).data("kendoGrid");
@@ -213,19 +219,32 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
         });
 
         //setup menu
-        var menu = $("#users").find(".settingsMenu");
+        var users = $("#users");
+        var menu = users.find(".settingsMenu");
         kendo.bind(menu);
         menu.kendoSettingsMenu({selectedItem: "Users"});
 
         setupDataSource();
         setupUsersGrid();
         //setup add button
-        $("#addUser").on("click", function () {
+        users.find("#addUser").on("click", function () {
             //workaround for lacking add/edit templates
             usersSettings.editorType = 'add';
 
             //open add new user popup
             grid.addRow();
+        });
+
+        users.find(".k-grid-edit").on("click", function () {
+            grid.editRow(grid.select());
+        });
+
+        users.find(".k-grid").delegate("tbody>tr", "dblclick", function () {
+            grid.editRow(grid.select());
+        });
+
+        users.find(".k-grid-delete").on("click", function () {
+            grid.removeRow(grid.select());
         });
     };
 

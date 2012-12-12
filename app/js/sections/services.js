@@ -437,17 +437,24 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
         //configure the columns based on the user's stored configuration
         columns = kendoTools.configureColumns(columns, vm.get("serviceType.Id"));
 
-        grid = $("#grid").data("kendoGrid");
+        var servicesSection = $("#services");
+
+        grid = servicesSection.find("#grid").data("kendoGrid");
         if (grid) {
             grid.destroy();
         }
-        $("#grid").empty();
+        servicesSection.find("#grid").empty();
 
-        grid = $("#grid").kendoGrid({
+        grid = servicesSection.find("#grid").kendoGrid({
             autoBind: false,
             change: function () {
-                //enable delete button
-                $('#services .k-grid-delete').removeAttr("disabled");
+                //show the delete button only if a row is selected
+                var servicesSection = $("#services");
+                if (servicesSection.find("tr.k-state-selected")[0]) {
+                    servicesSection.find(".k-grid-delete").attr("style", "display:inline-block");
+                } else {
+                    servicesSection.find(".k-grid-delete").attr("style", "display:none");
+                }
 
                 //whenever a field is changed, the grid needs to be reselected. handleChange is set to prevent triggering a reload
                 if (handleChange) {
@@ -566,7 +573,7 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
                     vm.set("serviceType", {Id: selectedOption.value, Name: selectedOption.name});
 
                     //disable the delete button and hide the service details
-                    $('#services .k-grid-delete').attr("disabled", "disabled");
+                    $("#services").find(".k-grid-delete").attr("style", "display:none");
 
                     //hide the serviceDetailsWrapper
                     $("#serviceDetailsWrapper").attr("style", "display:none");
@@ -581,10 +588,10 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
         $("#serviceDetails").kendoServiceDetails();
 
         //hookup the add & delete buttons
-        $("#services").find(".addDeleteBtns .k-grid-add").on("click", function () {
+        $("#services").find(".k-grid-add").on("click", function () {
             vm.addNewService();
         });
-        $("#services").find(".addDeleteBtns .k-grid-delete").on("click", function () {
+        $("#services").find(".k-grid-delete").on("click", function () {
             vm.deleteSelectedService();
         });
 

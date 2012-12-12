@@ -261,16 +261,18 @@ define(["tools/generalTools", "db/services", "db/session", "db/saveHistory", "to
         disableDefaultCheckboxes();
 
         //get the BusinessAccountId from another row to be used to set in new rows
-        busAcctId = grid._data[1].BusinessAccountId;
+        if (grid._data.length > 0) {
+            busAcctId = grid._data[1].BusinessAccountId;
+        }
 
         //bind to the selection change event
         grid.bind("change", function () {
             //hide the delete button if a default row is selected, otherwise show it
             var row = kendoTools.getSelectedRow(grid);
             if (row[0].cells[3].innerHTML !== "") {
-                $("#dispatcher").find(".k-grid-delete").attr("disabled", "disabled");
+                $("#dispatcher").find(".k-grid-delete").attr("style", "display:none");
             } else {
-                $("#dispatcher").find(".k-grid-delete").removeAttr("disabled");
+                $("#dispatcher").find(".k-grid-delete").attr("style", "display:inline-block");
             }
 
             selectedItem = grid.dataItem(grid.select());

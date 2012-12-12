@@ -47,7 +47,7 @@ table {
 /*region Variables*/
 @blue: #488FCD;
 @green: #5aad52;
-@red: #991A36;
+@red: #d06268;
 @orange: #D9591E;
 @charcoal: #333335;
 @white:#ffffff;
@@ -426,7 +426,7 @@ span.k-tooltip {
 
 //this keeps the grey background
 .km-ios, .km-ios .km-content {
-    background: @white;
+    background: @grey;
 }
 
 .km-ios, .km-ios .km-list > li {
@@ -490,7 +490,7 @@ span.k-tooltip {
         text-align: center;
     }
     div a, .km-root{
-        color: @green;
+        color: @blue;
         font-size: 12px;
         text-decoration: underline;
     }
@@ -530,7 +530,7 @@ hr {
 .wrap.top{
     margin-top: 25px;
 }
-
+/*region scrollbars*/
 ::-webkit-scrollbar {
     width: 12px;
     height: 12px;
@@ -559,48 +559,96 @@ hr {
 ::-webkit-scrollbar-corner{
     background: @white;
 }
+/*endregion*/
+/*region save/cancel/add/delete/edit buttons*/
 .addDeleteBtns .k-grid-delete, .addDeleteBtns .k-grid-add {
     padding-right: 6px;
 }
 .addDeleteBtns .k-grid-delete {
     margin: 0;
 }
-.saveBtn {
-    margin-left: 145.5px;
-    .buttonGradient;
-}
-.saveBtn:hover {
-    .buttonGradientHover;
-}
 button[disabled], .k-grid-update[disabled], .k-grid-cancel[disabled] {
     color: #999;
     cursor: default;
 }
+button[disabled]:hover{
+    background: @white;
+}
 button[disabled] .k-icon, button[disabled] .k-icon:hover {
     opacity: .5;
 }
-.saveBtn[disabled], .k-grid-update[disabled] {
-    border-color: #c5c5c5;
-    .buttonGradient;
+.saveBtn, .cancelBtn{
+    border-radius: 0;
+    border: none;
+    background: @white;
+    color: @green;
+    span{
+        background-image: url("../img/sprite.png");
+    }
+    filter: none;
 }
-.saveBtn[disabled]:hover, .k-grid-update[disabled]:hover {
-    color: #999;
+.saveBtn{
+    span{
+        background-position: -114px -157px;
+    }
 }
 .cancelBtn {
     margin-left: 4px;
+    color: @red;
 }
 .cancelBtn[disabled]:hover, .k-grid-cancel[disabled]:hover {
-    background-color: #e3e3e3;
-    border-color: #c5c5c5;
     color: #999;
 }
 .k-grid-edit, .k-grid-edit:hover, .k-grid-delete, .k-grid-delete:hover, .k-grid-add,
 .k-grid-add:hover, .k-grid-delete[disabled], .k-grid-delete[disabled]:hover, .csvBtn, .csvBtn:hover {
-    background: url("../img/btnSprite.png") no-repeat;
+    background: url("../img/combinedSprites.png") no-repeat;
     width: 22px;
     height: 22px;
-    background-position: 0 -132px;
+    background-position: 0 -56px;
 }
+
+.k-edit-form-container #btnCancel {
+    margin: 0;
+}
+
+.k-grid-cancel {
+    margin-left: 12px;
+}
+
+.k-grid-add {
+    background-position: 0 0;
+}
+
+.k-grid-add:hover {
+    background-position: 0 -28px;
+}
+
+.k-grid-delete {
+    display: none;
+    background-position: 0 -56px;
+}
+
+.k-grid-delete:hover {
+    background-position: 0 -84px;
+}
+
+.k-grid-edit, #usersGrid .k-grid-edit {
+    background-position: 0 -112px;
+    margin-right: 4px;
+}
+
+.k-grid-edit:hover, #usersGrid .k-grid-edit:hover {
+    background-position: 0 -140px;
+}
+
+.csvBtn {
+    background-position: 0 -172px;
+}
+
+.csvBtn:hover {
+    background-position: 0 -199px;
+}
+/*endregion*/
 
 .k-grid{
     border: none;
@@ -683,24 +731,27 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover {
         td{
             border-left: 1px solid @white;
             border-right: 1px solid @white;
-            border-bottom: 2px solid @white;
         }
         td:first-child{
-            border-left: none;
-            border-right: 1px solid @white;
+            border-left: 2px solid @white;
         }
         td:last-child{
-            border-right: none;
-            border-left: 1px solid @white;
+            border-right: 2px solid @white;
         }
     }
     td {
         height: 100%;
         padding: 5px 7px 5px 3px;
-        border: none;
-        border-left: 1px solid @grey;
-        border-right: 1px solid @grey;
-        border-bottom: 2px solid @grey;
+        border: 1px solid @grey;
+    }
+    tr:first-child td{
+        border-top: none;
+    }
+    tr:last-child td{
+        border-bottom: none;
+    }
+    tr:last-child.k-state-selected td{
+        border-bottom: 2px solid @white;
     }
     td:first-child{
         border-left: none;
@@ -792,21 +843,18 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover {
     text-decoration: underline;
 }
 
-#changePassword form, #createPassword form {
-    margin-left: 89px;
-}
-
 #changePassword .k-edit, #createPassword .k-edit {
     background-position: -32px 0;
 }
 
 #changePassword .save, #createPassword .save {
-    margin-left: 187px;
-    .buttonGradient;
+    background: @white;
+    color: @green;
 }
 
-#createPassword .save {
-    margin-left: 217px;
+#changePassword .k-delete{
+    background: url("../img/sprite.png") no-repeat;
+    background-position: -115px -135px;
 }
 
 #timeZoneForm .select2-container {
@@ -822,41 +870,44 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover {
 
 /*endregion*/
 /*region Settings -Users */
-#users .wrap {
-    min-width: 705px;
-}
-#usersGrid {
-    min-width: 675px;
-    overflow: auto;
+#users{
+    .wrap {
+        min-width: 705px;
+    }
+    .addDeleteBtns {
+        position: absolute;
+        right: 45px;
+        top: 135px;
+    }
+    #usersGrid {
+        min-width: 675px;
+        overflow: auto;
+    }
+    tbody a {
+        margin: 1px 0 -2px 0;
+        color: #0055cc;
+        text-decoration: underline;
+    }
+    #addNew {
+        background: url('../img/addUser.png') no-repeat;
+        height: 45px;
+        margin: 0 0 -32px 10px;
+    }
+    #addUser {
+        width: 120px;
+        margin: 0 0 10px 70px;
+        cursor: pointer;
+        color: @blue;
+        display: block;
+        font-size: 1.1em;
+    }
+    #addUser:hover {
+        text-decoration: underline;
+    }
 }
 
 #users tbody, #dispatcher tbody {
     font-size: .9em;
-}
-
-#users tbody a {
-    margin: 1px 0 2px 0;
-    color: #0055cc;
-    text-decoration: underline;
-}
-
-#addNew {
-    background: url('../img/addUser.png') no-repeat;
-    height: 45px;
-    margin: 0 0 -32px 10px;
-}
-
-#addUser {
-    width: 120px;
-    margin: 0 0 10px 70px;
-    cursor: pointer;
-    color: @blue;
-    display: block;
-    font-size: 1.1em;
-}
-
-#addUser:hover {
-    text-decoration: underline;
 }
 
 #Role, #RoleEdit {
@@ -865,79 +916,80 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover {
     margin-left: 2px;
 }
 
-.k-edit-form-container .k-grid-update {
-    margin-left: 116px;
-    .buttonGradient;
+.k-edit-form-container{
+    #btnAdd {
+        margin-left: 87px;
+        margin-right: 0;
+        background: @white;
+        color: @green;
+    }
+    .k-grid-update {
+        margin-left: 116px;
+        background: @white;
+        color: @green;
+        &:hover {
+            .hoverColor(@white, 15%);
+        }
+    }
+    .k-grid-update[disabled], .k-grid-cancel[disabled]{
+        .hoverColor();
+    }
+    .k-edit-label {
+        margin-left: 25px;
+    }
+    input{
+        height: 26px;
+        width: 200px;
+        border: none;
+        font-size: 1em;
+    }
+    .k-edit-label.title {
+        width: 95%;
+        font-size: 1.2em;
+        text-align: left;
+        padding-bottom: 0;
+        margin-bottom: 10px;
+        border-bottom: 1px solid @charcoal;
+    }
+    p {
+        font-size: 1.2em;
+        margin: -5px 0 10px 200px;
+    }
+    .k-dropdown {
+        width: 157px;
+    }
+    .k-dropdown-wrap{
+        background: @white;
+        border: none;
+        border-radius: 0;
+    }
+    .k-edit-field {
+        width: 200px;
+    }
+    .k-update{
+        background-position: -114px -157px;
+    }
+}
+
+.k-popup .k-list .k-state-focused, .k-popup .k-list .k-state-selected{
+    .hoverColor(@grey);
+    border: none;
+    border-radius: 0;
 }
 
 div.k-window-content {
     padding-top: 25px;
     padding-bottom: 25px;
+    background: @grey;
 }
 
-.k-edit-form-container .k-grid-update:hover {
-    .buttonGradientHover;
-}
-
-.k-edit-form-container #btnAdd {
-    margin-left: 87px;
-    margin-right: 0;
-    .buttonGradient;
-}
-
-.k-edit-form-container .k-edit-label {
-    margin-left: 45px;
-}
-
-#btnAdd:hover {
-    .buttonGradientHover;
-}
-
-.k-edit-form-container #btnCancel {
-    margin: 0;
-}
-
-.k-grid-cancel {
-    margin-left: 12px;
-}
-
-.k-grid .k-grid-edit {
-    background-position: 0 -66px;
-    margin-right: 4px;
-}
-
-.k-grid-edit:hover {
-    background-position: 0 -44px;
-}
-
-.k-grid-delete {
-    background-position: 0 -110px;
-}
-
-.k-grid-delete:hover {
-    background-position: 0 -88px;
-}
-
-.k-edit-label.title {
-    width: 95%;
-    font-size: 1.2em;
-    text-align: left;
-    padding-bottom: 0;
-    margin-bottom: 10px;
-    border-bottom: 1px solid @charcoal;
-}
-
-.k-edit-form-container p {
-    font-size: 1.2em;
-    margin: -5px 0 10px 200px;
-}
-
-.k-edit-form-container .k-dropdown {
-    width: 157px;
-}
-
-.k-edit-field {
-    width: 200px;
+.k-window{
+    border-radius: 0;
+    .k-header{
+        color: @white;
+        background: @green;
+        border-radius: 0;
+    }
 }
 
 /*endregion*/
@@ -947,7 +999,7 @@ div.k-window-content {
 }
 #dispatcher .addDeleteBtns {
     float: right;
-    margin: 15px 3px 0 0;
+    margin: 9px 7px 0 0;
 }
 #dispatcher .k-grid th {
     text-overflow: ellipsis;
@@ -974,15 +1026,6 @@ div.k-window-content {
     width: 8px;
     height: 8px;
     background-image: url(../img/arrow.png);
-}
-#dispatcher .saveBtn {
-    margin-left: 145.5px;
-}
-.k-grid-add {
-    background-position: 0 -22px;
-}
-.k-grid-add:hover {
-    background-position: 0 0;
 }
 /*region COLOR PICKER*/
 .colorpicker {
@@ -1185,10 +1228,9 @@ div.k-window-content {
 
 #dispatcher .gridColor {
     position: relative;
-    left: 5px;
     width: 26px;
     height: 26px;
-    margin-right: 0;
+    margin: 0 auto;
     cursor: pointer;
 }
 
@@ -1213,6 +1255,9 @@ div.k-window-content {
     min-width: 500px;
     background-color: #fff;
     background-image: url("../img/background-tile.png");
+    .km-content {
+        background: @white;
+    }
     :-moz-any(.km-scroll-container) {
         display: block;
     }
@@ -1277,24 +1322,6 @@ div.k-window-content {
         margin: 0 auto;
         width: 170px;
     }
-    .saveBtn, .cancelBtn{
-        border-radius: 0;
-        border: none;
-        background: @white;
-        color: @green;
-        span{
-            background-image: url("../img/sprite.png");
-        }
-        filter: none;
-    }
-    .saveBtn{
-        span{
-            background-position: -114px -157px;
-        }
-        &:disabled{
-            background-color: #ddd;
-        }
-    }
     .cancelBtn{
         color: @red;
     }
@@ -1354,6 +1381,10 @@ div.k-window-content {
     margin-left: 15px;
 }
 #importerSelect{
+    min-width: 510px;
+    .wrapper{
+        min-width: 480px;
+    }
     p{
         padding-left: 3px;
         margin-top: 5px;
@@ -1455,9 +1486,10 @@ div.k-window-content {
             }
         }
         td.status3{
-            background-color: #ff2222;
+            background-color: @red;
+            color: @white;
             &:hover{
-                .hoverColor(#ff2222);
+                .hoverColor(@red);
             }
         }
         .Client, .Location, .Repeat {
@@ -1496,7 +1528,7 @@ div.k-window-content {
                 height: 32px;
                 float: left;
                 margin: 10px;
-                background-image: url("../img/breadcrumbSprite.png");
+                background-image: url("../img/combinedSprites.png");
                 background-repeat: no-repeat;
             }
             p{
@@ -1509,33 +1541,29 @@ div.k-window-content {
         li:nth-child(1){
             width: 31%;
             span{
-                background-position: -1px 0;
+                background-position: -1px -226px;
             }
         }
         li:nth-child(2){
             display: inline-block;
             width: 22px;
-            background: url("../img/breadcrumbSprite.png") no-repeat -1px -213px;
+            background: url("../img/combinedSprites.png") no-repeat -1px -439px;
         }
         li:nth-child(3){
             width: 32%;
             span{
-                background-position: -1px -104px;
+                background-position: -1px -330px;
             }
         }
         li:nth-child(4){
              width: 32%;
             span{
-                background-position: -1px -174px;
+                background-position: -1px -400px;
             }
          }
     }
 }
 #importerSelect{
-    min-width: 510px;
-    .wrapper{
-        min-width: 480px;
-    }
     .crumbs{
         li:nth-child(1){
             width: 30%;
@@ -1544,29 +1572,29 @@ div.k-window-content {
                 cursor: pointer;
             }
             span{
-                background-position: -1px -34px;
+                background-position: -1px -260px;
             }
         }
         li:nth-child(2){
             display: inline-block;
             width: 22px;
-            background: url("../img/breadcrumbSprite.png") no-repeat -10px -275px;
+            background: url("../img/combinedSprites.png") no-repeat -10px -501px;
         }
         li:nth-child(3){
             width: 30%;
             span{
-                background-position: -1px -69px;
+                background-position: -1px -295px;
             }
         }
         li:nth-child(4){
             display: inline-block;
             width: 22px;
-            background: url("../img/breadcrumbSprite.png") no-repeat -1px -213px;
+            background: url("../img/combinedSprites.png") no-repeat -1px -439px;
         }
         li:nth-child(5){
             width: 30%;
             span{
-                background-position: -1px -174px;
+                background-position: -1px -400px;
             }
         }
     }
@@ -1580,7 +1608,7 @@ div.k-window-content {
                 cursor: pointer;
             }
             span{
-                background-position: -1px -34px;
+                background-position: -1px -260px;
             }
         }
         li:nth-child(2){
@@ -1591,7 +1619,7 @@ div.k-window-content {
                 cursor: pointer;
             }
             span{
-                background-position: -1px -104px;
+                background-position: -1px -330px;
             }
         }
 
@@ -1599,13 +1627,13 @@ div.k-window-content {
             display: inline-block;
             float: right;
             width: 22px;
-            background: url("../img/breadcrumbSprite.png") no-repeat -10px -275px;
+            background: url("../img/combinedSprites.png") no-repeat -10px -501px;
         }
         li:nth-child(3){
             float: right;
             width: 31%;
             span{
-                background-position: -1px -139px;
+                background-position: -1px -365px;
             }
         }
     }
@@ -1616,7 +1644,6 @@ div.k-window-content {
 #services {
     .km-content {
         min-width: 720px;
-        background: @grey;
     }
     #left {
         position: relative;
@@ -1634,15 +1661,8 @@ div.k-window-content {
         }
         .addDeleteBtns {
             position: absolute;
-            width: 80px;
-            right: 14px;
+            right: 18px;
             top: 8px;
-            .csvBtn {
-                background-position: 0 -176px;
-            }
-            .csvBtn:hover {
-                background-position: 0 -154px;
-            }
         }
         .k-grid{
             background: @grey;
@@ -1845,21 +1865,21 @@ div.k-window-content {
                     display: block;
                     float: left;
                     &.Email{
-                        background: url("../img/contactInfo.png") no-repeat 0 -35px;
+                        background: url("../img/combinedSprites.png") no-repeat -37px -300px;
                     }
                     &.Phone{
-                        background: url("../img/contactInfo.png") no-repeat 0 -105px;
+                        background: url("../img/combinedSprites.png") no-repeat -37px -370px;
                     }
                     &.Website{
-                        background: url("../img/contactInfo.png") no-repeat 0 -70px;
+                        background: url("../img/combinedSprites.png") no-repeat -37px -335px;
                     }
                     &.Other{
-                        background: url("../img/contactInfo.png") no-repeat 0 -140px;
+                        background: url("../img/combinedSprites.png") no-repeat -37px -405px;
                     }
                 }
                 .label{
                     font-size: 14px;
-                    color: @blue;
+                    color: @green;
                     margin: 0 0 7px 0;
                 }
                 .value{
@@ -1884,7 +1904,7 @@ div.k-window-content {
                     height: 35px;
                     display: block;
                     margin: 13px 0 0 6px;
-                    background: url("../img/contactInfo.png") no-repeat;
+                    background: url("../img/combinedSprites.png") no-repeat -37px -267px;
                 }
             }
             &:hover > div, &:hover > a {
@@ -2799,31 +2819,31 @@ ul.noty_cont.noty_layout_topRight li {
     }
 }
 .EmailAddressSmall, .WebsiteSmall, .PhoneNumberSmall, .OtherSmall, .iconDropdown .select2-results .select2-highlighted{
-    background: url("../img/contactInfoSmall.png") no-repeat 0 0;
+    background: url("../img/combinedSprites.png") no-repeat -40px 0;
 }
 .select2-results .EmailAddressSmall{
-    background-position: 0 -140px;
+    background-position: -40px -140px;
 }
 .select2-results .WebsiteSmall{
-    background-position: 0 -175px;
+    background-position: -40px -175px;
 }
 .select2-results .PhoneNumberSmall{
-    background-position: 0 -210px;
+    background-position: -40px -210px;
 }
 .select2-results .OtherSmall{
-    background-position: 0 -245px;
+    background-position: -40px -245px;
 }
 .EmailAddressSmall, .select2-results .EmailAddressSmall.select2-highlighted{
-    background-position: 0 0;
+    background-position: -40px 0;
 }
 .WebsiteSmall, .select2-results .WebsiteSmall.select2-highlighted{
-    background-position: 0 -35px;
+    background-position: -40px -35px;
 }
 .PhoneNumberSmall, .select2-results .PhoneNumberSmall.select2-highlighted{
-    background-position: 0 -70px;
+    background-position: -40px -70px;
 }
 .OtherSmall, .select2-results .OtherSmall.select2-highlighted{
-    background-position: 0 -105px;
+    background-position: -40px -105px;
 }
 /*endregion*/
 /*region SelectBox*/
