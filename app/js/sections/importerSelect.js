@@ -1,585 +1,536 @@
 'use strict';
 
 define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools/generalTools"], function ($, importerUpload, dbServices, _, generalTools) {
-    var importerSelect = {}, previousSelectedFields, originalFieldGroups, currentFieldGroups,
-        trackerTypes = {
-            Phone: "Phone",
-            Email: "Email",
-            Website: "Website",
-            Other: "Other"
-        },
-    //tracks the selected indexes of contact info types
-    //used to keep the contact info in order (Phone Label 1, Phone Label 2, etc)
-        selectionTrackers = [
-            [
-                [false, false, trackerTypes.Phone]
-            ],
-            [
-                [false, false, trackerTypes.Email]
-            ],
-            [
-                [false, false, trackerTypes.Website]
-            ],
-            [
-                [false, false, trackerTypes.Other]
-            ]
-        ];
+        var importerSelect = {},
+        //a jquery selector for this page
+            page,
+        //the currently selected fields
+            currentFields,
+        //the default fields
+            defaultFields = [
+                {text: "Do not Import", group: 0},
+                {text: "Client Name", group: 0},
+                //Location
+                {text: "Address Line 1", group: 1},
+                {text: "Address Line 2", group: 1},
+                {text: "City", group: 1},
+                {text: "State", group: 1},
+                {text: "Zipcode", group: 1},
+                {text: "Region Name", group: 1},
+                //Contact Info will automatically be generated in setupFieldGroups, below is an example set
+                //{text: "Phone Label 2", group: 2, contactInfo: { category: 0, type: 0, number: 2 }},
+                //{text: "Phone Value 2", group: 2, contactInfo: { category: 0, type: 1, number: 2 }},
+                //Service Schedule
+                {text: "Frequency", group: 3},
+                {text: "Frequency Detail", group: 3},
+                {text: "Repeat Every", group: 3},
+                {text: "Start Date", group: 3},
+                {text: "End Date", group: 3}
+            ];
 
-    //region Update Selectable Fields
+        //region Field List logic, Selecting / Adding & Removing Items
 
-    /**
-     * Add the unselectedField back to the options (currentFieldGroups)
-     * @param unselectedField
-     * @param [index] If provided, the field will be inserted at this index
-     */
-    var addBackUnselectedField = function (unselectedField, index) {
-        //add back the option if it was unselected (except "Do not import" and on initial load)
-        if (unselectedField !== "Do not Import" && unselectedField !== "") {
-            var lastIndex = -1, lastGroupName = "";
+        /**
+         * Setup the available fields by merging default fields with the service's fields to add
+         * @param serviceFieldsToAdd The service's fields to add
+         */
+        var setupAvailableFields = function (serviceFieldsToAdd) {
+            var serviceFields = [], name;
 
-            //find the group that lastField belongs to
-            var lastGroup = _.find(originalFieldGroups, function (group) {
-                //keep track of the index to use in order to get the entire field object
-                lastIndex = -1;
-                return _.find(group, function (el) {
-                    lastIndex++;
-                    //get the group name
-                    lastGroupName = el.group;
-                    return el.id === unselectedField;
-                });
+            if (serviceFieldsToAdd) {
+                for (var i in serviceFieldsToAdd) {
+                    name = serviceFieldsToAdd[i].Name;
+                    //don't add if name is ClientName or OccurDate
+                    if (name !== "ClientName" && name !== "OccurDate") {
+                        serviceFields.push({
+                            //replace "_" with " "
+                            text: name.replace(/_/g, ' '),
+                            group: 4
+                        });
+                    }
+                }
+            }
+
+            currentFields = generalTools.deepClone(defaultFields).concat(serviceFields);
+        };
+
+        //region Contact info field logic
+
+        /**
+         * Returns the contact info fields for a category. Grouped by number
+         * @param category
+         */
+        var contactInfoCategory = function (category) {
+            //group the contact info fields by category
+            var contactInfoFields = _.filter(currentFields, function (field) {
+                return field.contactInfo && field.contactInfo.category === category;
             });
 
+            //then group them by their number
+            var indexed = _.groupBy(contactInfoFields, function (field) {
+                return field.contactInfo.number;
+            });
 
-            var indexToInsert = index;
+            return indexed;
+        };
 
-            //if not provided, determine the index in which to insert the field
-            if (index === undefined) {
-                for (var i in currentFieldGroups[lastGroupName]) {
-                    var field = currentFieldGroups[lastGroupName][i];
-                    //find the first field in the current group whos order is above lastIndex
-                    if (field.order >= lastIndex) {
-                        indexToInsert = i;
+        /**
+         * Generate the contact info field text
+         * @param options {{category: string, type: string, number: number}}
+         */
+        var contactInfoText = function (options) {
+            var categories = { 0: "Phone", 1: "Email", 2: "Website", 3: "Other" };
+            var types = { 0: "Label", 1: "Value" };
+
+            var text = categories[options.category] + " " + types[options.type] + " " + options.number;
+            return text;
+        };
+
+        /**
+         * Inserts a contact info field based on the options
+         * @param options {{category: string, type: string, number: number}}
+         */
+        var insertContactInfo = function (options) {
+            var fieldToInsert = {text: contactInfoText(options), group: 2, contactInfo: options};
+
+            //find the right place to insert the contact info
+            var insertIndex;
+            for (insertIndex in currentFields) {
+                var nextField = currentFields[insertIndex];
+
+                //if the next field is a contact info field
+                if (nextField.group === 2) {
+                    //if it is the same category
+                    if (nextField.contactInfo.category === options.category) {
+                        //if it is the same number and this is a label, insert here
+                        if (nextField.contactInfo.number === options.number && options.type === 0) {
+                            break;
+                        }
+
+                        //if it is the next number, insert here
+                        if (nextField.contactInfo.number > options.number) {
+                            break;
+                        }
+                    }
+
+                    //if it is the next category, insert here
+                    if (nextField.contactInfo.category > options.category) {
                         break;
                     }
                 }
+
+                //if the next field is no longer contact info, insert here
+                if (nextField.group > 2) {
+                    break;
+                }
+
+                //continue moving to the next field
             }
 
-            //insert last field to its original position
-            currentFieldGroups[lastGroupName].splice(indexToInsert, 0, lastGroup[lastIndex]);
-        }
-    };
+            //insert the field
+            currentFields.splice(insertIndex, 0, fieldToInsert);
+        };
 
+        /**
+         * Inserts a contact info field set (label & value) from the parameters
+         * @param category Ex. 0 = (Phone)
+         * @param number
+         */
+        var insertContactInfoSet = function (category, number) {
+            insertContactInfo({category: category, type: 0, number: number});
+            insertContactInfo({category: category, type: 1, number: number});
+        };
 
-    //region Contact Info Methods
+        /**
+         * Removes a contact info set and
+         * decrements contact info of the same category greater than the number
+         * @param category Ex. 0 = (Phone)
+         * @param number
+         */
+        var removeContactInfoSet = function (category, number) {
+            var contactInfos = contactInfoCategory(category);
+            var length = _.keys(contactInfos).length;
 
-    /**
-     * Checks if the passed field is a contact info field
-     * @param {string} field
-     */
-    var isContactInfoField = function (field) {
-        return (field.indexOf("Value") != -1 || field.indexOf("Label") != -1) &&
-            (field.indexOf("Phone") != -1 || field.indexOf("Email") != -1 || field.indexOf("Website") != -1 || field.indexOf("Other") != -1);
-    };
-
-    /**
-     * Get the field type
-     * @param contactInfoField
-     * @return {string} Ex. Phone
-     */
-    var contactInfoType = function (contactInfoField) {
-        //regex gets "Phone" from "Phone Label 1"
-        return contactInfoField.match(/^(.*?)\s/)[1];
-    };
-
-    /**
-     * Get the field number
-     * @param contactInfoField
-     * @return {number}
-     */
-    var contactInfoNumber = function (contactInfoField) {
-        return parseInt(contactInfoField.match(/\s([0-9]*)$/)[1]);
-    };
-
-    /**
-     * Get the trackers for a contactInfo type
-     * @param type Ex. Phone
-     * @return {Array.<Array.<boolean>>}
-     */
-    var getContactInfoTrackers = function (type) {
-        var typeTrackers;
-
-        //get the correct array to use
-        if (type === trackerTypes.Phone) {
-            typeTrackers = selectionTrackers[0];
-        } else if (type === trackerTypes.Email) {
-            typeTrackers = selectionTrackers[1];
-        } else if (type === trackerTypes.Website) {
-            typeTrackers = selectionTrackers[2];
-        } else {
-            typeTrackers = selectionTrackers[3];
-        }
-
-        return typeTrackers;
-    };
-
-    /**
-     * Update the contact info selection tracker for the passed field
-     * @param {string} contactInfoField
-     */
-    var updateContactInfoTracking = function (contactInfoField) {
-        //get the number from the field (ex. if field is "Phone Label 1", num is 1)
-        var num = contactInfoNumber(contactInfoField);
-
-        var type = contactInfoType(contactInfoField);
-        var trackers = getContactInfoTrackers(type);
-
-        //get the appropriate row
-        var trackerRow = trackers[num - 1];
-
-        var indexToUpdate;
-
-        //check if the field is a label or a value
-        if (contactInfoField.indexOf("Label") != -1) {
-            indexToUpdate = 0;
-        } else {
-            indexToUpdate = 1;
-        }
-
-        //update the associated tracker row
-        trackerRow[indexToUpdate] = !trackerRow[indexToUpdate];
-    };
-
-    /**
-     * Update the available contact info fields
-     * @param lastField
-     * @param newField
-     */
-    var updateContactInfoFields = function (lastField, newField) {
-        //update the trackers
-        if (isContactInfoField(lastField)) {
-            updateContactInfoTracking(lastField);
-        }
-        if (isContactInfoField(newField)) {
-            updateContactInfoTracking(newField);
-        }
-
-        if (isContactInfoField(newField)) {
-            //Make sure there is still an available contact info at the bottom. Otherwise insert one
-            //(the last row of the tracker array should be [false, false])
-
-            var newType = contactInfoType(newField);
-            var newFieldTrackers = getContactInfoTrackers(newType);
-
-            //check the last row is available [false, false], if not add a new option
-            //ex. if "Phone Label 1" was selected, add "Phone Label 2" and "Phone Value 2"
-            var lastSelection = newFieldTrackers[newFieldTrackers.length - 1];
-            if (lastSelection[0] || lastSelection[1]) {
-                newFieldTrackers.push([false, false, newType]);
-                currentFieldGroups.contactInfo.push(
-                    {id: newType + " Label " + newFieldTrackers.length, order: currentFieldGroups.contactInfo, group: "contactInfo"},
-                    {id: newType + " Value " + newFieldTrackers.length, order: currentFieldGroups.contactInfo + 1, group: "contactInfo"}
-                );
-            }
-        }
-
-        if (isContactInfoField(lastField)) {
-            var lastFieldNum = contactInfoNumber(lastField);
-            var lastFieldType = contactInfoType(lastField);
-
-            //add old field back (in the right place)
-
-            var index = 0;
-            //TODO find the right index to insert the field at
-            addBackUnselectedField(lastField, index);
-
-            //search the contact info group the lastField was removed from
-            //to see if a label or value is selected
-
-            var lastFieldTrackers = getContactInfoTrackers(lastFieldType);
-            var lastTracker = lastFieldTrackers[lastFieldNum - 1];
-
-            //if neither are selected and it is not the first or last tracker:
-            //a) remove the selectedTracker
-            //b) decrement any contact info of the same type that have a > index
-
-            if (lastFieldNum > 1 && lastFieldNum < lastFieldTrackers.length && !lastTracker[0] && !lastTracker[1]) {
-                //TODO a & b
+            //remove the label & value
+            for (var j = 0; j < currentFields.length; j++) {
+                var field = currentFields[j];
+                if (field.contactInfo && field.contactInfo.category === category
+                    && field.contactInfo.number === number) {
+                    currentFields.splice(j, 1);
+                    currentFields.splice(j, 1);
+                    break;
+                }
             }
 
-//            //check for empty rows
-//            for (var s in selectionTrackers) {
-//                var group = selectionTrackers[s];
-//                var row;
-//                for (var g in group) {
-//                    row = group[g];
-//                    //if both values are false and this isn't the last row
-//                    if (!row[0] && !row[1] && g != group.length - 1) {
-//                        var infoType = row[2];
-//                        var num = parseInt(g) + 1;
-//
-//                        var decrementStartIndex = -1;
-//                        var typeToDecrement = "";
-//                        //remove the unused set from currentFieldGroups.contactInfo
-//                        for (var c in currentFieldGroups.contactInfo) {
-//                            //find the occurrences(2) that match the num and infoType
-//                            if (currentFieldGroups.contactInfo[c].id.indexOf(infoType) !== -1 && currentFieldGroups.contactInfo[c].id.match(/\s([0-9]*)$/)[1] === num.toString()) {
-//                                //remove them from the list
-//                                currentFieldGroups.contactInfo.splice(c, 2);
-//                                decrementStartIndex = c;
-//                                //get the type(ex. "Phone")
-//                                typeToDecrement = currentFieldGroups.contactInfo[c].id.match(/^(.*?)\s/)[1];
-//                                break;
-//                            }
-//                        }
-//                        for (var ci in currentFieldGroups.contactInfo) {
-//                            var fieldName = currentFieldGroups.contactInfo[ci].id;
-//                            //if the current index is at or above decrementStartIndex and this is the correct contactInfo type
-//                            if (ci >= decrementStartIndex && fieldName.match(/^(.*?)\s/)[1] === typeToDecrement) {
-//                                //decrement higher numbered fields in the contactInfo list
-//                                //get the number from the field(ex. if fieldName is "Phone Label 1", oldIndex is 1)
-//                                var oldIndex = fieldName.match(/\s([0-9]*)$/)[1];
-//                                //decrement the number
-//                                var newIndex = parseInt(oldIndex) - 1;
-//                                //replace the old name with the new name
-//                                currentFieldGroups.contactInfo[ci].id = fieldName.replace(oldIndex, newIndex.toString());
-//
-//                                //decrement already selected dropdown values that match the field
-//
-//                            }
-//                        }
-//                        //remove the corresponding row from the tracker
-//                        group.splice(g, 1);
-//                    }
-//                }
-//            }
-        }
-    };
+            var selects = page.find(".select2-container");
 
-    //endregion
+            //go through all greater indexes and decrement the fields
+            for (var i = number + 1; i <= length; i++) {
+                var fieldsToDecrement = contactInfos[i];
 
-    //update the available fields every time a field is selected
-    var updateSelectableFields = function () {
-        var selectedFields = [], dropdowns = $("#importerSelect").find(".select2-container");
+                var labelField = fieldsToDecrement[0];
+                var valueField = fieldsToDecrement[1];
 
-        //create a list of the selected fields
-        dropdowns.each(function () {
-            selectedFields.push($(this).select2("val"));
-        });
+                //change the currentFields numbers
+                labelField.contactInfo.number -= 1;
+                valueField.contactInfo.number -= 1;
 
-        //find the changed field
-        var fieldIndex = -1;
-        var newField = _.find(selectedFields, function (field) {
-            fieldIndex++;
-            return field !== previousSelectedFields[fieldIndex];
-        });
+                var newLabel = contactInfoText(fieldsToDecrement[0].contactInfo);
+                var newValue = contactInfoText(fieldsToDecrement[1].contactInfo);
 
-        //if a field changed, update the available fields
-        if (newField) {
-            var lastField = previousSelectedFields[fieldIndex];
+                //change the selects values
+                selects.each(function () {
+                    var val = $(this).select2("val");
+                    if (val === labelField.text) {
+                        $(this).select2("data", {id: newLabel, text: newLabel});
+                    } else if (val === valueField.text) {
+                        $(this).select2("data", {id: newValue, text: newValue});
+                    }
+                });
 
-            if (!isContactInfoField(lastField)) {
-                addBackUnselectedField(lastField);
+                //change the currentFields text
+                labelField.text = newLabel;
+                valueField.text = newValue;
+            }
+        };
+
+
+        /**
+         * For each contact info category make sure:
+         * a) there is an available set (label and value) at the end
+         * b) there are no extra available set in the middle
+         */
+        var updateContactInfoFields = function () {
+            for (var c = 0; c < 4; c++) {
+                var indexed = contactInfoCategory(c);
+
+                var lastNumber = _.keys(indexed).length;
+                //a) make sure there is an available set at the end
+                if (//check there is an initial set
+                    !lastNumber ||
+                        //then check the last set is fully available
+                        indexed[lastNumber][0].selected || indexed[lastNumber][1].selected) {
+
+                    //if not add another contact info set
+                    insertContactInfoSet(c, lastNumber + 1);
+                }
+
+                //reset indexed/lastNumber after inserts
+                indexed = contactInfoCategory(c);
+                lastNumber = _.keys(indexed).length;
+
+                //b) remove any extra available sets in the middle
+                for (var n = 1; n < lastNumber; n++) {
+                    if (!indexed[n][0].selected && !indexed[n][0].selected) {
+                        removeContactInfoSet(c, n);
+                    }
+                }
+            }
+        };
+
+        //endregion
+
+        /**
+         * Formats currentFields to field groups for the select2
+         */
+        var setupFieldGroups = function () {
+            var fieldGroups = [
+                {text: "", children: []},
+                {text: "Location", children: []},
+                {text: "Contact Info", children: []},
+                {text: "Service Schedule", children: []},
+                {text: "Service Fields", children: []}
+            ];
+
+            updateContactInfoFields();
+
+            //build the field groups from the available (not selected) fields
+            for (var i in currentFields) {
+                var field = currentFields[i];
+
+                //exclude selected fields (except Do not Import)
+                if (field.selected && field.text !== "Do not Import") {
+                    continue;
+                }
+
+                //add the field, need to set id so it is selectable for the select2
+                fieldGroups[field.group].children.push({id: field.text, text: field.text});
             }
 
-            //remove the new field from groups
-            _.each(currentFieldGroups, function (group, key) {
-                currentFieldGroups[key] = _.reject(group, function (el) {
-                    return el.id === newField && newField !== "Do not Import";
+            importerSelect.fieldGroups = fieldGroups;
+        };
+
+        /**
+         * Select fields where there are matching headers
+         */
+        var matchHeaders = function () {
+            var headers = importerUpload.uploadedData[0];
+            for (var h in headers) {
+                var header = headers[h],
+                    match = false,
+                    dropDown = page.find(".select2-container:eq(" + h + ")");
+
+                for (var i in currentFields) {
+                    var field = currentFields[i];
+
+                    //cannot select already selected field
+                    if (field.selected) {
+                        continue;
+                    }
+
+                    //if text matches corresponding header, select the header
+                    if (field.text === header) {
+                        field.selected = true;
+                        dropDown.select2("data", {id: field.text, text: field.text});
+                        match = true;
+                        break;
+                    }
+                }
+
+                if (!match) {
+                    dropDown.select2("data", {id: "Do not Import", text: "Do not Import"});
+                }
+            }
+        };
+
+        /**
+         * Setup the header field selectors
+         */
+        var setupSelectors = function () {
+            var formatItemName = function (item) {
+                return item.text;
+            };
+
+            page.find(".styled-select").select2({
+                placeholder: "",
+                minimumResultsForSearch: 200,
+                query: function (query) {
+                    if (!importerSelect.fieldGroups) {
+                        importerSelect.fieldGroups = [];
+                    }
+                    var data = {results: importerSelect.fieldGroups};
+                    query.callback(data);
+                },
+                formatSelection: formatItemName,
+                formatResult: formatItemName,
+                dropdownCssClass: "bigdrop"
+            })
+                //when a selector is opened
+                //a) store the selected field, to know if it changed later
+                //b) force re-render to get around scroll bug
+                .on("open", function () {
+                    //a) store the selected field, to know if it changed later
+                    var currentSelection = $(this).select2("data");
+                    if (currentSelection) {
+                        this._originalField = currentSelection.text;
+                    }
+
+                    //b) force re-render to get around scroll bug
+                    setTimeout(function () {
+                        $(".select2-drop-active").find(".select2-results")[0].style.overflowY = "scroll";
+                        setTimeout(function () {
+                            $(".select2-drop-active").find(".select2-results")[0].style.overflowY = "auto";
+                        }, 100);
+                    }, 100);
+                })
+                //when a selector is changed
+                //a) un-select the old _originalField & select selectedField
+                //b) re-setup field groups after selection
+                .on("change", function (e) {
+                    var selectedField = e.val;
+                    if (selectedField !== this._originalField) {
+                        for (var i in currentFields) {
+                            var field = currentFields[i];
+                            //a) un-select the old _originalField & select selectedField
+                            if (field.text === selectedField) {
+                                field.selected = true;
+                            } else if (field.text === this._originalField) {
+                                field.selected = false;
+                            }
+                        }
+
+                        //b) re-setup field groups after selection
+                        setupFieldGroups();
+                    }
+                });
+        };
+
+        //endregion
+
+        //region Data Formatting
+
+        //turn the first two rows sideways for the next page's headers
+        //ex. [{"Client Name", "City", "State"}, {"Burger King", "Lafeyette", "IN"}] becomes [{"Client Name", "Burger King"}, {"City", "Lafeyette"}, {"State", "IN"}]
+        //http://stackoverflow.com/questions/5971389/convert-array-of-rows-to-array-of-columns
+        var getHeadersWithExample = function (data) {
+            var newData = [];
+            data = data.slice(0, 2);
+            for (var i = 0; i < data[0].length; i++) {
+                newData.push([data[0][i], data[1][i]]);
+            }
+            return newData;
+        };
+
+        /**
+         * Formats the data, with the selected headers in this section
+         * @param data
+         * @return {Array}
+         */
+        var formatDataForValidation = function (data) {
+            //check value of toggle switch to know if headers should be included
+            var headersIncluded = page.find(".switch .on").hasClass("active");
+
+            var selectedFields = [];
+
+            var apiNameMap = {
+                "Address Line 1": "Address Line One",
+                "Address Line 2": "Address Line Two",
+                "City": "AdminDistrictTwo",
+                "State": "AdminDistrictOne",
+                "Zipcode": "PostalCode"
+            };
+
+            //create an array of the fields to be used (based on the selects)
+            page.find(".select2-container").each(function () {
+                var name = $(this).select2("val");
+
+                //change to the names needed for the API
+                if (apiNameMap[name]) {
+                    name = apiNameMap[name];
+                }
+
+                if (name === "Do not Import") {
+                    selectedFields.push(null);
+                } else {
+                    selectedFields.push(name);
+                }
+            });
+
+            var dataToValidate = [], row, field;
+
+            //if the headers are not included, insert a row for the headers
+            if (!headersIncluded) {
+                var length = selectedFields.length, headerRow = [];
+                for (var i = 0; i < length; i++) {
+                    field = selectedFields[i];
+                    if (field) {
+                        headerRow.push(field);
+                    }
+                }
+                dataToValidate.unshift(headerRow);
+            }
+
+            //iterate through each row of the data
+            for (var r in data) {
+                row = data[r];
+                var newArray = [];
+                //iterate through each column of the current row
+                for (var c in row) {
+                    field = selectedFields[c];
+                    //check the field should be imported
+                    if (field) {
+                        //use the header from the select instead of their header
+                        if (r == 0 && headersIncluded) {
+                            newArray.push(field);
+                        } else {
+                            newArray.push(row[c]);
+                        }
+                    }
+                }
+
+                dataToValidate.push(newArray);
+            }
+
+            return dataToValidate;
+        };
+
+        //endregion
+
+        /**
+         * Setup the Headers / Row 1 toggle switch
+         */
+        var setupToggleSwitch = function () {
+            //setup toggle switch states
+            var on = page.find(".switch .on");
+            on.on("click", function () {
+                off.removeClass("active");
+                on.addClass("active");
+                //page.find(".toggle").animate({left: "37px"}, 250, "easeInOutQuad");
+                page.find("#dynamicHeader span")[0].innerText = "Row 1";
+            });
+
+            var off = page.find(".switch .off");
+            off.on("click", function () {
+                on.removeClass("active");
+                off.addClass("active");
+                //page.find(".toggle").animate({left: "108px"}, 250, "easeInOutQuad");
+                page.find("#dynamicHeader span")[0].innerText = "Row 2";
+            });
+        };
+
+        //resize the list based on the current window's height
+        var resizeGrid = function () {
+            var extraMargin = 275;
+            var windowHeight = $(window).height();
+            var contentHeight = windowHeight - extraMargin;
+            page.find('#listView').css("maxHeight", contentHeight + 'px');
+        };
+
+        importerSelect.initialize = function () {
+            page = $("#importerSelect");
+
+            //on save button click
+            page.find(".saveBtn").on("click", function () {
+                importerSelect.dataToValidate = formatDataForValidation(importerUpload.uploadedData);
+
+                //submit data to be validated, then redirect to review page
+                dbServices.suggestions.update({body: {rowsWithHeaders: importerSelect.dataToValidate}}).done(function (suggestions) {
+                    importerSelect.gridData = suggestions;
+                    window.viewImporterReview();
                 });
             });
 
-            //update the contact info options
-            if (isContactInfoField(lastField) || isContactInfoField(newField)) {
-                updateContactInfoFields(lastField, newField);
-            }
-        }
-
-        importerSelect.currentFields = [
-            {text: "", children: currentFieldGroups.main},
-            {text: "Location", children: currentFieldGroups.location},
-            {text: "Contact Info", children: currentFieldGroups.contactInfo},
-            {text: "Service Schedule", children: currentFieldGroups.service},
-            {text: "Service Fields", children: currentFieldGroups.fields}
-        ];
-
-        //store the selected fields
-        previousSelectedFields = [];
-        dropdowns.each(function () {
-            previousSelectedFields.push($(this).select2("val"));
-        });
-    };
-
-    //endregion
-
-    /**
-     * Formats the data, with the selected headers in this section
-     * @param data
-     * @return {Array}
-     */
-    var formatDataForValidation = function (data) {
-        var selectPage = $("#importerSelect");
-        //check value of toggle switch to know if headers should be included
-        var headersIncluded = selectPage.find(".switch .on").hasClass("active");
-        var selectedFields = [];
-        //create an array of the fields to be used (based on the drop downs)
-        selectPage.find(".select2-container").each(function () {
-            var value = $(this).select2("val"), name;
-            //change to the names needed for the API
-            if (value === "Address Line 1") {
-                name = "Address Line One";
-            } else if (value === "Address Line 2") {
-                name = "Address Line Two";
-            } else if (value === "City") {
-                name = "AdminDistrictTwo";
-            } else if (value === "State") {
-                name = "AdminDistrictOne";
-            } else if (value === "Zipcode") {
-                name = "PostalCode";
-            } else {
-                name = value;
-            }
-            if (value !== "Do not Import") {
-                selectedFields.push({name: name, selected: true});
-            } else {
-                selectedFields.push(false);
-            }
-        });
-
-        var dataToValidate = [], row;
-        //iterate through each row of the data
-        for (var r in data) {
-            row = data[r];
-            var newArray = [];
-            //iterate through each column of the current row
-            for (var c in row) {
-                //if the field is to be imported ("Do not Import" wasn't selected for this row)
-                if (selectedFields[c]) {
-                    //use the header from the dropdown instead of their header
-                    if (r == 0 && headersIncluded) {
-                        newArray.push(selectedFields[c].name);
-                    } else {
-                        newArray.push(row[c]);
-                    }
-                }
-            }
-
-            dataToValidate.push(newArray);
-        }
-
-        //if the headers are not included, insert an extra row for the headers
-        if (!headersIncluded) {
-            var length = selectedFields.length, headerRow = [];
-            for (var i = 0; i < length; i++) {
-                if (selectedFields[i]) {
-                    headerRow.push(selectedFields[i].name);
-                }
-            }
-            dataToValidate.unshift(headerRow);
-        }
-
-        return dataToValidate;
-    };
-
-    //resize the list based on the current window's height
-    var resizeGrid = function () {
-        var extraMargin = 275;
-        var windowHeight = $(window).height();
-        var contentHeight = windowHeight - extraMargin;
-        $("#importerSelect").find('#listView').css("maxHeight", contentHeight + 'px');
-    };
-
-    //turn the first two rows sideways for the next page's headers
-    //ex. [{"Client Name", "City", "State"}, {"Burger King", "Lafeyette", "IN"}] becomes [{"Client Name", "Burger King"}, {"City", "Lafeyette"}, {"State", "IN"}]
-    //http://stackoverflow.com/questions/5971389/convert-array-of-rows-to-array-of-columns
-    var getHeadersWithExample = function (data) {
-        var newData = [];
-        data = data.slice(0, 2);
-        for (var i = 0; i < data[0].length; i++) {
-            newData.push([data[0][i], data[1][i]]);
-        }
-        return newData;
-    };
-
-    importerSelect.initialize = function () {
-        //on save button click
-        $("#importerSelect").find(".saveBtn").on("click", function () {
-            importerSelect.dataToValidate = formatDataForValidation(importerUpload.uploadedData);
-
-            //submit data to be validated, then redirect to review page
-            dbServices.suggestions.update({body: {rowsWithHeaders: importerSelect.dataToValidate}}).done(function (suggestions) {
-                importerSelect.gridData = suggestions;
-                window.viewImporterReview();
+            $(window).resize(function () {
+                resizeGrid();
             });
-        });
+        };
 
-        $(window).resize(function () {
+        importerSelect.show = function () {
+            //make sure there is a selected service type
+            if (!importerUpload.selectedService) {
+                window.viewImporterUpload();
+                return;
+            }
+
+            //setup the listview
+            $("#listView").kendoListView({
+                //setup the template to only include the header and the first row of data
+                template: "<li><div class='header'>#=data[0]#</div><div class='value'>#=data[1]#</div><div class='styled-select'></div></li>",
+                dataSource: getHeadersWithExample(importerUpload.uploadedData)
+            });
+
             resizeGrid();
-        });
-    };
 
-    importerSelect.show = function () {
-        //make sure there is a selected service type
-        if (!importerUpload.selectedService) {
-            window.viewImporterUpload();
-            return;
-        }
+            setupToggleSwitch();
 
-        //setup the default fields
-        var defaultFields = [
-            {text: "", children: [
-                {id: "Do not Import", order: 0, group: "main"},
-                {id: 'Client Name', order: 1, group: "main"}
-            ]},
-            {text: "Location", children: [
-                {id: 'Address Line 1', order: 0, group: "location"},
-                {id: 'Address Line 2', order: 1, group: "location"},
-                {id: 'City', order: 2, group: "location"},
-                {id: 'State', order: 3, group: "location"},
-                {id: 'Zipcode', order: 4, group: "location"},
-                {id: 'Region Name', order: 5, group: "location"}
-            ]},
-            {text: "Contact Info", children: [
-                {id: 'Phone Label 1', order: 0, group: "contactInfo"},
-                {id: 'Phone Value 1', order: 1, group: "contactInfo"},
-                {id: 'Email Label 1', order: 2, group: "contactInfo"},
-                {id: 'Email Value 1', order: 3, group: "contactInfo"},
-                {id: 'Website Label 1', order: 4, group: "contactInfo"},
-                {id: 'Website Value 1', order: 5, group: "contactInfo"},
-                {id: 'Other Label 1', order: 6, group: "contactInfo"},
-                {id: 'Other Value 1', order: 7, group: "contactInfo"}
-            ]},
-            {text: "Service Schedule", children: [
-                {id: 'Frequency', order: 0, group: "service"},
-                {id: 'Frequency Detail', order: 1, group: "service"},
-                {id: 'Repeat Every', order: 2, group: "service"},
-                {id: 'Start Date', order: 3, group: "service"},
-                {id: 'End Date', order: 4, group: "service"}
-            ]}
-        ];
+            //get the list of fields for the selected service (for the selectors), then set them up
+            if (importerUpload.selectedService) {
+                dbServices.services.read({params: {serviceTemplateId: importerUpload.selectedService.Id}}).done(function (service) {
+                    setupAvailableFields(service[0].Fields);
 
-        //setup the listview
-        $("#listView").kendoListView({
-            //setup the template to only include the header and the first row of data
-            template: "<li><div class='header'>#=data[0]#</div><div class='value'>#=data[1]#</div><div class='styled-select'></div></li>",
-            dataSource: getHeadersWithExample(importerUpload.uploadedData)
-        });
+                    //setup the initial field groups (need to do this to setup initial contact info)
+                    setupFieldGroups();
 
-        resizeGrid();
+                    setupSelectors();
+                    matchHeaders();
+                    //setup the initial field groups
+                    setupFieldGroups();
+                });
+            }
+        };
 
-        //setup toggle switch states
-        var selectPage = $("#importerSelect");
-        var on = selectPage.find(".switch .on");
-        var off = selectPage.find(".switch .off");
-        on.on("click", function () {
-            off.removeClass("active");
-            on.addClass("active");
-            //selectPage.find(".toggle").animate({left: "37px"}, 250, "easeInOutQuad");
-            selectPage.find("#dynamicHeader span")[0].innerText = "Row 1";
-        });
-        off.on("click", function () {
-            on.removeClass("active");
-            off.addClass("active");
-            //selectPage.find(".toggle").animate({left: "108px"}, 250, "easeInOutQuad");
-            selectPage.find("#dynamicHeader span")[0].innerText = "Row 2";
-        });
+        window.importerSelect = importerSelect;
 
-        //get the list of fields for the selected service(for the dropdowns)
-        if (importerUpload.selectedService) {
-            dbServices.services.read({params: {serviceTemplateId: importerUpload.selectedService.Id}}).done(function (service) {
-                var serviceFields = [], name, page = $("#importerSelect");
-                var fields = service[0].Fields;
-                //iterate throught the list of fields
-                for (var i in fields) {
-                    name = fields[i].Name;
-                    //don't add if type is guid or if name is ClientName or OccurDate
-                    if (name !== "ClientName" && name !== "OccurDate") {
-                        //add field to list
-                        serviceFields.push({id: name.replace(/_/g, ' '), order: i, group: "fields"}); //replace "_" with " "
-                    }
-                }
-
-                //reset the fields list
-                importerSelect.allFields = importerSelect.currentFields = defaultFields.concat({text: "Service Fields", children: serviceFields});
-
-                //function to format the option names of the frequency and end Date dropdowns
-                var formatItemName = function (item) {
-                    if (item.text) {
-                        return item.text;
-                    }
-
-                    return item.id;
-                };
-
-                page.find(".styled-select").select2({
-                    placeholder: "",
-                    minimumResultsForSearch: 200,
-                    query: function (query) {
-                        if (!importerSelect.currentFields) {
-                            importerSelect.currentFields = [];
-                        }
-                        var data = {results: importerSelect.currentFields};
-                        query.callback(data);
-                    },
-                    formatSelection: formatItemName,
-                    formatResult: formatItemName,
-                    dropdownCssClass: "bigdrop"
-                }).on("open",function () {
-                        //force rerender
-                        setTimeout(function () {
-                            $(".select2-drop-active").find(".select2-results")[0].style.overflowY = "scroll";
-                            setTimeout(function () {
-                                $(".select2-drop-active").find(".select2-results")[0].style.overflowY = "auto";
-                            }, 100);
-                        }, 100);
-                    }).on("change", function () {
-                        updateSelectableFields();
-                    });
-
-                //reset the current groups
-                currentFieldGroups = {
-                    main: importerSelect.allFields[0].children,
-                    location: importerSelect.allFields[1].children,
-                    contactInfo: importerSelect.allFields[2].children,
-                    service: importerSelect.allFields[3].children,
-                    fields: importerSelect.allFields[4].children
-                };
-
-                originalFieldGroups = generalTools.deepClone(currentFieldGroups);
-
-                /**
-                 * checks if the field exists in the groups of fields
-                 * @param {string} field
-                 * @return {boolean}
-                 */
-                var findMatch = function (field) {
-                    return _.any(currentFieldGroups, function (group) {
-                        return _.any(group, function (el) {
-                            return el.id === field;
-                        });
-                    });
-                };
-
-                //automatically select fields if there is a matching header
-                var dropdown, headers = importerUpload.uploadedData[0];
-                previousSelectedFields = [];
-                for (var h in headers) {
-                    dropdown = page.find(".select2-container:eq(" + h + ")");
-                    //select if text matches corresponding header
-                    if (findMatch(headers[h])) {
-                        dropdown.select2("data", {id: headers[h]});
-                        previousSelectedFields.push(headers[h]);
-                    } else {
-                        dropdown.select2("data", {id: "Do not Import"});
-                        previousSelectedFields.push("Do not Import");
-                    }
-
-                    updateSelectableFields();
-                }
-            });
-        }
-    };
-
-    window.importerSelect = importerSelect;
-
-    return importerSelect;
-});
+        return importerSelect;
+    }
+);
