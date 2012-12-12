@@ -42,12 +42,28 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "tools/paramete
                             contactInfo.ClientId = vm.get("selectedEntity.Client.Id");
                             contactInfo.Id = generalTools.newGuid();
                             dbServices.contactInfo.create({body: contactInfo});
+                            //Add contact from local data structure.
+                            vm.get("selectedEntity.Client.ContactInfoSet").unshift(contactInfo);
                         },
                         update: function (contactInfo) {
                             dbServices.contactInfo.update({body: contactInfo});
                         },
                         destroy: function (id) {
                             dbServices.contactInfo.destroy({params: {id: id}});
+                            var clientContacts = vm.get("selectedEntity.Client.ContactInfoSet"),
+                                locationContacts = vm.get("selectedEntity.Location.ContactInfoSet"),
+                                i;
+                            //Remove contact from local data structure.
+                            for (i = 0; i<clientContacts.length; i++) {
+                                if (clientContacts[i].Id === id) {
+                                    vm.get("selectedEntity.Client.ContactInfoSet").splice(i, 1);
+                                }
+                            }
+                            for (i = 0; i<locationContacts.length; i++) {
+                                if (locationContacts[i].Id === id) {
+                                    vm.get("selectedEntity.Location.ContactInfoSet").splice(i, 1);
+                                }
+                            }
                         }
                     }
                 });

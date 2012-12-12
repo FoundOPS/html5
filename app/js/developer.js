@@ -47,7 +47,7 @@ define(['lib/platform', "underscore", 'underscore.string', "tools/generalTools"]
      * This is for sections that are in the Silverlight application and is used for debugging
      * @type {developer.Frame}
      */
-    developer.CURRENT_FRAME = developer.Frame.DEFAULT;
+    developer.CURRENT_FRAME = developer.Frame.DISABLE_SL;
 
     /**
      * The current silverlight version
