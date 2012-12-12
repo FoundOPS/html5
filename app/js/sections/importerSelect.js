@@ -221,7 +221,7 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
 
                 //b) remove any extra available sets in the middle
                 for (var n = 1; n < lastNumber; n++) {
-                    if (!indexed[n][0].selected && !indexed[n][0].selected) {
+                    if (!indexed[n][0].selected && !indexed[n][1].selected) {
                         removeContactInfoSet(c, n);
                     }
                 }
