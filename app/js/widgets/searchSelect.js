@@ -117,9 +117,6 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                         }, searchSelect.options.queryDelay ? searchSelect.options.queryDelay : 0);
                         if (searchSelect.isTouchDevice) {
                             $(".km-scroll-wrapper").kendoMobileScroller("reset");
-                            if (generalTools.checkPlatform.isiOS()) {
-                                window.scrollTo(0,0);
-                            }
                         }
                     }
                     _scrolling = false;
@@ -147,9 +144,6 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                                     searchSelect.clearList();
                                     if (searchSelect.isTouchDevice) {
                                         $(".km-scroll-wrapper").kendoMobileScroller("reset");
-                                        if (generalTools.checkPlatform.isiOS()) {
-                                            window.scrollTo(0,0);
-                                        }
                                     }
                                 }
                             }, 200);
@@ -220,6 +214,7 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                 }
                 searchSelect.selectedOptionTempText = searchSelect.element.find("input").val();
                 searchSelect.clearList();
+                searchSelect.element.find("#optionListScroller").width(searchSelect.element.find("input").parent().width());
                 //add each returned item to the list
                 if (options) {
                     for (i = 0; i < options.length; i++) {
