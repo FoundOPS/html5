@@ -28,13 +28,11 @@ define(['jquery', "developer", 'lib/platform', 'tools/dateTools', 'moment'], fun
 
     //disable the save and cancel buttons
     generalTools.disableButtons = function (page) {
-        $(page + " .cancelBtn").attr("disabled", "disabled");
         $(page + " .saveBtn").attr("disabled", "disabled");
     };
 
     //enable the save and cancel buttons
     generalTools.enableButtons = function (page) {
-        $(page + " .cancelBtn").removeAttr("disabled");
         $(page + " .saveBtn").removeAttr("disabled");
     };
 
@@ -280,18 +278,6 @@ define(['jquery', "developer", 'lib/platform', 'tools/dateTools', 'moment'], fun
         //set the final sizes
         element.css("width", newW + "px");
         element.css("height", newH + "px");
-    };
-
-    //enable the save and cancel buttons
-    generalTools.enableButtons = function (page) {
-        $(page + " .cancelBtn").removeAttr("disabled");
-        $(page + " .saveBtn").removeAttr("disabled");
-    };
-
-    //disable the save and cancel buttons
-    generalTools.disableButtons = function (page) {
-        $(page + " .cancelBtn").attr("disabled", "disabled");
-        $(page + " .saveBtn").attr("disabled", "disabled");
     };
 
     $.fn.delayKeyup = function (callback, ms) {

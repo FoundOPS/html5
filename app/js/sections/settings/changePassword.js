@@ -42,7 +42,13 @@ define(["db/services", "tools/generalTools", "widgets/settingsMenu"], function (
         menu.kendoSettingsMenu();
 
         generalTools.observeInput(passPage.find("input"), function () {
-            generalTools.enableButtons("#changePassword");
+            var newPass = $("#newPass")[0].value;
+            var confirmPass = $("#confirmPass")[0].value;
+
+            if (changePassword.validator.validate && $("#oldPass")[0].value !== "" && newPass !== "" && confirmPass !== ""
+                 && newPass.length > 7 && confirmPass.length > 7 && newPass === confirmPass) {
+                generalTools.enableButtons("#changePassword");
+            }
         });
 
         changePassword.validator = $("#changePasswordForm").kendoValidator({
@@ -71,6 +77,10 @@ define(["db/services", "tools/generalTools", "widgets/settingsMenu"], function (
                 newLength: "Must be at least 8 characters long."
             }
         }).data("kendoValidator");
+    };
+
+    changePassword.show = function () {
+        $(".k-invalid-msg").attr("style", "display:none");
     };
 
     window.changePassword = changePassword;
