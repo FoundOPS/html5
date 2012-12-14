@@ -378,7 +378,7 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
          */
         var formatDataForValidation = function (data) {
             //check value of toggle switch to know if headers should be included
-            var headersIncluded = page.find(".switch .on").hasClass("active");
+            var headersIncluded = page.find(".toggleSwitch .on").hasClass("active");
 
             var selectedFields = [];
 

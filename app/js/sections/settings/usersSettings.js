@@ -59,7 +59,7 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
                     //TODO: set a timeout and notify if it is reached('complete' doesn't register a timeout error)
                     complete: function (jqXHR, textStatus) {
                         if (textStatus == "error") {
-                            saveHistory.error("Get");
+                            saveHistory.error("Connection Error");
                         }
                     },
                     url: getBaseUrl
@@ -110,6 +110,12 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
         });
     };
 
+    var hideButtons = function () {
+        var users = $("#users");
+        users.find(".k-grid-delete").attr("style", "display:none");
+        users.find(".k-grid-edit").attr("style", "display:none");
+    };
+
     var setupUsersGrid = function () {
         //add a grid to the #usersGrid div element
         grid = $("#usersGrid").kendoGrid({
@@ -121,8 +127,7 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
                     users.find(".k-grid-delete").attr("style", "display:inline-block");
                     users.find(".k-grid-edit").attr("style", "display:inline-block");
                 } else {
-                    users.find(".k-grid-delete").attr("style", "display:none");
-                    users.find(".k-grid-edit").attr("style", "display:none");
+                    hideButtons();
                 }
             },
             dataSource: usersDataSource,
@@ -146,6 +151,10 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
             },
             edit: function () {
                 var win = $('.k-window');
+                //hide the buttons any time the edit or add windiw closes
+//                win.live("pagehide", function() {
+//                    hideButtons();
+//                });
                 if (usersSettings.editorType === 'add') {
                     win.find('.k-window-title').html("Add New User");
                     //change update to Send Invite Email
@@ -270,7 +279,7 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
 
             usersSettings.availableEmployees = employees;
             usersDataSource.read();
-
+            hideButtons();
             resizeGrid();
         });
     };

@@ -51,7 +51,7 @@ define(["developer", "tools/dateTools", "db/saveHistory", "tools/parameters", "t
             if (!completeOptions) {
                 completeOptions = {};
             }
-
+            //the $.ajax complete option
             return function (jqXHR, textStatus) {
                 if (textStatus === "success") {
                     saveHistory.success();
@@ -61,7 +61,7 @@ define(["developer", "tools/dateTools", "db/saveHistory", "tools/parameters", "t
                     }
                 } else {
                     dataSource.cancelChanges();
-                    saveHistory.error(jqXHR.statusText);
+                    saveHistory.error(jqXHR.responseText);
 
                     if (completeOptions.fail) {
                         completeOptions.fail();

@@ -222,9 +222,9 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
         var locationWidget = reviewElement.find(".Location");
         var repeatWidget = reviewElement.find(".Repeat");
 
-        contactInfoWidget.popup({id: "contactInfoWidget", contents: $("<div class='contactInfoWidget'></div>")});
-        locationWidget.popup({id: "locationWidget", contents: $("<div class='locationWidget'></div>")});
-        repeatWidget.popup({id: "repeatWidget",contents: $("<div class='repeatWidget'></div>")});
+        contactInfoWidget.popup({id: "contactInfo", contents: $("<div></div>")});
+        locationWidget.popup({id: "location", contents: $("<div></div>")});
+        repeatWidget.popup({id: "repeat",contents: $("<div></div>")});
 
         /**
          * Updates the row/cell index that was clicked on
@@ -243,13 +243,13 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
         contactInfoWidget.on("click", function (e) {
             //initialize the contact info widget with the data from the grid dataSource
             var data = updateEditIndexes(e);
-            $("#popupContent").find(".contactInfoWidget").contactInfo({contacts: data.get("ContactInfo")});
+            $("#popupContent").find("#contactInfo").contactInfo({contacts: data.get("ContactInfo")});
         });
 
         locationWidget.on("click", function (e) {
             //initialize the location widget with the data from the grid dataSource
             var data = updateEditIndexes(e);
-            $("#popupContent").find(".locationWidget").location({initialLocation: data.get("Location"), change: function (location) {
+            $("#popupContent").find("#location").location({initialLocation: data.get("Location"), change: function (location) {
                 data.set("Location", location);
             }});
         });
@@ -257,7 +257,7 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
         repeatWidget.on("click", function (e) {
             //initialize the repeat widget with the data from the grid dataSource
             var data = updateEditIndexes(e);
-            $("#popupContent").find(".repeatWidget").repeat({repeat: data.get("Repeat")});
+            $("#popupContent").find("#repeat").repeat({repeat: data.get("Repeat")});
         });
     };
 
@@ -355,9 +355,9 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
             // get a reference to the grid
             var grid = $("#importerReview").find(".grid").data("kendoGrid");
 
-            var locationWidget = $(e.target).find(".locationWidget").data("location");
-            var repeatWidget = $(e.target).find(".repeatWidget").data("repeat");
-            var contactInfoWidget = $(e.target).find(".contactInfoWidget").data("contactInfo");
+            var locationWidget = $(e.target).find("#location").data("location");
+            var repeatWidget = $(e.target).find("#repeat").data("repeat");
+            var contactInfoWidget = $(e.target).find("#contactInfo").data("contactInfo");
 
             //check which widget is active and remove it
             if (locationWidget) {
