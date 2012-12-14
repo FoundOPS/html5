@@ -1,0 +1,18 @@
+<div data-init="importerReview.initialize" data-show="importerReview.show" data-role="view" data-title="Review Data" id="importerReview">
+    <div class="wrapper">
+        <ul class="crumbs">
+            <li onclick="window.viewImporterUpload()"><span></span><p>Upload File</p></li>
+            <li onclick="window.viewImporterSelect()"><span></span><p>Select Fields</p></li>
+            <li class="active"><span></span><p>Review Data</p></li>
+            <li></li>
+        </ul>
+        <div class="wrap">
+            <div class="grid"></div>
+            <div class="buttonWrapper">
+                <button class="k-button k-button-icontext cancelBtn" onclick="window.viewImporterSelect()">Back</button>
+                <!--disable button initially-->
+                <button id="importBtn" class="k-button k-button-icontext saveBtn"><span class="k-icon k-update"></span>Import</button>
+            </div>
+        </div>
+    </div>
+</div>

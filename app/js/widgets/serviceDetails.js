@@ -81,7 +81,7 @@ define(["jquery", "db/services", "db/session", "db/models", "tools/parameters", 
                 clientSelector = $(inputTemplate).attr("type", "hidden")
                     //For validation message
                     .attr("name", "Client").attr("required", "required")
-                    .appendTo(that.element).wrap("<label class='client'>Client</label>");
+                .appendTo(that.element).wrap("<h1>Client</h1>");
                 clientSelector.select2({
                     placeholder: "Choose a client",
                     minimumInputLength: 1,
@@ -137,7 +137,7 @@ define(["jquery", "db/services", "db/session", "db/models", "tools/parameters", 
                 locationSelector = $(inputTemplate).attr("type", "hidden")
                     //For validation message
                     .attr("name", "Location").attr("required", "required")
-                    .appendTo(that.element).wrap("<label class='location'>Location</label>");
+                .appendTo(that.element).wrap("<h1>Location</h1>");
                 locationSelector.select2({
                     placeholder: "Choose a location",
                     id: function (location) {
@@ -325,6 +325,7 @@ define(["jquery", "db/services", "db/session", "db/models", "tools/parameters", 
                 }
 
                 //Add all the fields
+            $('<h1 class="serviceFields">Service Fields</h1>').appendTo(that.element);
                 var fieldsListView = $('<ul id="fields"></ul>').appendTo(that.element);
                 var checkLists = $('<ul id="checkLists"></ul>').appendTo(that.element);
                 var sigListView = $('<ul id="sigListView"></ul>').appendTo(that.element);

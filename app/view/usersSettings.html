@@ -1,16 +1,16 @@
 <div data-init="usersSettings.initialize" data-show="usersSettings.show" data-role="view" data-title="Users Settings"
      id="users">
     <div class="settingsMenu"></div>
-    <h1 class="title">Manage Your Users</h1>
 
-    <div class="wrap">
-        <h2>New User</h2>
-
+    <div class="wrap top">
+        <h1>New User</h1>
         <div id="addNew"></div>
         <a id="addUser">Add New User</a>
-
-        <h2>Current Users</h2>
-
+        <h1>Current Users</h1>
+        <div class="addDeleteBtns">
+            <button class='k-button k-button-icontext k-grid-edit'></button>
+            <button class='k-button k-button-icontext k-grid-delete'></button>
+        </div>
         <div id="usersGrid"></div>
     </div>
 </div>

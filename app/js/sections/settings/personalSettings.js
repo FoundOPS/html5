@@ -39,8 +39,7 @@ define(["db/services", "db/saveHistory", "tools/dateTools", "underscore", "tools
 
         //setup image upload
         imageUpload = $("#personalImageUpload").kendoImageUpload({
-            imageWidth: 200,
-            containerWidth: 500
+            imageWidth: 200
         }).data("kendoImageUpload");
     };
 

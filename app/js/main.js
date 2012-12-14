@@ -65,7 +65,7 @@ require.config({
 
 require(["jquery", "widgets/navigator", "developer", "db/services", "db/session", "tools/parameters", "containers/silverlight", "tools/generalTools", "hasher", "db/models", "kendo", "underscore",
     "uservoice", "moment", "sections/settings/personalSettings", "sections/settings/businessSettings", "sections/settings/usersSettings", "sections/settings/dispatcherSettings",
-    "sections/settings/changePassword", "sections/services", "sections/routes", "sections/routeDetails", "sections/routeDestinationDetails", "sections/routeTask", "sections/mapView",
+    "sections/settings/changePassword", "sections/services", "sections/routes", "sections/importerUpload", "sections/importerSelect", "sections/importerReview", "sections/routeDetails", "sections/routeDestinationDetails", "sections/routeTask", "sections/mapView",
     "sections/routes", "sections/routeDetails", "sections/routeDestinationDetails", "sections/routeTask", "sections/signature", "sections/mapView",
     "widgets/serviceDetails", "tools/analytics"], function ($, Navigator, developer, dbServices, session, parameters, silverlight, generalTools, hasher) {
     /**
@@ -231,4 +231,18 @@ require(["jquery", "widgets/navigator", "developer", "db/services", "db/session"
 
     //Hookup remote loading into remoteContent, by using the kendo mobile application
     window.application = application = new kendo.mobile.Application($("#remoteContent"), { platform: "ios"});
+
+    /*region Importer Navigate Methods*/
+    window.viewImporterUpload = function () {
+        application.navigate("view/importerUpload.html");
+    };
+
+    window.viewImporterSelect = function () {
+        application.navigate("view/importerSelect.html");
+    };
+
+    window.viewImporterReview = function () {
+        application.navigate("view/importerReview.html");
+    };
+    /*endregion*/
 });

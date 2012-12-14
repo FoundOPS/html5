@@ -18,7 +18,20 @@ define(["tools/generalTools", "db/services", "db/session", "db/saveHistory", "to
     //endregion
 
     //region Setup Grid
+
+    //resize the grid based on the current window's height
+    var resizeGrid = function () {
+        var extraMargin = 207;
+        var windowHeight = $(window).height();
+        var contentHeight = windowHeight - extraMargin;
+        $("#dispatcherGrid").css("maxHeight", contentHeight + 'px');
+    };
+
     dispatcherSettings.initialize = function () {
+        $(window).resize(function () {
+            resizeGrid();
+        });
+
         //setup menu
         var menu = $("#dispatcher").find(".settingsMenu");
         kendo.bind(menu);
@@ -95,15 +108,14 @@ define(["tools/generalTools", "db/services", "db/session", "db/saveHistory", "to
             columns: [
                 {
                     field: "Name",
-                    title: "Name"
+                    width: "100px"
                 },
                 {
-                    width: 55,
                     field: "Color",
-                    title: "Color",
                     // The template for the color picker
                     editor: colorEditor,
-                    template: "<div class='gridColor' style='background-color: #=Color#'></div>"
+                    template: "<div class='gridColor' style='background-color: #=Color#'></div>",
+                    width: "75px"
                 },
                 {
                     field: "RemoveFromRoute",
@@ -111,18 +123,21 @@ define(["tools/generalTools", "db/services", "db/session", "db/saveHistory", "to
                     template: "<input type='checkbox' onclick='dispatcherSettings.updateCheckbox(checked)'" +
                         "# if (RemoveFromRoute) { # " +
                         "#= 'checked' # " +
-                        "# } # />"
+                        "# } # />",
+                    width: "75px"
                 },
                 {
                     field: "DefaultTypeInt",
                     title: "Attributes",
-                    template: '#= dispatcherSettings.getAttributeText(DefaultTypeInt) #'
+                    template: '#= dispatcherSettings.getAttributeText(DefaultTypeInt) #',
+                    width: "200px"
                 }
             ],
             dataSource: dataSource,
             dataBound: onDataBound,
             editable: true,
-            scrollable: false,
+            resizable: true,
+            scrollable: true,
             selectable: true,
             sortable: true,
             //called when the grid detects changes to the data()
@@ -146,6 +161,7 @@ define(["tools/generalTools", "db/services", "db/session", "db/saveHistory", "to
         //wait to load until the roleId parameter is set
         _.delay(function () {
             dataSource.read();
+            resizeGrid();
         }, 250);
     };
 
@@ -247,16 +263,18 @@ define(["tools/generalTools", "db/services", "db/session", "db/saveHistory", "to
         disableDefaultCheckboxes();
 
         //get the BusinessAccountId from another row to be used to set in new rows
-        busAcctId = grid._data[1].BusinessAccountId;
+        if (grid._data.length > 0) {
+            busAcctId = grid._data[1].BusinessAccountId;
+        }
 
         //bind to the selection change event
         grid.bind("change", function () {
             //hide the delete button if a default row is selected, otherwise show it
             var row = kendoTools.getSelectedRow(grid);
             if (row[0].cells[3].innerHTML !== "") {
-                $("#dispatcher").find(".k-grid-delete").attr("disabled", "disabled");
+                $("#dispatcher").find(".k-grid-delete").attr("style", "display:none");
             } else {
-                $("#dispatcher").find(".k-grid-delete").removeAttr("disabled");
+                $("#dispatcher").find(".k-grid-delete").attr("style", "display:inline-block");
             }
 
             selectedItem = grid.dataItem(grid.select());

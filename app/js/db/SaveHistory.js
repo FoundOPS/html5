@@ -7,7 +7,7 @@
 "use strict";
 
 define(['underscore', 'tools/generalTools', 'noty'], function (_, generalTools) {
-    var saveHistory = {}, successText = "Your Changes Have Been Saved.", errorText = "Error - Your Changes May Not Have Been Saved", undoEnabled = true;
+    var saveHistory = {}, undoEnabled = true;
 
     //Stores the states of the current section
     //the first state is the initial state
@@ -43,7 +43,7 @@ define(['underscore', 'tools/generalTools', 'noty'], function (_, generalTools) 
     //opens a save changes notification with undo links
     saveHistory.success = function (text) {
         if (!text) {
-            text = successText;
+            text = "Your Changes Have Been Saved.";
         }
 
         var timeout = 0;
@@ -76,23 +76,14 @@ define(['underscore', 'tools/generalTools', 'noty'], function (_, generalTools) 
 
     /**
      * Opens an error notification
-     * @param code The error text
      */
-    saveHistory.error = function (code) {
-        var text = errorText;
-        if (code === "Conflict") {
-            text = "Error - A User Already Exists With That Email Address";
-        } else if (code === "Get") {
-            text = "Connection Error";
-        } else if (code === "File Size") {
-            text = "File is Too Large! Maximum Allowed is 5MB.";
-        } else if (code === "File Type") {
-            text = "Only .JPG, .PNG, and .GIF Files Types Allowed!";
-        } else if (code === "No Client") {
-            text = "You Must Select a Client";
-        } else if (code === "No Location") {
-            text = "You Must Select a Location";
+    saveHistory.error = function (message) {
+        var text = "Error - Your Changes May Not Have Been Saved";
+
+        if (message) {
+            text = message;
         }
+
         $.noty({
             type: 'error',
             layout: 'topCenter',
@@ -114,8 +105,8 @@ define(['underscore', 'tools/generalTools', 'noty'], function (_, generalTools) 
     saveHistory.linkNotification = function (ajax) {
         return ajax.success(function () {
             saveHistory.success();
-        }).error(function (data, textStatus, jqXHR) {
-                saveHistory.error(jqXHR);
+        }).error(function (jqXHR) {
+                saveHistory.error(jqXHR.responseText.replace(/["']/g, ""));
             });
     };
 

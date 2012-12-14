@@ -59,7 +59,7 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
                     //TODO: set a timeout and notify if it is reached('complete' doesn't register a timeout error)
                     complete: function (jqXHR, textStatus) {
                         if (textStatus == "error") {
-                            saveHistory.error("Get");
+                            saveHistory.error("Connection Error");
                         }
                     },
                     url: getBaseUrl
@@ -110,10 +110,26 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
         });
     };
 
+    var hideButtons = function () {
+        var users = $("#users");
+        users.find(".k-grid-delete").attr("style", "display:none");
+        users.find(".k-grid-edit").attr("style", "display:none");
+    };
+
     var setupUsersGrid = function () {
         //add a grid to the #usersGrid div element
         grid = $("#usersGrid").kendoGrid({
             autoBind: false,
+            change: function () {
+                //show the delete button only if a row is selected
+                var users = $("#users");
+                if (users.find("tr.k-state-selected")[0]) {
+                    users.find(".k-grid-delete").attr("style", "display:inline-block");
+                    users.find(".k-grid-edit").attr("style", "display:inline-block");
+                } else {
+                    hideButtons();
+                }
+            },
             dataSource: usersDataSource,
             dataBound: function () {
                 //after the data is loaded, add tooltips to the edit and delete buttons
@@ -135,6 +151,10 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
             },
             edit: function () {
                 var win = $('.k-window');
+                //hide the buttons any time the edit or add windiw closes
+//                win.live("pagehide", function() {
+//                    hideButtons();
+//                });
                 if (usersSettings.editorType === 'add') {
                     win.find('.k-window-title').html("Add New User");
                     //change update to Send Invite Email
@@ -153,6 +173,7 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
                     }
                 });
             },
+            resizable: true,
             save: function (e) {
                 //check if the Send Invite button is disabled
                 if ($(".k-window-content .k-grid-update").attr("disabled") == "disabled") {
@@ -165,23 +186,28 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
                     $(".k-window-action").attr("style", "visibility: hidden");
                 }
             },
-            scrollable: false,
+            scrollable: true,
             sortable: true,
+            selectable: true,
             columns: [
                 {
                     field: "FirstName",
-                    title: "First Name"
+                    title: "First Name",
+                    width: "100px"
                 },
                 {
                     field: "LastName",
-                    title: "Last Name"
+                    title: "Last Name",
+                    width: "100px"
                 },
                 {
                     field: "EmailAddress",
-                    title: "Email"
+                    title: "Email",
+                    width: "150px"
                 },
                 {
-                    field: "Role"
+                    field: "Role",
+                    width: "100px"
                 },
                 //TODO: V2 add an employee records link
                 {
@@ -189,31 +215,53 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
                     title: "Employee Record",
                     template: "# if (EmployeeId) {#" +
                         "#= usersSettings.getEmployeeName(EmployeeId) #" +
-                        "# } #"
-                },
-                {
-                    command: ["edit", "destroy"],
-                    width: "87px"
+                        "# } #",
+                    width: "130px"
                 }
             ]
         }).data("kendoGrid");
     };
 
+    //resize the grid based on the current window's height
+    var resizeGrid = function () {
+        var extraMargin = 305;
+        var windowHeight = $(window).height();
+        var contentHeight = windowHeight - extraMargin;
+        $("#usersGrid").css("maxHeight", contentHeight + 'px');
+    };
+
     usersSettings.initialize = function () {
+        $(window).resize(function () {
+            resizeGrid();
+        });
+
         //setup menu
-        var menu = $("#users").find(".settingsMenu");
+        var users = $("#users");
+        var menu = users.find(".settingsMenu");
         kendo.bind(menu);
         menu.kendoSettingsMenu({selectedItem: "Users"});
 
         setupDataSource();
         setupUsersGrid();
         //setup add button
-        $("#addUser").on("click", function () {
+        users.find("#addUser").on("click", function () {
             //workaround for lacking add/edit templates
             usersSettings.editorType = 'add';
 
             //open add new user popup
             grid.addRow();
+        });
+
+        users.find(".k-grid-edit").on("click", function () {
+            grid.editRow(grid.select());
+        });
+
+        users.find(".k-grid").delegate("tbody>tr", "dblclick", function () {
+            grid.editRow(grid.select());
+        });
+
+        users.find(".k-grid-delete").on("click", function () {
+            grid.removeRow(grid.select());
         });
     };
 
@@ -231,6 +279,8 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
 
             usersSettings.availableEmployees = employees;
             usersDataSource.read();
+            hideButtons();
+            resizeGrid();
         });
     };
 

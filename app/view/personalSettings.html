@@ -1,31 +1,24 @@
 <div data-init="personalSettings.initialize" data-show="personalSettings.show" data-role="view" data-title="Personal Settings" id="personal">
     <div class="settingsMenu"></div>
-    <h1 class="title">Your Personal Settings</h1>
-    <div class="wrap">
-        <h2>The Basics</h2>
+    <div class="wrap top">
+        <h1>The Basics</h1>
         <form id="personalForm">
-            <table>
-                <tr>
-                    <td>First Name:&nbsp;</td>
-                    <td class="right"><input type="text" name="FirstName" data-bind="value: userAccount.FirstName" required/></td>
-                </tr>
-                <tr>
-                    <td>Last Name:&nbsp;</td>
-                    <td class="right"><input type="text" name="LastName" data-bind="value: userAccount.LastName" required/></td>
-                </tr>
-                <tr>
-                    <td>Email Address:&nbsp;</td>
-                    <td class="right"><span type="email" name="EmailAddress" data-bind="text: userAccount.EmailAddress"/></td>
-                </tr>
-            </table>
+            <label>First Name:&nbsp;</label><br/>
+            <input type="text" name="FirstName" data-bind="value: userAccount.FirstName" required/><br/>
+            <label>Last Name:&nbsp;</label><br/>
+            <input type="text" name="LastName" data-bind="value: userAccount.LastName" required/><br/>
+            <label>Email Address:</label><br/>
+            <input type="email" name="EmailAddress" data-bind="value: userAccount.EmailAddress" required/>
         </form>
-        <h2 class="middle">Your Photo</h2>
+        <h1 class="middle">Your Photo</h1>
         <div id="personalImageUpload"></div>
-        <h2 class="middle">Password</h2>
+        <h1 class="middle">Password</h1>
         <button class="k-button k-button-icontext changePassword" onclick="application.navigate('view/changePassword.html');"><span class="k-icon k-edit"></span>Change Your Password</button>
-        <h2 class="middle">Time Zone</h2>
+        <h1 class="middle">Time Zone</h1>
         <form id="timeZoneForm" style="text-align: center">
-            <div id="TimeZone"/>
+            <div class="styled-select">
+                <div id="TimeZone"></div>
+            </div>
         </form>
     </div>
 </div>

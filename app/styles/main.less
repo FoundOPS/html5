@@ -46,36 +46,21 @@ table {
 /*endregion*/
 /*region Variables*/
 @blue: #488FCD;
-@green: #659A41;
-@red: #991A36;
-@orange: #D9591E;
+@green: #5aad52;
+@red: #d06268;
 @charcoal: #333335;
 @white:#ffffff;
-@grey: rgb(242,242,242); //inner background
+@grey: rgb(230,230,230); //inner background
+.hoverColor (@color: @white, @strength: 10%){
+    background-color: darken(@color, @strength);
+}
 @darkBlue: #36C3E3;
 @buttonLight: #a7ff6c;
 @buttonDark: #8dd85b;
 @buttonHoverLight: #9cee65;
 @buttonHoverDark: #7ec152;
 @textColor: #222222;
-.buttonGradient {
-    background: -moz-linear-gradient(top, @buttonLight, @buttonDark);
-    filter: progid:dximagetransform.microsoft.gradient(startColorstr = @buttonLight, endColorstr = @buttonDark);
-    background: -webkit-gradient(linear, left top, left bottom, from(@buttonLight), to(@buttonDark));
-}
-
-.buttonGradientHover {
-    background: -moz-linear-gradient(top, @buttonHoverLight, @buttonHoverDark);
-    filter: progid:dximagetransform.microsoft.gradient(startColorstr = @buttonHoverLight, endColorstr = @buttonHoverDark);
-    background: -webkit-gradient(linear, left top, left bottom, from(@buttonHoverLight), to(@buttonHoverDark));
-}
-
-.rowGradient {
-    background-color: @darkBlue;
-    background: -moz-linear-gradient(top, @darkBlue, @blue);
-    filter: progid:dximagetransform.microsoft.gradient(startColorstr = @darkBlue, endColorstr = @blue);
-    background: -webkit-gradient(linear, left top, left bottom, from(@darkBlue), to(@blue));
-}
+//used for repeat widget weekdays
 .bgGradient(@top, @bottom){
     background-color: @top;
     background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0, @bottom), color-stop(0.5, @top));
@@ -95,33 +80,162 @@ table {
 @import url("kendo/kendo.default.less");
 
 /****** Kendo overrides ******/
-.k-header, .k-grid-header, .k-toolbar, .k-dropdown-wrap, .k-picker-wrap, .k-grouping-header, .k-tooltip, .k-pager-wrap, .k-button, .k-draghandle, .k-tile,
+.k-header:not(.k-menu, .k-dropdown), .k-grid-header, .k-toolbar, .k-dropdown-wrap, .k-picker-wrap, .k-grouping-header, .k-tooltip, .k-draghandle, .k-tile,
 .k-textbox, .k-autocomplete, .k-state-hover, .k-state-selected, .k-state-focused, .k-tabstrip-items .k-item, .cancelBtn {
-    background-image: url("../img/highlight.png")
+    background:none;
+    background-color: @green;
 }
-
 .k-icon, .k-tool-icon, .k-grouping-dropclue, .k-drop-hint, .k-callout, .k-progress, .k-progress-status, .k-column-menu .k-sprite {
-    background-image: url('../img/sprite.png')
+    background-image: url('../img/sprite.png');
 }
+.km-root select:not([multiple]){
+    font-size: 1em;
+}
+/*region grid filters*/
+.k-group.k-popup{
+    box-shadow: none;
+    -webkit-box-shadow: none;
+}
+.k-menu{
+    background:@white;
+    border-color: #ccc;
+    border-width: 0;
+    li:hover{
+        background: none;
+        .hoverColor;
+    }
+    .k-state-selected{
+        background:none;
+        background-color: @green;
+    }
+    .k-columns-item .k-state-active, .k-filter-item .k-state-active{
+        .hoverColor;
+    }
+    .k-filter-menu .k-filter-and{
+        margin-top: 6px;
+    }
+    .k-filter-item{
+        .k-datepicker, .k-dropdown{
+            width: 100%;
+            font-size: 1em;
+        }
+        .k-dropdown{
+            height: 25px;
+        }
+        .k-picker-wrap, .k-widget, .k-input, .k-state-focused:hover{
+            border: none;
+            background: none;
+        }
+        .k-widget, .k-state-focused:hover{
+            background-color: @white;
+        }
+        .k-dropdown{
+            margin-bottom: 7px;
+            padding-top: 0;
+        }
+        .k-dropdown-wrap{
+            border: none;
+            border-radius: 0;
+            background-color: @white;
+        }
+        .k-input{
+            font-size: 15px;
+            height: 17px;
+            box-shadow: none;
+            -webkit-box-shadow: none;
+            box-shadow: none;
+            -webkit-box-shadow: none;
+            box-shadow: none;
+            -webkit-box-shadow: none;
+        }
+        .k-numeric-wrap, input[type="text"]{
+            border: none;
+            border-radius: 0;
+            background-color: @white;
+        }
+        input[type="number"], input[type="text"] {
+            height: 25px;
+            padding-left: 2px;
+            font-family: "PTSans";
+        }
+        .k-datepicker input[type="text"]{
+            height: 17px;
+        }
+    }
+    .k-group{
+        background-color: @grey;
+        .k-item{
+            border: none;
+            border-radius: 0;
+            padding: 0 4px;
+            &:hover{
+                background-color: @grey;
+            }
+            .k-list-container{
+                background-color: @white;
+            }
+        }
+    }
+    .k-list .k-item:hover{
+        .hoverColor;
+    }
+    .k-list .k-state-selected:hover{
+        .hoverColor(@green);
+        color: @white;
+    }
+    .k-i-sort-asc, .k-i-sort-desc{
+        background: url('../img/sprite.png') left center;
+        width: 11px;
+        height: 8px;
+        background-position: -118px -248px;
+        opacity: 1;
+    }
+    .k-i-sort-desc{
+        background-position: -118px -262px;
+    }
+    .k-state-selected:not(.k-state-hover) .k-i-sort-asc{
+        background-position: -118px -200px;
+    }
+    .k-state-selected:not(.k-state-hover) .k-i-sort-desc{
+        background-position: -118px -214px;
+    }
+    button{
+        width: 80px;
+        height: 27px;
+        padding: 0 8px 3px;
+        border-radius: 0;
+        border: none;
+        background: @white;
+        color: @green;
+        &:hover{
+            border: none;
+            background: @white;
+        }
+    }
+    button[type="reset"]{
+        color: @red;
+    }
+}
+/*endregion*/
 
 .k-loading {
-    background-image: url('../img/loading.gif')
+    background-image: url('../img/loading.gif');
 }
 
 .k-loading-image {
-    background-image: url('../img/loading-image.gif')
+    background-image: url('../img/loading-image.gif');
 }
 
 .k-slider-horizontal .k-tick {
-    background-image: url('../img/slider-h.gif')
+    background-image: url('../img/slider-h.gif');
 }
 
 .k-slider-vertical .k-tick {
-    background-image: url('../img/slider-v.gif')
+    background-image: url('../img/slider-v.gif');
 }
 
 .k-tile .k-folder {
-    background-image: url('../img/imagebrowser.png')
+    background-image: url('../img/imagebrowser.png');
 }
 
 @font-face {
@@ -145,9 +259,9 @@ url-prefix
 .km-view {
     display: -moz-box;
 }
-.km-content, .km-scroll-container, .km-scrollview {
-    width: auto;
 }
+.km-content, .km-scroll-container, .km-scrollview {
+    width: inherit;
 }
 input[type="button"], button {
     color: #111;
@@ -239,26 +353,28 @@ span.k-tooltip {
 }
 
 //override the orange selected row highlight with blue
-.k-state-selected, .k-list > .k-state-selected, .k-list > .k-state-focused,
-.k-panelbar > .k-state-selected, .k-panel > .k-state-selected,
+.k-grid .k-state-selected, .k-list > .k-grid .k-state-selected, .k-list > .k-state-focused,
+.k-panelbar > .k-grid .k-state-selected, .k-panel > .k-grid .k-state-selected,
 .k-button:active, .k-ghost-splitbar-vertical, .k-ghost-splitbar-horizontal,
 .k-draghandle.k-state-selected:hover {
-    .rowGradient;
-    border-color: #488FCD;
+    background: none;
+    background-color: @grey;
+    border-color: @grey;
+    color: @black;
+}
+
+//make alternate grid rows background color white instead of transparent
+.k-grid tbody tr:not(.k-state-selected) {
+    background-color: @white;
+    &:hover{
+        background-color: #ddd;
+    }
+}
+.k-grid tbody tr.k-state-selected:hover{
+    .hoverColor(@grey, 15%);
 }
 
 /*region Overrides for kendo mobile*/
-#personal, #business, #users, #dispatcher, #changePassword, #createPassword, #services {
-    h1, .km-content h1 {
-        font-size: 1.5em;
-        margin: 36px 0 15px 184px;
-    }
-    h2, .km-content h2 {
-        font-size: 1.2em;
-        border-bottom: 1px solid #666666;
-        margin: 0 0 15px 0;
-    }
-}
 
 .km-ios {
     font-weight: normal;
@@ -276,13 +392,24 @@ span.k-tooltip {
     font-family: PTSans;
 }
 
+.k-button{
+    background: @white;
+    border: none;
+    border-radius: 0;
+    padding-top: 3px;
+    &:hover{
+        background: none;
+        .hoverColor(@white, 15%);
+    }
+}
+
 .km-stretched-view, .km-root .k-dropdown select, .km-root .k-dropdown .k-select, .km-root .k-dropdown-wrap {
     display: block;
 }
 
 //this keeps the grey background
 .km-ios, .km-ios .km-content {
-    background: none;
+    background: @grey;
 }
 
 .km-ios, .km-ios .km-list > li {
@@ -290,164 +417,396 @@ span.k-tooltip {
     font-family: PTSans;
 }
 
-//make alternate grid rows background color white instead of transparent
-.k-grid tbody tr:not(.k-alt):not(.k-state-selected) {
-    background-color: #fff;
-}
-
 /*endregion*/
 /*endregion*/
-/*region Settings - Menu*/
+/*region Settings Menu*/
 .settingsMenu {
     position: absolute;
-    width: 130px;
-    margin: 20px 0 10px 20px;
+    width: 250px;
+    height: 100%;
+    margin: 0 0 10px 0;
     padding-left: 0;
     font-size: 18px;
     z-index: 0;
-    -moz-box-shadow: 0 3px 5px #aaa;
-    -webkit-box-shadow: 0 3px 5px #aaa;
-    box-shadow: 0 3px 5px #aaa;
-    background-color: #fff;
-}
-
-.settingsMenu .active {
-    font-weight: bold;
-}
-
-.settingsMenu li {
-    list-style: none;
-    padding: 5px 0 5px 15px;
-    cursor: pointer;
-    border-bottom: 1px solid #ccc;
-}
-
-.settingsMenu li:last-child {
-    border-bottom: none;
-}
-
-.settingsMenu li a {
-    color: @charcoal;
-}
-
-.settingsMenu li:nth-child(2), .settingsMenu li:nth-child(3) {
-    display: none;
-}
-
-.settingsMenu li:nth-child(1):hover a, .settingsMenu li:nth-child(1).active a {
-    color: @green;
-}
-
-.settingsMenu li:nth-child(2):hover a, .settingsMenu li:nth-child(2).active a {
-    color: @red;
-}
-
-.settingsMenu li:nth-child(3):hover a, .settingsMenu li:nth-child(3).active a {
-    color: @blue;
-}
-
-.settingsMenu li:nth-child(4):hover a, .settingsMenu li:nth-child(4).active a {
-    color: @orange;
+    text-align: center;
+    background-color: @white;
+    h2{
+        margin-top: 10px;
+        margin-bottom: 10px;
+        font-size: 1.1em;
+        color: @green;
+    }
+    #settingsList{
+        text-align: left;
+    }
+    li {
+         list-style: none;
+         padding: 5px 0 5px 15px;
+         cursor: pointer;
+         //border-bottom: 1px solid @grey;
+        &:first-child{
+            //border-top: 3px solid @grey;
+        }
+        &:hover{
+            .hoverColor(@white);
+        }
+        a {
+            color: @charcoal;
+        }
+     }
+    li.active{
+        background-color: @green;
+        &:hover{
+            .hoverColor(@green);
+        }
+        a{
+            color: @white;
+        }
+    }
+    li:nth-child(2), li:nth-child(3), li:nth-child(4), li:nth-child(5){
+        display: none;
+    }
+    div{
+        position: absolute;
+        bottom: 10px;
+        width: 100%;
+        text-align: center;
+    }
+    div a, .km-root{
+        color: @blue;
+        font-size: 12px;
+        text-decoration: underline;
+    }
 }
 
 /*endregion*/
-/*region Settings - All */
+/*region Genaral */
 h1, h2, h3, td, p {
     cursor: default;
 }
 h1.title {
     width: 500px;
+    color: @charcoal;
+}
+h2{
+    color: @charcoal;
 }
 body {
     font-family: PTSans;
-    background-color: #efefef;
+    background-color: @grey;
     color: @charcoal;
 }
 hr {
     border: 1px solid #666;
 }
 .wrap {
-    margin: 0 20px 10px 180px;
-    padding: 15px;
-    -moz-box-shadow: 0 5px 8px #aaa;
-    -webkit-box-shadow: 0 5px 8px #aaa;
-    box-shadow: 0 5px 8px #aaa;
-    background-color: #fff;
+    margin: 15px 40px 0 290px;
+    padding: 0 0 15px;
+    h1{
+        margin:20px 0 5px 0;
+        padding: 4px 0 3px 0;
+        font-size: 1.7em;
+        font-weight: normal;
+        color: @green;
+    }
 }
-#dispatcher .addDeleteBtns {
-    float: right;
-    margin: -8px 0 0 0;
+.wrap.top{
+    margin-top: 25px;
 }
+/*region scrollbars*/
+::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+::-webkit-scrollbar-track{
+    background-color: @white;
+    &:horizontal{
+        border-top: 4px solid @grey;
+    }
+    &:vertical{
+        border-left: 4px solid @grey;
+    }
+}
+::-webkit-scrollbar-thumb{
+    background-color: @green;
+    &:horizontal{
+        border-top: 4px solid @grey;
+    }
+    &:vertical{
+        border-left: 4px solid @grey;
+    }
+}
+::-webkit-scrollbar-thumb:hover{
+    .hoverColor(@green);
+}
+::-webkit-scrollbar-corner{
+    background: @white;
+}
+#services ::-webkit-scrollbar-corner{
+    background: @grey;
+}
+/*endregion*/
+/*region save/cancel/add/delete/edit buttons*/
 .addDeleteBtns .k-grid-delete, .addDeleteBtns .k-grid-add {
     padding-right: 6px;
 }
 .addDeleteBtns .k-grid-delete {
     margin: 0;
 }
-.saveBtn {
-    margin-left: 145.5px;
-    .buttonGradient;
-}
-.saveBtn:hover {
-    .buttonGradientHover;
-}
 button[disabled], .k-grid-update[disabled], .k-grid-cancel[disabled] {
-    color: #999;
     cursor: default;
 }
-button[disabled] .k-icon, button[disabled] .k-icon:hover {
+button[disabled]:hover{
+    background: @white;
+}
+button[disabled], button[disabled]:hover {
     opacity: .5;
 }
-.saveBtn[disabled], .k-grid-update[disabled] {
-    border-color: #c5c5c5;
-    .buttonGradient;
+.saveBtn, .saveBtn:active, .cancelBtn{
+    border-radius: 0;
+    border: none;
+    background: @white;
+    color: @green;
+    span{
+        background-image: url("../img/sprite.png");
+    }
+    filter: none;
 }
-.saveBtn[disabled]:hover, .k-grid-update[disabled]:hover {
-    color: #999;
+.saveBtn{
+    span{
+        background-position: -114px -157px;
+    }
 }
-.cancelBtn {
+.cancelBtn, .cancelBtn:active {
     margin-left: 4px;
-}
-.cancelBtn[disabled]:hover, .k-grid-cancel[disabled]:hover {
-    background-color: #e3e3e3;
-    border-color: #c5c5c5;
-    color: #999;
+    color: @red;
 }
 .k-grid-edit, .k-grid-edit:hover, .k-grid-delete, .k-grid-delete:hover, .k-grid-add,
 .k-grid-add:hover, .k-grid-delete[disabled], .k-grid-delete[disabled]:hover, .csvBtn, .csvBtn:hover {
-    background: url("../img/btnSprite.png") no-repeat;
+    background: url("../img/combinedSprites.png") no-repeat;
     width: 22px;
     height: 22px;
-    background-position: 0 -132px;
+    background-position: 0 -56px;
+}
+
+.k-edit-form-container #btnCancel {
+    margin: 0;
+}
+
+.k-grid-cancel {
+    margin-left: 12px;
+}
+
+.k-grid-add {
+    background-position: 0 0;
+}
+
+.k-grid-add:hover {
+    background-position: 0 -28px;
+}
+
+.k-grid-delete {
+    display: none;
+    background-position: 0 -56px;
+}
+
+.k-grid-delete:hover {
+    background-position: 0 -84px;
+}
+
+.k-grid-edit, #usersGrid .k-grid-edit {
+    background-position: 0 -112px;
+    margin-right: 4px;
+    display: none;
+}
+
+.k-grid-edit:hover, #usersGrid .k-grid-edit:hover {
+    background-position: 0 -140px;
+}
+
+.optionsMenu {
+    display: inline-block;
+    background-position: 0 -172px;
+}
+
+.optionsMenu:hover {
+    background-position: 0 -199px;
+}
+/*endregion*/
+
+#personal, #business, #users, #dispatcher, #changePassword{
+    min-width: 550px;
+}
+
+.k-invalid-msg{
+    top: -32px;
+    left: 258px;
+    margin-bottom: -35px;
+    border: none;
+    border-radius: 0;
+    background: none;
+    text-align: left;
+    color: @red;
+    .k-warning{
+        display: none;
+    }
+}
+
+@media only screen and (max-width:840px) {
+    .k-invalid-msg{
+        top: 0;
+        left: -4px;
+        margin-bottom: 0;
+    }
+}
+
+.k-grid{
+    border: none;
+    border-left: 2px solid @grey;
+    .k-grid-header-wrap{
+        border: none;
+    }
+    .k-grid-header{
+        margin-top: 5px;
+        margin-bottom: 3px;
+        padding-right: 13px;
+        border: none;
+        background: @grey;
+        .k-header {
+            border: none;
+            font-size: 16px;
+            background: @green;
+            border-bottom: 2px solid @grey;
+            border-right: 1px solid @grey;
+            border-left: 1px solid @grey;
+            color: @white;
+            padding: 5px 0 6px 4px;
+            a{
+                color: @white;
+                span{
+                    vertical-align: middle;
+                }
+            }
+            &:hover{
+                .hoverColor (@green, 8%);
+            }
+            span.k-i-arrow-n, span.k-i-arrow-s{
+                float: right;
+                margin-right: 15px;
+                margin-top: 7px;
+                width: 11px;
+                height: 8px;
+                background-position: -118px -200px;
+                opacity: 1;
+            }
+            span.k-i-arrow-s{
+                background-position: -118px -214px;
+            }
+            .k-header-column-menu{
+                margin-right: 0;
+                padding-left:8px;
+                padding-right:8px;
+                .k-icon{
+                    width: 11px;
+                    height: 10px;
+                    opacity: 1;
+                    background-position: -118px -231px;
+                }
+                &:hover{
+                    .hoverColor (@green, 15%);
+                }
+            }
+        }
+        .k-header:first-child {
+            border-left: none;
+        }
+        .k-header:last-child {
+            border-right: none;
+        }
+    }
+    .k-grid-content{
+        overflow-y: auto;
+    }
+    tr{
+        background-color: @grey;
+        &:hover{
+            .hoverColor(@grey);
+            cursor: pointer;
+        }
+        &:last-child td{
+            border-bottom: none;
+        }
+    }
+    tr.k-state-selected{
+        td{
+            border-left: 1px solid @white;
+            border-right: 1px solid @white;
+        }
+        td:first-child{
+            border-left: 2px solid @white;
+        }
+        td:last-child{
+            border-right: 2px solid @white;
+        }
+    }
+    td {
+        height: 100%;
+        padding: 5px 7px 5px 3px;
+        border: 1px solid @grey;
+    }
+    tr:first-child td{
+        border-top: none;
+    }
+    tr:last-child td{
+        border-bottom: none;
+    }
+    tr:last-child.k-state-selected td{
+        border-bottom: 2px solid @white;
+    }
+    td:first-child{
+        border-left: none;
+        border-right: 1px solid @grey;
+    }
+    td:last-child{
+        border-right: none;
+        border-left: 1px solid @grey;
+    }
+    .k-grid-pager{
+        margin-top: 5px;
+        background: @grey;
+        border: none;
+        .k-link{
+            border-color: @grey;
+            &:hover{
+                .hoverColor(@grey);
+            }
+        }
+        span.k-state-selected{
+            background: @green;
+            color: @white;
+        }
+    }
 }
 /*endregion*/
 /*region ImageUploadButton */
-.imageupload-button {
-    margin-left: 192px;
-}
-
 .imageupload-button:hover {
     background-image: url("../img/highlight.png");
 }
-
 .imageupload-cropbox {
     margin-bottom: 10px;
 }
 
 /*endregion*/
 /*region Settings - Personal */
-#personal .wrap, #business .wrap, #changePassword .wrap, #createPassword .wrap { //display:block causes .wrap to bee too wide in Firefox
-    display: table;
-    width: 500px;
-    padding: 15px;
-}
-
-#personal h2.middle, #business h2.middle {
-    margin-top: 10px;
-}
-
-#personal table {
-    margin: 0 0 0 102px;
+#personal, #business, #changePassword, #createPassword{ //display:block causes .wrap to bee too wide in Firefox
+    .wrap{
+        display: block;
+        min-width: 250px;
+        max-width: 300px;
+        form, #usersGrid, #dispatcherGrid{
+            //margin: 0 15px;
+        }
+    }
 }
 
 #personal .k-dropdown {
@@ -465,20 +824,14 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover {
     margin: 0 0 5px 0;
 }
 
-#personal td.right, #business td.right, #changePassword td.right, #createPassword td.right {
-    text-align: left;
-}
-
-#personal td input, #business td input, #changePassword td input, #createPassword td input {
-    width: 190px;
-    height: 20px;
-    border: 1px inset #ccc;
+#personal input, #business input, #changePassword input, #createPassword input {
+    width: 240px;
+    height: 26px;
+    margin-top: 2px;
+    margin-bottom: 7px;
+    padding-left: 4px;
+    border: none;
     font-size: 1em;
-    padding-left: 2px;
-}
-
-#personal .changePassword {
-    margin-left: 164px;
 }
 
 #personal .k-image, #business .k-image {
@@ -500,21 +853,18 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover {
     text-decoration: underline;
 }
 
-#changePassword form, #createPassword form {
-    margin-left: 89px;
-}
-
 #changePassword .k-edit, #createPassword .k-edit {
     background-position: -32px 0;
 }
 
 #changePassword .save, #createPassword .save {
-    margin-left: 187px;
-    .buttonGradient;
+    background: @white;
+    color: @green;
 }
 
-#createPassword .save {
-    margin-left: 217px;
+#changePassword .k-delete{
+    background: url("../img/sprite.png") no-repeat;
+    background-position: -115px -135px;
 }
 
 #timeZoneForm .select2-container {
@@ -530,40 +880,46 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover {
 
 /*endregion*/
 /*region Settings -Users */
-#users .wrap {
-    min-width: 705px;
-}
-
-#usersGrid {
-    min-width: 675px;
+#users{
+    .addDeleteBtns {
+        position: absolute;
+        right: 45px;
+        top: 135px;
+    }
+    tbody a {
+        margin: 1px 0 -2px 0;
+        color: #0055cc;
+        text-decoration: underline;
+    }
+    #addNew {
+        background: url('../img/addUser.png') no-repeat;
+        height: 45px;
+        margin: 0 0 -32px 10px;
+    }
+    #addUser {
+        width: 120px;
+        margin: 0 0 10px 70px;
+        cursor: pointer;
+        color: @blue;
+        display: block;
+        font-size: 1.1em;
+    }
+    #addUser:hover {
+        text-decoration: underline;
+    }
+    #usersGrid{
+        min-width: 200px;
+        .k-grid-header{
+            padding-right: 0 !important;
+            table{
+                padding-right: 0;
+            }
+        }
+    }
 }
 
 #users tbody, #dispatcher tbody {
     font-size: .9em;
-}
-
-#users tbody a {
-    color: #0055cc;
-    text-decoration: underline;
-}
-
-#addNew {
-    background: url('../img/addUser.png') no-repeat;
-    height: 45px;
-    margin: 0 0 -32px 10px;
-}
-
-#addUser {
-    width: 120px;
-    margin: 0 0 25px 70px;
-    cursor: pointer;
-    color: @blue;
-    display: block;
-    font-size: 1.1em;
-}
-
-#addUser:hover {
-    text-decoration: underline;
 }
 
 #Role, #RoleEdit {
@@ -572,85 +928,94 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover {
     margin-left: 2px;
 }
 
-.k-edit-form-container .k-grid-update {
-    margin-left: 116px;
-    .buttonGradient;
+.k-edit-form-container{
+    #btnAdd {
+        margin-left: 87px;
+        margin-right: 0;
+        background: @white;
+        color: @green;
+    }
+    .k-grid-update {
+        margin-left: 116px;
+        background: @white;
+        color: @green;
+        &:hover {
+            .hoverColor(@white, 15%);
+        }
+    }
+    .k-grid-cancel{
+        color: @red;
+        span{
+            background-position: -115px -135px;
+        }
+    }
+    .k-grid-update[disabled], .k-grid-cancel[disabled]{
+        .hoverColor();
+    }
+    .k-edit-label {
+        margin-left: 25px;
+    }
+    input{
+        height: 26px;
+        width: 200px;
+        padding-left: 4px;
+        border: none;
+        font-size: 1em;
+    }
+    .k-edit-label.title {
+        width: 95%;
+        font-size: 1.2em;
+        text-align: left;
+        padding-bottom: 0;
+        margin-bottom: 10px;
+        border-bottom: 1px solid @charcoal;
+    }
+    p {
+        font-size: 1.2em;
+        margin: -5px 0 10px 200px;
+    }
+    .k-dropdown {
+        width: 157px;
+    }
+    .k-dropdown-wrap{
+        background: @white;
+        border: none;
+        border-radius: 0;
+    }
+    .k-edit-field {
+        width: 200px;
+    }
+    .k-update{
+        background-position: -114px -157px;
+    }
+}
+
+.k-popup .k-list .k-state-focused, .k-popup .k-list .k-state-selected{
+    .hoverColor(@grey);
+    border: none;
+    border-radius: 0;
 }
 
 div.k-window-content {
     padding-top: 25px;
     padding-bottom: 25px;
+    background: @grey;
 }
 
-.k-edit-form-container .k-grid-update:hover {
-    .buttonGradientHover;
-}
-
-.k-edit-form-container #btnAdd {
-    margin-left: 87px;
-    margin-right: 0;
-    .buttonGradient;
-}
-
-.k-edit-form-container .k-edit-label {
-    margin-left: 45px;
-}
-
-#btnAdd:hover {
-    .buttonGradientHover;
-}
-
-.k-edit-form-container #btnCancel {
-    margin: 0;
-}
-
-.k-grid-cancel {
-    margin-left: 12px;
-}
-
-.k-grid .k-grid-edit {
-    background-position: 0 -66px;
-    margin-right: 4px;
-}
-
-.k-grid-edit:hover {
-    background-position: 0 -44px;
-}
-
-.k-grid-delete {
-    background-position: 0 -110px;
-}
-
-.k-grid-delete:hover {
-    background-position: 0 -88px;
-}
-
-.k-edit-label.title {
-    width: 95%;
-    font-size: 1.2em;
-    text-align: left;
-    padding-bottom: 0;
-    margin-bottom: 10px;
-    border-bottom: 1px solid @charcoal;
-}
-
-.k-edit-form-container p {
-    font-size: 1.2em;
-    margin: -5px 0 10px 200px;
-}
-
-.k-edit-form-container .k-dropdown {
-    width: 157px;
-}
-
-.k-edit-field {
-    width: 200px;
+.k-window{
+    border-radius: 0;
+    .k-header{
+        color: @white;
+        background: @green;
+        border-radius: 0;
+    }
 }
 
 /*endregion*/
 /*region Settings - Dispatcher*/
-#dispatcher .wrap {
-    min-width: 450px;
+#dispatcher .addDeleteBtns {
+    float: right;
+    margin: 9px 7px 0 0;
 }
 #dispatcher .k-grid th {
     text-overflow: ellipsis;
@@ -658,7 +1023,7 @@ div.k-window-content {
 #dispatcher #color {
     width: 20px;
     height: 20px;
-    border: 1px solid #000000;
+    border: 1px solid @black;
     margin-left: 12px;
 }
 #dispatcher #color:hover {
@@ -677,15 +1042,6 @@ div.k-window-content {
     width: 8px;
     height: 8px;
     background-image: url(../img/arrow.png);
-}
-#dispatcher .saveBtn {
-    margin-left: 145.5px;
-}
-.k-grid-add {
-    background-position: 0 -22px;
-}
-.k-grid-add:hover {
-    background-position: 0 0;
 }
 /*region COLOR PICKER*/
 .colorpicker {
@@ -888,10 +1244,10 @@ div.k-window-content {
 
 #dispatcher .gridColor {
     position: relative;
-    left: 5px;
     width: 26px;
     height: 26px;
-    margin-right: 0;
+    margin: 0 auto;
+    cursor: pointer;
 }
 
 #dispatcher .colorInput {
@@ -905,76 +1261,482 @@ div.k-window-content {
 }
 
 #dispatcherGrid {
-    min-width: 262px;
     font-size: 1.1em;
+    min-width: 200px;
+    .k-grid-header{
+        padding-right: 0 !important;
+        table{
+            padding-right: 0;
+        }
+    }
 }
+/*endregion*/
+/*region Importer*/
+#importerUpload, #importerSelect, #importerReview{
+    min-width: 500px;
+    background-color: @white;
+    .km-content {
+        background: @white;
+    }
+    :-moz-any(.km-scroll-container) {
+        display: block;
+    }
+    .wrapper{
+        min-width: 460px;
+        margin: 0 auto;
+    }
+    .wrap{
+        margin: 30px 20px 0 20px;
+        padding: 15px 20px;
+        background-color: @grey;
+        -webkit-box-shadow: none;
+        -moz-box-shadow: none;
+        -o-box-shadow: none;
+        box-shadow: none;
+    }
+    .border{
+        border: 1px solid #ccc;
+        padding: 10px;
+    }
+    .km-vertical-scrollbar{
+        height: 0;
+    }
+    .km-horizontal-scrollbar{
+        width: 0;
+    }
+    .k-dropdown-wrap.k-state-default, .k-dropdown-wrap.k-state-active, .k-dropdown-wrap.k-state-focused,
+    .k-dropdown-wrap.k-state-focused:hover, .k-dropdown-wrap.k-state-hover{
+        background: none;
+    }
+    .k-list-container .k-state-hover:hover{
+        background-color: #ccc;
+    }
+    .k-listview{
+        border: none;
+        margin-left: 5px;
+    }
+    .k-block, .k-widget {
+        background: none;
+    }
+    .km-scroll-wrapper{
+        overflow: visible !important;
+    }
+    .saveBtn{
+        margin-left: 5px;
+    }
+    fieldset{
+        padding: 0;
+        border: none;
+    }
+    legend{
+        margin-bottom: 5px;
+        font-size: 18px;
+    }
+    #importerUpload .k-dropdown{
+        margin-top: 5px;
+    }
+    #fileName{
+        color: green;
+    }
+    .buttonWrapper{
+        margin: 0 auto;
+        width: 170px;
+    }
+    .cancelBtn{
+        color: @red;
+    }
+}
+#importerUpload .wrapper, #importerSelect .wrapper{
+    max-width: 795px;
+}
+/* region Upload */
+#importerUpload{
+    #hints{
+        margin-bottom: 5px;
+        padding: 10px;
+        background-color: @white;
+        ul{
+            padding: 0 0 0 20px;
+            li{
+                list-style: disc;
+                a{
+                    color: @blue;
+                }
+            }
+        }
+    }
+    .wrap:last-child{
+        margin-top: 20px;
+    }
+    .main{
+        width: 205px;
+        margin: 0 auto;
+        #styledUploadBtn{
+            width: 184px;
+            padding: 3px 8px 4px;
+            background: @white;
+            font-size: 16px;
+            text-align: center;
+            cursor: pointer;
+            span{
+                margin-right: 4px;
+            }
+        }
+    }
+    label{
+        display: inline-block;
+        margin-bottom: 4px;
+    }
+    .buttonWrapper{
+        width: 80px;
+        .saveBtn{
+            margin-left:0;
+        }
+    }
+}
+/*endregion*/
+/* region Select */
+#importerSelect .k-dropdown-wrap.k-state-default, #importerSelect .k-dropdown-wrap.k-state-active, #importerSelect .k-dropdown-wrap.k-state-focused,
+#importerSelect .k-dropdown-wrap.k-state-focused:hover, #importerSelect .k-dropdown-wrap.k-state-hover{
+    margin-left: 15px;
+}
+#importerSelect{
+    min-width: 510px;
+    .wrapper{
+        min-width: 480px;
+    }
+    p{
+        padding-left: 3px;
+        margin-top: 5px;
+    }
+    #topHeader {
+        margin: 0 0 20px 0;
+        width:100%;
+        li{
+            display: inline-block;
+            width: 30%;
+            margin-top: -5px;
+            text-align: center;
+            font-size: 16px;
+        }
+        li:first-child{
+            position: relative;
+            top: 11px;
+        }
+        li:nth-child(2), li:nth-child(3){
+            span{
+                display: inline-block;
+                width: 80px;
+                padding: 4px 6px 5px 6px;
+                text-align: center;
+                color: @white;
+                background: @green;
+            }
+        }
+        li:nth-child(3){
+            width: 38%;
+        }
+    }
+    #listView{
+        margin: 0 0 15px 0;
+        overflow: auto;
+        li{
+            margin: 0 0 4px 0;
+            .header{
+                color: #777;
+                width: 33%;
+                float: left;
+                padding: 5px 0 5px 5px;
+                background: @white;
+            }
+            .value{
+                color: #777;
+                width: 33%;
+                min-height: 18px;
+                overflow: hidden;
+                padding: 5px;
+                white-space: nowrap;
+                background: white;
+            }
+            .styled-select{
+                float: right;
+                width: 34%;
+                margin: -28px 0 0 0;
+            }
+        }
+        li:last-child{
+            margin: 0;
+        }
+    }
+    .wrap li{
+         list-style: none;
+     }
+}
+/*endregion*/
+/* region Review*/
+#importerReview{
+    .wrap{
+        margin: 30px 20px 30px 20px;
+    }
+    .grid{
+        .k-grid-header{
+            table{
+                padding-right: 0;
+            }
+        }
+        .k-grid-content{
+            margin-bottom: 15px;
+        }
+        tr{
+            &:hover{
+                background-color: @white;
+            }
+        }
+        td {
+            height: 100%;
+            padding: 0 7px 0 3px;
+            border: none;
+            border-bottom: 2px solid @grey;
+            border-right: 2px solid @grey;
+            &:hover{
+                .hoverColor (#eee);
+            }
+            &.k-edit-cell{
+                padding: 0;
+            }
+        }
+        td.status3{
+            background-color: @red;
+            color: @white;
+            &:hover{
+                .hoverColor(@red);
+            }
+        }
+        .Client, .Location, .Repeat {
+            width: 100%;
+            height: 100%;
+            padding: 3px 0;
+        }
+        .popupListener{
+            min-height: 20px;
+        }
+    }
+}
+/*endregion*/
+/*region Breadcrumbs*/
+/*--------------- Simple scalable breadcrumb by Veerle Pieters --------------*/
+#importerUpload, #importerSelect,#importerReview{
+    .crumbs{
+        position: relative;
+        top: 15px;
+        height: 50px;
+        margin: 0 20px;
+        border: 2px solid @grey;
+        background: @grey;
+        li {
+            float:left;
+            height: 50px;
+            list-style-type:none;
+        }
+        li{
+            &.active{
+                background: @white;
+            }
+            span{
+                display: block;
+                width: 32px;
+                height: 32px;
+                float: left;
+                margin: 10px;
+                background-image: url("../img/combinedSprites.png");
+                background-repeat: no-repeat;
+            }
+            p{
+                margin-top: 15px;
+                font-size: 16px;
+                margin-right: 0;
+                color: @charcoal;
+            }
+        }
+        li:nth-child(1){
+            width: 31%;
+            span{
+                background-position: -1px -226px;
+            }
+        }
+        li:nth-child(2){
+            display: inline-block;
+            width: 22px;
+            background: url("../img/combinedSprites.png") no-repeat -1px -439px;
+        }
+        li:nth-child(3){
+            width: 32%;
+            span{
+                background-position: -1px -330px;
+            }
+        }
+        li:nth-child(4){
+             width: 32%;
+            span{
+                background-position: -1px -400px;
+            }
+         }
+    }
+}
+#importerSelect{
+    .crumbs{
+        li:nth-child(1){
+            width: 30%;
+            cursor: pointer;
+            p{
+                cursor: pointer;
+            }
+            span{
+                background-position: -1px -260px;
+            }
+        }
+        li:nth-child(2){
+            display: inline-block;
+            width: 22px;
+            background: url("../img/combinedSprites.png") no-repeat -10px -501px;
+        }
+        li:nth-child(3){
+            width: 30%;
+            span{
+                background-position: -1px -295px;
+            }
+        }
+        li:nth-child(4){
+            display: inline-block;
+            width: 22px;
+            background: url("../img/combinedSprites.png") no-repeat -1px -439px;
+        }
+        li:nth-child(5){
+            width: 30%;
+            span{
+                background-position: -1px -400px;
+            }
+        }
+    }
+}
+#importerReview{
+    .crumbs{
+        li:nth-child(1){
+            width: 31%;
+            cursor: pointer;
+            p{
+                cursor: pointer;
+            }
+            span{
+                background-position: -1px -260px;
+            }
+        }
+        li:nth-child(2){
+            width: 31%;
+            cursor: pointer;
+            background:none;
+            p{
+                cursor: pointer;
+            }
+            span{
+                background-position: -1px -330px;
+            }
+        }
 
+        li:nth-child(4){
+            display: inline-block;
+            float: right;
+            width: 22px;
+            background: url("../img/combinedSprites.png") no-repeat -10px -501px;
+        }
+        li:nth-child(3){
+            float: right;
+            width: 31%;
+            span{
+                background-position: -1px -365px;
+            }
+        }
+    }
+}
+/*endregion*/
 /*endregion*/
 /*region Services */
 #services {
-    background-color: #fff;
-    background-image: url("../img/background-tile.png");
     .km-content {
         min-width: 720px;
     }
     #left {
-        height: 100%;
+        position: relative;
+        top: 15px;
+        max-height: 100%;
         width: auto;
-        margin: 0 370px 15px 15px;
-    }
-    .addDeleteBtns {
-        position: absolute;
-        width: 80px;
-        right: 370px;
-        top: 22px;
-        .csvBtn {
-            background-position: 0 -176px;
-        }
-        .csvBtn:hover {
-            background-position: 0 -154px;
-        }
-    }
-    .k-grid td {
-        line-height: 1.3em;
-        font-size: 14px;
-    }
-    input[type="checkbox"] {
-        vertical-align: middle;
-    }
-    .k-dropdown-wrap {
-        padding: 0 22px 0 0;
-        border-radius: 4px;
-    }
-    .k-grid-content {
-        overflow-x: scroll;
-    }
-    #top {
-        width: 680px;
-        padding: 10px 0;
+        margin: 0 330px 15px 30px;
         label {
             position: relative;
-            top: 3px;
+            top: -2px;
             margin-right: 5px;
-            padding-left: 20px;
-            color: @textColor;
-            font-size: 1.5em;
+            padding-left: 6px;
+            color: @green;
+            font-size: 1.7em;
         }
-        .select2-container {
-            margin-top: 5px;
+        .addDeleteBtns {
+            position: absolute;
+            top: 8px;
+            right: 18px;
+        }
+        #serviceOptions{
+            display: none;
+            position: absolute;
+            top: 37px;
+            right: 0;
+            width: 150px;
+            z-index: 2;
+            background: #fff;
+            border: 2px solid #c0c0c0;
+            li{
+                padding: 5px 10px;
+                &:hover{
+                    background-color: @grey;
+                    cursor: pointer;
+                }
+            }
+        }
+        .k-grid{
+            background: @grey;
+            td {
+                line-height: 1.3em;
+                font-size: 14px;
+            }
+        }
+        input[type="checkbox"] {
+            vertical-align: middle;
+        }
+        .k-grid-content {
+            overflow: auto;
+        }
+        #serviceTypes {
+            display: inline-block;
+            width: 140px;
+            position: relative;
+            top: -4px;
         }
     }
-  #serviceDetails{
-    width: 270px;
-  }
-  #serviceTypes {
-    display: inline;
-  }
 }
 
 #serviceDetails, #taskServiceDetails {
     font-family: "PTSans";
     color: @textColor;
     width: 270px;
+    h1{
+        margin-left: 0;
+        margin-right: 0;
+        padding-bottom: 5px;
+        color: @green;
+        font-size: 1.7em;
+    }
+    h1.serviceFields{
+        padding-bottom: 0;
+    }
     input, label{
         color: @textColor;
     }
@@ -997,9 +1759,6 @@ div.k-window-content {
             margin-left: 2px;
         }
     }
-    .select2-container {
-        margin-bottom: 5px;
-    }
     li.textarea {
         vertical-align: top;
         margin-bottom: 0;
@@ -1011,7 +1770,7 @@ div.k-window-content {
     .k-numeric-wrap, input[type="text"], .k-state-hover, textarea, .km-listview li{
         border: none;
         border-radius: 0;
-        background-color: #fff;
+        background-color: @white;
     }
     input[type="number"], input[type="text"] {
         height: 24px;
@@ -1024,7 +1783,7 @@ div.k-window-content {
         outline: none;
         padding: 0;
         &:checked {
-            background-color: #488FCD;
+            background-color: @green;
         }
     }
     .k-numeric-wrap .k-input {
@@ -1057,7 +1816,7 @@ div.k-window-content {
         min-width: 6em;
         padding-left: 5px !important;
         outline: 0;
-        background: #fff;
+        background: @white;
         color: @textColor;
         font-family: "PTSans";
         font-size: 14px;
@@ -1070,7 +1829,7 @@ div.k-window-content {
         margin: 0 0 5px 0;
         font-size: 16px;
         li {
-            background-color: #fff;
+            background-color: @white;
             margin-bottom: 0;
         }
     }
@@ -1089,17 +1848,19 @@ div.k-window-content {
   margin: auto;
 }
 
-#serviceDetails {
+#serviceDetailsWrapper{
     display: none;
     position: absolute;
-    top: 51px;
-    right: 30px;
+    top: 0;
+    right: 0;
+    width: 270px;
+    height: 100%;
+    padding: 20px 30px;
     background-color: @grey;
-    padding: 10px 20px;
+}
+
+#serviceDetails {
     overflow-y: auto;
-    label.client, label.location{
-        line-height: 1.5em;
-    }
 }
 /*endregion*/
 /*region Widgets */
@@ -1127,7 +1888,7 @@ div.k-window-content {
         margin-bottom: 15px;
         li {
             height: 60px;
-            background-color: #fff;
+            background-color: @white;
             border-bottom:1px solid @grey;
             .info {
                 height: 45px;
@@ -1141,21 +1902,21 @@ div.k-window-content {
                     display: block;
                     float: left;
                     &.Email{
-                        background: url("../img/contactInfo.png") no-repeat 0 -35px;
+                        background: url("../img/combinedSprites.png") no-repeat -37px -300px;
                     }
                     &.Phone{
-                        background: url("../img/contactInfo.png") no-repeat 0 -105px;
+                        background: url("../img/combinedSprites.png") no-repeat -37px -370px;
                     }
                     &.Website{
-                        background: url("../img/contactInfo.png") no-repeat 0 -70px;
+                        background: url("../img/combinedSprites.png") no-repeat -37px -335px;
                     }
                     &.Other{
-                        background: url("../img/contactInfo.png") no-repeat 0 -140px;
+                        background: url("../img/combinedSprites.png") no-repeat -37px -405px;
                     }
                 }
                 .label{
                     font-size: 14px;
-                    color: @blue;
+                    color: @green;
                     margin: 0 0 7px 0;
                 }
                 .value{
@@ -1180,7 +1941,7 @@ div.k-window-content {
                     height: 35px;
                     display: block;
                     margin: 13px 0 0 6px;
-                    background: url("../img/contactInfo.png") no-repeat;
+                    background: url("../img/combinedSprites.png") no-repeat -37px -267px;
                 }
             }
             &:hover > div, &:hover > a {
@@ -1270,33 +2031,29 @@ div.k-window-content {
     .k-button{
         border-radius: 0;
         border: none;
-        background: #fff;
+        background: @white;
         &:hover{
             background-color: #ddd;
         }
     }
 }
-
-#repeat{
-    display: none;
-    position: absolute;
-    top: 54px;
-    right: 30px;
+.repeatWidget{
+    position: relative;
     width: 250px;
     padding: 10px 20px;
     font-size: 15px;
-    background-color:#fff;
-    -moz-box-shadow: 0 5px 8px #aaa;
-    -webkit-box-shadow: 0 5px 8px #AAA;
-    box-shadow: 0 5px 8px #AAA;
     h3{
         font-size: 20px;
-        margin: 0 0 5px 0;
+        margin: 0 0 10px 0;
     }
-    label:not(#weeklyRepeatOn label){
+    label:not(.inline){
+        display: block;
+        margin-bottom: 4px;
+    }
+    label:not(.weeklyRepeatOn label){
         line-height: 1.5em;
     }
-    #weeklyRepeatOn{
+    .weeklyRepeatOn{
         display: none;
         position: relative;
         top:5px;
@@ -1304,27 +2061,27 @@ div.k-window-content {
             float: left;
         }
     }
-    #monthlyRepeatOn {
+    .monthlyRepeatOn {
         display:none;
         label{
             vertical-align: middle;
         }
     }
-    #weekdayWrapper{
+    .weekdayWrapper{
         width: 225px;
-        margin: 0 auto;
+        margin: 4px auto 0 auto;
     }
-    .weekday{
+    .weekdayWrapper div{
         float: left;
         width: 26px;
-        height: 24px;
-        padding-top: 3px;
+        height: 22px;
+        padding-top: 6px;
         vertical-align: middle;
         text-align: center;
-        color:#000000;
+        color: @black;
         border: 1px solid #c5c5c5;
         border-left: none;
-        .bgGradient(#ffffff, #eeeeee);
+        .bgGradient(@white, #eeeeee);
         &:hover{
             cursor: pointer;
             .bgGradient(#eeeeee, #cccccc);
@@ -1349,19 +2106,19 @@ div.k-window-content {
         }
         //don't make the ends blue when they're selected
         &.selected:not(.left):not(.right){
-            color: #ffffff;
-            .bgGradient(#36C3E3, #488FCD);
+            color: @white;
+            .bgGradient(#36C3E3, @blue);
         }
         &.selected:hover:not(.left):not(.right){
             .bgGradient(#44AFE4, #0067A0);
         }
     }
-    #repeatLabel{
+    .repeatLabel{
         position: relative;
         top: 2px;
         left: 2px;
     }
-    #startDate .k-datepicker, .k-dropdown, #repeatEvery .k-numerictextbox{
+    .startDate .k-datepicker, .k-dropdown, .repeatEvery .k-numerictextbox{
         width: 100%;
         font-size: 1em;
     }
@@ -1371,7 +2128,22 @@ div.k-window-content {
             padding-top: 5px;
         }
     }
-    #endDate{
+    .k-picker-wrap, .k-widget, .k-input, .k-numeric-wrap, .k-state-focused:hover{
+        border: none;
+        background: none;
+    }
+    .k-widget, .k-state-focused:hover{
+        background-color: @white;
+    }
+    .k-input{
+        box-shadow: none;
+        -webkit-box-shadow: none;
+        box-shadow: none;
+        -webkit-box-shadow: none;
+        box-shadow: none;
+        -webkit-box-shadow: none;
+    }
+    .endDate{
         label{
             padding-left: 2px;
             vertical-align: text-bottom;
@@ -1388,8 +2160,14 @@ div.k-window-content {
              display: inline-block !important;
          }
     }
-    .k-dropdown, #startDate, #repeatEvery, #weeklyRepeatOn, #monthlyRepeatOn, .select2-container{
+    .k-dropdown, .startDate, .repeatEvery, .weeklyRepeatOn, .monthlyRepeatOn, .select2-container{
         margin-bottom: 10px;
+    }
+    .weeklyRepeatOn{
+        margin-bottom:15px;
+    }
+    .repeatEvery{
+        margin-bottom: 5px;
     }
     .k-input{
       height: 17px;
@@ -1458,7 +2236,6 @@ div.k-window-content {
       left: 300px;
     }
     .editPane{
-        text-align: center;
         position: relative;
         top: -250px;
         left: -300px;
@@ -1518,7 +2295,7 @@ div.k-window-content {
       background-color: @white;
       cursor: pointer;
       &:hover{
-        .rowGradient;
+        .hoverColor();
         color: @white;
       }
       &:not(:last-child){
@@ -1583,7 +2360,7 @@ div.k-window-content {
       cursor: pointer;
       border: 1px solid #aaaaaa;
       &:hover{
-        .rowGradient;
+                    background-color: @green;
         color: @white;
       }
       &:not(:last-child){
@@ -1620,7 +2397,7 @@ div.k-window-content {
     z-index: 3000;
     color: @white;
     border-radius: 4px;
-    background-color: #000;
+    background-color: @black;
     padding: 4px 8px;
     opacity: .8;
 }
@@ -1653,7 +2430,7 @@ div.k-window-content {
     position: fixed;
     width: 100%;
     height: 100%;
-    background-color: #000;
+    background-color: @black;
     z-index: 10000;
     opacity: 0.6;
     display: none;
@@ -2059,7 +2836,7 @@ ul.noty_cont.noty_layout_topRight li {
 .select2-container .select2-choice, .select2-dropdown-open .select2-choice, .select2-drop{
     border: none;
     border-radius: 0;
-    background-color: #fff;
+    background-color: @white;
     background-image:none;
     color: @textColor;
     font-size: 14px;
@@ -2088,10 +2865,10 @@ ul.noty_cont.noty_layout_topRight li {
     outline: none;
 }
 .select2-container .select2-choice div{
-    background-color: #fff;
+    background-color: @white;
 }
 .select2-results .select2-highlighted{
-    background: @blue;
+    background: @green;
 }
 //next 2 styles make the dropdown arrow blue
 .select2-container .select2-choice div b {
@@ -2119,16 +2896,16 @@ ul.noty_cont.noty_layout_topRight li {
     font-weight: normal;
 }
 .select2-results .select2-no-results, .select2-results .select2-searching, .select2-results .select2-selection-limit {
-    background: #fff;
+    background: @white;
 }
 .select2-container .select2-choice span {
     font-size: 14px;
 }
 .select2-search input{
-    border: 1px solid #f2f2f2;
+    border: 1px solid @grey;
 }
 .labelDropdown, .iconDropdown{
-    border: 2px solid #F2F2F2;
+    border: 2px solid @grey;
     border-top: none;
     margin-top: 0;
     margin-left: -1px;
@@ -2156,52 +2933,53 @@ ul.noty_cont.noty_layout_topRight li {
         padding: 0;
     }
 }
-.EmailSmall, .WebsiteSmall, .PhoneSmall, .OtherSmall, .iconDropdown .select2-results .select2-highlighted{
-    background: url("../img/contactInfoSmall.png") no-repeat 0 0;
+.EmailAddressSmall, .WebsiteSmall, .PhoneNumberSmall, .OtherSmall, .iconDropdown .select2-results .select2-highlighted{
+    background: url("../img/combinedSprites.png") no-repeat -40px 0;
 }
-.select2-results .EmailSmall{
-    background-position: 0 -140px;
+.select2-results .EmailAddressSmall{
+    background-position: -40px -140px;
 }
 .select2-results .WebsiteSmall{
-    background-position: 0 -175px;
+    background-position: -40px -175px;
 }
-.select2-results .PhoneSmall{
-    background-position: 0 -210px;
+.select2-results .PhoneNumberSmall{
+    background-position: -40px -210px;
 }
 .select2-results .OtherSmall{
-    background-position: 0 -245px;
+    background-position: -40px -245px;
 }
-.EmailSmall, .select2-results .EmailSmall.select2-highlighted{
-    background-position: 0 0;
+.EmailAddressSmall, .select2-results .EmailAddressSmall.select2-highlighted{
+    background-position: -40px 0;
 }
 .WebsiteSmall, .select2-results .WebsiteSmall.select2-highlighted{
-    background-position: 0 -35px;
+    background-position: -40px -35px;
 }
-.PhoneSmall, .select2-results .PhoneSmall.select2-highlighted{
-    background-position: 0 -70px;
+.PhoneNumberSmall, .select2-results .PhoneNumberSmall.select2-highlighted{
+    background-position: -40px -70px;
 }
 .OtherSmall, .select2-results .OtherSmall.select2-highlighted{
-    background-position: 0 -105px;
+    background-position: -40px -105px;
 }
 /*endregion*/
 /*region SelectBox*/
-#serviceDetails, #taskServiceDetails, #importerUpload, #importerSelect, #importerReview {
-    .styled-select{
-        width: 100%;
-        height: 28px;
-        overflow: hidden;
-        background: url("../img/select-closed.png") no-repeat right #fff;
-    }
-    .selectBox {
-        width: 100%;
-        height: 28px;
-        padding: 5px;
-        border: none;
-        cursor: pointer;
-        font-size: 14px;
-        font-family: PTSans;
-        -webkit-appearance: none;
-        background: transparent;
+.styled-select{
+    width: 100%;
+    height: 28px;
+    overflow: hidden;
+    background: url("../img/select-closed.png") no-repeat right @white;
+}
+.selectBox {
+    width: 100%;
+    height: 28px;
+    padding: 5px 12px 5px 5px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-family: PTSans;
+    -webkit-appearance: none;
+    background: transparent;
+    option:hover{
+        background: @green;
     }
 }
 #importerUpload{
@@ -2211,52 +2989,33 @@ ul.noty_cont.noty_layout_topRight li {
 }
 /*endregion*/
 /*region Toggle Switch*/
-#toggleLabel{
-    float: left;
-    margin: 4px 10px 0 0;
-    font-size: 14px;
-}
-.switch {
+.toggleSwitch {
     display: inline-block;
     height: 33px;
-    width: 145px;
     cursor: pointer;
     line-height: 1.8em;
     background: @white;
     a {
-        position: relative;
         display: block;
         float: left;
         height: 25px;
-        width: 56px;
         line-height: 1.3em;
-        color: #ccc;
+        color: #aaa;
         text-align: center;
         font-size: 1em;
-        padding: 4px 6px 0 7px;
+        padding: 4px 8px 0 8px;
         margin: 2px 0 0 2px;
         z-index: 2;
     }
-    .toggle{
-        display: block;
-        position: absolute;
-        top: 2px;
-        left: 36px;
-        width: 63px;
-        height: 25px;
-        background: @blue;
-        padding: 4px 3px 0 4px;
-        z-index: 1;
-    }
     a.off{
-        padding: 4px 6px 0 7px;
-        margin-left: 3px;
+        margin-right: 2px;
     }
     a:not(.active):hover{
-        background: #f1f1f1;
+        background: @grey;
     }
     a.active {
         color: @white;
+        background: @green;
     }
 }
 /*endregion*/

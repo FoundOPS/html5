@@ -246,7 +246,7 @@ define(["jquery", "ui/popup", "lib/doT.min", "jmousewheel", "jscrollpane"], func
                     href = "href='" + currentSection.url + "'";
                 }
                 var name = currentSection.name,
-                    color = currentSection.color,
+                    color = "green",
                     iconUrl = currentSection.iconUrl,
                     hoverIconUrl = currentSection.hoverIconUrl;
                 //TODO: Implement sprite selection.

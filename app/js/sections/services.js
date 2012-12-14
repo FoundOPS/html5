@@ -45,8 +45,8 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
             saveHistory.resetHistory();
 
             if (service) {
-                //show the serviceDetails
-                $("#serviceDetails").attr("style", "display:block");
+                //show the serviceDetailsWrapper
+                $("#serviceDetailsWrapper").attr("style", "display:block");
             }
         },
         deleteSelectedService: function () {
@@ -54,8 +54,8 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
             if (answer) {
                 grid.dataSource.remove(selectedServiceHolder);
                 dbServices.services.destroy({body: this.get("selectedService")});
-                //hide the serviceDetails
-                $("#serviceDetails").attr("style", "display:none");
+                //hide the serviceDetailsWrapper
+                $("#serviceDetailsWrapper").attr("style", "display:none");
 
                 analytics.track("Delete Service");
             }
@@ -155,6 +155,16 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
         analytics.track("Export CSV");
     };
 
+    services.showOptions = function () {
+        $("#serviceOptions").attr("style", "display:block");
+
+        $('html').on('click touchend', function (e) {
+            if (e.target.type !== "submit") {
+                $("#serviceOptions").attr("style", "display:none");
+                $('html').off('click');
+            }
+        });
+    };
     //endregion
 
     //region Data/DataSource
@@ -342,13 +352,12 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
 
     //resize the grid based on the current window's height
     var resizeGrid = function () {
-        var extraMargin = 85;
+        var extraMargin = 158;
         var windowHeight = $(window).height();
-        var topHeight = $('#top').outerHeight(true);
-        var contentHeight = windowHeight - topHeight - extraMargin;
-        $('#grid').css("height", contentHeight + 24 + 'px');
-        $('#grid .k-grid-content').css("height", contentHeight - 41 + 'px');
-        $("#serviceDetails").css("max-height", contentHeight + 5 + 'px');
+        var contentHeight = windowHeight - extraMargin;
+        $('#grid').css("max-height", contentHeight + 19 + 'px');
+        $('#grid .k-grid-content').css("max-height", contentHeight - 15 + 'px');
+        $("#serviceDetails").css("max-height", contentHeight + 63 + 'px');
     };
 
     var setupGrid = function (fields) {
@@ -378,7 +387,7 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
             }
 
             //calculate the width based on number off characters
-            var titleLength = column.title.length * 7.5 + 35;
+            var titleLength = Math.round(column.title.length * 7.5) + 45;
             column.width = titleLength + "px";
 
             columns.push(column);
@@ -412,17 +421,24 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
         //configure the columns based on the user's stored configuration
         columns = kendoTools.configureColumns(columns, vm.get("serviceType.Id"));
 
-        grid = $("#grid").data("kendoGrid");
+        var servicesSection = $("#services");
+
+        grid = servicesSection.find("#grid").data("kendoGrid");
         if (grid) {
             grid.destroy();
         }
-        $("#grid").empty();
+        servicesSection.find("#grid").empty();
 
-        grid = $("#grid").kendoGrid({
+        grid = servicesSection.find("#grid").kendoGrid({
             autoBind: false,
             change: function () {
-                //enable delete button
-                $('#services .k-grid-delete').removeAttr("disabled");
+                //show the delete button only if a row is selected
+                var servicesSection = $("#services");
+                if (servicesSection.find("tr.k-state-selected")[0]) {
+                    servicesSection.find(".k-grid-delete").attr("style", "display:inline-block");
+                } else {
+                    servicesSection.find(".k-grid-delete").attr("style", "display:none");
+                }
 
                 //whenever a field is changed, the grid needs to be reselected. handleChange is set to prevent triggering a reload
                 if (handleChange) {
@@ -446,6 +462,7 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
             },
             columns: columns,
             columnMenu: true,
+            dataBound: resizeGrid,
             dataSource: serviceHoldersDataSource,
             filterable: true,
             pageable: true,
@@ -608,10 +625,10 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
                     vm.set("serviceType", {Id: selectedOption.value, Name: selectedOption.name});
 
                     //disable the delete button and hide the service details
-                    $('#services .k-grid-delete').attr("disabled", "disabled");
-
-                    //hide the serviceDetails
-                    $("#serviceDetails").attr("style", "display:none");
+                    $("#services").find(".k-grid-delete").attr("style", "display:none");
+                    
+                    //hide the serviceDetailsWrapper
+                    $("#serviceDetailsWrapper").attr("style", "display:none");
                 }
             });
 
@@ -683,10 +700,10 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
         setupServiceSelector();
 
         //hookup the add & delete buttons
-        $("#services").find(".addDeleteBtns .k-grid-add").on("click", function () {
+        $("#services").find(".k-grid-add").on("click", function () {
             vm.addNewService();
         });
-        $("#services").find(".addDeleteBtns .k-grid-delete").on("click", function () {
+        $("#services").find(".k-grid-delete").on("click", function () {
             vm.deleteSelectedService();
         });
 
@@ -694,7 +711,6 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
         $(window).resize(function () {
             resizeGrid();
         });
-        resizeGrid();
 
         handleParameterChanges();
     };

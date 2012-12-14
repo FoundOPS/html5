@@ -6,8 +6,9 @@
 
 "use strict";
 
-define(['jquery', "developer", 'lib/platform', 'moment'], function ($, developer, platform) {
+define(['jquery', "developer", 'lib/platform', 'tools/dateTools', 'moment'], function ($, developer, platform, dateTools) {
     var generalTools = {};
+    window.generalTools = generalTools;
 
     $.fn.delayKeyup = function (callback, ms) {
         var timer = 0;
@@ -25,7 +26,19 @@ define(['jquery', "developer", 'lib/platform', 'moment'], function ($, developer
         return JSON.parse(JSON.stringify(obj));
     };
 
-    /**
+    //disable the save and cancel buttons
+    generalTools.disableButtons = function (page) {
+        $(page + " .cancelBtn").attr("disabled", "disabled");
+        $(page + " .saveBtn").attr("disabled", "disabled");
+    };
+
+    //enable the save and cancel buttons
+    generalTools.enableButtons = function (page) {
+        $(page + " .cancelBtn").removeAttr("disabled");
+        $(page + " .saveBtn").removeAttr("disabled");
+    };
+
+     /**
      * Finds the index based on a filter function
      * @param collection
      * @param filter {Function([element], [index], [collection]}
@@ -38,6 +51,96 @@ define(['jquery', "developer", 'lib/platform', 'moment'], function ($, developer
             }
         }
         return -1;
+    };
+    
+    generalTools.frequencyDetail = {
+        OnDayInMonth: 8, //Ex. The 3rd of the month. Cannot be greater than 28 days
+        LastOfMonth: 10, //Example Febuary 28th
+        FirstOfDayOfWeekInMonth: 11, //Ex. First Monday
+        SecondOfDayOfWeekInMonth: 12, //Ex. Second Monday
+        ThirdOfDayOfWeekInMonth: 13, //Ex. Third Monday
+        LastOfDayOfWeekInMonth: 14 //Ex. Last Monday
+    };
+
+    generalTools.getContactInfoDisplayString = function (contactInfo) {
+        //check if there's no contact info
+        if (!contactInfo[0]) {
+            return "";
+        }
+
+        var contactData = "";
+        //add the data string if it exists
+        if (contactInfo[0].Data) {
+            //remove the "http://" or "https://" from the beginning if it's a link
+            contactData = contactInfo[0].Data.replace("http://", "");
+            contactData = contactData.replace("https://", "");
+            contactData += " ";
+        }
+
+        var contactLabel = "";
+        //add the label if it exists
+        if (contactInfo[0].Label) {
+            contactLabel = "(" + contactInfo[0].Label + ")";
+        }
+
+        var contactString = contactData + contactLabel;
+
+        //add text to the end to show how many more sets of contact info there are (ex. "+ 3 more")
+        if (contactInfo.length > 1) {
+            contactString = contactString.concat(" +", contactInfo.length - 1, " more");
+        }
+        return contactString;
+    };
+
+    //create a display string from a location object
+    generalTools.getLocationDisplayString = function (location) {
+        if (!location) {
+            return "";
+        }
+        var lineOne = location.AddressLineOne ? location.AddressLineOne + " " : "";
+        var lineTwo = location.AddressLineTwo ? location.AddressLineTwo + ", " : "";
+        var adminDistrictTwo = location.AdminDistrictTwo ? location.AdminDistrictTwo + ", " : "";
+        var adminDistrictOne = location.AdminDistrictOne ? location.AdminDistrictOne + " " : "";
+        var postalCode = location.PostalCode ? location.PostalCode : "";
+        //display any parts of the location that exist
+        var displayString = lineOne + lineTwo + adminDistrictTwo + adminDistrictOne + postalCode;
+        if (displayString !== "") {
+            return displayString;
+        } else {
+            return location.Latitude + ", " + location.Longitude;
+        }
+    };
+
+    /**
+     * Creates the string for monthly frequency detail
+     * @param {number} detailInt
+     * @param startDate
+     * @param {boolean} beginWithCapital If the first character "O" should be capitalized
+     * @return {String}
+     */
+    generalTools.getFrequencyDetailString = function (detailInt, startDate, beginWithCapital) {
+        var frequencyDetail = "", date = startDate;
+        //if date is a string, change it to a date object
+        if (!startDate.getDate) {
+            date = dateTools.parseDate(startDate);
+        }
+        //create a string based on the frequencyDetail (ex. "on the 2nd Wednesday")
+        if (detailInt === generalTools.frequencyDetail.OnDayInMonth || detailInt === generalTools.frequencyDetail.LastOfMonth) {
+            frequencyDetail = "on the " + dateTools.getDateWithSuffix(date);
+        } else if (detailInt === generalTools.frequencyDetail.FirstOfDayOfWeekInMonth) {
+            frequencyDetail = "on the 1st " + dateTools.days[date.getDay()];
+        } else if (detailInt === generalTools.frequencyDetail.SecondOfDayOfWeekInMonth) {
+            frequencyDetail = "on the 2nd " + dateTools.days[date.getDay()];
+        } else if (detailInt === generalTools.frequencyDetail.ThirdOfDayOfWeekInMonth) {
+            frequencyDetail = "on the 3rd " + dateTools.days[date.getDay()];
+        } else if (detailInt === generalTools.frequencyDetail.LastOfDayOfWeekInMonth) {
+            frequencyDetail = "on the last " + dateTools.days[date.getDay()];
+        }
+        //optionally capitalize the "O" in "on"
+        if (beginWithCapital) {
+            frequencyDetail = frequencyDetail.charAt(0).toUpperCase() + frequencyDetail.slice(1);
+        }
+        return frequencyDetail;
     };
 
     /**
@@ -125,7 +228,17 @@ define(['jquery', "developer", 'lib/platform', 'moment'], function ($, developer
         this.keysCache = [];
     };
 
-    /**
+    //frequency names to be used in repeat string generation(first two blank because null and "Once" are not used)
+    generalTools.repeatFrequencies = [
+        "",
+        "",
+        "Day",
+        "Week",
+        "Month",
+        "Year"
+    ];
+
+    /*
      * Gets the value for a key.
      * @param {Object} key The key to retrieve.
      * @return {Object} The value for a value.
@@ -150,9 +263,8 @@ define(['jquery', "developer", 'lib/platform', 'moment'], function ($, developer
      * Then center the image based on the parent container's width
      * @param element The jQuery element selector
      * @param {number} maxSize
-     * @param {number} containerWidth
      */
-    generalTools.resizeImage = function (element, maxSize, containerWidth) {
+    generalTools.resizeImage = function (element, maxSize) {
         //get the original dimensions of the image
         var width = element[0].width;
         var height = element[0].height;
@@ -168,9 +280,6 @@ define(['jquery', "developer", 'lib/platform', 'moment'], function ($, developer
         //set the final sizes
         element.css("width", newW + "px");
         element.css("height", newH + "px");
-        //center the image
-        var margin = (containerWidth - newW) / 2;
-        element.css("marginLeft", margin + "px");
     };
 
     //enable the save and cancel buttons
