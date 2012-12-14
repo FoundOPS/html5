@@ -21,9 +21,9 @@ define(["jquery", "db/session", "kendo"], function ($, session) {
                 '<li><a>Business</a></li>' +
                 '<li><a>Users</a></li>' +
                 '<li><a>Dispatcher</a></li>' +
-                '<li><a>Import</a></li>' +
-                '<li><a>Privacy Policy</a></li>' +
-                '<li><a>Terms of Service</a></li>' +
+//                '<li><a>Import</a></li>' +
+//                '<li><a>Privacy Policy</a></li>' +
+//                '<li><a>Terms of Service</a></li>' +
                 '</ul>' +
                 '<div><a href="http://indymade.com/" target="_blank">Made with Pride in Indiana</a></div>');
 
@@ -31,7 +31,7 @@ define(["jquery", "db/session", "kendo"], function ($, session) {
             var businessLi = _menu.find("li:nth-child(2)");
             var usersLi = _menu.find("li:nth-child(3)");
             var dispatcherLi = _menu.find("li:nth-child(4)");
-            var importerLi = _menu.find("li:nth-child(5)");
+//            var importerLi = _menu.find("li:nth-child(5)");
 
             personalLi.click(function () {
                 application.navigate("view/personalSettings.html");
@@ -45,9 +45,9 @@ define(["jquery", "db/session", "kendo"], function ($, session) {
             dispatcherLi.click(function () {
                 application.navigate("view/dispatcherSettings.html");
             });
-            importerLi.click(function () {
-                application.navigate("view/importerUpload.html");
-            });
+//            importerLi.click(function () {
+//                application.navigate("view/importerUpload.html");
+//            });
 
             if (options.selectedItem === "Personal") {
                 personalLi.addClass('active');
@@ -55,30 +55,30 @@ define(["jquery", "db/session", "kendo"], function ($, session) {
                 businessLi.removeClass('active');
                 usersLi.removeClass('active');
                 dispatcherLi.removeClass('active');
-                importerLi.removeClass('active');
+                //importerLi.removeClass('active');
             } else if (options.selectedItem === "Business") {
                 businessLi.addClass('active');
 
                 personalLi.removeClass('active');
                 usersLi.removeClass('active');
                 dispatcherLi.removeClass('active');
-                importerLi.removeClass('active');
+                //importerLi.removeClass('active');
             } else if (options.selectedItem === "Users") {
                 usersLi.addClass('active');
 
                 personalLi.removeClass('active');
                 businessLi.removeClass('active');
                 dispatcherLi.removeClass('active');
-                importerLi.removeClass('active');
+                //importerLi.removeClass('active');
             } else if (options.selectedItem === "Dispatcher") {
                 dispatcherLi.addClass('active');
 
                 personalLi.removeClass('active');
                 businessLi.removeClass('active');
                 usersLi.removeClass('active');
-                importerLi.removeClass('active');
+                //importerLi.removeClass('active');
             } else if (options.selectedItem === "Importer") {
-                importerLi.addClass('active');
+                //importerLi.addClass('active');
 
                 personalLi.removeClass('active');
                 businessLi.removeClass('active');
@@ -91,13 +91,13 @@ define(["jquery", "db/session", "kendo"], function ($, session) {
                     businessLi.css("display", "none");
                     usersLi.css("display", "none");
                     dispatcherLi.css("display", "none");
-                    importerLi.css("display", "none");
+                    //importerLi.css("display", "none");
                 } else {
                     //Show all settings if user is admin
                     businessLi.css("display", "block");
                     usersLi.css("display", "block");
                     dispatcherLi.css("display", "block");
-                    importerLi.css("display", "block");
+                    //importerLi.css("display", "block");
                 }
             });
 
