@@ -129,7 +129,7 @@ define(['db/session', 'db/services', 'tools/parameters'], function (session, dbS
      * Converts a datasource's view to CSV and saves it using data URI.
      * Uses moment.js for date parsing (you can change this if you would like)
      * @param {Array.<Object>} data The data to convert.
-     *
+     * @param {string} fileName
      * @param {boolean} humanize If true, it will humanize the column header names.
      * It will replace _ with a space and split CamelCase naming to have a space in between names -> Camel Case
      * @param {Array.<String>} ignore Columns to ignore.

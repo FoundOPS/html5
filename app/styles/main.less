@@ -48,11 +48,10 @@ table {
 @blue: #488FCD;
 @green: #5aad52;
 @red: #d06268;
-@orange: #D9591E;
 @charcoal: #333335;
 @white:#ffffff;
 @grey: rgb(230,230,230); //inner background
-.hoverColor (@color: #fff, @strength: 10%){
+.hoverColor (@color: @white, @strength: 10%){
     background-color: darken(@color, @strength);
 }
 @darkBlue: #36C3E3;
@@ -61,24 +60,7 @@ table {
 @buttonHoverLight: #9cee65;
 @buttonHoverDark: #7ec152;
 @textColor: #222222;
-.buttonGradient {
-    background: -moz-linear-gradient(top, @buttonLight, @buttonDark);
-    filter: progid:dximagetransform.microsoft.gradient(startColorstr = @buttonLight, endColorstr = @buttonDark);
-    background: -webkit-gradient(linear, left top, left bottom, from(@buttonLight), to(@buttonDark));
-}
-
-.buttonGradientHover {
-    background: -moz-linear-gradient(top, @buttonHoverLight, @buttonHoverDark);
-    filter: progid:dximagetransform.microsoft.gradient(startColorstr = @buttonHoverLight, endColorstr = @buttonHoverDark);
-    background: -webkit-gradient(linear, left top, left bottom, from(@buttonHoverLight), to(@buttonHoverDark));
-}
-
-.rowGradient {
-    background-color: @darkBlue;
-    background: -moz-linear-gradient(top, @darkBlue, @blue);
-    filter: progid:dximagetransform.microsoft.gradient(startColorstr = @darkBlue, endColorstr = @blue);
-    background: -webkit-gradient(linear, left top, left bottom, from(@darkBlue), to(@blue));
-}
+//used for repeat widget weekdays
 .bgGradient(@top, @bottom){
     background-color: @top;
     background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0, @bottom), color-stop(0.5, @top));
@@ -169,7 +151,7 @@ table {
         .k-numeric-wrap, input[type="text"]{
             border: none;
             border-radius: 0;
-            background-color: #fff;
+            background-color: @white;
         }
         input[type="number"], input[type="text"] {
             height: 25px;
@@ -383,7 +365,7 @@ span.k-tooltip {
 
 //make alternate grid rows background color white instead of transparent
 .k-grid tbody tr:not(.k-state-selected) {
-    background-color: #fff;
+    background-color: @white;
     &:hover{
         background-color: #ddd;
     }
@@ -414,6 +396,7 @@ span.k-tooltip {
     background: @white;
     border: none;
     border-radius: 0;
+    padding-top: 3px;
     &:hover{
         background: none;
         .hoverColor(@white, 15%);
@@ -536,7 +519,7 @@ hr {
     height: 12px;
 }
 ::-webkit-scrollbar-track{
-    background-color: #fff;
+    background-color: @white;
     &:horizontal{
         border-top: 4px solid @grey;
     }
@@ -559,6 +542,9 @@ hr {
 ::-webkit-scrollbar-corner{
     background: @white;
 }
+#services ::-webkit-scrollbar-corner{
+    background: @grey;
+}
 /*endregion*/
 /*region save/cancel/add/delete/edit buttons*/
 .addDeleteBtns .k-grid-delete, .addDeleteBtns .k-grid-add {
@@ -568,16 +554,15 @@ hr {
     margin: 0;
 }
 button[disabled], .k-grid-update[disabled], .k-grid-cancel[disabled] {
-    color: #999;
     cursor: default;
 }
 button[disabled]:hover{
     background: @white;
 }
-button[disabled] .k-icon, button[disabled] .k-icon:hover {
+button[disabled], button[disabled]:hover {
     opacity: .5;
 }
-.saveBtn, .cancelBtn{
+.saveBtn, .saveBtn:active, .cancelBtn{
     border-radius: 0;
     border: none;
     background: @white;
@@ -592,12 +577,9 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover {
         background-position: -114px -157px;
     }
 }
-.cancelBtn {
+.cancelBtn, .cancelBtn:active {
     margin-left: 4px;
     color: @red;
-}
-.cancelBtn[disabled]:hover, .k-grid-cancel[disabled]:hover {
-    color: #999;
 }
 .k-grid-edit, .k-grid-edit:hover, .k-grid-delete, .k-grid-delete:hover, .k-grid-add,
 .k-grid-add:hover, .k-grid-delete[disabled], .k-grid-delete[disabled]:hover, .csvBtn, .csvBtn:hover {
@@ -635,6 +617,7 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover {
 .k-grid-edit, #usersGrid .k-grid-edit {
     background-position: 0 -112px;
     margin-right: 4px;
+    display: none;
 }
 
 .k-grid-edit:hover, #usersGrid .k-grid-edit:hover {
@@ -650,6 +633,32 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover {
 }
 /*endregion*/
 
+#personal, #business, #users, #dispatcher, #changePassword{
+    min-width: 550px;
+}
+
+.k-invalid-msg{
+    top: -32px;
+    left: 258px;
+    margin-bottom: -35px;
+    border: none;
+    border-radius: 0;
+    background: none;
+    text-align: left;
+    color: @red;
+    .k-warning{
+        display: none;
+    }
+}
+
+@media only screen and (max-width:840px) {
+    .k-invalid-msg{
+        top: 0;
+        left: -4px;
+        margin-bottom: 0;
+    }
+}
+
 .k-grid{
     border: none;
     border-left: 2px solid @grey;
@@ -662,9 +671,6 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover {
         padding-right: 13px;
         border: none;
         background: @grey;
-        table{
-            padding-right: 13px;
-        }
         .k-header {
             border: none;
             font-size: 16px;
@@ -672,10 +678,10 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover {
             border-bottom: 2px solid @grey;
             border-right: 1px solid @grey;
             border-left: 1px solid @grey;
-            color: #fff;
+            color: @white;
             padding: 5px 0 6px 4px;
             a{
-                color: #fff;
+                color: @white;
                 span{
                     vertical-align: middle;
                 }
@@ -716,6 +722,9 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover {
         .k-header:last-child {
             border-right: none;
         }
+    }
+    .k-grid-content{
+        overflow-y: auto;
     }
     tr{
         background-color: @grey;
@@ -816,10 +825,10 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover {
 
 #personal input, #business input, #changePassword input, #createPassword input {
     width: 240px;
-    height: 28px;
+    height: 26px;
     margin-top: 2px;
     margin-bottom: 7px;
-    padding-left: 2px;
+    padding-left: 4px;
     border: none;
     font-size: 1em;
 }
@@ -871,17 +880,10 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover {
 /*endregion*/
 /*region Settings -Users */
 #users{
-    .wrap {
-        min-width: 705px;
-    }
     .addDeleteBtns {
         position: absolute;
         right: 45px;
         top: 135px;
-    }
-    #usersGrid {
-        min-width: 675px;
-        overflow: auto;
     }
     tbody a {
         margin: 1px 0 -2px 0;
@@ -903,6 +905,15 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover {
     }
     #addUser:hover {
         text-decoration: underline;
+    }
+    #usersGrid{
+        min-width: 200px;
+        .k-grid-header{
+            padding-right: 0 !important;
+            table{
+                padding-right: 0;
+            }
+        }
     }
 }
 
@@ -931,6 +942,12 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover {
             .hoverColor(@white, 15%);
         }
     }
+    .k-grid-cancel{
+        color: @red;
+        span{
+            background-position: -115px -135px;
+        }
+    }
     .k-grid-update[disabled], .k-grid-cancel[disabled]{
         .hoverColor();
     }
@@ -940,6 +957,7 @@ button[disabled] .k-icon, button[disabled] .k-icon:hover {
     input{
         height: 26px;
         width: 200px;
+        padding-left: 4px;
         border: none;
         font-size: 1em;
     }
@@ -994,9 +1012,6 @@ div.k-window-content {
 
 /*endregion*/
 /*region Settings - Dispatcher*/
-#dispatcher .wrap {
-    min-width: 450px;
-}
 #dispatcher .addDeleteBtns {
     float: right;
     margin: 9px 7px 0 0;
@@ -1007,7 +1022,7 @@ div.k-window-content {
 #dispatcher #color {
     width: 20px;
     height: 20px;
-    border: 1px solid #000000;
+    border: 1px solid @black;
     margin-left: 12px;
 }
 #dispatcher #color:hover {
@@ -1245,15 +1260,20 @@ div.k-window-content {
 }
 
 #dispatcherGrid {
-    overflow: auto;
-    min-width: 262px;
     font-size: 1.1em;
+    min-width: 200px;
+    .k-grid-header{
+        padding-right: 0 !important;
+        table{
+            padding-right: 0;
+        }
+    }
 }
 /*endregion*/
 /*region Importer*/
 #importerUpload, #importerSelect, #importerReview{
     min-width: 500px;
-    background-color: #fff;
+    background-color: @white;
     background-image: url("../img/background-tile.png");
     .km-content {
         background: @white;
@@ -1334,7 +1354,7 @@ div.k-window-content {
     #hints{
         margin-bottom: 5px;
         padding: 10px;
-        background-color: #fff;
+        background-color: @white;
         ul{
             padding: 0 0 0 20px;
             li{
@@ -1661,8 +1681,25 @@ div.k-window-content {
         }
         .addDeleteBtns {
             position: absolute;
-            right: 18px;
             top: 8px;
+            right: 18px;
+        }
+        #serviceOptions{
+            display: none;
+            position: absolute;
+            top: 37px;
+            right: 0;
+            width: 150px;
+            z-index: 2;
+            background: #fff;
+            border: 2px solid #c0c0c0;
+            li{
+                padding: 5px 10px;
+                &:hover{
+                    background-color: @grey;
+                    cursor: pointer;
+                }
+            }
         }
         .k-grid{
             background: @grey;
@@ -1733,7 +1770,7 @@ div.k-window-content {
     .k-numeric-wrap, input[type="text"], .k-state-hover, textarea, .km-listview li{
         border: none;
         border-radius: 0;
-        background-color: #fff;
+        background-color: @white;
     }
     input[type="number"], input[type="text"] {
         height: 24px;
@@ -1779,7 +1816,7 @@ div.k-window-content {
         min-width: 6em;
         padding-left: 5px !important;
         outline: 0;
-        background: #fff;
+        background: @white;
         color: @textColor;
         font-family: "PTSans";
         font-size: 14px;
@@ -1792,7 +1829,7 @@ div.k-window-content {
         margin: 0 0 5px 0;
         font-size: 16px;
         li {
-            background-color: #fff;
+            background-color: @white;
             margin-bottom: 0;
         }
     }
@@ -1851,7 +1888,7 @@ div.k-window-content {
         margin-bottom: 15px;
         li {
             height: 60px;
-            background-color: #fff;
+            background-color: @white;
             border-bottom:1px solid @grey;
             .info {
                 height: 45px;
@@ -1995,7 +2032,7 @@ div.k-window-content {
     .k-button{
         border-radius: 0;
         border: none;
-        background: #fff;
+        background: @white;
         &:hover{
             background-color: #ddd;
         }
@@ -2042,10 +2079,10 @@ div.k-window-content {
         padding-top: 6px;
         vertical-align: middle;
         text-align: center;
-        color:#000000;
+        color: @black;
         border: 1px solid #c5c5c5;
         border-left: none;
-        .bgGradient(#ffffff, #eeeeee);
+        .bgGradient(@white, #eeeeee);
         &:hover{
             cursor: pointer;
             .bgGradient(#eeeeee, #cccccc);
@@ -2070,7 +2107,7 @@ div.k-window-content {
         }
         //don't make the ends blue when they're selected
         &.selected:not(.left):not(.right){
-            color: #ffffff;
+            color: @white;
             .bgGradient(#36C3E3, @blue);
         }
         &.selected:hover:not(.left):not(.right){
@@ -2226,7 +2263,7 @@ div.k-window-content {
                 background-color: #efefef;
                 cursor: pointer;
                 &:hover{
-                    .rowGradient;
+                    background-color: @green;
                     color: @white;
                 }
                 &:not(:last-child){
@@ -2282,7 +2319,7 @@ div.k-window-content {
     z-index: 3000;
     color: @white;
     border-radius: 4px;
-    background-color: #000;
+    background-color: @black;
     padding: 4px 8px;
     opacity: .8;
 }
@@ -2315,7 +2352,7 @@ div.k-window-content {
     position: fixed;
     width: 100%;
     height: 100%;
-    background-color: #000;
+    background-color: @black;
     z-index: 10000;
     opacity: 0.6;
     display: none;
@@ -2721,7 +2758,7 @@ ul.noty_cont.noty_layout_topRight li {
 .select2-container .select2-choice, .select2-dropdown-open .select2-choice, .select2-drop{
     border: none;
     border-radius: 0;
-    background-color: #fff;
+    background-color: @white;
     background-image:none;
     color: @textColor;
     font-size: 14px;
@@ -2750,10 +2787,10 @@ ul.noty_cont.noty_layout_topRight li {
     outline: none;
 }
 .select2-container .select2-choice div{
-    background-color: #fff;
+    background-color: @white;
 }
 .select2-results .select2-highlighted{
-    background: @blue;
+    background: @green;
 }
 //next 2 styles make the dropdown arrow blue
 .select2-container .select2-choice div b {
@@ -2781,7 +2818,7 @@ ul.noty_cont.noty_layout_topRight li {
     font-weight: normal;
 }
 .select2-results .select2-no-results, .select2-results .select2-searching, .select2-results .select2-selection-limit {
-    background: #fff;
+    background: @white;
 }
 .select2-container .select2-choice span {
     font-size: 14px;
@@ -2851,7 +2888,7 @@ ul.noty_cont.noty_layout_topRight li {
     width: 100%;
     height: 28px;
     overflow: hidden;
-    background: url("../img/select-closed.png") no-repeat right #fff;
+    background: url("../img/select-closed.png") no-repeat right @white;
 }
 .selectBox {
     width: 100%;
@@ -2863,6 +2900,9 @@ ul.noty_cont.noty_layout_topRight li {
     font-family: PTSans;
     -webkit-appearance: none;
     background: transparent;
+    option:hover{
+        background: @green;
+    }
 }
 #importerUpload{
     .styled-select{
@@ -2871,50 +2911,27 @@ ul.noty_cont.noty_layout_topRight li {
 }
 /*endregion*/
 /*region Toggle Switch*/
-#toggleLabel{
-    float: left;
-    margin: 4px 10px 0 0;
-    font-size: 14px;
-}
-.switch {
+.toggleSwitch {
     display: inline-block;
     height: 33px;
-    width: 147px; //145px;
     cursor: pointer;
     line-height: 1.8em;
     background: @white;
     a {
-//        position: relative;
         display: block;
         float: left;
         height: 25px;
-        width: 63px;
         line-height: 1.3em;
         color: #aaa;
         text-align: center;
         font-size: 1em;
-        padding: 4px 3px 0 4px;//4px 6px 0 7px;
+        padding: 4px 8px 0 8px;
         margin: 2px 0 0 2px;
         z-index: 2;
     }
-//    .toggle{
-//        display: block;
-//        position: absolute;
-//        top: 2px;
-//        left: 37px;
-//        width: 63px;
-//        height: 25px;
-//        background: @blue;
-//        padding: 4px 3px 0 4px;
-//        z-index: 1;
-//    }
-    a.on{
-        width: 64px;
+    a.off{
+        margin-right: 2px;
     }
-//    a.off{
-//        padding: 4px 6px 0 7px;
-//        margin-left: 3px;
-//    }
     a:not(.active):hover{
         background: @grey;
     }

@@ -10,45 +10,69 @@ define(["db/services", "tools/generalTools", "widgets/settingsMenu"], function (
     var changePassword = {};
 
     changePassword.save = function () {
-        var oldPass = $("#old")[0].value;
-        var newPass = $("#new")[0].value;
-        var confirmPass = $("#confirm")[0].value;
+        var oldPass = $("#oldPass")[0];
+        var newPass = $("#newPass")[0];
+        var confirmPass = $("#confirmPass")[0];
+        var oldVal = oldPass.value;
+        var newVal = newPass.value;
+        var confirmVal = confirmPass.value;
         if (changePassword.validator.validate) {
-            dbServices.userAccounts.update({excludeRoleId: true, params: {oldPass: oldPass, newPass: newPass}});
-            $("#old")[0].value = "";
-            $("#new")[0].value = "";
-            $("#confirm")[0].value = "";
+            dbServices.userAccounts.update({excludeRoleId: true, params: {oldPass: oldVal, newPass: newVal}});
+            oldPass.value = "";
+            newPass.value = "";
+            confirmPass.value = "";
             generalTools.disableButtons("#changePassword");
             application.navigate("view/personalSettings.html");
         }
     };
 
     changePassword.cancel = function () {
-        $("#old")[0].value = "";
-        $("#new")[0].value = "";
-        $("#confirm")[0].value = "";
+        $("#oldPass")[0].value = "";
+        $("#newPass")[0].value = "";
+        $("#confirmPass")[0].value = "";
         generalTools.disableButtons("#changePassword");
         application.navigate("view/personalSettings.html");
     };
 
     changePassword.initialize = function () {
         //setup menu
-        var menu = $("#changePassword").find(".settingsMenu");
+        var passPage = $("#changePassword");
+        var menu = passPage.find(".settingsMenu");
         kendo.bind(menu);
         menu.kendoSettingsMenu();
 
-        generalTools.observeInput($("#changePassword").find("input"), function () {
+        generalTools.observeInput(passPage.find("input"), function () {
             generalTools.enableButtons("#changePassword");
         });
 
         changePassword.validator = $("#changePasswordForm").kendoValidator({
             rules: {
-                custom: function (input) {
-                    return (input.is("[name=confirm]") && input.val() === $("#new")[0].value) || !(input.is("[name=confirm]"));
+                oldExists: function (input) {
+                    return (input.is("[name=oldPass]") && input.val() !== "") || !(input.is("[name=oldPass]"));
+                },
+                newExists: function (input) {
+                    return (input.is("[name=newPass]") && input.val() !== "") || !(input.is("[name=newPass]"));
+                },
+                confirmExists: function (input) {
+                    return (input.is("[name=confirmPass]") && input.val() !== "") || !(input.is("[name=confirmPass]"));
+                },
+                match: function (input) {
+                    return (input.is("[name=confirmPass]") && input.val() === $("#newPass")[0].value) || !(input.is("[name=confirmPass]"));
+                },
+                newLength: function (input) {
+                    return (input.is("[name=newPass]") && input[0].value.length >= 8) || !(input.is("[name=newPass]"));
+                },
+                confirmLength: function (input) {
+                    return (input.is("[name=confirmPass]") && input[0].value.length >= 8) || !(input.is("[name=confirmPass]"));
                 }
             },
             messages: {
-                custom: "The passwords do not match."
+                oldExists: "Old Password is required.",
+                newExists: "New Password is required.",
+                confirmExists: "Confirm Password is required.",
+                match: "The passwords do not match.",
+                newLength: "Must be at least 8 characters long.",
+                confirmLength: "Must be at least 8 characters long."
             }
         }).data("kendoValidator");
     };

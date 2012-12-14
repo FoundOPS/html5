@@ -22,20 +22,23 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
                         {Name: "BK"},
                         {Name: "Subway"}
                     ], dataTextField: "Name"});
-            }
+            },
+            width: "150px"
         },
         {
             field: "Location",
             template: "<div class='Location'>#= generalTools.getLocationDisplayString(Location) #</div>",
             //disable editing by having empty custom editor
-            editor: closeCurrentCell
+            editor: closeCurrentCell,
+            width: "200px"
         },
         {
             field: "ContactInfo",
             title: "Contact Info",
             template: "<div class='ContactInfo'>#= generalTools.getContactInfoDisplayString(ContactInfo) #</div>",
             //disable editing by having empty custom editor
-            editor: closeCurrentCell
+            editor: closeCurrentCell,
+            width: "200px"
         },
         {
             field: "Repeat",
@@ -45,7 +48,8 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
             //set the status as the class name so it can be colored red if there's an error
             attributes: {
                 "class": "status#= RepeatStatus #"
-            }
+            },
+            width: "150px"
         }
     ];
 

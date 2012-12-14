@@ -148,6 +148,17 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
         form[0].action = dbServices.ROOT_API_URL + "serviceHolders/GetCsv";
         form.submit();
     };
+
+    services.showOptions = function () {
+        $("#serviceOptions").attr("style", "display:block");
+
+        $('html').on('click touchend', function (e) {
+            if (e.target.type !== "submit") {
+                $("#serviceOptions").attr("style", "display:none");
+                $('html').off('click');
+            }
+        });
+    };
     //endregion
 
     //region DataSource

@@ -77,10 +77,7 @@ table {
 @lightGrey: #F1F2F2;
 @darkGrey: #CCCCCC;
 @charcoal: #333335;
-@orange: #D9591E;
-@green: #659A41;
-@blue: #488FCD;
-@red: #991A36;
+@green: #5aad52;
 @black: #000;
 
 @navBorderColor: @lightCharcoal;
@@ -179,15 +176,6 @@ input:focus {
     }
 
     .navColor;
-    background: url("../img/navBg.png") 0 0 repeat-x;
-    /*background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0, @charcoal), color-stop(1, rgb(85, 85, 86)));*/
-    /*filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#555556', endColorstr='#222224'); /* IE6-9
-    background-image: linear-gradient(bottom, rgb(34,34,36) 31%, rgb(85,85,86) 100%);
-    background-image: -o-linear-gradient(bottom, rgb(34,34,36) 31%, rgb(85,85,86) 100%);
-    background-image: -moz-linear-gradient(bottom, rgb(34,34,36) 31%, rgb(85,85,86) 100%);
-    background-image: -webkit-linear-gradient(bottom, rgb(34,34,36) 31%, rgb(85,85,86) 100%);
-    background-image: -ms-linear-gradient(bottom, rgb(34,34,36) 31%, rgb(85,85,86) 100%);
-    background-image: -webkit-gradient(linear,left bottom,left top,color-stop(0.31, rgb(34,34,36)),color-stop(1, rgb(85,85,86)));*/
 }
 #navContainer {
     height: 100%;
@@ -212,6 +200,7 @@ zoom: 1;*/
     &:focus {
         outline: white solid thin;
     }
+
     box-shadow: inset 0 0 5px #777779;
     .roundedIcon;
     background: white;
@@ -311,8 +300,6 @@ zoom: 1;*/
 /*TODO: Give box shadows vendor prefixes.*/
     box-shadow: -1px 4px 6px #888;
     color: @lightGrey;
-
-    background: url("../img/sideBarBg.png") repeat;
 }
 
 #sideBarWrapper .jspDrag {
@@ -347,7 +334,6 @@ zoom: 1;*/
     line-height: 1;
 
     .navColor;
-    background: url("../img/sideBarBg.png") repeat;
 }
 
 .sideBarElement {
@@ -511,16 +497,7 @@ zoom: 1;*/
 .createColors('darkGrey')
 
 ;
-.createColors('red')
-
-;
-.createColors('orange')
-
-;
 .createColors('green')
-
-;
-.createColors('blue')
 
 ;
 .createColors('lightCharcoal')

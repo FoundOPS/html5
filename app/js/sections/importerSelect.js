@@ -1,6 +1,6 @@
 'use strict';
 
-define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools/generalTools"], function ($, importerUpload, dbServices, _, generalTools) {
+define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools/generalTools", "widgets/toggleSwitch"], function ($, importerUpload, dbServices, _, generalTools) {
         var importerSelect = {},
         //a jquery selector for this page
             page,
@@ -446,28 +446,6 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
 
         //endregion
 
-        /**
-         * Setup the Headers / Row 1 toggle switch
-         */
-        var setupToggleSwitch = function () {
-            //setup toggle switch states
-            var on = page.find(".switch .on");
-            on.on("click", function () {
-                off.removeClass("active");
-                on.addClass("active");
-                //page.find(".toggle").animate({left: "37px"}, 250, "easeInOutQuad");
-                page.find("#dynamicHeader span")[0].innerText = "Row 1";
-            });
-
-            var off = page.find(".switch .off");
-            off.on("click", function () {
-                on.removeClass("active");
-                off.addClass("active");
-                //page.find(".toggle").animate({left: "108px"}, 250, "easeInOutQuad");
-                page.find("#dynamicHeader span")[0].innerText = "Row 2";
-            });
-        };
-
         //resize the list based on the current window's height
         var resizeGrid = function () {
             var extraMargin = 275;
@@ -511,7 +489,19 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
 
             resizeGrid();
 
-            setupToggleSwitch();
+            //initialize the toggle switch widget
+            $("#importerSelect").find(".toggleSwitch").toggleSwitch({
+                leftText: "Headers",
+                rightText: "Row 1",
+                leftClick: function () {
+                    //change the middle header to "Row 1"
+                    $("#importerSelect").find("#dynamicHeader span")[0].innerText = "Row 1";
+                },
+                rightClick: function () {
+                    //change the middle header to "Row 2"
+                    $("#importerSelect").find("#dynamicHeader span")[0].innerText = "Row 2";
+                }
+            });
 
             //get the list of fields for the selected service (for the selectors), then set them up
             if (importerUpload.selectedService) {

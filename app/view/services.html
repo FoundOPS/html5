@@ -45,10 +45,13 @@
         <iframe id="csvFrame" style="display:none;">
         </iframe>
         <div class="addDeleteBtns">
-            <button class="k-button k-button-icontext k-grid-edit csvBtn" type="export" onclick="services.exportToCSV()"></button>
+            <button class="k-button k-button-icontext k-grid-edit csvBtn" onclick="services.showOptions()"></button>
             <button class='k-button k-button-icontext k-grid-add'></button>
             <button class='k-button k-button-icontext k-grid-delete'></button>
         </div>
+        <ul id="serviceOptions">
+            <li onclick="services.exportToCSV()">Download CSV</li>
+        </ul>
         <div id="grid"></div>
     </div>
     <div id="repeat" data-bind="service: selectedService"></div>

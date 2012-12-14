@@ -119,8 +119,10 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
                 var users = $("#users");
                 if (users.find("tr.k-state-selected")[0]) {
                     users.find(".k-grid-delete").attr("style", "display:inline-block");
+                    users.find(".k-grid-edit").attr("style", "display:inline-block");
                 } else {
                     users.find(".k-grid-delete").attr("style", "display:none");
+                    users.find(".k-grid-edit").attr("style", "display:none");
                 }
             },
             dataSource: usersDataSource,
@@ -162,6 +164,7 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
                     }
                 });
             },
+            resizable: true,
             save: function (e) {
                 //check if the Send Invite button is disabled
                 if ($(".k-window-content .k-grid-update").attr("disabled") == "disabled") {
@@ -174,24 +177,28 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
                     $(".k-window-action").attr("style", "visibility: hidden");
                 }
             },
-            scrollable: false,
+            scrollable: true,
             sortable: true,
             selectable: true,
             columns: [
                 {
                     field: "FirstName",
-                    title: "First Name"
+                    title: "First Name",
+                    width: "100px"
                 },
                 {
                     field: "LastName",
-                    title: "Last Name"
+                    title: "Last Name",
+                    width: "100px"
                 },
                 {
                     field: "EmailAddress",
-                    title: "Email"
+                    title: "Email",
+                    width: "150px"
                 },
                 {
-                    field: "Role"
+                    field: "Role",
+                    width: "100px"
                 },
                 //TODO: V2 add an employee records link
                 {
@@ -199,7 +206,8 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
                     title: "Employee Record",
                     template: "# if (EmployeeId) {#" +
                         "#= usersSettings.getEmployeeName(EmployeeId) #" +
-                        "# } #"
+                        "# } #",
+                    width: "130px"
                 }
             ]
         }).data("kendoGrid");

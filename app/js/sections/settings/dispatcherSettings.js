@@ -18,8 +18,8 @@ define(["tools/generalTools", "db/services", "db/session", "db/saveHistory", "to
     //endregion
 
     //region Setup Grid
-    //
-    // //resize the grid based on the current window's height
+
+    //resize the grid based on the current window's height
     var resizeGrid = function () {
         var extraMargin = 207;
         var windowHeight = $(window).height();
@@ -108,15 +108,14 @@ define(["tools/generalTools", "db/services", "db/session", "db/saveHistory", "to
             columns: [
                 {
                     field: "Name",
-                    title: "Name"
+                    width: "100px"
                 },
                 {
-                    width: 75,
                     field: "Color",
-                    title: "Color",
                     // The template for the color picker
                     editor: colorEditor,
-                    template: "<div class='gridColor' style='background-color: #=Color#'></div>"
+                    template: "<div class='gridColor' style='background-color: #=Color#'></div>",
+                    width: "75px"
                 },
                 {
                     field: "RemoveFromRoute",
@@ -124,18 +123,21 @@ define(["tools/generalTools", "db/services", "db/session", "db/saveHistory", "to
                     template: "<input type='checkbox' onclick='dispatcherSettings.updateCheckbox(checked)'" +
                         "# if (RemoveFromRoute) { # " +
                         "#= 'checked' # " +
-                        "# } # />"
+                        "# } # />",
+                    width: "75px"
                 },
                 {
                     field: "DefaultTypeInt",
                     title: "Attributes",
-                    template: '#= dispatcherSettings.getAttributeText(DefaultTypeInt) #'
+                    template: '#= dispatcherSettings.getAttributeText(DefaultTypeInt) #',
+                    width: "200px"
                 }
             ],
             dataSource: dataSource,
             dataBound: onDataBound,
             editable: true,
-            scrollable: false,
+            resizable: true,
+            scrollable: true,
             selectable: true,
             sortable: true,
             //called when the grid detects changes to the data()
