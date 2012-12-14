@@ -1,0 +1,387 @@
+#importerUpload, #importerSelect, #importerReview{
+    min-width: 500px;
+    background-color: @white;
+    .km-content {
+        background: @white;
+    }
+    :-moz-any(.km-scroll-container) {
+        display: block;
+    }
+    .wrapper{
+        min-width: 460px;
+        margin: 0 auto;
+    }
+    .wrap{
+        margin: 30px 20px 0 20px;
+        padding: 15px 20px;
+        background-color: @grey;
+        -webkit-box-shadow: none;
+        -moz-box-shadow: none;
+        -o-box-shadow: none;
+        box-shadow: none;
+    }
+    .border{
+        border: 1px solid #ccc;
+        padding: 10px;
+    }
+    .km-vertical-scrollbar{
+        height: 0;
+    }
+    .km-horizontal-scrollbar{
+        width: 0;
+    }
+    .k-dropdown-wrap.k-state-default, .k-dropdown-wrap.k-state-active, .k-dropdown-wrap.k-state-focused,
+    .k-dropdown-wrap.k-state-focused:hover, .k-dropdown-wrap.k-state-hover{
+        background: none;
+    }
+    .k-list-container .k-state-hover:hover{
+        background-color: #ccc;
+    }
+    .k-listview{
+        border: none;
+        margin-left: 5px;
+    }
+    .k-block, .k-widget {
+        background: none;
+    }
+    .km-scroll-wrapper{
+        overflow: visible !important;
+    }
+    .saveBtn{
+        margin-left: 5px;
+    }
+    fieldset{
+        padding: 0;
+        border: none;
+    }
+    legend{
+        margin-bottom: 5px;
+        font-size: 18px;
+    }
+    #importerUpload .k-dropdown{
+        margin-top: 5px;
+    }
+    #fileName{
+        color: green;
+    }
+    .buttonWrapper{
+        margin: 0 auto;
+        width: 170px;
+    }
+    .cancelBtn{
+        color: @red;
+    }
+}
+#importerUpload .wrapper, #importerSelect .wrapper{
+    max-width: 795px;
+}
+/* region Upload */
+#importerUpload{
+    #hints{
+        margin-bottom: 5px;
+        padding: 10px;
+        background-color: @white;
+        ul{
+            padding: 0 0 0 20px;
+            li{
+                list-style: disc;
+                a{
+                    color: @blue;
+                }
+            }
+        }
+    }
+    .wrap:last-child{
+        margin-top: 20px;
+    }
+    .main{
+        width: 205px;
+        margin: 0 auto;
+        #styledUploadBtn{
+            width: 184px;
+            padding: 3px 8px 4px;
+            background: @white;
+            font-size: 16px;
+            text-align: center;
+            cursor: pointer;
+            span{
+                margin-right: 4px;
+            }
+        }
+    }
+    label{
+        display: inline-block;
+        margin-bottom: 4px;
+    }
+    .buttonWrapper{
+        width: 80px;
+        .saveBtn{
+            margin-left:0;
+        }
+    }
+}
+/*endregion*/
+/* region Select */
+#importerSelect .k-dropdown-wrap.k-state-default, #importerSelect .k-dropdown-wrap.k-state-active, #importerSelect .k-dropdown-wrap.k-state-focused,
+#importerSelect .k-dropdown-wrap.k-state-focused:hover, #importerSelect .k-dropdown-wrap.k-state-hover{
+    margin-left: 15px;
+}
+#importerSelect{
+    min-width: 510px;
+    .wrapper{
+        min-width: 480px;
+    }
+    p{
+        padding-left: 3px;
+        margin-top: 5px;
+    }
+    #topHeader {
+        margin: 0 0 20px 0;
+        width:100%;
+        li{
+            display: inline-block;
+            width: 30%;
+            margin-top: -5px;
+            text-align: center;
+            font-size: 16px;
+        }
+        li:first-child{
+            position: relative;
+            top: 11px;
+        }
+        li:nth-child(2), li:nth-child(3){
+            span{
+                display: inline-block;
+                width: 80px;
+                padding: 4px 6px 5px 6px;
+                text-align: center;
+                color: @white;
+                background: @green;
+            }
+        }
+        li:nth-child(3){
+            width: 38%;
+        }
+    }
+    #listView{
+        margin: 0 0 15px 0;
+        overflow: auto;
+        li{
+            margin: 0 0 4px 0;
+            .header{
+                color: #777;
+                width: 33%;
+                float: left;
+                padding: 5px 0 5px 5px;
+                background: @white;
+            }
+            .value{
+                color: #777;
+                width: 33%;
+                min-height: 18px;
+                overflow: hidden;
+                padding: 5px;
+                white-space: nowrap;
+                background: white;
+            }
+            .styled-select{
+                float: right;
+                width: 34%;
+                margin: -28px 0 0 0;
+            }
+        }
+        li:last-child{
+            margin: 0;
+        }
+    }
+    .wrap li{
+        list-style: none;
+    }
+}
+/*endregion*/
+/* region Review*/
+#importerReview{
+    .wrap{
+        margin: 30px 20px 30px 20px;
+    }
+    .grid{
+        .k-grid-header{
+            table{
+                padding-right: 0;
+            }
+        }
+        .k-grid-content{
+            margin-bottom: 15px;
+        }
+        tr{
+            &:hover{
+                background-color: @white;
+            }
+        }
+        td {
+            height: 100%;
+            padding: 0 7px 0 3px;
+            border: none;
+            border-bottom: 2px solid @grey;
+            border-right: 2px solid @grey;
+            &:hover{
+                .hoverColor (#eee);
+            }
+            &.k-edit-cell{
+                padding: 0;
+            }
+        }
+        td.status3{
+            background-color: @red;
+            color: @white;
+            &:hover{
+                .hoverColor(@red);
+            }
+        }
+        .Client, .Location, .Repeat {
+            width: 100%;
+            height: 100%;
+            padding: 3px 0;
+        }
+        .popupListener{
+            min-height: 20px;
+        }
+    }
+}
+/*endregion*/
+/*region Breadcrumbs*/
+/*--------------- Simple scalable breadcrumb by Veerle Pieters --------------*/
+#importerUpload, #importerSelect,#importerReview{
+    .crumbs{
+        position: relative;
+        top: 15px;
+        height: 50px;
+        margin: 0 20px;
+        border: 2px solid @grey;
+        background: @grey;
+        li {
+            float:left;
+            height: 50px;
+            list-style-type:none;
+        }
+        li{
+            &.active{
+                background: @white;
+            }
+            span{
+                display: block;
+                width: 32px;
+                height: 32px;
+                float: left;
+                margin: 10px;
+                background-image: url("../img/combinedSprites.png");
+                background-repeat: no-repeat;
+            }
+            p{
+                margin-top: 15px;
+                font-size: 16px;
+                margin-right: 0;
+                color: @charcoal;
+            }
+        }
+        li:nth-child(1){
+            width: 31%;
+            span{
+                background-position: -1px -226px;
+            }
+        }
+        li:nth-child(2){
+            display: inline-block;
+            width: 22px;
+            background: url("../img/combinedSprites.png") no-repeat -1px -439px;
+        }
+        li:nth-child(3){
+            width: 32%;
+            span{
+                background-position: -1px -330px;
+            }
+        }
+        li:nth-child(4){
+            width: 32%;
+            span{
+                background-position: -1px -400px;
+            }
+        }
+    }
+}
+#importerSelect{
+    .crumbs{
+        li:nth-child(1){
+            width: 30%;
+            cursor: pointer;
+            p{
+                cursor: pointer;
+            }
+            span{
+                background-position: -1px -260px;
+            }
+        }
+        li:nth-child(2){
+            display: inline-block;
+            width: 22px;
+            background: url("../img/combinedSprites.png") no-repeat -10px -501px;
+        }
+        li:nth-child(3){
+            width: 30%;
+            span{
+                background-position: -1px -295px;
+            }
+        }
+        li:nth-child(4){
+            display: inline-block;
+            width: 22px;
+            background: url("../img/combinedSprites.png") no-repeat -1px -439px;
+        }
+        li:nth-child(5){
+            width: 30%;
+            span{
+                background-position: -1px -400px;
+            }
+        }
+    }
+}
+#importerReview{
+    .crumbs{
+        li:nth-child(1){
+            width: 31%;
+            cursor: pointer;
+            p{
+                cursor: pointer;
+            }
+            span{
+                background-position: -1px -260px;
+            }
+        }
+        li:nth-child(2){
+            width: 31%;
+            cursor: pointer;
+            background:none;
+            p{
+                cursor: pointer;
+            }
+            span{
+                background-position: -1px -330px;
+            }
+        }
+
+        li:nth-child(4){
+            display: inline-block;
+            float: right;
+            width: 22px;
+            background: url("../img/combinedSprites.png") no-repeat -10px -501px;
+        }
+        li:nth-child(3){
+            float: right;
+            width: 31%;
+            span{
+                background-position: -1px -365px;
+            }
+        }
+    }
+}
+/*endregion*/

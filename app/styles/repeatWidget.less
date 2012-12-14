@@ -1,0 +1,136 @@
+.repeatWidget{
+    position: relative;
+    width: 250px;
+    padding: 10px 20px;
+    font-size: 15px;
+    h3{
+        font-size: 20px;
+        margin: 0 0 10px 0;
+    }
+    label:not(.inline){
+        display: block;
+        margin-bottom: 4px;
+    }
+    label:not(.weeklyRepeatOn label){
+        line-height: 1.5em;
+    }
+    .weeklyRepeatOn{
+        display: none;
+        position: relative;
+        top:5px;
+        label{
+            float: left;
+        }
+    }
+    .monthlyRepeatOn {
+        display:none;
+        label{
+            vertical-align: middle;
+        }
+    }
+    .weekdayWrapper{
+        width: 225px;
+        margin: 4px auto 0 auto;
+    }
+    .weekdayWrapper div{
+        float: left;
+        width: 26px;
+        height: 22px;
+        padding-top: 6px;
+        vertical-align: middle;
+        text-align: center;
+        color: @black;
+        border: 1px solid #c5c5c5;
+        border-left: none;
+        .bgGradient(@white, #eeeeee);
+        &:hover{
+            cursor: pointer;
+            .bgGradient(#eeeeee, #cccccc);
+        }
+        &:active{
+            cursor: pointer;
+            .bgGradient(#aaaaaa, #888888);
+        }
+    //rounded left piece of weekday selectors
+        &.left{
+            width: 16px;
+            border-left: 1px solid #c5c5c5;
+            border-bottom-left-radius: 16px;
+            border-top-left-radius: 16px;
+        }
+    //rounded right piece of weekday selectors
+        &.right{
+            width: 16px;
+            border-right: 1px solid #c5c5c5;
+            border-bottom-right-radius: 16px;
+            border-top-right-radius: 16px;
+        }
+    //don't make the ends blue when they're selected
+        &.selected:not(.left):not(.right){
+            color: @white;
+            .bgGradient(#36C3E3, @blue);
+        }
+        &.selected:hover:not(.left):not(.right){
+            .bgGradient(#44AFE4, #0067A0);
+        }
+    }
+    .repeatLabel{
+        position: relative;
+        top: 2px;
+        left: 2px;
+    }
+    .startDate .k-datepicker, .k-dropdown, .repeatEvery .k-numerictextbox{
+        width: 100%;
+        font-size: 1em;
+    }
+    .k-dropdown{
+        height: 29px;
+        .k-input{
+            padding-top: 5px;
+        }
+    }
+    .k-picker-wrap, .k-widget, .k-input, .k-numeric-wrap, .k-state-focused:hover{
+        border: none;
+        background: none;
+    }
+    .k-widget, .k-state-focused:hover{
+        background-color: @white;
+    }
+    .k-input{
+        box-shadow: none;
+        -webkit-box-shadow: none;
+        box-shadow: none;
+        -webkit-box-shadow: none;
+        box-shadow: none;
+        -webkit-box-shadow: none;
+    }
+    .endDate{
+        label{
+            padding-left: 2px;
+            vertical-align: text-bottom;
+        }
+        .k-dropdown{
+            width: 80px;
+        }
+        .k-numerictextbox,.k-datepicker{
+            display: none !important;
+            width: 160px;
+            margin: 0px 0 3px 10px;
+        }
+        .k-numerictextbox.showInput,.k-datepicker.showInput{
+            display: inline-block !important;
+        }
+    }
+    .k-dropdown, .startDate, .repeatEvery, .weeklyRepeatOn, .monthlyRepeatOn, .select2-container{
+        margin-bottom: 10px;
+    }
+    .weeklyRepeatOn{
+        margin-bottom:15px;
+    }
+    .repeatEvery{
+        margin-bottom: 5px;
+    }
+    .k-input{
+        height: 17px;
+    }
+}

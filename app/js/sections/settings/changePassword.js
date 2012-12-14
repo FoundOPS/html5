@@ -61,18 +61,14 @@ define(["db/services", "tools/generalTools", "widgets/settingsMenu"], function (
                 },
                 newLength: function (input) {
                     return (input.is("[name=newPass]") && input[0].value.length >= 8) || !(input.is("[name=newPass]"));
-                },
-                confirmLength: function (input) {
-                    return (input.is("[name=confirmPass]") && input[0].value.length >= 8) || !(input.is("[name=confirmPass]"));
                 }
             },
             messages: {
-                oldExists: "Old Password is required.",
-                newExists: "New Password is required.",
-                confirmExists: "Confirm Password is required.",
+                oldExists: "Old password is required.",
+                newExists: "New password is required.",
+                confirmExists: "Confirm password is required.",
                 match: "The passwords do not match.",
-                newLength: "Must be at least 8 characters long.",
-                confirmLength: "Must be at least 8 characters long."
+                newLength: "Must be at least 8 characters long."
             }
         }).data("kendoValidator");
     };

@@ -1,0 +1,74 @@
+#personal, #business, #changePassword{ //display:block causes .wrap to be too wide in Firefox
+    .wrap{
+        display: block;
+        min-width: 250px;
+        max-width: 300px
+    }
+}
+
+#personal .k-dropdown {
+    width: 310px;
+    margin-left: 95px;
+    font-size: 1em;
+    .k-select {
+        margin-top: 2px;
+    }
+}
+
+#personal td, #business td, #changePassword td{
+    height: 30px;
+    text-align: right;
+    margin: 0 0 5px 0;
+}
+
+#personal input, #business input, #changePassword input{
+    width: 240px;
+    height: 26px;
+    margin-top: 2px;
+    margin-bottom: 7px;
+    padding-left: 4px;
+    border: none;
+    font-size: 1em;
+}
+
+#personal .k-image, #business .k-image {
+    background-position: -115px -91px;
+}
+
+#personal #uploadBtn, #business #uploadBtn {
+    width: 95px;
+    margin-bottom: 10px;
+}
+
+/*region Change Password*/
+#changePassword{
+    h2 a{
+        color: @blue;
+        text-decoration: none;
+        &:hover{
+            text-decoration: underline;
+        }
+    }
+    .k-edit{
+        background-position: -32px 0;
+    }
+    .save{
+        background: @white;
+        color: @green;
+    }
+    .k-delete{
+        background: url("../img/sprite.png") no-repeat;
+        background-position: -115px -135px;
+    }
+    .wrap a{
+        color: @blue;
+    }
+}
+
+#timeZoneForm .select2-container {
+    margin-left: 95px;
+}
+/*endregion*/
+#business table {
+    margin: 0 0 0 129px;
+}

@@ -1,0 +1,173 @@
+.contactInfoWidget {
+    margin: 1em;
+    color: @textColor;
+    font-size: 12px;
+    h3 {
+        margin: 0 0 5px 0;
+        font-size: 20px;
+        color: @textColor;
+    }
+    label{
+        color: @textColor;
+    }
+    .addButtonWrapper{
+        width: 82px;
+        margin: 0 auto;
+    }
+    .saveDeleteButtonWrapper{
+        width: 150px;
+        margin: 0 auto;
+    }
+    .contactList {
+        margin-bottom: 15px;
+        li {
+            height: 60px;
+            background-color: @white;
+            border-bottom:1px solid @grey;
+            .info {
+                height: 45px;
+                overflow: hidden;
+                display: block;
+                padding: 10px 5px 5px 5px;
+                cursor: pointer;
+                span{
+                    width: 35px;
+                    height: 35px;
+                    display: block;
+                    float: left;
+                    &.Email{
+                        background: url("../img/combinedSprites.png") no-repeat -37px -300px;
+                    }
+                    &.Phone{
+                        background: url("../img/combinedSprites.png") no-repeat -37px -370px;
+                    }
+                    &.Website{
+                        background: url("../img/combinedSprites.png") no-repeat -37px -335px;
+                    }
+                    &.Other{
+                        background: url("../img/combinedSprites.png") no-repeat -37px -405px;
+                    }
+                }
+                .label{
+                    font-size: 14px;
+                    color: @green;
+                    margin: 0 0 7px 0;
+                }
+                .value{
+                    font-size: 16px;
+                    margin: 0;
+                }
+                p{
+                    padding-left: 5px;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    cursor: pointer;
+                }
+            }
+            .editBtn {
+                float: right;
+                width: 50px;
+                height: 100%;
+                cursor: pointer;
+                span{
+                    width: 35px;
+                    height: 35px;
+                    display: block;
+                    margin: 13px 0 0 6px;
+                    background: url("../img/combinedSprites.png") no-repeat -37px -267px;
+                }
+            }
+            &:hover > div, &:hover > a {
+                background-color: #eee;
+            }
+            &:hover > div:hover, &:hover > a:hover {
+                background-color: #dfdfdf;
+            }
+            &:last-child {
+                margin-bottom: 10px;
+            }
+        }
+    }
+    .add {
+        width: 95px;
+        font-size: 14px;
+        color: @green;
+        span{
+            background-position: -115px -180px;
+        }
+    }
+    .editWrapper{
+        display: none;
+        width: 100%;
+        label{
+            color: @textColor;
+            font-size: 14px;
+            line-height: 22px;
+        }
+        .labelIcon{
+            width: 26px;
+            height: 26px;
+            display: block;
+            float: left;
+        }
+        .value{
+            width: 100%;
+            height: 24px;
+            margin-bottom: 5px;
+            padding-left: 5px;
+            border: none;
+            color: @textColor;
+            box-sizing: border-box;
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+        }
+        .select2-container{
+            .select2-choices{
+                height: 26px !important;
+                border: none;
+                background-image: none;
+                .select2-search-choice-close{
+                    top:2px;
+                }
+                .select2-search-choice{
+                    padding-top: 2px;
+                }
+            }
+            &:not(.iconContainer){
+                margin-bottom: 15px;
+            }
+        }
+        .labelContainer{
+            right: 0;
+        }
+    }
+    button{
+        font-size: 14px;
+    }
+    .save, .delete{
+        display: none;
+    }
+    .delete{
+        color: @red;
+        span{
+            background-position: -115px -135px;
+        }
+    }
+    .save{
+        float: left;
+        margin: 0 9px 0 0;
+        color: @green;
+        span{
+            background-position: -114px -157px;
+        }
+    }
+    .k-button{
+        border-radius: 0;
+        border: none;
+        background: @white;
+        &:hover{
+            background-color: #ddd;
+        }
+    }
+}

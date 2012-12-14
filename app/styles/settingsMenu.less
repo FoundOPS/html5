@@ -1,0 +1,56 @@
+.settingsMenu {
+    position: absolute;
+    width: 250px;
+    height: 100%;
+    margin: 0 0 10px 0;
+    padding-left: 0;
+    font-size: 18px;
+    z-index: 0;
+    text-align: center;
+    background-color: @white;
+    h2{
+        margin-top: 10px;
+        margin-bottom: 10px;
+        font-size: 1.1em;
+        color: @green;
+    }
+    #settingsList{
+        text-align: left;
+    }
+    li {
+        list-style: none;
+        padding: 5px 0 5px 15px;
+        cursor: pointer;
+        &:first-child{
+        }
+        &:hover{
+            .hoverColor(@white);
+        }
+        a {
+            color: @charcoal;
+        }
+    }
+    li.active{
+        background-color: @green;
+        &:hover{
+            .hoverColor(@green);
+        }
+        a{
+            color: @white;
+        }
+    }
+    li:nth-child(2), li:nth-child(3), li:nth-child(4), li:nth-child(5){
+        display: none;
+    }
+    div{
+        position: absolute;
+        bottom: 10px;
+        width: 100%;
+        text-align: center;
+    }
+    div a, .km-root{
+        color: @blue;
+        font-size: 12px;
+        text-decoration: underline;
+    }
+}

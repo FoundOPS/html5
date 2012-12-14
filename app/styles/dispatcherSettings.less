@@ -1,0 +1,62 @@
+#dispatcher{
+    .addDeleteBtns {
+        float: right;
+        margin: 9px 7px 0 0;
+    }
+    .colorInput {
+        visibility: hidden;
+        max-width: 30px;
+        padding: 5px;
+    }
+    .gridColor {
+        position: relative;
+        width: 26px;
+        height: 26px;
+        margin: 0 auto;
+        cursor: pointer;
+    }
+    #color {
+        width: 20px;
+        height: 20px;
+        border: 1px solid @black;
+        margin-left: 12px;
+        &:hover {
+            cursor: pointer;
+        }
+    }
+    input[type="checkbox"]:hover {
+        cursor: pointer;
+    }
+    .customWidget {
+        position: absolute;
+        height: 36px;
+        margin-top: -33px;
+        z-index: 100;
+        padding: 6px;
+    }
+    #dispatcherGrid {
+        font-size: 1.1em;
+        min-width: 200px;
+        .k-grid-header{
+            padding-right: 0 !important;
+            table{
+                padding-right: 0;
+            }
+            .k-header {
+                white-space: normal;
+                .k-link {
+                    height: auto;
+                }
+            }
+        }
+        tbody{
+            font-size: .9em;
+            tr {
+                min-height: 30px;
+            }
+        }
+        th {
+            text-overflow: ellipsis;
+        }
+    }
+}

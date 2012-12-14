@@ -1,0 +1,129 @@
+#users{
+    .addDeleteBtns {
+        position: absolute;
+        right: 45px;
+        top: 135px;
+    }
+    tbody{
+        font-size: .9em;
+        a {
+            margin: 1px 0 -2px 0;
+            color: #0055cc;
+            text-decoration: underline;
+        }
+    }
+    #addNew {
+        background: url('../img/addUser.png') no-repeat;
+        height: 45px;
+        margin: 0 0 -32px 10px;
+    }
+    #addUser {
+        width: 120px;
+        margin: 0 0 10px 70px;
+        cursor: pointer;
+        color: @blue;
+        display: block;
+        font-size: 1.1em;
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+    #usersGrid{
+        min-width: 200px;
+        .k-grid-header{
+            padding-right: 0 !important;
+            table{
+                padding-right: 0;
+            }
+        }
+    }
+}
+
+#Role, #RoleEdit {
+    width: 155px;
+    height: 22px;
+    margin-left: 2px;
+}
+
+.k-edit-form-container{
+    #btnAdd {
+        margin-left: 87px;
+        margin-right: 0;
+        background: @white;
+        color: @green;
+    }
+    .k-grid-update {
+        margin-left: 116px;
+        background: @white;
+        color: @green;
+        &:hover {
+            .hoverColor(@white, 15%);
+        }
+    }
+    .k-grid-cancel{
+        color: @red;
+        span{
+            background-position: -115px -135px;
+        }
+    }
+    .k-grid-update[disabled], .k-grid-cancel[disabled]{
+        .hoverColor();
+    }
+    .k-edit-label {
+        margin-left: 25px;
+    }
+    input{
+        height: 26px;
+        width: 200px;
+        padding-left: 4px;
+        border: none;
+        font-size: 1em;
+    }
+    .k-edit-label.title {
+        width: 95%;
+        font-size: 1.2em;
+        text-align: left;
+        padding-bottom: 0;
+        margin-bottom: 10px;
+        border-bottom: 1px solid @charcoal;
+    }
+    p {
+        font-size: 1.2em;
+        margin: -5px 0 10px 200px;
+    }
+    .k-dropdown {
+        width: 157px;
+    }
+    .k-dropdown-wrap{
+        background: @white;
+        border: none;
+        border-radius: 0;
+    }
+    .k-edit-field {
+        width: 200px;
+    }
+    .k-update{
+        background-position: -114px -157px;
+    }
+}
+
+.k-popup .k-list .k-state-focused, .k-popup .k-list .k-state-selected{
+    .hoverColor(@grey);
+    border: none;
+    border-radius: 0;
+}
+
+div.k-window-content {
+    padding-top: 25px;
+    padding-bottom: 25px;
+    background: @grey;
+}
+
+.k-window{
+    border-radius: 0;
+    .k-header{
+        color: @white;
+        background: @green;
+        border-radius: 0;
+    }
+}

@@ -1,0 +1,90 @@
+.locationWidget{
+    position: relative;
+    width: 250px;
+    height: 285px;
+    overflow: hidden;
+    padding: 15px 20px;
+    font-size: 15px;
+    h3{
+        font-size: 20px;
+        margin: 0 0 5px 0;
+    }
+    label{
+        line-height: 1.5em;
+    }
+    #locationWidgetMap{
+        width: 250px;
+        height: 250px;
+        .leaflet-popup-content {
+            margin: 10px;
+        }
+    }
+    #locationWidgetMap.shown {
+        opacity: 1;
+    }
+    #locationWidgetMap.hidden {
+        opacity: .3;
+    }
+    .buttonPane{
+        position: relative;
+        top: -250px;
+        left: 0;
+        width: 250px;
+        height: 2px;
+        background:none;
+        border: 1px solid transparent;
+        .navigateBtn{
+            display: none;
+            position: absolute;
+            top:5px;
+            right: 5px;
+            width: 22px;
+            height: 22px;
+            background: url("../img/navigateBtn.png") no-repeat;
+        }
+        .k-grid-edit{
+            position: absolute;
+            top:5px;
+            left: 5px;
+            width: 22px;
+            height: 22px;
+            background-position: 0 -66px;
+            &:hover{
+                background-position: 0 -44px;
+            }
+        }
+    }
+    .buttonPane.shown{
+        left: 0;
+    }
+    .buttonPane.hidden{
+        left: 300px;
+    }
+    .editPane{
+        position: relative;
+        top: -250px;
+        left: -300px;
+        ul{
+            li{
+                #previousLocation {
+                    height: 18px;
+                    width: 22px;
+                    float: left;
+                    background: url("../img/previousLocation.png") no-repeat left center;
+                }
+                #manuallyDropPin {
+                    height: 18px;
+                    width: 22px;
+                    float: left;
+                    background: url("../img/markerIcon.png") no-repeat left center;
+                }
+            }
+        }
+    }
+    .editPane.shown{
+        left: 0px;
+    }
+    .editPane.hidden{
+        left: -300px;
+    }
+}

@@ -1,0 +1,338 @@
+.k-header:not(.k-menu, .k-dropdown), .k-grid-header, .k-toolbar, .k-dropdown-wrap, .k-picker-wrap, .k-grouping-header, .k-tooltip, .k-draghandle, .k-tile,
+.k-textbox, .k-autocomplete, .k-state-hover, .k-state-selected, .k-state-focused, .k-tabstrip-items .k-item, .cancelBtn {
+    background:none;
+    background-color: @green;
+}
+.k-icon, .k-tool-icon, .k-grouping-dropclue, .k-drop-hint, .k-callout, .k-progress, .k-progress-status, .k-column-menu .k-sprite {
+    background-image: url('../img/sprite.png');
+}
+.km-root select:not([multiple]){
+    font-size: 1em;
+}
+/*region grid filters*/
+.k-group.k-popup{
+    box-shadow: none;
+    -webkit-box-shadow: none;
+}
+.k-menu{
+    background:@white;
+    border-color: #ccc;
+    border-width: 0;
+    li:hover{
+        background: none;
+        .hoverColor;
+    }
+    .k-state-selected{
+        background:none;
+        background-color: @green;
+    }
+    .k-columns-item .k-state-active, .k-filter-item .k-state-active{
+        .hoverColor;
+    }
+    .k-filter-menu .k-filter-and{
+        margin-top: 6px;
+    }
+    .k-filter-item{
+        .k-datepicker, .k-dropdown{
+            width: 100%;
+            font-size: 1em;
+        }
+        .k-dropdown{
+            height: 25px;
+        }
+        .k-picker-wrap, .k-widget, .k-input, .k-state-focused:hover{
+            border: none;
+            background: none;
+        }
+        .k-widget, .k-state-focused:hover{
+            background-color: @white;
+        }
+        .k-dropdown{
+            margin-bottom: 7px;
+            padding-top: 0;
+        }
+        .k-dropdown-wrap{
+            border: none;
+            border-radius: 0;
+            background-color: @white;
+        }
+        .k-input{
+            font-size: 15px;
+            height: 17px;
+            box-shadow: none;
+            -webkit-box-shadow: none;
+            box-shadow: none;
+            -webkit-box-shadow: none;
+            box-shadow: none;
+            -webkit-box-shadow: none;
+        }
+        .k-numeric-wrap, input[type="text"]{
+            border: none;
+            border-radius: 0;
+            background-color: @white;
+        }
+        input[type="number"], input[type="text"] {
+            height: 25px;
+            padding-left: 2px;
+            font-family: "PTSans";
+        }
+        .k-datepicker input[type="text"]{
+            height: 17px;
+        }
+    }
+    .k-group{
+        background-color: @grey;
+        .k-item{
+            border: none;
+            border-radius: 0;
+            padding: 0 4px;
+            &:hover{
+                background-color: @grey;
+            }
+            .k-list-container{
+                background-color: @white;
+            }
+        }
+    }
+    .k-list .k-item:hover{
+        .hoverColor;
+    }
+    .k-list .k-state-selected:hover{
+        .hoverColor(@green);
+        color: @white;
+    }
+    .k-i-sort-asc, .k-i-sort-desc{
+        background: url('../img/sprite.png') left center;
+        width: 11px;
+        height: 8px;
+        background-position: -118px -248px;
+        opacity: 1;
+    }
+    .k-i-sort-desc{
+        background-position: -118px -262px;
+    }
+    .k-state-selected:not(.k-state-hover) .k-i-sort-asc{
+        background-position: -118px -200px;
+    }
+    .k-state-selected:not(.k-state-hover) .k-i-sort-desc{
+        background-position: -118px -214px;
+    }
+    button{
+        width: 80px;
+        height: 27px;
+        padding: 0 8px 3px;
+        border-radius: 0;
+        border: none;
+        background: @white;
+        color: @green;
+        &:hover{
+            border: none;
+            background: @white;
+        }
+    }
+    button[type="reset"]{
+        color: @red;
+    }
+}
+/*endregion*/
+
+.k-loading {
+    background-image: url('../img/loading.gif');
+}
+
+.k-loading-image {
+    background-image: url('../img/loading-image.gif');
+}
+
+.k-slider-horizontal .k-tick {
+    background-image: url('../img/slider-h.gif');
+}
+
+.k-slider-vertical .k-tick {
+    background-image: url('../img/slider-v.gif');
+}
+
+.k-tile .k-folder {
+    background-image: url('../img/imagebrowser.png');
+}
+
+@font-face {
+    font-family: PTSans;
+    src: url(PTS55F.ttf);  /* TTF file for CSS3 browsers */
+}
+.km-view {
+    z-index: 1;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -ms-box-sizing: border-box;
+    box-sizing: border-box;
+    display: block;
+}
+//firefox workaround(otherwise settings pages don't show up)
+@-moz-document
+url-prefix
+(
+)
+{
+.km-view {
+    display: -moz-box;
+}
+}
+.km-content, .km-scroll-container, .km-scrollview {
+    width: inherit;
+}
+input[type="button"], button {
+    color: #111;
+}
+
+.k-grid tbody .k-button {
+    min-width: 0
+}
+
+.k-grid tbody button.k-button, #ie8#skips {
+    min-width: 0
+}
+
+*+html .k-grid tbody a.k-button {
+    min-width: 0
+}
+
+#users .k-edit, #users .k-delete, #dispatcher .k-edit, #dispatcher .k-delete, #dispatcher .k-add {
+    background-image: none;
+}
+
+.k-grid-edit, .k-grid-delete, .k-grid-edit:hover, .k-grid-delete:hover, .k-grid-add, .k-grid-add:hover {
+    background: none;
+    border: none;
+}
+
+//keep add/delete buttons on the right side of grid
+.k-grid-toolbar {
+    text-align: right;
+}
+
+.k-grid .k-button {
+    margin: 3px 0 0 0;
+}
+
+//reduce the height of grid rows
+.k-grid td {
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
+
+.k-grid tbody td > .k-grid-delete {
+    margin-top: 0;
+}
+
+//center button icons
+.k-button-icontext .k-icon {
+    margin: -2px 3px 0 -3px;
+    vertical-align: middle;
+}
+
+span.k-tooltip {
+    position: relative;
+    display: block;
+}
+
+//keep items in grid from shifting during edit mode
+.k-grid .k-edit-cell {
+    padding-left: 8px;
+}
+
+.km-content, .km-scroll-container {
+    height: 100%;
+}
+
+.km-scroll-container {
+    -webkit-user-select: auto;
+    -moz-user-select: auto;
+}
+
+//BUG FIX: This fixes Kendo scrollbar bug!
+.km-horizontal-scrollbar {
+    width: auto;
+}
+
+//BUG FIX: Fix for kinetic scrollbars on mobile only.
+@media only screen and (max-width:800px) {
+    .km-view {
+        height: 100%;
+    }
+
+    .km-content { //BUG FIX: Required to fix content size in firefox.
+        overflow: visible !important; //padding-bottom: 18px;  //BUG FIX: This fixes Kendo scrollbar bug! (disabled for second bugfix)
+    }
+}
+
+.k-grid .k-edit-cell input {
+    margin-left: 4px;
+}
+
+//override the orange selected row highlight with blue
+.k-grid .k-state-selected, .k-list > .k-grid .k-state-selected, .k-list > .k-state-focused,
+.k-panelbar > .k-grid .k-state-selected, .k-panel > .k-grid .k-state-selected,
+.k-button:active, .k-ghost-splitbar-vertical, .k-ghost-splitbar-horizontal,
+.k-draghandle.k-state-selected:hover {
+    background: none;
+    background-color: @grey;
+    border-color: @grey;
+    color: @black;
+}
+
+//make alternate grid rows background color white instead of transparent
+.k-grid tbody tr:not(.k-state-selected) {
+    background-color: @white;
+    &:hover{
+        background-color: #ddd;
+    }
+}
+.k-grid tbody tr.k-state-selected:hover{
+    .hoverColor(@grey, 15%);
+}
+
+/*region Overrides for kendo mobile*/
+
+.km-ios {
+    font-weight: normal;
+    font-family: PTSans;
+}
+
+//adds space after the last item in serviceDetails
+.km-ios .km-listinset > li:last-child .k-widget, .km-ios .km-listgroupinset .km-list > li:last-child .k-widget {
+    margin-bottom: 4px;
+}
+
+.km-ios .km-list input:not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="image"]):not([type="checkbox"]):not([type="radio"]):not(.k-input):not(.k-button),
+.km-ios .km-list select:not([multiple]) {
+    position: static;
+    font-family: PTSans;
+}
+
+.k-button{
+    background: @white;
+    border: none;
+    border-radius: 0;
+    padding-top: 3px;
+    &:hover{
+        background: none;
+        .hoverColor(@white, 15%);
+    }
+}
+
+.km-stretched-view, .km-root .k-dropdown select, .km-root .k-dropdown .k-select, .km-root .k-dropdown-wrap {
+    display: block;
+}
+
+//this keeps the grey background
+.km-ios, .km-ios .km-content {
+    background: @grey;
+}
+
+.km-ios, .km-ios .km-list > li {
+    font-weight: normal;
+    font-family: PTSans;
+}
+
+/*endregion*/
