@@ -107,8 +107,7 @@ define(["tools/generalTools", "db/services", "db/session", "db/saveHistory", "to
             autoBind: false,
             columns: [
                 {
-                    field: "Name",
-                    width: "100px"
+                    field: "Name"
                 },
                 {
                     field: "Color",
@@ -123,14 +122,12 @@ define(["tools/generalTools", "db/services", "db/session", "db/saveHistory", "to
                     template: "<input type='checkbox' onclick='dispatcherSettings.updateCheckbox(checked)'" +
                         "# if (RemoveFromRoute) { # " +
                         "#= 'checked' # " +
-                        "# } # />",
-                    width: "75px"
+                        "# } # />"
                 },
                 {
                     field: "DefaultTypeInt",
                     title: "Attributes",
-                    template: '#= dispatcherSettings.getAttributeText(DefaultTypeInt) #',
-                    width: "200px"
+                    template: '#= dispatcherSettings.getAttributeText(DefaultTypeInt) #'
                 }
             ],
             dataSource: dataSource,

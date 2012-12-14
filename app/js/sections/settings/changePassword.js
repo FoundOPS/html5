@@ -42,7 +42,15 @@ define(["db/services", "tools/generalTools", "widgets/settingsMenu"], function (
         menu.kendoSettingsMenu();
 
         generalTools.observeInput(passPage.find("input"), function () {
-            generalTools.enableButtons("#changePassword");
+            var newPass = $("#newPass")[0].value;
+            var confirmPass = $("#confirmPass")[0].value;
+
+            //if valid
+            if (changePassword.validator.validate && $("#oldPass")[0].value !== "" && newPass !== "" && confirmPass !== ""
+                 && newPass.length > 7 && confirmPass.length > 7 && newPass === confirmPass) {
+                //enable the save button
+                generalTools.enableButtons("#changePassword");
+            }
         });
 
         changePassword.validator = $("#changePasswordForm").kendoValidator({
@@ -56,9 +64,11 @@ define(["db/services", "tools/generalTools", "widgets/settingsMenu"], function (
                 confirmExists: function (input) {
                     return (input.is("[name=confirmPass]") && input.val() !== "") || !(input.is("[name=confirmPass]"));
                 },
+                //check if new and confirm are the same
                 match: function (input) {
                     return (input.is("[name=confirmPass]") && input.val() === $("#newPass")[0].value) || !(input.is("[name=confirmPass]"));
                 },
+                //check if new password is at least 8 characters
                 newLength: function (input) {
                     return (input.is("[name=newPass]") && input[0].value.length >= 8) || !(input.is("[name=newPass]"));
                 }
@@ -71,6 +81,11 @@ define(["db/services", "tools/generalTools", "widgets/settingsMenu"], function (
                 newLength: "Must be at least 8 characters long."
             }
         }).data("kendoValidator");
+    };
+
+    changePassword.show = function () {
+        //hide all error messages
+        $("#changePassword").find(".k-invalid-msg").attr("style", "display:none");
     };
 
     window.changePassword = changePassword;
