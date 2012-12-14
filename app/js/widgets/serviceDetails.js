@@ -1,5 +1,5 @@
 'use strict';
-define(["jquery", "db/services", "db/session", "db/models", "tools/parameters", "tools/kendoTools", "tools/generalTools", "widgets/selectBox", "select2", "kendo", "jmaskmoney",
+define(["jquery", "db/services", "db/session", "db/models", "tools/parameters", "tools/kendoTools", "tools/generalTools", "widgets/selectBox", "widgets/location", "select2", "kendo", "jmaskmoney",
     "jautosize", "jtooltip", "jsignature", "jsigbase30", "jsigSVG"],
     function ($, dbServices, session, models, parameters, kendoTools, generalTools) {
 
@@ -109,11 +109,11 @@ define(["jquery", "db/services", "db/session", "db/models", "tools/parameters", 
                     formatResult: formatClientName,
                     dropdownCssClass: "bigdrop"
                 }).on("change", function () {
-                        var client = clientSelector.select2("data");
-                        service.set("Client", client);
-                        service.set("ClientId", client.Id);
-                        updateLocations(client);
-                    });
+                    var client = clientSelector.select2("data");
+                    service.set("Client", client);
+                    service.set("ClientId", client.Id);
+                    updateLocations(client);
+                });
 
                 if (service.Client) {
                     //set the initial selection
@@ -127,7 +127,7 @@ define(["jquery", "db/services", "db/session", "db/models", "tools/parameters", 
                 };
 
                 locationSelected = function () {
-                    var location = locationSelector.select2("data");
+//                    var location = locationSelector.select2("data");
                     var destinationField = models.getDestinationField(service);
                     //Used for updating the grid
                     destinationField.Value = location;
@@ -137,23 +137,57 @@ define(["jquery", "db/services", "db/session", "db/models", "tools/parameters", 
                 locationSelector = $(inputTemplate).attr("type", "hidden")
                     //For validation message
                     .attr("name", "Location").attr("required", "required")
-                .appendTo(that.element).wrap("<h1>Location</h1>");
-                locationSelector.select2({
-                    placeholder: "Choose a location",
-                    id: function (location) {
-                        return location.Id;
-                    },
-                    query: function (query) {
-                        if (!that._locations) {
-                            that._locations = [];
+                    .appendTo(that.element).wrap("<h1>Location</h1>");
+
+
+                var client = clientSelector.select2("data");
+                service.set("Client", client);
+                service.set("ClientId", client.Id);
+                dbServices.locations.read({params: {clientId: client.Id}}).done(function (locations) {
+                    that._locations = locations;
+
+                    // select the selected destination
+                    var destinationField = models.getDestinationField(service);
+                    if (locations.length > 0) {
+                        var destination = models.firstFromId(locations, destinationField.LocationId);
+                        if (destination) {
+//                            locationSelector.select2("data", destination);
+
+                            //trigger location selected because it does not happen by default
+                            locationSelected();
+                        } else {
+                            //set the destination to the first location
+                            //in serviceDetails
+//                            locationSelector.select2("data", locations[0]);
+
+                            //trigger location selected because it does not happen by default
+                            locationSelected();
                         }
-                        var data = {results: that._locations};
-                        query.callback(data);
-                    },
-                    formatSelection: formatLocationName,
-                    formatResult: formatLocationName,
-                    dropdownCssClass: "bigdrop"
-                }).on("change", locationSelected);
+
+                        locationSelector.select2("enable");
+                    }
+                });
+                locationSelector.location({initialLocation: models.firstFromId(that._locations, models.getDestinationField(service).LocationId), change: function (location) {
+                    console.log(location);
+                }});
+
+
+//                locationSelector.select2({
+//                    placeholder: "Choose a location",
+//                    id: function (location) {
+//                        return location.Id;
+//                    },
+//                    query: function (query) {
+//                        if (!that._locations) {
+//                            that._locations = [];
+//                        }
+//                        var data = {results: that._locations};
+//                        query.callback(data);
+//                    },
+//                    formatSelection: formatLocationName,
+//                    formatResult: formatLocationName,
+//                    dropdownCssClass: "bigdrop"
+//                }).on("change", locationSelected);
             },
 
             //region Field Factories

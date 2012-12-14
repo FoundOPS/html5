@@ -10,17 +10,9 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
         },
 
         _create: function () {
-            var that = this, shouldAddMarker = true;
-            //check for a location
-            if (!that.options.initialLocation) {
-                shouldAddMarker = false;
-                that._showEditScreen();
-                return;
-            }
+            var locationWidget = this;
 
-            var location = that.options.initialLocation;
-
-            that._location = $('<h3>Location</h3>' +
+            locationWidget._location = $('<h3>Location</h3>' +
                 '<div id="locationWidgetMap">' +
                 '</div>' +
                 '<div class="buttonPane shown">' +
@@ -33,45 +25,13 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
                 '</div>'
             );
 
-            that.element.append(that._location);
+            locationWidget.element.append(locationWidget._location);
 
-            var widgetElement = $(that.element);
-
-            var center, zoom;
-
-            //center the map at the location
-            if (location && location.Latitude && location.Longitude) {
-                center = [location.Latitude, location.Longitude];
-                zoom = 15;
-            //if no location exists, center on 'merica!
-            } else {
-                center = [40, -89];
-                zoom = 4;
-            }
-
-            //initialize the map on the "locationWidgetMap" div with a given center and zoom
-            that._map = L.map('locationWidgetMap', {
-                center: center,
-                zoom: zoom,
-                attributionControl: false,
-                zoomControl: false
-            });
-            //create a CloudMade tile layer and add it to the map
-            that._cloudmade = L.tileLayer('http://{s}.tile.cloudmade.com/57cbb6ca8cac418dbb1a402586df4528/997/256/{z}/{x}/{y}.png', {
-                maxZoom: 18
-            });
-            that._map.addLayer(that._cloudmade);
-
-            if (shouldAddMarker) {
-                //move the marker to the new location
-                that._changeMarkerLocation(location, false);
-                //set the current selected location
-                that._updateCurrentLocation(location, false);
-            }
+            var widgetElement = $(locationWidget.element);
 
             //animate to edit screen on edit button click
             widgetElement.find(".buttonPane .k-grid-edit").on("click", function () {
-                that._showEditScreen();
+                locationWidget._showEditScreen();
             });
 
             //when an option is selected from the list
@@ -80,16 +40,16 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
                 var id = e.currentTarget.id;
                 //if the previous location was selected
                 if (id == "previous") {
-                    that._changeMarkerLocation(that.currentLocation, false);
+                    locationWidget._changeMarkerLocation(locationWidget.currentLocation, false);
                     //if "Manually Drop Pin" was selected
                 } else if (id == "manual") {
-                    that._changeMarkerLocation(null, false);
+                    locationWidget._changeMarkerLocation(null, false);
                     //allow the marker to move on map click
-                    that._allowMapClick = true;
+                    locationWidget._allowMapClick = true;
                     //if a new location was selected
                 } else {
-                    that._changeMarkerLocation(that._locationList[id], false);
-                    that._updateCurrentLocation(that._locationList[id], true);
+                    locationWidget._changeMarkerLocation(locationWidget._locationList[id], false);
+                    locationWidget._updateCurrentLocation(locationWidget._locationList[id], true);
                 }
 
                 //animate back to map from edit screen
@@ -99,27 +59,27 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
             });
 
             //(in "Manually Drop Pin" mode) move the marker on map click
-            that._map.on('click', function (e) {
+            locationWidget._map.on('click', function (e) {
                 //check if in "Manually Drop Pin" mode
-                if (that._allowMapClick) {
-                    that._changeMarkerLocation({Latitude: e.latlng.lat, Longitude: e.latlng.lng}, true);
-                    that._marker.openPopup();
+                if (locationWidget._allowMapClick) {
+                    locationWidget._changeMarkerLocation({Latitude: e.latlng.lat, Longitude: e.latlng.lng}, true);
+                    locationWidget._marker.openPopup();
 
                     //click event of save button in marker popup
-                    $(that.element).find(".saveLocation").on("click", function (e) {
+                    $(locationWidget.element).find(".saveLocation").on("click", function (e) {
                         //set/save the current marker location
-                        var markerPosition = that._marker.getLatLng();
-                        that._updateCurrentLocation({Latitude: markerPosition.lat, Longitude: markerPosition.lng}, true);
+                        var markerPosition = locationWidget._marker.getLatLng();
+                        locationWidget._updateCurrentLocation({Latitude: markerPosition.lat, Longitude: markerPosition.lng}, true);
                         //don't allow map click after save button is clicked TODO:make sure this is what we want to happen
-                        that._allowMapClick = false;
+                        locationWidget._allowMapClick = false;
                         //remove the popup from the marker
-                        that._marker.unbindPopup();
+                        locationWidget._marker.unbindPopup();
                     });
                 }
             });
 
             widgetElement.find(".navigateBtn").on("click", function () {
-                that._navigateToLink();
+                locationWidget._navigateToLink();
             });
 
             //update search after 1 second of input edit
@@ -127,19 +87,62 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
                 //get the list of location matches
                 if (searchText) {
                     dbServices.locations.read({params: {search: searchText}}).done(function (locations) {
-                        that._updateLocationList(locations);
+                        locationWidget._updateLocationList(locations);
                     });
                 }
             }, 750);
+        },
+        _init: function () {
+            var locationWidget = this, shouldAddMarker = true;
+            //check for a location
+            if (!locationWidget.options.initialLocation) {
+                shouldAddMarker = false;
+                locationWidget._showEditScreen();
+                return;
+            }
+
+            var location = locationWidget.options.initialLocation;
+
+            var center, zoom;
+
+            //center the map at the location
+            if (location && location.Latitude && location.Longitude) {
+                center = [location.Latitude, location.Longitude];
+                zoom = 15;
+                //if no location exists, center on 'merica!
+            } else {
+                center = [40, -89];
+                zoom = 4;
+            }
+
+            //initialize the map on the "locationWidgetMap" div with a given center and zoom
+            locationWidget._map = L.map('locationWidgetMap', {
+                center: center,
+                zoom: zoom,
+                attributionControl: false,
+                zoomControl: false
+            });
+            //create a CloudMade tile layer and add it to the map
+            locationWidget._cloudmade = L.tileLayer('http://{s}.tile.cloudmade.com/57cbb6ca8cac418dbb1a402586df4528/997/256/{z}/{x}/{y}.png', {
+                maxZoom: 18
+            });
+            locationWidget._map.addLayer(locationWidget._cloudmade);
+
+            if (shouldAddMarker) {
+                //move the marker to the new location
+                locationWidget._changeMarkerLocation(location, false);
+                //set the current selected location
+                locationWidget._updateCurrentLocation(location, false);
+            }
 
             //if there is no location on initialization, go directly to the edit pane
             if (!shouldAddMarker) {
-                that._showEditScreen();
+                locationWidget._showEditScreen();
             } else {
                 //if there is a location, show the navigate(with google maps) button
-                widgetElement.find(".navigateBtn").css("display", "block");
+                locationWidget.element.find(".navigateBtn").css("display", "block");
 
-                that._updateNavigateLink(location, true);
+                locationWidget._updateNavigateLink(location, true);
             }
         },
 
