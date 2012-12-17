@@ -152,9 +152,6 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
             edit: function () {
                 var win = $('.k-window');
                 //hide the buttons any time the edit or add windiw closes
-//                win.live("pagehide", function() {
-//                    hideButtons();
-//                });
                 if (usersSettings.editorType === 'add') {
                     win.find('.k-window-title').html("Add New User");
                     //change update to Send Invite Email
@@ -171,6 +168,12 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
                         //prevent cancel
                         return false;
                     }
+                    hideButtons();
+                });
+
+                //hide the buttons any time the edit or add windiw closes
+                $(".k-grid-update, .k-window-action").on("click", function () {
+                    hideButtons();
                 });
             },
             resizable: true,
@@ -224,10 +227,10 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
 
     //resize the grid based on the current window's height
     var resizeGrid = function () {
-        var extraMargin = 305;
+        var extraMargin = 272;
         var windowHeight = $(window).height();
         var contentHeight = windowHeight - extraMargin;
-        $("#usersGrid").css("maxHeight", contentHeight + 'px');
+        $("#usersGrid").find(".k-grid-content").css("maxHeight", contentHeight + 'px');
     };
 
     usersSettings.initialize = function () {
@@ -257,6 +260,7 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
         });
 
         users.find(".k-grid").delegate("tbody>tr", "dblclick", function () {
+            usersSettings.editorType = 'edit';
             grid.editRow(grid.select());
         });
 

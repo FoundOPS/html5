@@ -2,8 +2,10 @@
     position: absolute;
     width: 250px;
     height: 100%;
+    min-height: 300px;
     margin: 0 0 10px 0;
     padding-left: 0;
+    overflow-y: auto;
     font-size: 18px;
     z-index: 0;
     text-align: center;
@@ -39,7 +41,8 @@
             color: @white;
         }
     }
-    li:nth-child(2), li:nth-child(3), li:nth-child(4), li:nth-child(5){
+    //todo: add li:nth-child(5) when adding import link
+    li:nth-child(2), li:nth-child(3), li:nth-child(4){
         display: none;
     }
     div{

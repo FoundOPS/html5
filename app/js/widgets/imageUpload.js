@@ -29,7 +29,9 @@ define(["tools/generalTools", "db/saveHistory", "db/services", "jquery", "kendo"
             that.newImage = false;
 
             that.cropBox.on("load", function () {
-                generalTools.resizeImage(that.cropBox, that.options.imageWidth);
+                if (Math.max(that.cropBox[0].naturalWidth, that.cropBox[0].naturalHeight) > 200) {
+                    generalTools.resizeImage(that.cropBox, that.options.imageWidth);
+                }
             });
 
             //setup the FileReader on the imageUpload button
@@ -63,7 +65,10 @@ define(["tools/generalTools", "db/saveHistory", "db/services", "jquery", "kendo"
                 that.cropBox.css("visibility", "visible").css("width", "auto").css("height", "auto");
 
                 that.newImage = true;
-                generalTools.resizeImage(that.cropBox, that.options.imageWidth);
+                if (Math.max(that.cropBox[0].width, that.cropBox[0].height) > 200) {
+                    generalTools.resizeImage(that.cropBox, that.options.imageWidth);
+                }
+
                 that.submitForm();
             };
 
@@ -84,7 +89,9 @@ define(["tools/generalTools", "db/saveHistory", "db/services", "jquery", "kendo"
 
             //set the form value
             that.imageFileNameField.val(file.name);
-            generalTools.resizeImage(that.cropBox, that.options.imageWidth);
+            if (Math.max(that.cropBox[0].width, that.cropBox[0].height) > 200) {
+                generalTools.resizeImage(that.cropBox, that.options.imageWidth);
+            }
         },
 
         events: ["uploaded"],
@@ -103,7 +110,9 @@ define(["tools/generalTools", "db/saveHistory", "db/services", "jquery", "kendo"
                 that.setImageUrl(data);
             }
 
-            generalTools.resizeImage(that.cropBox, that.options.imageWidth);
+            if (Math.max(that.cropBox[0].width, that.cropBox[0].height) > 200) {
+                generalTools.resizeImage(that.cropBox, that.options.imageWidth);
+            }
         },
 
         submitForm: function () {
