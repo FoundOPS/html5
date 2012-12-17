@@ -34,7 +34,7 @@ define(["jquery", "db/services", "db/session", "db/models", "tools/parameters", 
              * @private
              */
             _createClientLocation: function (service) {
-                var that = this, clientSelector, locationSelector, locationSelected;
+                var that = this, clientSelector, locationSelector;
 
                 var formatClientName = function (client) {
                     return client.Name;
@@ -43,10 +43,6 @@ define(["jquery", "db/services", "db/session", "db/models", "tools/parameters", 
                 //updates the location's comboBox to the current client's locations
                 var updateLocations = function (client) {
                     //clear & disable the locations combobox
-                    if (locationSelector) {
-                        locationSelector.select2("data", {AddressLineOne: "", AddressLineTwo: ""});
-                        locationSelector.select2("disable");
-                    }
 
                     if (client) {
                         //load the client's locations
@@ -58,20 +54,11 @@ define(["jquery", "db/services", "db/session", "db/models", "tools/parameters", 
                             if (locations.length > 0) {
                                 var destination = models.firstFromId(locations, destinationField.LocationId);
                                 if (destination) {
-                                    locationSelector.select2("data", destination);
-
-                                    //trigger location selected because it does not happen by default
-                                    locationSelected();
+                                    $(locationSelector).location("updateCurrentLocation", destination, true);
                                 } else {
                                     //set the destination to the first location
-                                    //in serviceDetails
-                                    locationSelector.select2("data", locations[0]);
-
-                                    //trigger location selected because it does not happen by default
-                                    locationSelected();
+                                    $(locationSelector).location("updateCurrentLocation", locations[0], true);
                                 }
-
-                                locationSelector.select2("enable");
                             }
                         });
                     }
@@ -126,34 +113,15 @@ define(["jquery", "db/services", "db/session", "db/models", "tools/parameters", 
                     return location.AddressLineOne + " " + location.AddressLineTwo;
                 };
 
-                locationSelected = function () {
-                    var location = locationSelector.select2("data");
-                    var destinationField = models.getDestinationField(service);
-                    //Used for updating the grid
-                    destinationField.Value = location;
-                    destinationField.set("LocationId", location.Id);
-                };
-
-                locationSelector = $(inputTemplate).attr("type", "hidden")
-                    //For validation message
-                    .attr("name", "Location").attr("required", "required")
-                .appendTo(that.element).wrap("<h1>Location</h1>");
-                locationSelector.select2({
-                    placeholder: "Choose a location",
-                    id: function (location) {
-                        return location.Id;
-                    },
-                    query: function (query) {
-                        if (!that._locations) {
-                            that._locations = [];
-                        }
-                        var data = {results: that._locations};
-                        query.callback(data);
-                    },
-                    formatSelection: formatLocationName,
-                    formatResult: formatLocationName,
-                    dropdownCssClass: "bigdrop"
-                }).on("change", locationSelected);
+                locationSelector = document.createElement("div");
+                $(locationSelector).addClass("locationWidget").attr("type", "hidden").attr("name", "Location").attr("required", "required").appendTo(that.element);
+                $(locationSelector).location({initialLocation: {Latitude: 0, Longitude: 0}, change: function () {
+                        console.log("Location Widget Change.")
+                    }
+                });
+                $(locationSelector).css("padding", "0");
+                $(locationSelector).find("h3").replaceWith("<h1>Location</h1>");
+                $(locationSelector).find("h1").css("margin", "-5px 0")
             },
 
             //region Field Factories
