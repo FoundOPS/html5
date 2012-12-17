@@ -18,7 +18,7 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
              *         array: data to display
              *     formatOption {function(data)}
              *         should return text or a valid HTML string to display as an option (defaults to JSON.stringify())
-             *     onSelect {function(*)}
+             *     onSelect {function(e, selectedData)}
              *         A callback function triggered when an item is selected. The parameters are the triggered jQuery event and the selected data.
              *     minimumInputLength {int}
              *         number of characters necessary search box to start a search (defaults to 1)
@@ -168,23 +168,27 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
             // Public functions
             filter: function (searchTerm) {
                 var searchSelect = this, matches = [];
-                //get the list of location matches
-                    var dataItem, i;
-                    if (searchTerm.length) {
-                        for (i = 0; i < searchSelect.options.data.length; i++) {
-                            dataItem = searchSelect.options.data[i];
-                            if (searchSelect.options.formatOption(dataItem).toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1) {
-                                matches.push(dataItem);
+                if(searchSelect.options.data) {
+                    //get the list of location matches
+                        var dataItem, i;
+                        if (searchTerm.length) {
+                            for (i = 0; i < searchSelect.options.data.length; i++) {
+                                dataItem = searchSelect.options.data[i];
+                                if (searchSelect.options.formatOption(dataItem).toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1) {
+                                    matches.push(dataItem);
+                                }
                             }
+                        } else {
+                            matches = searchSelect.options.data;
                         }
-                    } else {
-                        matches = searchSelect.options.data;
+                    return matches;
+                    if (searchSelect.isTouchDevice) {
+                        $(".km-scroll-wrapper").kendoMobileScroller("scrollTo", 0, -(searchSelect.element.height()));
+                        searchSelect.element.find(".optionList").css("-webkit-transform", "translate3d(0px, " + (searchSelect.element.height()) + "px, 0)").css("position", "relative").css("top", -searchSelect.element.height());
+                        $(".km-scroll-container").css("-webkit-transform", "translate3d(0px, -1px, 0)");
                     }
-                return matches;
-                if (searchSelect.isTouchDevice) {
-                    $(".km-scroll-wrapper").kendoMobileScroller("scrollTo", 0, -(searchSelect.element.height()));
-                    searchSelect.element.find(".optionList").css("-webkit-transform", "translate3d(0px, " + (searchSelect.element.height()) + "px, 0)").css("position", "relative").css("top", -searchSelect.element.height());
-                    $(".km-scroll-container").css("-webkit-transform", "translate3d(0px, -1px, 0)");
+                } else {
+                    console.log("The filter function only works when a predefined data object is supplied to the widget.");
                 }
             },
             clearList: function () {
@@ -195,24 +199,16 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                 }
             },
             /**
-             * Opens the list of items the user can select
-             * //TODO rename to openOptionList
+             * Opens the list of items the user can select.
              */
-            //Populates and edits the list of items that the user can select.
-            open: function (searchTerm) {
+            open: function (options) {
                 var searchSelect = this,
                     optionList = searchSelect.element.find(".optionList"),
-                    options, i;
-                if (searchSelect.options.query) {
-                    if (searchTerm.length >= searchSelect.options.minimumInputLength) {
-                        options = searchSelect.options.query(searchTerm, $.proxy(searchSelect.open, searchSelect));
-                    } else {
-                        searchSelect.clearList();
-                    }
-                } else {
-                    options = searchSelect.filter(searchTerm);
-                }
+                    i;
                 searchSelect.selectedOptionTempText = searchSelect.element.find("input").val();
+                if (searchSelect.options.data) {
+                    options = searchSelect.filter(searchSelect.selectedOptionTempText);
+                }
                 searchSelect.clearList();
                 searchSelect.element.find("#optionListScroller").width(searchSelect.element.find("input").parent().width());
                 //add each returned item to the list
@@ -250,7 +246,7 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
 
                 return searchSelect.selectedData;
             },
-            //Returns the current selected data's text
+            //Returns the current selected data's text.
             text: function () {
                 var searchSelect = this;
                 return searchSelect.selectedOptionText ? searchSelect.selectedOptionText : "";
