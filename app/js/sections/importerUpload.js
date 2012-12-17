@@ -15,7 +15,7 @@ define(["jquery", "lib/csv", "db/services", "widgets/selectBox", "jui", "jfilere
     importerUpload.initialize = function () {
         //setup the FileReader on the fileUpload button
         //this will enable the flash FileReader polyfill from https://github.com/Jahdrien/FileReader
-        var uploadButton = $("#importerUpload #styledUploadBtn");
+        var uploadButton = $("#importerUpload").find("#styledUploadBtn");
         uploadButton.fileReader({
             id: "fileReaderSWFObject",
             filereader: "lib/filereader.swf",
@@ -37,8 +37,8 @@ define(["jquery", "lib/csv", "db/services", "widgets/selectBox", "jui", "jfilere
             }
             //since the csv file has been selected, read it as text
             reader.readAsText(csvFile);
-            $('#importerUpload #fileName').text(csvFile.name);
-            $('#importerUpload #uploadBtn').removeAttr('disabled');
+            $("#importerUpload").find("#fileName").text(csvFile.name);
+            $("#importerUpload").find("#uploadBtn").removeAttr('disabled');
         });
 
         //listen to change event of the serviceType dropdown
@@ -49,7 +49,7 @@ define(["jquery", "lib/csv", "db/services", "widgets/selectBox", "jui", "jfilere
         //get the available service templates
         dbServices.serviceTemplates.read().done(function (serviceTypes) {
             //create the service types dropdown
-            $("#importerUpload #serviceType").selectBox({data: serviceTypes, dataTextField: "Name", onSelect: onSelect});
+            $("#importerUpload").find("#serviceType").selectBox({data: serviceTypes, dataTextField: "Name", onSelect: onSelect});
 
             importerUpload.selectedService = serviceTypes[0];
         });

@@ -21,10 +21,10 @@ define(["tools/generalTools", "db/services", "db/session", "db/saveHistory", "to
 
     //resize the grid based on the current window's height
     var resizeGrid = function () {
-        var extraMargin = 207;
+        var extraMargin = 194;
         var windowHeight = $(window).height();
         var contentHeight = windowHeight - extraMargin;
-        $("#dispatcherGrid").css("maxHeight", contentHeight + 'px');
+        $("#dispatcherGrid").find(".k-grid-content").css("maxHeight", contentHeight + 'px');
     };
 
     dispatcherSettings.initialize = function () {
@@ -107,7 +107,8 @@ define(["tools/generalTools", "db/services", "db/session", "db/saveHistory", "to
             autoBind: false,
             columns: [
                 {
-                    field: "Name"
+                    field: "Name",
+                    width: "150px"
                 },
                 {
                     field: "Color",
@@ -122,18 +123,20 @@ define(["tools/generalTools", "db/services", "db/session", "db/saveHistory", "to
                     template: "<input type='checkbox' onclick='dispatcherSettings.updateCheckbox(checked)'" +
                         "# if (RemoveFromRoute) { # " +
                         "#= 'checked' # " +
-                        "# } # />"
+                        "# } # />",
+                    width: "150px"
                 },
                 {
                     field: "DefaultTypeInt",
                     title: "Attributes",
-                    template: '#= dispatcherSettings.getAttributeText(DefaultTypeInt) #'
+                    template: '#= dispatcherSettings.getAttributeText(DefaultTypeInt) #',
+                    width: "150px"
                 }
             ],
             dataSource: dataSource,
             dataBound: onDataBound,
             editable: true,
-            resizable: true,
+            resizable: false,
             scrollable: true,
             selectable: true,
             sortable: true,

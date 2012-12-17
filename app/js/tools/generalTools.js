@@ -264,8 +264,8 @@ define(['jquery', "developer", 'lib/platform', 'tools/dateTools', 'moment'], fun
      */
     generalTools.resizeImage = function (element, maxSize) {
         //get the original dimensions of the image
-        var width = element[0].width;
-        var height = element[0].height;
+        var width = element[0].naturalWidth;
+        var height = element[0].naturalHeight;
         //get the ratio for each dimension
         var w = maxSize / width;
         var h = maxSize / height;
