@@ -9,6 +9,7 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
             change: function (location) {}
         },
 
+//region - General Widget Methods
         _create: function () {
             var that = this, shouldAddMarker = true;
             //check for a location
@@ -66,7 +67,7 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
                 //move the marker to the new location
                 that._changeMarkerLocation(location, false);
                 //set the current selected location
-                that._updateCurrentLocation(location, false);
+                that.updateCurrentLocation(location, false);
             }
 
             //animate to edit screen on edit button click
@@ -89,7 +90,7 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
                     //if a new location was selected
                 } else {
                     that._changeMarkerLocation(that._locationList[id], false);
-                    that._updateCurrentLocation(that._locationList[id], true);
+                    that.updateCurrentLocation(that._locationList[id], true);
                 }
 
                 //animate back to map from edit screen
@@ -109,7 +110,7 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
                     $(that.element).find(".saveLocation").on("click", function (e) {
                         //set/save the current marker location
                         var markerPosition = that._marker.getLatLng();
-                        that._updateCurrentLocation({Latitude: markerPosition.lat, Longitude: markerPosition.lng}, true);
+                        that.updateCurrentLocation({Latitude: markerPosition.lat, Longitude: markerPosition.lng}, true);
                         //don't allow map click after save button is clicked TODO:make sure this is what we want to happen
                         that._allowMapClick = false;
                         //remove the popup from the marker
@@ -142,7 +143,36 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
                 that._updateNavigateLink(location, true);
             }
         },
+        /**
+         * Update and (conditionally) save the currently selected location
+         * @param location
+         * @param shouldSave If the current location needs to be saved
+         * @private
+         */
+        updateCurrentLocation: function (location, shouldSave) {
+            var that = this;
 
+            that.currentLocation = location;
+            that.options.change(location);
+            that._changeMarkerLocation(location, false);
+
+            if (shouldSave) {
+                //TODO: save here(not necessary for use in popup)
+            }
+        },
+        //remove all traces of the map
+        removeWidget: function () {
+            var that = this;
+            if (that._map) {
+                that._map.closePopup();
+                that._map.removeLayer(that._cloudmade);
+                that._map = null;
+            }
+            $(that.element)[0].innerHTML = "";
+        },
+//endregion - General Widget Methods
+
+//region - Edit Screen Methods
         //animate to the edit screen
         _showEditScreen: function () {
             var that = this, widgetElement = $(that.element);
@@ -157,7 +187,44 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
             widgetElement.find(".editPane").switchClass("hidden", "shown", 500, 'swing');
             widgetElement.find("#locationWidgetMap").switchClass("shown", "hidden", 500);
         },
+        /**
+         * @param locations The locations returned from the search
+         * @private
+         */
+        _updateLocationList: function (locations) {
+            var that = this;
+            that._locationList = locations;
+            var list = "";
+            //clear the current list
+            $(that.element).find(".locationList")[0].innerHTML = "";
+            //add each returned location to the list
+            for (var i in locations) {
+                list += '<li id="' + i + '"><span class="fromWeb"></span><span class="name">' + generalTools.getLocationDisplayString(locations[i]) + '</span></li>';
+            }
 
+            //add the current saved location to the list, if there is one
+            if (that.currentLocation) {
+                list += '<li id="previous"><span id="previousLocation"></span><span class="name">' + generalTools.getLocationDisplayString(that.currentLocation) + '</span></li>';
+            }
+
+            //add option for "Manually Drop Pin"
+            list += //'<li id="current"><span id="currentLocation"></span><span class="name">Use Current Location</span></li>' +
+                '<li id="manual"><span id="manuallyDropPin"></span><span class="name">Manually Drop Pin</span></li>';
+
+            $(list).appendTo($(that.element).find(".locationList"));
+
+            //adjust the text to make sure everything is vertically centered
+            $(that.element).find(".locationList li").each(function () {
+                if ($(this)[0].childNodes[1].clientHeight < 25) {
+                    $(this).addClass("singleLine");
+                } else if ($(this)[0].childNodes[1].clientHeight > 50) {
+                    $(this).addClass("tripleLine");
+                }
+            });
+        },
+//endregion - Edit Screen Methods
+
+//region - Map Methods
         /**
          * @param location
          * @param {boolean} addPopup If a popup should be added to the new marker(only when in "Manually Drop Pin" mode)
@@ -200,60 +267,6 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
                 $(that.element).find(".navigateBtn").css("display", "none");
             }
         },
-
-        /**
-         * @param locations The locations returned from the search
-         * @private
-         */
-        _updateLocationList: function (locations) {
-            var that = this;
-            that._locationList = locations;
-            var list = "";
-            //clear the current list
-            $(that.element).find(".locationList")[0].innerHTML = "";
-            //add each returned location to the list
-            for (var i in locations) {
-                list += '<li id="' + i + '"><span class="fromWeb"></span><span class="name">' + generalTools.getLocationDisplayString(locations[i]) + '</span></li>';
-            }
-
-            //add the current saved location to the list, if there is one
-            if (that.currentLocation) {
-                list += '<li id="previous"><span id="previousLocation"></span><span class="name">' + generalTools.getLocationDisplayString(that.currentLocation) + '</span></li>';
-            }
-
-            //add option for "Manually Drop Pin"
-            list += //'<li id="current"><span id="currentLocation"></span><span class="name">Use Current Location</span></li>' +
-                '<li id="manual"><span id="manuallyDropPin"></span><span class="name">Manually Drop Pin</span></li>';
-
-            $(list).appendTo($(that.element).find(".locationList"));
-
-            //adjust the text to make sure everything is vertically centered
-            $(that.element).find(".locationList li").each(function () {
-                if ($(this)[0].childNodes[1].clientHeight < 25) {
-                    $(this).addClass("singleLine");
-                } else if ($(this)[0].childNodes[1].clientHeight > 50) {
-                    $(this).addClass("tripleLine");
-                }
-            });
-        },
-
-        /**
-         * Update and (conditionally) save the currently selected location
-         * @param location
-         * @param shouldSave If the current location needs to be saved
-         * @private
-         */
-        _updateCurrentLocation: function (location, shouldSave) {
-            var that = this;
-
-            that.currentLocation = location;
-            that.options.change(location);
-
-            if (shouldSave) {
-                //TODO: save here(not necessary for use in popup)
-            }
-        },
-
         /**
          * Update the query that will be used for the navigate link
          * @param location
@@ -280,7 +293,6 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
                 $(that.element).find(".navigateBtn").attr("style", "display:block");
             }
         },
-
         //open a new window with google maps directions to the current location
         _navigateToLink: function () {
             var currentPosition, that = this;
@@ -293,17 +305,7 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
                 // If geolocation is NOT successful just show the location.
                 generalTools.goToUrl("http://maps.google.com/maps?q=" + that._navigateQuery);
             }, {timeout: 10000, enableHighAccuracy: true});
-        },
-
-        //remove all traces of the map
-        removeWidget: function () {
-            var that = this;
-            if (that._map) {
-                that._map.closePopup();
-                that._map.removeLayer(that._cloudmade);
-                that._map = null;
-            }
-            $(that.element)[0].innerHTML = "";
         }
+//endregion - Map Methods
     });
 });
