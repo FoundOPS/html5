@@ -540,10 +540,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
 
     function OptionsPopup(popupListener){
         Popup.apply(this, [popupListener]);
-        //this.prototype = new Popup(popupListener);
-        //Popup.call(this, popupListener);
         var thisOptionsPopup = this;
-
         var isBackEnabled = true;
 
         $(document)
@@ -570,8 +567,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
             })
             .on('popup.created', function(){
                 createBackButton();
-            })
-        ;
+            });
 
         var createBackButton = function(){
             //Don't create back button or listener if disabled.
