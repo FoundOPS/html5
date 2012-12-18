@@ -1,5 +1,5 @@
 'use strict';
-define(["jquery", "db/services", "db/session", "db/models", "tools/parameters", "tools/kendoTools", "tools/generalTools", "widgets/selectBox", "widgets/locationSearchSelect", "select2", "kendo", "jmaskmoney",
+define(["jquery", "db/services", "db/session", "db/models", "tools/parameters", "tools/kendoTools", "tools/generalTools", "widgets/selectBox", "widgets/location", "select2", "kendo", "jmaskmoney",
     "jautosize", "jtooltip", "jsignature", "jsigbase30", "jsigSVG"],
     function ($, dbServices, session, models, parameters, kendoTools, generalTools) {
 
@@ -55,11 +55,11 @@ define(["jquery", "db/services", "db/session", "db/models", "tools/parameters", 
                                 var destination = models.firstFromId(locations, destinationField.LocationId);
                                 if (destination) {
 //                                    $(locationSelector).location("updateCurrentLocation", destination, true);
-                                    $(locationSelectorSearchSelect).locationSearchSelect("updateCurrentLocation", destination, true);
+                                    $(locationSelectorSearchSelect).location("updateCurrentLocation", destination, true);
                                 } else {
                                     //set the destination to the first location
 //                                    $(locationSelector).location("updateCurrentLocation", locations[0], true);
-                                    $(locationSelectorSearchSelect).locationSearchSelect("updateCurrentLocation", locations[0], true);
+                                    $(locationSelectorSearchSelect).location("updateCurrentLocation", locations[0], true);
                                 }
                             }
                         });
@@ -112,7 +112,7 @@ define(["jquery", "db/services", "db/session", "db/models", "tools/parameters", 
 
                 locationSelectorSearchSelect = document.createElement("div");
                 $(locationSelectorSearchSelect).addClass("locationWidget").attr("type", "hidden").attr("name", "Location").attr("required", "required").appendTo(that.element);
-                $(locationSelectorSearchSelect).locationSearchSelect({initialLocation: {Latitude: 0, Longitude: 0}, change: function () {
+                $(locationSelectorSearchSelect).location({initialLocation: {Latitude: 0, Longitude: 0}, change: function () {
                     //Location Widget Change Event Code.
                 }
                 });
