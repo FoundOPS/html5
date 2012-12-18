@@ -110,20 +110,10 @@ define(["jquery", "db/services", "db/session", "db/models", "tools/parameters", 
                     updateLocations(service.Client);
                 }
 
-//                locationSelector = document.createElement("div");
-//                $(locationSelector).addClass("locationWidget").attr("type", "hidden").attr("name", "Location").attr("required", "required").appendTo(that.element);
-//                $(locationSelector).location({initialLocation: {Latitude: 0, Longitude: 0}, change: function () {
-//                    console.log("Location Widget Change.")
-//                }
-//                });
-//                $(locationSelector).css("padding", "0");
-//                $(locationSelector).find("h3").replaceWith("<h1>Location</h1>");
-//                $(locationSelector).find("h1").css("padding", "0");
-
                 locationSelectorSearchSelect = document.createElement("div");
                 $(locationSelectorSearchSelect).addClass("locationWidget").attr("type", "hidden").attr("name", "Location").attr("required", "required").appendTo(that.element);
                 $(locationSelectorSearchSelect).locationSearchSelect({initialLocation: {Latitude: 0, Longitude: 0}, change: function () {
-                    console.log("Location Widget Change.")
+                    //Location Widget Change Event Code.
                 }
                 });
                 $(locationSelectorSearchSelect).css("padding", "0");

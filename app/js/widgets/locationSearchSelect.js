@@ -34,38 +34,38 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
 
             that.element.append(that._location);
             that.element.find(".locationSearchSelect").searchSelect({
-                query: function (searchText, callback) {
+                query: function (searchTerm, callback) {
                     //get the list of location matches
-                    if (searchText) {
-                        dbServices.locations.read({params: {search: searchText}}).done(function (locations) {
+                    if (searchTerm) {
+                        that.element.find("input").css("background-image", "url('img/spinner.gif')").css("background-position", "98% 50%");
+                        dbServices.locations.read({params: {search: searchTerm}}).done(function (locations) {
+                            that.element.find("input").css("background", "");
                             callback(locations);
                         });
                     }
                 },
                 formatOption: generalTools.getLocationDisplayString,
                 onSelect: function (e, selectedData) {
-                    console.log(e);
-                    console.log(selectedData);
-//                    //match the index of the selected item to the index of locationList
-//                    var id = e.currentTarget.id;
-//                    //if the previous location was selected
-//                    if (id == "previous") {
-//                        that._changeMarkerLocation(that.currentLocation, false);
-//                        //if "Manually Drop Pin" was selected
-//                    } else if (id == "manual") {
-//                        that._changeMarkerLocation(null, false);
-//                        //allow the marker to move on map click
-//                        that._allowMapClick = true;
-//                        //if a new location was selected
-//                    } else {
-//                        that._changeMarkerLocation(that._locationList[id], false);
-//                        that.updateCurrentLocation(that._locationList[id], true);
-//                    }
-//
-//                    //animate back to map from edit screen
-//                    widgetElement.find(".buttonPane").switchClass("hidden", "shown", 500, 'swing');
-//                    widgetElement.find(".editPane").switchClass("shown", "hidden", 500, 'swing');
-//                    widgetElement.find("#locationWidgetMap").switchClass("hidden", "shown", 500);
+                    //match the index of the selected item to the index of locationList
+                    var id = e.currentTarget.id;
+                    //if the previous location was selected
+                    if (id == "previous") {
+                        that._changeMarkerLocation(that.currentLocation, false);
+                        //if "Manually Drop Pin" was selected
+                    } else if (id == "manual") {
+                        that._changeMarkerLocation(null, false);
+                        //allow the marker to move on map click
+                        that._allowMapClick = true;
+                        //if a new location was selected
+                    } else {
+                        that._changeMarkerLocation(selectedData, false);
+                        that.updateCurrentLocation(selectedData, true);
+                    }
+
+                    //animate back to map from edit screen
+                    widgetElement.find(".buttonPane").switchClass("hidden", "shown", 500, 'swing');
+                    widgetElement.find(".editPane").switchClass("shown", "hidden", 500, 'swing');
+                    widgetElement.find("#locationWidgetMap").switchClass("hidden", "shown", 500);
                 },
                 queryDelay: 750,
                 minimumInputLength: 0,
@@ -111,30 +111,6 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
                 that._showEditScreen();
             });
 
-            //when an option is selected from the list
-//            widgetElement.find(".editPane li").live("click", function (e) {
-//                //match the index of the selected item to the index of locationList
-//                var id = e.currentTarget.id;
-//                //if the previous location was selected
-//                if (id == "previous") {
-//                    that._changeMarkerLocation(that.currentLocation, false);
-//                    //if "Manually Drop Pin" was selected
-//                } else if (id == "manual") {
-//                    that._changeMarkerLocation(null, false);
-//                    //allow the marker to move on map click
-//                    that._allowMapClick = true;
-//                    //if a new location was selected
-//                } else {
-//                    that._changeMarkerLocation(that._locationList[id], false);
-//                    that.updateCurrentLocation(that._locationList[id], true);
-//                }
-//
-//                //animate back to map from edit screen
-//                widgetElement.find(".buttonPane").switchClass("hidden", "shown", 500, 'swing');
-//                widgetElement.find(".editPane").switchClass("shown", "hidden", 500, 'swing');
-//                widgetElement.find("#locationWidgetMap").switchClass("hidden", "shown", 500);
-//            });
-
             //(in "Manually Drop Pin" mode) move the marker on map click
             that._map.on('click', function (e) {
                 //check if in "Manually Drop Pin" mode
@@ -158,16 +134,6 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
             widgetElement.find(".navigateBtn").on("click", function () {
                 that._navigateToLink();
             });
-
-            //update search after 1 second of input edit
-//            generalTools.observeInput(widgetElement.find(".editPane input"), function (searchText) {
-//                //get the list of location matches
-//                if (searchText) {
-//                    dbServices.locations.read({params: {search: searchText}}).done(function (locations) {
-//                        that._updateLocationList(locations);
-//                    });
-//                }
-//            }, 750);
 
             //if there is no location on initialization, go directly to the edit pane
             if (!shouldAddMarker) {
@@ -222,43 +188,6 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
             widgetElement.find(".editPane").switchClass("hidden", "shown", 500, 'swing');
             widgetElement.find("#locationWidgetMap").switchClass("shown", "hidden", 500);
         },
-        /**
-         * Update Location List
-         * @param locations The locations returned from the search
-         * @private
-         */
-//        _updateLocationList: function (locations) {
-//            var that = this;
-//            that._locationList = locations;
-//            var list = "";
-//            //clear the current list
-//            $(that.element).find(".locationList")[0].innerHTML = "";
-//            //add each returned location to the list
-//            for (var i in locations) {
-//                list += '<li id="' + i + '"><span class="fromWeb"></span><span class="name">' + generalTools.getLocationDisplayString(locations[i]) + '</span></li>';
-//            }
-//
-//            //add the current saved location to the list, if there is one
-//            if (that.currentLocation) {
-//                list += '<li id="previous"><span id="previousLocation"></span><span class="name">' + generalTools.getLocationDisplayString(that.currentLocation) + '</span></li>';
-//            }
-//
-//            //add option for "Manually Drop Pin"
-//            list += //'<li id="current"><span id="currentLocation"></span><span class="name">Use Current Location</span></li>' +
-//                '<li id="manual"><span id="manuallyDropPin"></span><span class="name">Manually Drop Pin</span></li>';
-//
-//            $(list).appendTo($(that.element).find(".locationList"));
-//
-//            //adjust the text to make sure everything is vertically centered
-//            $(that.element).find(".locationList li").each(function () {
-//                if ($(this)[0].childNodes[1].clientHeight < 25) {
-//                    $(this).addClass("singleLine");
-//                } else if ($(this)[0].childNodes[1].clientHeight > 50) {
-//                    $(this).addClass("tripleLine");
-//                }
-//            });
-//        },
-
 //endregion - Edit Screen Methods
 
 //region - Map Methods

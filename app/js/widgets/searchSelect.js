@@ -37,7 +37,7 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                     this._trigger("selected", event, selectedData);
                 },
                 queryDelay: null,
-                minimumInputLength: 2,
+                minimumInputLength: 1,
                 showPreviousSelection: false
             },
             _create: function () {
@@ -74,7 +74,7 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                 element.children[1].children[0].setAttribute("class", "optionList");
 
                 //Listen to input in search box and update the widget accordingly.
-                generalTools.observeInput(searchSelect.element.find("input"), $.proxy(searchSelect.open, searchSelect), searchSelect.options.queryDelay || 1);
+                generalTools.observeInput(searchSelect.element.find("input"), $.proxy(searchSelect._getOptions, searchSelect), searchSelect.options.queryDelay || 1);
 
                 try {
                     document.createEvent("TouchEvent");
@@ -97,28 +97,32 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                     } else {
                         this.value = "";
                     }
-                    searchSelect.open(this.value);
+                    searchSelect.selectedOptionTempText = searchSelect.element.find("input").val();
+                    searchSelect._getOptions(this.value);
                 });
                 //Select an option on click or touchend. Does not occur if user is scrolling instead of selecting.
                 searchSelect.element.find(".optionList").on("click touchend", searchSelect.element.find(".optionList li"), function (e) {
-                    if (!_scrolling) {
-                        searchSelect.selectedData = $(e.target).parent().data().selectedData || $(e.target).data().selectedData;
-                        if (e.target.nodeName === "SPAN") {
-                            searchSelect.selectedOptionText = $(e.target).parent()[0].innerText
-                        } else {
-                            searchSelect.selectedOptionText = $(e.target)[0].innerText;
+                    //Wait for scrolling flag to get set if user is scrolling.
+                    setTimeout(function () {
+                        if (!_scrolling) {
+                            searchSelect.selectedData = $(e.target).parent().data().selectedData || $(e.target).data().selectedData;
+                            if (e.target.nodeName === "SPAN") {
+                                searchSelect.selectedOptionText = $(e.target).parent()[0].innerText
+                            } else {
+                                searchSelect.selectedOptionText = $(e.target)[0].innerText;
+                            }
+                            searchSelect.element.find("input")[0].value = searchSelect.selectedOptionText;
+                            searchSelect.selectedOptionTempText = "";
+                            searchSelect.options.onSelect(e, searchSelect.selectedData);
+//                            //Wait for listeners from other widgets to use the selected option before removing it from the DOM.
+//                            setTimeout(function () {
+                                searchSelect.clearList();
+//                            }, 200);
+                            if (searchSelect.isTouchDevice) {
+                                $(".km-scroll-wrapper").kendoMobileScroller("reset");
+                            }
                         }
-                        searchSelect.element.find("input")[0].value = searchSelect.selectedOptionText;
-                        searchSelect.selectedOptionTempText = "";
-                        searchSelect.options.onSelect(e, searchSelect.selectedData);
-                        //Wait for listeners from other widgets to use the selected option before removing it from the DOM.
-                        setTimeout(function () {
-                            searchSelect.clearList();
-                        }, searchSelect.options.queryDelay ? searchSelect.options.queryDelay : 0);
-                        if (searchSelect.isTouchDevice) {
-                            $(".km-scroll-wrapper").kendoMobileScroller("reset");
-                        }
-                    }
+                    }, 200);
                     _scrolling = false;
                 });
                 //Set the scrolling flag to on.
@@ -133,20 +137,20 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                 //When clicking outside of the select widget, close the option list and handle text inside the textbox.
                 $(document.body).on('click touchend', function (e) {
                     if (!($(e.target).closest(searchSelect.element)[0] === searchSelect.element.context)) {
-                            setTimeout(function () {
-                                if (!_scrolling) {
-                                    if (searchSelect.selectedOptionText) {
-                                        searchSelect.element.find("input")[0].value = searchSelect.selectedOptionText;
-                                    } else {
-                                        searchSelect.selectedOptionTempText = searchSelect.element.find("input")[0].value;
-                                        searchSelect.element.find("input")[0].value = "";
-                                    }
-                                    searchSelect.clearList();
-                                    if (searchSelect.isTouchDevice) {
-                                        $(".km-scroll-wrapper").kendoMobileScroller("reset");
-                                    }
+                        setTimeout(function () {
+                            if (!_scrolling) {
+                                if (searchSelect.selectedOptionText) {
+                                    searchSelect.element.find("input")[0].value = searchSelect.selectedOptionText;
+                                } else {
+                                    searchSelect.selectedOptionTempText = searchSelect.element.find("input")[0].value;
+                                    searchSelect.element.find("input")[0].value = "";
                                 }
-                            }, 200);
+                                searchSelect.clearList();
+                                if (searchSelect.isTouchDevice) {
+                                    $(".km-scroll-wrapper").kendoMobileScroller("reset");
+                                }
+                            }
+                        }, 200);
                     }
                 });
             },
@@ -165,32 +169,32 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                     }, false);
                 }
             },
-            // Public functions
-            filter: function (searchTerm) {
+            _getOptions: function (searchTerm) {
                 var searchSelect = this, matches = [];
-                if(searchSelect.options.data) {
+                if (searchSelect.options.data) {
                     //get the list of location matches
-                        var dataItem, i;
-                        if (searchTerm.length) {
-                            for (i = 0; i < searchSelect.options.data.length; i++) {
-                                dataItem = searchSelect.options.data[i];
-                                if (searchSelect.options.formatOption(dataItem).toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1) {
-                                    matches.push(dataItem);
-                                }
+                    var dataItem, i;
+                    if (searchTerm.length >= searchSelect.options.minimumInputLength) {
+                        for (i = 0; i < searchSelect.options.data.length; i++) {
+                            dataItem = searchSelect.options.data[i];
+                            if (searchSelect.options.formatOption(dataItem).toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1) {
+                                matches.push(dataItem);
                             }
-                        } else {
-                            matches = searchSelect.options.data;
                         }
-                    return matches;
-                    if (searchSelect.isTouchDevice) {
-                        $(".km-scroll-wrapper").kendoMobileScroller("scrollTo", 0, -(searchSelect.element.height()));
-                        searchSelect.element.find(".optionList").css("-webkit-transform", "translate3d(0px, " + (searchSelect.element.height()) + "px, 0)").css("position", "relative").css("top", -searchSelect.element.height());
-                        $(".km-scroll-container").css("-webkit-transform", "translate3d(0px, -1px, 0)");
+                    } else {
+                        matches = searchSelect.options.data;
                     }
+                    searchSelect.open(matches);
                 } else {
-                    console.log("The filter function only works when a predefined data object is supplied to the widget.");
+                    searchSelect.options.query(searchTerm, $.proxy(searchSelect.open, searchSelect));
+                }
+                if (searchSelect.isTouchDevice) {
+                    $(".km-scroll-wrapper").kendoMobileScroller("scrollTo", 0, -(searchSelect.element.height()));
+                    searchSelect.element.find(".optionList").css("-webkit-transform", "translate3d(0px, " + (searchSelect.element.height()) + "px, 0)").css("position", "relative").css("top", -searchSelect.element.height());
+                    $(".km-scroll-container").css("-webkit-transform", "translate3d(0px, -1px, 0)");
                 }
             },
+            // Public functions
             clearList: function () {
                 var optionList = this.element.find(".optionList")[0];
                 //Clear current list if there is one.
@@ -205,20 +209,21 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                 var searchSelect = this,
                     optionList = searchSelect.element.find(".optionList"),
                     i;
-                searchSelect.selectedOptionTempText = searchSelect.element.find("input").val();
-                if (searchSelect.options.data) {
-                    options = searchSelect.filter(searchSelect.selectedOptionTempText);
-                }
                 searchSelect.clearList();
+                //Set option list to same width as input box.
                 searchSelect.element.find("#optionListScroller").width(searchSelect.element.find("input").parent().width());
-                //add each returned item to the list
                 if (options) {
-                    for (i = 0; i < options.length; i++) {
-                        $('<li id="' + i + '"><span class="name">' + searchSelect.options.formatOption(options[i]) + '</div></li>').data("selectedData", options[i]).appendTo(optionList);
+                    if (options.length) {
+                        //Add each option item to the list.
+                        for (i = 0; i < options.length; i++) {
+                        optionList.append($('<li id="' + i + '"><span class="name">' + searchSelect.options.formatOption(options[i]) + '</span></li>').data("selectedData", options[i]));
+                        }
+                    } else {
+                        optionList.append($('<div id="noOptions"><span>No Options Found</span></div>'));
                     }
                 }
                 if (searchSelect.options.showPreviousSelection && searchSelect.selectedData && searchSelect.options.data) {
-                    $('<li id="' + i + '"><span id="previousSelection" class="name">' + searchSelect.options.formatOption(searchSelect.selectedData) + '</div></li>').data("selectedData", searchSelect.selectedData).appendTo(optionList);
+                    optionList.append($('<li id="' + i + '"><span id="previousSelection" class="name">' + searchSelect.options.formatOption(searchSelect.selectedData) + '</span></li>').data("selectedData", searchSelect.selectedData));
                 }
                 //adjust the text to make sure everything is vertically centered
                 optionList.each(function () {
