@@ -22,8 +22,8 @@ define(["jquery", "db/session", "kendo"], function ($, session) {
                 '<li><a>Users</a></li>' +
                 '<li><a>Dispatcher</a></li>' +
 //                '<li><a>Import</a></li>' +
-                '<li><a>Privacy Policy</a></li>' +
-                '<li><a>Terms of Service</a></li>' +
+//                '<li><a>Privacy Policy</a></li>' +
+//                '<li><a>Terms of Service</a></li>' +
                 '</ul>' +
                 '<div><a href="http://indymade.com/" target="_blank">Made with Pride in Indiana</a></div>');
 
@@ -32,8 +32,8 @@ define(["jquery", "db/session", "kendo"], function ($, session) {
             var usersLi = _menu.find("li:nth-child(3)");
             var dispatcherLi = _menu.find("li:nth-child(4)");
 //            var importerLi = _menu.find("li:nth-child(5)");
-            var privacyLi = _menu.find("li:nth-child(5)");
-            var termsLi = _menu.find("li:nth-child(6)");
+//            var privacyLi = _menu.find("li:nth-child(5)");
+//            var termsLi = _menu.find("li:nth-child(6)");
 
             personalLi.click(function () {
                 application.navigate("view/personalSettings.html");
@@ -50,12 +50,12 @@ define(["jquery", "db/session", "kendo"], function ($, session) {
 //            importerLi.click(function () {
 //                application.navigate("view/importerUpload.html");
 //            });
-            privacyLi.click(function () {
-                application.navigate("view/privacyPolicy.html");
-            });
-            termsLi.click(function () {
-                application.navigate("view/termsOfService.html");
-            });
+//            privacyLi.click(function () {
+//                application.navigate("view/privacyPolicy.html");
+//            });
+//            termsLi.click(function () {
+//                application.navigate("view/termsOfService.html");
+//            });
 
             if (options.selectedItem === "Personal") {
                 personalLi.addClass('active');
@@ -67,10 +67,10 @@ define(["jquery", "db/session", "kendo"], function ($, session) {
                 dispatcherLi.addClass('active');
             } else if (options.selectedItem === "Importer") {
                 //importerLi.addClass('active');
-            } else if (options.selectedItem === "Privacy") {
-                privacyLi.addClass('active');
-            } else if (options.selectedItem === "Terms") {
-                termsLi.addClass('active');
+//            } else if (options.selectedItem === "Privacy") {
+//                privacyLi.addClass('active');
+//            } else if (options.selectedItem === "Terms") {
+//                termsLi.addClass('active');
             }
 
             session.followRole(function (role) {
