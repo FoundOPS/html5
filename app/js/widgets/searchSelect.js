@@ -25,7 +25,9 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
              *     showPreviousSelection {boolean}
              *         defines whether the previous selection should be attached at the end of the list or not (defaults to false)
              *         only works for predefined data, user must set this in their query function if they desire such behavior.
-             *     }
+             *     dontCloseOn {string}
+             *         A class from an element that the user would like to be able to click on without closing the optionList.
+             * }
              */
             options: {
                 query: undefined,
@@ -38,7 +40,8 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                 },
                 queryDelay: null,
                 minimumInputLength: 1,
-                showPreviousSelection: false
+                showPreviousSelection: false,
+                dontCloseOn: null
             },
             _create: function () {
                 var searchSelect = this;
@@ -136,7 +139,9 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                 });
                 //When clicking outside of the select widget, close the option list and handle text inside the textbox.
                 $(document.body).on('click touchend', function (e) {
-                    if (!($(e.target).closest(searchSelect.element)[0] === searchSelect.element.context)) {
+                    //This if statement creates an xor logic gate. If there is a dontCloseOn option provided by the user it will use it to check if it should clear the option list.
+                    //TODO: Find a way to do this without relying on searchSelect element's class name (searchSelect.element.context.className).
+                    if ($(e.target).parents().filter("."+searchSelect.element.context.className).length === 0 || searchSelect.options.dontCloseOn && e.target.className ? e.target.className.indexOf(searchSelect.options.dontCloseOn) === -1 : false) {
                         setTimeout(function () {
                             if (!_scrolling) {
                                 if (searchSelect.selectedOptionText) {
