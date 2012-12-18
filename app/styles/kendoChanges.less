@@ -168,11 +168,13 @@
     box-sizing: border-box;
     display: block;
 }
-//firefox workaround(otherwise settings pages don't show up)
+//firefox workarounds
 @-moz-document url-prefix() {
+    //to make settings pages show up
     .km-view {
         display: -moz-box;
     }
+    //dropdown display issue
     .selectBox{
         width: 122% !important;
         overflow: hidden;
