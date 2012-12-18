@@ -34,7 +34,7 @@ define(["jquery", "db/services", "db/session", "db/models", "tools/parameters", 
              * @private
              */
             _createClientLocation: function (service) {
-                var that = this, clientSelector, locationSelector, locationSelectorSearchSelect;
+                var that = this, clientSelector, locationSelector, locationSelector;
 
                 var formatClientName = function (client) {
                     return client.Name;
@@ -55,11 +55,11 @@ define(["jquery", "db/services", "db/session", "db/models", "tools/parameters", 
                                 var destination = models.firstFromId(locations, destinationField.LocationId);
                                 if (destination) {
 //                                    $(locationSelector).location("updateCurrentLocation", destination, true);
-                                    $(locationSelectorSearchSelect).location("updateCurrentLocation", destination, true);
+                                    $(locationSelector).location("updateCurrentLocation", destination, true);
                                 } else {
                                     //set the destination to the first location
 //                                    $(locationSelector).location("updateCurrentLocation", locations[0], true);
-                                    $(locationSelectorSearchSelect).location("updateCurrentLocation", locations[0], true);
+                                    $(locationSelector).location("updateCurrentLocation", locations[0], true);
                                 }
                             }
                         });
@@ -110,15 +110,15 @@ define(["jquery", "db/services", "db/session", "db/models", "tools/parameters", 
                     updateLocations(service.Client);
                 }
 
-                locationSelectorSearchSelect = document.createElement("div");
-                $(locationSelectorSearchSelect).addClass("locationWidget").attr("type", "hidden").attr("name", "Location").attr("required", "required").appendTo(that.element);
-                $(locationSelectorSearchSelect).location({initialLocation: {Latitude: 0, Longitude: 0}, change: function () {
+                locationSelector = document.createElement("div");
+                $(locationSelector).addClass("locationWidget").attr("type", "hidden").attr("name", "Location").attr("required", "required").appendTo(that.element);
+                $(locationSelector).location({initialLocation: {Latitude: 0, Longitude: 0}, change: function () {
                     //Location Widget Change Event Code.
                 }
                 });
-                $(locationSelectorSearchSelect).css("padding", "0");
-                $(locationSelectorSearchSelect).find("h3").replaceWith("<h1>Location SS</h1>");
-                $(locationSelectorSearchSelect).find("h1").css("padding", "0");
+                $(locationSelector).css("padding", "0");
+                $(locationSelector).find("h3").replaceWith("<h1>Location SS</h1>");
+                $(locationSelector).find("h1").css("padding", "0");
             },
 
             //region Field Factories
