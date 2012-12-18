@@ -169,14 +169,14 @@
     display: block;
 }
 //firefox workaround(otherwise settings pages don't show up)
-@-moz-document
-url-prefix
-(
-)
-{
-.km-view {
-    display: -moz-box;
-}
+@-moz-document url-prefix() {
+    .km-view {
+        display: -moz-box;
+    }
+    .selectBox{
+        width: 122% !important;
+        overflow: hidden;
+    }
 }
 .km-content, .km-scroll-container, .km-scrollview {
     width: inherit;
