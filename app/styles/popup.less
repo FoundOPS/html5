@@ -165,6 +165,7 @@ html{
 
     border-right: 2px solid @darkGrey;
     border-left: 2px solid @darkGrey;
+    border-bottom: 2px solid @darkGrey;
     .borderBox;
 
     .last {
@@ -204,7 +205,6 @@ html{
     width: 100% !important;
     //border-radius: 8px;
     box-shadow: 0 0 10px @lightCharcoal;
-    border-bottom: 2px solid @darkGrey;
 }
 
 #popupContentWrapper .jspContainer {
@@ -217,5 +217,9 @@ html{
 
 #popupContentWrapper .jspCapTop {
     display: block;
-    height: @popupHeaderHeight;
+    height: @popupHeaderHeight+4;
+}
+#popupContentWrapper .jspCapBottom {
+    display: block;
+    height: 2px;
 }

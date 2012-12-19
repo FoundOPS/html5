@@ -489,7 +489,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
             //$("#popupWrapper").css("visibility", "hidden");
         });
 
-        $("#popupContentWrapper")
+        $("#popupContent")
             .css("paddingTop", "47px");
 
         //$("#popup .jspPane").css("padding", "0");
