@@ -137,11 +137,11 @@ define(["jquery", "db/services", "db/session", "db/models", "tools/parameters", 
                 },
                 "SignatureField": function (field, fieldIndex, elementToAppendTo, options) {
                     var fieldElement = $('<div class="fieldLabel" style="margin-left:0"><span>' + field.Name + '</span></div>' +
-                                            '<ul data-role="listview" data-style="inset">' +
-                                                '<li id="sigPadOpener">' +
-                                                    '<img id="sigDisplay"/>' +
-                                                '</li>' +
-                                            '</ul>').appendTo(elementToAppendTo);
+                        '<ul data-role="listview" data-style="inset">' +
+                        '<li id="sigPadOpener">' +
+                        '<img id="sigDisplay"/>' +
+                        '</li>' +
+                        '</ul>').appendTo(elementToAppendTo);
 
                     if (!options.signatureIsReadOnly) {
                         var query, goToSigPad = function () {
@@ -193,7 +193,7 @@ define(["jquery", "db/services", "db/session", "db/models", "tools/parameters", 
                 }
 
                 //Add all the fields
-            $('<h1 class="serviceFields">Service Fields</h1>').appendTo(that.element);
+                $('<h1 class="serviceFields">Service Fields</h1>').appendTo(that.element);
                 var fieldsListView = $('<ul id="fields"></ul>').appendTo(that.element);
                 var checkLists = $('<ul id="checkLists"></ul>').appendTo(that.element);
                 var sigListView = $('<ul id="sigListView"></ul>').appendTo(that.element);
