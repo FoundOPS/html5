@@ -58,6 +58,7 @@ html{
     visibility: visible !important;
     z-index: 10;
     -webkit-transform: translateZ(0);
+    border-top: 2px solid @darkGrey;
 
     a {
         color: @charcoal;
@@ -76,10 +77,6 @@ html{
     background: @lighterGrey;
     border-bottom: 2px solid @darkGrey;
     visibility: visible;
-//box-shadow: 0 0 5px #888;
-    //border-top-right-radius: 5px;
-    //border-top-left-radius: 5px;
-    border-top: 2px solid @darkGrey;
     border-right: 2px solid @darkGrey;
     border-left: 2px solid @darkGrey;
     height: 49px;
@@ -89,7 +86,7 @@ html{
 #popupArrow {
     position: absolute;
     float: left;
-    margin-top: -1* @popupCarrotHeight + 2;
+    margin-top: -1* @popupCarrotHeight;
     margin-left: -1 * (@popupCarrotWidth / 2)-2; /* Half width */
     visibility: visible;
     left: 50%;
@@ -146,7 +143,7 @@ html{
 #popupContentWrapper {
     position: relative;
     overflow: visible !important;
-    padding-top: 49px;
+    padding-top: 0px;
     height: 100%;
     width: 100%;
     .borderBox;
@@ -165,13 +162,9 @@ html{
     text-align: left;
     font-size: 1em;
     background: @lighterGrey;
-    //color: @charcoal;
 
     border-right: 2px solid @darkGrey;
-    border-bottom: 2px solid @darkGrey;
     border-left: 2px solid @darkGrey;
-    //border-bottom-right-radius: 5px;
-    //border-bottom-left-radius: 5px;
     .borderBox;
 
     .last {
@@ -210,8 +203,8 @@ html{
 #popupContentWrapper .jspPane{
     width: 100% !important;
     //border-radius: 8px;
-    background: @lighterGrey;
     box-shadow: 0 0 10px @lightCharcoal;
+    border-bottom: 2px solid @darkGrey;
 }
 
 #popupContentWrapper .jspContainer {

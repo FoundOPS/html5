@@ -127,39 +127,6 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         this.isHeaderDisabled = false;
     };
 
-    //TODO: Move header into setContent.
-    Popup.prototype.hideHeader = function() {
-        $("#popupHeader").hide();
-
-        //TODO: Move into navigator? Shouldn't rely on jscrollpane.
-        $("#popup .jspPane").css("padding", "0");
-
-        $("#popupContentWrapper").css("padding-top", "0px");
-
-        $("#popupContent")
-            .css("border-top", "2px solid #CCC")
-            .css("border-right", "2px solid #CCC")
-            .css("border-left", "2px solid #CCC");
-        //.css("border-top-right-radius", "5px")
-        //.css("border-top-left-radius", "5px");
-    };
-
-    Popup.prototype.showHeader = function() {
-        $("#popupHeader").show();
-
-        //TODO: Move into navigator? Shouldn't rely on jscrollpane.
-        $("#popup .jspPane").css("padding", "");
-
-        $("#popupContentWrapper").css("padding-top", "");
-
-        $("#popupContent")
-            .css("border-top", "")
-            .css("border-right", "")
-            .css("border-left", "");
-        //.css("border-top-right-radius", "5px")
-        //.css("border-top-left-radius", "5px");
-    };
-
     Popup.prototype.toggleVisible = function (e, clicked) {
         Popup.lastPopupClicked = this;
         var clickedDiv = $(clicked);
@@ -227,11 +194,6 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
             $("#popupContent").css("border-color", Popup.borderColor);
             $(".popupContentRow").css("border-color", Popup.borderColor);
         }
-
-        if(this.isHeaderDisabled)
-            this.hideHeader();
-        else
-            this.showHeader();
 
         //Make popup visible
         $("#popup").stop(false, true).fadeIn('fast');
@@ -357,27 +319,17 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         popupWrapperDiv.attr("id", "popupWrapper");
 
         var s = "<div id='popup'>" +
-            "<div id='popupArrow'></div>" +
-            "<div id='currentPopupAction' style='display: none;'></div>" +
-            "<div id='popupHeader'>" +
-            "<div id='popupTitle'></div>" +
-            "<a id='popupClose'></a>" +
-            "</div>" +
-            "<div id='popupContentWrapper'>" +
-            "<div id='popupContent'></div>" +
-            "</div>" +
-            "</div>";
+                    "<div id='popupArrow'></div>" +
+                    "<div id='currentPopupAction' style='display: none;'></div>" +
+                    "<div id='popupContentWrapper'>" +
+                        "<div id='popupContent'></div>" +
+                    "</div>" +
+                "</div>";
         popupWrapperDiv.html(s);
         popupWrapperDiv.find("#popup").css("display", "none");
 
         //Appends created div to page.
         $("body").prepend(popupWrapperDiv);
-
-        //Click listener for popup close button.
-        $("#popupClose").click(function () {
-            thisPopup.closePopup();
-            //$("#popupWrapper").css("visibility", "hidden");
-        });
 
         //Window resize listener to check if popup is off screen.
         $(window).on('resize', function () {
@@ -488,7 +440,6 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
 
     //Public void function that populates setTitle and setContent with data found by id passed.
     Popup.prototype.populate = function (identifierList) {
-
         var newMenu = null;
         var i=0;
         for(i; i<identifierList.length; i++){
@@ -505,12 +456,55 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         }
         $(document).trigger('popup.populating');
         Popup.history.push(newMenu);
+
         this.clearData();
+        if(!this.isHeaderDisabled)
+            this.insertHeader();
         this.setData(newMenu);
         return true;
     };
 
+    Popup.prototype.insertHeader = function (){
+        var header = "<div id='popupHeader'>" +
+                        "<div id='popupTitle'></div>" +
+                        "<a id='popupClose'></a>" +
+                     "</div>";
+
+        $("#popupContentWrapper").before(header);
+
+        //Create back button
+        //Don't create back button or listener if disabled.
+        if(this.isBackEnabled){
+            //console.log("Creating back button.");
+            var thisPopup = this;
+            $("#popupHeader").prepend("<a id='popupBack'></a>");
+            $("#popupBack").on("click", function () {
+                thisPopup.previousPopup();
+            });
+        }
+
+        //Click listener for popup close button.
+        $("#popupClose").on("click", function () {
+            thisPopup.closePopup();
+            //$("#popupWrapper").css("visibility", "hidden");
+        });
+
+        $("#popupContentWrapper")
+            .css("paddingTop", "47px");
+
+        //$("#popup .jspPane").css("padding", "0");
+    };
+
+    Popup.prototype.removeHeader = function() {
+        $("#popupBack").off("click");
+        $("#popupClose").off("click");
+        $("#popupHeader").remove();
+        $("#popupContentWrapper").css("paddingTop", "");
+    };
+
     Popup.prototype.clearData = function (){
+        this.removeHeader();
+
         $("#popupTitle").html("");
         $("#popupContent").html("");
     };
@@ -622,16 +616,6 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
                 var keepOpen = thisOptionsPopup.populate(newId);
                 if (!keepOpen) thisOptionsPopup.closePopup();
             })
-            .on('popup.created', function(){
-                //Create back button
-                //Don't create back button or listener if disabled.
-                if(!thisOptionsPopup.isBackEnabled)return;
-                //console.log("Creating back button.");
-                $("#popupHeader").prepend("<a id='popupBack'></a>");
-                $("#popupBack").click(function () {
-                    thisOptionsPopup.previousPopup();
-                });
-            });
     };
 
     OptionsPopup.prototype.disableBackButton = function(){
