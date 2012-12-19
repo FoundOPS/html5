@@ -33,6 +33,7 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
             );
 
             locationWidget.element.append(locationWidget._location);
+            locationWidget.element.find("#locationWidgetMap").height(locationWidget.element.find("#locationWidgetMap").width());
             locationWidget.element.find(".locationSearchSelect").searchSelect({
                 query: function (searchTerm, callback) {
                     //get the list of location matches
