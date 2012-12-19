@@ -20,7 +20,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
                 }
 
                 if(typeof(options.disableHeader) !== 'undefined'){
-                    popup.disableHeader();
+                    if(options.disableHeader)popup.disableHeader();
                 }
 
                 popup.addMenu(options.id, options.title, options.contents);
@@ -96,20 +96,21 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
     ////////////////////////////////////////////////////////////
     //          Popup Block
     ////////////////////////////////////////////////////////////
-    /** Popup Constructor **/
+    /**     Popup CONSTRUCTOR    **/
     function Popup(popupListener) {
-        var thisPopup = this;
+        //Set this popup's number and increment Popup count.
+        this.popupNumber = ++Popup.popupNum;
+        //Class added to detect clicks on primary buttons triggering popups.
+        this.popupListenerID = "popupListener"+this.popupNumber;
+        this.isHeaderDisabled = true;
 
+        var thisPopup = this;
         var listenerElements = $(popupListener);
         listenerElements.addClass(this.popupListenerID);
         listenerElements.css("cursor", "pointer");
         listenerElements.click(function (e) {
             thisPopup.toggleVisible(e, $(this));
         });
-
-        this.popupNumber = ++Popup.popupNum;
-        //Class added to detect clicks on primary buttons triggering popups.
-        this.popupListenerID = "popupListener"+this.popupNumber;
     }
 
     Popup.prototype.updatePositions = function(target){
@@ -119,6 +120,15 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
     };
 
     Popup.prototype.disableHeader = function() {
+        this.isHeaderDisabled = true;
+    };
+
+    Popup.prototype.enableHeader = function() {
+        this.isHeaderDisabled = false;
+    };
+
+    //TODO: Move header into setContent.
+    Popup.prototype.hideHeader = function() {
         $("#popupHeader").hide();
 
         //TODO: Move into navigator? Shouldn't rely on jscrollpane.
@@ -126,11 +136,28 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
 
         $("#popupContentWrapper").css("padding-top", "0px");
 
-        $("#popupContent").css("border-top-right-radius", "5px")
-            .css("border-top-left-radius", "5px")
+        $("#popupContent")
             .css("border-top", "2px solid #CCC")
             .css("border-right", "2px solid #CCC")
             .css("border-left", "2px solid #CCC");
+        //.css("border-top-right-radius", "5px")
+        //.css("border-top-left-radius", "5px");
+    };
+
+    Popup.prototype.showHeader = function() {
+        $("#popupHeader").show();
+
+        //TODO: Move into navigator? Shouldn't rely on jscrollpane.
+        $("#popup .jspPane").css("padding", "");
+
+        $("#popupContentWrapper").css("padding-top", "");
+
+        $("#popupContent")
+            .css("border-top", "")
+            .css("border-right", "")
+            .css("border-left", "");
+        //.css("border-top-right-radius", "5px")
+        //.css("border-top-left-radius", "5px");
     };
 
     Popup.prototype.toggleVisible = function (e, clicked) {
@@ -201,6 +228,11 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
             $(".popupContentRow").css("border-color", Popup.borderColor);
         }
 
+        if(this.isHeaderDisabled)
+            this.hideHeader();
+        else
+            this.showHeader();
+
         //Make popup visible
         $("#popup").stop(false, true).fadeIn('fast');
         $("#popupWrapper").css("visibility", "visible");
@@ -221,7 +253,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         Popup.currentTarget = target;
         var targetLeft = target.offset().left + target.outerWidth() / 2;
         var rightOffset = targetLeft + popupWrapperDiv.outerWidth() / 2;
-        var offset = targetLeft - popupWrapperDiv.outerWidth() / 2 + Popup.padding + 1; //TODO: Figure out where the 1 extra pixel is.. could just be rounding.
+        var offset = targetLeft - popupWrapperDiv.outerWidth() / 2 + Popup.padding + 1;
         var windowWidth = $(window).width();
 
         Popup.offScreenX = false;
@@ -499,7 +531,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         $("#popupContentWrapper").trigger("popup.setContent", $(this));
     };
 
-    //Static popup variables
+    /**     STATIC VARIABLES     **/
     Popup.popupNum = 0;
     Popup.lastElementClick = null;
     Popup.currentTarget = null;
@@ -514,12 +546,11 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
     Popup.offScreenX = false;
     Popup.offScreenY = false;
     Popup.isLocked = false;
-    Popup.isHeaderDisabled = false;
     Popup.above = false;
     Popup.caretLeftOffset = "50%";
     Popup.lastPopupClicked = null;
 
-    //Static functions
+    /**     STATIC FUNCTIONS     **/
     Popup.setBackgroundColor = function(color){
         Popup.backgroundColor = color;
     };
@@ -544,11 +575,12 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
     //          OptionsPopup Block
     ////////////////////////////////////////////////////////////
 
-    //OptionsPopup Constructor
+    /**   OptionsPopup CONSTRUCTOR  **/
     function OptionsPopup(popupListener){
         //Super constructor call.
         Popup.apply(this, [popupListener]);
 
+        this.isHeaderDisabled = false;
         this.isBackEnabled = true;
 
         if(!OptionsPopup.hasRun){
@@ -556,15 +588,15 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
             OptionsPopup.hasRun = true;
         }
     }
-
+    //Inherit Popup
     OptionsPopup.prototype = new Popup();
     OptionsPopup.constructor = OptionsPopup;
 
-    //Static Variables
+    /**     STATIC VARIABLES        **/
     OptionsPopup.hasRun = false;
 
-    //Prototype Functions
-    //run-once function for listeners
+    /**     PROTOTYPE FUNCTIONS     **/
+    //Run-once function for listeners
     //TODO: Possibly change to static? Will that increase mem usage?
     OptionsPopup.prototype.init = function(){
         var thisOptionsPopup = this;

@@ -222,9 +222,9 @@ define(["jquery", "underscore", "sections/importerUpload", "sections/importerSel
         var locationWidget = reviewElement.find(".Location");
         var repeatWidget = reviewElement.find(".Repeat");
 
-        contactInfoWidget.popup({contents: $("<div class='contactInfoWidget'></div>")});
-        locationWidget.popup({contents: $("<div class='locationWidget'></div>")});
-        repeatWidget.popup({contents: $("<div class='repeatWidget'></div>")});
+        contactInfoWidget.popup({id:"ContactInfo", contents: $("<div class='contactInfoWidget'></div>")});
+        locationWidget.popup({id:"Location", contents: $("<div class='locationWidget'></div>")});
+        repeatWidget.popup({id:"Repeat", contents: $("<div class='repeatWidget'></div>")});
 
         /**
          * Updates the row/cell index that was clicked on
