@@ -56,10 +56,12 @@
     </div>
     <div id="repeat" data-bind="service: selectedService"></div>
     <div id="serviceSelectorsWrapper">
-        <h1>Client</h1>
-        <input id="clientSelector" name="Client" required="required"/>
-        <div id="locationSelector" class="locationWidget" name="Location" required="required"></div>
-        <div id="serviceDetails" data-role="kendoServiceDetails" data-bind="service: selectedService"></div>
+        <div id="serviceSelectorsScroller">
+            <h1>Client</h1>
+            <input id="clientSelector" name="Client" required="required"/>
+            <div id="locationSelector" class="locationWidget" name="Location" required="required"></div>
+            <div id="serviceDetails" data-role="kendoServiceDetails" data-bind="service: selectedService"></div>
+        </div>
     </div>
 
 </div>

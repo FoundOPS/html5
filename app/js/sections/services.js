@@ -436,7 +436,7 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
         var contentHeight = windowHeight - extraMargin;
         $('#grid').css("max-height", contentHeight + 19 + 'px');
         $('#grid .k-grid-content').css("max-height", contentHeight - 15 + 'px');
-        $("#serviceDetails").css("max-height", contentHeight + 63 + 'px');
+        $("#serviceSelectorsScroller").css("max-height", contentHeight + 63 + 'px');
     };
 
     var setupGrid = function (fields) {
