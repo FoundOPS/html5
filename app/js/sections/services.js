@@ -2,8 +2,8 @@
 
 'use strict';
 
-require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateTools", "db/saveHistory", "tools/kendoTools", "tools/analytics", "widgets/serviceDetails",
-    "jform", "select2", "widgets/selectBox"], function ($, session, dbServices, parameters, dateTools, saveHistory, kendoTools, analytics) {
+require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateTools", "db/saveHistory", "tools/kendoTools", "tools/analytics", "db/models", "widgets/serviceDetails",
+    "jform", "select2", "widgets/selectBox"], function ($, session, dbServices, parameters, dateTools, saveHistory, kendoTools, analytics, models) {
     var services = {}, serviceHoldersDataSource, grid, handleChange, selectedServiceHolder, vm;
 
     //region Public
@@ -45,8 +45,87 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
             saveHistory.resetHistory();
 
             if (service) {
-                //show the serviceDetailsWrapper
-                $("#serviceDetailsWrapper").attr("style", "display:block");
+                //show the serviceSelectorsWrapper
+                $("#serviceSelectorsWrapper").attr("style", "display:block");
+
+                //Initialize client and location selectors.
+                var clientSelector = $("#clientSelector"), locationSelector = $("#locationSelector");
+
+                var formatClientName = function (client) {
+                    return client.Name;
+                };
+
+                //updates the location's comboBox to the current client's locations
+                var updateLocations = function (client) {
+                    //clear & disable the locations combobox
+
+                    if (client) {
+                        //load the client's locations
+                        dbServices.locations.read({params: {clientId: client.Id}}).done(function (locations) {
+                            // select the selected destination
+                            var destinationField = models.getDestinationField(service);
+                            if (locations.length > 0) {
+                                var destination = models.firstFromId(locations, destinationField.LocationId);
+                                if (destination) {
+//                                    $(locationSelector).location("updateCurrentLocation", destination, true);
+                                    $(locationSelector).location("updateCurrentLocation", destination, true);
+                                } else {
+                                    //set the destination to the first location
+//                                    $(locationSelector).location("updateCurrentLocation", locations[0], true);
+                                    $(locationSelector).location("updateCurrentLocation", locations[0], true);
+                                }
+                            }
+                        });
+                    }
+                };
+
+                //Add the Client selector w auto-complete and infinite scrolling
+                clientSelector.select2({
+                    placeholder: "Choose a client",
+                    minimumInputLength: 1,
+                    ajax: {
+                        url: dbServices.API_URL + "Clients/Get?roleId=" + session.get("role.id"),
+                        dataType: 'jsonp',
+                        quietMillis: 100,
+                        data: function (term, page) { // page is the one-based page number tracked by Select2
+                            return {
+                                search: term,
+                                skip: (page - 1) * 10,
+                                take: 10 // page size
+                            };
+                        },
+                        results: function (data, page) {
+                            // whether or not there are more results available
+                            var more = data.length > 9;
+                            return {results: data, more: more};
+                        }
+                    },
+                    id: function (client) {
+                        return client.Id;
+                    },
+                    formatSelection: formatClientName,
+                    formatResult: formatClientName,
+                    dropdownCssClass: "bigdrop"
+                }).on("change", function () {
+                        var client = clientSelector.select2("data");
+                        vm.get("selectedService").set("Client", client);
+                        vm.get("selectedService").set("ClientId", client.Id);
+                        updateLocations(client);
+                    });
+
+                if (service.Client) {
+                    //set the initial selection
+                    clientSelector.select2("data", service.Client);
+                    updateLocations(service.Client);
+                }
+
+                locationSelector.location({initialLocation: {Latitude: 0, Longitude: 0}, change: function () {
+                    //Location Widget Change Event Code.
+                }
+                });
+                locationSelector.css("padding", "0");
+                locationSelector.find("h3").replaceWith("<h1>Location</h1>");
+                locationSelector.find("h1").css("padding", "0");
             }
         },
         deleteSelectedService: function () {
@@ -54,8 +133,8 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
             if (answer) {
                 grid.dataSource.remove(selectedServiceHolder);
                 dbServices.services.destroy({body: this.get("selectedService")});
-                //hide the serviceDetailsWrapper
-                $("#serviceDetailsWrapper").attr("style", "display:none");
+                //hide the serviceSelectorsWrapper
+                $("#serviceSelectorsWrapper").attr("style", "display:none");
 
                 analytics.track("Delete Service");
             }
@@ -357,7 +436,7 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
         var contentHeight = windowHeight - extraMargin;
         $('#grid').css("max-height", contentHeight + 19 + 'px');
         $('#grid .k-grid-content').css("max-height", contentHeight - 15 + 'px');
-        $("#serviceDetails").css("max-height", contentHeight + 63 + 'px');
+        $("#serviceSelectorsScroller").css("max-height", contentHeight + 63 + 'px');
     };
 
     var setupGrid = function (fields) {
@@ -627,8 +706,8 @@ require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateT
                     //disable the delete button and hide the service details
                     $("#services").find(".k-grid-delete").attr("style", "display:none");
                     
-                    //hide the serviceDetailsWrapper
-                    $("#serviceDetailsWrapper").attr("style", "display:none");
+                    //hide the serviceSelectorsWrapper
+                    $("#serviceSelectorsWrapper").attr("style", "display:none");
                 }
             });
 

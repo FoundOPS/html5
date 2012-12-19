@@ -18,14 +18,16 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
              *         array: data to display
              *     formatOption {function(data)}
              *         should return text or a valid HTML string to display as an option (defaults to JSON.stringify())
-             *     onSelect {function(*)}
+             *     onSelect {function(e, selectedData)}
              *         A callback function triggered when an item is selected. The parameters are the triggered jQuery event and the selected data.
              *     minimumInputLength {int}
              *         number of characters necessary search box to start a search (defaults to 1)
              *     showPreviousSelection {boolean}
              *         defines whether the previous selection should be attached at the end of the list or not (defaults to false)
              *         only works for predefined data, user must set this in their query function if they desire such behavior.
-             *     }
+             *     dontCloseOn {string}
+             *         A class from an element that the user would like to be able to click on without closing the optionList.
+             * }
              */
             options: {
                 query: undefined,
@@ -37,8 +39,9 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                     this._trigger("selected", event, selectedData);
                 },
                 queryDelay: null,
-                minimumInputLength: 2,
-                showPreviousSelection: false
+                minimumInputLength: 1,
+                showPreviousSelection: false,
+                dontCloseOn: null
             },
             _create: function () {
                 var searchSelect = this;
@@ -74,7 +77,7 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                 element.children[1].children[0].setAttribute("class", "optionList");
 
                 //Listen to input in search box and update the widget accordingly.
-                generalTools.observeInput(searchSelect.element.find("input"), $.proxy(searchSelect.open, searchSelect), searchSelect.options.queryDelay || 1);
+                generalTools.observeInput(searchSelect.element.find("input"), $.proxy(searchSelect._getOptions, searchSelect), searchSelect.options.queryDelay || 1);
 
                 try {
                     document.createEvent("TouchEvent");
@@ -97,28 +100,32 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                     } else {
                         this.value = "";
                     }
-                    searchSelect.open(this.value);
+                    searchSelect.selectedOptionTempText = searchSelect.element.find("input").val();
+                    searchSelect._getOptions(this.value);
                 });
                 //Select an option on click or touchend. Does not occur if user is scrolling instead of selecting.
                 searchSelect.element.find(".optionList").on("click touchend", searchSelect.element.find(".optionList li"), function (e) {
-                    if (!_scrolling) {
-                        searchSelect.selectedData = $(e.target).parent().data().selectedData || $(e.target).data().selectedData;
-                        if (e.target.nodeName === "SPAN") {
-                            searchSelect.selectedOptionText = $(e.target).parent()[0].innerText
-                        } else {
-                            searchSelect.selectedOptionText = $(e.target)[0].innerText;
+                    //Wait for scrolling flag to get set if user is scrolling.
+                    setTimeout(function () {
+                        if (!_scrolling) {
+                            searchSelect.selectedData = $(e.target).parent().data().selectedData || $(e.target).data().selectedData;
+                            if (e.target.nodeName === "SPAN") {
+                                searchSelect.selectedOptionText = $(e.target).parent()[0].innerText
+                            } else {
+                                searchSelect.selectedOptionText = $(e.target)[0].innerText;
+                            }
+                            searchSelect.element.find("input")[0].value = searchSelect.selectedOptionText;
+                            searchSelect.selectedOptionTempText = "";
+                            searchSelect.options.onSelect(e, searchSelect.selectedData);
+//                            //Wait for listeners from other widgets to use the selected option before removing it from the DOM.
+//                            setTimeout(function () {
+                                searchSelect.clearList();
+//                            }, 200);
+                            if (searchSelect.isTouchDevice) {
+                                $(".km-scroll-wrapper").kendoMobileScroller("reset");
+                            }
                         }
-                        searchSelect.element.find("input")[0].value = searchSelect.selectedOptionText;
-                        searchSelect.selectedOptionTempText = "";
-                        searchSelect.options.onSelect(e, searchSelect.selectedData);
-                        //Wait for listeners from other widgets to use the selected option before removing it from the DOM.
-                        setTimeout(function () {
-                            searchSelect.clearList();
-                        }, searchSelect.options.queryDelay ? searchSelect.options.queryDelay : 0);
-                        if (searchSelect.isTouchDevice) {
-                            $(".km-scroll-wrapper").kendoMobileScroller("reset");
-                        }
-                    }
+                    }, 200);
                     _scrolling = false;
                 });
                 //Set the scrolling flag to on.
@@ -132,21 +139,23 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                 });
                 //When clicking outside of the select widget, close the option list and handle text inside the textbox.
                 $(document.body).on('click touchend', function (e) {
-                    if (!($(e.target).closest(searchSelect.element)[0] === searchSelect.element.context)) {
-                            setTimeout(function () {
-                                if (!_scrolling) {
-                                    if (searchSelect.selectedOptionText) {
-                                        searchSelect.element.find("input")[0].value = searchSelect.selectedOptionText;
-                                    } else {
-                                        searchSelect.selectedOptionTempText = searchSelect.element.find("input")[0].value;
-                                        searchSelect.element.find("input")[0].value = "";
-                                    }
-                                    searchSelect.clearList();
-                                    if (searchSelect.isTouchDevice) {
-                                        $(".km-scroll-wrapper").kendoMobileScroller("reset");
-                                    }
+                    //This if statement creates an xor logic gate. If there is a dontCloseOn option provided by the user it will use it to check if it should clear the option list.
+                    //TODO: Find a way to do this without relying on searchSelect element's class name (searchSelect.element.context.className).
+                    if ($(e.target).parents().filter("."+searchSelect.element.context.className).length === 0 || searchSelect.options.dontCloseOn && e.target.className ? e.target.className.indexOf(searchSelect.options.dontCloseOn) === -1 : false) {
+                        setTimeout(function () {
+                            if (!_scrolling) {
+                                if (searchSelect.selectedOptionText) {
+                                    searchSelect.element.find("input")[0].value = searchSelect.selectedOptionText;
+                                } else {
+                                    searchSelect.selectedOptionTempText = searchSelect.element.find("input")[0].value;
+                                    searchSelect.element.find("input")[0].value = "";
                                 }
-                            }, 200);
+                                searchSelect.clearList();
+                                if (searchSelect.isTouchDevice) {
+                                    $(".km-scroll-wrapper").kendoMobileScroller("reset");
+                                }
+                            }
+                        }, 200);
                     }
                 });
             },
@@ -165,12 +174,12 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                     }, false);
                 }
             },
-            // Public functions
-            filter: function (searchTerm) {
+            _getOptions: function (searchTerm) {
                 var searchSelect = this, matches = [];
-                //get the list of location matches
+                if (searchSelect.options.data) {
+                    //get the list of location matches
                     var dataItem, i;
-                    if (searchTerm.length) {
+                    if (searchTerm.length >= searchSelect.options.minimumInputLength) {
                         for (i = 0; i < searchSelect.options.data.length; i++) {
                             dataItem = searchSelect.options.data[i];
                             if (searchSelect.options.formatOption(dataItem).toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1) {
@@ -180,13 +189,17 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                     } else {
                         matches = searchSelect.options.data;
                     }
-                return matches;
+                    searchSelect.open(matches);
+                } else {
+                    searchSelect.options.query(searchTerm, $.proxy(searchSelect.open, searchSelect));
+                }
                 if (searchSelect.isTouchDevice) {
                     $(".km-scroll-wrapper").kendoMobileScroller("scrollTo", 0, -(searchSelect.element.height()));
                     searchSelect.element.find(".optionList").css("-webkit-transform", "translate3d(0px, " + (searchSelect.element.height()) + "px, 0)").css("position", "relative").css("top", -searchSelect.element.height());
                     $(".km-scroll-container").css("-webkit-transform", "translate3d(0px, -1px, 0)");
                 }
             },
+            // Public functions
             clearList: function () {
                 var optionList = this.element.find(".optionList")[0];
                 //Clear current list if there is one.
@@ -195,34 +208,27 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
                 }
             },
             /**
-             * Opens the list of items the user can select
-             * //TODO rename to openOptionList
+             * Opens the list of items the user can select.
              */
-            //Populates and edits the list of items that the user can select.
-            open: function (searchTerm) {
+            open: function (options) {
                 var searchSelect = this,
                     optionList = searchSelect.element.find(".optionList"),
-                    options, i;
-                if (searchSelect.options.query) {
-                    if (searchTerm.length >= searchSelect.options.minimumInputLength) {
-                        options = searchSelect.options.query(searchTerm, $.proxy(searchSelect.open, searchSelect));
-                    } else {
-                        searchSelect.clearList();
-                    }
-                } else {
-                    options = searchSelect.filter(searchTerm);
-                }
-                searchSelect.selectedOptionTempText = searchSelect.element.find("input").val();
+                    i;
                 searchSelect.clearList();
+                //Set option list to same width as input box.
                 searchSelect.element.find("#optionListScroller").width(searchSelect.element.find("input").parent().width());
-                //add each returned item to the list
                 if (options) {
-                    for (i = 0; i < options.length; i++) {
-                        $('<li id="' + i + '"><span class="name">' + searchSelect.options.formatOption(options[i]) + '</div></li>').data("selectedData", options[i]).appendTo(optionList);
+                    if (options.length) {
+                        //Add each option item to the list.
+                        for (i = 0; i < options.length; i++) {
+                        optionList.append($('<li id="' + i + '"><span class="name">' + searchSelect.options.formatOption(options[i]) + '</span></li>').data("selectedData", options[i]));
+                        }
+                    } else {
+                        optionList.append($('<div id="noOptions"><span>No Options Found</span></div>'));
                     }
                 }
                 if (searchSelect.options.showPreviousSelection && searchSelect.selectedData && searchSelect.options.data) {
-                    $('<li id="' + i + '"><span id="previousSelection" class="name">' + searchSelect.options.formatOption(searchSelect.selectedData) + '</div></li>').data("selectedData", searchSelect.selectedData).appendTo(optionList);
+                    optionList.append($('<li id="' + i + '"><span id="previousSelection" class="name">' + searchSelect.options.formatOption(searchSelect.selectedData) + '</span></li>').data("selectedData", searchSelect.selectedData));
                 }
                 //adjust the text to make sure everything is vertically centered
                 optionList.each(function () {
@@ -250,7 +256,7 @@ define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "k
 
                 return searchSelect.selectedData;
             },
-            //Returns the current selected data's text
+            //Returns the current selected data's text.
             text: function () {
                 var searchSelect = this;
                 return searchSelect.selectedOptionText ? searchSelect.selectedOptionText : "";
