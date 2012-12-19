@@ -28,12 +28,12 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
                     '<a class="navigateBtn" href="javascript:void(0)"></a>' +
                 '</div>' +
                 '<div class="editPane hidden">' +
-                    '<div class="location" />' +
+                    '<div class="locationSearchSelect">' +
                 '</div>'
             );
 
             locationWidget.element.append(locationWidget._location);
-            locationWidget.element.find(".location").searchSelect({
+            locationWidget.element.find(".locationSearchSelect").searchSelect({
                 query: function (searchTerm, callback) {
                     //get the list of location matches
                     if (searchTerm) {
@@ -80,7 +80,7 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
             if (location && location.Latitude && location.Longitude) {
                 center = [location.Latitude, location.Longitude];
                 zoom = 15;
-            //if no location exists, center on 'merica!
+                //if no location exists, center on 'merica!
             } else {
                 center = [40, -89];
                 zoom = 4;
@@ -180,11 +180,11 @@ define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/le
             //if there has been a location saved
             if (locationWidget.currentLocation) {
                 //update the location list to include the current(aka previous) location
-                if (locationWidget.element.find(".location").searchSelect("data")) {
+                if (locationWidget.element.find(".locationSearchSelect").searchSelect("data")) {
                     locationWidget.element.find("input").css("background-image", "url('img/spinner.gif')").css("background-position", "98% 50%");
-                    dbServices.locations.read({params: {search: generalTools.getLocationDisplayString(locationWidget.element.find(".location").searchSelect("data"))}}).done(function (locations) {
+                    dbServices.locations.read({params: {search: generalTools.getLocationDisplayString(locationWidget.element.find(".locationSearchSelect").searchSelect("data"))}}).done(function (locations) {
                         locationWidget.element.find("input").css("background", "");
-                        locationWidget.element.find(".location").searchSelect("open", locations);
+                        locationWidget.element.find(".locationSearchSelect").searchSelect("open", locations);
                     });
                 }
             }

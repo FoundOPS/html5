@@ -55,7 +55,10 @@
         <div id="grid"></div>
     </div>
     <div id="repeat" data-bind="service: selectedService"></div>
-    <div id="serviceDetailsWrapper">
+    <div id="serviceSelectorWrapper">
+        <h1>Client</h1>
+        <input id="clientSelector" type="text" name="Client" required="required" />
+        <div id="locationSelector" name="Location" required="required"></div>
         <div id="serviceDetails" data-role="kendoServiceDetails" data-bind="service: selectedService"></div>
     </div>
 
