@@ -1,6 +1,6 @@
 'use strict';
 
-define(["jquery", "lib/csv", "db/services", "widgets/selectBox", "jui", "jfilereader", "lib/swfobject"], function ($, csv, dbServices) {
+define(["db/services", "widgets/selectBox"], function (dbServices) {
     var importerUpload = {};
 
     //checks for .csv file type
@@ -18,7 +18,6 @@ define(["jquery", "lib/csv", "db/services", "widgets/selectBox", "jui", "jfilere
         var uploadButton = $("#importerUpload").find("#styledUploadBtn");
         uploadButton.fileReader({
             id: "fileReaderSWFObject",
-            filereader: "lib/filereader.swf",
             debugMode: false,
             multiple: false
         });

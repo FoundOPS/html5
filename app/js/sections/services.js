@@ -2,8 +2,8 @@
 
 'use strict';
 
-require(["jquery", "db/session", "db/services", "tools/parameters", "tools/dateTools", "db/saveHistory", "tools/kendoTools", "tools/analytics", "widgets/serviceDetails",
-    "jform", "select2", "widgets/selectBox"], function ($, session, dbServices, parameters, dateTools, saveHistory, kendoTools, analytics) {
+require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db/saveHistory", "tools/kendoTools", "tools/analytics", "widgets/serviceDetails",
+    "widgets/selectBox"], function (session, dbServices, parameters, dateTools, saveHistory, kendoTools, analytics) {
     var services = {}, serviceHoldersDataSource, grid, handleChange, selectedServiceHolder, vm;
 
     //region Public

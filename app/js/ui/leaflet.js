@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(['underscore', 'db/models', 'tools/generalTools', 'ui/ui', 'lib/leaflet', 'moment'], function (_, models, generalTools, ui) {
+define(['db/models', 'tools/generalTools', 'ui/ui'], function (_, models, generalTools, ui) {
     var leaflet = {};
 
     /**

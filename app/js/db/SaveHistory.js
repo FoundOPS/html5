@@ -6,7 +6,8 @@
 
 "use strict";
 
-define(['underscore', 'tools/generalTools', 'noty'], function (_, generalTools) {
+//requires: underscore, noty
+define(['tools/generalTools'], function (generalTools) {
     var saveHistory = {}, undoEnabled = true;
 
     //Stores the states of the current section

@@ -1,0 +1,25 @@
+^data-title="Task Details" data-model="routeTask.vm" data-stretch="true"^
+<div id="taskServiceDetails" data-role="kendoServiceDetails" data-bind="service: selectedService"></div>
+
+<div class="fieldLabel"><span>Status</span></div>
+<ul id="routeStatus-listview" data-role="listview" data-style="inset" data-bind="click: openTaskStatuses" style="margin-top:0;">
+    <li>
+        <a class="km-button" data-bind="style: { backgroundColor: selectedTaskStatus.Color}">
+            <span data-bind="text: selectedTaskStatus.Name"></span>
+        </a>
+    </li>
+</ul>
+
+<div id="taskStatuses">
+    <p id="taskStatusesTitle">Mark Task As:</p>
+    <ul id="taskStatuses-listview" style="text-align: center"
+        data-bind="source:taskStatusesSource, click:selectStatus"
+        data-role="listview" data-style="inset" data-template="taskStatusTemplate"></ul>
+    <ul id="taskStatuses-cancelButton" style="text-align: center" data-role="listview" data-style="inset" data-bind="click: closeTaskStatuses">
+        <li><a><span>Cancel</span></a></li>
+    </ul>
+</div>
+
+<div id="background-dimmer"></div>
+
+<footer></footer>

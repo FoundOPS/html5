@@ -22,7 +22,7 @@ define(["db/services", "tools/generalTools", "widgets/settingsMenu"], function (
             newPass.value = "";
             confirmPass.value = "";
             generalTools.disableButtons("#changePassword");
-            application.navigate("view/personalSettings.html");
+            application.navigate("personalSettings.html");
         }
     };
 
@@ -31,7 +31,7 @@ define(["db/services", "tools/generalTools", "widgets/settingsMenu"], function (
         $("#newPass")[0].value = "";
         $("#confirmPass")[0].value = "";
         generalTools.disableButtons("#changePassword");
-        application.navigate("view/personalSettings.html");
+        application.navigate("personalSettings.html");
     };
 
     changePassword.initialize = function () {

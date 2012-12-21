@@ -2,7 +2,7 @@
 
 'use strict';
 
-define(["jquery", "underscore", "db/services", "ui/ui", "tools/generalTools", "kendo"], function ($, _, dbServices, fui, generalTools) {
+define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui, generalTools) {
     (function ($, window, undefined) {
         /**
          * A jquery widget that uses a textbox input to search for options in a list that is automatically generated from developer defined data.

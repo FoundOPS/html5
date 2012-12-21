@@ -2,7 +2,7 @@
 
 'use strict';
 
-define(["jquery", "tools/generalTools", "tools/dateTools", "kendo", "select2", "moment"], function ($, generalTools, dateTools) {
+define(["tools/generalTools", "tools/dateTools"], function (generalTools, dateTools) {
 //    var testService = {FrequencyInt: 4, StartDate: new Date(), RepeatEveryTimes: 2, EndDate: new Date(), FrequencyDetailInt: 14,
 //        EndAfterTimes: null, AvailableMonthlyFrequencyDetailTypes: [8, 14];
     var service = {FrequencyInt: null, StartDate: null, RepeatEveryTimes: null, EndDate: null,

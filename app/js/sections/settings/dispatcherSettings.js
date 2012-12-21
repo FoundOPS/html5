@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(["tools/generalTools", "db/services", "db/session", "db/saveHistory", "tools/parameters", "tools/kendoTools", "widgets/settingsMenu", "colorpicker",
+define(["tools/generalTools", "db/services", "db/session", "db/saveHistory", "tools/parameters", "tools/kendoTools", "widgets/settingsMenu", "ui/colorPicker",
     "ui/kendoChanges"], function (generalTools, dbServices, session, saveHistory, parameters, kendoTools) {
     var dispatcherSettings = {}, dataSource, grid;
 
