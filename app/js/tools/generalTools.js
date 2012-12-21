@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(['jquery', "developer", 'lib/platform', 'tools/dateTools', 'moment'], function ($, developer, platform, dateTools) {
+define(["developer", 'tools/dateTools'], function (developer, dateTools) {
     var generalTools = {};
     window.generalTools = generalTools;
 

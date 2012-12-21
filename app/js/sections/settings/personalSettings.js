@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(["db/services", "db/saveHistory", "tools/dateTools", "underscore", "tools/parameters", "widgets/imageUpload", "widgets/selectBox"], function (dbServices, saveHistory, dateTools, _, parameters) {
+define(["db/services", "db/saveHistory", "tools/dateTools", "tools/parameters", "widgets/imageUpload", "widgets/selectBox"], function (dbServices, saveHistory, dateTools, parameters) {
     var personalSettings = {}, imageUpload, vm = kendo.observable();
 
     personalSettings.vm = vm;

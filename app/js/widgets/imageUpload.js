@@ -1,5 +1,4 @@
-define(["tools/generalTools", "db/saveHistory", "db/services", "jquery", "kendo", "jui",
-    "jfilereader", "lib/swfobject", "jform"], function (generalTools, saveHistory, dbServices, $) {
+define(["tools/generalTools", "db/saveHistory", "db/services"], function (generalTools, saveHistory, dbServices) {
     // shorten references to variables. this is better for uglification
     var kendo = window.kendo,
         ui = kendo.ui,

@@ -1,0 +1,43 @@
+<!DOCTYPE HTML>
+<html style="height:100%;">
+<head>
+    <title>FoundOPS</title>
+    <meta charset="utf-8">
+    <title>FoundOPS</title>
+    <meta name="description" content="">
+    @@mobileOptimizationTags
+    <meta http-equiv="cleartype" content="on">
+    <link rel="stylesheet" href="styles/login.css">
+</head>
+
+<body>
+<div id="vertCenterUpper" style="#position: relative;">                     <!--Used to-->
+    <div id="vertCenterMiddle" style=" #position: absolute; #top: 50%;">    <!--place content-->
+        <div id="vertCenterLower" style=" #position: relative; #top: -50%"> <!--in middle of page-->
+            <img src="@@imgSrcLogoWhiteText.png" alt="FoundOPS" style="width:70%; max-width:600px"/><br/>
+            <form id="loginForm" name="loginForm">
+                <input id="EmailAddress" name="EmailAddress" placeholder="E-mail Address" required="required" type="email"
+                       onblur="rememberMe();"/><br />
+                <input id="Password" name="Password" placeholder="Password" required="required" type="password"/><br />
+                <input id="submit" type="submit" value="Login"/><br/>
+            </form>
+            <br/>
+            <div id="toggleWrapper">
+                <p id="toggleLabel">Remember Me</p>
+                <div class="switch">
+                    <a class="on" href="javascript:toggleRememberMe('on')"><span>On</span></a>
+                    <a class="off active" href="javascript:toggleRememberMe('off')"><span>Off</span></a>
+                </div>
+            </div>
+            <br/>
+            <a id="forgotPassword" rel="external" href="http://app.foundops.com/Account/ForgotPassword">Forgot Password?</a>
+        </div>
+    </div>
+</div>
+</body>
+
+<!-- build:js scripts/login.js -->
+<script src="js/vendor/jquery.js"></script>
+<script src="js/login/login.js"></script>
+<!-- endbuild -->
+</html>

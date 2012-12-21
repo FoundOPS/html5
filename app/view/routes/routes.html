@@ -1,0 +1,10 @@
+^data-title="Assigned Routes"^
+<!--Add following attributes when supported server info is pagable
+data-pull-to-refresh="true" style="margin-bottom: 600px;"-->
+<ul id="routes-listview" data-bind="source: dataSource, click: select"
+    data-role="listview" data-style="inset" data-template="routeListViewTemplate">
+</ul>
+<div style="text-align: center">
+    <a id="refreshButton" data-bind="click: refresh" data-role="button">Refresh</a>
+</div>
+<footer></footer>

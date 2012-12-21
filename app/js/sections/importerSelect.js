@@ -1,6 +1,6 @@
 'use strict';
 
-define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools/generalTools", "widgets/toggleSwitch"], function ($, importerUpload, dbServices, _, generalTools) {
+define(["sections/importerUpload", "db/services", "tools/generalTools", "widgets/toggleSwitch"], function (importerUpload, dbServices, generalTools) {
         var importerSelect = {},
         //a jquery selector for this page
             page,
@@ -476,7 +476,7 @@ define(["jquery", "sections/importerUpload", "db/services", "underscore", "tools
         importerSelect.show = function () {
             //make sure there is a selected service type
             if (!importerUpload.selectedService) {
-                window.viewImporterUpload();
+                application.navigate('importerUpload');
                 return;
             }
 

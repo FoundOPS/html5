@@ -1,0 +1,85 @@
+<!doctype html>
+<!--[if IEMobile 7 ]>
+<html class="no-js iem7" lang="en"> <![endif]-->
+<!--[if (gt IEMobile 7)|!(IEMobile)]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head>
+    <meta charset="utf-8">
+    <title>FoundOPS</title>
+    <meta name="description" content="">
+    @@mobileOptimizationTags
+    <meta http-equiv="cleartype" content="on">
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+
+<body ontouchstart="">
+<div id="contentWrapper">
+    <div id="content">
+        <div id="remoteContent">
+            <!--Setup an empty silverlight view, so there is something to navigate to-->
+            <div data-role="view" id="silverlight"></div>
+			@@views
+            @@kendoTemplates
+        </div>
+    </div>
+</div>
+</body>
+
+<!--[if lt IE 7]>
+<p class="chromeframe">You are using an outdated browser. <a href="http://browsehappy.com/">Upgrade your browser
+    today</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to better
+    experience this site.</p>
+<![endif]-->
+
+<!--[if IE]>
+<link rel="stylesheet" href="styles/mapIE.css">
+<![endif]-->
+
+<!-- build:js scripts/baseFrameworks.js -->
+<script src="js/vendor/jquery.js"></script>
+<script src="js/vendor/kendo.all.js"></script>
+<script src="js/vendor/doT.min.js"></script>
+<script src="js/vendor/underscore.js"></script>
+<script src="js/vendor/underscore.string.js"></script>
+<!-- endbuild -->
+
+<!-- build:js scripts/jqueryPlugins.js -->
+<script src="js/vendor/jquery-ui-1.8.21.core.min.js"></script>
+<script src="js/vendor/jquery.mousewheel.js"></script>
+<script src="js/vendor/jquery.jScrollPane.js"></script>
+<script src="js/vendor/jquery.FileReader.js"></script>
+<script src="js/vendor/jquery.FileReader.js"></script>
+<script src="js/vendor/swfobject.js"></script>
+<script src="js/vendor/jquery.form.js"></script>
+<script src="js/vendor/jquery.tooltip.min.js"></script>
+<script src="js/vendor/jquery.autosize.js"></script>
+<script src="js/vendor/jSignature.js"></script>
+<script src="js/vendor/jSignature.CompressorBase30.js"></script>
+<script src="js/vendor/jSignature.CompressorSVG.js"></script>
+<!-- endbuild -->
+
+<!-- build:js scripts/otherVendor.js -->
+<script src="js/vendor/moment.js"></script>
+<script src="js/vendor/signals.js"></script>
+<script src="js/vendor/hasher.js"></script>
+<script src="js/vendor/platform.js"></script>
+<script src="js/vendor/noty.js"></script>
+<script src="js/vendor/select2.js"></script>
+<script src="js/vendor/uservoice.js"></script>
+<script src="js/vendor/totango.js"></script>
+<script src="js/vendor/leaflet.js"></script>
+<script src="js/vendor/csv.js"></script>
+<!-- endbuild -->
+
+<!-- build:js scripts/fort.js -->
+<script src="js/vendor/popup.js"></script>
+<script src="js/vendor/navigator.js"></script>
+<!-- endbuild -->
+
+<!-- TODO? move all others into new functional definition, remove AMD -->
+
+<!-- build:js scripts/amd-app.js -->
+<script data-main="js/app" src="js/vendor/require.js"></script>
+<!-- endbuild -->
+
+</html>

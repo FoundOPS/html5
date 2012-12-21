@@ -2,7 +2,7 @@
 
 'use strict';
 
-define(["jquery", "db/services", "ui/ui", "tools/generalTools", "kendo", "lib/leaflet"], function ($, dbServices, fui, generalTools) {
+define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui, generalTools) {
     $.widget("ui.location", {
         options: {
             initialLocation: {},

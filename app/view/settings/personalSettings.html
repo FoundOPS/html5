@@ -1,0 +1,23 @@
+^id="personal" data-title="Personal Settings"^
+<div class="settingsMenu"></div>
+<div class="wrap top">
+    <h1>The Basics</h1>
+    <form id="personalForm">
+        <label>First Name:&nbsp;</label><br/>
+        <input type="text" name="FirstName" data-bind="value: userAccount.FirstName" required/><br/>
+        <label>Last Name:&nbsp;</label><br/>
+        <input type="text" name="LastName" data-bind="value: userAccount.LastName" required/><br/>
+        <label>Email Address:</label><br/>
+        <input type="email" name="EmailAddress" data-bind="value: userAccount.EmailAddress" required/>
+    </form>
+    <h1 class="middle">Your Photo</h1>
+    <div id="personalImageUpload"></div>
+    <h1 class="middle">Password</h1>
+    <button class="k-button k-button-icontext changePassword" onclick="application.navigate('changePassword');"><span class="k-icon k-edit"></span>Change Your Password</button>
+    <h1 class="middle">Time Zone</h1>
+    <form id="timeZoneForm" style="text-align: center">
+        <div class="styled-select">
+            <div id="TimeZone"></div>
+        </div>
+    </form>
+</div>

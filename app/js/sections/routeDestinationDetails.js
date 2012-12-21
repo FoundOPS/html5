@@ -7,7 +7,7 @@
 'use strict';
 
 define(["sections/linkedEntitySection", "sections/routeDetails", "tools/parameters", "developer", "tools/generalTools", "tools/analytics",
-    "lib/platform", "db/services", "underscore", "underscore.string", "widgets/contactInfo"], function (createBase, routeDetails, parameters, developer, generalTools, analytics, platform, dbServices, _, _s) {
+    "db/services", "widgets/contactInfo"], function (createBase, routeDetails, parameters, developer, generalTools, analytics, dbServices) {
     var vm, contacts,
     //true if on an Android device with cordova
         section = createBase("routeDestinationDetails", "routeTask", "routeTaskId",

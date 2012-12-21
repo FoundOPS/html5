@@ -6,8 +6,8 @@
 
 'use strict';
 
-define(["sections/routeTask", "db/services", "db/saveHistory", "tools/parameters", "underscore", "jsignature", "jsigbase30", "jsigSVG"],
-    function (routeTask, dbServices, saveHistory, parameters, _) {
+define(["sections/routeTask", "db/services", "db/saveHistory", "tools/parameters"],
+    function (routeTask, dbServices, saveHistory, parameters) {
         /**
          * vm = viewModel
          * popupCaller = the button who's click opened the popup.

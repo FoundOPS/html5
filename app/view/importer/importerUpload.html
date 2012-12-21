@@ -1,0 +1,36 @@
+^data-title="Upload File"^
+<div class="wrapper">
+    <ul class="crumbs">
+        <li class="active" onclick="application.navigate('importerUpload')"><span></span><p>Upload File</p></li>
+        <li></li>
+        <li><span></span><p>Select Fields</p></li>
+        <li><span></span><p>Review Data</p></li>
+    </ul>
+    <div class="wrap">
+        <fieldset>
+            <legend>Helpful Hints</legend>
+            <div id="hints">
+                <ul>
+                    <li>If you are unsure how to format your .CSV sheet, try downloading this
+                        <a href="../lib/example.xlsx">sample file</a>.</li>
+                    <li>If you run into any difficulties during the process, feel free to contact support,
+                        either <a href="javascript:void(0)" onclick="UserVoice.showPopupWidget()">online</a>, or by calling (347) 460-4004.</li>
+                </ul>
+            </div>
+        </fieldset>
+    </div>
+    <div class="wrap">
+        <div class="main">
+            <label for="styledUploadBtn">Data Sheet: <span id="fileName"></span></label><br />
+            <div id="styledUploadBtn"><span class="k-icon k-goup"></span>Upload CSV</div>
+            <br />
+            <label for="serviceType">Service Type:</label><br />
+            <div id="serviceType" class="styled-select"></div>
+            <br />
+            <br />
+            <div class="buttonWrapper">
+                <button class="k-button k-button-icontext saveBtn" id="uploadBtn" onclick="window.viewImporterSelect()" disabled="disabled"><span class="k-icon k-update"></span>Upload</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -6,7 +6,15 @@
 
 "use strict";
 
-define(['moment'], function () {
+(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module.
+        define(['vendor/moment'], factory);
+    } else {
+        // Browser globals
+        root.dateTools = factory(root.moment);
+    }
+}(this, function (moment) {
     var dateTools = {};
 
     /**
@@ -118,4 +126,4 @@ define(['moment'], function () {
     };
 
     return dateTools;
-});
+}));

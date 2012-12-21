@@ -4,7 +4,7 @@
 'use strict';
 
 //need to require kendo so it is loaded before this widget, otherwise funky stuff happens
-define(["jquery", "underscore", "tools/generalTools", "tools/parserTools", "tools/analytics", "select2", "widgets/searchSelect", "kendo"], function ($, _, generalTools, parserTools, analytics) {
+define(["tools/generalTools", "tools/parserTools", "tools/analytics", "widgets/searchSelect"], function (generalTools, parserTools, analytics) {
     //region Locals
 //   var sampleContacts = [
 //            {Entity: "Burger King", Data: "765-494-2786", Type: "Phone Number", Label: "Mobile"},

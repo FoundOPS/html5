@@ -8,3 +8,11 @@ build/mobile/Android/assets/www/
 build/grunt/app/
 build/grunt/test/
 login/login-test.html
+temp
+node_modules
+dist
+app/styles/main.css
+app/index.html
+app/compiledViews.html
+app/styles/login.css
+app/styles/requirements.css

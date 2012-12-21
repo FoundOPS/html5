@@ -2,7 +2,8 @@
 
 'use strict';
 
-define(['developer', 'db/services', "tools/parameters", "kendo"], function (developer, dbServices, parameters) {
+//requires kendo, underscore
+define(['developer', 'db/services', "tools/parameters"], function (developer, dbServices, parameters) {
     var session = new kendo.data.ObservableObject({});
     window.session = session;
 
@@ -124,7 +125,7 @@ define(['developer', 'db/services', "tools/parameters", "kendo"], function (deve
 //    set static values set for config & selected role
 //    session._data = {
 //        "name": "Jonathan Perl",
-//        "settingsUrl": "#view/personalSettings.html",
+//        "settingsUrl": "#personalSettings",
 //        "logOutUrl": "../view/logout.html",
 //        "avatarUrl": "img/emptyPerson.png",
 //        "roles": [

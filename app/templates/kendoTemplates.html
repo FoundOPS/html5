@@ -1,0 +1,108 @@
+<script type="text/x-kendo-template" id="locationTemplate">
+    # if (selectedEntity.Location) { #
+    <h1>${selectedEntity.Location.Name}</h1>
+    <p>${selectedEntity.Location.AddressLineOne}</p>
+    <p>${selectedEntity.Location.AddressLineTwo}</p>
+    <p>${selectedEntity.Location.AdminDistrictTwo}, ${selectedEntity.Location.AdminDistrictOne} ${selectedEntity.Location.PostalCode}</p>
+
+    <a id="directionsButton" data-bind="click: getDirections">Directions</a>
+    # } else { #
+    <h1>${selectedEntity.Client.Name}</h1>
+    <p style="color:red"> No<br/>Location<br/>Information<br/>Available</p>
+    # } #
+</script>
+
+<script type="text/x-kendo-template" id="routeTasksTemplate">
+    <a><span>#=Name#</span></a>
+</script>
+
+<script type="text/x-kendo-template" id="routeDestinationViewTemplate">
+    # if (data.Location) { #
+    <a class="km-listview-link"><span>#= Location.Name #</span><div class="taskStatusColorImg" style="background-color:#=routeDetails.getTaskColor(data.Id)#"></div>
+        <br/><label>#= Location.AddressLineOne #</label></a>
+    # } else if (data.Client) { #
+    <a class="km-listview-link"><span>#= Client.Name #</span><div class="taskStatusColorImg" style="background-color:#=routeDetails.getTaskColor(data.Id)#"></div>
+        <br/><label style="color:red">No Location Available</label></a>
+    # } #
+</script>
+
+<script type="text/x-kendo-template" id="routeListViewTemplate">
+    <a><span># if (data.Name) { # #= Name # #}#</span></a>
+</script>
+
+<script type="text/x-kendo-template" id="taskStatusTemplate">
+    <a class="km-listview-link" style="background-color:#=Color#" taskId="#=Id#"><span>#=Name#</span></a>
+</script>
+
+<script type="text/x-kendo-template" id="signatureTemplate">
+</script>
+
+<script type="text/x-kendo-template" id="userPopupTemplate">
+    <div class="k-edit-form-container">
+        # if (usersSettings.editorType === 'add') {#
+
+        <div class="k-edit-label">
+            <label for="FirstName">First Name</label>
+        </div>
+        <div data-container-for="FirstName" class="k-edit-field">
+            <input type="text" id="FirstName" name="FirstName" required="required" data-type="text"
+                   data-bind="value:FirstName"
+                   data-role="textbox"/>
+        </div>
+        <div class="k-edit-label">
+            <label for="LastName">Last Name</label>
+        </div>
+        <div data-container-for="LastName" class="k-edit-field">
+            <input type="text" id="LastName" name="LastName" required="required" data-type="text"
+                   data-bind="value:LastName"
+                   data-role="textbox" />
+        </div>
+        <div class="k-edit-label">
+            <label for="EmailAddress">Email</label>
+        </div>
+        <div data-container-for="EmailAddress" class="k-edit-field">
+            <input type="email" id="EmailAddress" name="EmailAddress" required data-type="text"
+                   data-bind="value:EmailAddress">
+        </div>
+        # } else { #
+        <div class="k-edit-label">
+            <label for="First">First Name</label>
+        </div>
+        <div data-container-for="FirstName" class="k-edit-field">
+            <span id="First" data-bind="text:FirstName"/>
+        </div>
+        <div class="k-edit-label">
+            <label for="Last">Last Name</label>
+        </div>
+        <div data-container-for="LastName" class="k-edit-field">
+            <span id="Last" data-bind="text:LastName"/>
+        </div>
+        <div class="k-edit-label">
+            <label for="Email">Email</label>
+        </div>
+        <div data-container-for="EmailAddress" class="k-edit-field">
+            <label id="Email" data-bind="text:EmailAddress"></label>
+        </div>
+        # } #
+
+        <div class="k-edit-label">
+            <label for="RoleEdit">Role</label>
+        </div>
+        <div data-container-for="Role" class="k-edit-field">
+            <select id="RoleEdit" name="RoleEdit" data-type="text" data-bind="value:Role">
+                <option>Administrator</option>
+                <option>Regular</option>
+                <option>Mobile</option>
+            </select>
+        </div>
+        <div class="k-edit-label">
+            <label for="linkedEmployee">Linked Employee</label>
+        </div>
+        <div data-container-for="Employee" class="k-edit-field">
+            <input id="linkedEmployee" data-source="usersSettings.availableEmployees" data-text-field="DisplayName"
+                   data-value-field="Id" data-bind="value:EmployeeId" data-role="dropdownlist"/>
+        </div>
+
+        <br/><br/>
+    </div>
+</script>

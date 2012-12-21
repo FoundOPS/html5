@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(['jquery', 'containers/silverlight', 'developer', 'tools/parameters', 'db/session', 'underscore.string', 'totango'], function ($, silverlight, developer, parameters, session, _s) {
+define(['tools/silverlight', 'developer', 'tools/parameters', 'db/session'], function (silverlight, developer, parameters, session) {
     var analytics = {}, totango, totangoServiceId;
 
     if (developer.DEPLOY) {
@@ -39,11 +39,11 @@ define(['jquery', 'containers/silverlight', 'developer', 'tools/parameters', 'db
         var organization = session.get("role.name");
         var email = session.get("email");
         //don't include foundops emails
-        if (email && _s.include(email, "foundops.com")) {
+        if (email && _.str.include(email, "foundops.com")) {
             return;
         }
 
-        var section = _s.capitalize(parameters.getSection().name);
+        var section = _.str.capitalize(parameters.getSection().name);
 
         //triggered before session loaded or not in a section
         if (!organization || !user || !section) {

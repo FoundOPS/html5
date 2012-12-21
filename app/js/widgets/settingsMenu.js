@@ -1,4 +1,4 @@
-define(["jquery", "db/session", "kendo"], function ($, session) {
+define(["db/session"], function (session) {
     //shorten references to variables. this is better for uglification
     var kendo = window.kendo,
         ui = kendo.ui,
@@ -36,16 +36,16 @@ define(["jquery", "db/session", "kendo"], function ($, session) {
 //            var termsLi = _menu.find("li:nth-child(6)");
 
             personalLi.click(function () {
-                application.navigate("view/personalSettings.html");
+                application.navigate("personalSettings");
             });
             businessLi.click(function () {
-                application.navigate("view/businessSettings.html");
+                application.navigate("businessSettings");
             });
             usersLi.click(function () {
-                application.navigate("view/usersSettings.html");
+                application.navigate("usersSettings");
             });
             dispatcherLi.click(function () {
-                application.navigate("view/dispatcherSettings.html");
+                application.navigate("dispatcherSettings");
             });
 //            importerLi.click(function () {
 //                application.navigate("view/importerUpload.html");

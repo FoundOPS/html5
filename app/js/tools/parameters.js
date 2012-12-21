@@ -1,12 +1,20 @@
 // Copyright 2012 FoundOPS LLC. All Rights Reserved.
 
 /**
- * @fileoverview Class to hold parameter tools.
+ * @fileoverview Parameter tools
  */
 
 "use strict";
 
-define(['jquery', 'hasher', 'underscore.string', 'signals'], function ($, hasher, _s, signals) {
+(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module.
+        define(['vendor/signals', 'vendor/hasher'], factory);
+    } else {
+        // Browser globals
+        root.parameters = factory(root.signals);
+    }
+}(this, function (signals) {
     var parameters = {
         //whenever the parameters, section, or roleId changes trigger changed
         changed: new signals.Signal(),
@@ -82,15 +90,8 @@ define(['jquery', 'hasher', 'underscore.string', 'signals'], function ($, hasher
             hash = hasher.getHash();
         }
 
-        if (_s.include(hash, "view")) {
-            var from = hash.indexOf("view") + 5;
-            var to = hash.indexOf(".html", from);
-            return {
-                name: hash.substring(from, to)
-            };
-        }
         //ex #silverlight?section=sectionName
-        else {
+        if (_.str.include(hash, "silverlight")) {
             var params = parameters.get(hash);
             if (!params || !params.section) {
                 return null;
@@ -100,8 +101,19 @@ define(['jquery', 'hasher', 'underscore.string', 'signals'], function ($, hasher
                 isSilverlight: true
             };
         }
+        //else: ex #personalSetting?
+        var qIndex = hash.indexOf('?');
+        if (qIndex > -1) {
+            hash = hash.substring(0, qIndex);
+        }
 
-        return null;
+        if (hash.length <= 0) {
+            return null;
+        }
+
+        return {
+            name: hash
+        };
     };
 
     /**
@@ -135,14 +147,14 @@ define(['jquery', 'hasher', 'underscore.string', 'signals'], function ($, hasher
         if (!section) {
             section = parameters.getSection();
         }
-        var query = "";
+        var query = "#";
 
         if (section) {
             if (section.isSilverlight) {
-                query = "silverlight";
+                query += "silverlight";
                 params.section = section.name;
             } else {
-                query = "view/" + section.name + ".html";
+                query += section.name;
             }
         }
 
@@ -259,6 +271,5 @@ define(['jquery', 'hasher', 'underscore.string', 'signals'], function ($, hasher
         }
     });
 
-
     return parameters;
-});
+}));

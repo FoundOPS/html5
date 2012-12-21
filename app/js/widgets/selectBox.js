@@ -1,6 +1,5 @@
 'use strict';
 
-define(['jquery', 'underscore'], function ($, _) {
     /**
      * A dynamic drop down list jquery widget that uses a <select> element for mobile compatibility.
      * @param config - {
@@ -67,4 +66,3 @@ define(['jquery', 'underscore'], function ($, _) {
             selectBox.appendChild(sel);
         });
     };
-});
