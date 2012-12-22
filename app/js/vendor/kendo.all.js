@@ -1,5 +1,5 @@
 /*
-* Kendo UI Complete v2012.2.913 (http://kendoui.com)
+* Kendo UI Complete v2012.3.1210 (http://kendoui.com)
 * Copyright 2012 Telerik AD. All rights reserved.
 *
 * Kendo UI Complete commercial licenses may be obtained at
@@ -208,7 +208,8 @@
         escapedCurlyRegExp = /\\\}/g,
         curlyRegExp = /__CURLY__/g,
         escapedSharpRegExp = /\\#/g,
-        sharpRegExp = /__SHARP__/g;
+        sharpRegExp = /__SHARP__/g,
+        zeros = ["", "0", "00", "000", "0000"];
 
     Template = {
         paramName: "data", // name of the parameter of the generated template
@@ -272,8 +273,16 @@
         }
     };
 
-function pad(number) {
-    return number < 10 ? "0" + number : number;
+function pad(number, digits, end) {
+    number = number + "";
+    digits = digits || 2;
+    end = digits - number.length;
+
+    if (end) {
+        return zeros[digits].substring(0, end) + number;
+    }
+
+    return number;
 }
 
     //JSON stringify
@@ -295,17 +304,16 @@ function pad(number) {
 
     if (typeof Date.prototype.toJSON !== FUNCTION) {
 
-
         Date.prototype.toJSON = function (key) {
             var that = this;
 
             return isFinite(that.valueOf()) ?
-                that.getUTCFullYear()     + "-" +
-                pad(that.getUTCMonth() + 1) + "-" +
-                pad(that.getUTCDate())      + "T" +
-                pad(that.getUTCHours())     + ":" +
-                pad(that.getUTCMinutes())   + ":" +
-                pad(that.getUTCSeconds())   + "Z" : null;
+                pad(that.getUTCFullYear(), 4) + "-" +
+                pad(that.getUTCMonth() + 1)   + "-" +
+                pad(that.getUTCDate())        + "T" +
+                pad(that.getUTCHours())       + ":" +
+                pad(that.getUTCMinutes())     + ":" +
+                pad(that.getUTCSeconds())     + "Z" : null;
         };
 
         String.prototype.toJSON = Number.prototype.toJSON = Boolean.prototype.toJSON = function (key) {
@@ -569,7 +577,7 @@ function pad(number) {
             } else if (match === "yy") {
                 result = pad(date.getFullYear() % 100);
             } else if (match === "yyyy") {
-                result = date.getFullYear();
+                result = pad(date.getFullYear(), 4);
             } else if (match === "h" ) {
                 result = date.getHours() % 12 || 12;
             } else if (match === "hh") {
@@ -997,6 +1005,13 @@ function pad(number) {
         return $.map(designators, designatorPredicate);
     }
 
+    //if date's day is different than the typed one - adjust
+    function adjustDate(date, hours) {
+        if (!hours && date.getHours() === 23) {
+            date.setHours(date.getHours() + 2);
+        }
+    }
+
     function parseExact(value, format, culture) {
         if (!value) {
             return null;
@@ -1065,7 +1080,8 @@ function pad(number) {
             ch, count, length, pattern,
             pmHour, UTC, ISO8601, matches,
             amDesignators, pmDesignators,
-            hoursOffset, minutesOffset;
+            hoursOffset, minutesOffset,
+            century;
 
         if (!format) {
             format = "d"; //shord date format
@@ -1108,11 +1124,17 @@ function pad(number) {
                 } else if (ch === "y") {
                     count = lookAhead("y");
                     year = getNumber(count);
+
                     if (year === null) {
-                        year = defaultYear;
+                        return null;
                     }
-                    if (year < shortYearCutOff) {
-                        year = (defaultYear - defaultYear % 100) + year;
+
+                    if (count == 2) {
+                        century = defaultYear - defaultYear % 100;
+                        if (shortYearCutOff < year) {
+                            century -= 100;
+                        }
+                        year = century + year;
                     }
                 } else if (ch === "h" ) {
                     lookAhead("h");
@@ -1144,9 +1166,15 @@ function pad(number) {
                 } else if (ch === "f") {
                     count = lookAhead("f");
                     milliseconds = getNumber(count);
+
+                    if (milliseconds !== null && count > 3) {
+                        milliseconds = parseInt(milliseconds.toString().substring(0, 3), 10);
+                    }
+
                     if (milliseconds === null || outOfRange(milliseconds, 0, 999)) {
                         return null;
                     }
+
                 } else if (ch === "t") {
                     count = lookAhead("t");
                     amDesignators = calendar.AM;
@@ -1208,6 +1236,10 @@ function pad(number) {
             }
         }
 
+        if (year === null) {
+            year = defaultYear;
+        }
+
         if (pmHour && hours < 12) {
             hours += 12;
         }
@@ -1225,11 +1257,20 @@ function pad(number) {
                 minutes += -minutesOffset;
             }
 
-            return new Date(Date.UTC(year, month, day, hours, minutes, seconds, milliseconds));
+            value = new Date(Date.UTC(year, month, day, hours, minutes, seconds, milliseconds));
+        } else {
+            value = new Date(year, month, day, hours, minutes, seconds, milliseconds);
+            adjustDate(value, hours);
         }
 
-        return new Date(year, month, day, hours, minutes, seconds, milliseconds);
+        if (year < 100) {
+            value.setFullYear(year);
+        }
+
+        return value;
     }
+
+    kendo._adjustDate = adjustDate;
 
     kendo.parseDate = function(value, formats, culture) {
         if (value instanceof Date) {
@@ -1258,6 +1299,7 @@ function pad(number) {
                 formats[idx] = patterns[formatsSequence[idx]];
             }
             formats[idx] = "ddd MMM dd yyyy HH:mm:ss";
+            formats[++idx] = "yyyy-MM-ddTHH:mm:ss.fffffffzzz";
             formats[++idx] = "yyyy-MM-ddTHH:mm:ss.fffzzz";
             formats[++idx] = "yyyy-MM-ddTHH:mm:sszzz";
             formats[++idx] = "yyyy-MM-ddTHH:mmzzz";
@@ -1352,13 +1394,28 @@ function pad(number) {
     };
 
     if (globalize) {
-        kendo.parseDate = proxy(globalize.parseDate, globalize);
-        kendo.parseFloat = proxy(globalize.parseFloat, globalize);
+        kendo.parseDate = function (value, format, culture) {
+            if (value instanceof Date) {
+                return value;
+            }
+
+            return globalize.parseDate(value, format, culture);
+        };
+
+        kendo.parseFloat = function (value, culture, format) {
+            if (typeof value === NUMBER) {
+                return value;
+            }
+
+            return globalize.parseFloat(value, culture);
+        };
     }
 })();
 
     function wrap(element) {
-        var browser = support.browser, percentage;
+        var browser = support.browser,
+            percentage,
+            isRtl = element.css("direction") == "rtl";
 
         if (!element.parent().hasClass("k-animation-container")) {
             var shadow = element.css(kendo.support.transitions.css + "box-shadow") || element.css("box-shadow"),
@@ -1387,7 +1444,7 @@ function pad(number) {
                          .css({
                              width: width,
                              height: height,
-                             marginLeft: -left,
+                             marginLeft: left * (isRtl ? 1 : -1),
                              paddingLeft: left,
                              paddingRight: right,
                              paddingBottom: bottom
@@ -1522,6 +1579,10 @@ function pad(number) {
             return result;
         };
 
+        support.isRtl = function(element) {
+            return $(element).closest(".k-rtl").length > 0;
+        };
+
         var table = document.createElement("table");
 
         // Internet Explorer does not support setting the innerHTML of TBODY and TABLE elements
@@ -1579,7 +1640,7 @@ function pad(number) {
                     ipad: /(iPad).*OS\s+(\d+)[\._]([\d_]+)/,
                     meego: /(MeeGo).+NokiaBrowser\/(\d+)\.([\d\._]+)/,
                     webos: /(webOS)\/(\d+)\.(\d+(\.\d+)?)/,
-                    blackberry: /(BlackBerry).*?Version\/(\d+)\.(\d+(\.\d+)?)/,
+                    blackberry: /(BlackBerry|BB10).*?Version\/(\d+)\.(\d+(\.\d+)?)/,
                     playbook: /(PlayBook).*?Tablet\s*OS\s*(\d+)\.(\d+(\.\d+)?)/,
                     winphone: /(IEMobile)\/(\d+)\.(\d+(\.\d+)?)/,
                     windows: /(MSIE)\s+(\d+)\.(\d+(\.\d+)?)/
@@ -1621,7 +1682,7 @@ function pad(number) {
                         os.flatVersion = os.majorVersion + minorVersion + (new Array(3 - (minorVersion.length < 3 ? minorVersion.length : 2)).join("0"));
                         os.appMode = window.navigator.standalone || (/file|local/).test(window.location.protocol) || typeof window.PhoneGap !== UNDEFINED || typeof window.cordova !== UNDEFINED; // Use file protocol to detect appModes.
 
-                        if (os.android && support.devicePixelRatio < 1.5 && (window.outerWidth > 800 || window.outerHeight > 800)) {
+                        if (os.android && support.devicePixelRatio < 1.5 && (window.outerWidth > 800 || window.outerHeight > 800 || (window.screen && (window.screen.availWidth > 800 || window.screen.availHeight > 800)))) {
                             os.tablet = agent;
                         }
 
@@ -1633,6 +1694,8 @@ function pad(number) {
         };
 
         support.mobileOS = support.detectOS(navigator.userAgent);
+
+        support.kineticScrollNeeded = support.mobileOS && support.touch;
 
         function detectBrowser(ua) {
             var browser = false, match = [],
@@ -1661,6 +1724,29 @@ function pad(number) {
         }
 
         support.browser = detectBrowser(navigator.userAgent);
+
+        (function(browser) {
+            // add browser-specific CSS class
+            var cssClass,
+                version = "" + browser.version,
+                majorVersion = version.substring(0, version.indexOf("."));
+
+            if (browser.msie) {
+                cssClass = "ie";
+            } else if (browser.mozilla) {
+                cssClass = "ff";
+            } else if (browser.safari) {
+                cssClass = "safari";
+            } else if (browser.webkit) {
+                cssClass = "webkit";
+            } else if (browser.opera) {
+                cssClass = "opera";
+            }
+
+            if (cssClass) {
+                $(document.documentElement).addClass("k-" + cssClass + " k-" + cssClass + majorVersion);
+            }
+        })(support.browser);
 
         support.zoomLevel = function() {
             return support.touch ? (document.documentElement.clientWidth / window.innerWidth) : 1;
@@ -1752,9 +1838,17 @@ function pad(number) {
         return effects;
     }
 
-    var fx = {
+    function fx(element) {
+        return new kendo.fx.Element(element);
+    }
+
+    $.extend(fx, {
+        Element: function(element) {
+            this.element = $(element);
+        },
+
         promise: function (element, options) {
-            if (options.show) {
+            if (!element.is(":visible")) {
                 element.css({ display: element.data("olddisplay") || "block" }).css("display");
             }
 
@@ -1786,7 +1880,7 @@ function pad(number) {
 
             return element;
         }
-    };
+    });
 
     function prepareAnimationOptions(options, duration, reverse, complete) {
         if (typeof options === STRING) {
@@ -1824,19 +1918,22 @@ function pad(number) {
             reverse: false,
             init: noop,
             teardown: noop,
-            hide: false,
-            show: false
+            hide: false
         }, options, { completeCallback: options.complete, complete: noop }); // Move external complete callback, so deferred.resolve can be always executed.
 
     }
 
     function animate(element, options, duration, reverse, complete) {
-        element.each(function (idx, el) { // fire separate queues on every element to separate the callback elements
-            el = $(el);
-            el.queue(function () {
-                fx.promise(el, prepareAnimationOptions(options, duration, reverse, complete));
+        var idx = 0,
+            length = element.length,
+            instance;
+
+        for (; idx < length; idx ++) {
+            instance = $(element[idx]);
+            instance.queue(function() {
+                fx.promise(instance, prepareAnimationOptions(options, duration, reverse, complete));
             });
-        });
+        }
 
         return element;
     }
@@ -1932,13 +2029,10 @@ function pad(number) {
         };
 
         eventTarget = function(e) {
-            var touches = "originalEvent" in e ? e.originalEvent.changedTouches : "changedTouches" in e ? e.changedTouches : null;
+            var touches = "originalEvent" in e ? e.originalEvent.changedTouches : "changedTouches" in e ? e.changedTouches : null,
+                property = mobileChrome ? "screen" : "client";
 
-            if (mobileChrome) {
-                return touches ? document.elementFromPoint(touches[0].screenX, touches[0].screenY) : null;
-            } else {
-                return touches ? document.elementFromPoint(touches[0].clientX, touches[0].clientY) : null;
-            }
+            return touches ? document.elementFromPoint(touches[0][property + "X"], touches[0][property + "Y"]) : e.target;
         };
 
         each(["swipe", "swipeLeft", "swipeRight", "swipeUp", "swipeDown", "doubleTap", "tap"], function(m, value) {
@@ -1949,22 +2043,34 @@ function pad(number) {
     }
 
     if (support.touch) {
-        support.mousedown = "touchstart";
-        support.mouseup = "touchend";
-        support.mousemove = "touchmove";
-        support.mousecancel = "touchcancel";
-        support.resize = "orientationchange";
+        if (!support.mobileOS) {
+            support.mousedown = "mousedown touchstart";
+            support.mouseup = "mouseup touchend";
+            support.mousemove = "mousemove touchmove";
+            support.mousecancel = "mouseleave touchcancel";
+            support.click = "click touchend";
+            support.resize = "resize";
+        } else {
+            support.mousedown = "touchstart";
+            support.mouseup = "touchend";
+            support.mousemove = "touchmove";
+            support.mousecancel = "touchcancel";
+            support.click = "touchend";
+            support.resize = "orientationchange";
+        }
     } else if (support.pointers) {
         support.mousemove = "MSPointerMove";
         support.mousedown = "MSPointerDown";
         support.mouseup = "MSPointerUp";
         support.mousecancel = "MSPointerCancel";
+        support.click = "MSPointerUp";
         support.resize = "orientationchange resize";
     } else {
         support.mousemove = "mousemove";
         support.mousedown = "mousedown";
         support.mouseup = "mouseup";
         support.mousecancel = "mouseleave";
+        support.click = "click";
         support.resize = "resize";
     }
 
@@ -2117,7 +2223,7 @@ function pad(number) {
         init: function(element, options) {
             var that = this;
 
-            that.element = $(element);
+            that.element = kendo.jQuery(element).handler(that);
 
             Observable.fn.init.call(that);
 
@@ -2136,6 +2242,18 @@ function pad(number) {
 
         options: {
             prefix: ""
+        },
+
+        _tabindex: function(target) {
+            target = target || this.wrapper;
+
+            var element = this.element,
+                TABINDEX = "tabindex",
+                tabindex = target.attr(TABINDEX) || element.attr(TABINDEX);
+
+            element.removeAttr(TABINDEX);
+
+            target.attr(TABINDEX, !isNaN(tabindex) ? tabindex : 0);
         },
 
         setOptions: function(options) {
@@ -2289,15 +2407,19 @@ function pad(number) {
     };
 
     kendo.rolesFromNamespaces = function(namespaces) {
-        var roles;
+        var roles = [],
+            idx,
+            length;
 
         if (!namespaces[0]) {
             namespaces = [kendo.ui, kendo.dataviz.ui];
         }
 
-        roles = $.map(namespaces, function(namespace) { return namespace.roles; }).reverse();
+        for (idx = 0, length = namespaces.length; idx < length; idx ++) {
+            roles[idx] = namespaces[idx].roles;
+        }
 
-        return extend.apply(null, [{}].concat(roles));
+        return extend.apply(null, [{}].concat(roles.reverse()));
     };
 
     kendo.init = function(element) {
@@ -2398,10 +2520,18 @@ function pad(number) {
         }
     });
 
+    var ContainerNullObject = { bind: $.noop };
+
     var MobileWidget = Widget.extend({
         init: function(element, options) {
             Widget.fn.init.call(this, element, options);
+            this.element.autoApplyNS();
             this.wrapper = this.element;
+        },
+
+        destroy: function() {
+            Widget.fn.destroy.call(this);
+            this.element.kendoDestroy();
         },
 
         options: {
@@ -2410,11 +2540,14 @@ function pad(number) {
 
         events: [],
 
-        viewShow: $.noop,
-
         view: function() {
-            var viewElement = this.element.closest(kendo.roleSelector("view") + "," + kendo.roleSelector("splitview"));
+            var viewElement = this.element.closest(kendo.roleSelector("view splitview"));
             return viewElement.data("kendoMobileView") || viewElement.data("kendoMobileSplitView");
+        },
+
+        container: function() {
+            var element = this.element.closest(kendo.roleSelector("view layout"));
+            return kendo.widgetInstance(element, kendo.mobile.ui) || ContainerNullObject;
         }
     });
 
@@ -2436,7 +2569,7 @@ function pad(number) {
         // return the first touch scroller
         return $(elements).map(function(idx, element) {
             element = $(element);
-            if (support.touch && kendo.mobile.ui.Scroller && !element.data("kendoMobileScroller")) {
+            if (support.kineticScrollNeeded && kendo.mobile.ui.Scroller && !element.data("kendoMobileScroller")) {
                 element.kendoMobileScroller(options);
                 return element.data("kendoMobileScroller");
             } else {
@@ -2469,6 +2602,204 @@ function pad(number) {
     kendo.attrValue = function(element, key) {
         return element.data(kendo.ns + key);
     };
+
+    kendo.days = {
+        Sunday: 0,
+        Monday: 1,
+        Tuesday: 2,
+        Wednesday: 3,
+        Thursday: 4,
+        Friday: 5,
+        Saturday: 6
+    };
+
+    function focusable(element, isTabIndexNotNaN) {
+        var nodeName = element.nodeName.toLowerCase();
+
+        return (/input|select|textarea|button|object/.test(nodeName) ?
+                !element.disabled :
+                "a" === nodeName ?
+                element.href || isTabIndexNotNaN :
+                isTabIndexNotNaN
+               ) &&
+            visible(element);
+    }
+
+    function visible(element) {
+        return !$(element).parents().andSelf().filter(function() {
+            return $.css(this,"visibility") === "hidden" || $.expr.filters.hidden(this);
+        }).length;
+    }
+
+    $.extend($.expr[ ":" ], {
+        focusable: function(element) {
+            var idx = $.attr(element, "tabindex");
+            return focusable(element, !isNaN(idx) && idx > -1);
+        }
+    });
+
+
+    var MOUSE_EVENTS = ["mousedown", "mousemove", "mouseenter", "mouseleave", "mouseover", "mouseout", "mouseup", "click"];
+    var EXCLUDE_BUST_CLICK_SELECTOR = "label, input[type=file], [data-rel=external]";
+
+    var MouseEventNormalizer = {
+        setupMouseMute: function() {
+            var idx = 0,
+                length = MOUSE_EVENTS.length,
+                element = document.documentElement;
+
+            if (MouseEventNormalizer.mouseTrap || !support.eventCapture) {
+                return;
+            }
+
+            MouseEventNormalizer.mouseTrap = true;
+
+            MouseEventNormalizer.bustClick = false;
+            MouseEventNormalizer.captureMouse = false;
+
+            var handler = function(e) {
+                if (MouseEventNormalizer.captureMouse) {
+                    if (e.type === "click") {
+                        if (MouseEventNormalizer.bustClick && !$(e.target).is(EXCLUDE_BUST_CLICK_SELECTOR)) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                        }
+                    } else {
+                        e.stopPropagation();
+                    }
+                }
+            };
+
+            for (; idx < length; idx++) {
+                element.addEventListener(MOUSE_EVENTS[idx], handler, true);
+            }
+        },
+
+        muteMouse: function(e) {
+            MouseEventNormalizer.captureMouse = true;
+            if (e.data.bustClick) {
+                MouseEventNormalizer.bustClick = true;
+            }
+            clearTimeout(MouseEventNormalizer.mouseTrapTimeoutID);
+        },
+
+        unMuteMouse: function() {
+            clearTimeout(MouseEventNormalizer.mouseTrapTimeoutID);
+            MouseEventNormalizer.mouseTrapTimeoutID = setTimeout(function() {
+                MouseEventNormalizer.captureMouse = false;
+                MouseEventNormalizer.bustClick = false;
+            }, 400);
+        }
+    };
+
+    var eventMap = {
+        down: "touchstart mousedown",
+        move: "mousemove touchmove",
+        up: "mouseup touchend touchcancel",
+        cancel: "mouseleave touchcancel"
+    };
+
+    if (support.pointers) {
+        eventMap = {
+            down: "MSPointerDown",
+            move: "MSPointerMove",
+            up: "MSPointerUp",
+            cancel: "MSPointerCancel"
+        };
+    }
+
+    function applyEventMap(e) {
+        return (eventMap[e] || e);
+    }
+
+    var on = $.fn.on;
+
+    var kendoJQuery = $.sub();
+
+    extend(kendoJQuery.fn, {
+        handler: function(handler) {
+            this.data("handler", handler);
+            return this;
+        },
+
+        autoApplyNS: function(ns) {
+            ns = ns || kendo.guid();
+            this.data("kendoNS", "." + ns);
+            return this;
+        },
+
+        on: function() {
+            var that = this,
+                ns = that.data("kendoNS");
+
+            // support for event map signature
+            if (arguments.length === 1) {
+                return on.call(that, arguments[0]);
+            }
+
+            var context = that,
+                args = slice.call(arguments);
+
+            if (typeof args[args.length -1] === UNDEFINED) {
+                args.pop();
+            }
+
+            var callback =  args[args.length - 1],
+                events = args[0].replace(/([^ ]+)/g, applyEventMap);
+
+            if (ns) {
+                events = events.replace(/( |$)/g, ns + " ");
+            }
+
+            // setup mouse trap
+            if (support.touch && events.search(/mouse|click/) > -1 && this[0] !== document.documentElement) {
+                MouseEventNormalizer.setupMouseMute();
+                var selector = args.length === 2 ? null : args[1],
+                    bustClick = events.indexOf("click") > -1 && events.indexOf("touchend") > -1;
+
+                on.call(this,
+                    {
+                        touchstart: MouseEventNormalizer.muteMouse,
+                        touchend: MouseEventNormalizer.unMuteMouse
+                    },
+                    selector,
+                    {
+                        bustClick: bustClick
+                    } );
+            }
+
+            if (typeof callback === STRING) {
+                context = that.data("handler");
+                callback = context[callback];
+
+                args[args.length - 1] = function(e) {
+                    callback.call(context, e);
+                };
+            }
+
+            args[0] = events;
+
+            on.apply(that, args);
+
+            return that;
+        },
+
+        kendoDestroy: function(ns) {
+            if (ns) {
+                ns = "." + ns;
+            } else {
+                ns = this.data("kendoNS");
+            }
+
+            if (ns) {
+                this.off(ns);
+            }
+            return this;
+        }
+    });
+
+    kendo.jQuery = kendoJQuery;
+    kendo.eventMap = eventMap;
 })(jQuery);
 (function($, undefined) {
     /**
@@ -2481,7 +2812,6 @@ function pad(number) {
         each = $.each,
         extend = $.extend,
         proxy = $.proxy,
-        size = kendo.size,
         support = kendo.support,
         browser = support.browser,
         transforms = support.transforms,
@@ -2499,6 +2829,7 @@ function pad(number) {
         transform2d = ["rotate", "scale", "scalex", "scaley", "skew", "skewx", "skewy", "translate", "translatex", "translatey", "matrix"],
         transform2units = { "rotate": "deg", scale: "", skew: "px", translate: "px" },
         cssPrefix = transforms.css,
+        Effects = {},
         round = Math.round,
         BLANK = "",
         PX = "px",
@@ -2514,52 +2845,61 @@ function pad(number) {
         TRANSITION = cssPrefix + "transition",
         TRANSFORM = cssPrefix + "transform",
         PERSPECTIVE = cssPrefix + "perspective",
-        BACKFACE = cssPrefix + "backface-visibility";
+        BACKFACE = cssPrefix + "backface-visibility",
+        directions = {
+            left: {
+                reverse: "right",
+                property: "left",
+                transition: "translatex",
+                vertical: false,
+                modifier: -1
+            },
+            right: {
+                reverse: "left",
+                property: "left",
+                transition: "translatex",
+                vertical: false,
+                modifier: 1
+            },
+            down: {
+                reverse: "up",
+                property: "top",
+                transition: "translatey",
+                vertical: true,
+                modifier: 1
+            },
+            up: {
+                reverse: "down",
+                property: "top",
+                transition: "translatey",
+                vertical: true,
+                modifier: -1
+            },
+            top: {
+                reverse: "bottom"
+            },
+            bottom: {
+                reverse: "top"
+            },
+            "in": {
+                reverse: "out",
+                modifier: -1
+            },
+            out: {
+                reverse: "in",
+                modifier: 1
+            },
 
-    kendo.directions = {
-        left: {
-            reverse: "right",
-            property: "left",
-            transition: "translatex",
-            vertical: false,
-            modifier: -1
-        },
-        right: {
-            reverse: "left",
-            property: "left",
-            transition: "translatex",
-            vertical: false,
-            modifier: 1
-        },
-        down: {
-            reverse: "up",
-            property: "top",
-            transition: "translatey",
-            vertical: true,
-            modifier: 1
-        },
-        up: {
-            reverse: "down",
-            property: "top",
-            transition: "translatey",
-            vertical: true,
-            modifier: -1
-        },
-        top: {
-            reverse: "bottom"
-        },
-        bottom: {
-            reverse: "top"
-        },
-        "in": {
-            reverse: "out",
-            modifier: -1
-        },
-        out: {
-            reverse: "in",
-            modifier: 1
-        }
-    };
+            vertical: {
+                reverse: "vertical"
+            },
+
+            horizontal: {
+                reverse: "horizontal"
+            }
+        };
+
+        kendo.directions = directions;
 
     extend($.fn, {
         kendoStop: function(clearQueue, gotoEnd) {
@@ -2645,7 +2985,7 @@ function pad(number) {
                     effectBody = {};
 
                 if (effect.length > 1) {
-                    effectBody.direction = (mirror && redirectedEffect ? kendo.directions[direction].reverse : direction);
+                    effectBody.direction = (mirror && redirectedEffect ? directions[direction].reverse : direction);
                 }
 
                 effects[effect[0]] = effectBody;
@@ -2655,7 +2995,7 @@ function pad(number) {
                 var direction = this.direction;
 
                 if (direction && mirror && !singleEffectRegExp.test(idx)) {
-                    this.direction = kendo.directions[direction].reverse;
+                    this.direction = directions[direction].reverse;
                 }
 
                 effects[idx] = this;
@@ -2673,25 +3013,21 @@ function pad(number) {
         return parseInteger(element.css(property));
     }
 
-    function slideToSlideIn(options) {
-      options.effects.slideIn = options.effects.slide;
-      delete options.effects.slide;
-      delete options.complete;
-      return options;
-    }
 
     function parseTransitionEffects(options) {
-        var effects = options.effects,
-            mirror;
+        var effects = options.effects;
 
         if (effects === "zoom") {
-            effects = "zoomIn fadeIn";
-        }
-        if (effects === "slide") {
-            effects = "slide:left";
+            effects = "zoom:in fade:in";
         }
         if (effects === "fade") {
-            effects = "fadeIn";
+            effects = "fade:in";
+        }
+        if (effects === "slide") {
+            effects = "tile:left";
+        }
+        if (/^slide:(.+)$/.test(effects)) {
+            effects = "tile:" + RegExp.$1;
         }
         if (effects === "overlay") {
             effects = "slideIn:left";
@@ -2700,13 +3036,7 @@ function pad(number) {
             effects = "slideIn:" + RegExp.$1;
         }
 
-        mirror = options.reverse && /^(slide:)/.test(effects);
-
-        if (mirror) {
-            delete options.reverse;
-        }
-
-        options.effects = $.extend(kendo.parseEffects(effects, mirror), {show: true});
+        options.effects = kendo.parseEffects(effects);
 
         return options;
     }
@@ -2719,34 +3049,6 @@ function pad(number) {
         return acc;
     }
 
-    function stopTransition(element, transition) {
-        if (element.data(ABORT_ID)) {
-            clearTimeout(element.data(ABORT_ID));
-            element.removeData(ABORT_ID);
-        }
-
-        element.css(TRANSITION, "").css(TRANSITION);
-        element.dequeue();
-        transition.complete.call(element);
-    }
-
-    function activateTask(currentTransition) {
-        var element = currentTransition.object, delay = 0;
-
-        if (!currentTransition) {
-            return;
-        }
-
-        element.css(currentTransition.setup).css(TRANSITION);
-        element.css(currentTransition.CSS).css(TRANSFORM);
-
-        if (browser.mozilla) {
-            element.one(transitions.event, function () { stopTransition(element, currentTransition); } );
-            delay = 50;
-        }
-        element.data(ABORT_ID, setTimeout(stopTransition, currentTransition.duration + delay, element, currentTransition));
-    }
-
     function strip3DTransforms(properties) {
         for (var key in properties) {
             if (transformProps.indexOf(key) != -1 && transform2d.indexOf(key) == -1) {
@@ -2757,26 +3059,8 @@ function pad(number) {
         return properties;
     }
 
-    function evaluateCSS(element, properties, options) {
-        var key, value;
-
-        for (key in properties) {
-            if ($.isFunction(properties[key])) {
-                value = properties[key](element, options);
-                if (value !== undefined) {
-                    properties[key] = value;
-                } else {
-                    delete properties[key];
-                }
-            }
-
-        }
-
-        return properties;
-    }
-
-    function normalizeCSS(element, properties, options) {
-        var transformation = [], cssValues = {}, lowerKey, key, value, exitValue, isTransformed;
+    function normalizeCSS(element, properties) {
+        var transformation = [], cssValues = {}, lowerKey, key, value, isTransformed;
 
         for (key in properties) {
             lowerKey = key.toLowerCase();
@@ -2785,23 +3069,12 @@ function pad(number) {
             if (!support.hasHW3D && isTransformed && transform2d.indexOf(lowerKey) == -1) {
                 delete properties[key];
             } else {
-                exitValue = false;
+                value = properties[key];
 
-                if ($.isFunction(properties[key])) {
-                    value = properties[key](element, options);
-                    if (value !== undefined) {
-                        exitValue = value;
-                    }
+                if (isTransformed) {
+                    transformation.push(key + "(" + value + ")");
                 } else {
-                    exitValue = properties[key];
-                }
-
-                if (exitValue !== false) {
-                    if (isTransformed) {
-                        transformation.push(key + "(" + exitValue + ")");
-                    } else {
-                        cssValues[key] = exitValue;
-                    }
+                    cssValues[key] = value;
                 }
             }
         }
@@ -2814,9 +3087,12 @@ function pad(number) {
     }
 
     if (transitions) {
-
         extend(kendo.fx, {
             transition: function(element, properties, options) {
+                var css,
+                    delay = 0,
+                    oldKeys = element.data("keys") || [],
+                    timeoutID;
 
                 options = extend({
                         duration: 200,
@@ -2827,28 +3103,42 @@ function pad(number) {
                     options
                 );
 
+                var stopTransition = function() {
+                   if (timeoutID) {
+                       clearTimeout(timeoutID);
+                       timeoutID = null;
+                       element
+                           .removeData(ABORT_ID)
+                           .dequeue()
+                           .css(TRANSITION, "")
+                           .css(TRANSITION);
+
+                       options.complete.call(element);
+                   }
+                };
+
                 options.duration = $.fx ? $.fx.speeds[options.duration] || options.duration : options.duration;
 
-                var css = normalizeCSS(element, properties, options),
-                    currentTask = {
-                        keys: keys(css),
-                        CSS: css,
-                        object: element,
-                        setup: {},
-                        duration: options.duration,
-                        complete: options.complete
-                    };
-                currentTask.setup[TRANSITION] = options.exclusive + " " + options.duration + "ms " + options.ease;
+                css = normalizeCSS(element, properties);
 
-                var oldKeys = element.data("keys") || [];
-                $.merge(oldKeys, currentTask.keys);
-                element.data("keys", $.unique(oldKeys));
+                $.merge(oldKeys, keys(css));
+                element
+                    .data("keys", $.unique(oldKeys))
+                    .height();
 
-                activateTask(currentTask);
+                element.css(TRANSITION, options.exclusive + " " + options.duration + "ms " + options.ease).css(TRANSITION);
+                element.css(css).css(TRANSFORM);
+
+                if (browser.mozilla) {
+                    element.one(transitions.event, stopTransition);
+                    delay = 50;
+                }
+
+                timeoutID = setTimeout(stopTransition, options.duration + delay);
+                element.data(ABORT_ID, timeoutID);
             },
 
             stopQueue: function(element, clearQueue, gotoEnd) {
-
                 if (element.data(ABORT_ID)) {
                     clearTimeout(element.data(ABORT_ID));
                     element.removeData(ABORT_ID);
@@ -2877,7 +3167,6 @@ function pad(number) {
                 element.stop(clearQueue);
                 return element;
             }
-
         });
     }
 
@@ -2914,109 +3203,132 @@ function pad(number) {
         }
     }
 
-    function initDirection (element, direction, reverse) {
-        var real = kendo.directions[direction],
-            dir = reverse ? kendo.directions[real.reverse] : real;
+    var EffectSet = kendo.Class.extend({
+        init: function(element, options) {
+            var that = this;
 
-        return { direction: dir, offset: -dir.modifier * (dir.vertical ? element.outerHeight() : element.outerWidth()) };
-    }
+            that.element = element;
+            that.effects = [];
+            that.options = options;
+            that.restore = [];
+        },
 
-    kendo.fx.promise = function(element, options) {
-        var promises = [], effects;
+        run: function(effects) {
+            var that = this,
+                effect,
+                idx, jdx,
+                length = effects.length,
+                element = that.element,
+                options = that.options,
+                deferred = $.Deferred(),
+                start = {},
+                end = {},
+                target,
+                children,
+                childrenLength;
 
-        effects = kendo.parseEffects(options.effects);
-        options.effects = effects;
+            that.effects = effects;
 
-        element.data("animating", true);
+            deferred.then($.proxy(that, "complete"));
 
-        var props = { keep: [], restore: [] }, css = {}, target,
-            methods = { setup: [], teardown: [] }, properties = {},
+            element.data("animating", true);
 
-            // create a promise for each effect
-            promise = $.Deferred(function(deferred) {
-                if (size(effects)) {
-                    var opts = extend({}, options, { complete: deferred.resolve });
+            for (idx = 0; idx < length; idx ++) {
+                effect = effects[idx];
 
-                    each(effects, function(effectName, settings) {
-                        var effect = kendo.fx[effectName];
+                effect.setReverse(options.reverse);
+                effect.setOptions(options);
 
-                        if (effect) {
-                            var dir = kendo.directions[settings.direction];
-                            if (settings.direction && dir) {
-                                settings.direction = (options.reverse ? dir.reverse : settings.direction);
-                            }
+                that.addRestoreProperties(effect.restore);
 
-                            opts = extend(true, opts, settings);
+                effect.prepare(start, end);
 
-                            each(methods, function (idx) {
-                                if (effect[idx]) {
-                                    methods[idx].push(effect[idx]);
-                                }
-                            });
+                children = effect.children();
 
-                            each(props, function(idx) {
-                                if (effect[idx]) {
-                                    $.merge(props[idx], effect[idx]);
-                                }
-                            });
-
-                            if (effect.css) {
-                                css = extend(css, effect.css);
-                            }
-                        }
-                    });
-
-                    if (methods.setup.length) {
-                        each ($.unique(props.keep), function(idx, value) {
-                            if (!element.data(value)) {
-                                element.data(value, element.css(value));
-                            }
-                        });
-
-                        if (options.show) {
-                            css = extend(css, { display: element.data("olddisplay") || "block" }); // Add show to the set
-                        }
-
-                        if (transforms && !options.reset) {
-                            css = evaluateCSS(element, css, opts);
-
-                            target = element.data("targetTransform");
-
-                            if (target) {
-                                css = extend(target, css);
-                            }
-                        }
-                        css = normalizeCSS(element, css, opts);
-
-                        if (transforms && !transitions) {
-                            css = strip3DTransforms(css);
-                        }
-
-                        element.css(css)
-                               .css(TRANSFORM); // Nudge
-
-                        each (methods.setup, function() { properties = extend(properties, this(element, opts)); });
-
-                        if (kendo.fx.animate) {
-                            options.init();
-                            element.data("targetTransform", properties);
-                            kendo.fx.animate(element, properties, opts);
-                        }
-
-                        return;
-                    }
-                } else if (options.show) {
-                    element.css({ display: element.data("olddisplay") || "block" }).css("display");
-                    options.init();
+                for (jdx = 0, childrenLength = children.length; jdx < childrenLength; jdx ++) {
+                    children[jdx].duration(options.duration).run();
                 }
+            }
 
-                deferred.resolve();
-            }).promise();
+            // legacy support for options.properties
+            for (var effectName in options.effects) {
+                extend(end, options.effects[effectName].properties);
+            }
 
-        promises.push(promise);
+            // Show the element initially
+            if (!element.is(":visible")) {
+                extend(start, { display: element.data("olddisplay") || "block" });
+            }
 
-        //wait for all effects to complete
-        $.when.apply(null, promises).then(function() {
+            if (transforms && !options.reset) {
+                target = element.data("targetTransform");
+
+                if (target) {
+                    start = extend(target, start);
+                }
+            }
+
+            start = normalizeCSS(element, start);
+
+            if (transforms && !transitions) {
+                start = strip3DTransforms(start);
+            }
+
+            element.css(start)
+                   .css(TRANSFORM); // Nudge
+
+            for (idx = 0; idx < length; idx ++) {
+                effects[idx].setup();
+            }
+
+            if (options.init) {
+                options.init();
+            }
+
+            element.data("targetTransform", end);
+            kendo.fx.animate(element, end, extend({}, options, { complete: deferred.resolve }));
+
+            return deferred.promise();
+        },
+
+        stop: function() {
+            $(this.element).kendoStop();
+        },
+
+        addRestoreProperties: function(restore) {
+            var element = this.element,
+                value,
+                i = 0,
+                length = restore.length;
+
+            for (; i < length; i ++) {
+                value = restore[i];
+
+                this.restore.push(value);
+
+                if (!element.data(value)) {
+                    element.data(value, element.css(value));
+                }
+            }
+        },
+
+        restoreCallback: function() {
+            var element = this.element;
+
+            for (var i = 0, length = this.restore.length; i < length; i ++) {
+                var value = this.restore[i];
+                element.css(value, element.data(value));
+            }
+        },
+
+        complete: function() {
+            var that = this,
+                idx = 0,
+                element = that.element,
+                options = that.options,
+                effects = that.effects,
+                length = effects.length;
+
             element
                 .removeData("animating")
                 .dequeue(); // call next animation from the queue
@@ -3025,25 +3337,54 @@ function pad(number) {
                 element.data("olddisplay", element.css("display")).hide();
             }
 
-            if (size(effects)) {
-                var restore = function() {
-                    each ($.unique(props.restore), function(idx, value) {
-                        element.css(value, element.data(value));
-                    });
-                };
+            this.restoreCallback();
 
-                restore();
-                if (hasZoom && !transforms) {
-                    setTimeout(restore, 0); // Again jQuery callback in IE8-.
-                }
+            if (hasZoom && !transforms) {
+                setTimeout($.proxy(this, "restoreCallback"), 0); // Again jQuery callback in IE8-
+            }
 
-                each(methods.teardown, function() { this(element, options); }); // call the internal completion callbacks
+            for (; idx < length; idx ++) {
+                effects[idx].teardown();
             }
 
             if (options.completeCallback) {
-                options.completeCallback(element); // call the external complete callback with the element
+                options.completeCallback(element);
             }
-        });
+        }
+    });
+
+    kendo.fx.promise = function(element, options) {
+        var effects = [],
+            effectClass,
+            effectSet = new EffectSet(element, options),
+            parsedEffects = kendo.parseEffects(options.effects),
+            effect;
+
+        options.effects = parsedEffects;
+
+        for (var effectName in parsedEffects) {
+            effectClass = Effects[effectName];
+
+            if (effectClass) {
+                effect = new effectClass(element, parsedEffects[effectName].direction);
+                effects.push(effect);
+            }
+        }
+
+        if (effects[0]) {
+            effectSet.run(effects);
+        } else { // Not sure how would an fx promise reach this state - means that you call kendoAnimate with no valid effects? Why?
+            if (!element.is(":visible")) {
+                element.css({ display: element.data("olddisplay") || "block" }).css("display");
+            }
+
+            if (options.init) {
+                options.init();
+            }
+
+            element.dequeue();
+            effectSet.complete();
+        }
     };
 
     kendo.fx.transitionPromise = function(element, destination, options) {
@@ -3075,17 +3416,8 @@ function pad(number) {
 
                                 if (value in scaleProperties && properties[value] !== undefined) {
                                     params = currentValue.match(cssParamsRegExp);
-                                    if (hasZoom) {
-                                        var half = (1 - params[1]) / 2;
-                                        extend(single, {
-                                                           zoom: +params[1],
-                                                           marginLeft: element.width() * half,
-                                                           marginTop: element.height() * half
-                                                       });
-                                    } else if (transforms) {
-                                        extend(single, {
-                                                           scale: +params[0]
-                                                       });
+                                    if (transforms) {
+                                        extend(single, { scale: +params[0] });
                                     }
                                 } else {
                                     if (value in translateProperties && properties[value] !== undefined) {
@@ -3183,225 +3515,665 @@ function pad(number) {
             }
 
             options.complete = browser.msie ? function() { setTimeout(complete, 0); } : complete;
+            options.previous = (options.reverse ? destination : element);
+
             options.reset = true; // Reset transforms if there are any.
 
-            if ("slide" in options.effects) {
-                element.kendoAnimate(options);
-                destination.kendoAnimate(slideToSlideIn(options));
+            // execute callback only once, and hook up derived animations to previous view only once.
+            (options.reverse ? element : destination).each(function() {
+                $(this).kendoAnimate(extend(true, {}, options));
+                options.complete = null;
+                options.previous = null;
+            });
+        }
+    });
+
+    var Effect = kendo.Class.extend({
+        init: function(element, direction) {
+            var that = this;
+            that.element = element;
+            that._direction = direction;
+            that.options = {};
+            that._additionalEffects = [];
+
+            if (!that.restore) {
+                that.restore = [];
+            }
+        },
+
+// Public API
+        reverse: function() {
+            this._reverse = true;
+            return this.run();
+        },
+
+        play: function() {
+            this._reverse = false;
+            return this.run();
+        },
+
+        add: function(additional) {
+            this._additionalEffects.push(additional);
+            return this;
+        },
+
+        direction: function(value) {
+            this._direction = value;
+            return this;
+        },
+
+        duration: function(duration) {
+            this._duration = duration;
+            return this;
+        },
+
+        compositeRun: function() {
+            var that = this,
+                effectSet = new EffectSet(that.element, { reverse: that._reverse, duration: that._duration }),
+                effects = that._additionalEffects.concat([ that ]);
+
+            return effectSet.run(effects);
+        },
+
+        run: function() {
+            if (this._additionalEffects && this._additionalEffects[0]) {
+                return this.compositeRun();
+            }
+
+            var that = this,
+                element = that.element,
+                idx = 0,
+                restore = that.restore,
+                length = restore.length,
+                value,
+                deferred = $.Deferred(),
+                start = {},
+                end = {},
+                target,
+                children = that.children(),
+                childrenLength = children.length;
+
+            deferred.then($.proxy(that, "_complete"));
+
+            element.data("animating", true);
+
+            for (idx = 0; idx < length; idx ++) {
+                value = restore[idx];
+
+                if (!element.data(value)) {
+                    element.data(value, element.css(value));
+                }
+            }
+
+            for (idx = 0; idx < childrenLength; idx ++) {
+                children[idx].duration(that._duration).run();
+            }
+
+            that.prepare(start, end);
+
+            if (!element.is(":visible")) {
+                extend(start, { display: element.data("olddisplay") || "block" });
+            }
+
+            if (transforms) {
+                target = element.data("targetTransform");
+
+                if (target) {
+                    start = extend(target, start);
+                }
+            }
+
+            start = normalizeCSS(element, start);
+
+            if (transforms && !transitions) {
+                start = strip3DTransforms(start);
+            }
+
+            element.css(start).css(TRANSFORM); // Nudge
+
+            that.setup();
+
+            element.data("targetTransform", end);
+            kendo.fx.animate(element, end, { duration: that._duration, complete: deferred.resolve });
+
+            return deferred.promise();
+        },
+
+        stop: function() {
+            var idx = 0,
+                children = this.children(),
+                childrenLength = children.length;
+
+            for (idx = 0; idx < childrenLength; idx ++) {
+                children[idx].stop();
+            }
+
+            $(this.element).kendoStop();
+            return this;
+        },
+
+        restoreCallback: function() {
+            var element = this.element;
+
+            for (var i = 0, length = this.restore.length; i < length; i ++) {
+                var value = this.restore[i];
+                element.css(value, element.data(value));
+            }
+        },
+
+        _complete: function() {
+            var that = this,
+                element = that.element;
+
+            element
+                .removeData("animating")
+                .dequeue(); // call next animation from the queue
+
+            that.restoreCallback();
+
+            if (that.shouldHide()) {
+                element.data("olddisplay", element.css("display")).hide();
+            }
+
+            if (hasZoom && !transforms) {
+                setTimeout($.proxy(that, "restoreCallback"), 0); // Again jQuery callback in IE8-
+            }
+
+            that.teardown();
+        },
+
+        /////////////////////////// Support for kendo.animate;
+        setOptions: function(options) {
+            extend(true, this.options, options);
+        },
+
+        children: function() {
+            return [];
+        },
+
+        shouldHide: $.noop,
+
+        setup: $.noop,
+        prepare: $.noop,
+        teardown: $.noop,
+        directions: [],
+
+        setReverse: function(reverse) {
+            this._reverse = reverse;
+            return this;
+        }
+    });
+
+    function toUpperCase(letter) {
+        return letter.toUpperCase();
+    }
+
+    function capitalize(word) {
+        return word.replace(/^./, toUpperCase);
+    }
+
+    function createEffect(name, definition) {
+        var effectClass = Effect.extend(definition),
+            directions = effectClass.prototype.directions;
+
+        Effects[name] = effectClass;
+
+        fx.Element.prototype[name] = function(direction, opt1, opt2, opt3) {
+            return new effectClass(this.element, direction, opt1, opt2, opt3);
+        };
+
+        each(directions, function(idx, theDirection) {
+            fx.Element.prototype[name + capitalize(theDirection)] = function(opt1, opt2, opt3) {
+                return new effectClass(this.element, theDirection, opt1, opt2, opt3);
+            };
+        });
+    }
+
+    var FOUR_DIRECTIONS = ["left", "right", "up", "down"],
+        IN_OUT = ["in", "out"];
+
+    createEffect("slideIn", {
+        directions: FOUR_DIRECTIONS,
+
+        prepare: function(start, end) {
+            var that = this,
+                tmp,
+                element = that.element,
+                direction = directions[that._direction],
+                offset = -direction.modifier * (direction.vertical ? element.outerHeight() : element.outerWidth()),
+                startValue = offset / (that.options && that.options.divisor || 1) + PX,
+                endValue = "0px";
+
+            if (that._reverse) {
+                tmp = start;
+                start = end;
+                end = tmp;
+            }
+
+            if (transforms) {
+                start[direction.transition] = startValue;
+                end[direction.transition] = endValue;
             } else {
-                (options.reverse ? element : destination).kendoAnimate(options);
-            }
-        },
-
-        fade: {
-            keep: [ "opacity" ],
-            css: {
-                opacity: function(element, options) {
-                    var opacity = element.data("opacity"), direction = options.effects.fade.direction;
-                    return direction == "out" && isNaN(opacity) || direction == "in" ? 0 : opacity;
-                }
-            },
-            restore: [ "opacity" ],
-            setup: function(element, options) {
-                return extend({ opacity: options.effects.fade.direction == "out" ? 0 : 1 }, options.properties);
-            }
-        },
-        zoom: {
-            css: {
-                scale: function(element, options) {
-                    var scale = animationProperty(element, "scale");
-                    return options.effects.zoom.direction == "in" ? (scale != 1 ? scale : "0.01") : 1;
-                },
-                zoom: function(element, options) {
-                    var zoom = element[0].style.zoom;
-                    return options.effects.zoom.direction == "in" && hasZoom ? (zoom ? zoom : "0.01") : undefined;
-                }
-            },
-            setup: function(element, options) {
-                var reverse = options.effects.zoom.direction == "out";
-
-                if (hasZoom) {
-                    var version = browser.version,
-                        style = element[0].currentStyle,
-                        width = style.width.indexOf("%") != -1 ? element.parent().width() : element.width(),
-                        height = style.height.indexOf("%") != -1 ? element.parent().height() : parseInteger(style.height),
-                        half = version < 9 && options.effects.fade ? 0 : (1 - (parseInteger(element.css("zoom")) / 100)) / 2; // Kill margins in IE7/8 if using fade
-
-                    element.css({
-                        marginLeft: width * (version < 8 ? 0 : half),
-                        marginTop: height * half
-                    });
-                }
-
-                return extend({ scale: reverse ? 0.01 : 1 }, options.properties);
-            }
-        },
-        slide: {
-            setup: function(element, options) {
-                var reverse = options.reverse, extender = {},
-                    init = initDirection(element, options.effects.slide.direction, reverse),
-                    property = transforms && options.transition !== false ? init.direction.transition : init.direction.property;
-
-                init.offset /= -(options.divisor || 1);
-                if (!reverse) {
-                    var origin = element.data(ORIGIN);
-                    if (!origin && origin !== 0) {
-                        element.data(ORIGIN, animationProperty(element, property));
-                    }
-                }
-
-                extender[property] = reverse ? (element.data(ORIGIN) || 0) : (element.data(ORIGIN) || 0) + init.offset + PX;
-
-                return extend(extender, options.properties);
-            }
-        },
-        slideMargin: {
-            setup: function(element, options) {
-                var origin = element.data(ORIGIN),
-                    offset = options.offset, margin,
-                    extender = {}, reverse = options.reverse;
-
-                if (!reverse && !origin && origin !== 0) {
-                    element.data(ORIGIN, parseFloat(element.css("margin-" + options.axis)));
-                }
-
-                margin = (element.data(ORIGIN) || 0);
-                extender["margin-" + options.axis] = !reverse ? margin + offset : margin;
-                return extend(extender, options.properties);
-            }
-        },
-        slideTo: {
-            setup: function(element, options) {
-                var offset = (options.offset+"").split(","),
-                    extender = {}, reverse = options.reverse;
-
-                if (transforms && options.transition !== false) {
-                    extender.translatex = !reverse ? offset[0] : 0;
-                    extender.translatey = !reverse ? offset[1] : 0;
-                } else {
-                    extender.left = !reverse ? offset[0] : 0;
-                    extender.top = !reverse ? offset[1] : 0;
-                }
-                element.css("left");
-
-                return extend(extender, options.properties);
-            }
-        },
-        slideIn: {
-            css: {
-                translatex: function (element, options) {
-                    var init = initDirection(element, options.effects.slideIn.direction, options.reverse);
-                    return init.direction.transition == "translatex" ? (!options.reverse ? init.offset : 0) + PX : undefined;
-                },
-                translatey: function (element, options) {
-                    var init = initDirection(element, options.effects.slideIn.direction, options.reverse);
-                    return init.direction.transition == "translatey" ? (!options.reverse ? init.offset : 0) + PX : undefined;
-                }
-            },
-            setup: function(element, options) {
-                var reverse = options.reverse,
-                    init = initDirection(element, options.effects.slideIn.direction, reverse),
-                    extender = {};
-
-                if (transforms && options.transition !== false) {
-                    extender[init.direction.transition] = (reverse ? init.offset : 0) + PX;
-                } else {
-                    if (!reverse) {
-                        element.css(init.direction.property, init.offset + PX);
-                    }
-                    extender[init.direction.property] = (reverse ? init.offset : 0) + PX;
-                    element.css(init.direction.property);
-                }
-
-                return extend(extender, options.properties);
-            }
-        },
-        expand: {
-            keep: [ OVERFLOW ],
-            css: { overflow: HIDDEN },
-            restore: [ OVERFLOW ],
-            setup: function(element, options) {
-                var reverse = options.reverse,
-                    direction = options.effects.expand.direction,
-                    property = (direction ? direction == "vertical" : true) ? HEIGHT : WIDTH,
-                    setLength = element[0].style[property],
-                    oldLength = element.data(property),
-                    length = parseFloat(oldLength || setLength),
-                    realLength = round(element.css(property, AUTO)[property]()),
-                    completion = {};
-
-                length = options.reset ? realLength || length : length || realLength;
-
-                completion[property] = (reverse ? 0 : length) + PX;
-                element.css(property, reverse ? length : 0).css(property);
-                if (oldLength === undefined) {
-                    element.data(property, setLength);
-                }
-
-                return extend(completion, options.properties);
-            },
-            teardown: function(element, options) {
-                var direction = options.effects.expand.direction,
-                    property = (direction ? direction == "vertical" : true) ? HEIGHT : WIDTH,
-                    length = element.data(property);
-                if (length == AUTO || length === BLANK) {
-                    setTimeout(function() { element.css(property, AUTO).css(property); }, 0); // jQuery animate complete callback in IE is called before the last animation step!
-                }
-            }
-        },
-        flip: {
-            css: {
-                rotatex: function (element, options) {
-                    return options.effects.flip.direction == "vertical" ? options.reverse ? "180deg" : "0deg" : undefined;
-                },
-                rotatey: function (element, options) {
-                    return options.effects.flip.direction == "horizontal" ? options.reverse ? "180deg" : "0deg" : undefined;
-                }
-            },
-            setup: function(element, options) {
-                var rotation = options.effects.flip.direction == "horizontal" ? "rotatey" : "rotatex",
-                    reverse = options.reverse, parent = element.parent(),
-                    degree = options.degree, face = options.face, back = options.back,
-                    faceRotation = rotation + (reverse ? "(180deg)" : "(0deg)"),
-                    backRotation = rotation + (reverse ? "(0deg)" : "(180deg)"),
-                    completion = {};
-
-                if (support.hasHW3D) {
-                    if (parent.css(PERSPECTIVE) == NONE) {
-                        parent.css(PERSPECTIVE, 500);
-                    }
-
-                    element.css(cssPrefix + "transform-style", "preserve-3d");
-                    face.css(BACKFACE, HIDDEN).css(TRANSFORM, faceRotation).css("z-index", reverse ? 0 : -1);
-                    back.css(BACKFACE, HIDDEN).css(TRANSFORM, backRotation).css("z-index", reverse ? -1 : 0);
-                    completion[rotation] = (reverse ? "-" : "") + (degree ? degree : 180) + "deg";
-                } else {
-                    if (kendo.size(options.effects) == 1) {
-                        options.duration = 0;
-                    }
-                }
-                face.show();
-                back.show();
-
-                return extend(completion, options.properties);
-            },
-            teardown: function(element, options) {
-                options[options.reverse ? "back" : "face"].hide();
-
-                if (support.hasHW3D) {
-                    $().add(options.face).add(options.back).add(element)
-                        .css(BACKFACE, "");
-                }
-            }
-        },
-        simple: {
-            setup: function(element, options) {
-                return options.properties;
+                start[direction.property] = startValue;
+                end[direction.property] = endValue;
             }
         }
     });
 
-    kendo.fx.expandVertical = kendo.fx.expand; // expandVertical is deprecated.
+    createEffect("tile", {
+        directions: FOUR_DIRECTIONS,
+
+        init: function(element, direction, previous) {
+            Effect.prototype.init.call(this, element, direction);
+            this.options = { previous: previous };
+        },
+
+        children: function() {
+            var that = this,
+                reverse = that._reverse,
+                previous = that.options.previous,
+                dir = that._direction;
+
+            var children = [ fx(that.element).slideIn(dir).setReverse(reverse) ];
+
+            if (previous) {
+                children.push( fx(previous).slideIn(directions[dir].reverse).setReverse(!reverse) );
+            }
+
+            return children;
+        }
+    });
+
+    function createToggleEffect(name, property, endValue) {
+        createEffect(name, {
+            directions: IN_OUT,
+
+            restore: [ property ],
+
+            startValue: function(value) {
+                this._startValue = value;
+                return this;
+            },
+
+            endValue: function(value) {
+                this._endValue = value;
+                return this;
+            },
+
+            shouldHide: function() {
+               return (this._direction === "out" && this._end() === endValue) ? !this._reverse : this._reverse;
+            },
+
+            _end: function() {
+                return this._endValue || endValue;
+            },
+
+            _start: function() {
+                return this._startValue || 1;
+            },
+
+            prepare: function(start, end) {
+                var that = this,
+                    opacity = that.element.data(property),
+                    out = that.shouldHide(),
+                    value = isNaN(opacity) || opacity === "" ? that._start() : opacity;
+
+                start[property] = end[property] = that._end();
+
+                if (out) {
+                    start[property] = value;
+                } else {
+                    end[property] = value;
+                }
+            }
+        });
+    }
+
+    createToggleEffect("fade", "opacity", 0);
+    createToggleEffect("zoom", "scale", 0.01);
+
+    createEffect("slideMargin", {
+        prepare: function(start, end) {
+            var that = this,
+                element = that.element,
+                options = that.options,
+                origin = element.data(ORIGIN),
+                offset = options.offset,
+                margin,
+                reverse = that._reverse;
+
+            if (!reverse && origin === null) {
+                element.data(ORIGIN, parseFloat(element.css("margin-" + options.axis)));
+            }
+
+            margin = (element.data(ORIGIN) || 0);
+            end["margin-" + options.axis] = !reverse ? margin + offset : margin;
+        }
+    });
+
+    createEffect("slideTo", {
+        prepare: function(start, end) {
+            var that = this,
+                element = that.element,
+                options = that.options,
+                offset = options.offset.split(","),
+                reverse = that._reverse;
+
+            if (transforms) {
+                end.translatex = !reverse ? offset[0] : 0;
+                end.translatey = !reverse ? offset[1] : 0;
+            } else {
+                end.left = !reverse ? offset[0] : 0;
+                end.top = !reverse ? offset[1] : 0;
+            }
+            element.css("left");
+        }
+    });
+
+    createEffect("expand", {
+        directions: ["horizontal", "vertical"],
+
+        restore: [ OVERFLOW ],
+
+        prepare: function(start, end) {
+            var that = this,
+                element = that.element,
+                options = that.options,
+                reverse = that._reverse,
+                property = that._direction === "vertical" ? HEIGHT : WIDTH,
+                setLength = element[0].style[property],
+                oldLength = element.data(property),
+                length = parseFloat(oldLength || setLength),
+                realLength = round(element.css(property, AUTO)[property]());
+
+            start.overflow = HIDDEN;
+
+            length = (options && options.reset) ? realLength || length : length || realLength;
+
+            end[property] = (reverse ? 0 : length) + PX;
+            start[property] = (reverse ? length : 0) + PX;
+
+            if (oldLength === undefined) {
+                element.data(property, setLength);
+            }
+        },
+
+        shouldHide: function() {
+           return this._reverse;
+        },
+
+        teardown: function() {
+            var that = this,
+                element = that.element,
+                property = that._direction === "vertical" ? HEIGHT : WIDTH,
+                length = element.data(property);
+
+            if (length == AUTO || length === BLANK) {
+                setTimeout(function() { element.css(property, AUTO).css(property); }, 0); // jQuery animate complete callback in IE is called before the last animation step!
+            }
+        }
+    });
+
+    var TRANSFER_START_STATE = { position: "absolute", marginLeft: 0, marginTop: 0, scale: 1 };
+    /**
+     * Intersection point formulas are taken from here - http://zonalandeducation.com/mmts/intersections/intersectionOfTwoLines1/intersectionOfTwoLines1.html
+     * Formula for a linear function from two points from here - http://demo.activemath.org/ActiveMath2/search/show.cmd?id=mbase://AC_UK_calculus/functions/ex_linear_equation_two_points
+     * The transform origin point is the intersection point of the two lines from the top left corners/top right corners of the element and target.
+     * The math and variables below MAY BE SIMPLIFIED (zeroes removed), but this would make the formula too cryptic.
+     */
+    createEffect("transfer", {
+        init: function(element, target) {
+            this.element = element;
+            this.options = { target: target };
+            this.restore = [];
+        },
+
+        setup: function() {
+            this.element.appendTo(document.body);
+        },
+
+        prepare: function(start, end) {
+            var that = this,
+                element = that.element,
+                options = that.options,
+                reverse = that._reverse,
+                target = options.target,
+                offset,
+                currentScale = animationProperty(element, "scale"),
+                targetOffset = target.offset(),
+                scale = target.outerHeight() / element.outerHeight();
+
+            extend(start, TRANSFER_START_STATE);
+            end.scale = 1;
+
+            element.css(TRANSFORM, "scale(1)").css(TRANSFORM);
+            offset = element.offset();
+            element.css(TRANSFORM, "scale(" + currentScale + ")");
+
+            var x1 = 0,
+                y1 = 0,
+
+                x2 = targetOffset.left - offset.left,
+                y2 = targetOffset.top - offset.top,
+
+                x3 = x1 + element.outerWidth(),
+                y3 = y1,
+
+                x4 = x2 + target.outerWidth(),
+                y4 = y2,
+
+                Z1 = (y2 - y1) / (x2 - x1),
+                Z2 = (y4 - y3) / (x4 - x3),
+
+                X = (y1 - y3 - Z1 * x1 + Z2 * x3) / (Z2 - Z1),
+                Y = y1 + Z1 * (X - x1);
+
+            start.top = offset.top;
+            start.left = offset.left;
+            start.transformOrigin = X + PX + " " + Y + PX;
+
+            if (reverse) {
+                start.scale = scale;
+            } else {
+                end.scale = scale;
+            }
+        }
+    });
+
+
+    var CLIPS = {
+        top: "rect(auto auto $size auto)",
+        bottom: "rect($size auto auto auto)",
+        left: "rect(auto $size auto auto)",
+        right: "rect(auto auto auto $size)"
+    };
+
+    var ROTATIONS = {
+        top:    { start: "rotatex(0deg)", end: "rotatex(180deg)" },
+        bottom: { start: "rotatex(-180deg)", end: "rotatex(0deg)" },
+        left:   { start: "rotatey(0deg)", end: "rotatey(-180deg)" },
+        right:  { start: "rotatey(180deg)", end: "rotatey(0deg)" }
+    };
+
+    function clipInHalf(container, direction) {
+        var vertical = kendo.directions[direction].vertical,
+            size = (container[vertical ? HEIGHT : WIDTH]() / 2) + "px";
+
+        return CLIPS[direction].replace("$size", size);
+    }
+
+    createEffect("turningPage", {
+        directions: FOUR_DIRECTIONS,
+
+        init: function(element, direction, container) {
+            Effect.prototype.init.call(this, element, direction);
+            this._container = container;
+        },
+
+        prepare: function(start, end) {
+            var that = this,
+                reverse = that._reverse,
+                direction = reverse ? directions[that._direction].reverse : that._direction,
+                rotation = ROTATIONS[direction];
+
+            start.zIndex = 1;
+
+            if (that._clipInHalf) {
+               start.clip = clipInHalf(that._container, kendo.directions[direction].reverse);
+            }
+
+            start[BACKFACE] = HIDDEN;
+
+            end[TRANSFORM] = reverse ? rotation.start : rotation.end;
+            start[TRANSFORM] = reverse ? rotation.end : rotation.start;
+        },
+
+        setup: function() {
+            this._container.append(this.element);
+        },
+
+        face: function(value) {
+            this._face = value;
+            return this;
+        },
+
+        shouldHide: function() {
+            var that = this,
+                reverse = that._reverse,
+                face = that._face;
+
+            return (reverse && !face) || (!reverse && face);
+        },
+
+        clipInHalf: function(value) {
+            this._clipInHalf = value;
+            return this;
+        },
+
+        temporary: function(value) {
+            this._temporary = value;
+            return this;
+        },
+
+        teardown: function() {
+            if (this._temporary) {
+                this.element.remove();
+            }
+        }
+    });
+
+    createEffect("staticPage", {
+        directions: FOUR_DIRECTIONS,
+
+        init: function(element, direction, container) {
+            Effect.prototype.init.call(this, element, direction);
+            this._container = container;
+        },
+
+        restore: ["clip"],
+
+        prepare: function(start, end) {
+            var that = this,
+                direction = that._reverse ? directions[that._direction].reverse : that._direction;
+
+            start.clip = clipInHalf(that._container, direction);
+        },
+
+        shouldHide: function() {
+            var that = this,
+                reverse = that._reverse,
+                face = that._face;
+
+            return (reverse && !face) || (!reverse && face);
+        },
+
+        face: function(value) {
+            this._face = value;
+            return this;
+        }
+    });
+
+    createEffect("pageturn", {
+        directions: ["horizontal", "vertical"],
+
+        init: function(element, direction, face, back) {
+            Effect.prototype.init.call(this, element, direction);
+            this.options = {};
+            this.options.face = face;
+            this.options.back = back;
+        },
+
+        children: function() {
+            var that = this,
+                options = that.options,
+                direction = that._direction === "horizontal" ? "left" : "top",
+                reverseDirection = kendo.directions[direction].reverse,
+                reverse = that._reverse,
+                temp,
+                faceClone = options.face.clone(true).removeAttr("id"),
+                backClone = options.back.clone(true).removeAttr("id"),
+                element = that.element;
+
+            if (reverse) {
+                temp = direction;
+                direction = reverseDirection;
+                reverseDirection = temp;
+            }
+
+            return [
+                fx(options.face).staticPage(direction, element).face(true).setReverse(reverse),
+                fx(options.back).staticPage(reverseDirection, element).setReverse(reverse),
+                fx(faceClone).turningPage(direction, element).face(true).clipInHalf(true).temporary(true).setReverse(reverse),
+                fx(backClone).turningPage(reverseDirection, element).clipInHalf(true).temporary(true).setReverse(reverse)
+            ];
+        },
+
+        prepare: function(start, end) {
+            start[PERSPECTIVE] = 1000;
+            start.transformStyle = "preserve-3d";
+        },
+
+        teardown: function() {
+            this.element.find(".temp-pages").remove();
+        }
+    });
+
+    createEffect("flip", {
+        directions: ["horizontal", "vertical"],
+
+        init: function(element, direction, face, back) {
+            Effect.prototype.init.call(this, element, direction);
+            this.options = {};
+            this.options.face = face;
+            this.options.back = back;
+        },
+
+        children: function() {
+            var that = this,
+                options = that.options,
+                direction = that._direction === "horizontal" ? "left" : "top",
+                reverseDirection = kendo.directions[direction].reverse,
+                reverse = that._reverse,
+                temp,
+                element = that.element;
+
+            if (reverse) {
+                temp = direction;
+                direction = reverseDirection;
+                reverseDirection = temp;
+            }
+
+            return [
+                fx(options.face).turningPage(direction, element).face(true).setReverse(reverse),
+                fx(options.back).turningPage(reverseDirection, element).setReverse(reverse)
+            ];
+        },
+
+        prepare: function(start, end) {
+            start[PERSPECTIVE] = 1000;
+            start.transformStyle = "preserve-3d";
+        }
+    });
 
     var animationFrame  = window.requestAnimationFrame       ||
                           window.webkitRequestAnimationFrame ||
@@ -3423,8 +4195,10 @@ function pad(number) {
         onCancel: $.noop,
 
         start: function() {
-            this._started = true;
-            animationFrame(this._tickProxy);
+            if (!this.done()) {
+                this._started = true;
+                animationFrame(this._tickProxy);
+            }
         },
 
         cancel: function() {
@@ -3499,7 +4273,9 @@ function pad(number) {
 
     fx.Animation = Animation;
     fx.Transition = Transition;
-})(jQuery);
+    fx.createEffect = createEffect;
+    fx.Effects = Effects;
+})(window.kendo.jQuery);
 (function($, undefined) {
     var kendo = window.kendo,
         extend = $.extend,
@@ -3705,7 +4481,7 @@ function pad(number) {
             }
         }
     });
-})(jQuery);
+})(window.kendo.jQuery);
 (function($, undefined) {
     var kendo = window.kendo,
         isArray = $.isArray,
@@ -3911,7 +4687,7 @@ function pad(number) {
             xml: XmlDataReader
         }
     });
-})(jQuery);
+})(window.kendo.jQuery);
 (function($, undefined) {
     var extend = $.extend,
         proxy = $.proxy,
@@ -3938,6 +4714,7 @@ function pad(number) {
         GET = "get",
         ERROR = "error",
         REQUESTSTART = "requestStart",
+        PROGRESS = "progress",
         REQUESTEND = "requestEnd",
         crud = [CREATE, READ, UPDATE, DESTROY],
         identity = function(o) { return o; },
@@ -4139,6 +4916,24 @@ function pad(number) {
         }
     });
 
+    function eventHandler(context, type, field, prefix) {
+        return function(e) {
+            var event = {}, key;
+
+            for (key in e) {
+                event[key] = e[key];
+            }
+
+            if (prefix) {
+                event.field = field + "." + e.field;
+            } else {
+                event.field = field;
+            }
+
+            context.trigger(type, event);
+        };
+    }
+
     var ObservableObject = Observable.extend({
         init: function(value) {
             var that = this,
@@ -4222,7 +5017,7 @@ function pad(number) {
 
         set: function(field, value) {
             var that = this,
-                current = that[field],
+                current = kendo.getter(field, true)(that),
                 parent = function() { return that; };
 
             if (current !== value) {
@@ -4247,30 +5042,23 @@ function pad(number) {
                     object = new ObservableObject(object);
                 }
 
-                object.parent = parent;
+                if (object.parent() != parent()) {
 
-                (function(field) {
-                    object.bind(GET, function(e) {
-                        e.field = field + "." + e.field;
-                        that.trigger(GET, e);
-                    });
+                    object.parent = parent;
 
-                    object.bind(CHANGE, function(e) {
-                        e.field = field + "." + e.field;
-                        that.trigger(CHANGE, e);
-                    });
-                })(field);
+                    object.bind(GET, eventHandler(that, GET, field, true));
+                    object.bind(CHANGE, eventHandler(that, CHANGE, field, true));
+                }
             } else if (object !== null && (type === "[object Array]" || isObservableArray)) {
                 if (!isObservableArray) {
                     object = new ObservableArray(object);
                 }
-                object.parent = parent;
 
-                (function(field) {
-                    object.bind(CHANGE, function(e) {
-                        that.trigger(CHANGE, { field: field, index: e.index, items: e.items, action: e.action});
-                    });
-                })(field);
+                if (object.parent() != parent()) {
+                    object.parent = parent;
+
+                    object.bind(CHANGE, eventHandler(that, CHANGE, field, false));
+                }
             } else if (object !== null && object instanceof DataSource) {
                 object._parent = parent; // assign parent to the DataSource if part of observable object
             }
@@ -4321,7 +5109,7 @@ function pad(number) {
             if (typeof value === STRING) {
                 return value.toLowerCase() === "true";
             }
-            return !!value;
+            return value != null ? !!value : value;
         },
 
         "string": function(value) {
@@ -4340,6 +5128,21 @@ function pad(number) {
         "boolean": false,
         "default": ""
     };
+
+    function getFieldByName(obj, name) {
+        var field,
+            fieldName;
+
+        for (fieldName in obj) {
+            field = obj[fieldName];
+            if (isPlainObject(field) && field.field && field.field === name) {
+                return field;
+            } else if (field === name) {
+                return field;
+            }
+        }
+        return null;
+    }
 
     var Model = ObservableObject.extend({
         init: function(data) {
@@ -4368,9 +5171,14 @@ function pad(number) {
 
         _parse: function(field, value) {
             var that = this,
-            parse;
+                fieldName = field,
+                fields = (that.fields || {}),
+                parse;
 
-            field = (that.fields || {})[field];
+            field = fields[field];
+            if (!field) {
+                field = getFieldByName(fields, fieldName);
+            }
             if (field) {
                 parse = field.parse;
                 if (!parse && field.type) {
@@ -4490,6 +5298,18 @@ function pad(number) {
                 a = selector(a);
                 b = selector(b);
 
+                if (a == null && b ==null) {
+                    return 0;
+                }
+
+                if ((a && !b) || b == null) {
+                    return 1;
+                }
+
+                if (b && !a) {
+                    return -1;
+                }
+
                 return a > b ? 1 : (a < b ? -1 : 0);
             };
         },
@@ -4499,6 +5319,18 @@ function pad(number) {
             return function (a, b) {
                 a = selector(a);
                 b = selector(b);
+
+                if (a == null && b == null) {
+                    return 0;
+                }
+
+                if ((a && !b) || b == null) {
+                    return -1;
+                }
+
+                if ((b && !a) || a == null) {
+                    return 1;
+                }
 
                 return a < b ? 1 : (a > b ? -1 : 0);
             };
@@ -4538,6 +5370,11 @@ function pad(number) {
                 if (valueA === valueB) {
                     return a.__position - b.__position;
                 }
+
+                if (valueB == null) {
+                    return 1;
+                }
+
                 return valueA > valueB ? 1 : (valueA < valueB ? -1 : 0);
             };
         },
@@ -4547,6 +5384,11 @@ function pad(number) {
             return function (a, b) {
                 var valueA = selector(a);
                 var valueB = selector(b);
+
+                if (valueA && valueA.getTime && valueB && valueB.getTime) {
+                    valueA = valueA.getTime();
+                    valueB = valueB.getTime();
+                }
 
                 if (valueA === valueB) {
                     return a.__position - b.__position;
@@ -4645,7 +5487,7 @@ function pad(number) {
                     b = quote(b);
                 }
 
-                return a + ".lastIndexOf('" + b + "') == " + a + ".length - " + (b || "").length;
+                return a + ".indexOf('" + b + "', " + a + ".length - " + (b || "").length + ") >= 0";
             },
             contains: function(a, b, ignore) {
                 if (ignore) {
@@ -5139,7 +5981,9 @@ function pad(number) {
         create: function(options) {
             options.success(options.data);
         },
-        destroy: noop
+        destroy: function(options) {
+            options.success(options.data);
+        }
     });
 
     var RemoteTransport = Class.extend( {
@@ -5549,7 +6393,7 @@ function pad(number) {
 
             that._data = that._observe(that._data);
 
-            that.bind([ERROR, CHANGE, REQUESTSTART, SYNC, REQUESTEND], options);
+            that.bind([ERROR, CHANGE, REQUESTSTART, SYNC, REQUESTEND, PROGRESS], options);
         },
 
         options: {
@@ -5632,7 +6476,7 @@ function pad(number) {
                         that._accept(arguments[idx]);
                     }
 
-                    that._change();
+                    that._change({ action: "sync" });
 
                     that.trigger(SYNC);
                 });
@@ -5747,9 +6591,9 @@ function pad(number) {
                             type: type
                         });
                     },
-                    error: function(response) {
+                    error: function(response, status, error) {
                         deferred.reject(response);
-                        that.trigger(ERROR, response);
+                        that.error(response, status, error);
                     }
                 }, data)
                 );
@@ -5835,13 +6679,18 @@ function pad(number) {
             var that = this, params = that._params(data);
 
             that._queueRequest(params, function() {
-                that.trigger(REQUESTSTART);
-                that._ranges = [];
-                that.transport.read({
-                    data: params,
-                    success: proxy(that.success, that),
-                    error: proxy(that.error, that)
-                });
+                if (!that.trigger(REQUESTSTART)) {
+                    that.trigger(PROGRESS);
+
+                    that._ranges = [];
+                    that.transport.read({
+                        data: params,
+                        success: proxy(that.success, that),
+                        error: proxy(that.error, that)
+                    });
+                } else {
+                    that._dequeueRequest();
+                }
             });
         },
 
@@ -6136,10 +6985,8 @@ function pad(number) {
             return this._view;
         },
 
-        query: function(options) {
-            var that = this,
-            result,
-            remote = that.options.serverSorting || that.options.serverPaging || that.options.serverFiltering || that.options.serverGrouping || that.options.serverAggregates;
+        _mergeState: function(options) {
+            var that = this;
 
             if (options !== undefined) {
                 that._pageSize = options.pageSize;
@@ -6176,24 +7023,35 @@ function pad(number) {
                     that._aggregate = options.aggregate = normalizeAggregate(options.aggregate);
                 }
             }
+            return options;
+        },
+
+        query: function(options) {
+            var that = this,
+                result,
+                remote = that.options.serverSorting || that.options.serverPaging || that.options.serverFiltering || that.options.serverGrouping || that.options.serverAggregates;
 
             if (remote || (that._data === undefined || that._data.length === 0)) {
-                that.read(options);
+                that.read(that._mergeState(options));
             } else {
-                that.trigger(REQUESTSTART);
-                result = process(that._data, options);
+                if (!that.trigger(REQUESTSTART)) {
+                    that.trigger(PROGRESS);
 
-                if (!that.options.serverFiltering) {
-                    if (result.total !== undefined) {
-                        that._total = result.total;
-                    } else {
-                        that._total = that._data.length;
+                    result = process(that._data, that._mergeState(options));
+
+                    if (!that.options.serverFiltering) {
+                        if (result.total !== undefined) {
+                            that._total = result.total;
+                        } else {
+                            that._total = that._data.length;
+                        }
                     }
-                }
 
-                that._view = result.data;
-                that._aggregateResult = calculateAggregates(that._data, options);
-                that.trigger(CHANGE, { items: result.data });
+                    that._view = result.data;
+                    that._aggregateResult = calculateAggregates(that._data, options);
+                    that.trigger(REQUESTEND, { });
+                    that.trigger(CHANGE, { items: result.data });
+                }
             }
         },
 
@@ -6658,28 +7516,34 @@ function pad(number) {
         init: function(value) {
             var that = this,
                 hasChildren = that.hasChildren || value && value.hasChildren,
-                data = "items",
-                children = {};
+                childrenField = "items",
+                childrenOptions = {};
 
             kendo.data.Model.fn.init.call(that, value);
 
+
             if (typeof that.children === STRING) {
-               data = that.children;
+                childrenField = that.children;
             }
 
-            children = extend({
+            childrenOptions = {
                 schema: {
-                    data: data,
+                    data: childrenField,
                     model: {
-                        hasChildren: hasChildren
+                        hasChildren: hasChildren,
+                        id: that.idField
                     }
                 }
-            }, that.children);
+            };
 
-            children.data = value;
+            if (typeof that.children !== STRING) {
+                extend(childrenOptions, that.children);
+            }
+
+            childrenOptions.data = value;
 
             if (!hasChildren) {
-                hasChildren = children.schema.data;
+                hasChildren = childrenOptions.schema.data;
             }
 
             if (typeof hasChildren === STRING) {
@@ -6690,13 +7554,13 @@ function pad(number) {
                 that.hasChildren = !!hasChildren.call(that, that);
             }
 
-            that._childrenOptions = children;
+            that._childrenOptions = childrenOptions;
 
             if (that.hasChildren) {
                 that._initChildren();
             }
 
-            that._loaded = !!(value && value[data]);
+            that._loaded = !!(value && value[childrenField]);
         },
 
         _initChildren: function() {
@@ -6712,6 +7576,8 @@ function pad(number) {
                     e.node = e.node || that;
                     that.trigger(CHANGE, e);
                 });
+
+                that._updateChildrenField();
             }
         },
 
@@ -6727,12 +7593,18 @@ function pad(number) {
             var parentNode = this.parentNode(),
                 level = 0;
 
-            while (parentNode) {
+            while (parentNode && parentNode.parentNode) {
                 level++;
                 parentNode = parentNode.parentNode ? parentNode.parentNode() : null;
             }
 
             return level;
+        },
+
+        _updateChildrenField: function() {
+            var fieldName = this._childrenOptions.schema.data;
+
+            this[fieldName || "items"] = this.children.data();
         },
 
         load: function() {
@@ -6750,6 +7622,8 @@ function pad(number) {
 
                 that.children.one(CHANGE, function() {
                             that._loaded = true;
+
+                            that._updateChildrenField();
                         })
                         ._query(options);
             }
@@ -6770,7 +7644,11 @@ function pad(number) {
         },
 
         shouldSerialize: function(field) {
-            return Model.fn.shouldSerialize.call(this, field) && field !== "children" && field !== "_loaded" && field !== "hasChildren";
+            return Model.fn.shouldSerialize.call(this, field) &&
+                    field !== "children" &&
+                    field !== "_loaded" &&
+                    field !== "hasChildren" &&
+                    field !== "_childrenOptions";
         }
     });
 
@@ -6921,6 +7799,10 @@ function pad(number) {
             fields = dataSource.fields,
             list = dataSource.list;
 
+        if (data && data._dataSource) {
+            return data._dataSource;
+        }
+
         if (!data && fields && !dataSource.transport) {
             if (list) {
                 data = inferList(list, fields);
@@ -6948,7 +7830,7 @@ function pad(number) {
         DataReader: DataReader,
         Model: Model
     });
-})(jQuery);
+})(window.kendo.jQuery);
 (function ($, unefined) {
     var kendo = window.kendo,
         Observable = kendo.Observable,
@@ -6961,6 +7843,7 @@ function pad(number) {
         proxy = $.proxy,
         VALUE = "value",
         SOURCE = "source",
+        EVENTS = "events",
         CHECKED = "checked",
         CHANGE = "change";
 
@@ -7185,6 +8068,16 @@ function pad(number) {
                 this.element.setAttribute("disabled", "disabled");
             }
         }
+    });
+
+    binders.readonly = Binder.extend({
+       refresh: function() {
+            if (this.bindings.readonly.get()) {
+                this.element.setAttribute("readonly", "readonly");
+            } else {
+                this.element.removeAttribute("readonly");
+            }
+       }
     });
 
     binders.disabled = Binder.extend({
@@ -7741,7 +8634,7 @@ function pad(number) {
             },
 
             itemChange: function(e) {
-                bindElement(e.item[0], e.data, (e.ns || kendo.ui).roles);
+                bindElement(e.item[0], e.data, this._ns(e.ns));
             },
 
             dataBinding: function() {
@@ -7755,6 +8648,15 @@ function pad(number) {
                 }
             },
 
+            _ns: function(ns) {
+                ns = ns || kendo.ui;
+                var all = [ kendo.ui, kendo.dataviz.ui, kendo.mobile.ui ];
+                all.splice($.inArray(ns, all), 1);
+                all.unshift(ns);
+
+                return kendo.rolesFromNamespaces(all);
+            },
+
             dataBound: function(e) {
                 var idx,
                     length,
@@ -7762,7 +8664,6 @@ function pad(number) {
                     items = widget.items(),
                     dataSource = widget.dataSource,
                     view = dataSource.view(),
-                    ns = e.ns || kendo.ui,
                     groups = dataSource.group() || [];
 
                 if (items.length) {
@@ -7771,7 +8672,7 @@ function pad(number) {
                     }
 
                     for (idx = 0, length = view.length; idx < length; idx++) {
-                        bindElement(items[idx], view[idx], ns.roles);
+                        bindElement(items[idx], view[idx], this._ns(e.ns));
                     }
                 }
             },
@@ -7794,6 +8695,8 @@ function pad(number) {
                         source = that.bindings.source.get();
                         if (source instanceof kendo.data.DataSource) {
                             widget.setDataSource(source);
+                        } else if (source && source._dataSource) {
+                            widget.setDataSource(source._dataSource);
                         } else {
                             widget.dataSource.data(source);
                         }
@@ -7888,6 +8791,7 @@ function pad(number) {
                 key,
                 hasValue,
                 hasSource,
+                hasEvents,
                 specificBinders = binders[nodeName] || {};
 
             for (key in bindings) {
@@ -7895,6 +8799,8 @@ function pad(number) {
                     hasValue = true;
                 } else if (key == SOURCE) {
                     hasSource = true;
+                } else if (key == EVENTS) {
+                    hasEvents = true;
                 } else {
                     this.applyBinding(key, bindings, specificBinders);
                 }
@@ -7906,6 +8812,10 @@ function pad(number) {
 
             if (hasValue) {
                 this.applyBinding(VALUE, bindings, specificBinders);
+            }
+
+            if (hasEvents) {
+                this.applyBinding(EVENTS, bindings, specificBinders);
             }
         },
 
@@ -8209,7 +9119,35 @@ function pad(number) {
         return object;
     };
 
-})(jQuery);
+    kendo.observableHierarchy = function(array) {
+        var dataSource = kendo.data.HierarchicalDataSource.create(array);
+
+        function recursiveRead(data) {
+            var i, children;
+
+            for (i = 0; i < data.length; i++) {
+                data[i]._initChildren();
+
+                children = data[i].children;
+
+                children.fetch();
+
+                data[i].items = children.data();
+
+                recursiveRead(data[i].items);
+            }
+        }
+
+        dataSource.fetch();
+
+        recursiveRead(dataSource.data());
+
+        dataSource._data._dataSource = dataSource;
+
+        return dataSource._data;
+    };
+
+})(window.kendo.jQuery);
 ;(function($, undefined) {
     var kendo = window.kendo,
         Widget = kendo.ui.Widget,
@@ -8218,7 +9156,8 @@ function pad(number) {
         INVALIDINPUT = "k-invalid",
         emailRegExp = /^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))$/i,
         urlRegExp = /^(https?|ftp):\/\/(((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:)*@)?(((\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5]))|((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?)(:\d*)?)(\/((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)+(\/(([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)*)*)?)?(\?((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|[\uE000-\uF8FF]|\/|\?)*)?(\#((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|\/|\?)*)?$/i,
-        INPUTSELECTOR = ":input:not(:button,[type=submit],[type=reset],[disabled])",
+        INPUTSELECTOR = ":input:not(:button,[type=submit],[type=reset],[disabled],[readonly])",
+        CHECKBOXSELECTOR = ":checkbox:not([disabled],[readonly])",
         NUMBERINPUTSELECTOR = "[type=number],[type=range]",
         BLUR = "blur",
         NAME = "name",
@@ -8270,7 +9209,16 @@ function pad(number) {
             .replace(/&gt;/g, '>');
     }
 
-    var Validator = Widget.extend({        init: function(element, options) {
+    function numberOfDecimalDigits(value) {
+        value = (value + "").split('.');
+        if (value.length > 1) {
+            return value[1].length;
+        }
+        return 0;
+    }
+
+    var Validator = Widget.extend({
+        init: function(element, options) {
             var that = this,
                 resolved = resolveRules(element);
 
@@ -8339,10 +9287,16 @@ function pad(number) {
                 step: function(input) {
                     if (input.filter(NUMBERINPUTSELECTOR + ",[" + kendo.attr("type") + "=number]").filter("[step]").length && input.val() !== "") {
                         var min = parseFloat(input.attr("min")) || 0,
-                            step = parseFloat(input.attr("step")) || 0,
-                            val = parseFloat(input.val());
+                            step = parseFloat(input.attr("step")) || 1,
+                            val = parseFloat(input.val()),
+                            decimals = numberOfDecimalDigits(step),
+                            raise;
 
-                        return (((val-min)*10)%(step*10)) / 100 === 0;
+                        if (decimals) {
+                            raise = Math.pow(10, decimals);
+                            return (((val-min)*raise)%(step*raise)) / Math.pow(100, decimals) === 0;
+                        }
+                        return ((val-min)%step) === 0;
                     }
                     return true;
                 },
@@ -8390,10 +9344,20 @@ function pad(number) {
                     that.element.on(BLUR + NS, INPUTSELECTOR, function() {
                         that.validateInput($(this));
                     });
+
+                    that.element.on("click" + NS, CHECKBOXSELECTOR, function() {
+                        that.validateInput($(this));
+                    });
                 } else {
                     that.element.on(BLUR + NS, function() {
                         that.validateInput(that.element);
                     });
+
+                    if (that.element.is(CHECKBOXSELECTOR)) {
+                        that.element.on("click" + NS, function() {
+                            that.validateInput(that.element);
+                        });
+                    }
                 }
             }
         },
@@ -8432,6 +9396,8 @@ function pad(number) {
                 lbl = that._findMessageContainer(fieldName).add(input.next(className)).hide(),
                 messageText;
 
+            input.removeAttr("aria-invalid");
+
             if (!valid) {
                 messageText = that._extractMessage(input, result.key);
                 that._errors[fieldName] = messageText;
@@ -8443,6 +9409,8 @@ function pad(number) {
                     messageLabel.insertAfter(input);
                 }
                 messageLabel.show();
+
+                input.attr("aria-invalid", true);
             }
 
             input.toggleClass(INVALIDINPUT, !valid);
@@ -8466,11 +9434,14 @@ function pad(number) {
             var locators = kendo.ui.validator.messageLocators,
                 name;
 
-            container.addClass(INVALIDMSG).attr(kendo.attr("for"), fieldName || "");
+            container.addClass(INVALIDMSG)
+                .attr(kendo.attr("for"), fieldName || "");
 
             for (name in locators) {
                 locators[name].decorate(container, fieldName);
             }
+
+            container.attr("role", "alert");
         },
 
         _extractMessage: function(input, ruleKey) {
@@ -8509,7 +9480,7 @@ function pad(number) {
     });
 
     kendo.ui.plugin(Validator);
-})(jQuery);
+})(window.kendo.jQuery);
 (function ($, undefined) {
     var kendo = window.kendo,
         support = kendo.support,
@@ -8517,10 +9488,506 @@ function pad(number) {
         document = window.document,
         SURFACE = $(document.documentElement),
         Class = kendo.Class,
+        Observable = kendo.Observable,
+        now = $.now,
+        extend = $.extend,
+        OS = support.mobileOS,
+        invalidZeroEvents = OS && OS.android,
+
+        // UserEvents events
+        PRESS = "press",
+        START = "start",
+        MOVE = "move",
+        END = "end",
+        CANCEL = "cancel",
+        TAP = "tap",
+        GESTURESTART = "gesturestart",
+        GESTURECHANGE = "gesturechange",
+        GESTUREEND = "gestureend",
+        GESTURETAP = "gesturetap";
+
+    function preventTrigger(e) {
+        e.preventDefault();
+
+        var target = $(e.data.root),   // Determine the correct parent to receive the event and bubble.
+            parent = target.closest(".k-widget").parent();
+
+        if (!parent[0]) {
+            parent = target.parent();
+        }
+
+        parent.trigger($.Event(e.type, { target: target[0] }));
+    }
+
+    function touchDelta(touch1, touch2) {
+        var x1 = touch1.x.location,
+            y1 = touch1.y.location,
+            x2 = touch2.x.location,
+            y2 = touch2.y.location,
+            dx = x1 - x2,
+            dy = y1 - y2;
+
+        return {
+            center: {
+               x: (x1 + x2) / 2,
+               y: (y1 + y2) / 2
+            },
+
+            distance: Math.sqrt(dx*dx + dy*dy)
+        };
+    }
+
+    function getTouches(e) {
+        var touches = [],
+            originalEvent = e.originalEvent,
+            idx = 0, length,
+            changedTouches,
+            touch;
+
+        if (e.api) {
+            touches.push({
+                id: 2,  // hardcoded ID for API call;
+                event: e,
+                target: e.target,
+                location: e
+            });
+        }
+        else if (e.type.match(/touch/)) {
+            changedTouches = originalEvent ? originalEvent.changedTouches : [];
+            for (length = changedTouches.length; idx < length; idx ++) {
+                touch = changedTouches[idx];
+                touches.push({
+                    location: touch,
+                    event: e,
+                    target: touch.target,
+                    id: touch.identifier
+                });
+            }
+        }
+        else if (support.pointers) {
+            touches.push({
+                location: originalEvent,
+                event: e,
+                target: e.target,
+                id: originalEvent.pointerId
+
+            });
+        } else {
+            touches.push({
+                id: 1, // hardcoded ID for mouse event;
+                event: e,
+                target: e.target,
+                location: e
+            });
+        }
+
+        return touches;
+    }
+
+    var TouchAxis = Class.extend({
+        init: function(axis, location) {
+            var that = this;
+
+            that.axis = axis;
+
+            that._updateLocationData(location);
+
+            that.startLocation = that.location;
+            that.velocity = that.delta = 0;
+            that.timeStamp = now();
+        },
+
+        move: function(location) {
+            var that = this,
+                offset = location["page" + that.axis],
+                timeStamp = now(),
+                timeDelta = (timeStamp - that.timeStamp) || 1; // Firing manually events in tests can make this 0;
+
+            if (!offset && invalidZeroEvents) {
+                return;
+            }
+
+            that.delta = offset - that.location;
+
+            that._updateLocationData(location);
+
+            that.initialDelta = offset - that.startLocation;
+            that.velocity = that.delta / timeDelta;
+            that.timeStamp = timeStamp;
+        },
+
+        _updateLocationData: function(location) {
+            var that = this, axis = that.axis;
+
+            that.location = location["page" + axis];
+            that.client = location["client" + axis];
+            that.screen = location["screen" + axis];
+        }
+    });
+
+    var Touch = Class.extend({
+        init: function(userEvents, target, touchInfo) {
+            var that = this;
+
+            extend(that, {
+                x: new TouchAxis("X", touchInfo.location),
+                y: new TouchAxis("Y", touchInfo.location),
+                userEvents: userEvents,
+                target: target,
+                currentTarget: touchInfo.currentTarget,
+                id: touchInfo.id,
+                _moved: false,
+                _finished: false
+            });
+
+            that._trigger(PRESS, touchInfo);
+        },
+
+        move: function(touchInfo) {
+            var that = this;
+
+            if (that._finished) { return; }
+
+            that.x.move(touchInfo.location);
+            that.y.move(touchInfo.location);
+
+            if (!that._moved) {
+                if (that._withinIgnoreThreshold()) {
+                    return;
+                }
+
+                if (!UserEvents.current || UserEvents.current === that.userEvents) {
+                    that._start(touchInfo);
+                } else {
+                    return that.dispose();
+                }
+            }
+
+            // Event handlers may cancel the drag in the START event handler, hence the double check for pressed.
+            if (!that._finished) {
+                that._trigger(MOVE, touchInfo);
+            }
+        },
+
+        end: function(touchInfo) {
+            var that = this;
+
+            that.endTime = now();
+
+            if (that._finished) { return; }
+
+            if (that._moved) {
+                that._trigger(END, touchInfo);
+            } else {
+                that._trigger(TAP, touchInfo);
+            }
+
+            that.dispose();
+        },
+
+        dispose: function() {
+            var that = this,
+                userEvents = that.userEvents,
+                activeTouches = userEvents.touches;
+
+            that._finished = true;
+
+            activeTouches.splice($.inArray(that, activeTouches), 1);
+        },
+
+        skip: function() {
+            this.dispose();
+        },
+
+        cancel: function() {
+            this.dispose();
+        },
+
+        isMoved: function() {
+            return this._moved;
+        },
+
+        _start: function(touchInfo) {
+            this.startTime = now();
+            this._moved = true;
+            this._trigger(START, touchInfo);
+        },
+
+        _trigger: function(name, touchInfo) {
+            var that = this,
+                jQueryEvent = touchInfo.event,
+                data = {
+                    touch: that,
+                    x: that.x,
+                    y: that.y,
+                    target: that.target,
+                    event: jQueryEvent
+                };
+
+            if(that.userEvents.notify(name, data)) {
+                jQueryEvent.preventDefault();
+            }
+        },
+
+        _withinIgnoreThreshold: function() {
+            var xDelta = this.x.initialDelta,
+                yDelta = this.y.initialDelta;
+
+            return Math.sqrt(xDelta * xDelta + yDelta * yDelta) <= this.userEvents.threshold;
+        }
+    });
+
+    var UserEvents = Observable.extend({
+        init: function(element, options) {
+            var that = this,
+                filter;
+
+            options = options || {};
+            filter = that.filter = options.filter;
+            that.threshold = options.threshold || 0;
+            that.touches = [];
+            that._maxTouches = options.multiTouch ? 2 : 1;
+            that.eventNS = kendo.guid();
+
+            element = $(element).handler(that).autoApplyNS(that.eventNS);
+            Observable.fn.init.call(that);
+
+            extend(that, {
+                element: element,
+                surface: options.global ? SURFACE : options.surface || element,
+                stopPropagation: options.stopPropagation,
+                pressed: false
+            });
+
+            that.surface.handler(that).autoApplyNS(that.eventNS)
+                .on("move", "_move")
+                .on("up cancel", "_end");
+
+            element.on("down", filter, "_start");
+
+            if (pointers) {
+                element.css("-ms-touch-action", "pinch-zoom double-tap-zoom");
+            }
+
+            if (options.preventDragEvent) {
+                element.on("dragstart", kendo.preventDefault);
+            }
+
+            if (!options.allowSelection) {
+                element.on("mousedown selectstart", filter, { root: element }, preventTrigger);
+            }
+
+            if (support.eventCapture) {
+                var downEvents = kendo.eventMap.up.split(" "),
+                    idx = 0,
+                    length = downEvents.length,
+                    surfaceElement = that.surface[0],
+                    preventIfMoving = function(e) {
+                        if (that._isMoved()) {
+                            e.preventDefault();
+                        }
+                    };
+
+                for(; idx < length; idx ++) {
+                    surfaceElement.addEventListener(downEvents[idx], preventIfMoving, true);
+                }
+            }
+
+            that.bind([
+            PRESS,
+            TAP,
+            START,
+            MOVE,
+            END,
+            CANCEL,
+            GESTURESTART,
+            GESTURECHANGE,
+            GESTUREEND,
+            GESTURETAP], options);
+        },
+
+        destroy: function() {
+            var that = this;
+            that.element.kendoDestroy(that.eventNS);
+            that.surface.kendoDestroy(that.eventNS);
+            that._disposeAll();
+        },
+
+        capture: function() {
+            UserEvents.current = this;
+        },
+
+        cancel: function() {
+            this._disposeAll();
+            this.trigger(CANCEL);
+        },
+
+        notify: function(eventName, data) {
+            var that = this,
+                touches = that.touches;
+
+            if (this._isMultiTouch()) {
+                switch(eventName) {
+                    case MOVE:
+                        eventName = GESTURECHANGE;
+                        break;
+                    case END:
+                        eventName = GESTUREEND;
+                        break;
+                    case TAP:
+                        eventName = GESTURETAP;
+                        break;
+                }
+
+                $.extend(data, {touches: touches}, touchDelta(touches[0], touches[1]));
+            }
+
+            return this.trigger(eventName, data);
+        },
+
+        // API
+        press: function(x, y, target) {
+            this._apiCall("_start", x, y, target);
+        },
+
+        move: function(x, y) {
+            this._apiCall("_move", x, y);
+        },
+
+        end: function(x, y) {
+            this._apiCall("_end", x, y);
+        },
+
+        _isMultiTouch: function() {
+            return this.touches.length > 1;
+        },
+
+        _maxTouchesReached: function() {
+            return this.touches.length >= this._maxTouches;
+        },
+
+        _disposeAll: function() {
+            $.each(this.touches, function() {
+                this.dispose();
+            });
+        },
+
+        _isMoved: function() {
+            return $.grep(this.touches, function(touch) {
+                return touch.isMoved();
+            }).length;
+        },
+
+        _isPressed: function() {
+            return this.touches.length;
+        },
+
+        _start: function(e) {
+            var that = this,
+                idx = 0,
+                filter = that.filter,
+                target,
+                touches = getTouches(e),
+                length = touches.length,
+                touch;
+
+            if (that._maxTouchesReached()) {
+                return;
+            }
+
+            UserEvents.current = null;
+
+            that.currentTarget = e.currentTarget;
+
+            if (that.stopPropagation) {
+                e.stopPropagation();
+            }
+
+            for (; idx < length; idx ++) {
+                if (that._maxTouchesReached()) {
+                    break;
+                }
+
+                touch = touches[idx];
+
+                target = $(touch.target);
+
+                if (filter) {
+                    target = target.is(filter) ? target : target.closest(filter, that.element);
+                } else {
+                    target = that.element;
+                }
+
+                if (!target.length) {
+                    continue;
+                }
+
+                that.touches.push(new Touch(that, target, touch));
+
+                if (that._isMultiTouch()) {
+                    that.notify("gesturestart", {});
+                }
+            }
+        },
+
+        _move: function(e) {
+            this._eachTouch("move", e);
+        },
+
+        _end: function(e) {
+            this._eachTouch("end", e);
+        },
+
+        _eachTouch: function(methodName, e) {
+            var that = this,
+                dict = {},
+                touches = getTouches(e),
+                activeTouches = that.touches,
+                idx,
+                touch,
+                touchInfo,
+                matchingTouch;
+
+            for (idx = 0; idx < activeTouches.length; idx ++) {
+                touch = activeTouches[idx];
+                dict[touch.id] = touch;
+            }
+
+            for (idx = 0; idx < touches.length; idx ++) {
+                touchInfo = touches[idx];
+                matchingTouch = dict[touchInfo.id];
+
+                if (matchingTouch) {
+                    matchingTouch[methodName](touchInfo);
+                }
+            }
+        },
+
+        _apiCall: function(type, x, y, target) {
+            this[type]({
+                api: true,
+                pageX: x,
+                pageY: y,
+                target: target || this.element,
+                stopPropagation: $.noop,
+                preventDefault: $.noop
+            });
+        }
+    });
+
+    kendo.getTouches = getTouches;
+    kendo.touchDelta = touchDelta;
+    kendo.UserEvents = UserEvents;
+ })(window.kendo.jQuery);
+(function ($, undefined) {
+    var kendo = window.kendo,
+        support = kendo.support,
+        document = window.document,
+        Class = kendo.Class,
         Widget = kendo.ui.Widget,
         Observable = kendo.Observable,
+        UserEvents = kendo.UserEvents,
         proxy = $.proxy,
-        now = $.now,
         extend = $.extend,
         getOffset = kendo.getOffset,
         draggables = {},
@@ -8530,9 +9997,6 @@ function pad(number) {
         OS = support.mobileOS,
         invalidZeroEvents = OS && OS.android,
         mobileChrome = (invalidZeroEvents && OS.browser == "chrome"),
-        START_EVENTS = "mousedown",
-        MOVE_EVENTS = "mousemove",
-        END_EVENTS = "mouseup mouseleave",
         KEYUP = "keyup",
         CHANGE = "change",
 
@@ -8545,26 +10009,7 @@ function pad(number) {
         // DropTarget events
         DRAGENTER = "dragenter",
         DRAGLEAVE = "dragleave",
-        DROP = "drop",
-
-        // Drag events
-        START = "start",
-        MOVE = "move",
-        END = "end",
-        CANCEL = "cancel",
-        TAP = "tap";
-
-    if (support.touch) {
-        START_EVENTS = "touchstart";
-        MOVE_EVENTS = "touchmove";
-        END_EVENTS = "touchend touchcancel";
-    }
-
-    if(pointers) {
-        START_EVENTS = "MSPointerDown";
-        MOVE_EVENTS = "MSPointerMove";
-        END_EVENTS = "MSPointerUp MSPointerCancel";
-    }
+        DROP = "drop";
 
     function contains(parent, child) {
         try {
@@ -8603,23 +10048,6 @@ function pad(number) {
         };
     }
 
-    function addNS(events, ns) {
-        return events.replace(/ /g, ns + " ");
-    }
-
-    function preventTrigger(e) {
-        e.preventDefault();
-
-        var target = $(e.target),   // Determine the correct parent to receive the event and bubble.
-            parent = target.closest(".k-widget").parent();
-
-        if (!parent[0]) {
-            parent = target.parent();
-        }
-
-        parent.trigger(e.type);
-    }
-
     function checkTarget(target, targets, areas) {
         var theTarget, theFilter, i = 0,
             targetLen = targets && targets.length,
@@ -8646,287 +10074,30 @@ function pad(number) {
         return undefined;
     }
 
-    var DragAxis = Class.extend({
-        init: function(axis) {
-            this.axis = axis;
-        },
-
-        start: function(location, timeStamp) {
-            var that = this,
-                offset = location["page" + that.axis];
-
-            that.startLocation = that.location = offset;
-            that.client = location["client" + that.axis];
-            that.screen = location["screen" + that.axis];
-            that.velocity = that.delta = 0;
-            that.timeStamp = timeStamp;
-        },
-
-        move: function(location, timeStamp) {
-            var that = this,
-                offset = location["page" + that.axis];
-
-            if (!offset && invalidZeroEvents) {
-                return;
-            }
-
-            that.delta = offset - that.location;
-            that.location = offset;
-            that.client = location["client" + that.axis];
-            that.screen = location["screen" + that.axis];
-            that.initialDelta = offset - that.startLocation;
-            that.velocity = that.delta / (timeStamp - that.timeStamp);
-            that.timeStamp = timeStamp;
-        }
-    });
-
-    var Drag = Observable.extend({
-        init: function(element, options) {
-            var that = this,
-                eventMap = {},
-                filter,
-                preventIfMoving,
-                ns = "." + kendo.guid();
-
-            options = options || {};
-            filter = that.filter = options.filter;
-            that.threshold = options.threshold || 0;
-
-            element = $(element);
-            Observable.fn.init.call(that);
-
-            eventMap[addNS(MOVE_EVENTS, ns)] = proxy(that._move, that);
-            eventMap[addNS(END_EVENTS, ns)] = proxy(that._end, that);
-
-            extend(that, {
-                x: new DragAxis("X"),
-                y: new DragAxis("Y"),
-                element: element,
-                surface: options.global ? SURFACE : options.surface || element,
-                stopPropagation: options.stopPropagation,
-                pressed: false,
-                eventMap: eventMap,
-                ns: ns
-            });
-
-            element.on(START_EVENTS, filter, proxy(that._start, that));
-
-            if (pointers) {
-                element.css("-ms-touch-action", "pinch-zoom double-tap-zoom");
-            }
-
-            if (options.preventDragEvent) {
-                element.on("dragstart", false);
-            }
-
-            if (!options.allowSelection) {
-                var args = ["mousedown selectstart", filter, preventTrigger];
-
-                if (filter instanceof $) {
-                    args.splice(2, 0, null);
-                }
-
-                element.on.apply(element, args);
-            }
-
-            if (support.eventCapture) {
-                preventIfMoving = function(e) {
-                    if (that.moved) {
-                        e.preventDefault();
-                    }
-                };
-
-                that.surface[0].addEventListener(support.mouseup, preventIfMoving, true);
-            }
-
-            that.bind([
-            TAP,
-            START,
-            MOVE,
-            END,
-            CANCEL], options);
-        },
-
-        capture: function() {
-            Drag.captured = true;
-        },
-
-        cancel: function() {
-            this._cancel();
-            this.trigger(CANCEL);
-        },
-
-        skip: function() {
-            this._cancel();
-        },
-
-        _cancel: function() {
-            var that = this;
-            that.moved = that.pressed = false;
-            that.surface.off(that.ns);
-        },
-
-        _start: function(e) {
-            var that = this,
-                filter = that.filter,
-                originalEvent = e.originalEvent,
-                touch,
-                location = e;
-
-            if (that.pressed) { return; }
-
-            if (filter) {
-                that.target = $(e.target).is(filter) ? $(e.target) : $(e.target).closest(filter);
-            } else {
-                that.target = that.element;
-            }
-
-            if (!that.target.length) {
-                return;
-            }
-
-            that.currentTarget = e.currentTarget;
-
-            if (that.stopPropagation) {
-                e.stopPropagation();
-            }
-
-            that.pressed = true;
-            that.moved = false;
-            that.startTime = null;
-
-            if (support.touch) {
-                touch = originalEvent.changedTouches[0];
-                that.touchID = touch.identifier;
-                location = touch;
-            }
-
-            if (pointers) {
-                that.touchID = originalEvent.pointerId;
-                location = originalEvent;
-            }
-
-            that._perAxis(START, location, now());
-            that.surface.off(that.eventMap).on(that.eventMap);
-            Drag.captured = false;
-        },
-
-        _move: function(e) {
-            var that = this,
-                xDelta,
-                yDelta,
-                delta;
-
-            if (!that.pressed) { return; }
-
-            that._withEvent(e, function(location) {
-
-                that._perAxis(MOVE, location, now());
-
-                if (!that.moved) {
-                    xDelta = that.x.initialDelta;
-                    yDelta = that.y.initialDelta;
-
-                    delta = Math.sqrt(xDelta * xDelta + yDelta * yDelta);
-
-                    if (delta <= that.threshold) {
-                        return;
-                    }
-
-                    if (!Drag.captured) {
-                        that.startTime = now();
-                        that._trigger(START, e);
-                        that.moved = true;
-                    } else {
-                        return that._cancel();
-                    }
-                }
-
-                // Event handlers may cancel the swipe in the START event handler, hence the double check for pressed.
-                if (that.pressed) {
-                    that._trigger(MOVE, e);
-                }
-            });
-        },
-
-        _end: function(e) {
-            var that = this;
-
-            if (!that.pressed) { return; }
-
-            that._withEvent(e, function() {
-                if (that.moved) {
-                    that.endTime = now();
-                    that._trigger(END, e);
-                    that.moved = false;
-                } else {
-                    that._trigger(TAP, e);
-                }
-
-                that._cancel();
-            });
-        },
-
-        _perAxis: function(method, location, timeStamp) {
-            this.x[method](location, timeStamp);
-            this.y[method](location, timeStamp);
-        },
-
-        _trigger: function(name, e) {
-            var data = {
-                x: this.x,
-                y: this.y,
-                target: this.target,
-                event: e
-            };
-
-            if(this.trigger(name, data)) {
-                e.preventDefault();
-            }
-        },
-
-        _withEvent: function(e, callback) {
-            var that = this,
-                touchID = that.touchID,
-                originalEvent = e.originalEvent,
-                touches,
-                idx;
-
-            if (support.touch) {
-                touches = originalEvent ? originalEvent.changedTouches : [];
-                idx = touches.length;
-
-                while (idx) {
-                    idx --;
-                    if (touches[idx].identifier === touchID) {
-                        return callback(touches[idx]);
-                    }
-                }
-            }
-            else if (pointers) {
-                if (touchID === originalEvent.pointerId) {
-                    return callback(originalEvent);
-                }
-            } else {
-                return callback(e);
-            }
-        }
-    });
-
-    var Tap = Observable.extend({
+    var TapCapture = Observable.extend({
         init: function(element, options) {
             var that = this,
                 domElement = element[0];
 
             that.capture = false;
-            domElement.addEventListener(START_EVENTS, proxy(that._press, that), true);
-            $.each(END_EVENTS.split(" "), function() {
+            $.each(kendo.eventMap.down.split(" "), function() {
+                domElement.addEventListener(this, proxy(that._press, that), true);
+            });
+            $.each(kendo.eventMap.up.split(" "), function() {
                 domElement.addEventListener(this, proxy(that._release, that), true);
             });
 
             Observable.fn.init.call(that);
 
             that.bind(["press", "release"], options || {});
+        },
+
+        captureNext: function() {
+            this.capture = true;
+        },
+
+        cancelCapture: function() {
+            this.capture = false;
         },
 
         _press: function(e) {
@@ -8945,14 +10116,6 @@ function pad(number) {
                 e.preventDefault();
                 that.cancelCapture();
             }
-        },
-
-        captureNext: function() {
-            this.capture = true;
-        },
-
-        cancelCapture: function() {
-            this.capture = false;
         }
     });
 
@@ -8961,10 +10124,12 @@ function pad(number) {
             var that = this;
             Observable.fn.init.call(that);
 
+            that.forcedEnabled = false;
+
             $.extend(that, options);
 
+            that.scale = 1;
             that.max = 0;
-            that._forceEnabled = false;
 
             if (that.horizontal) {
                 that.measure = "width";
@@ -8981,12 +10146,8 @@ function pad(number) {
             return  offset > this.max || offset < this.min;
         },
 
-        present: function() {
-            return this._forceEnabled || (this.max - this.min);
-        },
-
         forceEnabled: function() {
-            this._forceEnabled = true;
+            this.forcedEnabled = true;
         },
 
         getSize: function() {
@@ -8997,12 +10158,23 @@ function pad(number) {
             return this.element[0][this.scrollSize];
         },
 
-        update: function(silent) {
-            var that = this;
+        rescale: function(scale) {
+            this.scale = scale;
+        },
 
-            that.size = that.getSize();
-            that.total = that.getTotal();
-            that.min = Math.min(that.max, that.size - that.total);
+        update: function(silent) {
+            var that = this,
+                total = that.getTotal(),
+                scaledTotal = total * that.scale,
+                size = that.getSize();
+
+            that.size = size;
+            that.total = scaledTotal;
+            that.min = Math.min(that.max, that.size - scaledTotal);
+            that.minScale = that.size / total;
+
+            that.enabled = that.forcedEnabled || (scaledTotal > size);
+
             if (!silent) {
                 that.trigger(CHANGE, that);
             }
@@ -9018,20 +10190,26 @@ function pad(number) {
 
             that.x = new PaneDimension(extend({horizontal: true}, options));
             that.y = new PaneDimension(extend({horizontal: false}, options));
+            that.forcedMinScale = options.minScale;
 
             that.bind(CHANGE, options);
 
             kendo.onResize(refresh);
         },
 
-        present: function() {
-            return this.x.present() || this.y.present();
+        rescale: function(newScale) {
+            this.x.rescale(newScale);
+            this.y.rescale(newScale);
+            this.refresh();
         },
 
         refresh: function() {
-            this.x.update();
-            this.y.update();
-            this.trigger(CHANGE);
+            var that = this;
+            that.x.update();
+            that.y.update();
+            that.enabled = that.x.enabled || that.y.enabled;
+            that.minScale = that.forcedMinScale || Math.max(that.x.minScale, that.y.minScale);
+            that.trigger(CHANGE);
         }
     });
 
@@ -9049,7 +10227,7 @@ function pad(number) {
                 movable = that.movable,
                 position = movable[axis] + delta;
 
-            if (!dimension.present()) {
+            if (!dimension.enabled) {
                 return;
             }
 
@@ -9063,38 +10241,75 @@ function pad(number) {
     });
 
     var Pane = Class.extend({
+
         init: function(options) {
             var that = this,
                 x,
                 y,
-                resistance;
+                resistance,
+                movable;
 
             extend(that, {elastic: true}, options);
 
             resistance = that.elastic ? 0.5 : 0;
+            movable = that.movable;
 
             that.x = x = new PaneAxis({
                 axis: "x",
                 dimension: that.dimensions.x,
                 resistance: resistance,
-                movable: that.movable
+                movable: movable
             });
 
             that.y = y = new PaneAxis({
                 axis: "y",
                 dimension: that.dimensions.y,
                 resistance: resistance,
-                movable: that.movable
+                movable: movable
             });
 
-            that.drag.bind(["move", "end"], {
+            that.userEvents.bind(["move", "end", "gesturestart", "gesturechange"], {
+                gesturestart: function(e) {
+                    that.gesture = e;
+                },
+
+                gesturechange: function(e) {
+                    var previousGesture = that.gesture,
+                        previousCenter = previousGesture.center,
+
+                        center = e.center,
+
+                        scaleDelta = e.distance / previousGesture.distance,
+
+                        minScale = that.dimensions.minScale,
+                        coordinates;
+
+                    if (movable.scale <= minScale && scaleDelta < 1) {
+                        // Resist shrinking. Instead of shrinking from 1 to 0.5, it will shrink to 0.5 + (1 /* minScale */ - 0.5) * 0.8 = 0.9;
+                        scaleDelta += (1 - scaleDelta) * 0.8;
+                    }
+
+                    coordinates = {
+                        x: (movable.x - previousCenter.x) * scaleDelta + center.x - movable.x,
+                        y: (movable.y - previousCenter.y) * scaleDelta + center.y - movable.y
+                    };
+
+                    movable.scaleWith(scaleDelta);
+
+                    x.dragMove(coordinates.x);
+                    y.dragMove(coordinates.y);
+
+                    that.dimensions.rescale(movable.scale);
+                    that.gesture = e;
+                },
+
                 move: function(e) {
-                    if (x.dimension.present() || y.dimension.present()) {
+                    if (x.dimension.enabled || y.dimension.enabled) {
                         x.dragMove(e.x.delta);
                         y.dragMove(e.y.delta);
                         e.preventDefault();
                     } else {
-                        that.drag.skip();
+                        e.touch.skip();
                     }
                 },
 
@@ -9110,12 +10325,12 @@ function pad(number) {
         translate;
 
     if (support.hasHW3D) {
-        translate = function(x, y) {
-            return "translate3d(" + round(x) + "px," + round(y) +"px,0)";
+        translate = function(x, y, scale) {
+            return "translate3d(" + round(x) + "px," + round(y) +"px,0) scale(" + scale + ")";
         };
     } else {
-        translate = function(x, y) {
-            return "translate(" + round(x) + "px," + round(y) +"px)";
+        translate = function(x, y, scale) {
+            return "translate(" + round(x) + "px," + round(y) +"px) scale(" + scale + ")";
         };
     }
 
@@ -9126,13 +10341,25 @@ function pad(number) {
             Observable.fn.init.call(that);
 
             that.element = $(element);
+            that.element[0].style.webkitTransformOrigin = "left top";
             that.x = 0;
             that.y = 0;
-            that._saveCoordinates(translate(that.x, that.y));
+            that.scale = 1;
+            that._saveCoordinates(translate(that.x, that.y, that.scale));
         },
 
         translateAxis: function(axis, by) {
             this[axis] += by;
+            this.refresh();
+        },
+
+        scaleTo: function(scale) {
+            this.scale = scale;
+            this.refresh();
+        },
+
+        scaleWith: function(scaleDelta) {
+            this.scale *= scaleDelta;
             this.refresh();
         },
 
@@ -9154,7 +10381,7 @@ function pad(number) {
 
         refresh: function() {
             var that = this,
-                newCoordinates = translate(that.x, that.y);
+                newCoordinates = translate(that.x, that.y, that.scale);
 
             if (newCoordinates != that.coordinates) {
                 that.element[0].style[TRANSFORM_STYLE] = newCoordinates;
@@ -9194,6 +10421,25 @@ function pad(number) {
             group: "default"
         },
 
+        destroy: function() {
+            var groupName = this.options.group,
+                group = dropTargets[groupName] || dropAreas[groupName],
+                i;
+
+            if (group.length > 1) {
+                Widget.fn.destroy.call(this);
+
+                for (i = 0; i < group.length; i++) {
+                    if (group[i] == this) {
+                        group.splice(i, 1);
+                        break;
+                    }
+                }
+            } else {
+                DropTarget.destroyGroup(groupName);
+            }
+        },
+
         _trigger: function(eventName, e) {
             var that = this,
                 draggable = draggables[that.options.group];
@@ -9224,6 +10470,23 @@ function pad(number) {
         }
     });
 
+    DropTarget.destroyGroup = function(groupName) {
+        var group = dropTargets[groupName] || dropAreas[groupName],
+            i;
+
+        if (group) {
+            for (i = 0; i < group.length; i++) {
+                Widget.fn.destroy.call(group[i]);
+            }
+
+            group.length = 0;
+            delete dropTargets[groupName];
+            delete dropAreas[groupName];
+        }
+    };
+
+    DropTarget._cache = dropTargets;
+
     var DropTargetArea = DropTarget.extend({
         init: function(element, options) {
             var that = this;
@@ -9252,7 +10515,7 @@ function pad(number) {
 
             Widget.fn.init.call(that, element, options);
 
-            that.drag = new Drag(that.element, {
+            that.userEvents = new UserEvents(that.element, {
                 global: true,
                 stopPropagation: true,
                 filter: that.options.filter,
@@ -9263,11 +10526,11 @@ function pad(number) {
                 cancel: proxy(that._cancel, that)
             });
 
-            that.destroy = proxy(that._destroy, that);
+            that._afterEndHandler = proxy(that._afterEnd, that);
             that.captureEscape = function(e) {
                 if (e.keyCode === kendo.keys.ESC) {
                     that._trigger(DRAGCANCEL, {event: e});
-                    that.drag.cancel();
+                    that.userEvents.cancel();
                 }
             };
         },
@@ -9289,47 +10552,7 @@ function pad(number) {
             dropped: false
         },
 
-        _start: function(e) {
-            var that = this,
-                options = that.options,
-                container = options.container,
-                hint = options.hint;
-
-            that.currentTarget = that.drag.target;
-            that.currentTargetOffset = getOffset(that.currentTarget);
-
-            if (hint) {
-                that.hint = $.isFunction(hint) ? $(hint(that.currentTarget)) : hint;
-
-                var offset = getOffset(that.currentTarget);
-                that.hintOffset = offset;
-
-                that.hint.css( {
-                    position: "absolute",
-                    zIndex: 20000, // the Window's z-index is 10000 and can be raised because of z-stacking
-                    left: offset.left,
-                    top: offset.top
-                })
-                .appendTo(document.body);
-            }
-
-            draggables[options.group] = that;
-
-            that.dropped = false;
-
-            if (container) {
-                that.boundaries = containerBoundaries(container, that.hint);
-            }
-
-            if (that._trigger(DRAGSTART, e)) {
-                that.drag.cancel();
-                that.destroy();
-            }
-
-            $(document).on(KEYUP, that.captureEscape);
-        },
-
-        updateHint: function(e) {
+        _updateHint: function(e) {
             var that = this,
                 coordinates,
                 options = that.options,
@@ -9357,6 +10580,46 @@ function pad(number) {
             }
 
             that.hint.css(coordinates);
+        },
+
+        _start: function(e) {
+            var that = this,
+                options = that.options,
+                container = options.container,
+                hint = options.hint;
+
+            that.currentTarget = e.target;
+            that.currentTargetOffset = getOffset(that.currentTarget);
+
+            if (hint) {
+                that.hint = $.isFunction(hint) ? $(hint.call(that, that.currentTarget)) : hint;
+
+                var offset = getOffset(that.currentTarget);
+                that.hintOffset = offset;
+
+                that.hint.css( {
+                    position: "absolute",
+                    zIndex: 20000, // the Window's z-index is 10000 and can be raised because of z-stacking
+                    left: offset.left,
+                    top: offset.top
+                })
+                .appendTo(document.body);
+            }
+
+            draggables[options.group] = that;
+
+            that.dropped = false;
+
+            if (container) {
+                that.boundaries = containerBoundaries(container, that.hint);
+            }
+
+            if (that._trigger(DRAGSTART, e)) {
+                that.userEvents.cancel();
+                that._afterEnd();
+            }
+
+            $(document).on(KEYUP, that.captureEscape);
         },
 
         _drag: function(e) {
@@ -9388,7 +10651,7 @@ function pad(number) {
             that._trigger(DRAG, e);
 
             if (that.hint) {
-                that.updateHint(e);
+                that._updateHint(e);
             }
         },
 
@@ -9410,9 +10673,9 @@ function pad(number) {
             var that = this;
 
             if (that.hint && !that.dropped) {
-                that.hint.animate(that.currentTargetOffset, "fast", that.destroy);
+                that.hint.animate(that.currentTargetOffset, "fast", that._afterEndHandler);
             } else {
-                that.destroy();
+                that._afterEnd();
             }
         },
 
@@ -9463,7 +10726,17 @@ function pad(number) {
             }
         },
 
-        _destroy: function() {
+        destroy: function() {
+            var that = this;
+
+            Widget.fn.destroy.call(that);
+
+            that._afterEnd();
+
+            that.userEvents.destroy();
+        },
+
+        _afterEnd: function() {
             var that = this;
 
             if (that.hint) {
@@ -9480,8 +10753,7 @@ function pad(number) {
     kendo.ui.plugin(DropTarget);
     kendo.ui.plugin(DropTargetArea);
     kendo.ui.plugin(Draggable);
-    kendo.Drag = Drag;
-    kendo.Tap = Tap;
+    kendo.TapCapture = TapCapture;
     kendo.containerBoundaries = containerBoundaries;
 
     extend(kendo.ui, {
@@ -9490,7 +10762,7 @@ function pad(number) {
         Movable: Movable
     });
 
- })(jQuery);
+ })(window.kendo.jQuery);
 (function($, undefined) {
     var kendo = window.kendo,
         mobile = kendo.mobile,
@@ -9505,6 +10777,7 @@ function pad(number) {
         PaneDimensions = kendo.ui.PaneDimensions,
         Transition = fx.Transition,
         Animation = fx.Animation,
+        abs = Math.abs,
         SNAPBACK_DURATION = 500,
         SCROLLBAR_OPACITY = 0.7,
         FRICTION = 0.93,
@@ -9515,6 +10788,33 @@ function pad(number) {
         CHANGE = "change",
         RESIZE = "resize",
         SCROLL = "scroll";
+
+    var ZoomSnapBack = Animation.extend({
+        init: function(options) {
+            var that = this;
+            Animation.fn.init.call(that);
+            extend(that, options);
+
+            that.userEvents.bind("gestureend", proxy(that.start, that));
+            that.tapCapture.bind("press", proxy(that.cancel, that));
+        },
+
+        done: function() {
+            return this.dimensions.minScale - this.movable.scale < 0.01;
+        },
+
+        tick: function() {
+            var movable = this.movable;
+            movable.scaleWith(1.1);
+            this.dimensions.rescale(movable.scale);
+        },
+
+        onEnd: function() {
+            var movable = this.movable;
+            movable.scaleTo(this.dimensions.minScale);
+            this.dimensions.rescale(movable.scale);
+        }
+    });
 
     var DragInertia = Animation.extend({
         init: function(options) {
@@ -9530,9 +10830,10 @@ function pad(number) {
                 })
             });
 
-            that.tap.bind("press", function() { that.cancel(); });
-            that.drag.bind("end", proxy(that.start, that));
-            that.drag.bind("tap", proxy(that.onEnd, that));
+            that.tapCapture.bind("press", function() { that.cancel(); });
+            that.userEvents.bind("end", proxy(that.start, that));
+            that.userEvents.bind("gestureend", proxy(that.start, that));
+            that.userEvents.bind("tap", proxy(that.onEnd, that));
         },
 
         onCancel: function() {
@@ -9555,20 +10856,20 @@ function pad(number) {
         },
 
         done: function() {
-            return Math.abs(this.velocity) < 1;
+            return abs(this.velocity) < 1;
         },
 
-        start: function() {
+        start: function(e) {
             var that = this;
 
-            if (!that.dimension.present()) { return; }
+            if (!that.dimension.enabled) { return; }
 
             if (that._outOfBounds()) {
                 that._snapBack();
             } else {
-                that.velocity = that.drag[that.axis].velocity * 16;
+                that.velocity = e.touch[that.axis].velocity * 16;
                 if (that.velocity) {
-                    that.tap.captureNext();
+                    that.tapCapture.captureNext();
                     Animation.fn.start.call(that);
                 }
             }
@@ -9590,7 +10891,7 @@ function pad(number) {
         },
 
         _end: function() {
-            this.tap.cancelCapture();
+            this.tapCapture.cancelCapture();
             this.end();
         },
 
@@ -9677,28 +10978,34 @@ function pad(number) {
 
             var inner = element.children().eq(1),
 
-                tap = new kendo.Tap(element),
+                tapCapture = new kendo.TapCapture(element),
 
                 movable = new Movable(inner),
 
                 dimensions = new PaneDimensions({
                     element: inner,
                     container: element,
+                    forcedEnabled: that.options.zoom,
                     change: function() {
                         that.trigger(RESIZE);
                     }
                 }),
 
-                drag = new kendo.Drag(element, {
+                userEvents = new kendo.UserEvents(element, {
                     allowSelection: true,
                     preventDragEvent: true,
+                    multiTouch: that.options.zoom,
                     start: function(e) {
                         dimensions.refresh();
 
-                        if (dimensions.present()) {
-                            drag.capture();
+                        var velocityX = abs(e.x.velocity),
+                            velocityY = abs(e.y.velocity);
+
+                        if (dimensions.x.enabled && velocityX * 2 >= velocityY ||
+                            dimensions.y.enabled && velocityY * 2 >= velocityX) {
+                            userEvents.capture();
                         } else {
-                            drag.cancel();
+                            userEvents.cancel();
                         }
                     }
                 }),
@@ -9706,8 +11013,15 @@ function pad(number) {
                 pane = new Pane({
                     movable: movable,
                     dimensions: dimensions,
-                    drag: drag,
+                    userEvents: userEvents,
                     elastic: that.options.elastic
+                }),
+
+                zoomSnapBack = new ZoomSnapBack({
+                    movable: movable,
+                    dimensions: dimensions,
+                    userEvents: userEvents,
+                    tapCapture: tapCapture
                 });
 
             movable.bind(CHANGE, function() {
@@ -9723,9 +11037,10 @@ function pad(number) {
             extend(that, {
                 movable: movable,
                 dimensions: dimensions,
-                drag: drag,
+                zoomSnapBack: zoomSnapBack,
+                userEvents: userEvents,
                 pane: pane,
-                tap: tap,
+                tapCapture: tapCapture,
                 pulled: false,
                 scrollElement: inner,
                 fixedContainer: element.children().first()
@@ -9753,6 +11068,7 @@ function pad(number) {
 
         options: {
             name: "Scroller",
+            zoom: false,
             pullOffset: 140,
             elastic: true,
             pullTemplate: "Pull to refresh",
@@ -9792,7 +11108,7 @@ function pad(number) {
 
         destroy: function() {
             Widget.fn.destroy.call(this);
-            this.drag.destroy();
+            this.userEvents.destroy();
         },
 
         _initPullToRefresh: function() {
@@ -9808,7 +11124,7 @@ function pad(number) {
             that.hintContainer = that.refreshHint.children(".km-template");
 
             that.pane.y.bind("change", proxy(that._paneChange, that));
-            that.drag.bind("end", proxy(that._dragEnd, that));
+            that.userEvents.bind("end", proxy(that._dragEnd, that));
         },
 
         _dragEnd: function() {
@@ -9845,7 +11161,7 @@ function pad(number) {
             var that = this,
             movable = that.movable,
             dimension = that.dimensions[axis],
-            tap = that.tap,
+            tapCapture = that.tapCapture,
 
             scrollBar = new ScrollBar({
                 axis: axis,
@@ -9857,8 +11173,8 @@ function pad(number) {
             inertia = new DragInertia({
                 axis: axis,
                 movable: movable,
-                tap: tap,
-                drag: that.drag,
+                tapCapture: tapCapture,
+                userEvents: that.userEvents,
                 dimension: dimension,
                 elastic: that.options.elastic,
                 end: function() { scrollBar.hide(); }
@@ -9873,7 +11189,7 @@ function pad(number) {
     });
 
     ui.plugin(Scroller);
-})(jQuery);
+})(window.kendo.jQuery);
 (function ($, undefined) {
     var kendo = window.kendo,
         Widget = kendo.ui.Widget,
@@ -9919,7 +11235,7 @@ function pad(number) {
 
             Widget.fn.init.call(that, element, options);
 
-            draggable = that.options.draggable || new kendo.ui.Draggable(that.element, {
+            that.draggable = draggable = that.options.draggable || new kendo.ui.Draggable(that.element, {
                 filter: that.options.filter,
                 hint: hint,
                 group: group
@@ -10054,7 +11370,12 @@ function pad(number) {
 
             that.groupContainer
                 .off(NS)
+                .kendoDropTarget("destroy")
                 .kendoDraggable("destroy");
+
+            if (!that.options.draggable) {
+                that.draggable.destroy();
+            }
 
             if (that.dataSource && that._refreshHandler) {
                 that.dataSource.unbind("change", that._refreshHandler);
@@ -10219,7 +11540,7 @@ function pad(number) {
 
     kendo.ui.plugin(Groupable);
 
-})(jQuery);
+})(window.kendo.jQuery);
 (function ($, undefined) {
     var kendo = window.kendo,
         Widget = kendo.ui.Widget,
@@ -10339,7 +11660,7 @@ function pad(number) {
 
     kendo.ui.plugin(Reorderable);
 
-})(jQuery);
+})(window.kendo.jQuery);
 (function($, undefined) {
     var kendo = window.kendo,
         ui = kendo.ui,
@@ -10368,9 +11689,12 @@ function pad(number) {
                 distance: 0,
                 filter: options.handle,
                 drag: proxy(that._resize, that),
+                dragcancel: proxy(that._cancel, that),
                 dragstart: proxy(that._start, that),
                 dragend: proxy(that._stop, that)
             });
+
+            that.userEvents = that.draggable.userEvents;
         },
 
         events: [
@@ -10383,6 +11707,7 @@ function pad(number) {
             name: "Resizable",
             orientation: HORIZONTAL
         },
+
         _max: function(e) {
             var that = this,
                 hintSize = that.hint ? that.hint[that._sizingDom]() : 0,
@@ -10390,19 +11715,21 @@ function pad(number) {
 
             return isFunction(size) ? size(e) : size !== undefined ? (that._initialElementPosition + size) - hintSize : size;
         },
+
         _min: function(e) {
             var that = this,
                 size = that.options.min;
 
             return isFunction(size) ? size(e) : size !== undefined ? that._initialElementPosition + size : size;
         },
+
         _start: function(e) {
             var that = this,
                 hint = that.options.hint,
                 el = $(e.currentTarget);
 
-            that._initialMousePosition = e[that._positionMouse].location;
             that._initialElementPosition = el.position()[that._position];
+            that._initialMousePosition = e[that._positionMouse].startLocation;
 
             if (hint) {
                 that.hint = isFunction(hint) ? $(hint(el)) : hint;
@@ -10421,6 +11748,7 @@ function pad(number) {
 
             $(document.body).css("cursor", el.css("cursor"));
         },
+
         _resize: function(e) {
             var that = this,
                 handle = $(e.currentTarget),
@@ -10437,8 +11765,10 @@ function pad(number) {
                          .css(that._position, position);
             }
 
+            that.resizing = true;
             that.trigger(RESIZE, extend(e, { position: position }));
         },
+
         _stop: function(e) {
             var that = this;
 
@@ -10446,9 +11776,21 @@ function pad(number) {
                 that.hint.remove();
             }
 
+            that.resizing = false;
             that.trigger(RESIZEEND, extend(e, { position: that.position }));
             $(document.body).css("cursor", "");
         },
+
+        _cancel: function(e) {
+            var that = this;
+
+            if (that.hint) {
+                that.position = undefined;
+                that.hint.css(that._position, that._initialElementPosition);
+                that._stop(e);
+            }
+        },
+
         destroy: function() {
             var that = this;
 
@@ -10457,22 +11799,56 @@ function pad(number) {
             if (that.draggable) {
                 that.draggable.destroy();
             }
+        },
+
+        press: function(target) {
+            if (!target) {
+                return;
+            }
+
+            var position = target.position(),
+                that = this;
+
+            that.userEvents.press(position.left, position.top, target[0]);
+            that.targetPosition = position;
+            that.target = target;
+        },
+
+        move: function(delta) {
+            var that = this,
+                orientation = that._position,
+                position = that.targetPosition,
+                current = that.position;
+
+            if (current === undefined) {
+                current = position[orientation];
+            }
+
+            position[orientation] = current + delta;
+
+            that.userEvents.move(position.left, position.top);
+        },
+
+        end: function() {
+            this.userEvents.end();
+            this.target = this.position = undefined;
         }
     });
 
     kendo.ui.plugin(Resizable);
 
-})(jQuery);
+})(window.kendo.jQuery);
 (function($, undefined) {
     var kendo = window.kendo,
         proxy = $.proxy,
-        DIR = "data-dir",
+        DIR = "dir",
         ASC = "asc",
         SINGLE = "single",
-        FIELD = "data-field",
+        FIELD = "field",
         DESC = "desc",
         NS = ".kendoSortable",
         TLINK = ".k-link",
+        ARIASORT = "aria-sort",
         Widget = kendo.ui.Widget;
 
     var Sortable = Widget.extend({
@@ -10520,34 +11896,37 @@ function pad(number) {
                 descriptor,
                 dir,
                 element = that.element,
-                field = element.attr(FIELD);
+                field = element.attr(kendo.attr(FIELD));
 
-            element.removeAttr(DIR);
+            element.removeAttr(kendo.attr(DIR));
+            element.removeAttr(ARIASORT);
 
             for (idx = 0, length = sort.length; idx < length; idx++) {
                descriptor = sort[idx];
 
                if (field == descriptor.field) {
-                   element.attr(DIR, descriptor.dir);
+                   element.attr(kendo.attr(DIR), descriptor.dir);
                }
             }
 
-            dir = element.attr(DIR);
+            dir = element.attr(kendo.attr(DIR));
 
             element.find(".k-i-arrow-n,.k-i-arrow-s").remove();
 
             if (dir === ASC) {
                 $('<span class="k-icon k-i-arrow-n" />').appendTo(that.link);
+                element.attr(ARIASORT, "ascending");
             } else if (dir === DESC) {
                 $('<span class="k-icon k-i-arrow-s" />').appendTo(that.link);
+                element.attr(ARIASORT, "descending");
             }
         },
 
         _click: function(e) {
             var that = this,
                 element = that.element,
-                field = element.attr(FIELD),
-                dir = element.attr(DIR),
+                field = element.attr(kendo.attr(FIELD)),
+                dir = element.attr(kendo.attr(DIR)),
                 options = that.options,
                 sort = that.dataSource.sort() || [],
                 idx,
@@ -10580,20 +11959,16 @@ function pad(number) {
     });
 
     kendo.ui.plugin(Sortable);
-})(jQuery);
+})(window.kendo.jQuery);
 (function ($, undefined) {
     var kendo = window.kendo,
-        touch = kendo.support.touch,
         Widget = kendo.ui.Widget,
         proxy = $.proxy,
-        MOUSEUP = touch? "touchend" : "mouseup",
-        MOUSEDOWN = touch? "touchstart" : "mousedown",
-        MOUSEMOVE = touch? "touchmove" : "mousemove",
+        abs = Math.abs,
+        ARIASELECTED = "aria-selected",
         SELECTED = "k-state-selected",
         ACTIVE = "k-state-selecting",
         SELECTABLE = "k-selectable",
-        SELECTSTART = "selectstart",
-        DOCUMENT = $(document),
         CHANGE = "change",
         NS = ".kendoSelectable",
         UNSELECTING = "k-state-unselecting",
@@ -10612,18 +11987,29 @@ function pad(number) {
 
     var Selectable = Widget.extend({
         init: function(element, options) {
-            var that = this;
+            var that = this,
+                multiple;
 
             Widget.fn.init.call(that, element, options);
 
             that._marquee = $("<div class='k-marquee'></div>");
             that._lastActive = null;
-
-            that._moveDelegate = proxy(that._move, that);
-            that._upDelegate = proxy(that._up, that);
-
             that.element.addClass(SELECTABLE);
-            that.element.on(MOUSEDOWN + NS, (!supportEventDelegation ? "." + SELECTABLE + " " : "") + that.options.filter, proxy(that._down, that));
+
+            multiple = that.options.multiple;
+            that.userEvents = new kendo.UserEvents(that.element, {
+                global: true,
+                allowSelection: !multiple,
+                filter: (!supportEventDelegation ? "." + SELECTABLE + " " : "") + that.options.filter,
+                tap: proxy(that._tap, that)
+            });
+
+            if (multiple) {
+                that.userEvents
+                   .bind("start", proxy(that._start, that))
+                   .bind("move", proxy(that._move, that))
+                   .bind("end", proxy(that._end, that));
+            }
         },
 
         events: [CHANGE],
@@ -10633,194 +12019,105 @@ function pad(number) {
             filter: ">*",
             multiple: false
         },
-        _collide: function(element, marqueePos) {
-            var pos = element.offset(),
-                selectee = {
-                    left: pos.left,
-                    top: pos.top,
-                    right: pos.left + element.outerWidth(),
-                    bottom: pos.top + element.outerHeight()
-                };
 
-            return (!(selectee.left > marqueePos.right ||
-                selectee.right < marqueePos.left ||
-                selectee.top > marqueePos.bottom ||
-                selectee.bottom < marqueePos.top));
-        },
-        _position: function(event) {
-            var pos = this._originalPosition,
-                left = pos.x,
-                top = pos.y,
-                right = event.pageX,
-                bottom = event.pageY,
-                tmp;
+        _tap: function(e) {
+            var target = $(e.target),
+                that = this,
+                ctrlKey = e.event.ctrlKey,
+                multiple = that.options.multiple,
+                shiftKey = multiple && e.event.shiftKey,
+                selected;
 
-            if (left > right) {
-                tmp = right;
-                right = left;
-                left = tmp;
-            }
-
-            if (top > bottom) {
-                tmp = bottom;
-                bottom = top;
-                top = tmp;
-            }
-
-            return {
-                top: top,
-                right: right,
-                left: left,
-                bottom: bottom
-            };
-        },
-        _down: function (event) {
-            var that = this,
-                selected,
-                ctrlKey = event.ctrlKey,
-                shiftKey = event.shiftKey,
-                single = !that.options.multiple;
-
-            that._downTarget = $(event.currentTarget);
-            that._shiftPressed = shiftKey;
-
-            if (that._downTarget.closest("." + SELECTABLE)[0] !== that.element[0]) {
+            //in case of hierarchy
+            if (target.closest("." + SELECTABLE)[0] !== that.element[0]) {
                 return;
             }
 
-            DOCUMENT
-                .unbind(MOUSEUP, that._upDelegate) // more cancel friendly
-                .bind(MOUSEUP, that._upDelegate);
-
-            that._originalPosition = {
-                x: event.pageX,
-                y: event.pageY
-            };
-
-            if(!single && $(event.target).is(":not(:input, a)")) {
-                DOCUMENT
-                    .unbind(MOUSEMOVE, that._moveDelegate)
-                    .bind(MOUSEMOVE, that._moveDelegate)
-                    .unbind(SELECTSTART, false)
-                    .bind(SELECTSTART, false);
-
-                if (!kendo.support.touch) {
-                    event.preventDefault();
-                }
+            selected = target.hasClass(SELECTED);
+            if (!multiple || !ctrlKey) {
+                that.clear();
             }
 
-            if (!single) {
-                $("body").append(that._marquee);
-                that._marquee.css({
-                    left: event.clientX + 1,
-                    top: event.clientY + 1,
+            if (shiftKey) {
+                that.selectRange(that._firstSelectee(), target);
+            } else {
+                if (selected && ctrlKey) {
+                    that._unselect(target);
+                    that._notify(CHANGE);
+                } else {
+                    that.value(target);
+                }
+
+                that._lastActive = that._downTarget = target;
+            }
+        },
+
+        _start: function(e) {
+            var that = this,
+                target = $(e.target),
+                selected = target.hasClass(SELECTED),
+                ctrlKey = e.event.ctrlKey;
+
+            that._downTarget = target;
+
+            //in case of hierarchy
+            if (target.closest("." + SELECTABLE)[0] !== that.element[0]) {
+                that.userEvents.cancel();
+                that._downTarget = null;
+                return;
+            }
+
+            that._marquee
+                .appendTo(document.body)
+                .css({
+                    left: e.x.client + 1,
+                    top: e.y.client + 1,
                     width: 0,
                     height: 0
                 });
+
+            if (!ctrlKey) {
+                that.clear();
             }
 
-            selected = that._downTarget.hasClass(SELECTED);
-            if(single || !(ctrlKey || shiftKey)) {
-                that.element
-                .find(that.options.filter + "." + SELECTED)
-                .not(that._downTarget)
-                .removeClass(SELECTED);
-            }
-            if(ctrlKey) {
-                that._lastActive = that._downTarget;
-            }
-
-            if(selected && (ctrlKey || shiftKey)) {
-                that._downTarget.addClass(SELECTED);
-                if(!shiftKey) {
-                    that._downTarget.addClass(UNSELECTING);
-                }
-            }
-            else {
-                if (!(kendo.support.touch && single)) {
-                    that._downTarget.addClass(ACTIVE);
-
-                    if (single && that._downTarget.hasClass(SELECTED)) {
-                        that._downTarget.removeClass(ACTIVE);
-                    }
+            if (selected) {
+                that._selectElement(target, true);
+                if (ctrlKey) {
+                    target.addClass(UNSELECTING);
                 }
             }
         },
-        _move: function (event) {
+
+        _move: function(e) {
             var that = this,
-                pos = that._position(event),
-                ctrlKey = event.ctrlKey,
-                selectee, collide;
+                position = {
+                    left: e.x.startLocation > e.x.location ? e.x.location : e.x.startLocation,
+                    top: e.y.startLocation > e.y.location ? e.y.location : e.y.startLocation,
+                    width: abs(e.x.initialDelta),
+                    height: abs(e.y.initialDelta)
+                },
+                items = that.element.find(that.options.filter);
 
-                that._marquee.css({
-                    left: pos.left,
-                    top: pos.top,
-                    width: pos.right - pos.left,
-                    height: pos.bottom - pos.top
-                });
+            that._marquee.css(position);
 
-            that.element.find(that.options.filter).each(function () {
-                selectee = $(this);
-                collide = that._collide(selectee, pos);
+            invalidateSelectables(items, that._downTarget[0], position, e.event.ctrlKey);
 
-                if (collide) {
-                    if(selectee.hasClass(SELECTED)) {
-                        if(that._downTarget[0] !== selectee[0] && ctrlKey) {
-                            selectee
-                                .removeClass(SELECTED)
-                                .addClass(UNSELECTING);
-                        }
-                    } else if (!selectee.hasClass(ACTIVE) && !selectee.hasClass(UNSELECTING)) {
-                        selectee.addClass(ACTIVE);
-                    }
-                }
-                else {
-                    if (selectee.hasClass(ACTIVE)) {
-                        selectee.removeClass(ACTIVE);
-                    }
-                    else if(ctrlKey && selectee.hasClass(UNSELECTING)) {
-                        selectee
-                            .removeClass(UNSELECTING)
-                            .addClass(SELECTED);
-                    }
-                }
-            });
+            e.preventDefault();
         },
-        _up: function (event) {
-            var that = this,
-                options = that.options,
-                single = !options.multiple;
 
-            DOCUMENT
-                .unbind(SELECTSTART, false)
-                .unbind(MOUSEMOVE, that._moveDelegate)
-                .unbind(MOUSEUP, that._upDelegate);
+        _end: function() {
+            var that = this;
 
-            if (!single) {
-                that._marquee.remove();
-            }
+            that._marquee.remove();
 
-            if (kendo.support.touch && single) {
-                that._downTarget.addClass(ACTIVE);
-            }
+            that._unselect(that.element
+                .find(that.options.filter + "." + UNSELECTING))
+                .removeClass(UNSELECTING);
 
-            if(!single && that._shiftPressed === true) {
-                that.selectRange(that._firstSelectee(), that._downTarget);
-            }
-            else {
-                that.element
-                    .find(options.filter + "." + UNSELECTING)
-                    .removeClass(UNSELECTING)
-                    .removeClass(SELECTED);
-
-                that.value(that.element.find(options.filter + "." + ACTIVE));
-            }
-            if(!that._shiftPressed) {
-                that._lastActive = that._downTarget;
-            }
-            that._downTarget = null;
-            that._shiftPressed = false;
+            that.value(that.element.find(that.options.filter + "." + ACTIVE));
+            that._lastActive = that._downTarget;
         },
+
         value: function(val) {
             var that = this,
                 selectElement = proxy(that._selectElement, that);
@@ -10830,15 +12127,17 @@ function pad(number) {
                     selectElement(this);
                 });
 
-                that.trigger(CHANGE, {});
+                that._notify(CHANGE);
                 return;
             }
 
-            return that.element
-                    .find(that.options.filter + "." + SELECTED);
+            return that.element.find(that.options.filter + "." + SELECTED);
         },
+
         _firstSelectee: function() {
-            var that = this, selected;
+            var that = this,
+                selected;
+
             if(that._lastActive !== null) {
                 return that._lastActive;
             }
@@ -10848,63 +12147,131 @@ function pad(number) {
                     selected[0] :
                     that.element.find(that.options.filter);
         },
-        _selectElement: function(el) {
-            var selecee = $(el),
-                isPrevented = this.trigger("select", { element: el });
 
-            selecee.removeClass(ACTIVE);
+        _selectElement: function(element, preventNotify) {
+            var toSelect = $(element),
+                isPrevented =  !preventNotify && this._notify("select", { element: element });
+
+            toSelect.removeClass(ACTIVE);
             if(!isPrevented) {
-                selecee.addClass(SELECTED);
+                 toSelect.addClass(SELECTED);
+
+                if (this.options.aria) {
+                    toSelect.attr(ARIASELECTED, true);
+                }
             }
         },
-        clear: function() {
-            var that = this;
-            that.element
-                .find(that.options.filter + "." + SELECTED)
-                .removeClass(SELECTED);
+
+        _notify: function(name, args) {
+            args = args || { };
+            return this.trigger(name, args);
         },
+
+        _unselect: function(element) {
+            element.removeClass(SELECTED);
+
+            if (this.options.aria) {
+                element.attr(ARIASELECTED, false);
+            }
+
+            return element;
+        },
+
+        clear: function() {
+            var items = this.element.find(this.options.filter + "." + SELECTED);
+            this._unselect(items);
+        },
+
         selectRange: function(start, end) {
             var that = this,
                 found = false,
-                selectElement = proxy(that._selectElement, that),
-                selectee;
+                idx,
+                length,
+                tmp,
+                toSelect,
+                items = that.element.find(that.options.filter),
+                selectElement = proxy(that._selectElement, that);
+
             start = $(start)[0];
             end = $(end)[0];
-            that.element.find(that.options.filter).each(function () {
-                selectee = $(this);
+
+            for (idx = 0, length = items.length; idx < length; idx ++) {
+                toSelect = items[idx];
                 if(found) {
-                    selectElement(this);
-                    found = this !== end;
-                }
-                else if(this === start) {
+                    selectElement(toSelect);
+                    found = toSelect !== end;
+                } else if(toSelect === start) {
                     found = start !== end;
-                    selectElement(this);
-                }
-                else if(this === end) {
-                    var tmp = start;
+                    selectElement(toSelect);
+                } else if(toSelect === end) {
+                    tmp = start;
                     start = end;
                     end = tmp;
                     found = true;
-                    selectElement(this);
+                    selectElement(toSelect);
+                } else {
+                    $(toSelect).removeClass(SELECTED);
                 }
-                else {
-                    selectee.removeClass(SELECTED);
-                }
-            });
-            that.trigger(CHANGE, {});
+            }
+
+            that._notify(CHANGE);
         },
+
         destroy: function() {
             var that = this;
 
             Widget.fn.destroy.call(that);
 
             that.element.off(NS);
+
+            that.userEvents.destroy();
         }
     });
 
+    function collision(element, position) {
+        var elementPosition = element.offset(),
+            right = position.left + position.width,
+            bottom = position.top + position.height;
+
+        elementPosition.right = elementPosition.left + element.outerWidth();
+        elementPosition.bottom = elementPosition.top + element.outerHeight();
+
+        return !(elementPosition.left > right||
+            elementPosition.right < position.left ||
+            elementPosition.top > bottom ||
+            elementPosition.bottom < position.top);
+    }
+
+    function invalidateSelectables(items, target, position, ctrlKey) {
+        var idx,
+            length,
+            toSelect;
+
+        for (idx = 0, length = items.length; idx < length; idx ++) {
+            toSelect = items.eq(idx);
+
+            if (collision(toSelect, position)) {
+                if(toSelect.hasClass(SELECTED)) {
+                    if(ctrlKey && target !== toSelect[0]) {
+                        toSelect.removeClass(SELECTED).addClass(UNSELECTING);
+                    }
+                } else if (!toSelect.hasClass(ACTIVE) && !toSelect.hasClass(UNSELECTING)) {
+                    toSelect.addClass(ACTIVE);
+                }
+            } else {
+                if (toSelect.hasClass(ACTIVE)) {
+                    toSelect.removeClass(ACTIVE);
+                } else if(ctrlKey && toSelect.hasClass(UNSELECTING)) {
+                    toSelect.removeClass(UNSELECTING).addClass(SELECTED);
+                }
+            }
+        }
+    }
+
     kendo.ui.plugin(Selectable);
 
-})(jQuery);
+})(window.kendo.jQuery);
+
 (function($, undefined) {
     var kendo = window.kendo,
         ui = kendo.ui,
@@ -10941,6 +12308,7 @@ function pad(number) {
        element.find(selector)
               .parent()
               .attr(kendo.attr("page"), page)
+              .attr("tabindex", -1)
               .toggleClass("k-state-disabled", disabled);
     }
 
@@ -11053,7 +12421,7 @@ function pad(number) {
                         '"><span class="k-icon k-i-refresh">' + options.messages.refresh + "</span></a>");
                 }
 
-                that.element.on(CLICK + NS, ".k-pager-refresh", proxy(that._refreshClick, that));
+                that.element.on("touchend" + NS + " " + CLICK + NS, ".k-pager-refresh", proxy(that._refreshClick, that));
             }
 
             if (options.info) {
@@ -11063,7 +12431,7 @@ function pad(number) {
             }
 
             that.element
-                .on(CLICK + NS , "a", proxy(that._click, that))
+                .on("touchend" + NS + " " + CLICK + NS , "a", proxy(that._click, that))
                 .addClass("k-pager-wrap k-widget");
 
             if (options.autoBind) {
@@ -11077,6 +12445,7 @@ function pad(number) {
             var that = this;
 
             Widget.fn.destroy.call(that);
+
             that.element.off(NS);
             that.dataSource.unbind(CHANGE, that._refreshHandler);
         },
@@ -11088,7 +12457,7 @@ function pad(number) {
         options: {
             name: "Pager",
             selectTemplate: '<li><span class="k-state-selected">#=text#</span></li>',
-            linkTemplate: '<li><a href="\\#" class="k-link" data-#=ns#page="#=idx#">#=text#</a></li>',
+            linkTemplate: '<li><a tabindex="-1" href="\\#" class="k-link" data-#=ns#page="#=idx#">#=text#</a></li>',
             buttonCount: 10,
             autoBind: true,
             numeric: true,
@@ -11202,7 +12571,12 @@ function pad(number) {
             }
 
             if (options.pageSizes) {
-                that.element.find(".k-pager-sizes select").val(pageSize);
+                that.element
+                    .find(".k-pager-sizes select")
+                    .val(pageSize)
+                    .filter("[" + kendo.attr("role") + "=dropdownlist]")
+                    .kendoDropDownList("value", pageSize)
+                    .kendoDropDownList("text", pageSize); // handles custom values
             }
         },
 
@@ -11269,13 +12643,12 @@ function pad(number) {
     });
 
     ui.plugin(Pager);
-})(jQuery);
+})(window.kendo.jQuery);
 (function($, undefined) {
     var kendo = window.kendo,
         ui = kendo.ui,
         Widget = ui.Widget,
         support = kendo.support,
-        touch = support.touch,
         getOffset = kendo.getOffset,
         browser = kendo.support.browser,
         appendingToBodyTriggersResize = browser.msie && browser.version < 9,
@@ -11299,7 +12672,7 @@ function pad(number) {
         ACTIVE = "k-state-active",
         ACTIVEBORDER = "k-state-border",
         ACTIVECHILDREN = ".k-picker-wrap, .k-dropdown-wrap, .k-link",
-        MOUSEDOWN = touch ? "touchstart" : "mousedown",
+        MOUSEDOWN = "down",
         DOCUMENT= $(document),
         WINDOW = $(window),
         DOCUMENT_ELEMENT = $(document.documentElement),
@@ -11323,6 +12696,13 @@ function pad(number) {
         init: function(element, options) {
             var that = this, parentPopup;
 
+            options = options || {};
+
+            if (options.isRtl) {
+                options.origin = options.origin || BOTTOM + " " + RIGHT;
+                options.position = options.position || TOP + " " + RIGHT;
+            }
+
             Widget.fn.init.call(that, element, options);
 
             element = that.element;
@@ -11339,6 +12719,7 @@ function pad(number) {
 
             that.element.hide()
                 .addClass("k-popup k-group k-reset")
+                .toggleClass("k-rtl", !!options.isRtl)
                 .css({ position : ABSOLUTE })
                 .appendTo(options.appendTo)
                 .on("mouseenter" + NS, function() {
@@ -11351,7 +12732,7 @@ function pad(number) {
             that.wrapper = $();
 
             if (options.animation === false) {
-                options.animation = { open: { show: true, effects: {} }, close: { hide: true, effects: {} } };
+                options.animation = { open: { effects: {} }, close: { hide: true, effects: {} } };
             }
 
             extend(options.animation.open, {
@@ -11425,12 +12806,10 @@ function pad(number) {
                 open: {
                     effects: "slideIn:down",
                     transition: true,
-                    duration: 200,
-                    show: true
+                    duration: 200
                 },
                 close: { // if close animation effects are defined, they will be used instead of open.reverse
                     duration: 100,
-                    show: false,
                     hide: true
                 }
             }
@@ -11461,7 +12840,7 @@ function pad(number) {
                 }
             }
 
-            kendo.destroy(that.element);
+            kendo.destroy(that.element.children());
         },
 
         open: function(x, y) {
@@ -11482,7 +12861,9 @@ function pad(number) {
 
                 DOCUMENT_ELEMENT.unbind(MOUSEDOWN, that._mousedownProxy)
                                 .bind(MOUSEDOWN, that._mousedownProxy);
-                if (!touch) {
+
+                // this binding hangs iOS in editor
+                if (!(support.mobileOS.ios || support.mobileOS.android)) {
                     WINDOW.unbind(RESIZE_SCROLL, that._resizeProxy)
                           .bind(RESIZE_SCROLL, that._resizeProxy);
                 }
@@ -11578,7 +12959,7 @@ function pad(number) {
             }
         },
 
-        _resize: function(e) {
+        _resize: function() {
             var that = this;
 
             if (appendingToBodyTriggersResize) {
@@ -11654,14 +13035,24 @@ function pad(number) {
                 positions = options.position.toLowerCase().split(" "),
                 collisions = that.collisions,
                 zoomLevel = support.zoomLevel(),
-                zIndex = 10002;
+                siblingContainer, parents,
+                parentZIndex, zIndex = 10002,
+                idx = 0, length;
 
-            var siblingContainer = anchor.parents().filter(wrapper.siblings());
+            siblingContainer = anchor.parents().filter(wrapper.siblings());
 
             if (siblingContainer[0]) {
-                var parentZIndex = Number($(siblingContainer).css("zIndex"));
+                parentZIndex = Number($(siblingContainer).css("zIndex"));
                 if (parentZIndex) {
                     zIndex = parentZIndex + 1;
+                } else {
+                    parents = anchor.parentsUntil(siblingContainer);
+                    for (length = parents.length; idx < length; idx++) {
+                        parentZIndex = Number($(parents[idx]).css("zIndex"));
+                        if (parentZIndex && zIndex < parentZIndex) {
+                            zIndex = parentZIndex + 1;
+                        }
+                    }
                 }
             }
 
@@ -11794,17 +13185,15 @@ function pad(number) {
     });
 
     ui.plugin(Popup);
-})(jQuery);
+})(window.kendo.jQuery);
 (function($, undefined) {
     var kendo = window.kendo,
         ui = kendo.ui,
         Widget = ui.Widget,
         keys = kendo.keys,
-        touch = kendo.support.touch,
         htmlEncode = kendo.htmlEncode,
         ID = "id",
         LI = "li",
-        CLICK = touch ? "touchend" : "click",
         CHANGE = "change",
         CHARACTER = "character",
         FOCUSED = "k-state-focused",
@@ -11813,9 +13202,9 @@ function pad(number) {
         OPEN = "open",
         CLOSE = "close",
         SELECT = "select",
-        SELECTED = "selected",
-        REQUESTSTART = "requestStart",
+        PROGRESS = "progress",
         REQUESTEND = "requestEnd",
+        WIDTH = "width",
         extend = $.extend,
         proxy = $.proxy,
         browser = kendo.support.browser,
@@ -11826,27 +13215,36 @@ function pad(number) {
         init: function(element, options) {
             var that = this,
                 ns = that.ns,
-                list, id;
+                id;
 
             Widget.fn.init.call(that, element, options);
+            element = that.element;
 
             that._template();
 
             that.ul = $('<ul unselectable="on" class="k-list k-reset"/>')
-                        .css({ overflow: kendo.support.touch ? "": "auto" })
+                        .css({ overflow: kendo.support.kineticScrollNeeded ? "": "auto" })
                         .on("mouseenter" + ns, LI, function() { $(this).addClass(HOVER); })
                         .on("mouseleave" + ns, LI, function() { $(this).removeClass(HOVER); })
-                        .on(CLICK + ns, LI, proxy(that._click, that));
+                        .on("touchend" + ns + " click" + ns, LI, proxy(that._click, that))
+                        .attr({
+                            tabIndex: -1,
+                            role: "listbox",
+                            "aria-hidden": true
+                        });
 
-            that.list = list = $("<div class='k-list-container'/>")
+            that.list = $("<div class='k-list-container'/>")
                         .append(that.ul)
                         .on("mousedown" + ns, function(e) {
                             e.preventDefault();
                         });
 
-            id = that.element.attr(ID);
+            id = element.attr(ID);
+
             if (id) {
-                list.attr(ID, id + "-list");
+                that.list.attr(ID, id + "-list");
+                that.ul.attr(ID, id + "_listbox");
+                that._optionID = id + "_option_selected";
             }
         },
 
@@ -11855,16 +13253,28 @@ function pad(number) {
         },
 
         current: function(candidate) {
-            var that = this;
+            var that = this,
+                id = that._optionID;
 
             if (candidate !== undefined) {
                 if (that._current) {
-                    that._current.removeClass(FOCUSED);
+                    that._current
+                        .removeClass(FOCUSED)
+                        .removeAttr("aria-selected")
+                        .removeAttr(ID);
+
+                    that._focused
+                        .removeAttr("aria-activedescendant");
                 }
 
                 if (candidate) {
                     candidate.addClass(FOCUSED);
                     that._scroll(candidate);
+
+                    if (id) {
+                        candidate.attr("id", id);
+                        that._focused.attr("aria-activedescendant", id);
+                    }
                 }
 
                 that._current = candidate;
@@ -11919,6 +13329,22 @@ function pad(number) {
 
             that._text = getter(options.dataTextField);
             that._value = getter(options.dataValueField);
+        },
+
+        _aria: function() {
+            var that = this,
+                options = that.options,
+                element = that._focused;
+
+            if (options.suggest !== undefined) {
+                element.attr("aria-autocomplete", options.suggest ? "both" : "list");
+            }
+
+            if (that.element[0].id) {
+                element.attr("aria-owns", that.ul[0].id);
+            }
+
+            that.ul.attr("aria-live", !options.filter || options.filter === "none" ? "off" : "polite");
         },
 
         _blur: function() {
@@ -11985,6 +13411,8 @@ function pad(number) {
             }
 
             that._select(li);
+            that._triggerCascade();
+
             that._blur();
         },
 
@@ -12010,6 +13438,10 @@ function pad(number) {
                 wrapper = this.wrapper,
                 computedStyle, computedWidth;
 
+            if (!list.data(WIDTH) && width) {
+                return;
+            }
+
             computedStyle = window.getComputedStyle ? window.getComputedStyle(wrapper[0], null) : 0;
             computedWidth = computedStyle ? parseFloat(computedStyle.width) : wrapper.outerWidth();
 
@@ -12022,7 +13454,8 @@ function pad(number) {
             list.css({
                 fontFamily: wrapper.css("font-family"),
                 width: width
-            });
+            })
+            .data(WIDTH, width);
 
             return true;
         },
@@ -12030,6 +13463,7 @@ function pad(number) {
         _popup: function() {
             var that = this,
                 list = that.list,
+                focused = that._focused,
                 options = that.options,
                 wrapper = that.wrapper;
 
@@ -12040,36 +13474,41 @@ function pad(number) {
 
                     if (that.trigger(OPEN)) {
                         e.preventDefault();
+                    } else {
+                        focused.attr("aria-expanded", true);
+                        that.ul.attr("aria-hidden", false);
                     }
                 },
                 close: function(e) {
                     if (that.trigger(CLOSE)) {
                         e.preventDefault();
+                    } else {
+                        focused.attr("aria-expanded", false);
+                        that.ul.attr("aria-hidden", true);
                     }
                 },
-                animation: options.animation
+                animation: options.animation,
+                isRtl: kendo.support.isRtl(wrapper)
             }));
 
             that._touchScroller = kendo.touchScroller(that.popup.element);
         },
 
-        _makeUnselectable: function(element) {
+        _makeUnselectable: function() {
             if (isIE8) {
                 this.list.find("*").attr("unselectable", "on");
             }
         },
 
         _toggleHover: function(e) {
-            if (!touch) {
-                $(e.currentTarget).toggleClass(HOVER, e.type === "mouseenter");
-            }
+            $(e.currentTarget).toggleClass(HOVER, e.type === "mouseenter");
         },
 
         _toggle: function(open) {
             var that = this;
             open = open !== undefined? open : !that.popup.visible();
 
-            if (!touch && that._focused[0] !== document.activeElement) {
+            if (!kendo.support.mobileOS && that._focused[0] !== document.activeElement) {
                 that._focused.focus();
             }
 
@@ -12112,13 +13551,27 @@ function pad(number) {
             }
 
             if (!template) {
-                that.template = kendo.template('<li unselectable="on" class="k-item">${data' + (options.dataTextField ? "." : "") + options.dataTextField + "}</li>", { useWithBlock: false });
+                that.template = kendo.template('<li tabindex="-1" role="option" unselectable="on" class="k-item">${data' + (options.dataTextField ? "." : "") + options.dataTextField + "}</li>", { useWithBlock: false });
             } else {
                 template = kendo.template(template);
                 that.template = function(data) {
-                    return '<li unselectable="on" class="k-item">' + template(data) + "</li>";
+                    return '<li tabindex="-1" role="option" unselectable="on" class="k-item">' + template(data) + "</li>";
                 };
             }
+        },
+
+       _triggerCascade: function() {
+            if (this._old !== this.value()) {
+                this.trigger("cascade");
+            }
+        },
+
+       _unbindDataSource: function() {
+            var that = this;
+
+            that.dataSource.unbind(CHANGE, that._refreshHandler)
+                           .unbind(PROGRESS, that._progressHandler)
+                           .unbind(REQUESTEND, that._requestEndHandler);
         }
     });
 
@@ -12188,6 +13641,19 @@ function pad(number) {
             this.popup.close();
         },
 
+        select: function(li) {
+            var that = this;
+
+            if (li === undefined) {
+                return that.selectedIndex;
+            } else {
+                that._select(li);
+                that._triggerCascade();
+                that._old = that._accessor();
+                that._oldIndex = that.selectedIndex;
+            }
+        },
+
         _accessor: function(value, idx) {
             var element = this.element,
                 isSelect = element.is(SELECT),
@@ -12223,6 +13689,7 @@ function pad(number) {
             var that = this;
             clearTimeout(that._busy);
             that._arrow.removeClass(LOADING);
+            that._focused.attr("aria-busy", false);
             that._busy = null;
         },
 
@@ -12236,6 +13703,7 @@ function pad(number) {
             }
 
             that._busy = setTimeout(function () {
+                that._focused.attr("aria-busy", true);
                 that._arrow.addClass(LOADING);
             }, 100);
         },
@@ -12268,22 +13736,14 @@ function pad(number) {
                 that._unbindDataSource();
             } else {
                 that._refreshHandler = proxy(that.refresh, that);
-                that._requestStartHandler = proxy(that._showBusy, that);
+                that._progressHandler = proxy(that._showBusy, that);
                 that._requestEndHandler = proxy(that._requestEnd, that);
             }
 
             that.dataSource = kendo.data.DataSource.create(dataSource)
                                    .bind(CHANGE, that._refreshHandler)
-                                   .bind(REQUESTSTART, that._requestStartHandler)
+                                   .bind(PROGRESS, that._progressHandler)
                                    .bind(REQUESTEND, that._requestEndHandler);
-        },
-
-        _unbindDataSource: function() {
-            var that = this;
-
-            that.dataSource.unbind(CHANGE, that._refreshHandler)
-                           .unbind(REQUESTSTART, that._requestStartHandler)
-                           .unbind(REQUESTEND, that._requestEndHandler);
         },
 
         _index: function(value) {
@@ -12349,12 +13809,16 @@ function pad(number) {
                 if (e.altKey) {
                     that.toggle(down);
                 } else if (down) {
-                    that._select(current ? current[0].nextSibling : ul.firstChild);
-                    e.preventDefault();
+                    if (!current || (that.selectedIndex === -1 && !that.value())) {
+                        current = ul.firstChild;
+                    } else {
+                        current = current[0].nextSibling;
+                    }
+                    that._select(current);
                 } else {
                     that._select(current ? current[0].previousSibling : ul.lastChild);
-                    e.preventDefault();
                 }
+                e.preventDefault();
                 pressed = true;
             } else if (key === keys.ENTER || key === keys.TAB) {
 
@@ -12365,6 +13829,9 @@ function pad(number) {
                 that._accept(current);
                 pressed = true;
             } else if (key === keys.ESC) {
+                if (that.popup.visible()) {
+                    e.preventDefault();
+                }
                 that.close();
                 pressed = true;
             }
@@ -12376,34 +13843,39 @@ function pad(number) {
             var that = this,
                 options = that.options;
 
-            value = value || options.value || that.value();
+            value = that._selectedValue || options.value || that._accessor();
 
             if (value) {
                 that.value(value);
             } else {
                 that.select(options.index);
             }
-
-            that.trigger("selected");
         },
 
-        _valueOnFetch: function(value) {
-            var that = this;
+        _fetchItems: function(value) {
+            var that = this,
+                hasItems = that.ul[0].firstChild;
 
-            if (!that.ul[0].firstChild && !that._fetch) {
-                that.dataSource.one(CHANGE, function() {
-                    that._fetch = true;
-                    that.value(value);
-                });
-
-                if (!that._request) { // if request is started do not fetch again
-                    that.dataSource.fetch();
-                }
-
+            //if request is started avoid datasource.fetch
+            if (that._request) {
                 return true;
             }
 
-            that._fetch = false;
+            if (!that._fetch && !hasItems) {
+                if (that.options.cascadeFrom) {
+                    return !hasItems;
+                }
+
+                that.dataSource.one(CHANGE, function() {
+                    that.value(value);
+                    that._fetch = false;
+                });
+
+                that._fetch = true;
+                that.dataSource.fetch();
+
+                return true;
+            }
         },
 
         _options: function(data, optionLabel) {
@@ -12474,7 +13946,7 @@ function pad(number) {
                 options = that.options,
                 cascade = options.cascadeFrom,
                 parent, select, valueField,
-                deactivate, change, dataSource;
+                change;
 
             if (cascade) {
                 parent = $("#" + cascade).data("kendo" + options.name);
@@ -12483,23 +13955,18 @@ function pad(number) {
                     return;
                 }
 
-                dataSource = that.dataSource;
                 valueField = parent.options.dataValueField;
-                deactivate = function() {
-                    that.value("");
-                    that.enable(false);
-                };
                 change = function() {
-                    var value = that.value();
+                    var value = that._selectedValue || that.value();
                     if (value) {
                         that.value(value);
-                        if (that.selectedIndex == -1) {
-                            that.value("");
+                        if (!that.dataSource.view()[0] || that.selectedIndex === -1) {
+                            that._clearSelection(parent, true);
                         }
                     } else {
                         that.select(options.index);
                     }
-                    that.trigger(SELECTED);
+
                     that.enable();
                 };
                 select = function() {
@@ -12508,7 +13975,7 @@ function pad(number) {
                         expressions, filters;
 
                     if (filterValue) {
-                        expressions = dataSource.filter() || {};
+                        expressions = that.dataSource.filter() || {};
                         removeFiltersForField(expressions, valueField);
                         filters = expressions.filters || [];
 
@@ -12518,26 +13985,22 @@ function pad(number) {
                             value: filterValue
                         });
 
-                        dataSource
+                        that.dataSource
                             .one(CHANGE, change)
                             .filter(filters);
 
                     } else {
-                        deactivate();
+                        that.enable(false);
+                        that._clearSelection(parent);
                     }
+
+                    that._triggerCascade();
                 };
 
-                parent.bind("cascade", deactivate)
-                      .bind(CHANGE, function() {
-                          select();
-                          that.trigger("cascade");
-                      })
-                      .one(SELECTED, function() {
-                          select();
-                      });
+                parent.bind("cascade", function() { select(); });
 
-
-                if (parent._valueCalled !== undefined) {
+                //refresh was called
+                if (parent._bound) {
                     select();
                 } else if (!parent.value()) {
                     that.enable(false);
@@ -12561,27 +14024,30 @@ function pad(number) {
 
     ui.Select.removeFiltersForField = removeFiltersForField;
 
-})(jQuery);
+})(window.kendo.jQuery);
 (function($, undefined) {
     var kendo = window.kendo,
         ui = kendo.ui,
         Widget = ui.Widget,
         parse = kendo.parseDate,
+        adjustDate = kendo._adjustDate,
+        keys = kendo.keys,
         extractFormat = kendo._extractFormat,
         template = kendo.template,
         getCulture = kendo.getCulture,
-        touch = kendo.support.touch,
         transitions = kendo.support.transitions,
         transitionOrigin = transitions ? transitions.css + "transform-origin" : "",
-        cellTemplate = template('<td#=data.cssClass#><a class="k-link" href="\\#" data-#=data.ns#value="#=data.dateString#">#=data.value#</a></td>', { useWithBlock: false }),
-        emptyCellTemplate = template("<td>&nbsp;</td>", { useWithBlock: false }),
+        cellTemplate = template('<td#=data.cssClass# role="gridcell"><a tabindex="-1" class="k-link" href="\\#" data-#=data.ns#value="#=data.dateString#">#=data.value#</a></td>', { useWithBlock: false }),
+        emptyCellTemplate = template('<td role="gridcell">&nbsp;</td>', { useWithBlock: false }),
         browser = kendo.support.browser,
         isIE8 = browser.msie && (parseInt(browser.version, 10) < 9 || (document.documentMode && document.documentMode < 9)),
         ns = ".kendoCalendar",
-        CLICK = (touch ? "touchend" : "click") + ns,
+        CLICK = "touchend" + ns + " click" + ns,
+        KEYDOWN_NS = "keydown" + ns,
+        ID = "id",
         MIN = "min",
         LEFT = "left",
-        SLIDE = "slide",
+        SLIDE = "slideIn",
         MONTH = "month",
         CENTURY = "century",
         CHANGE = "change",
@@ -12589,17 +14055,23 @@ function pad(number) {
         VALUE = "value",
         HOVER = "k-state-hover",
         DISABLED = "k-state-disabled",
+        FOCUSED = "k-state-focused",
         OTHERMONTH = "k-other-month",
         OTHERMONTHCLASS = ' class="' + OTHERMONTH + '"',
         TODAY = "k-nav-today",
         CELLSELECTOR = "td:has(.k-link)",
-        MOUSEENTER = touch ? "touchstart" : "mouseenter",
-        MOUSEENTER_WITH_NS = MOUSEENTER + ns,
-        MOUSELEAVE = (touch ? "touchend" : "mouseleave") + ns,
+        BLUR = "blur" + ns,
+        FOCUS = "focus",
+        FOCUS_WITH_NS = FOCUS + ns,
+        MOUSEENTER = "touchstart mouseenter",
+        MOUSEENTER_WITH_NS = "touchstart" + ns + " mouseenter" + ns,
+        MOUSELEAVE = "touchend" + ns + " mouseleave" + ns,
         MS_PER_MINUTE = 60000,
         MS_PER_DAY = 86400000,
         PREVARROW = "_prevArrow",
         NEXTARROW = "_nextArrow",
+        ARIA_DISABLED = "aria-disabled",
+        ARIA_SELECTED = "aria-selected",
         proxy = $.proxy,
         extend = $.extend,
         DATE = Date,
@@ -12612,7 +14084,7 @@ function pad(number) {
 
     var Calendar = Widget.extend({
         init: function(element, options) {
-            var that = this, value;
+            var that = this, value, id;
 
             Widget.fn.init.call(that, element, options);
 
@@ -12621,23 +14093,49 @@ function pad(number) {
 
             options.url = window.unescape(options.url);
 
-            element.addClass("k-widget k-calendar");
-
             that._templates();
 
             that._header();
 
             that._footer(that.footer);
 
-            element
-                .on(MOUSEENTER_WITH_NS + " " + MOUSELEAVE, CELLSELECTOR, mousetoggle)
-                .on(CLICK, CELLSELECTOR, proxy(that._click, that));
+            id = element
+                    .addClass("k-widget k-calendar")
+                    .on(MOUSEENTER_WITH_NS + " " + MOUSELEAVE, CELLSELECTOR, mousetoggle)
+                    .on(KEYDOWN_NS, "table.k-content", proxy(that._move, that))
+                    .on(CLICK, CELLSELECTOR, function(e) {
+                        var link = e.currentTarget.firstChild;
+
+                        if (link.href.indexOf("#") != -1) {
+                            e.preventDefault();
+                        }
+
+                        that._click($(link));
+                    })
+                    .on("click" + ns, function() {
+                        that._focusView(that.options.focusOnNav !== false);
+                    })
+                    .attr(ID);
+
+            if (id) {
+                that._cellID = id + "_cell_selected";
+            }
 
             value = options.value;
             normalize(options);
 
             that._index = views[options.start];
-            that._current = new DATE(restrictValue(value, options.min, options.max));
+            that._current = new DATE(+restrictValue(value, options.min, options.max));
+
+            that._addClassProxy = function() {
+                that._active = true;
+                that._cell.addClass(FOCUSED);
+            };
+
+            that._removeClassProxy = function() {
+                that._active = false;
+                that._cell.removeClass(FOCUSED);
+            };
 
             that.value(value);
 
@@ -12660,6 +14158,7 @@ function pad(number) {
             animation: {
                 horizontal: {
                     effects: SLIDE,
+                    reverse: true,
                     duration: 500,
                     divisor: 2
                 },
@@ -12694,6 +14193,12 @@ function pad(number) {
             kendo.destroy(that._view);
 
             Widget.fn.destroy.call(that);
+        },
+
+        focus: function(table) {
+            table = table || this._table;
+            this._bindTable(table);
+            table.focus();
         },
 
         min: function(value) {
@@ -12757,12 +14262,13 @@ function pad(number) {
                 currentValue = that._current,
                 future = value && +value > +currentValue,
                 vertical = view !== undefined && view !== that._index,
-                to, currentView, compare;
+                to, currentView, compare,
+                disabled;
 
             if (!value) {
                 value = currentValue;
             } else {
-                that._current = value = new DATE(restrictValue(value, min, max));
+                that._current = value = new DATE(+restrictValue(value, min, max));
             }
 
             if (view === undefined) {
@@ -12774,9 +14280,14 @@ function pad(number) {
             that._view = currentView = calendar.views[view];
             compare = currentView.compare;
 
-            title.toggleClass(DISABLED, view === views[CENTURY]);
-            that[PREVARROW].toggleClass(DISABLED, compare(value, min) < 1);
-            that[NEXTARROW].toggleClass(DISABLED, compare(value, max) > -1);
+            disabled = view === views[CENTURY];
+            title.toggleClass(DISABLED, disabled).attr(ARIA_DISABLED, disabled);
+
+            disabled = compare(value, min) < 1;
+            that[PREVARROW].toggleClass(DISABLED, disabled).attr(ARIA_DISABLED, disabled);
+
+            disabled = compare(value, max) > -1;
+            that[NEXTARROW].toggleClass(DISABLED, disabled).attr(ARIA_DISABLED, disabled);
 
             if (!from || that._changeView) {
                 title.html(currentView.title(value, culture));
@@ -12800,11 +14311,18 @@ function pad(number) {
                     future: future
                 });
 
+                that._focus(value);
                 that.trigger(NAVIGATE);
             }
 
             if (view === views[options.depth] && selectedValue) {
                 that._class("k-state-selected", currentView.toDateString(selectedValue));
+            }
+
+            that._class(FOCUSED, currentView.toDateString(value));
+
+            if (!from && that._cell) {
+                that._cell.removeClass(FOCUSED);
             }
 
             that._changeView = true;
@@ -12824,7 +14342,7 @@ function pad(number) {
             value = parse(value, options.format, options.culture);
 
             if (value !== null) {
-                value = new DATE(value);
+                value = new DATE(+value);
 
                 if (!isInRange(value, min, max)) {
                     value = null;
@@ -12837,21 +14355,98 @@ function pad(number) {
             that.navigate(value);
         },
 
+        _move: function(e) {
+            var that = this,
+                options = that.options,
+                key = e.keyCode,
+                view = that._view,
+                index = that._index,
+                currentValue = new DATE(+that._current),
+                value, prevent, method, temp;
+
+            if (e.target === that._table[0]) {
+                that._active = true;
+            }
+
+            if (e.ctrlKey) {
+                if (key == keys.RIGHT) {
+                    that.navigateToFuture();
+                    prevent = true;
+                } else if (key == keys.LEFT) {
+                    that.navigateToPast();
+                    prevent = true;
+                } else if (key == keys.UP) {
+                    that.navigateUp();
+                    prevent = true;
+                } else if (key == keys.DOWN) {
+                    that._click($(that._cell[0].firstChild));
+                    prevent = true;
+                }
+            } else {
+                if (key == keys.RIGHT) {
+                    value = 1;
+                    prevent = true;
+                } else if (key == keys.LEFT) {
+                    value = -1;
+                    prevent = true;
+                } else if (key == keys.UP) {
+                    value = index === 0 ? -7 : -4;
+                    prevent = true;
+                } else if (key == keys.DOWN) {
+                    value = index === 0 ? 7 : 4;
+                    prevent = true;
+                } else if (key == keys.ENTER) {
+                    that._click($(that._cell[0].firstChild));
+                    prevent = true;
+                } else if (key == keys.HOME || key == keys.END) {
+                    method = key == keys.HOME ? "first" : "last";
+                    temp = view[method](currentValue);
+                    currentValue = new DATE(temp.getFullYear(), temp.getMonth(), temp.getDate(), currentValue.getHours(), currentValue.getMinutes(), currentValue.getSeconds(), currentValue.getMilliseconds());
+                    prevent = true;
+                } else if (key == keys.PAGEUP) {
+                    prevent = true;
+                    that.navigateToPast();
+                } else if (key == keys.PAGEDOWN) {
+                    prevent = true;
+                    that.navigateToFuture();
+                }
+
+                if (value || method) {
+                    if (!method) {
+                        view.setDate(currentValue, value);
+                    }
+
+                    that._focus(restrictValue(currentValue, options.min, options.max));
+                }
+            }
+
+            if (prevent) {
+                e.preventDefault();
+            }
+
+            return that._current;
+        },
+
         _animate: function(options) {
             var that = this,
                 from = options.from,
-                to = options.to;
+                to = options.to,
+                active = that._active;
 
             if (!from) {
                 to.insertAfter(that.element[0].firstChild);
+                that._bindTable(to);
             } else if (from.parent().data("animating")) {
                 from.parent().kendoStop(true, true).remove();
                 from.remove();
 
                 to.insertAfter(that.element[0].firstChild);
+                that._focusView(active);
             } else if (!from.is(":visible") || that.options.animation === false) {
                 to.insertAfter(from);
                 from.remove();
+
+                that._focusView(active);
             } else {
                 that[options.vertical ? "_vertical" : "_horizontal"](from, to, options.future);
             }
@@ -12859,16 +14454,19 @@ function pad(number) {
 
         _horizontal: function(from, to, future) {
             var that = this,
+                active = that._active,
                 horizontal = that.options.animation.horizontal,
                 effects = horizontal.effects,
                 viewWidth = from.outerWidth();
 
-                if (effects && effects.indexOf(SLIDE) != -1) {
-                    from.add(to).css({ width: viewWidth });
+            if (effects && effects.indexOf(SLIDE) != -1) {
+                from.add(to).css({ width: viewWidth });
 
-                    from.wrap("<div/>");
+                from.wrap("<div/>");
 
-                    from.parent()
+                that._focusView(active, from);
+
+                from.parent()
                     .css({
                         position: "relative",
                         width: viewWidth * 2,
@@ -12876,24 +14474,27 @@ function pad(number) {
                         left: future ? 0 : -viewWidth
                     });
 
-                    to[future ? "insertAfter" : "insertBefore"](from);
+                to[future ? "insertAfter" : "insertBefore"](from);
 
-                    extend(horizontal, {
-                        effects: SLIDE + ":" + (future ? LEFT : "right"),
-                        complete: function() {
-                            from.remove();
-                            to.unwrap();
-                        }
-                    });
+                extend(horizontal, {
+                    effects: SLIDE + ":" + (future ? "right" : LEFT),
+                    complete: function() {
+                        from.remove();
+                        to.unwrap();
 
-                    from.parent().kendoStop(true, true).kendoAnimate(horizontal);
-                }
+                        that._focusView(active);
+                    }
+                });
+
+                from.parent().kendoStop(true, true).kendoAnimate(horizontal);
+            }
         },
 
         _vertical: function(from, to) {
             var that = this,
                 vertical = that.options.animation.vertical,
                 effects = vertical.effects,
+                active = that._active, //active state before from's blur
                 cell, position;
 
             if (effects && effects.indexOf("zoom") != -1) {
@@ -12920,6 +14521,8 @@ function pad(number) {
                             top: 0,
                             left: 0
                         });
+
+                        that._focusView(active);
                     }
                 });
 
@@ -12935,33 +14538,56 @@ function pad(number) {
         },
 
         _class: function(className, value) {
-            this._table.find("td:not(." + OTHERMONTH + ")")
-                .removeClass(className)
-                .filter(function() {
-                   return $(this.firstChild).attr(kendo.attr(VALUE)) === value;
-                })
-                .addClass(className);
+            var that = this,
+                id = that._cellID,
+                cell = that._cell;
+
+            if (cell) {
+                cell.removeAttr(ARIA_SELECTED)
+                    .removeAttr(ID);
+            }
+
+            cell = that._table
+                       .find("td:not(." + OTHERMONTH + ")")
+                       .removeClass(className)
+                       .filter(function() {
+                          return $(this.firstChild).attr(kendo.attr(VALUE)) === value;
+                       })
+                       .attr(ARIA_SELECTED, true);
+
+            if (className === FOCUSED && !that._active && that.options.focusOnNav !== false) {
+                className = "";
+            }
+
+            cell.addClass(className);
+
+            if (cell[0]) {
+                that._cell = cell;
+            }
+
+            if (id) {
+                cell.attr(ID, id);
+                that._table.removeAttr("aria-activedescendant").attr("aria-activedescendant", id);
+            }
         },
 
-        _click: function(e) {
+        _bindTable: function (table) {
+            table
+                .on(FOCUS_WITH_NS, this._addClassProxy)
+                .on(BLUR, this._removeClassProxy);
+        },
+
+        _click: function(link) {
             var that = this,
                 options = that.options,
-                currentValue = that._current,
-                link = $(e.currentTarget.firstChild),
+                currentValue = new Date(+that._current),
                 value = link.attr(kendo.attr(VALUE)).split("/");
 
-            //Safari cannot create corretly date from "1/1/2090"
+            //Safari cannot create correctly date from "1/1/2090"
             value = new DATE(value[0], value[1], value[2]);
+            adjustDate(value);
 
-            if (link[0].href.indexOf("#") != -1) {
-                e.preventDefault();
-            }
-
-            if (link.parent().hasClass(OTHERMONTH)) {
-                currentValue = value;
-            } else {
-                that._view.setDate(currentValue, value);
-            }
+            that._view.setDate(currentValue, value);
 
             that.navigateDown(restrictValue(currentValue, options.min, options.max));
         },
@@ -12974,9 +14600,14 @@ function pad(number) {
                 that.navigate(value);
             } else {
                 that._current = value;
+                that._class(FOCUSED, view.toDateString(value));
             }
+        },
 
-            that._class("k-state-focused", view.toDateString(value));
+        _focusView: function(active, table) {
+            if (active) {
+                this.focus(table);
+            }
         },
 
         _footer: function(template) {
@@ -13006,29 +14637,30 @@ function pad(number) {
         _header: function() {
             var that = this,
             element = that.element,
+            active = that.options.focusOnNav !== false,
             links;
 
             if (!element.find(".k-header")[0]) {
                 element.html('<div class="k-header">' +
-                             '<a href="#" class="k-link k-nav-prev"><span class="k-icon k-i-arrow-w"></span></a>' +
-                             '<a href="#" class="k-link k-nav-fast"></a>' +
-                             '<a href="#" class="k-link k-nav-next"><span class="k-icon k-i-arrow-e"></span></a>' +
+                             '<a href="#" role="button" class="k-link k-nav-prev"><span class="k-icon k-i-arrow-w"></span></a>' +
+                             '<a href="#" role="button" aria-live="assertive" aria-atomic="true" class="k-link k-nav-fast"></a>' +
+                             '<a href="#" role="button" class="k-link k-nav-next"><span class="k-icon k-i-arrow-e"></span></a>' +
                              '</div>');
             }
 
             links = element.find(".k-link")
-                           .on(MOUSEENTER_WITH_NS + " " + MOUSELEAVE, mousetoggle)
+                           .on(MOUSEENTER_WITH_NS + " " + MOUSELEAVE + " " + FOCUS_WITH_NS + " " + BLUR, mousetoggle)
                            .click(false);
 
-            that._title = links.eq(1).on(CLICK, proxy(that.navigateUp, that));
-            that[PREVARROW] = links.eq(0).on(CLICK, proxy(that.navigateToPast, that));
-            that[NEXTARROW] = links.eq(2).on(CLICK, proxy(that.navigateToFuture, that));
+            that._title = links.eq(1).on(CLICK, function() { that._focusView(active); that.navigateUp(); });
+            that[PREVARROW] = links.eq(0).on(CLICK, function() { that._focusView(active); that.navigateToPast(); });
+            that[NEXTARROW] = links.eq(2).on(CLICK, function() { that._focusView(active); that.navigateToFuture(); });
         },
 
         _navigate: function(arrow, modifier) {
             var that = this,
                 index = that._index + 1,
-                currentValue = new DATE(that._current);
+                currentValue = new DATE(+that._current);
 
             arrow = that[arrow];
 
@@ -13047,7 +14679,8 @@ function pad(number) {
             var that = this,
                 options = that.options,
                 selectedValue = +that._value,
-                bigger, navigate;
+                bigger, navigate,
+                arrow = NEXTARROW;
 
             if (value === undefined) {
                 return options[option];
@@ -13059,13 +14692,14 @@ function pad(number) {
                 return;
             }
 
-            options[option] = new DATE(value);
+            options[option] = new DATE(+value);
 
             navigate = that._view.compare(value, that._current);
 
             if (option === MIN) {
                 bigger = +value > selectedValue;
                 navigate = navigate > -1;
+                arrow = PREVARROW;
             } else {
                 bigger = selectedValue > +value;
                 navigate = navigate < 1;
@@ -13075,6 +14709,10 @@ function pad(number) {
                 that.value(null);
             } else if (navigate) {
                 that.navigate();
+            } else {
+                that[arrow]
+                    .toggleClass(DISABLED, false)
+                    .attr(ARIA_DISABLED, false);
             }
 
             that._toggle();
@@ -13130,8 +14768,8 @@ function pad(number) {
                 empty = month.empty;
 
             that.month = {
-                content: template('<td#=data.cssClass#><a class="k-link#=data.linkClass#" href="#=data.url#" ' + kendo.attr("value") + '="#=data.dateString#" title="#=data.title#">' + (content || "#=data.value#") + '</a></td>', { useWithBlock: !!content }),
-                empty: template("<td>" + (empty || "&nbsp;") + "</td>", { useWithBlock: !!empty })
+                content: template('<td#=data.cssClass# role="gridcell"><a tabindex="-1" class="k-link#=data.linkClass#" href="#=data.url#" ' + kendo.attr("value") + '="#=data.dateString#" title="#=data.title#">' + (content || "#=data.value#") + '</a></td>', { useWithBlock: !!content }),
+                empty: template('<td role="gridcell">' + (empty || "&nbsp;") + "</td>", { useWithBlock: !!empty })
             };
 
             if (footer !== false) {
@@ -13191,31 +14829,33 @@ function pad(number) {
                 firstDayIdx = currentCalendar.firstDay,
                 days = currentCalendar.days,
                 names = shiftArray(days.names, firstDayIdx),
-                short = shiftArray(days.namesShort, firstDayIdx),
+                shortNames = shiftArray(days.namesShort, firstDayIdx),
                 start = calendar.firstVisibleDay(date, currentCalendar),
                 firstDayOfMonth = that.first(date),
                 lastDayOfMonth = that.last(date),
                 toDateString = that.toDateString,
                 today = new DATE(),
-                html = '<table class="k-content" cellspacing="0"><thead><tr>';
+                html = '<table tabindex="0" role="grid" class="k-content" cellspacing="0"><thead><tr role="row">';
 
                 for (; idx < 7; idx++) {
-                    html += '<th scope="col" title="' + names[idx] + '">' + short[idx] + '</th>';
+                    html += '<th scope="col" title="' + names[idx] + '">' + shortNames[idx] + '</th>';
                 }
 
-                today = +new DATE(today.getFullYear(), today.getMonth(), today.getDate());
+                today = new DATE(today.getFullYear(), today.getMonth(), today.getDate());
+                adjustDate(today);
+                today = +today;
 
                 return view({
                     cells: 42,
                     perRow: 7,
-                    html: html += "</tr></thead><tbody><tr>",
+                    html: html += '</tr></thead><tbody><tr role="row">',
                     start: new DATE(start.getFullYear(), start.getMonth(), start.getDate()),
                     min: new DATE(min.getFullYear(), min.getMonth(), min.getDate()),
                     max: new DATE(max.getFullYear(), max.getMonth(), max.getDate()),
                     content: options.content,
                     empty: options.empty,
                     setter: that.setDate,
-                    build: function(date, idx) {
+                    build: function(date) {
                         var cssClass = [],
                             day = date.getDay(),
                             linkClass = "",
@@ -13256,7 +14896,15 @@ function pad(number) {
                 return calendar.firstDayOfMonth(date);
             },
             last: function(date) {
-                return new DATE(date.getFullYear(), date.getMonth() + 1, 0);
+                var last = new DATE(date.getFullYear(), date.getMonth() + 1, 0),
+                    first = calendar.firstDayOfMonth(date),
+                    timeOffset = Math.abs(last.getTimezoneOffset() - first.getTimezoneOffset());
+
+                if (timeOffset) {
+                    last.setHours(first.getHours() + (timeOffset / 60));
+                }
+
+                return last;
             },
             compare: function(date1, date2) {
                 var result,
@@ -13276,11 +14924,13 @@ function pad(number) {
                 return result;
             },
             setDate: function(date, value) {
+                var hours = date.getHours();
                 if (value instanceof DATE) {
                     date.setFullYear(value.getFullYear(), value.getMonth(), value.getDate());
                 } else {
                     calendar.setTime(date, value * MS_PER_DAY);
                 }
+                adjustDate(date, hours);
             },
             toDateString: function(date) {
                 return date.getFullYear() + "/" + date.getMonth() + "/" + date.getDate();
@@ -13322,7 +14972,9 @@ function pad(number) {
                 return compare(date1, date2);
             },
             setDate: function(date, value) {
-                var month;
+                var month,
+                    hours = date.getHours();
+
                 if (value instanceof DATE) {
                     month = value.getMonth();
 
@@ -13344,6 +14996,8 @@ function pad(number) {
                         date.setDate(0);
                     }
                 }
+
+                adjustDate(date, hours);
             },
             toDateString: function(date) {
                 return date.getFullYear() + "/" + date.getMonth() + "/1";
@@ -13466,11 +15120,11 @@ function pad(number) {
             cellsPerRow = options.perRow || 4,
             content = options.content || cellTemplate,
             empty = options.empty || emptyCellTemplate,
-            html = options.html || '<table class="k-content k-meta-view" cellspacing="0"><tbody><tr>';
+            html = options.html || '<table tabindex="0" role="grid" class="k-content k-meta-view" cellspacing="0"><tbody><tr role="row">';
 
         for(; idx < length; idx++) {
             if (idx > 0 && idx % cellsPerRow === 0) {
-                html += "</tr><tr>";
+                html += '</tr><tr role="row">';
             }
 
             data = build(start, idx);
@@ -13509,13 +15163,13 @@ function pad(number) {
         today = new DATE(today.getFullYear(), today.getMonth(), today.getDate());
 
         if (value) {
-            today = new DATE(value);
+            today = new DATE(+value);
         }
 
         if (min > today) {
-            today = new DATE(min);
+            today = new DATE(+min);
         } else if (max < today) {
-            today = new DATE(max);
+            today = new DATE(+max);
         }
         return today;
     }
@@ -13534,11 +15188,11 @@ function pad(number) {
     }
 
     function mousetoggle(e) {
-        if (!touch) {
+        if (e.type.indexOf("touch") === -1) {
             e.stopImmediatePropagation();
         }
 
-        $(this).toggleClass(HOVER, e.type == MOUSEENTER);
+        $(this).toggleClass(HOVER, MOUSEENTER.indexOf(e.type) > -1 || e.type == FOCUS);
     }
 
     function prevent (e) {
@@ -13563,6 +15217,10 @@ function pad(number) {
 
         if (depth === undefined || depth > start) {
             options.depth = MONTH;
+        }
+
+        if (!options.dates) {
+            options.dates = [];
         }
     }
 
@@ -13599,11 +15257,10 @@ function pad(number) {
     calendar.viewsEnum = views;
 
     kendo.calendar = calendar;
-})(jQuery);
+})(window.kendo.jQuery);
 (function($, undefined) {
     var kendo = window.kendo,
     ui = kendo.ui,
-    touch = kendo.support.touch,
     Widget = ui.Widget,
     parse = kendo.parseDate,
     keys = kendo.keys,
@@ -13611,11 +15268,10 @@ function pad(number) {
     DIV = "<div />",
     SPAN = "<span />",
     ns = ".kendoDatePicker",
-    CLICK = (touch ? "touchend" : "click") + ns,
+    CLICK = "touchend" + ns + " click" + ns,
     OPEN = "open",
     CLOSE = "close",
     CHANGE = "change",
-    NAVIGATE = "navigate",
     DATEVIEW = "dateView",
     DISABLED = "disabled",
     DEFAULT = "k-state-default",
@@ -13623,12 +15279,16 @@ function pad(number) {
     SELECTED = "k-state-selected",
     STATEDISABLED = "k-state-disabled",
     HOVER = "k-state-hover",
+    KEYDOWN = "keydown" + ns,
     HOVEREVENTS = "mouseenter" + ns + " mouseleave" + ns,
-    MOUSEDOWN = (touch ? "touchstart" : "mousedown") + ns,
+    MOUSEDOWN = "touchstart" + ns + " mousedown" + ns,
+    ID = "id",
     MIN = "min",
     MAX = "max",
     MONTH = "month",
-    FIRST = "first",
+    ARIA_DISABLED = "aria-disabled",
+    ARIA_EXPANDED = "aria-expanded",
+    ARIA_HIDDEN = "aria-hidden",
     calendar = kendo.calendar,
     isInRange = calendar.isInRange,
     restrictValue = calendar.restrictValue,
@@ -13653,18 +15313,31 @@ function pad(number) {
     }
 
     var DateView = function(options) {
-        var that = this,
+        var that = this, id,
             body = document.body,
-            sharedCalendar = DatePicker.sharedCalendar;
+            sharedCalendar = DatePicker.sharedCalendar,
+            div = $(DIV).attr(ARIA_HIDDEN, "true")
+                        .addClass("k-calendar-container")
+                        .appendTo(body);
 
         if (!sharedCalendar) {
-            sharedCalendar = DatePicker.sharedCalendar = new ui.Calendar($(DIV).hide().appendTo(body));
+            sharedCalendar = DatePicker.sharedCalendar = new ui.Calendar($(DIV).attr(ID, kendo.guid()).hide().appendTo(body), { focusOnNav: false });
             calendar.makeUnselectable(sharedCalendar.element);
         }
 
         that.calendar = sharedCalendar;
         that.options = options = options || {};
-        that.popup = new ui.Popup($(DIV).addClass("k-calendar-container").appendTo(body), extend(options.popup, options, { name: "Popup" }));
+        id = options.id;
+
+        if (id) {
+            id += "_dateview";
+
+            div.attr(ID, id);
+            that._dateViewID = id;
+        }
+
+        that.popup = new ui.Popup(div, extend(options.popup, options, { name: "Popup", isRtl: kendo.support.isRtl(options.anchor) }));
+        that.div = div;
 
         that._templates();
 
@@ -13683,7 +15356,7 @@ function pad(number) {
 
                 element.appendTo(popup.element)
                        .data(DATEVIEW, that)
-                       .off(CLICK + " " + MOUSEDOWN)
+                       .off(CLICK + " " + KEYDOWN)
                        .on(CLICK, "td:has(.k-link)", proxy(that._click, that))
                        .on(MOUSEDOWN, preventDefault)
                        .show();
@@ -13691,12 +15364,8 @@ function pad(number) {
                 calendar.unbind(CHANGE)
                         .bind(CHANGE, options);
 
-                if (!touch) {
-                    calendar.unbind(NAVIGATE)
-                            .bind(NAVIGATE, proxy(that._navigate, that));
-                }
-
                 calendar.month = that.month;
+                calendar.options.dates = options.dates;
                 calendar.options.depth = options.depth;
                 calendar.options.culture = options.culture;
 
@@ -13714,9 +15383,10 @@ function pad(number) {
             var that = this,
                 calendar = that.calendar,
                 element = calendar.element,
+                dv = element.data(DATEVIEW),
                 popups;
 
-            if (element.data(DATEVIEW) === that) {
+            if (dv === undefined || dv === that) {
                 popups = $(".k-calendar-container");
 
                 if (popups.length > 1) {
@@ -13758,13 +15428,9 @@ function pad(number) {
 
         move: function(e) {
             var that = this,
-                options = that.options,
-                currentValue = new DATE(that._current),
-                calendar = that.calendar,
-                index = calendar._index,
-                view = calendar._view,
                 key = e.keyCode,
-                value, prevent, method;
+                calendar = that.calendar,
+                selectIsClicked = e.ctrlKey && key == keys.DOWN || key == keys.ENTER;
 
             if (key == keys.ESC) {
                 that.close();
@@ -13774,74 +15440,27 @@ function pad(number) {
             if (e.altKey) {
                 if (key == keys.DOWN) {
                     that.open();
-                    prevent = true;
+                    e.preventDefault();
                 } else if (key == keys.UP) {
                     that.close();
-                    prevent = true;
+                    e.preventDefault();
                 }
                 return;
             }
 
-            if (!that.popup.visible() || calendar._table.parent().data("animating")) {
+            if (!that.popup.visible()){
                 return;
             }
 
-            if (e.ctrlKey) {
-                if (key == keys.RIGHT) {
-                    calendar.navigateToFuture();
-                    prevent = true;
-                } else if (key == keys.LEFT) {
-                    calendar.navigateToPast();
-                    prevent = true;
-                } else if (key == keys.UP) {
-                    calendar.navigateUp();
-                    prevent = true;
-                } else if (key == keys.DOWN) {
-                    that._navigateDown();
-                    prevent = true;
-                }
-            } else {
-                if (key == keys.RIGHT) {
-                    value = 1;
-                    prevent = true;
-                } else if (key == keys.LEFT) {
-                    value = -1;
-                    prevent = true;
-                } else if (key == keys.UP) {
-                    value = index === 0 ? -7 : -4;
-                    prevent = true;
-                } else if (key == keys.DOWN) {
-                    value = index === 0 ? 7 : 4;
-                    prevent = true;
-                } else if (key == keys.ENTER) {
-                    that._navigateDown();
-                    prevent = true;
-                } else if (key == keys.HOME || key == keys.END) {
-                    method = key == keys.HOME ? FIRST : "last";
-                    currentValue = view[method](currentValue);
-                    prevent = true;
-                } else if (key == keys.PAGEUP) {
-                    prevent = true;
-                    calendar.navigateToPast();
-                } else if (key == keys.PAGEDOWN) {
-                    prevent = true;
-                    calendar.navigateToFuture();
-                }
-
-                if (value || method) {
-                    if (!method) {
-                        view.setDate(currentValue, value);
-                    }
-
-                    that._current = currentValue = restrictValue(currentValue, options.min, options.max);
-                    calendar._focus(currentValue);
-                }
-            }
-
-            if (prevent) {
+            if (selectIsClicked && calendar._cell.hasClass(SELECTED)) {
+                that.close();
                 e.preventDefault();
+                return;
             }
+
+            that._current = calendar._move(e);
         },
+
 
         value: function(value) {
             var that = this,
@@ -13849,10 +15468,9 @@ function pad(number) {
                 options = that.options;
 
             that._value = value;
-            that._current = new DATE(restrictValue(value, options.min, options.max));
+            that._current = new DATE(+restrictValue(value, options.min, options.max));
 
             if (calendar.element.data(DATEVIEW) === that) {
-                calendar._focus(that._current);
                 calendar.value(value);
             }
         },
@@ -13861,33 +15479,6 @@ function pad(number) {
             if (e.currentTarget.className.indexOf(SELECTED) !== -1) {
                 this.close();
             }
-        },
-
-        _navigate: function() {
-            var that = this,
-                calendar = that.calendar;
-
-            that._current = new DATE(calendar._current);
-            calendar._focus(calendar._current);
-        },
-
-        _navigateDown: function() {
-            var that = this,
-                calendar = that.calendar,
-                currentValue = calendar._current,
-                cell = calendar._table.find("." + FOCUSED),
-                value = cell.children(":" + FIRST).attr(kendo.attr("value")).split("/");
-
-            //Safari cannot create corretly date from "1/1/2090"
-            value = new DATE(value[0], value[1], value[2]);
-
-            if (!cell[0] || cell.hasClass(SELECTED)) {
-                that.close();
-                return;
-            }
-
-            calendar._view.setDate(currentValue, value);
-            calendar.navigateDown(currentValue);
         },
 
         _option: function(option, value) {
@@ -13911,7 +15502,7 @@ function pad(number) {
                 empty = month.empty;
 
             that.month = {
-                content: template('<td#=data.cssClass#><a class="k-link" href="\\#" ' + kendo.attr("value") + '="#=data.dateString#" title="#=data.title#">' + (content || "#=data.value#") + '</a></td>', { useWithBlock: !!content }),
+                content: template('<td#=data.cssClass#><a tabindex="-1" class="k-link" href="\\#" ' + kendo.attr("value") + '="#=data.dateString#" title="#=data.title#">' + (content || "#=data.value#") + '</a></td>', { useWithBlock: !!content }),
                 empty: template("<td>" + (empty || "&nbsp;") + "</td>", { useWithBlock: !!empty })
             };
 
@@ -13927,7 +15518,7 @@ function pad(number) {
 
     var DatePicker = Widget.extend({
         init: function(element, options) {
-            var that = this;
+            var that = this, div;
 
             Widget.fn.init.call(that, element, options);
             element = that.element;
@@ -13938,6 +15529,7 @@ function pad(number) {
             that._wrapper();
 
             that.dateView = new DateView(extend({}, options, {
+                id: element.attr(ID),
                 anchor: that.wrapper,
                 change: function() {
                     // calendar is the current scope
@@ -13947,14 +15539,31 @@ function pad(number) {
                 close: function(e) {
                     if (that.trigger(CLOSE)) {
                         e.preventDefault();
+                    } else {
+                        element.attr(ARIA_EXPANDED, false);
+                        div.attr(ARIA_HIDDEN, true);
                     }
                 },
                 open: function(e) {
+                    var options = that.options,
+                        date;
                     if (that.trigger(OPEN)) {
                         e.preventDefault();
+                    } else {
+                        date = parse(element.val(), options.parseFormats, options.culture);
+                        if (!date) {
+                            that.dateView.value(date);
+                        } else {
+                            that.dateView._current = date;
+                            that.dateView.calendar._focus(date);
+                        }
+
+                        element.attr(ARIA_EXPANDED, true);
+                        div.attr(ARIA_HIDDEN, false);
                     }
                 }
             }));
+            div = that.dateView.div;
 
             that._icon();
 
@@ -13963,11 +15572,18 @@ function pad(number) {
                 .addClass("k-input")
                 .on("keydown" + ns, proxy(that._keydown, that))
                 .on("blur" + ns, proxy(that._blur, that))
-                .on("focus" + ns, function(e) {
+                .on("focus" + ns, function() {
                     that._inputWrapper.addClass(FOCUSED);
+                })
+                .attr({
+                    role: "textbox",
+                    "aria-haspopup": true,
+                    "aria-expanded": false,
+                    "aria-owns": that.dateView._dateViewID
                 });
 
             that._reset();
+            that._template();
 
             that.enable(!element.is('[disabled]'));
             that.value(options.value || that.element.val());
@@ -13990,17 +15606,25 @@ function pad(number) {
             start: MONTH,
             depth: MONTH,
             animation: {},
-            month : {}
+            month : {},
+            dates: [],
+            ARIATemplate: 'Current focused date is #=kendo.toString(data.current, "D")#'
         },
 
         setOptions: function(options) {
-            var that = this;
+            var that = this,
+                dateView = that.dateView,
+                dateViewOptions = dateView.options;
 
             Widget.fn.setOptions.call(that, options);
 
             normalize(that.options);
 
-            extend(that.dateView.options, that.options);
+            dateView.options = extend(dateViewOptions, that.options, {
+                change: dateViewOptions.change,
+                close: dateViewOptions.close,
+                open: dateViewOptions.open
+            });
         },
 
         enable: function(enable) {
@@ -14014,7 +15638,8 @@ function pad(number) {
                     .removeClass(DEFAULT)
                     .addClass(STATEDISABLED);
 
-                element.attr(DISABLED, DISABLED);
+                element.attr(DISABLED, DISABLED)
+                       .attr(ARIA_DISABLED, true);
             } else {
                 wrapper
                     .addClass(DEFAULT)
@@ -14022,7 +15647,8 @@ function pad(number) {
                     .on(HOVEREVENTS, that._toggleHover);
 
                 element
-                    .removeAttr(DISABLED);
+                    .removeAttr(DISABLED)
+                    .attr(ARIA_DISABLED, false);
 
                 icon.on(CLICK, proxy(that._click, that))
                     .on(MOUSEDOWN, preventDefault);
@@ -14072,9 +15698,7 @@ function pad(number) {
         },
 
         _toggleHover: function(e) {
-            if (!touch) {
-                $(e.currentTarget).toggleClass(HOVER, e.type === "mouseenter");
-            }
+            $(e.currentTarget).toggleClass(HOVER, e.type === "mouseenter");
         },
 
         _blur: function() {
@@ -14085,13 +15709,13 @@ function pad(number) {
             that._inputWrapper.removeClass(FOCUSED);
         },
 
-        _click: function() {
+        _click: function(e) {
             var that = this,
                 element = that.element;
 
             that.dateView.toggle();
 
-            if (!touch && element[0] !== document.activeElement) {
+            if (e.type === "click" && element[0] !== document.activeElement) {
                 element.focus();
             }
         },
@@ -14118,6 +15742,7 @@ function pad(number) {
                 that._change(that.element.val());
             } else {
                 dateView.move(e);
+                that._updateARIA(dateView._current);
             }
         },
 
@@ -14132,7 +15757,10 @@ function pad(number) {
                 icon = $('<span unselectable="on" class="k-select"><span unselectable="on" class="k-icon k-i-calendar">select</span></span>').insertAfter(element);
             }
 
-            that._dateIcon = icon;
+            that._dateIcon = icon.attr({
+                "role": "button",
+                "aria-controls": that.dateView._dateViewID
+            });
         },
 
         _option: function(option, value) {
@@ -14149,7 +15777,7 @@ function pad(number) {
                 return;
             }
 
-            options[option] = new DATE(value);
+            options[option] = new DATE(+value);
             that.dateView[option](value);
         },
 
@@ -14180,6 +15808,7 @@ function pad(number) {
             that._value = date;
             that.dateView.value(date);
             that.element.val(date ? kendo.toString(date, options.format, options.culture) : value);
+            that._updateARIA(date);
 
             return date;
         },
@@ -14203,8 +15832,7 @@ function pad(number) {
             });
 
             that.wrapper = wrapper.addClass("k-widget k-datepicker k-header")
-                                  .addClass(element[0].className)
-                                  .show();
+                                  .addClass(element[0].className);
 
             that._inputWrapper = $(wrapper[0].firstChild);
         },
@@ -14221,12 +15849,20 @@ function pad(number) {
 
                 that._form = form.on("reset", that._resetHandler);
             }
+        },
+
+        _template: function() {
+            this._ariaTemplate = template(this.options.ARIATemplate);
+        },
+
+        _updateARIA: function(date) {
+            this.element.attr("aria-label", this._ariaTemplate({ current: date }));
         }
     });
 
     ui.plugin(DatePicker);
 
-})(jQuery);
+})(window.kendo.jQuery);
 (function ($, undefined) {
     var kendo = window.kendo,
         support = kendo.support,
@@ -14235,7 +15871,7 @@ function pad(number) {
         keys = kendo.keys,
         DataSource = kendo.data.DataSource,
         List = ui.List,
-        CHANGE = "change",
+        ARIA_DISABLED = "aria-disabled",
         DEFAULT = "k-state-default",
         DISABLED = "disabled",
         FOCUSED = "k-state-focused",
@@ -14300,13 +15936,14 @@ function pad(number) {
             element[0].type = "text";
             wrapper = that.wrapper;
 
+            that._popup();
+
             element
-                .attr("autocomplete", "off")
                 .addClass("k-input")
                 .on("keydown" + ns, proxy(that._keydown, that))
                 .on("paste" + ns, proxy(that._search, that))
                 .on("focus" + ns, function () {
-                    that._prev = that.value();
+                    that._prev = that._accessor();
                     that._placeholder(false);
                     wrapper.addClass(FOCUSED);
                 })
@@ -14314,13 +15951,24 @@ function pad(number) {
                     that._change();
                     that._placeholder();
                     wrapper.removeClass(FOCUSED);
+                })
+                .attr({
+                    autocomplete: "off",
+                    role: "textbox",
+                    "aria-haspopup": true
                 });
 
             that._enable();
 
             that._popup();
 
-            that._old = that.value();
+            that._old = that._accessor();
+
+            if (element[0].id) {
+                element.attr("aria-owns", that.ul[0].id);
+            }
+
+            that._aria();
 
             that._placeholder();
 
@@ -14329,6 +15977,7 @@ function pad(number) {
 
         options: {
             name: "AutoComplete",
+            enable: true,
             suggest: false,
             template: "",
             dataTextField: "",
@@ -14347,13 +15996,13 @@ function pad(number) {
             var that = this;
 
             if (that.dataSource && that._refreshHandler) {
-                that.dataSource.unbind(CHANGE, that._refreshHandler);
+                that._unbindDataSource();
             } else {
                 that._refreshHandler = proxy(that.refresh, that);
             }
 
             that.dataSource = DataSource.create(that.options.dataSource)
-                .bind(CHANGE, that._refreshHandler);
+                .bind("change", that._refreshHandler);
         },
 
         setDataSource: function(dataSource) {
@@ -14365,7 +16014,7 @@ function pad(number) {
         events: [
             "open",
             "close",
-            CHANGE,
+            "change",
             "select",
             "dataBinding",
             "dataBound"
@@ -14376,6 +16025,7 @@ function pad(number) {
 
             this._template();
             this._accessors();
+            this._aria();
         },
 
 
@@ -14389,7 +16039,8 @@ function pad(number) {
                     .removeClass(DEFAULT)
                     .addClass(STATEDISABLED);
 
-                element.attr(DISABLED, DISABLED);
+                element.attr(DISABLED, DISABLED)
+                       .attr(ARIA_DISABLED, true);
             } else {
                 wrapper
                     .removeClass(STATEDISABLED)
@@ -14397,13 +16048,14 @@ function pad(number) {
                     .on(HOVEREVENTS, that._toggleHover);
 
                 element
-                    .removeAttr(DISABLED);
+                    .removeAttr(DISABLED)
+                    .attr(ARIA_DISABLED, false);
             }
         },
 
         close: function () {
             var that = this;
-            that._current = null;
+            that.current(null);
             that.popup.close();
         },
 
@@ -14477,7 +16129,7 @@ function pad(number) {
             separator = options.separator,
             length;
 
-            word = word || that.value();
+            word = word || that._accessor();
 
             that._current = null;
 
@@ -14506,7 +16158,7 @@ function pad(number) {
         suggest: function (word) {
             var that = this,
                 key = that._last,
-                value = that.value(),
+                value = that._accessor(),
                 element = that.element[0],
                 caret = caretPosition(element),
                 separator = that.options.separator,
@@ -14558,12 +16210,21 @@ function pad(number) {
 
             words[wordIndex] = value;
 
-            that.value(words.join(separator || ""));
+            that._accessor(words.join(separator || ""));
 
             selectText(element, caret, selectionEnd);
         },
 
         value: function (value) {
+            if (value !== undefined) {
+                this._accessor(value);
+                this._old = value;
+            } else {
+                return this._accessor();
+            }
+        },
+
+        _accessor: function (value) {
             var that = this,
                 element = that.element[0];
 
@@ -14619,6 +16280,9 @@ function pad(number) {
 
                 that._accept(current);
             } else if (key === keys.ESC) {
+                if (that.popup.visible()) {
+                    e.preventDefault();
+                }
                 that.close();
             } else {
                 that._search();
@@ -14676,8 +16340,8 @@ function pad(number) {
             clearTimeout(that._typing);
 
             that._typing = setTimeout(function () {
-                if (that._prev !== that.value()) {
-                    that._prev = that.value();
+                if (that._prev !== that._accessor()) {
+                    that._prev = that._accessor();
                     that.search();
                 }
             }, that.options.delay);
@@ -14700,19 +16364,17 @@ function pad(number) {
                     text = that._text(data);
 
                     if (separator) {
-                        text = replaceWordAtCaret(caretPosition(that.element[0]), that.value(), text, separator);
+                        text = replaceWordAtCaret(caretPosition(that.element[0]), that._accessor(), text, separator);
                     }
 
-                    that.value(text);
+                    that._accessor(text);
                     that.current(li.addClass(SELECTED));
                 }
             }
         },
 
         _toggleHover: function(e) {
-            if (!support.touch) {
-                $(e.currentTarget).toggleClass(HOVER, e.type === "mouseenter");
-            }
+            $(e.currentTarget).toggleClass(HOVER, e.type === "mouseenter");
         },
 
         _wrapper: function () {
@@ -14726,6 +16388,13 @@ function pad(number) {
             if (!wrapper.is("span.k-widget")) {
                 wrapper = element.wrap("<span />").parent();
             }
+
+            //aria
+
+            wrapper.attr("tabindex", -1);
+            wrapper.attr("role", "presentation");
+
+            //end
 
             wrapper[0].style.cssText = DOMelement.style.cssText;
             element.css({
@@ -14741,8 +16410,7 @@ function pad(number) {
     });
 
     ui.plugin(AutoComplete);
-})(jQuery);
-
+})(window.kendo.jQuery);
 (function($, undefined) {
     var kendo = window.kendo,
         ui = kendo.ui,
@@ -14756,7 +16424,6 @@ function pad(number) {
         DEFAULT = "k-state-default",
         DISABLED = "k-state-disabled",
         SELECTED = "k-state-selected",
-        TABINDEX = "tabIndex",
         HOVEREVENTS = "mouseenter" + ns + " mouseleave" + ns,
         proxy = $.proxy;
 
@@ -14783,6 +16450,10 @@ function pad(number) {
             that._word = "";
 
             that._wrapper();
+
+            that._tabindex();
+
+            that._aria();
 
             that._span();
 
@@ -14850,7 +16521,8 @@ function pad(number) {
             CHANGE,
             "select",
             "dataBinding",
-            "dataBound"
+            "dataBound",
+            "cascade"
         ],
 
         setOptions: function(options) {
@@ -14858,6 +16530,7 @@ function pad(number) {
 
             this._template();
             this._accessors();
+            this._aria();
         },
 
         destroy: function() {
@@ -14892,7 +16565,8 @@ function pad(number) {
                     .on(HOVEREVENTS, that._toggleHover);
 
                 wrapper
-                    .on("click" + ns, function(e) {
+                    .on("touchend" + ns + " click" + ns, function(e) {
+                            that._blured = false;
                             e.preventDefault();
                             that.toggle();
                     })
@@ -14900,15 +16574,16 @@ function pad(number) {
                     .on("keypress" + ns, proxy(that._keypress, that))
                     .on("focusin" + ns, function() {
                         dropDownWrapper.addClass(FOCUSED);
-                        clearTimeout(that._bluring);
+                        that._blured = false;
                     })
                     .on("focusout" + ns, function() {
-                        that._blur();
-                        dropDownWrapper.removeClass(FOCUSED);
+                        if (!that._blured) {
+                            that._blur();
+                            dropDownWrapper.removeClass(FOCUSED);
 
-                        that._bluring = setTimeout(function() {
+                            that._blured = true;
                             element.blur();
-                        });
+                        }
                     });
             }
         },
@@ -14967,11 +16642,11 @@ function pad(number) {
             that._hideBusy();
             that._makeUnselectable();
 
-            if (!that._valueCalled) {
+            if (!that._fetch && length /*do set value when no data*/) {
                 that._selectItem();
-                that._valueCalled = false;
             }
 
+            that._bound = true;
             that.trigger("dataBound");
         },
 
@@ -15001,18 +16676,6 @@ function pad(number) {
             }
         },
 
-        select: function(li) {
-            var that = this;
-
-            if (li === undefined) {
-                return that.selectedIndex;
-            } else {
-                that._select(li);
-                that._old = that._accessor();
-                that._oldIndex = that.selectedIndex;
-            }
-        },
-
         text: function (text) {
             var span = this.span;
 
@@ -15025,21 +16688,21 @@ function pad(number) {
 
         value: function(value) {
             var that = this,
-                idx;
+                idx, hasValue;
 
             if (value !== undefined) {
                 if (value !== null) {
                     value = value.toString();
                 }
 
-                that._valueCalled = true;
+                that._selectedValue = value;
 
-                if (value && that._valueOnFetch(value)) {
+                hasValue = value || (that.options.optionLabel && !that.element[0].disabled && value === "");
+                if (hasValue && that._fetchItems(value)) {
                     return;
                 }
 
                 idx = that._index(value);
-
                 that.select(idx > -1 ? idx : 0);
             } else {
                 return that._accessor();
@@ -15103,6 +16766,13 @@ function pad(number) {
                 keys = kendo.keys,
                 ul = that.ul[0];
 
+            if (key === keys.LEFT) {
+                key = keys.UP;
+            } else if (key === keys.RIGHT) {
+                key = keys.DOWN;
+            }
+
+            e.keyCode = key;
             that._move(e);
 
             if (key === keys.HOME) {
@@ -15166,7 +16836,13 @@ function pad(number) {
 
                     that.text(text);
                     that._accessor(value !== undefined ? value : text, idx);
+                    that._selectedValue = that._accessor();
+
                     that.current(li.addClass(SELECTED));
+
+                    if (that._optionID) {
+                        that._current.attr("aria-selected", true);
+                    }
                 }
             }
         },
@@ -15184,7 +16860,7 @@ function pad(number) {
         _span: function() {
             var that = this,
                 wrapper = that.wrapper,
-                SELECTOR = ".k-input",
+                SELECTOR = "span.k-input",
                 span;
 
             span = wrapper.find(SELECTOR);
@@ -15205,23 +16881,41 @@ function pad(number) {
             var that = this,
                 element = that.element,
                 DOMelement = element[0],
-                tabIndex = element.attr(TABINDEX),
                 wrapper;
 
             wrapper = element.parent();
 
             if (!wrapper.is("span.k-widget")) {
                 wrapper = element.wrap("<span />").parent();
+                wrapper[0].style.cssText = DOMelement.style.cssText;
             }
 
-            wrapper.attr(TABINDEX, tabIndex || 0);
-            wrapper[0].style.cssText = DOMelement.style.cssText;
             element.hide();
 
             that._focused = that.wrapper = wrapper
-                              .attr("unselectable", "on")
                               .addClass("k-widget k-dropdown k-header")
-                              .addClass(DOMelement.className);
+                              .addClass(DOMelement.className)
+                              .css("display", "")
+                              .attr({
+                                  unselectable: "on",
+                                  role: "listbox",
+                                  "aria-haspopup": true,
+                                  "aria-expanded": false
+                              });
+        },
+
+        _clearSelection: function() {
+            var that = this,
+                optionLabel = that.options.optionLabel;
+
+            if (that.dataSource.view()[0] && optionLabel) {
+                that.select(0);
+                return;
+            }
+
+            that.text(optionLabel);
+            that.element.val("");
+            that.selectedIndex = -1;
         }
     });
 
@@ -15244,7 +16938,7 @@ function pad(number) {
     }
 
     ui.plugin(DropDownList);
-})(jQuery);
+})(window.kendo.jQuery);
 (function($, undefined) {
     var kendo = window.kendo,
         ui = kendo.ui,
@@ -15255,14 +16949,15 @@ function pad(number) {
         removeFiltersForField = Select.removeFiltersForField,
         keys = kendo.keys,
         ns = ".kendoComboBox",
-        CLICK = (support.touch ? "touchend" : "click") + ns,
+        CLICK = "touchend" + ns + " click" + ns,
         ATTRIBUTE = "disabled",
         CHANGE = "change",
         DEFAULT = "k-state-default",
         DISABLED = "k-state-disabled",
         FOCUSED = "k-state-focused",
-        MOUSEDOWN = "mousedown" + ns,
+        MOUSEDOWN = "mousedown" + ns + " touchstart" + ns,
         SELECT = "select",
+        ARIA_DISABLED = "aria-disabled",
         STATE_SELECTED = "k-state-selected",
         STATE_FILTER = "filter",
         STATE_ACCEPT = "accept",
@@ -15326,10 +17021,16 @@ function pad(number) {
                     that._blur();
 
                     element.blur();
+                })
+                .attr({
+                    "role": "combobox",
+                    "aria-expanded": false
                 });
 
+            that._aria();
+
             that._oldIndex = that.selectedIndex = -1;
-            that._old = that.value();
+            that._old = options.value || that._accessor();
 
             if (options.autoBind) {
                 that._filterSource();
@@ -15373,13 +17074,12 @@ function pad(number) {
 
         events:[
             "open",
-
             "close",
-
             CHANGE,
             "select",
             "dataBinding",
-            "dataBound"
+            "dataBound",
+            "cascade"
         ],
 
         setOptions: function(options) {
@@ -15387,6 +17087,7 @@ function pad(number) {
 
             this._template();
             this._accessors();
+            this._aria();
         },
 
         current: function(li) {
@@ -15425,14 +17126,17 @@ function pad(number) {
                     .removeClass(DEFAULT)
                     .addClass(DISABLED);
 
-                input.attr(ATTRIBUTE, ATTRIBUTE);
+                input.attr(ATTRIBUTE, ATTRIBUTE)
+                     .attr(ARIA_DISABLED, true);
             } else {
                 wrapper
                     .removeClass(DISABLED)
                     .addClass(DEFAULT)
                     .on(HOVEREVENTS, that._toggleHover);
 
-                input.removeAttr(ATTRIBUTE);
+                input.removeAttr(ATTRIBUTE)
+                     .attr(ARIA_DISABLED, false);
+
                 arrow.on(CLICK, function() { that.toggle(); })
                      .on(MOUSEDOWN, function(e) { e.preventDefault(); });
             }
@@ -15463,7 +17167,7 @@ function pad(number) {
                 state = that._state,
                 data = that._data(),
                 length = data.length,
-                value, open;
+                value, open, custom;
 
             that.trigger("dataBinding");
 
@@ -15476,12 +17180,17 @@ function pad(number) {
 
             if (that.element.is(SELECT)) {
                 if (state === STATE_REBIND) {
-                    value = that.value();
                     that._state = "";
+                    value = that.value();
                 }
 
+                custom = that._option;
                 that._option = undefined;
                 that._options(data);
+
+                if (custom && custom[0].selected) {
+                    that._custom(custom.val());
+                }
             }
 
             if (length) {
@@ -15489,9 +17198,13 @@ function pad(number) {
                     that.current($(ul.firstChild));
                 }
 
-                if (options.suggest && that.input.val() && that._valueCalled !== undefined) {
+                if (options.suggest && that.input.val() && that._request !== undefined /*first refresh ever*/) {
                     that.suggest($(ul.firstChild));
                 }
+            }
+
+            if (state !== STATE_FILTER && !that._fetch) {
+                that._selectItem();
             }
 
             if (that._open) {
@@ -15512,25 +17225,9 @@ function pad(number) {
 
             that._makeUnselectable();
 
-            if (!that._valueCalled && state !== STATE_FILTER) {
-                that._selectItem(value);
-                that._valueCalled = false;
-            }
-
             that._hideBusy();
+            that._bound = true;
             that.trigger("dataBound");
-        },
-
-        select: function(li) {
-            var that = this;
-
-            if (li === undefined) {
-                return that.selectedIndex;
-            } else {
-                that._select(li);
-                that._old = that._accessor();
-                that._oldIndex = that.selectedIndex;
-            }
         },
 
         search: function(word) {
@@ -15545,12 +17242,11 @@ function pad(number) {
             clearTimeout(that._typing);
 
             if (length >= options.minLength) {
+                that._state = STATE_FILTER;
                 if (filter === "none") {
                     that._filter(word);
                 } else {
                     that._open = true;
-                    that._state = STATE_FILTER;
-
                     that._filterSource({
                         value: ignoreCase ? word.toLowerCase() : word,
                         field: field,
@@ -15641,6 +17337,7 @@ function pad(number) {
                     input.value = text;
                 }
 
+                that._triggerCascade();
             } else {
                 return input.value;
             }
@@ -15661,9 +17358,9 @@ function pad(number) {
                     value = value.toString();
                 }
 
-                that._valueCalled = true;
+                that._selectedValue = value;
 
-                if (value && that._valueOnFetch(value)) {
+                if (!that._open && value && that._fetchItems(value)) {
                     return;
                 }
 
@@ -15674,6 +17371,7 @@ function pad(number) {
                 } else {
                     that.current(NULL);
                     that._custom(value);
+
                     that.text(value);
                     that._placeholder();
                 }
@@ -15689,11 +17387,6 @@ function pad(number) {
             var that = this;
 
             if (li && that.popup.visible()) {
-
-                if (that._state === STATE_FILTER) {
-                    that._state = STATE_ACCEPT;
-                }
-
                 that._focus(li);
             } else {
                 that.text(that.text());
@@ -15706,6 +17399,10 @@ function pad(number) {
                 element = that.element,
                 custom = that._option;
 
+            if (that._state === STATE_FILTER) {
+                that._state = STATE_ACCEPT;
+            }
+
             if (element.is(SELECT)) {
                 if (!custom) {
                     custom = that._option = $("<option/>");
@@ -15716,6 +17413,8 @@ function pad(number) {
             } else {
                 element.val(value);
             }
+
+            that._selectedValue = value;
         },
 
         _filter: function(word) {
@@ -15787,10 +17486,11 @@ function pad(number) {
 
         _input: function() {
             var that = this,
-                element = that.element[0],
+                element = that.element.removeClass("k-input")[0],
                 tabIndex = element.tabIndex,
+                accessKey = element.accessKey,
                 wrapper = that.wrapper,
-                SELECTOR = ".k-input",
+                SELECTOR = "input.k-input",
                 input, DOMInput,
                 name = element.name || "";
 
@@ -15801,7 +17501,7 @@ function pad(number) {
             input = wrapper.find(SELECTOR);
 
             if (!input[0]) {
-                wrapper.append('<span unselectable="on" class="k-dropdown-wrap k-state-default"><input ' + name + 'class="k-input" type="text" autocomplete="off"/><span unselectable="on" class="k-select"><span unselectable="on" class="k-icon k-i-arrow-s">select</span></span></span>')
+                wrapper.append('<span tabindex="-1" unselectable="on" class="k-dropdown-wrap k-state-default"><input ' + name + 'class="k-input" type="text" autocomplete="off"/><span tabindex="-1" unselectable="on" class="k-select"><span unselectable="on" class="k-icon k-i-arrow-s">select</span></span></span>')
                        .append(that.element);
 
                 input = wrapper.find(SELECTOR);
@@ -15827,9 +17527,22 @@ function pad(number) {
                 input.attr("placeholder", that.options.placeholder);
             }
 
+            if (accessKey) {
+                element.accessKey = "";
+                input[0].accessKey = accessKey;
+            }
+
             that._focused = that.input = input;
-            that._arrow = wrapper.find(".k-icon");
             that._inputWrapper = $(wrapper[0].firstChild);
+            that._arrow = wrapper.find(".k-icon")
+                                 .attr({
+                                     "role": "button",
+                                     "tabIndex": -1
+                                 });
+
+            if (element.id) {
+                that._arrow.attr("aria-controls", that.ul[0].id);
+            }
         },
 
         _keydown: function(e) {
@@ -15892,12 +17605,16 @@ function pad(number) {
             var that = this,
                 text,
                 value,
-                idx = that._highlight(li),
-                data = that._data();
+                data = that._data(),
+                idx = that._highlight(li);
 
             that.selectedIndex = idx;
 
             if (idx !== -1) {
+                if (that._state === STATE_FILTER) {
+                    that._state = STATE_ACCEPT;
+                }
+
                 that._current.addClass(STATE_SELECTED);
 
                 data = data[idx];
@@ -15906,7 +17623,12 @@ function pad(number) {
 
                 that._prev = that.input[0].value = text;
                 that._accessor(value !== undefined ? value : text, idx);
+                that._selectedValue = that._accessor();
                 that._placeholder();
+
+                if (that._optionID) {
+                    that._current.attr("aria-selected", true);
+                }
             }
         },
 
@@ -15933,17 +17655,27 @@ function pad(number) {
 
             if (!wrapper.is("span.k-widget")) {
                 wrapper = element.hide().wrap("<span />").parent();
+                wrapper[0].style.cssText = element[0].style.cssText;
             }
 
-            wrapper[0].style.cssText = element[0].style.cssText;
             that.wrapper = wrapper.addClass("k-widget k-combobox k-header")
                                   .addClass(element[0].className)
-                                  .show();
+                                  .css("display", "");
+        },
+
+        _clearSelection: function(parent, isFiltered) {
+            var that = this,
+                hasValue = parent._selectedValue || parent.value(),
+                custom = hasValue && parent.selectedIndex === -1;
+
+            if (isFiltered || !hasValue || custom) {
+                that.value("");
+            }
         }
     });
 
     ui.plugin(ComboBox);
-})(jQuery);
+})(window.kendo.jQuery);
 (function($, undefined) {
     var kendo = window.kendo,
         ui = kendo.ui,
@@ -15987,7 +17719,9 @@ function pad(number) {
                 link = element.prepend('<a class="k-header-column-menu" href="#"><span class="k-icon k-i-arrowhead-s"/></a>').find(".k-header-column-menu");
             }
 
-            that.link = link.on("click" + NS, proxy(that._click, that));
+            that.link = link
+                .attr("tabindex", -1)
+                .on("click" + NS, proxy(that._click, that));
 
             that.wrapper = $('<div class="k-column-menu"/>');
 
@@ -16002,7 +17736,9 @@ function pad(number) {
 
             that.popup = that.wrapper[POPUP]({
                 anchor: link,
-                open: proxy(that._open, that)
+                open: proxy(that._open, that),
+                activate: proxy(that._activate, that),
+                close: that.options.closeCallback
             }).data(POPUP);
 
             that._menu();
@@ -16056,6 +17792,7 @@ function pad(number) {
         close: function() {
             this.menu.close();
             this.popup.close();
+            this.popup.element.off("keydown" + NS);
         },
 
         _click: function(e) {
@@ -16065,9 +17802,19 @@ function pad(number) {
         },
 
         _open: function() {
-            $(".k-column-menu").not(this.wrapper).each(function() {
+            var that = this;
+            $(".k-column-menu").not(that.wrapper).each(function() {
                 $(this).data(POPUP).close();
             });
+            that.popup.element.on("keydown" + NS, function(e) {
+                if (e.keyCode == kendo.keys.ESC) {
+                    that.close();
+                }
+            });
+        },
+
+        _activate: function() {
+            this.menu.element.focus();
         },
 
         _ownerColumns: function() {
@@ -16164,19 +17911,31 @@ function pad(number) {
 
                 that.owner.bind(["columnHide", "columnShow"], that._updateColumnsMenuHandler);
 
-                that.wrapper.on(CHANGE + NS, "[type=checkbox]", function(e) {
-                    var input = $(this),
+                that.menu.bind("select", function(e) {
+                    var item = $(e.item),
+                        input,
                         index,
                         column,
                         columns = that.owner.columns,
-                        field = input.attr(kendo.attr("field"));
+                        field;
 
-                     column = grep(columns, function(column) {
+                    if (!item.parent().closest("li.k-columns-item")[0]) {
+                        return;
+                    }
+
+                    input = item.find(":checkbox");
+                    if (input.attr("disabled")) {
+                        return;
+                    }
+
+                    field = input.attr(kendo.attr("field"));
+
+                    column = grep(columns, function(column) {
                         return column.field == field || column.title == field;
                     })[0];
                     index = inArray(column, columns);
 
-                    if (input.is(":checked")) {
+                    if (column.hidden === true) {
                         that.owner.showColumn(index);
                     } else {
                         that.owner.hideColumn(index);
@@ -16250,7 +18009,7 @@ function pad(number) {
                     '#if(showColumns){#'+
                         '<li class="k-item k-columns-item"><span class="k-link"><span class="k-sprite k-i-columns"></span>${messages.columns}</span><ul>'+
                         '#for (var col in columns) {#'+
-                            '<li><label><input type="checkbox" data-#=ns#field="#=columns[col].field#" data-#=ns#index="#=columns[col].index#"/>#=columns[col].title#</label></li>'+
+                            '<li><input type="checkbox" data-#=ns#field="#=columns[col].field#" data-#=ns#index="#=columns[col].index#"/>#=columns[col].title#</li>'+
                         '#}#'+
                         '</ul></li>'+
                         '#if(filterable){#'+
@@ -16265,7 +18024,7 @@ function pad(number) {
                     '</ul>';
 
     ui.plugin(ColumnMenu);
-})(jQuery);
+})(window.kendo.jQuery);
 (function($, undefined) {
     var kendo = window.kendo,
         ui = kendo.ui,
@@ -16284,13 +18043,16 @@ function pad(number) {
         isFunction = $.isFunction,
         isEmptyObject = $.isEmptyObject,
         math = Math,
-        REQUESTSTART = "requestStart",
+        PROGRESS = "progress",
         ERROR = "error",
-        ROW_SELECTOR = "tbody>tr:not(.k-grouping-row):not(.k-detail-row):not(.k-group-footer):visible",
+        //ROW_SELECTOR = "tbody>tr:not(.k-grouping-row):not(.k-detail-row):not(.k-group-footer):visible",
         DATA_CELL = ":not(.k-group-cell):not(.k-hierarchy-cell):visible",
         SELECTION_CELL_SELECTOR = "tbody>tr:not(.k-grouping-row):not(.k-detail-row):not(.k-group-footer) > td:not(.k-group-cell):not(.k-hierarchy-cell)",
-        CELL_SELECTOR =  ROW_SELECTOR + ">td" + DATA_CELL,
-        FIRST_CELL_SELECTOR = ROW_SELECTOR + ":first" + ">td" + DATA_CELL + ":first",
+        //CELL_SELECTOR =  ROW_SELECTOR + ">td" + DATA_CELL,
+        //FIRST_CELL_SELECTOR = ROW_SELECTOR + ":first" + ">td" + DATA_CELL + ":first",
+        NAVROW = "tr:not(.k-footer-template):visible",
+        NAVCELL = ":not(.k-group-cell):not(.k-hierarchy-cell):visible",
+        FIRSTNAVITEM = NAVROW + ":first>" + NAVCELL + ":first",
         NS = ".kendoGrid",
         EDIT = "edit",
         SAVE = "save",
@@ -16304,7 +18066,7 @@ function pad(number) {
         DETAILEXPAND = "detailExpand",
         DETAILCOLLAPSE = "detailCollapse",
         FOCUSED = "k-state-focused",
-        FOCUSABLE = "k-focusable",
+        //FOCUSABLE = "k-focusable",
         SELECTED = "k-state-selected",
         COLUMNRESIZE = "columnResize",
         COLUMNREORDER = "columnReorder",
@@ -16317,7 +18079,8 @@ function pad(number) {
         formatRegExp = /(\}|\#)/ig,
         indicatorWidth = 3,
         templateHashRegExp = /#/ig,
-        COMMANDBUTTONTMPL = '<a class="k-button k-button-icontext #=className#" #=attr# href="\\#"><span class="#=iconClass# #=imageClass#"></span>#=text#</a>';
+        COMMANDBUTTONTMPL = '<a class="k-button k-button-icontext #=className#" #=attr# href="\\#"><span class="#=iconClass# #=imageClass#"></span>#=text#</a>',
+        isRtl = false;
 
     var VirtualScrollable =  Widget.extend({
         init: function(element, options) {
@@ -16360,23 +18123,24 @@ function pad(number) {
             var that = this,
                 // workaround for IE issue where scroll is not raised if container is same width as the scrollbar
                 scrollbar = kendo.support.scrollbar() + 1,
-                element = that.element;
+                element = that.element,
+                wrapper;
 
             element.css( {
                 width: "auto",
-                paddingRight: scrollbar,
                 overflow: "hidden"
-            });
+            }).css((isRtl ? "padding-left" : "padding-right"), scrollbar);
             that.content = element.children().first();
-            that.wrapper = that.content.wrap('<div class="k-virtual-scrollable-wrap"/>')
+            wrapper = that.wrapper = that.content.wrap('<div class="k-virtual-scrollable-wrap"/>')
                                 .parent()
                                 .bind("DOMMouseScroll" + NS + " mousewheel" + NS, proxy(that._wheelScroll, that));
 
-            if (kendo.support.touch) {
-                that.drag = new kendo.Drag(that.wrapper, {
+            if (kendo.support.kineticScrollNeeded) {
+                that.drag = new kendo.UserEvents(that.wrapper, {
                     global: true,
                     move: function(e) {
                         that.verticalScrollbar.scrollTop(that.verticalScrollbar.scrollTop() - e.y.delta);
+                        wrapper.scrollLeft(wrapper.scrollLeft() - e.x.delta);
                         e.preventDefault();
                     }
                 });
@@ -16492,7 +18256,7 @@ function pad(number) {
                 maxHeight = 250000,
                 dataSource = that.dataSource,
                 rangeStart = that._rangeStart,
-                scrollbar = kendo.support.scrollbar(),
+                scrollbar = !kendo.support.kineticScrollNeeded ? kendo.support.scrollbar() : 0,
                 wrapperElement = that.wrapper[0],
                 totalHeight,
                 idx,
@@ -16648,7 +18412,7 @@ function pad(number) {
 
             if (isPlainObject(command) && command.click) {
                 commandName = command.name || command.text;
-                container.on(CLICK, "a.k-grid-" + (commandName || "").replace(/\s/g, ""), { commandName: commandName }, proxy(command.click, context));
+                container.on("touchend " + CLICK, "a.k-grid-" + (commandName || "").replace(/\s/g, ""), { commandName: commandName }, proxy(command.click, context));
             }
         }
     }
@@ -16680,7 +18444,7 @@ function pad(number) {
         var style = attr.style;
 
         if(style) {
-            attr.style = style.replace(/((.*)?)(display\s*:\s*none)\s*;?/i, "$1");
+            attr.style = style.replace(/(display\s*:\s*none\s*;?)*/ig, "");
         }
 
         return attr;
@@ -16719,7 +18483,11 @@ function pad(number) {
 
             Widget.fn.init.call(that, element, options);
 
+            isRtl = kendo.support.isRtl(element);
+
             that._element();
+
+            that._aria();
 
             that._columns(that.options.columns);
 
@@ -16861,17 +18629,22 @@ function pad(number) {
             that._destroyEditable();
 
             that.dataSource.unbind(CHANGE, that._refreshHandler)
-                           .unbind(REQUESTSTART, that._requestStartHandler)
+                           .unbind(PROGRESS, that._progressHandler)
                            .unbind(ERROR, that._errorHandler);
 
             that.element
                 .add(that.wrapper)
                 .add(that.table)
                 .add(that.thead)
-                .add(that.content)
-                .add(that.content.find(">.k-virtual-scrollable-wrap"))
-                .add(that.wrapper.find(">.k-grid-toolbar"))
-                .off(NS);
+                .add(that.wrapper.find(">.k-grid-toolbar"));
+
+            if (that.content) {
+                that.element
+                    .add(that.content)
+                    .add(that.content.find(">.k-virtual-scrollable-wrap"));
+            }
+
+            that.element.off(NS);
 
             kendo.destroy(that.wrapper);
         },
@@ -16904,6 +18677,14 @@ function pad(number) {
             }
         },
 
+        _aria: function() {
+            var id = this.element.attr("id") || "aria";
+
+            if (id) {
+                this._cellId = id + "_active_cell";
+            }
+        },
+
         _element: function() {
             var that = this,
                 table = that.element;
@@ -16920,7 +18701,7 @@ function pad(number) {
                 }
             }
 
-            that.table = table.attr("cellspacing", 0);
+            that.table = table.attr("cellspacing", 0).attr("role", that._hasDetails() ? "treegrid" : "grid");
 
             that._wrapper();
         },
@@ -16933,20 +18714,29 @@ function pad(number) {
 
             that.thead.on("mousemove" + NS, "th:not(.k-group-cell,.k-hierarchy-cell)", function(e) {
                  var th = $(this),
-                    position = th.offset().left + this.offsetWidth;
+                    clientX = e.clientX,
+                    winScrollLeft = $(window).scrollLeft(),
+                    position = th.offset().left + (!isRtl ? this.offsetWidth : 0);
 
-                if(e.clientX > position - indicatorWidth &&  e.clientX < position + indicatorWidth) {
-
+                if(clientX + winScrollLeft > position - indicatorWidth &&  clientX + winScrollLeft < position + indicatorWidth) {
                     if (!resizeHandle) {
                         resizeHandle = that.resizeHandle = $('<div class="k-resize-handle"/>');
                         container.append(resizeHandle);
                     }
 
-                    left = this.offsetWidth;
+                    if (!isRtl) {
+                        left = this.offsetWidth;
 
-                    th.prevAll().each(function() {
-                        left += this.offsetWidth;
-                    });
+                        th.prevAll(":visible").each(function() {
+                            left += this.offsetWidth;
+                        });
+                    } else {
+                        var headerWrap = th.closest(".k-grid-header-wrap"),
+                            ieCorrection = $.browser.msie ? headerWrap.scrollLeft() : 0,
+                            webkitCorrection = $.browser.webkit ? (headerWrap[0].scrollWidth - headerWrap[0].offsetWidth - headerWrap.scrollLeft()) : 0,
+                            firefoxCorrection = $.browser.mozilla ? (headerWrap[0].scrollWidth - headerWrap[0].offsetWidth - (headerWrap[0].scrollWidth - headerWrap[0].offsetWidth - headerWrap.scrollLeft())) : 0;
+                        left = th.position().left - webkitCorrection + firefoxCorrection - ieCorrection;
+                    }
 
                     resizeHandle.css({
                         top: scrollable ? 0 : heightAboveHeader(that.wrapper),
@@ -16978,7 +18768,7 @@ function pad(number) {
                 col;
 
             if (options.resizable) {
-                container = options.scrollable ? that.wrapper.find(".k-grid-header-wrap") : that.wrapper;
+                container = options.scrollable ? that.wrapper.find(".k-grid-header-wrap:first") : that.wrapper;
 
                 that._positionColumnResizeHandle(container);
 
@@ -17010,14 +18800,16 @@ function pad(number) {
                         gridWidth = that.tbody.outerWidth();
                     },
                     resize: function(e) {
-                        var width = columnWidth + e.x.location - columnStart,
+
+                        var rtlMultiplier = isRtl ? -1 : 1,
+                            width = columnWidth + (e.x.location * rtlMultiplier) - (columnStart * rtlMultiplier),
                             footer = that.footer || $();
 
                         if (width > 10) {
                             col.css('width', width);
 
                             if (options.scrollable) {
-                                that._footerWidth = gridWidth + e.x.location - columnStart;
+                                that._footerWidth = gridWidth + (e.x.location * rtlMultiplier) - (columnStart * rtlMultiplier);
                                 that.tbody.parent()
                                     .add(that.thead.parent())
                                     .add(footer.find("table"))
@@ -17052,9 +18844,13 @@ function pad(number) {
         _draggable: function() {
             var that = this;
             if (that.options.reorderable) {
-                that._draggableInstance = that.thead.kendoDraggable({
+                if (that._draggableInstance) {
+                    that._draggableInstance.destroy();
+                }
+
+                that._draggableInstance = that.wrapper.kendoDraggable({
                     group: kendo.guid(),
-                    filter: ".k-header:not(.k-group-cell,.k-hierarchy-cell)",
+                    filter: "th.k-header:not(.k-group-cell,.k-hierarchy-cell)",
                     hint: function(target) {
                         return $('<div class="k-header k-drag-clue" />')
                             .css({
@@ -17128,7 +18924,7 @@ function pad(number) {
         },
 
         cellIndex: function(td) {
-            return $(td).parent().find('td:not(.k-group-cell,.k-hierarchy-cell)').index(td);
+            return $(td).parent().children('td:not(.k-group-cell,.k-hierarchy-cell)').index(td);
         },
 
         _modelForContainer: function(container) {
@@ -17161,7 +18957,7 @@ function pad(number) {
                 var mode = that._editMode();
                 if (mode === "incell") {
                     if (editable.update !== false) {
-                        that.wrapper.on(CLICK + NS, "tr:not(.k-grouping-row) > td", function(e) {
+                        that.wrapper.on("touchend" + NS + " " + CLICK + NS, "tr:not(.k-grouping-row) > td", function(e) {
                             var td = $(this);
 
                             if (td.hasClass("k-hierarchy-cell") ||
@@ -17194,7 +18990,7 @@ function pad(number) {
                     }
                 } else {
                     if (editable.update !== false) {
-                        that.wrapper.on(CLICK + NS, "tbody>tr:not(.k-detail-row,.k-grouping-row):visible a.k-grid-edit", function(e) {
+                        that.wrapper.on("touchend" + NS + " " + CLICK + NS, "tbody>tr:not(.k-detail-row,.k-grouping-row):visible a.k-grid-edit", function(e) {
                             e.preventDefault();
                             that.editRow($(this).closest("tr"));
                         });
@@ -17202,14 +18998,14 @@ function pad(number) {
                 }
 
                 if (editable.destroy !== false) {
-                    that.wrapper.on(CLICK + NS, "tbody>tr:not(.k-detail-row,.k-grouping-row):visible .k-grid-delete", function(e) {
+                    that.wrapper.on("touchend" + NS + " " + CLICK + NS, "tbody>tr:not(.k-detail-row,.k-grouping-row):visible .k-grid-delete", function(e) {
                         e.preventDefault();
                         e.stopPropagation();
                         that.removeRow($(this).closest("tr"));
                     });
                 } else {
                     //Required for the MVC server wrapper delete button
-                    that.wrapper.on(CLICK + NS, "tbody>tr:not(.k-detail-row,.k-grouping-row):visible button.k-grid-delete", function(e) {
+                    that.wrapper.on("touchend" + NS + " " + CLICK + NS, "tbody>tr:not(.k-detail-row,.k-grouping-row):visible button.k-grid-delete", function(e) {
                         if (!that._confirmation()) {
                             e.preventDefault();
                         }
@@ -17361,6 +19157,7 @@ function pad(number) {
             var that = this,
                 model = that._modelForContainer(row),
                 mode = that._editMode(),
+                navigatable = that.options.navigatable,
                 container;
 
             that.cancelRow();
@@ -17389,14 +19186,21 @@ function pad(number) {
 
                 container = that._editContainer;
 
-                container.on(CLICK + NS, "a.k-grid-cancel", function(e) {
+                container.on("touchend" + NS + " " + CLICK + NS, "a.k-grid-cancel", function(e) {
                     e.preventDefault();
                     e.stopPropagation();
 
+                    var currentIndex = that.items().index($(that.current()).parent());
+
                     that.cancelRow();
+
+                    if (navigatable) {
+                        that.current(that.items().eq(currentIndex).children().filter(NAVCELL).first());
+                        that.table.focus();
+                    }
                 });
 
-                container.on(CLICK + NS, "a.k-grid-update", function(e) {
+                container.on("touchend" + NS + " " + CLICK + NS, "a.k-grid-update", function(e) {
                     e.preventDefault();
                     e.stopPropagation();
 
@@ -17426,6 +19230,7 @@ function pad(number) {
                 if (typeof template === STRING) {
                     template = window.unescape(template);
                 }
+
                 html += (kendo.template(template, settings))(model);
 
                 for (idx = 0, length = that.columns.length; idx < length; idx++) {
@@ -17484,14 +19289,13 @@ function pad(number) {
                     resizable: false,
                     draggable: true,
                     title: "Edit",
-                    visible: false
+                    visible: false,
+                    close: function(e) {
+                        if (e.userTriggered) {
+                            that.cancelRow();
+                        }
+                    }
                 }, options));
-
-            var wnd = container.data("kendoWindow");
-
-            wnd.wrapper.on(CLICK + NS, "a:has(.k-i-close)", function() {
-                that.cancelRow();
-            });
 
             that.editable = that._editContainer
                 .kendoEditable({
@@ -17500,7 +19304,7 @@ function pad(number) {
                     clearContainer: false
                 }).data("kendoEditable");
 
-            wnd.center().open();
+            container.data("kendoWindow").center().open();
 
             that.trigger(EDIT, { container: container, model: model });
         },
@@ -17656,7 +19460,7 @@ function pad(number) {
                 var model = dataSource.insert(index, {}),
                     id = model.uid,
                     row = that.table.find("tr[" + kendo.attr("uid") + "=" + id + "]"),
-                    cell = row.children("td:not(.k-group-cell,.k-hierarchy-cell)").first();
+                    cell = row.children("td:not(.k-group-cell,.k-hierarchy-cell)").eq(that._firstEditableColumnIndex(row));
 
                 if ((mode === "inline" || mode === "popup") && row.length) {
                     that.editRow(row);
@@ -17666,31 +19470,49 @@ function pad(number) {
             }
         },
 
+        _firstEditableColumnIndex: function(container) {
+            var that = this,
+                column,
+                columns = that.columns,
+                idx,
+                length,
+                model = that._modelForContainer(container);
+
+            for (idx = 0, length = columns.length; idx < length; idx++) {
+                column = columns[idx];
+
+                if (model && (!model.editable || model.editable(column.field)) && !column.command && column.field) {
+                    return idx;
+                }
+            }
+            return -1;
+        },
+
         _toolbar: function() {
             var that = this,
                 wrapper = that.wrapper,
                 toolbar = that.options.toolbar,
                 editable = that.options.editable,
-                container,
-                template;
+                container;
 
             if (toolbar) {
                 container = that.wrapper.find(".k-grid-toolbar");
 
                 if (!container.length) {
-                    toolbar = isFunction(toolbar) ? toolbar({}) : (typeof toolbar === STRING ? toolbar : that._toolbarTmpl(toolbar).replace(templateHashRegExp, "\\#"));
-
-                    template = proxy(kendo.template(toolbar), that);
+                    if (!isFunction(toolbar)) {
+                        toolbar = (typeof toolbar === STRING ? toolbar : that._toolbarTmpl(toolbar).replace(templateHashRegExp, "\\#"));
+                        toolbar = proxy(kendo.template(toolbar), that);
+                    }
 
                     container = $('<div class="k-toolbar k-grid-toolbar" />')
-                        .html(template({}))
+                        .html(toolbar({}))
                         .prependTo(wrapper);
                 }
 
                 if (editable && editable.create !== false) {
-                    container.on(CLICK + NS, ".k-grid-add", function(e) { e.preventDefault(); that.addRow(); })
-                        .on(CLICK + NS, ".k-grid-cancel-changes", function(e) { e.preventDefault(); that.cancelChanges(); })
-                        .on(CLICK + NS, ".k-grid-save-changes", function(e) { e.preventDefault(); that.saveChanges(); });
+                    container.on("touchend" + NS + " " + CLICK + NS, ".k-grid-add", function(e) { e.preventDefault(); that.addRow(); })
+                        .on("touchend" + NS + " " + CLICK + NS, ".k-grid-cancel-changes", function(e) { e.preventDefault(); that.cancelChanges(); })
+                        .on("touchend" + NS + " " + CLICK + NS, ".k-grid-save-changes", function(e) { e.preventDefault(); that.saveChanges(); });
                 }
             }
         },
@@ -17741,28 +19563,32 @@ function pad(number) {
         },
 
         _groupable: function() {
+            var that = this;
+
+            that.table.on("touchend" + NS + " " + CLICK + NS, ".k-grouping-row .k-i-collapse, .k-grouping-row .k-i-expand", function(e) {
+                var element = $(this),
+                group = element.closest("tr");
+
+                if(element.hasClass('k-i-collapse')) {
+                    that.collapseGroup(group);
+                } else {
+                    that.expandGroup(group);
+                }
+                e.preventDefault();
+                e.stopPropagation();
+            });
+
+            that._attachGroupable();
+        },
+
+        _attachGroupable: function() {
             var that = this,
                 wrapper = that.wrapper,
                 groupable = that.options.groupable;
 
-            if (!that.groupable) {
-                that.table.on(CLICK + NS, ".k-grouping-row .k-i-collapse, .k-grouping-row .k-i-expand", function(e) {
-                    var element = $(this),
-                    group = element.closest("tr");
-
-                    if(element.hasClass('k-i-collapse')) {
-                        that.collapseGroup(group);
-                    } else {
-                        that.expandGroup(group);
-                    }
-                    e.preventDefault();
-                    e.stopPropagation();
-                });
-            }
-
             if (groupable) {
                 if(!wrapper.has("div.k-grouping-header")[0]) {
-                    $("<div />").addClass("k-grouping-header").html("&nbsp;").prependTo(wrapper);
+                    $("<div />").addClass("k-grouping-header").prependTo(wrapper);
                 }
 
                 if (that.groupable) {
@@ -17791,6 +19617,7 @@ function pad(number) {
 
                 that.selectable = new kendo.ui.Selectable(that.table, {
                     filter: ">" + (cell ? SELECTION_CELL_SELECTOR : "tbody>tr:not(.k-grouping-row,.k-detail-row,.k-group-footer)"),
+                    aria: true,
                     multiple: multi,
                     change: function() {
                         that.trigger(CHANGE);
@@ -17798,9 +19625,11 @@ function pad(number) {
                 });
 
                 if (that.options.navigatable) {
-                    that.wrapper.keydown(function(e) {
+                    that.table.on("keydown" + NS, function(e) {
                         var current = that.current();
-                        if (e.keyCode === keys.SPACEBAR && e.target == that.wrapper[0] && !current.hasClass("k-edit-cell")) {
+                        if (e.keyCode === keys.SPACEBAR && e.target == that.table[0] &&
+                            !current.is(".k-edit-cell,.k-header") &&
+                            current.parent().is(":not(.k-grouping-row,.k-detail-row,.k-group-footer)")) {
                             e.preventDefault();
                             e.stopPropagation();
                             current = cell ? current : current.parent();
@@ -17811,7 +19640,8 @@ function pad(number) {
                                 } else {
                                     if(current.hasClass(SELECTED)) {
                                         current.removeClass(SELECTED);
-                                        current = null;
+                                        that.trigger(CHANGE);
+                                        return;
                                     }
                                 }
                             } else {
@@ -17851,15 +19681,20 @@ function pad(number) {
         current: function(element) {
             var that = this,
                 scrollable = that.options.scrollable,
-                current = that._current;
+                current = that._current,
+                table = that.table.add(that.thead.parent());
 
             if (element !== undefined && element.length) {
                 if (!current || current[0] !== element[0]) {
-                    element.addClass(FOCUSED);
                     if (current) {
-                        current.removeClass(FOCUSED);
+                        current.removeClass(FOCUSED).removeAttr("id");
+                        table.removeAttr("aria-activedescendant");
                     }
-                    that._current = element;
+
+                    element.attr("id", that._cellId);
+                    that._current = element.addClass(FOCUSED);
+
+                    table.attr("aria-activedescendant", that._cellId);
 
                     if(element.length && scrollable) {
                         that._scrollTo(element.parent()[0], that.content[0]);
@@ -17873,6 +19708,13 @@ function pad(number) {
             }
 
             return that._current;
+        },
+
+        _removeCurrent: function() {
+            if (this._current) {
+                this._current.removeClass(FOCUSED);
+                this._current = null;
+            }
         },
 
         _scrollTo: function(element, container) {
@@ -17891,127 +19733,215 @@ function pad(number) {
 
         _navigatable: function() {
             var that = this,
-                wrapper = that.wrapper,
-                table = that.table.addClass(FOCUSABLE),
                 currentProxy = proxy(that.current, that),
-                selector = "." + FOCUSABLE + " " + CELL_SELECTOR,
-                browser = kendo.support.browser,
-                clickCallback = function(e) {
-                    var currentTarget = $(e.currentTarget);
-                    if (currentTarget.closest("tbody")[0] !== that.tbody[0]) {
-                        return;
-                    }
+                table = that.table,
+                headerTable = that.thead.parent(),
+                dataTable = table;
 
-                    currentProxy(currentTarget);
-                    if(!$(e.target).is(":button,a,:input,a>.k-icon,textarea,span.k-icon,.k-input")) {
-                        setTimeout(function() { wrapper.focus(); } );
-                    }
+            if (!that.options.navigatable) {
+                return;
+            }
 
-                    e.stopPropagation();
-                };
+            if (that.options.scrollable) {
+                dataTable = table.add(headerTable);
+                headerTable.attr(TABINDEX, -1);
 
-            if (that.options.navigatable) {
-                wrapper.on("focus" + NS, function() {
-                    var current = that._current;
-                    if(current && current.is(":visible")) {
-                        current.addClass(FOCUSED);
+                //required for FF
+                //that.content.attr("tabindex", -1);
+            }
+
+            headerTable.on("keydown" + NS, function(e) {
+                if (e.altKey && e.keyCode == keys.DOWN) {
+                    currentProxy().find(".k-grid-filter, .k-header-column-menu").click();
+                    e.stopImmediatePropagation();
+                }
+            })
+            .find("a.k-link").attr("tabIndex", -1);
+
+            table
+            .attr(TABINDEX, math.max(table.attr(TABINDEX) || 0, 0))
+            .on("mousedown" + NS + " keydown" + NS, ".k-detail-cell", function(e) {
+                if (e.target !== e.currentTarget) {
+                    e.stopImmediatePropagation();
+                }
+            });
+
+            dataTable
+            .on("mousedown" + NS, NAVROW + ">" + NAVCELL, proxy(tableClick, that))
+            .on("focus" + NS, function(e) {
+                var current = currentProxy();
+                if (current && current.is(":visible")) {
+                    current.addClass(FOCUSED);
+                } else {
+                    currentProxy($(this).find(FIRSTNAVITEM));
+                }
+
+                if (this == table[0]) {
+                    headerTable.attr(TABINDEX, -1);
+                    table.attr(TABINDEX, 0);
+                } else {
+                    table.attr(TABINDEX, -1);
+                    headerTable.attr(TABINDEX, 0);
+                }
+            })
+            .on("focusout" + NS, function(e) {
+                var current = currentProxy();
+                if (current) {
+                    current.removeClass(FOCUSED);
+                }
+            })
+            .on("keydown" + NS, function(e) {
+                var key = e.keyCode,
+                    handled = false,
+                    canHandle = !e.isDefaultPrevented() && !$(e.target).is(":button,a,:input,a>.k-icon"),
+                    pageable = that.options.pageable,
+                    dataSource = that.dataSource,
+                    isInCell = that._editMode() == "incell",
+                    currentIndex,
+                    row,
+                    index,
+                    shiftKey = e.shiftKey,
+                    browser = kendo.support.browser,
+                    current = currentProxy();
+
+                if (current && current.is("th")) {
+                    canHandle = true;
+                }
+
+                if (canHandle && key == keys.UP) {
+                    if (current) {
+                        row = current.parent().prevAll(NAVROW).first();
+                        if (!row[0]) {
+                            row = that.thead.parent().focus().find(NAVROW).first();
+                        }
+
+                        index = current.index();
+                        current = row.children().eq(index);
+                        if (!current[0] || !current.is(NAVCELL)) {
+                            current = row.children(NAVCELL).first();
+                        }
                     } else {
-                        currentProxy(that.table.find(FIRST_CELL_SELECTOR));
+                        current = table.find(FIRSTNAVITEM);
                     }
-                })
-                .on("focusout" + NS, function(e) {
-                    if (that._current) {
-                        that._current.removeClass(FOCUSED);
+
+                    handled = true;
+                    currentProxy(current);
+                } else if (canHandle && key == keys.DOWN) {
+                    if (current) {
+                        row = current.parent().nextAll(NAVROW).first();
+                        if (!row[0] && current.is("th")) {
+                            row = that.tbody.parent().focus().end().find(NAVROW).first();
+                        }
+                        index = current.index();
+                        current = row.children().eq(index);
+                        if (!current[0] || !current.is(NAVCELL)) {
+                            current = row.children(NAVCELL).first();
+                        }
+                    } else {
+                        current = table.find(FIRSTNAVITEM);
                     }
-                    e.stopPropagation();
-                })
-                .on("keydown" + NS, function(e) {
-                    var key = e.keyCode,
-                        current = that.current(),
-                        shiftKey = e.shiftKey,
-                        dataSource = that.dataSource,
-                        pageable = that.options.pageable,
-                        canHandle = !$(e.target).is(":button,a,:input,a>.t-icon"),
-                        isInCell = that._editMode() == "incell",
-                        currentIndex,
-                        cell,
-                        handled = false;
 
-                    if (canHandle && keys.UP === key) {
-                        currentProxy(current ? current.parent().prevAll(ROW_SELECTOR).first().children()
-                            .eq(current.index() >= 0 ? current.index() : 0).last() : table.find(FIRST_CELL_SELECTOR));
+                    handled = true;
+                    currentProxy(current);
+                } else if (canHandle && key == keys.LEFT) {
+                    currentProxy(current ? current.prevAll(DATA_CELL + ":first") : table.find(FIRSTNAVITEM));
+                    handled = true;
+                } else if (canHandle && key == keys.RIGHT) {
+                    if (current) {
+                        if (current.next()[0]) {
+                            current = current.nextAll(DATA_CELL + ":first");
+                        }
+                    } else {
+                        current = table.find(FIRSTNAVITEM);
+                    }
 
+                    handled = true;
+                    currentProxy(current);
+                } else if (canHandle && pageable && keys.PAGEDOWN == key) {
+                    dataSource.page(dataSource.page() + 1);
+                    handled = true;
+                } else if (canHandle && pageable && keys.PAGEUP == key) {
+                    dataSource.page(dataSource.page() - 1);
+                    handled = true;
+                } else if (key == keys.ENTER || keys.F2 == key) {
+                    current = current ? current : table.find(FIRSTNAVITEM);
+                    if (current.is("th")) {
+                        current.find(".k-link").click();
                         handled = true;
-                    } else if (canHandle && keys.DOWN === key) {
-                        currentProxy(current ? current.parent().nextAll(ROW_SELECTOR).first().children()
-                            .eq(current.index() >= 0 ? current.index() : 0).last() : table.find(FIRST_CELL_SELECTOR));
-
+                    } else if (current.parent().is(".k-master-row,.k-grouping-row")) {
+                        current.parent().find(".k-icon:first").click();
                         handled = true;
-                    } else if (canHandle && keys.LEFT === key) {
-                        currentProxy(current ? current.prevAll(DATA_CELL + ":first") : table.find(FIRST_CELL_SELECTOR));
-                        handled = true;
-                    } else if (canHandle && keys.RIGHT === key) {
-                        currentProxy(current ? current.nextAll(":visible:first") : table.find(FIRST_CELL_SELECTOR));
-                        handled = true;
-                    } else if (canHandle && pageable && keys.PAGEDOWN == key) {
-                        that._current = null;
-                        dataSource.page(dataSource.page() + 1);
-                        handled = true;
-                    } else if (canHandle && pageable && keys.PAGEUP == key) {
-                        that._current = null;
-                        dataSource.page(dataSource.page() - 1);
-                        handled = true;
-                    } else if (that.options.editable) {
-                        current = current ? current : table.find(FIRST_CELL_SELECTOR);
-                        if (keys.ENTER == key || keys.F2 == key) {
+                    } else {
+                        var focusable = current.find(":focusable:first");
+                        if (!current.hasClass("k-edit-cell") && focusable[0] && current.hasClass("k-state-focused")) {
+                            focusable.focus();
+                            handled = true;
+                        } else if (that.options.editable && !$(e.target).is(":button,.k-button")) {
                             that._handleEditing(current);
                             handled = true;
-                        } else if (keys.TAB == key && isInCell) {
-                            cell = shiftKey ? current.prevAll(DATA_CELL + ":first") : current.nextAll(":visible:first");
-                            if (!cell.length) {
-                                cell = current.parent()[shiftKey ? "prevAll" : "nextAll"]("tr:not(.k-grouping-row,.k-detail-row):visible")
-                                    .children(DATA_CELL + (shiftKey ? ":last" : ":first"));
-                            }
-
-                            if (cell.length) {
-                                that._handleEditing(current, cell);
-                                handled = true;
-                            }
-                        } else if (keys.ESC == key && that._editContainer) {
-                            if (that._editContainer.has(current[0]) || current[0] === that._editContainer[0]) {
-                                if (isInCell) {
-                                    that.closeCell();
-                                } else {
-                                    currentIndex = that.items().index(current.parent());
-                                    document.activeElement.blur();
-                                    that.cancelRow();
-                                    if (currentIndex >= 0) {
-                                        that.current(that.items().eq(currentIndex).children().filter(DATA_CELL).first());
-                                    }
-                                }
-
-                                if (browser.msie && parseInt(browser.version, 10) < 9) {
-                                    document.body.focus();
-                                }
-                                wrapper.focus();
-                                handled = true;
-                            }
                         }
                     }
+                } else if (keys.ESC == key) {
+                    if (current && $.contains(current[0], document.activeElement) && !current.hasClass("k-edit-cell") && !current.parent().hasClass("k-grid-edit-row")) {
+                        that.table[0].focus();
+                        handled = true;
+                    } else if (that._editContainer && (!current || that._editContainer.has(current[0]) || current[0] === that._editContainer[0])) {
+                        if (isInCell) {
+                            that.closeCell();
+                        } else {
+                            currentIndex = that.items().index($(current).parent());
+                            document.activeElement.blur();
+                            that.cancelRow();
+                            if (currentIndex >= 0) {
+                                that.current(that.items().eq(currentIndex).children().filter(NAVCELL).first());
+                            }
+                        }
 
-                    if(handled) {
-                        e.preventDefault();
-                        e.stopPropagation();
+                        if (browser.msie && parseInt(browser.version, 10) < 9) {
+                            document.body.focus();
+                        }
+                        table.focus();
+                        handled = true;
                     }
-                })
-                .on("mousedown" + NS, selector, clickCallback); }
+                } else if (keys.TAB == key) {
+                    var cell;
+
+                    current = $(current);
+                    if (that.options.editable && isInCell) {
+                         cell = $(document.activeElement).closest(".k-edit-cell");
+
+                         if (cell[0] && cell[0] !== current[0]) {
+                             current = cell;
+                         }
+                    }
+
+                    cell = shiftKey ? current.prevAll(DATA_CELL + ":first") : current.nextAll(":visible:first");
+                    if (!cell.length) {
+                        cell = current.parent()[shiftKey ? "prevAll" : "nextAll"]("tr:not(.k-grouping-row):not(.k-detail-row):visible:first")
+                        .children(DATA_CELL + (shiftKey ? ":last" : ":first"));
+                    }
+
+                    if (!current.is("th") && cell.length && that.options.editable && isInCell) {
+                        that._handleEditing(current, cell);
+                        handled = true;
+                    }
+                }
+
+                if (handled) {
+                    //prevent browser scrolling
+                    e.preventDefault();
+                    //required in hierarchy
+                    e.stopPropagation();
+                }
+            });
         },
 
         _handleEditing: function(current, next) {
             var that = this,
+                activeElement = $(document.activeElement),
                 mode = that._editMode(),
                 editContainer = that._editContainer,
-                idx,
+                focusable,
                 isEdited;
 
             if (mode == "incell") {
@@ -18021,21 +19951,23 @@ function pad(number) {
             }
 
             if (that.editable) {
-                if ($.contains(editContainer[0], document.activeElement)) {
-                    $(document.activeElement).blur();
+                if ($.contains(editContainer[0], activeElement[0])) {
+                    activeElement.blur();
+                    if (kendo.support.browser.opera) {
+                        activeElement.change();
+                    }
+                }
+
+                if (!that.editable) {
+                    that.table.focus();
+                    return;
                 }
 
                 if (that.editable.end()) {
                     if (mode == "incell") {
                         that.closeCell();
                     } else {
-                        if (current.parent()[0] === editContainer[0]) {
-                            idx = that.items().index(current.parent());
-                        } else {
-                            idx = that.items().index(editContainer);
-                        }
                         that.saveRow();
-                        that.current(that.items().eq(idx).children().filter(DATA_CELL).first());
                         isEdited = true;
                     }
                 } else {
@@ -18044,7 +19976,10 @@ function pad(number) {
                     } else {
                         that.current(editContainer.children().filter(DATA_CELL).first());
                     }
-                    editContainer.find(":input:visible:first").focus();
+                    focusable = editContainer.find(":focusable:first")[0];
+                    if (focusable) {
+                        focusable.focus();
+                    }
                     return;
                 }
             }
@@ -18053,7 +19988,7 @@ function pad(number) {
                 that.current(next);
             }
 
-            that.wrapper.focus();
+            that.table.focus();
             if ((!isEdited && !next) || next) {
                 if (mode == "incell") {
                     that.editCell(that.current());
@@ -18073,10 +20008,11 @@ function pad(number) {
                wrapper = wrapper.wrap("<div/>").parent();
             }
 
-            that.wrapper = wrapper.addClass("k-grid k-widget")
+            that.wrapper = wrapper.addClass("k-grid k-widget");/*
                                   .attr(TABINDEX, math.max(table.attr(TABINDEX) || 0, 0));
 
             table.removeAttr(TABINDEX);
+            */
 
             if (height) {
                 that.wrapper.css(HEIGHT, height);
@@ -18104,7 +20040,8 @@ function pad(number) {
                 table,
                 options = that.options,
                 scrollable = options.scrollable,
-                scrollbar = kendo.support.scrollbar();
+                hasVirtualScroll = scrollable !== true && scrollable.virtual && !that.virtualScrollable,
+                scrollbar = !kendo.support.kineticScrollNeeded || hasVirtualScroll ? kendo.support.scrollbar() : 0;
 
             if (scrollable) {
                 header = that.wrapper.children(".k-grid-header");
@@ -18114,8 +20051,8 @@ function pad(number) {
                 }
 
                 // workaround for IE issue where scroll is not raised if container is same width as the scrollbar
-                header.css("padding-right", scrollable.virtual ? scrollbar + 1 : scrollbar);
-                table = $('<table cellspacing="0" />');
+                header.css((isRtl ? "padding-left" : "padding-right"), scrollable.virtual ? scrollbar + 1 : scrollbar);
+                table = $('<table role="grid" cellspacing="0" />');
                 table.append(that.thead);
                 header.empty().append($('<div class="k-grid-header-wrap" />').append(table));
 
@@ -18128,7 +20065,7 @@ function pad(number) {
                 if (!that.content.is(".k-grid-content, .k-virtual-scrollable-wrap")) {
                     that.content = that.table.wrap('<div class="k-grid-content" />').parent();
                 }
-                if (scrollable !== true && scrollable.virtual && !that.virtualScrollable) {
+                if (hasVirtualScroll) {
                     that.virtualScrollable = new VirtualScrollable(that.content, {
                         dataSource: that.dataSource,
                         itemHeight: proxy(that._averageRowHeight, that)
@@ -18138,18 +20075,20 @@ function pad(number) {
                 that.scrollables = header.children(".k-grid-header-wrap");
 
                 // the footer may exists if rendered from the server
-                var footer = that.wrapper.find(".k-grid-footer");
+                var footer = that.wrapper.find(".k-grid-footer"),
+                    webKitRtlCorrection = (isRtl && $.browser.webkit) ? scrollbar : 0;
+
                 if (footer.length) {
                     that.scrollables = that.scrollables.add(footer.children(".k-grid-footer-wrap"));
                 }
 
                 if (scrollable.virtual) {
                     that.content.find(">.k-virtual-scrollable-wrap").bind("scroll" + NS, function () {
-                        that.scrollables.scrollLeft(this.scrollLeft);
+                        that.scrollables.scrollLeft(this.scrollLeft + webKitRtlCorrection);
                     });
                 } else {
                     that.content.bind("scroll" + NS, function () {
-                        that.scrollables.scrollLeft(this.scrollLeft);
+                        that.scrollables.scrollLeft(this.scrollLeft + webKitRtlCorrection);
                     });
 
                     var touchScroller = kendo.touchScroller(that.content);
@@ -18219,22 +20158,10 @@ function pad(number) {
         },
 
         _averageRowHeight: function() {
-            var that = this,
-                rowHeight = that._rowHeight;
+            var rowHeight = this._rowHeight;
 
-            if (!that._rowHeight) {
-                that._rowHeight = rowHeight = that.table.outerHeight() / that.table[0].rows.length;
-                that._sum = rowHeight;
-                that._measures = 1;
-            }
+            this._rowHeight = rowHeight = this.table.outerHeight() / this.table[0].rows.length;
 
-            var currentRowHeight = that.table.outerHeight() / that.table[0].rows.length;
-
-            if (rowHeight !== currentRowHeight) {
-                that._measures ++;
-                that._sum += currentRowHeight;
-                that._rowHeight = that._sum / that._measures;
-            }
             return rowHeight;
         },
 
@@ -18258,17 +20185,17 @@ function pad(number) {
 
             if (that.dataSource && that._refreshHandler) {
                 that.dataSource.unbind(CHANGE, that._refreshHandler)
-                                .unbind(REQUESTSTART, that._requestStartHandler)
+                                .unbind(PROGRESS, that._progressHandler)
                                 .unbind(ERROR, that._errorHandler);
             } else {
                 that._refreshHandler = proxy(that.refresh, that);
-                that._requestStartHandler = proxy(that._requestStart, that);
+                that._progressHandler = proxy(that._requestStart, that);
                 that._errorHandler = proxy(that._error, that);
             }
 
             that.dataSource = DataSource.create(dataSource)
                                 .bind(CHANGE, that._refreshHandler)
-                                .bind(REQUESTSTART, that._requestStartHandler)
+                                .bind(PROGRESS, that._progressHandler)
                                 .bind(ERROR, that._errorHandler);
         },
 
@@ -18276,7 +20203,7 @@ function pad(number) {
             this._progress(false);
         },
 
-        _requestStart: function() {
+        _requestStart: function(e) {
             this._progress(true);
         },
 
@@ -18354,47 +20281,51 @@ function pad(number) {
                 html = "",
                 footerTemplate = that.footerTemplate,
                 options = that.options,
-                footer;
+                footer = that.footer || that.wrapper.find(".k-grid-footer");
 
             if (footerTemplate) {
                 aggregates = !isEmptyObject(aggregates) ? aggregates : buildEmptyAggregatesObject(that.dataSource.aggregate());
 
                 html = $(that._wrapFooter(footerTemplate(aggregates)));
-                footer = that.footer || that.wrapper.find(".k-grid-footer");
 
                 if (footer.length) {
                     var tmp = html;
 
                     footer.replaceWith(tmp);
-                    that.footer = tmp;
+                    footer = that.footer = tmp;
                 } else {
                     if (options.scrollable) {
-                        that.footer = options.pageable ? html.insertBefore(that.wrapper.children("div.k-grid-pager")) : html.appendTo(that.wrapper);
+                        footer = that.footer = options.pageable ? html.insertBefore(that.wrapper.children("div.k-grid-pager")) : html.appendTo(that.wrapper);
                     } else {
-                        that.footer = html.insertBefore(that.tbody);
+                        footer = that.footer = html.insertBefore(that.tbody);
                     }
                 }
+            } else if (footer && !that.footer) {
+                that.footer = footer;
+            }
 
+            if (footer.length) {
                 if (options.scrollable) {
                     that.scrollables = that.scrollables
                         .not(".k-grid-footer-wrap")
-                        .add(that.footer.children(".k-grid-footer-wrap"));
+                        .add(that.footer.attr("tabindex", -1).children(".k-grid-footer-wrap"));
                 }
 
                 if (options.resizable && that._footerWidth) {
-                    that.footer.find("table").css('width', that._footerWidth);
+                    footer.find("table").css('width', that._footerWidth);
                 }
             }
         },
 
         _wrapFooter: function(footerRow) {
             var that = this,
-                html = "";
+                html = "",
+                scrollbar = !kendo.support.mobileOS ? kendo.support.scrollbar() : 0;
 
             if (that.options.scrollable) {
                 html = $('<div class="k-grid-footer"><div class="k-grid-footer-wrap"><table cellspacing="0"><tbody>' + footerRow + '</tbody></table></div></div>');
                 that._appendCols(html.find("table"));
-                html.css("padding-right", kendo.support.scrollbar()); // Update inner fix.
+                html.css((isRtl ? "padding-left" : "padding-right"), scrollbar); // Update inner fix.
 
                 return html;
             }
@@ -18412,6 +20343,9 @@ function pad(number) {
                 menuOptions,
                 sortable,
                 filterable,
+                closeCallback = function() {
+                    that.thead.parent().focus();
+                },
                 cell;
 
             if (columnMenu) {
@@ -18439,7 +20373,8 @@ function pad(number) {
                                 sortable: sortable,
                                 filterable: filterable,
                                 messages: columnMenu.messages,
-                                owner: that
+                                owner: that,
+                                closeCallback: closeCallback
                             };
 
                             cell.kendoColumnMenu(menuOptions);
@@ -18453,6 +20388,9 @@ function pad(number) {
                 columns = that.columns,
                 cell,
                 filterMenu,
+                closeCallback = function() {
+                    that.thead.parent().focus();
+                },
                 filterable = that.options.filterable;
 
             if (filterable && !that.options.columnMenu) {
@@ -18465,7 +20403,11 @@ function pad(number) {
                             if (filterMenu) {
                                 filterMenu.destroy();
                             }
-                            cell.kendoFilterMenu(extend(true, {}, filterable, columns[index].filterable, { dataSource: that.dataSource, values: columns[index].values}));
+                            cell.kendoFilterMenu(extend(true, {}, filterable, columns[index].filterable, {
+                                dataSource: that.dataSource,
+                                values: columns[index].values,
+                                closeCallback: closeCallback
+                            }));
                         }
                     });
             }
@@ -18483,7 +20425,9 @@ function pad(number) {
                     .each(function(index) {
                         column = columns[index];
                         if (column.sortable !== false && !column.command && column.field) {
-                            $(this).attr("data-" + kendo.ns +"field", column.field).kendoSortable(extend({}, sortable, { dataSource: that.dataSource }));
+                            $(this)
+                            .attr("data-" + kendo.ns +"field", column.field)
+                            .kendoSortable(extend({}, sortable, { dataSource: that.dataSource, aria: true }));
                         }
                     });
             }
@@ -18574,14 +20518,14 @@ function pad(number) {
                     rowTemplate += ' ' + kendo.attr("uid") + '="#=' + settings.paramName + '.uid#"';
                 }
 
-                rowTemplate += ">";
+                rowTemplate += " role='row'>";
 
                 if (groups > 0) {
                     rowTemplate += groupCells(groups);
                 }
 
                 if (hasDetails) {
-                    rowTemplate += '<td class="k-hierarchy-cell"><a class="k-icon k-plus" href="\\#"></a></td>';
+                    rowTemplate += '<td class="k-hierarchy-cell"><a class="k-icon k-plus" href="\\#" tabindex="-1"></a></td>';
                 }
 
                 for (idx = 0; idx < length; idx++) {
@@ -18589,7 +20533,7 @@ function pad(number) {
                     template = column.template;
                     type = typeof template;
 
-                    rowTemplate += "<td" + stringifyAttributes(column.attributes) + ">";
+                    rowTemplate += "<td" + stringifyAttributes(column.attributes) + " role='gridcell'>";
                     rowTemplate += that._cellTmpl(column, state);
 
                     rowTemplate += "</td>";
@@ -18693,6 +20637,7 @@ function pad(number) {
                 options = that.options,
                 dataSource = that.dataSource,
                 groups = dataSource.group(),
+                footer = that.footer || that.wrapper.find(".k-grid-footer"),
                 aggregates = dataSource.aggregate();
 
             that.rowTemplate = that._tmpl(options.rowTemplate);
@@ -18702,7 +20647,7 @@ function pad(number) {
                 that.detailTemplate = that._detailTmpl(options.detailTemplate || "");
             }
 
-            if (!isEmptyObject(aggregates) ||
+            if ((!isEmptyObject(aggregates) && !footer.length) ||
                 grep(that.columns, function(column) { return column.footerTemplate; }).length) {
 
                 that.footerTemplate = that._footerTmpl(aggregates, "footerTemplate", "k-footer-template");
@@ -18820,7 +20765,7 @@ function pad(number) {
         _details: function() {
             var that = this;
 
-            that.table.on(CLICK + NS, ".k-hierarchy-cell .k-plus, .k-hierarchy-cell .k-minus", function(e) {
+            that.table.on("touchend" + NS + " " + CLICK + NS, ".k-hierarchy-cell .k-plus, .k-hierarchy-cell .k-minus", function(e) {
                 var button = $(this),
                     expanding = button.hasClass("k-plus"),
                     masterRow = button.closest("tr.k-master-row"),
@@ -18845,6 +20790,10 @@ function pad(number) {
 
                 that.trigger(expanding ? DETAILEXPAND : DETAILCOLLAPSE, { masterRow: masterRow, detailRow: detailRow});
                 detailRow.toggle(expanding);
+
+                if (that._current) {
+                    that._current.attr("aria-expanded", expanding);
+                }
 
                 e.preventDefault();
                 return false;
@@ -18898,7 +20847,7 @@ function pad(number) {
                     text = that._headerCellText(th);
 
                     if (!th.command) {
-                        html += "<th " + kendo.attr("field") + "='" + (th.field || "") + "' ";
+                        html += "<th role='columnheader' " + kendo.attr("field") + "='" + (th.field || "") + "' ";
                         if (th.title) {
                             html += kendo.attr("title") + '="' + th.title.replace(/'/g, "\'") + '" ';
                         }
@@ -18947,6 +20896,10 @@ function pad(number) {
             that._draggable();
 
             that._reorderable();
+
+            if (that.groupable) {
+                that._attachGroupable();
+            }
 
             that._columnMenu();
         },
@@ -19012,6 +20965,7 @@ function pad(number) {
                 template = column.groupHeaderTemplate,
                 text =  (column.title || field) + ': ' + value,
                 data = extend({}, { field: group.field, value: group.value }, group.aggregates[group.field]),
+                footerDefaults = that._groupAggregatesDefaultObject || {},
                 groupItems = group.items;
 
             if (template) {
@@ -19019,9 +20973,9 @@ function pad(number) {
             }
 
             html +=  '<tr class="k-grouping-row">' + groupCells(level) +
-                      '<td colspan="' + colspan + '">' +
+                      '<td colspan="' + colspan + '" aria-expanded="true">' +
                         '<p class="k-reset">' +
-                         '<a class="k-icon k-i-collapse" href="#"></a>' + text +
+                         '<a class="k-icon k-i-collapse" href="#" tabindex="-1"></a>' + text +
                          '</p></td></tr>';
 
             if(group.hasSubgroups) {
@@ -19033,7 +20987,7 @@ function pad(number) {
             }
 
             if (that.groupFooterTemplate) {
-                html += that.groupFooterTemplate(group.aggregates);
+                html += that.groupFooterTemplate(extend(footerDefaults, group.aggregates));
             }
             return html;
         },
@@ -19046,6 +21000,7 @@ function pad(number) {
                 offset,
                 tr;
 
+            group.find("td:first").attr("aria-expanded", false);
             group.nextAll("tr").each(function() {
                 tr = $(this);
                 offset = tr.find(".k-group-cell").length;
@@ -19072,6 +21027,7 @@ function pad(number) {
                 offset,
                 groupsCount = 1;
 
+            group.find("td:first").attr("aria-expanded", true);
             group.nextAll("tr").each(function () {
                 tr = $(this);
                 offset = tr.find(".k-group-cell").length;
@@ -19134,6 +21090,7 @@ function pad(number) {
                 rows,
                 row,
                 cell,
+                tables,
                 idx,
                 cols,
                 colWidth,
@@ -19198,8 +21155,17 @@ function pad(number) {
                 }
             }
 
+            tables = $(">.k-grid-header table:first,>.k-grid-footer table:first",that.wrapper).add(that.table);
+
             if (width) {
-                $(">.k-grid-header table:first,>.k-grid-footer table:first",that.wrapper).add(that.table).width(width);
+                tables.width(width);
+            }
+
+            if($.browser.msie && parseInt($.browser.version, 10) == 8) {
+                tables.css("display", "inline-table");
+                setTimeout(function() {
+                    tables.css("display", "table");
+                }, 1);
             }
 
             that.trigger(COLUMNHIDE, { column: column });
@@ -19300,10 +21266,12 @@ function pad(number) {
                 idx,
                 html = "",
                 data = that.dataSource.view(),
+                navigatable = that.options.navigatable,
                 tbody,
                 placeholder,
                 currentIndex,
-                current = that.current(),
+                current = $(that.current()),
+                isCurrentInHeader = false,
                 groups = (that.dataSource.group() || []).length,
                 colspan = groups + visibleColumns(that.columns).length;
 
@@ -19317,8 +21285,12 @@ function pad(number) {
                 return;
             }
 
-            if (current && current.hasClass("k-state-focused")) {
-                currentIndex = that.items().index(current.parent());
+            if (navigatable && (that.table[0] === document.activeElement || $.contains(that.table[0], document.activeElement))) {
+                isCurrentInHeader = current.is("th");
+                currentIndex = 0;
+                if (isCurrentInHeader) {
+                    currentIndex = that.thead.find("th:not(.k-group-cell)").index(current);
+                }
             }
 
             that._destroyEditable();
@@ -19346,6 +21318,10 @@ function pad(number) {
                     colspan++;
                 }
 
+                if (that.groupFooterTemplate) {
+                    that._groupAggregatesDefaultObject = buildEmptyAggregatesObject(that.dataSource.aggregate());
+                }
+
                 for (idx = 0, length = data.length; idx < length; idx++) {
                     html += that._groupRowHtml(data[idx], colspan, 0);
                 }
@@ -19368,7 +21344,13 @@ function pad(number) {
             that._setContentHeight();
 
             if (currentIndex >= 0) {
-                that.current(that.items().eq(currentIndex).children().filter(DATA_CELL).first());
+                that._removeCurrent();
+                if (!isCurrentInHeader) {
+                    that.current(that.items().eq(currentIndex).children().filter(DATA_CELL).first());
+                } else {
+                    that.current(that.thead.find("th:not(.k-group-cell)").eq(currentIndex));
+                }
+                that._current.closest("table")[0].focus();
             }
 
             that.trigger(DATABOUND);
@@ -19398,9 +21380,30 @@ function pad(number) {
        return null;
    }
 
+   function tableClick(e) {
+       var currentTarget = $(e.currentTarget),
+           currentTable = currentTarget.closest("table")[0];
+
+       if (currentTable !== this.table[0] && currentTable !== this.thead.parent()[0]) {
+           return;
+       }
+
+       this.current(currentTarget);
+
+       if (currentTarget.is("th") || !$(e.target).is(":button,a,:input,a>.k-icon,textarea,span.k-icon,.k-input")) {
+           setTimeout(function() {
+               currentTable.focus(); //because preventDefault bellow, IE cannot focus the table alternative is unselectable=on
+           });
+       }
+
+       if (currentTarget.is("th")) {
+           e.preventDefault(); //if any problem occurs, call preventDefault only for the clicked header links
+       }
+   }
+
    ui.plugin(Grid);
    ui.plugin(VirtualScrollable);
-})(jQuery);
+})(window.kendo.jQuery);
 (function($, undefined) {
     var kendo = window.kendo,
         CHANGE = "change",
@@ -19409,10 +21412,9 @@ function pad(number) {
         Widget = kendo.ui.Widget,
         keys = kendo.keys,
         FOCUSSELECTOR =  ">*",
-        REQUESTSTART = "requestStart",
+        PROGRESS = "progress",
         ERROR = "error",
         FOCUSED = "k-state-focused",
-        FOCUSABLE = "k-focusable",
         SELECTED = "k-state-selected",
         KEDITITEM = "k-edit-item",
         STRING = "string",
@@ -19435,7 +21437,11 @@ function pad(number) {
 
             options = that.options;
 
-            that.wrapper = that.element;
+            that.wrapper = element = that.element;
+
+            if (element[0].id) {
+                that._itemId = element[0].id + "_lv_active";
+            }
 
             that._element();
 
@@ -19479,8 +21485,12 @@ function pad(number) {
             editTemplate: ""
         },
 
+        _item: function(action) {
+            return this.element.children()[action]();
+        },
+
         items: function() {
-            return this.element.find(FOCUSSELECTOR);
+            return this.element.children();
         },
 
         setDataSource: function(dataSource) {
@@ -19496,7 +21506,7 @@ function pad(number) {
             var that = this;
 
             that.dataSource.unbind(CHANGE, that._refreshHandler)
-                            .unbind(REQUESTSTART, that._requestStartHandler)
+                            .unbind(PROGRESS, that._progressHandler)
                             .unbind(ERROR, that._errorHandler);
         },
 
@@ -19507,17 +21517,17 @@ function pad(number) {
                 that._unbindDataSource();
             } else {
                 that._refreshHandler = proxy(that.refresh, that);
-                that._requestStartHandler = proxy(that._requestStart, that);
+                that._progressHandler = proxy(that._progress, that);
                 that._errorHandler = proxy(that._error, that);
             }
 
             that.dataSource = DataSource.create(that.options.dataSource)
                                 .bind(CHANGE, that._refreshHandler)
-                                .bind(REQUESTSTART, that._requestStartHandler)
+                                .bind(PROGRESS, that._progressHandler)
                                 .bind(ERROR, that._errorHandler);
         },
 
-        _requestStart: function() {
+        _progress: function(e) {
             progress(this.element, true);
         },
 
@@ -19526,7 +21536,7 @@ function pad(number) {
         },
 
         _element: function() {
-            this.element.addClass("k-widget k-listview");
+            this.element.addClass("k-widget k-listview").attr("role", "listbox");
         },
 
         refresh: function(e) {
@@ -19547,7 +21557,7 @@ function pad(number) {
                     idx = $.inArray(data, view);
 
                     if (idx >= 0) {
-                        item = $(template(data));
+                        item = $(template(data)).attr(kendo.attr("uid"), data.uid);
                         that.items().eq(idx).replaceWith(item);
 
                         that.trigger("itemChange", {
@@ -19580,7 +21590,13 @@ function pad(number) {
 
             items = that.items();
             for (idx = 0, length = view.length; idx < length; idx++) {
-                items.eq(idx).attr(kendo.attr("uid"), view[idx].uid);
+                items.eq(idx).attr(kendo.attr("uid"), view[idx].uid)
+                             .attr("role", "option")
+                             .attr("aria-selected", "false");
+            }
+
+            if (that.element[0] === document.activeElement && that.options.navigatable) {
+                that.current(items.eq(0));
             }
 
             that.trigger(DATABOUND);
@@ -19613,7 +21629,12 @@ function pad(number) {
             if (selectable) {
                 multi = typeof selectable === STRING && selectable.toLowerCase().indexOf("multiple") > -1;
 
+                if (multi) {
+                    that.element.attr("aria-multiselectable", true);
+                }
+
                 that.selectable = new kendo.ui.Selectable(that.element, {
+                    aria: true,
                     multiple: multi,
                     filter: FOCUSSELECTOR,
                     change: function() {
@@ -19625,14 +21646,16 @@ function pad(number) {
                     that.element.on("keydown" + NS, function(e) {
                         if (e.keyCode === keys.SPACEBAR) {
                             current = that.current();
-                            e.preventDefault();
+                            if (e.target == e.currentTarget) {
+                                e.preventDefault();
+                            }
                             if(multi) {
                                 if(!e.ctrlKey) {
                                     that.selectable.clear();
                                 } else {
-                                    if(current.hasClass(SELECTED)) {
+                                    if (current && current.hasClass(SELECTED)) {
                                         current.removeClass(SELECTED);
-                                        current = null;
+                                        return;
                                     }
                                 }
                             } else {
@@ -19646,44 +21669,88 @@ function pad(number) {
             }
         },
 
-        current: function(element) {
+        current: function(candidate) {
             var that = this,
-                current = that._current;
+                element = that.element,
+                current = that._current,
+                id = that._itemId;
 
-            if (element !== undefined && element.length) {
-                if (!current || current[0] !== element[0]) {
-                    element.addClass(FOCUSED);
-                    if (current) {
-                        current.removeClass(FOCUSED);
-                    }
-                    that._current = element;
-                }
+            if (candidate === undefined) {
+                return current;
             }
 
-            return that._current;
+            if (current) {
+                if (current[0].id === id) {
+                    current.removeAttr("id");
+                }
+
+                current.removeClass(FOCUSED);
+                element.removeAttr("aria-activedescendant");
+            }
+
+            if (candidate && candidate[0]) {
+                id = candidate[0].id || id;
+
+                that._scrollTo(candidate[0]);
+
+                element.attr("aria-activedescendant", id);
+                candidate.addClass(FOCUSED).attr("id", id);
+            }
+
+            that._current = candidate;
+        },
+
+        _scrollTo: function(element) {
+            var that = this,
+                container,
+                UseJQueryoffset = false,
+                SCROLL = "scroll";
+
+            if (that.wrapper.css("overflow") == "auto" || that.wrapper.css("overflow") == SCROLL) {
+                container = that.wrapper[0];
+            } else {
+                container = window;
+                UseJQueryoffset = true;
+            }
+
+            var scrollDirectionFunc = function(direction, dimension) {
+
+                var elementOffset = UseJQueryoffset ? $(element).offset()[direction.toLowerCase()] : element["offset" + direction],
+                    elementDimension = element["client" + dimension],
+                    containerScrollAmount = $(container)[SCROLL + direction](),
+                    containerDimension = $(container)[dimension.toLowerCase()]();
+
+                if (elementOffset + elementDimension > containerScrollAmount + containerDimension) {
+                    $(container)[SCROLL + direction](elementOffset + elementDimension - containerDimension);
+                } else if (elementOffset < containerScrollAmount) {
+                    $(container)[SCROLL + direction](elementOffset);
+                }
+            };
+
+            scrollDirectionFunc("Top", "Height");
+            scrollDirectionFunc("Left", "Width");
         },
 
         _navigatable: function() {
             var that = this,
                 navigatable = that.options.navigatable,
                 element = that.element,
-                currentProxy = proxy(that.current, that),
                 clickCallback = function(e) {
-                    currentProxy($(e.currentTarget));
+                    that.current($(e.currentTarget));
                     if(!$(e.target).is(":button,a,:input,a>.k-icon,textarea")) {
                         element.focus();
                     }
                 };
 
             if (navigatable) {
-                element.attr("tabIndex", Math.max(element.attr("tabIndex") || 0, 0));
+                that._tabindex();
                 element.on("focus" + NS, function() {
                         var current = that._current;
-                        if(current && current.is(":visible")) {
-                            current.addClass(FOCUSED);
-                        } else {
-                            currentProxy(element.find(FOCUSSELECTOR).first());
+                        if(!current || !current.is(":visible")) {
+                            current = that._item("first");
                         }
+
+                        that.current(current);
                     })
                     .on("focusout" + NS, function() {
                         if (that._current) {
@@ -19692,22 +21759,72 @@ function pad(number) {
                     })
                     .on("keydown" + NS, function(e) {
                         var key = e.keyCode,
-                            current = that.current();
+                            current = that.current(),
+                            target = $(e.target),
+                            canHandle = !target.is(":button,textarea,a,a>.t-icon,input"),
+                            isTextBox = target.is(":text"),
+                            preventDefault = kendo.preventDefault,
+                            editItem = element.find("." + KEDITITEM),
+                            idx;
 
-                        if (keys.UP === key) {
-                            that.current(current ? current.prev() : element.find(FOCUSSELECTOR).first());
-                        } else if (keys.DOWN === key) {
-                            that.current(current ? current.next() : element.find(FOCUSSELECTOR).first());
-                        } else if (keys.PAGEUP == key) {
-                            that._current = null;
+                        if ((!canHandle && !isTextBox && keys.ESC != key) || (isTextBox && keys.ESC != key && keys.ENTER != key)) {
+                            //console.log("not handled");
+                            return;
+                        }
+
+                        if (keys.UP === key || keys.LEFT === key) {
+                            if (current) {
+                                current = current.prev();
+                            }
+
+                            that.current(!current || !current[0] ? that._item("last") : current);
+                            preventDefault(e);
+                        } else if (keys.DOWN === key || keys.RIGHT === key) {
+                            if (current) {
+                                current = current.next();
+                            }
+                            that.current(!current || !current[0] ? that._item("first") : current);
+                            preventDefault(e);
+                        } else if (keys.PAGEUP === key) {
+                            that.current(null);
                             that.dataSource.page(that.dataSource.page() - 1);
-                        } else if (keys.PAGEDOWN == key) {
-                            that._current = null;
+                            preventDefault(e);
+                        } else if (keys.PAGEDOWN === key) {
+                            that.current(null);
                             that.dataSource.page(that.dataSource.page() + 1);
+                            preventDefault(e);
+                        } else if (keys.HOME === key) {
+                            that.current(that._item("first"));
+                            preventDefault(e);
+                        } else if (keys.END === key) {
+                            that.current(that._item("last"));
+                            preventDefault(e);
+                        } else if (keys.ENTER === key) {
+                            if (editItem.length !== 0 && (canHandle || isTextBox)) {
+                                idx = that.items().index(editItem);
+                                document.activeElement.blur();
+                                that.save();
+                                var focusAgain = function(){
+                                    that.element.trigger("focus");
+                                    that.current(that.items().eq(idx));
+                                };
+                                that.one("dataBound", focusAgain);
+                            } else if (that.options.editTemplate !== "") {
+                                that.edit(current);
+                            }
+                        } else if (keys.ESC === key) {
+                            editItem = element.find("." + KEDITITEM);
+                            if (editItem.length === 0) {
+                                return;
+                            }
+                            idx = that.items().index(editItem);
+                            that.cancel();
+                            that.element.trigger("focus");
+                            that.current(that.items().eq(idx));
                         }
                     });
 
-                element.addClass(FOCUSABLE).on("mousedown" + NS, "." + FOCUSABLE + FOCUSSELECTOR, clickCallback);
+                element.on("mousedown" + NS + " touchstart" + NS, FOCUSSELECTOR, proxy(clickCallback, that));
             }
        },
 
@@ -19753,6 +21870,7 @@ function pad(number) {
                editable = that.editable,
                data,
                container,
+               template = that.template,
                valid = true;
 
            if (editable) {
@@ -19761,8 +21879,12 @@ function pad(number) {
                }
 
                if (valid) {
+                   if (editable.element.index() % 2) {
+                       template = that.altTemplate;
+                   }
+
                    data = that._modelFromElement(editable.element);
-                   container = $(that.template(data)).attr(kendo.attr("uid"), data.uid);
+                   container = $(template(data)).attr(kendo.attr("uid"), data.uid);
                    that._destroyEditable();
                    editable.element.replaceWith(container);
                }
@@ -19786,8 +21908,15 @@ function pad(number) {
 
        save: function() {
            var that = this,
-               editable = that.editable.element,
-               model = that._modelFromElement(editable);
+               editable = that.editable,
+               model;
+
+           if (!editable) {
+               return;
+           }
+
+           editable = editable.element;
+           model = that._modelFromElement(editable);
 
            if (!that.trigger(SAVE, { model: model, item: editable }) && that._closeEditable(true)) {
                that.dataSource.sync();
@@ -19832,7 +21961,7 @@ function pad(number) {
 
        _crudHandlers: function() {
            var that = this,
-               clickNS = CLICK + NS;
+               clickNS = "touchend" + NS + " " + CLICK + NS;
 
            that.element.on(clickNS, ".k-edit-button", function(e) {
                var item = $(this).closest("[" + kendo.attr("uid") + "]");
@@ -19881,7 +22010,1150 @@ function pad(number) {
     });
 
     kendo.ui.plugin(ListView);
-})(jQuery);
+})(window.kendo.jQuery);
+;(function($, undefined) {
+    var kendo = window.kendo,
+        Widget = kendo.ui.Widget,
+        isPlainObject = $.isPlainObject,
+        proxy = $.proxy,
+        extend = $.extend,
+        placeholderSupported = kendo.support.placeholder,
+        isFunction = $.isFunction,
+        trimSlashesRegExp = /(^\/|\/$)/g,
+        CHANGE = "change",
+        APPLY = "apply",
+        ERROR = "error",
+        CLICK = "click",
+        NS = ".kendoImageBrowser",
+        BREADCRUBMSNS = ".kendoBreadcrumbs",
+        SEARCHBOXNS = ".kendoSearchBox",
+        NAMEFIELD = "name",
+        SIZEFIELD = "size",
+        TYPEFIELD = "type",
+        DEFAULTSORTORDER = { field: TYPEFIELD, dir: "asc" },
+        ARRANGEBYTMPL = kendo.template('<li data-#=ns#value="#=value#" class="k-item">${text}</li>'),
+        EMPTYTILE = kendo.template('<li class="k-tile-empty"><strong>${text}</strong></li>'),
+        TOOLBARTMPL = '<div class="k-widget k-toolbar k-floatwrap">' +
+                            '<div class="k-toolbar-wrap">' +
+                                '#if(showUpload) { # ' +
+                                    '<div class="k-widget k-upload"><div class="k-button k-button-icontext k-button-bare k-upload-button">' +
+                                        '<span class="k-icon k-add"></span>#=messages.uploadFile#<input type="file" name="file" /></div></div>' +
+                                '#}#' +
+                                '#if(showCreate) {#' +
+                                    '<button type="button" class="k-button k-button-icon k-button-bare"><span class="k-icon k-addfolder"></span></button>' +
+                                '#}#' +
+                                '#if(showDelete) {#' +
+                                    '<button type="button" class="k-button k-button-icon k-button-bare k-state-disabled"><span class="k-icon k-delete"></span></button>&nbsp;' +
+                                '#}#' +
+                            '</div>' +
+                            '<div class="k-tiles-arrange">#=messages.orderBy#: <a href="\\#" class="k-link"><span>#=messages.orderByName#</span><span class="k-icon k-i-arrow-s"></span></a>' +
+                            '</div>' +
+                        '</div>';
+
+    extend(true, kendo.data, {
+        schemas: {
+            "imagebrowser": {
+                data: function(data) {
+                    return data.items || data || [];
+                },
+                model: {
+                    id: "name",
+                    fields: {
+                        name: "name",
+                        size: "size",
+                        type: "type"
+                    }
+                }
+            }
+        }
+    });
+
+    extend(true, kendo.data, {
+        transports: {
+            "imagebrowser": kendo.data.RemoteTransport.extend({
+                init: function(options) {
+                    kendo.data.RemoteTransport.fn.init.call(this, $.extend(true, {}, this.options, options));
+                },
+                _call: function(type, options) {
+                    options.data = $.extend({}, options.data, { path: this.options.path() });
+
+                    if (isFunction(this.options[type])) {
+                        this.options[type].call(this, options);
+                    } else {
+                        kendo.data.RemoteTransport.fn[type].call(this, options);
+                    }
+                },
+                read: function(options) {
+                    this._call("read", options);
+                },
+                create: function(options) {
+                    this._call("create", options);
+                },
+                destroy: function(options) {
+                    this._call("destroy", options);
+                },
+                update: function() {
+                    //updates are handled by the upload
+                },
+                options: {
+                    read: {
+                        type: "POST"
+                    },
+                    update: {
+                        type: "POST"
+                    },
+                    create: {
+                        type: "POST"
+                    },
+                    destroy: {
+                        type: "POST"
+                    }
+                }
+            })
+        }
+    });
+
+    function bindDragEventWrappers(element, onDragEnter, onDragLeave) {
+        var hideInterval, lastDrag;
+
+        element
+            .on("dragenter" + NS, function(e) {
+                onDragEnter();
+                lastDrag = new Date();
+
+                if (!hideInterval) {
+                    hideInterval = setInterval(function() {
+                        var sinceLastDrag = new Date() - lastDrag;
+                        if (sinceLastDrag > 100) {
+                            onDragLeave();
+
+                            clearInterval(hideInterval);
+                            hideInterval = null;
+                        }
+                    }, 100);
+                }
+            })
+            .on("dragover" + NS, function(e) {
+                lastDrag = new Date();
+            });
+    }
+
+    var offsetTop;
+    if ($.browser.msie && parseFloat($.browser.version) < 8) {
+        offsetTop = function (element) {
+            return element.offsetTop;
+        };
+    } else {
+        offsetTop = function (element) {
+            return element.offsetTop - $(element).height();
+        };
+    }
+
+    function fieldName(fields, name) {
+        var descriptor = fields[name];
+
+        if (isPlainObject(descriptor)) {
+            return descriptor.field || name;
+        }
+        return descriptor;
+    }
+
+    function concatPaths(path, name) {
+        if(path === undefined || !path.match(/\/$/)) {
+            path = (path || "") + "/";
+        }
+        return path + name;
+    }
+
+    function sizeFormatter(value) {
+        if(!value) {
+            return "";
+        }
+
+        var suffix = " bytes";
+
+        if (value >= 1073741824) {
+            suffix = " GB";
+            value /= 1073741824;
+        } else if (value >= 1048576) {
+            suffix = " MB";
+            value /= 1048576;
+        } else  if (value >= 1024) {
+            suffix = " KB";
+            value /= 1024;
+        }
+
+        return Math.round(value * 100) / 100 + suffix;
+    }
+
+    var ImageBrowser = Widget.extend({
+        init: function(element, options) {
+            var that = this;
+
+            options = options || {};
+
+            Widget.fn.init.call(that, element, options);
+
+            that.element.addClass("k-imagebrowser");
+
+            that.element
+                .on(CLICK + NS, ".k-toolbar button:not(.k-state-disabled):has(.k-delete)", proxy(that._deleteClick, that))
+                .on(CLICK + NS, ".k-toolbar button:not(.k-state-disabled):has(.k-addfolder)", proxy(that._addClick, that))
+                .on("keydown" + NS, "li.k-state-selected input", proxy(that._directoryKeyDown, that))
+                .on("blur" + NS, "li.k-state-selected input", proxy(that._directoryBlur, that));
+
+            that._dataSource();
+
+            that.refresh();
+
+            that.path(that.options.path);
+        },
+
+        options: {
+            name: "ImageBrowser",
+            messages: {
+                uploadFile: "Upload",
+                orderBy: "Arrange by",
+                orderByName: "Name",
+                orderBySize: "Size",
+                directoryNotFound: "A directory with this name was not found.",
+                emptyFolder: "Empty Folder",
+                deleteFile: 'Are you sure you want to delete "{0}"?',
+                invalidFileType: "The selected file \"{0}\" is not valid. Supported file types are {1}.",
+                overwriteFile: "A file with name \"{0}\" already exists in the current directory. Do you want to overwrite it?",
+                dropFilesHere: "drop files here to upload"
+            },
+            transport: {},
+            path: "/",
+            fileTypes: "*.png,*.gif,*.jpg,*.jpeg"
+        },
+
+        events: [ERROR, CHANGE, APPLY],
+
+        destroy: function() {
+            var that = this;
+
+            Widget.fn.destroy.call(that);
+
+            that.dataSource
+                .unbind(ERROR, that._errorHandler);
+
+            that.element
+                .add(that.list)
+                .add(that.toolbar)
+                .off(NS);
+
+            if (that.arrangeByPopup) {
+                that.arrangeByPopup.destroy();
+            }
+
+            kendo.destroy(that.element);
+        },
+
+        value: function() {
+            var that = this,
+                selected = that._selectedItem(),
+                path,
+                imageUrl = that.options.transport.imageUrl;
+
+            if (selected && selected.get(that._getFieldName(TYPEFIELD)) === "f") {
+                path = concatPaths(that.path(), selected.get(that._getFieldName(NAMEFIELD))).replace(trimSlashesRegExp, "");
+                if (imageUrl) {
+                    path = isFunction(imageUrl) ? imageUrl(path) : kendo.format(imageUrl, path);
+                }
+                return path;
+            }
+        },
+
+        _selectedItem: function() {
+            var listView = this.listView,
+                selected = listView.select();
+
+            if (selected.length) {
+                return this.dataSource.getByUid(selected.attr(kendo.attr("uid")));
+            }
+        },
+
+        _toolbar: function() {
+            var that = this,
+                template = kendo.template(TOOLBARTMPL),
+                messages = that.options.messages,
+                link,
+                popup,
+                arrangeBy = [{ text: messages.orderByName, value: "name", ns: kendo.ns },
+                    { text: messages.orderBySize, value: "size", ns: kendo.ns }];
+
+            that.toolbar = $(template({
+                    messages: messages,
+                    showUpload: that.options.transport.uploadUrl,
+                    showCreate: that.options.transport.create,
+                    showDelete: that.options.transport.destroy
+                }))
+                .appendTo(that.element)
+                .find(".k-upload input")
+                .kendoUpload({
+                    multiple: false,
+                    localization: {
+                        dropFilesHere: messages.dropFilesHere
+                    },
+                    async: {
+                        saveUrl: that.options.transport.uploadUrl,
+                        autoUpload: true
+                    },
+                    upload: proxy(that._fileUpload, that)
+                }).end();
+
+            that.upload = that.toolbar
+                .find(".k-upload input")
+                .data("kendoUpload");
+
+            link = that.toolbar.find(".k-tiles-arrange a");
+
+            that.arrangeByPopup = popup = $("<ul>" + kendo.render(ARRANGEBYTMPL, arrangeBy) + "</ul>")
+                .kendoPopup({
+                    anchor: link
+                })
+                .on(CLICK + NS, "li", function() {
+                    var item = $(this),
+                        field = item.attr(kendo.attr("value"));
+
+                    that.toolbar.find(".k-tiles-arrange a span:first").html(item.text());
+                    popup.close();
+
+                    that.orderBy(field);
+
+                }).data("kendoPopup");
+
+            link.on(CLICK + NS, function(e) {
+                e.preventDefault();
+                popup.toggle();
+            });
+
+            that._attachDropzoneEvents();
+        },
+
+        _attachDropzoneEvents: function() {
+            var that = this;
+
+            if (that.options.transport.uploadUrl) {
+                bindDragEventWrappers($(document.documentElement),
+                    $.proxy(that._dropEnter, that),
+                    $.proxy(that._dropLeave, that)
+                );
+                that._scrollHandler = proxy(that._positionDropzone, that);
+            }
+        },
+
+        _dropEnter: function() {
+            this._positionDropzone();
+            $(document).on("scroll" + NS, this._scrollHandler);
+        },
+
+        _dropLeave: function() {
+            this._removeDropzone();
+            $(document).off("scroll" + NS, this._scrollHandler);
+        },
+
+        _positionDropzone: function() {
+            var that = this,
+                element = that.element,
+                offset = element.offset();
+
+            that.toolbar.find(".k-dropzone")
+                .addClass("k-imagebrowser-dropzone")
+                .offset(offset)
+                .css({
+                    width: element[0].clientWidth,
+                    height: element[0].clientHeight,
+                    lineHeight: element[0].clientHeight + "px"
+                });
+        },
+
+        _removeDropzone: function() {
+            this.toolbar.find(".k-dropzone")
+                .removeClass("k-imagebrowser-dropzone")
+                .css({ width: "", height: "", lineHeight: "", top: "", left: "" });
+        },
+
+        _deleteClick: function() {
+            var that = this,
+                item = that.listView.select(),
+                message = kendo.format(that.options.messages.deleteFile, item.find("strong").text());
+
+            if (item.length && that._showMessage(message, "confirm")) {
+                that.listView.remove(item);
+            }
+        },
+
+        _addClick: function() {
+            this.createDirectory();
+        },
+
+        _fileUpload: function(e) {
+            var that = this,
+                options = that.options,
+                fileTypes = options.fileTypes,
+                filterRegExp = new RegExp(("(" + fileTypes.split(",").join(")|(") + ")").replace(/\*\./g , ".*."), "i"),
+                fileName = e.files[0].name,
+                fileNameField = that._getFieldName(NAMEFIELD),
+                sizeField = that._getFieldName(SIZEFIELD),
+                model;
+
+            if (filterRegExp.test(fileName)) {
+                e.data = { path: that.path() };
+
+                model = that._createFile(fileName);
+
+                if (!model) {
+                    e.preventDefault();
+                } else {
+                    that.upload.one("success", function(e) {
+                        model.set(fileNameField, e.response[fileNameField]);
+                        model.set(sizeField, e.response[sizeField]);
+                        that._tiles = that.listView.items().filter("[" + kendo.attr("type") + "=f]");
+                    });
+                }
+            } else {
+                e.preventDefault();
+                that._showMessage(kendo.format(options.messages.invalidFileType, fileName, fileTypes));
+            }
+        },
+
+        _findFile: function(name) {
+            var data = this.dataSource.data(),
+                idx,
+                result,
+                typeField = this._getFieldName(TYPEFIELD),
+                nameField = this._getFieldName(NAMEFIELD),
+                length;
+
+            name = name.toLowerCase();
+
+            for (idx = 0, length = data.length; idx < length; idx++) {
+                if (data[idx].get(typeField) === "f" &&
+                    data[idx].get(nameField).toLowerCase() === name) {
+
+                    result = data[idx];
+                    break;
+                }
+            }
+            return result;
+        },
+
+        _createFile: function(fileName) {
+            var that = this,
+                idx,
+                length,
+                index = 0,
+                model = {},
+                typeField = that._getFieldName(TYPEFIELD),
+                view = that.dataSource.view(),
+                file = that._findFile(fileName);
+
+            if (file && !that._showMessage(kendo.format(that.options.messages.overwriteFile, fileName), "confirm")) {
+                return null;
+            }
+
+            if (file) {
+                return file;
+            }
+
+            for (idx = 0, length = view.length; idx < length; idx++) {
+                if (view[idx].get(typeField) === "f") {
+                    index = idx;
+                    break;
+                }
+            }
+
+            model[typeField] = "f";
+            model[that._getFieldName(NAMEFIELD)] = fileName;
+            model[that._getFieldName(SIZEFIELD)] = 0;
+
+            return that.dataSource.insert(++index, model);
+        },
+
+        createDirectory: function() {
+            var that = this,
+                idx,
+                length,
+                lastDirectoryIdx = 0,
+                typeField = that._getFieldName(TYPEFIELD),
+                nameField = that._getFieldName(NAMEFIELD),
+                view = that.dataSource.data(),
+                name = that._nameDirectory(),
+                model = new that.dataSource.reader.model();
+
+            for (idx = 0, length = view.length; idx < length; idx++) {
+                if (view[idx].get(typeField) === "d") {
+                    lastDirectoryIdx = idx;
+                }
+            }
+
+            model.set(typeField, "d");
+            model.set(nameField, name);
+
+            that.listView.one("dataBound", function() {
+                var selected = that.listView.items()
+                    .filter("[" + kendo.attr("uid") + "=" + model.uid + "]"),
+                    input = selected.find("input");
+
+                if (selected.length) {
+                    this.edit(selected);
+                }
+
+                this.element.scrollTop(selected.attr("offsetTop") - this.element[0].offsetHeight);
+
+                setTimeout(function() {
+                    input.select();
+                });
+            })
+            .one("save", function(e) {
+                var value = e.model.get(nameField);
+
+                if (!value) {
+                    e.model.set(nameField, name);
+                } else {
+                    e.model.set(nameField, that._nameExists(value, model.uid) ? that._nameDirectory() : value);
+                }
+            });
+
+            that.dataSource.insert(++lastDirectoryIdx, model);
+        },
+
+        _directoryKeyDown: function(e) {
+            if (e.keyCode == 13) {
+                e.currentTarget.blur();
+            }
+        },
+
+        _directoryBlur: function(e) {
+            this.listView.save();
+        },
+
+        _nameExists: function(name, uid) {
+            var data = this.dataSource.data(),
+                typeField = this._getFieldName(TYPEFIELD),
+                nameField = this._getFieldName(NAMEFIELD),
+                idx,
+                length;
+
+            for (idx = 0, length = data.length; idx < length; idx++) {
+                if (data[idx].get(typeField) === "d" &&
+                    data[idx].get(nameField).toLowerCase() === name.toLowerCase() &&
+                    data[idx].uid !== uid) {
+                    return true;
+                }
+            }
+            return false;
+        },
+
+        _nameDirectory: function() {
+            var name = "New folder",
+                data = this.dataSource.data(),
+                directoryNames = [],
+                typeField = this._getFieldName(TYPEFIELD),
+                nameField = this._getFieldName(NAMEFIELD),
+                candidate,
+                idx,
+                length;
+
+            for (idx = 0, length = data.length; idx < length; idx++) {
+                if (data[idx].get(typeField) === "d" && data[idx].get(nameField).toLowerCase().indexOf(name.toLowerCase()) > -1) {
+                    directoryNames.push(data[idx].get(nameField));
+                }
+            }
+
+            if ($.inArray(name, directoryNames) > -1) {
+                idx = 2;
+
+                do {
+                    candidate = name + " (" + idx + ")";
+                    idx++;
+                } while ($.inArray(candidate, directoryNames) > -1);
+
+                name = candidate;
+            }
+
+            return name;
+        },
+
+        orderBy: function(field) {
+            this.dataSource.sort([
+                { field: this._getFieldName(TYPEFIELD), dir: "asc" },
+                { field: this._getFieldName(field), dir: "asc" }
+            ]);
+        },
+
+        search: function(name) {
+            this.dataSource.filter({
+                field: this._getFieldName(NAMEFIELD),
+                operator: "contains",
+                value: name
+            });
+        },
+
+        _content: function() {
+            var that = this;
+
+            that.list = $('<ul class="k-reset k-floats k-tiles" />')
+                .appendTo(that.element)
+                .on("scroll" + NS, proxy(that._scroll, that))
+                .on("dblclick" + NS, "li", proxy(that._dblClick, that));
+
+            that.listView = new kendo.ui.ListView(that.list, {
+                dataSource: that.dataSource,
+                template: that._itemTmpl(),
+                editTemplate: that._editTmpl(),
+                selectable: true,
+                autoBind: false,
+                dataBinding: function(e) {
+                    that.toolbar.find(".k-delete").parent().addClass("k-state-disabled");
+
+                    if (e.action === "remove" || e.action === "sync") {
+                        e.preventDefault();
+                    }
+                },
+                dataBound: function() {
+                    if (that.dataSource.view().length) {
+                        that._tiles = this.items().filter("[" + kendo.attr("type") + "=f]");
+                        that._scroll();
+                    } else {
+                        this.wrapper.append(EMPTYTILE({ text: that.options.messages.emptyFolder }));
+                    }
+                },
+                change: proxy(that._listViewChange, that)
+            });
+        },
+
+        _dblClick: function(e) {
+            var that = this,
+                li = $(e.currentTarget);
+
+            if (li.filter("[" + kendo.attr("type") + "=d]").length) {
+                var folder = that.dataSource.getByUid(li.attr(kendo.attr("uid")));
+                if (folder) {
+                    that.path(concatPaths(that.path(), folder.get(that._getFieldName(NAMEFIELD))));
+                    that.breadcrumbs.value(that.path());
+                }
+            } else if (li.filter("[" + kendo.attr("type") + "=f]").length) {
+                that.trigger(APPLY);
+            }
+        },
+
+        _listViewChange: function() {
+            var selected = this._selectedItem();
+
+            this.toolbar.find(".k-delete").parent().removeClass("k-state-disabled");
+
+            if (selected && selected.get(this._getFieldName(TYPEFIELD)) === "f") {
+                this.trigger(CHANGE);
+            }
+        },
+
+        _dataSource: function() {
+            var that = this,
+                options = that.options,
+                transport = options.transport,
+                typeSortOrder = extend({}, DEFAULTSORTORDER),
+                nameSortOrder = { field: NAMEFIELD, dir: "asc" },
+                schema,
+                dataSource = {
+                    type: transport.type || "imagebrowser",
+                    sort: [typeSortOrder, nameSortOrder]
+                };
+
+            if (isPlainObject(transport)) {
+                transport.path = proxy(that.path, that);
+                dataSource.transport = transport;
+            }
+
+            if (isPlainObject(options.schema)) {
+                dataSource.schema = options.schema;
+                if (isPlainObject(options.schema.model) && options.schema.model.fields) {
+                    typeSortOrder.field = fieldName(options.schema.model.fields, TYPEFIELD);
+                    nameSortOrder.field = fieldName(options.schema.model.fields, NAMEFIELD);
+                }
+            } else if (transport.type && isPlainObject(kendo.data.schemas[transport.type])) {
+                schema = kendo.data.schemas[transport.type];
+                if (isPlainObject(schema.model) && schema.model.fields) {
+                    typeSortOrder.field = fieldName(schema.model.fields, TYPEFIELD);
+                    nameSortOrder.field = fieldName(schema.model.fields, NAMEFIELD);
+                }
+            }
+
+            if (that.dataSource && that._errorHandler) {
+                that.dataSource.unbind(ERROR, that._errorHandler);
+            } else {
+                that._errorHandler = proxy(that._error, that);
+            }
+
+            that.dataSource = kendo.data.DataSource.create(dataSource)
+                .bind(ERROR, that._errorHandler);
+        },
+
+        _navigation: function() {
+            var that = this,
+                navigation = $('<div class="k-floatwrap"><input/><input/></div>')
+                    .appendTo(this.element);
+
+            that.breadcrumbs = navigation.find("input:first")
+                    .kendoBreadcrumbs({
+                        value: that.options.path,
+                        change: function() {
+                            that.path(this.value());
+                        }
+                    }).data("kendoBreadcrumbs");
+
+            that.searchBox = navigation.parent().find("input:last")
+                    .kendoSearchBox({
+                        change: function() {
+                            that.search(this.value());
+                        }
+                    }).data("kendoSearchBox");
+        },
+
+        _error: function(e) {
+            var that = this,
+                status;
+
+            if (!that.trigger(ERROR, e)) {
+                status = e.xhr.status;
+
+                if (e.status == 'error') {
+                    if (status == '404') {
+                        that._showMessage(that.options.messages.directoryNotFound);
+                    } else if (status != '0') {
+                        that._showMessage('Error! The requested URL returned ' + status + ' - ' + e.xhr.statusText);
+                    }
+                } else if (status == 'timeout') {
+                    that._showMessage('Error! Server timeout.');
+                }
+            }
+        },
+
+        _showMessage: function(message, type) {
+            return window[type || "alert"](message);
+        },
+
+        refresh: function() {
+            var that = this;
+            that._navigation();
+            that._toolbar();
+            that._content();
+        },
+
+        _loadImage: function(li) {
+            var that = this,
+                element = $(li),
+                dataItem = that.dataSource.getByUid(element.attr(kendo.attr("uid"))),
+                name = dataItem.get(that._getFieldName(NAMEFIELD)),
+                img = $("<img />", {
+                    alt: name
+                })
+                .hide()
+                .on("load" + NS, function() {
+                    $(this).prev().remove().end().addClass("k-image").fadeIn();
+                });
+
+            element.find(".k-loading").after(img);
+
+            // IE8 will trigger the load event immediately when the src is assign
+            // if the image is loaded from the cache
+            img.attr("src", that.options.transport.thumbnailUrl + "?path=" + that.path() + encodeURIComponent(name));
+
+            li.loaded = true;
+        },
+
+        _scroll: function(e) {
+            var that = this;
+            if (that.options.transport && that.options.transport.thumbnailUrl) {
+                clearTimeout(that._timeout);
+
+                that._timeout = setTimeout(function() {
+                    var height = that.list.outerHeight(),
+                        viewTop = that.list.scrollTop(),
+                        viewBottom = viewTop + height;
+
+                    that._tiles.each(function() {
+                        var top = offsetTop(this),
+                            bottom = top + this.offsetHeight;
+
+                        if ((top >= viewTop && top < viewBottom) || (bottom >= viewTop && bottom < viewBottom)) {
+                            that._loadImage(this);
+                        }
+
+                        if (top > viewBottom) {
+                            return false;
+                        }
+                    });
+
+                    that._tiles = that._tiles.filter(function() {
+                        return !this.loaded;
+                    });
+
+                }, 250);
+            }
+        },
+
+        _editTmpl: function() {
+            var that = this,
+                html = '<li class="k-tile k-state-selected" ' + kendo.attr("uid") + '="#=uid#" ';
+
+            html += kendo.attr("type") + '="${' + that._getFieldName(TYPEFIELD) + '}">';
+            html += '#if(' + that._getFieldName(TYPEFIELD) + ' == "d") { #';
+            html += '<div class="k-thumb"><span class="k-icon k-folder"></span></div>';
+            html += "#}else{#";
+            html += '<div class="k-thumb"><span class="k-icon k-loading"></span></div>';
+            html += "#}#";
+            html += '#if(' + that._getFieldName(TYPEFIELD) + ' == "d") { #';
+            html += '<input class="k-input" ' + kendo.attr("bind") + '="value:' + that._getFieldName(NAMEFIELD) + '"/>';
+            html += "#}#";
+            html += '</li>';
+
+            return proxy(kendo.template(html), { sizeFormatter: sizeFormatter } );
+        },
+
+        _itemTmpl: function() {
+            var that = this,
+                html = '<li class="k-tile" ' + kendo.attr("uid") + '="#=uid#" ';
+
+            html += kendo.attr("type") + '="${' + that._getFieldName(TYPEFIELD) + '}">';
+            html += '#if(' + that._getFieldName(TYPEFIELD) + ' == "d") { #';
+            html += '<div class="k-thumb"><span class="k-icon k-folder"></span></div>';
+            html += "#}else{#";
+            if (that.options.transport && that.options.transport.thumbnailUrl) {
+                html += '<div class="k-thumb"><span class="k-icon k-loading"></span></div>';
+            } else {
+                html += '<div class="k-thumb"><span class="k-icon k-file"></span></div>';
+            }
+            html += "#}#";
+            html += '<strong>${' + that._getFieldName(NAMEFIELD) + '}</strong>';
+            html += '#if(' + that._getFieldName(TYPEFIELD) + ' == "f") { # <span class="k-filesize">${this.sizeFormatter(' + that._getFieldName(SIZEFIELD) + ')}</span> #}#';
+            html += '</li>';
+
+            return proxy(kendo.template(html), { sizeFormatter: sizeFormatter } );
+        },
+
+        _getFieldName: function(name) {
+            return fieldName(this.dataSource.reader.model.fields, name);
+        },
+
+        path: function(value) {
+            var that = this,
+                path = that._path || "";
+
+            if (value !== undefined) {
+                that._path = value.replace(trimSlashesRegExp, "") + "/";
+                that.dataSource.read({ path: that._path });
+                return;
+            }
+
+            if (path) {
+                path = path.replace(trimSlashesRegExp, "");
+            }
+
+            return path === "/" || path === "" ? "" : (path + "/");
+        }
+    });
+
+    var SearchBox = Widget.extend({
+        init: function(element, options) {
+            var that = this;
+
+            options = options || {};
+
+            Widget.fn.init.call(that, element, options);
+
+            if (placeholderSupported) {
+                that.element.attr("placeholder", that.options.label);
+            }
+
+            that._wrapper();
+
+            that.element
+                .on("keydown" + SEARCHBOXNS, proxy(that._keydown, that))
+                .on("change" + SEARCHBOXNS, proxy(that._updateValue, that));
+
+            that.wrapper
+                .on(CLICK + SEARCHBOXNS, "a", proxy(that._click, that));
+
+            if (!placeholderSupported) {
+                that.element.on("focus" + SEARCHBOXNS, proxy(that._focus, that))
+                    .on("blur" + SEARCHBOXNS, proxy(that._blur, that));
+            }
+        },
+
+        options: {
+            name: "SearchBox",
+            label: "Search",
+            value: ""
+        },
+
+        events: [ CHANGE ],
+
+        destroy: function() {
+            var that = this;
+
+            that.wrapper
+                .add(that.element)
+                .add(that.label)
+                .off(SEARCHBOXNS);
+
+            Widget.fn.destroy.call(that);
+        },
+
+        _keydown: function(e) {
+            if (e.keyCode === 13) {
+                this._updateValue();
+            }
+        },
+
+        _click: function(e) {
+            e.preventDefault();
+            this._updateValue();
+        },
+
+        _updateValue: function() {
+            var that = this,
+                value = that.element.val();
+
+            if (value !== that.value()) {
+                that.value(value);
+
+                that.trigger(CHANGE);
+            }
+        },
+
+        _blur: function() {
+            this._updateValue();
+            this._toggleLabel();
+        },
+
+        _toggleLabel: function() {
+            if (!placeholderSupported) {
+                this.label.toggle(!this.element.val());
+            }
+        },
+
+        _focus: function() {
+            this.label.hide();
+        },
+
+        _wrapper: function() {
+            var element = this.element,
+                wrapper = element.parents(".k-search-wrap");
+
+            element[0].style.width = "";
+            element.addClass("k-input k-textbox");
+
+            if (!wrapper.length) {
+                wrapper = element.wrap($('<div class="k-widget k-search-wrap k-textbox"/>')).parent();
+                if (!placeholderSupported) {
+                    $('<label style="display:block">' + this.options.label + '</label>').insertBefore(element);
+                }
+                $('<a href="#" class="k-icon k-i-search k-search"/>').appendTo(wrapper);
+            }
+
+            this.wrapper = wrapper;
+            this.label = wrapper.find(">label");
+        },
+
+        value: function(value) {
+            var that = this;
+
+            if (value !== undefined) {
+                that.options.value = value;
+                that.element.val(value);
+                that._toggleLabel();
+                return;
+            }
+            return that.options.value;
+        }
+    });
+
+    var Breadcrumbs = Widget.extend({
+        init: function(element, options) {
+            var that = this;
+
+            options = options || {};
+
+            Widget.fn.init.call(that, element, options);
+
+            that._wrapper();
+
+            that.wrapper
+                .on("focus" + BREADCRUBMSNS, "input", proxy(that._focus, that))
+                .on("blur" + BREADCRUBMSNS, "input", proxy(that._blur, that))
+                .on("keydown" + BREADCRUBMSNS, "input", proxy(that._keydown, that))
+                .on(CLICK + BREADCRUBMSNS, "a.k-i-arrow-n:first", proxy(that._rootClick, that))
+                .on(CLICK + BREADCRUBMSNS, "a:not(.k-i-arrow-n)", proxy(that._click, that));
+
+            that.value(that.options.value);
+        },
+
+        options: {
+            name: "Breadcrumbs",
+            gap: 50
+        },
+
+        events: [ CHANGE ],
+
+        destroy: function() {
+            var that = this;
+
+            Widget.fn.destroy.call(that);
+
+            that.wrapper
+                .add(that.wrapper.find("input"))
+                .add(that.wrapper.find("a"))
+                .off(BREADCRUBMSNS);
+        },
+
+        _update: function(val) {
+            val = (val || "").charAt(0) === "/" ? val : ("/" + (val || ""));
+
+            if (val !== this.value()) {
+                this.value(val);
+                this.trigger(CHANGE);
+            }
+        },
+
+        _click: function(e) {
+            e.preventDefault();
+            this._update(this._path($(e.target).prevAll("a:not(.k-i-arrow-n)").andSelf()));
+        },
+
+        _rootClick: function(e) {
+            e.preventDefault();
+            this._update("");
+        },
+
+        _focus: function() {
+            var that = this,
+                element = that.element;
+
+            that.overlay.hide();
+            that.element.val(that.value());
+
+            setTimeout(function() {
+               element.select();
+            });
+        },
+
+        _blur: function() {
+            if (this.overlay.is(":visible")) {
+                return;
+            }
+
+            var that = this,
+                element = that.element,
+                val = element.val().replace(/\/{2,}/g, "/");
+
+            that.overlay.show();
+            element.val("");
+            that._update(val);
+        },
+
+        _keydown: function(e) {
+            var that = this;
+            if (e.keyCode === 13) {
+                that._blur();
+
+                setTimeout(function() {
+                    that.overlay.find("a:first").focus();
+                });
+            }
+        },
+
+        _wrapper: function() {
+            var element = this.element,
+                wrapper = element.parents(".k-breadcrumbs"),
+                overlay;
+
+            element[0].style.width = "";
+            element.addClass("k-input");
+
+            if (!wrapper.length) {
+                wrapper = element.wrap($('<div class="k-widget k-breadcrumbs k-header k-state-default"/>')).parent();
+            }
+
+            overlay = wrapper.find(".k-breadcrumbs-wrap");
+            if (!overlay.length) {
+                overlay = $('<div class="k-breadcrumbs-wrap"/>').appendTo(wrapper);
+            }
+            this.wrapper = wrapper;
+            this.overlay = overlay;
+        },
+
+        refresh: function() {
+            var html = "",
+                value = this.value(),
+                segments,
+                segment,
+                idx,
+                length;
+
+            if (value === undefined || !value.match(/^\//)) {
+                value = "/" + (value || "");
+            }
+
+            segments = value.split("/");
+
+            for (idx = 0, length = segments.length; idx < length; idx++) {
+                segment = segments[idx];
+                if (segment) {
+                    if (!html) {
+                        html += '<a href="#" class="k-icon k-i-arrow-n">root</a>';
+                    }
+                    html += '<a class="k-link" href="#">' + segments[idx] + '</a>';
+                    html += '<span class="k-icon k-i-arrow-e">&gt;</span>';
+                }
+            }
+            this.overlay.empty().append($(html));
+
+            this._adjustSectionWidth();
+        },
+
+        _adjustSectionWidth: function() {
+            var that = this,
+                wrapper = that.wrapper,
+                width = wrapper.width() - that.options.gap,
+                links = that.overlay.find("a"),
+                a;
+
+            links.each(function(index) {
+                a = $(this);
+
+                if (a.parent().width() > width) {
+                    if (index == links.length - 1) {
+                        a.width(width);
+                    } else {
+                        a.prev().andSelf().hide();
+                    }
+                }
+            });
+        },
+
+        value: function(val) {
+            if (val !== undefined) {
+                this._value = val.replace(/\/{2,}/g, "/");
+                this.refresh();
+                return;
+            }
+            return this._value;
+        },
+
+        _path: function(trail) {
+            return "/" + $.map(trail, function(b) {
+                return $(b).text();
+            }).join("/");
+        }
+    });
+
+    kendo.ui.plugin(ImageBrowser);
+    kendo.ui.plugin(Breadcrumbs);
+    kendo.ui.plugin(SearchBox);
+})(window.kendo.jQuery);
 (function($,undefined) {
 
     // Imports ================================================================
@@ -19918,19 +23190,19 @@ function pad(number) {
         },
 
         editorWrapperTemplate:
-            '<table cellspacing="4" cellpadding="0" class="k-widget k-editor k-header"><tbody>' +
-                '<tr><td class="k-editor-toolbar-wrap"><ul class="k-editor-toolbar"></ul></td></tr>' +
+            '<table cellspacing="4" cellpadding="0" class="k-widget k-editor k-header" role="presentation"><tbody>' +
+                '<tr role="presentation"><td class="k-editor-toolbar-wrap" role="presentation"><ul class="k-editor-toolbar" role="toolbar"></ul></td></tr>' +
                 '<tr><td class="k-editable-area"></td></tr>' +
             '</tbody></table>',
 
         buttonTemplate:
-            '<li class="k-editor-button">' +
-                '<a href="" class="k-tool-icon #= cssClass #" unselectable="on" title="#= tooltip #">#= tooltip #</a>' +
+            '<li class="k-editor-button" role="presentation">' +
+                '<a href="" role="button" class="k-tool-icon #= cssClass #" unselectable="on" title="#= tooltip #">#= tooltip #</a>' +
             '</li>',
 
         colorPickerTemplate:
-            '<li class="k-editor-colorpicker">' +
-                '<div class="k-widget k-colorpicker k-header #= cssClass #">' +
+            '<li class="k-editor-colorpicker" role="presentation">' +
+                '<div class="k-widget k-colorpicker k-header #= cssClass #" role="combobox" title="#=tooltip#">' +
                     '<span class="k-tool-icon"><span class="k-selected-color"></span></span><span class="k-icon k-i-arrow-s"></span>' +
             '</div></li>',
 
@@ -19944,12 +23216,15 @@ function pad(number) {
                 '<select title="#= tooltip #" class="#= cssClass #"></select>' +
             '</li>',
 
+        separatorTemplate:
+            '<li class="k-separator"></li>',
+
         focusable: ".k-colorpicker,a.k-tool-icon:not(.k-state-disabled),.k-selectbox, .k-combobox .k-input",
 
         wrapTextarea: function(textarea) {
 
-            var w = textarea.width(),
-                h = textarea.height(),
+            var w = textarea[0].style.width,
+                h = textarea[0].style.height,
                 template = EditorUtils.editorWrapperTemplate,
                 editorWrap = $(template).insertBefore(textarea).width(w).height(h),
                 editArea = editorWrap.find(".k-editable-area");
@@ -19970,6 +23245,7 @@ function pad(number) {
             if (tools) {
                 for (i = 0; i < tools.length; i++) {
                     currentTool = tools[i];
+                    options = null;
 
                     if ($.isPlainObject(currentTool)) {
 
@@ -19990,10 +23266,6 @@ function pad(number) {
                                     options.template = EditorUtils.buttonTemplate;
                                 }
                             }
-
-                            //if (options.exec && typeof(options.exec) == "string") {
-                            //    options.exec = $.parseJSON('{"exec":' + '"' + options.exec + '"}').exec;
-                            //}
                         }
                     } else if (editor.tools[currentTool]) {
                         editorTools[currentTool] = editor.tools[currentTool];
@@ -20060,7 +23332,7 @@ function pad(number) {
 
         createContentElement: function(textarea, stylesheets) {
             var iframe, wnd, doc,
-                rtlStyle = textarea.closest(".k-rtl").length ? "direction:rtl;" : "";
+                rtlStyle = kendo.support.isRtl(textarea) ? "direction:rtl;" : "";
 
             textarea.hide();
             iframe = $("<iframe />", { src: 'javascript:""', frameBorder: "0" })
@@ -20079,7 +23351,7 @@ function pad(number) {
                     "<!DOCTYPE html><html><head>" +
                     "<meta charset='utf-8' />" +
                     "<style>" +
-                        "html,body{padding:0;margin:0;font-family:Verdana,Geneva,sans-serif;background:#fff;}" +
+                        "html,body{padding:0;margin:0;font-family:Verdana,Geneva,sans-serif;background:#fff;height:100%;min-height:100%;}" +
                         "html{font-size:100%}body{font-size:.75em;line-height:1.5;padding-top:1px;margin-top:-1px;" +
                         "word-wrap: break-word;-webkit-nbsp-mode: space;-webkit-line-break: after-white-space;" +
                         rtlStyle +
@@ -20223,6 +23495,17 @@ function pad(number) {
 
         registerFormat: function(formatName, format) {
             kendo.ui.Editor.fn.options.formats[formatName] = format;
+        },
+
+        createDialog: function (windowContent, editor, initOptions) {
+            var isRtl = kendo.support.isRtl(editor.wrapper),
+                win = $(windowContent).appendTo(document.body).kendoWindow(initOptions);
+
+            if (isRtl) {
+                win.closest(".k-window").addClass("k-rtl");
+            }
+
+            return win;
         }
     };
 
@@ -20256,6 +23539,8 @@ function pad(number) {
         fontSize: "Select font size",
         fontSizeInherit: "(inherited size)",
         formatBlock: "Format",
+        foreColor: "Color",
+        backColor: "Background color",
         style: "Styles",
         emptyFolder: "Empty Folder",
         uploadFile: "Upload",
@@ -20265,7 +23550,16 @@ function pad(number) {
         invalidFileType: "The selected file \"{0}\" is not valid. Supported file types are {1}.",
         deleteFile: 'Are you sure you want to delete "{0}"?',
         overwriteFile: 'A file with name "{0}" already exists in the current directory. Do you want to overwrite it?',
-        directoryNotFound: "A directory with this name was not found."
+        directoryNotFound: "A directory with this name was not found.",
+        imageWebAddress: "Web address",
+        imageAltText: "Alternate text",
+        linkWebAddress: "Web address",
+        linkText: "Text",
+        linkToolTip: "ToolTip",
+        linkOpenInNewWindow: "Open link in new window",
+        dialogInsert: "Insert",
+        dialogButtonSeparator: "or",
+        dialogCancel: "Cancel"
     };
 
     var supportedBrowser = !os || (os.ios && os.flatVersion >= 500) || (!os.ios && typeof(document.documentElement.contentEditable) != 'undefined');
@@ -20301,6 +23595,10 @@ function pad(number) {
             that.textarea = element.attr("autocomplete", "off")[0];
 
             wrapper = that.wrapper = wrapTextarea(element);
+
+            if (that.textarea.id) {
+                wrapper.find(".k-editor-toolbar").attr("aria-controls", that.textarea.id);
+            }
 
             renderTools(that, that.options.tools);
 
@@ -20389,13 +23687,13 @@ function pad(number) {
                     if (keyCode == keys.RIGHT) {
                         focusElement = closestLi.nextAll(focusableTool).first().find(focusable);
                     } else if (keyCode == keys.LEFT) {
-                        focusElement = closestLi.prevAll(focusableTool).last().find(focusable);
+                        focusElement = closestLi.prevAll(focusableTool).first().find(focusable);
                     } else if (keyCode == keys.ESC) {
                         focusElement = that;
                     } else if (keyCode == keys.TAB && !(e.ctrlKey || e.altKey)) {
                         // skip tabbing to disabled tools, and focus the editing area when running out of tools
                         if (e.shiftKey) {
-                            focusElement = closestLi.prevAll(focusableTool).last().find(focusable);
+                            focusElement = closestLi.prevAll(focusableTool).first().find(focusable);
 
                             if (focusElement.length) {
                                 e.preventDefault();
@@ -20513,7 +23811,9 @@ function pad(number) {
             "change",
             "execute",
             "error",
-            "paste"
+            "paste",
+            "keydown",
+            "keyup"
         ],
 
         options: {
@@ -20577,9 +23877,10 @@ function pad(number) {
                 "createLink",
                 "unlink",
                 "insertImage"/*,
-                "style", // declare explicitly
-                "subscript", // declare explicitly
-                "superscript" // declare explicitly */
+                "separator", // declare these explicitly
+                "style",
+                "subscript",
+                "superscript"  */
             ]
         },
 
@@ -20616,10 +23917,15 @@ function pad(number) {
 
         value: function (html) {
             var body = this.body,
-                dom = kendo.ui.editor.Dom;
+                dom = kendo.ui.editor.Dom,
+                currentHtml = kendo.ui.editor.Serializer.domToXhtml(body);
 
             if (html === undefined) {
-                return kendo.ui.editor.Serializer.domToXhtml(body);
+                return currentHtml;
+            }
+
+            if (html == currentHtml) {
+                return;
             }
 
             this.pendingFormats.clear();
@@ -20665,9 +23971,28 @@ function pad(number) {
                 });
             } else {
                 body.innerHTML = html;
+
                 if (browser.msie) {
                     // having unicode characters creates denormalized DOM tree in IE9
                     dom.normalize(body);
+
+                    setTimeout(function() {
+                        // fix for IE9 OL bug -- https://connect.microsoft.com/IE/feedback/details/657695/ordered-list-numbering-changes-from-correct-to-0-0
+                        var ols = body.getElementsByTagName("ol"), i, ol, originalStart;
+
+                        for (i = 0; i < ols.length; i++) {
+                            ol = ols[i];
+                            originalStart = ol.getAttribute("start");
+
+                            ol.setAttribute("start", 1);
+
+                            if (originalStart) {
+                                ol.setAttribute("start", originalStart);
+                            } else {
+                                ol.removeAttribute(originalStart);
+                            }
+                        }
+                    }, 1);
                 }
             }
 
@@ -20829,8 +24154,11 @@ function pad(number) {
                 isActive = isPending ? !isFormatted : isFormatted;
 
             $ui.toggleClass("k-state-active", isActive);
+            $ui.attr("aria-pressed", isActive);
         }
     });
+
+    EditorUtils.registerTool("separator", new Tool({ template: new ToolTemplate({template: EditorUtils.separatorTemplate})}));
 
     // Exports ================================================================
 
@@ -20843,7 +24171,7 @@ function pad(number) {
         }
     });
 
-})(jQuery);
+})(window.kendo.jQuery);
 (function($) {
 
 var kendo = window.kendo,
@@ -21337,7 +24665,7 @@ var Dom = {
 
 kendo.ui.editor.Dom = Dom;
 
-})(jQuery);
+})(window.kendo.jQuery);
 (function($, undefined) {
 
 // Imports ================================================================
@@ -21349,7 +24677,8 @@ var kendo = window.kendo,
 var fontSizeMappings = 'xx-small,x-small,small,medium,large,x-large,xx-large'.split(','),
     quoteRe = /"/g,
     brRe = /<br[^>]*>/i,
-    emptyPRe = /<p><\/p>/i;
+    emptyPRe = /<p><\/p>/i,
+    cssDeclaration = /([\w|\-]+)\s*:\s*([^;]+);?/i;
 
 var Serializer = {
     domToXhtml: function(root) {
@@ -21451,9 +24780,9 @@ var Serializer = {
                     for (var cssIndex = 0, len = css.length; cssIndex < len; cssIndex++) {
                         var pair = css[cssIndex];
                         if (pair.length) {
-                            var propertyAndValue = pair.split(':');
-                            var property = trim(propertyAndValue[0].toLowerCase()),
-                                value = trim(propertyAndValue[1]);
+                            var match = cssDeclaration.exec(pair);
+                            var property = trim(match[1].toLowerCase()),
+                                value = trim(match[2]);
 
                             if (property == "font-size-adjust" || property == "font-stretch") {
                                 continue;
@@ -21497,7 +24826,7 @@ var Serializer = {
             if (nodeType == 1) {
                 tagName = dom.name(node);
 
-                if (!tagName || (node.attributes._moz_dirty && dom.is(node, 'br')) || node.className == "k-marker") {
+                if (!tagName || ((node.attributes._moz_dirty || node.attributes._moz_editor_bogus_node) && dom.is(node, 'br')) || node.className == "k-marker") {
                     return;
                 }
 
@@ -21579,7 +24908,7 @@ extend(Editor, {
     Serializer: Serializer
 });
 
-})(jQuery);
+})(window.kendo.jQuery);
 (function($) {
 
     // Imports ================================================================
@@ -22618,7 +25947,7 @@ extend(Editor, {
     RangeUtils: RangeUtils
 });
 
-})(jQuery);
+})(window.kendo.jQuery);
 (function($) {
 
     // Imports ================================================================
@@ -22784,9 +26113,16 @@ var TypingHandler = Class.extend({
         var that = this,
             editor = that.editor,
             keyboard = editor.keyboard,
-            isTypingKey = keyboard.isTypingKey(e);
+            isTypingKey = keyboard.isTypingKey(e),
+            evt = extend($.Event(), e);
 
-        if (isTypingKey && !keyboard.isTypingInProgress()) {
+        that.editor.trigger("keydown", evt);
+
+        if (evt.isDefaultPrevented()) {
+            e.preventDefault();
+        }
+
+        if (!evt.isDefaultPrevented() && isTypingKey && !keyboard.isTypingInProgress()) {
             var range = editor.getRange();
             that.startRestorePoint = new RestorePoint(range);
 
@@ -22803,6 +26139,8 @@ var TypingHandler = Class.extend({
 
     keyup: function (e) {
         var keyboard = this.editor.keyboard;
+
+        this.editor.trigger("keyup", e);
 
         if (keyboard.isTypingInProgress()) {
             keyboard.endTyping();
@@ -23280,7 +26618,7 @@ extend(Editor, {
 
 registerTool("insertHtml", new InsertHtmlTool({template: new ToolTemplate({template: EditorUtils.dropDownListTemplate, title: "Insert HTML", initialValue: "Insert HTML"})}));
 
-})(jQuery);
+})(window.kendo.jQuery);
 (function($) {
 
 var kendo = window.kendo,
@@ -23705,8 +27043,11 @@ var ColorTool = Tool.extend({
         var editor = initOptions.editor,
             toolName = this.name;
 
+        ui.attr("title", initOptions.title);
+
         new Editor.ColorPicker(ui, {
             value: "#000000",
+            ariaId: editor.element[0].id ? kendo.format("{0}_{1}_cp", editor.element[0].id, toolName) : "",
             change: function (e) {
                 Tool.exec(editor, toolName, e.value);
             }
@@ -23796,7 +27137,7 @@ registerTool("fontName", new FontTool({cssAttr:"font-family", domAttr: "fontFami
 
 registerTool("fontSize", new FontTool({cssAttr:"font-size", domAttr:"fontSize", name:"fontSize", defaultValue: [{ text: "fontSizeInherit",  value: "inherit" }], template: new ToolTemplate({template: EditorUtils.comboBoxTemplate, title: "Font Size"})}));
 
-})(jQuery);
+})(window.kendo.jQuery);
 (function($) {
 
 var kendo = window.kendo,
@@ -24129,7 +27470,7 @@ registerTool("justifyRight", new BlockFormatTool({format: formats.justifyRight, 
 registerFormat("justifyFull", [ { tags: dom.blockElements, attr: { style: { textAlign: "justify"}} } ]);
 registerTool("justifyFull", new BlockFormatTool({format: formats.justifyFull, template: new ToolTemplate({template: EditorUtils.buttonTemplate, title: "Justify Full"})}));
 
-})(jQuery);
+})(window.kendo.jQuery);
 (function($) {
 
 // Imports ================================================================
@@ -24317,7 +27658,7 @@ extend(Editor, {
 registerTool("insertLineBreak", new Tool({ key: 13, shift: true, command: NewLineCommand }));
 registerTool("insertParagraph", new Tool({ key: 13, command: ParagraphCommand }));
 
-})(jQuery);
+})(window.kendo.jQuery);
 (function($) {
 
 // Imports ================================================================
@@ -24531,7 +27872,7 @@ var ListFormatter = Class.extend({
         }
 
         if (!commonAncestor) {
-            commonAncestor = dom.parentOfType(nodes[0], ["td"]) || nodes[0].ownerDocument.body;
+            commonAncestor = dom.parentOfType(nodes[0], ["p", "td"]) || nodes[0].ownerDocument.body;
         }
 
         if (dom.isInline(commonAncestor)) {
@@ -24745,7 +28086,7 @@ extend(Editor, {
 registerTool("insertUnorderedList", new ListTool({tag:'ul', template: new ToolTemplate({template: EditorUtils.buttonTemplate, title: "Remove Link"})}));
 registerTool("insertOrderedList", new ListTool({tag:'ol', template: new ToolTemplate({template: EditorUtils.buttonTemplate, title: "Remove Link"})}));
 
-})(jQuery);
+})(window.kendo.jQuery);
 (function($, undefined) {
 
 var kendo = window.kendo,
@@ -24822,6 +28163,41 @@ var LinkCommand = Command.extend({
         cmd.formatter = new LinkFormatter();
     },
 
+    _dialogTemplate: function(showText) {
+        return kendo.template(
+            '<div class="k-editor-dialog">' +
+                "<ol>" +
+                    "<li class='k-form-text-row'>" +
+                        "<label for='k-editor-link-url'>#: messages.linkWebAddress #</label>" +
+                        "<input type='text' class='k-input' id='k-editor-link-url'>" +
+                    "</li>" +
+                    "# if (showText) { #" +
+                        "<li class='k-form-text-row'>" +
+                            "<label for='k-editor-link-text'>#: messages.linkText #</label>" +
+                            "<input type='text' class='k-input' id='k-editor-link-text'>" +
+                        "</li>" +
+                    "# } #" +
+                    "<li class='k-form-text-row'>" +
+                        "<label for='k-editor-link-title'>#: messages.linkToolTip #</label>" +
+                        "<input type='text' class='k-input' id='k-editor-link-title'>" +
+                    "</li>" +
+                    "<li class='k-form-checkbox-row'>" +
+                        "<input type='checkbox' id='k-editor-link-target'>" +
+                        "<label for='k-editor-link-target'>#: messages.linkOpenInNewWindow #</label>" +
+                    "</li>" +
+                "</ol>" +
+                "<div class='k-button-wrapper'>" +
+                    '<button class="k-dialog-insert k-button">#: messages.dialogInsert #</button>' +
+                    '&nbsp;#: messages.dialogButtonSeparator #&nbsp;' +
+                    '<a href="\\#" class="k-dialog-close k-link">#: messages.dialogCancel #</a>' +
+                "</div>" +
+            "</div>"
+        )({
+            messages: this.editor.options.messages,
+            showText: showText
+        });
+    },
+
     exec: function () {
         var that = this,
             range = that.getRange(),
@@ -24833,23 +28209,24 @@ var LinkCommand = Command.extend({
         nodes = textNodes(range);
 
         function apply(e) {
-            var href = $("#k-editor-link-url", dialog.element).val(),
+            var element = dialog.element,
+                href = $("#k-editor-link-url", element).val(),
                 title, text, target;
 
             if (href && href != "http://") {
                 that.attributes = { href: href };
 
-                title = $("#k-editor-link-title", dialog.element).val();
+                title = $("#k-editor-link-title", element).val();
                 if (title) {
                     that.attributes.title = title;
                 }
 
-                text = $("#k-editor-link-text", dialog.element).val();
+                text = $("#k-editor-link-text", element).val();
                 if (text !== initialText) {
                     that.attributes.innerHTML = text || href;
                 }
 
-                target = $("#k-editor-link-target", dialog.element).is(":checked");
+                target = $("#k-editor-link-target", element).is(":checked");
                 if (target) {
                     that.attributes.target = "_blank";
                 }
@@ -24875,24 +28252,9 @@ var LinkCommand = Command.extend({
 
         var a = nodes.length ? that.formatter.finder.findSuitable(nodes[0]) : null;
 
-        var shouldShowText = nodes.length <= 1 || (nodes.length == 2 && collapsed);
+        var showText = nodes.length <= 1 || (nodes.length == 2 && collapsed);
 
-        var windowContent =
-            "<div class='k-editor-dialog'>" +
-                "<ol>" +
-                    "<li class='k-form-text-row'><label for='k-editor-link-url'>Web address</label><input type='text' class='k-input' id='k-editor-link-url'></li>" +
-                    (shouldShowText ? "<li class='k-form-text-row'><label for='k-editor-link-text'>Text</label><input type='text' class='k-input' id='k-editor-link-text'></li>" : "") +
-                    "<li class='k-form-text-row'><label for='k-editor-link-title'>Tooltip</label><input type='text' class='k-input' id='k-editor-link-title'></li>" +
-                    "<li class='k-form-checkbox-row'><input type='checkbox' id='k-editor-link-target'><label for='k-editor-link-target'>Open link in new window</label></li>" +
-                "</ol>" +
-                "<div class='k-button-wrapper'>" +
-                    "<button class='k-dialog-insert k-button'>Insert</button>" +
-                    "&nbsp;or&nbsp;" +
-                    "<a href='#' class='k-dialog-close k-link'>Close</a>" +
-                "</div>" +
-            "</div>";
-
-        var dialog = $(windowContent).appendTo(document.body).kendoWindow($.extend({}, this.editor.options.dialogOptions, {
+        var dialog = EditorUtils.createDialog(that._dialogTemplate(showText), that.editor, extend({}, that.editor.options.dialogOptions, {
             title: "Insert link",
             close: close
         }))
@@ -24916,7 +28278,7 @@ var LinkCommand = Command.extend({
             .data("kendoWindow")
             .center();
 
-        if (shouldShowText && nodes.length > 0) {
+        if (showText && nodes.length > 0) {
             initialText = $("#k-editor-link-text", dialog.element).val();
         }
 
@@ -24963,7 +28325,7 @@ extend(kendo.ui.editor, {
 registerTool("createLink", new Tool({ key: "K", ctrl: true, command: LinkCommand, template: new ToolTemplate({template: EditorUtils.buttonTemplate, title: "Create Link"})}));
 registerTool("unlink", new UnlinkTool({ key: "K", ctrl: true, shift: true, template: new ToolTemplate({template: EditorUtils.buttonTemplate, title: "Remove Link"})}));
 
-})(jQuery);
+})(window.kendo.jQuery);
 (function($, undefined) {
 
 var kendo = window.kendo,
@@ -25014,6 +28376,34 @@ var ImageCommand = Command.extend({
         return false;
     },
 
+    _dialogTemplate: function(showBrowser) {
+        return kendo.template(
+            '<div class="k-editor-dialog">' +
+                '# if (showBrowser) { #' +
+                    '<div class="k-imagebrowser"></div>' +
+                '# } #' +
+                '<ol>' +
+                    '<li class="k-form-text-row">' +
+                        '<label for="k-editor-image-url">#: messages.imageWebAddress #</label>' +
+                        '<input type="text" class="k-input" id="k-editor-image-url">' +
+                    '</li>' +
+                    '<li class="k-form-text-row">' +
+                        '<label for="k-editor-image-title">#: messages.imageAltText #</label>' +
+                        '<input type="text" class="k-input" id="k-editor-image-title">' +
+                    '</li>' +
+                '</ol>' +
+                '<div class="k-button-wrapper">' +
+                    '<button class="k-dialog-insert k-button">#: messages.dialogInsert #</button>' +
+                    '&nbsp;#: messages.dialogButtonSeparator #&nbsp;' +
+                    '<a href="\\#" class="k-dialog-close k-link">#: messages.dialogCancel #</a>' +
+                '</div>' +
+            '</div>'
+        )({
+            messages: this.editor.options.messages,
+            showBrowser: showBrowser
+        });
+    },
+
     redo: function () {
         var that = this,
             range = that.lockRange();
@@ -25028,7 +28418,8 @@ var ImageCommand = Command.extend({
             range = that.lockRange(),
             applied = false,
             img = RangeUtils.image(range),
-            windowContent, dialog;
+            dialog, dialogWidth,
+            options = that.editor.options;
 
         function apply(e) {
             that.attributes = {
@@ -25063,44 +28454,36 @@ var ImageCommand = Command.extend({
             }
         }
 
-        //var fileBrowser = that.editor.fileBrowser;
-        //var showBrowser = fileBrowser && fileBrowser.selectUrl !== undefined;
+        var imageBrowser = options.imageBrowser;
+        var showBrowser = !!(kendo.ui.ImageBrowser && imageBrowser && imageBrowser.transport && imageBrowser.transport.read !== undefined);
 
-        windowContent =
-            '<div class="k-editor-dialog">' +
-                '<ol>' +
-                    '<li class="k-form-text-row"><label for="k-editor-image-url">Web address</label><input type="text" class="k-input" id="k-editor-image-url"/></li>' +
-                    '<li class="k-form-text-row"><label for="k-editor-image-title">Tooltip</label><input type="text" class="k-input" id="k-editor-image-title"/></li>' +
-                '</ol>' +
-                '<div class="k-button-wrapper">' +
-                    '<button class="k-dialog-insert k-button">Insert</button>' +
-                    '&nbsp;or&nbsp;' +
-                    '<a href="#" class="k-dialog-close k-link">Close</a>' +
-                '</div>' +
-            '</div>';
 
-        dialog = $(windowContent)
-                .appendTo(document.body)
-                .kendoWindow(extend({}, that.editor.options.dialogOptions, {
-                    title: INSERTIMAGE,
-                    close: close,
-                    activate: function() {
-                        //if (showBrowser) {
-                            //new $t.imageBrowser(
-                                //$(this).find(".k-image-browser"),
-                                //extend(fileBrowser, {
-                                    //apply: apply,
-                                    //element: that.editor.element,
-                                    //messages: that.editor.options.messages
-                                //}));
-                        //}
-                    }
-                }))
+        dialogWidth = showBrowser ? { width: "960px" } : {};
+
+        dialog = EditorUtils.createDialog(that._dialogTemplate(showBrowser), that.editor, extend(dialogWidth, options.dialogOptions, {
+            title: INSERTIMAGE,
+            close: close,
+            resizable: showBrowser,
+            activate: function() {
+                if (showBrowser) {
+                    var that = this;
+
+                    new kendo.ui.ImageBrowser(
+                        that.element.find(".k-imagebrowser"),
+                        extend({}, imageBrowser, {
+                            change: function() {
+                                that.element.find(KEDITORIMAGEURL).val(this.value());
+                            },
+                            apply: apply
+                        })
+                    );
+                }
+            }
+        }))
                 .hide()
                 .find(".k-dialog-insert").click(apply).end()
                 .find(".k-dialog-close").click(close).end()
                 .find(".k-form-text-row input").keydown(keyDown).end()
-                //.toggleClass("k-imagebrowser", showBrowser)
                 // IE < 8 returns absolute url if getAttribute is not used
                 .find(KEDITORIMAGEURL).val(img ? img.getAttribute("src", 2) : "http://").end()
                 .find(KEDITORIMAGETITLE).val(img ? img.alt : "").end()
@@ -25117,7 +28500,7 @@ kendo.ui.editor.ImageCommand = ImageCommand;
 
 registerTool("insertImage", new Editor.Tool({ command: ImageCommand, template: new ToolTemplate({template: EditorUtils.buttonTemplate, title: INSERTIMAGE}) }));
 
-})(jQuery);
+})(window.kendo.jQuery);
 (function($, undefined) {
 
 var kendo = window.kendo,
@@ -25131,12 +28514,14 @@ var kendo = window.kendo,
     SELECTEDCOLORCLASS = ".k-selected-color",
     UNSELECTABLE = "unselectable",
     BACKGROUNDCOLOR = "background-color",
+    ARIASELECTED = "aria-selected",
+    ARIALABELLEDBY = "aria-labelledby",
     keys = kendo.keys,
     template = kendo.template(
 '<div class="k-colorpicker-popup">' +
    '<ul class="k-reset">'+
         '# for(var i = 0; i < colors.length; i++) { #' +
-            '<li class="k-item #= colors[i] == value ? "k-state-selected" : "" #">' +
+            '<li #=(id && i === 0) ? "id=\\""+id+"\\" aria-selected=\\"true\\"" : "" # class="k-item #= colors[i] == value ? "k-state-selected" : "" #" aria-label="\\##= colors[i]#">' +
                 '<div style="background-color:\\##= colors[i] #"></div>'+
             '</li>' +
         '# } #' +
@@ -25145,7 +28530,8 @@ var kendo = window.kendo,
 
 var ColorPicker = Widget.extend({
     init: function(element, options) {
-        var that = this;
+        var that = this,
+            ariaId;
 
         Widget.fn.init.call(that, element, options);
 
@@ -25153,10 +28539,16 @@ var ColorPicker = Widget.extend({
         options = that.options;
 
         that._value = options.value;
+        that._ariaId = ariaId = options.ariaId;
+
+        if (ariaId) {
+            element.attr(ARIALABELLEDBY, ariaId);
+        }
 
         that.popup = $(template({
                         colors: options.colors,
-                        value: options.value.substring(1)
+                        value: options.value.substring(1),
+                        id: ariaId
                      }))
                      .kendoPopup({
                         anchor: element,
@@ -25227,6 +28619,22 @@ var ColorPicker = Widget.extend({
         this.popup.toggle();
     },
 
+    _applyAriaAttributes: function(prev, next) {
+        var that = this;
+
+        that.element.removeAttr(ARIALABELLEDBY);
+
+        that.element.attr(ARIALABELLEDBY, that._ariaId);
+
+        prev.removeAttr("id");
+        prev.attr(ARIASELECTED, false);
+
+        next.attr({
+            id: that._ariaId,
+            "aria-selected": true
+        });
+    },
+
     keydown: function(e) {
         var that = this,
             popup = that.popup.element,
@@ -25252,6 +28660,8 @@ var ColorPicker = Widget.extend({
                 if (next[0]) {
                     selected.removeClass(KSTATESELECTED);
                     next.addClass(KSTATESELECTED);
+
+                    that._applyAriaAttributes(selected, next);
                 }
             }
 
@@ -25264,6 +28674,8 @@ var ColorPicker = Widget.extend({
                 if (prev[0]) {
                     selected.removeClass(KSTATESELECTED);
                     prev.addClass(KSTATESELECTED);
+
+                    that._applyAriaAttributes(selected, prev);
                 }
             }
             preventDefault = true;
@@ -25326,7 +28738,7 @@ var SelectBox = DropDownList.extend({
 kendo.ui.editor.ColorPicker = ColorPicker;
 kendo.ui.editor.SelectBox = SelectBox;
 
-})(jQuery);
+})(window.kendo.jQuery);
 (function($, undefined) {
 
 // Imports ================================================================
@@ -25346,7 +28758,9 @@ var kendo = window.kendo,
     BlockFormatter = Editor.BlockFormatter;
 
 function indent(node, value) {
-    var property = dom.name(node) != "td" ? "marginLeft" : "paddingLeft";
+    var isRtl = $(node).css("direction") == "rtl",
+        indentDirection = isRtl ? "Right" : "Left",
+        property = dom.name(node) != "td" ? "margin" + indentDirection : "padding" + indentDirection;
     if (value === undefined) {
         return node.style[property] || 0;
     } else {
@@ -25552,7 +28966,7 @@ extend(Editor, {
 registerTool("indent", new Tool({ command: IndentCommand, template: new ToolTemplate({template: EditorUtils.buttonTemplate, title: "Indent"}) }));
 registerTool("outdent", new OutdentTool({template: new ToolTemplate({template: EditorUtils.buttonTemplate, title: "Outdent"})}));
 
-})(jQuery);
+})(window.kendo.jQuery);
 (function($, undefined) {
 
 var kendo = window.kendo,
@@ -25590,6 +29004,8 @@ var ViewHtmlCommand = Command.extend({
             if (that.change) {
                 that.change();
             }
+
+            editor.trigger("change");
         }
 
         function close(e) {
@@ -25637,7 +29053,7 @@ kendo.ui.editor.ViewHtmlCommand = ViewHtmlCommand;
 
 Editor.EditorUtils.registerTool("viewHtml", new Tool({ command: ViewHtmlCommand, template: new ToolTemplate({template: EditorUtils.buttonTemplate, title: "View HTML"})}));
 
-})(jQuery);
+})(window.kendo.jQuery);
 (function($) {
 
 // Imports ================================================================
@@ -25667,12 +29083,16 @@ var PendingFormats = Class.extend({
 
         var target = caret.previousSibling;
 
-        /* under IE, target is a zero-length text node. go figure. */
-        if (!target.nodeValue) {
-            target = target.previousSibling;
-        }
+        if (target) {
+            /* under IE, target may be a zero-length text node */
+            if (!target.nodeValue) {
+                target = target.previousSibling;
+            }
 
-        range.setStart(target, target.nodeValue.length - 1);
+            range.setStart(target, target.nodeValue.length - 1);
+        } else {
+            range.setStart(target, 0);
+        }
 
         marker.add(range);
 
@@ -25757,7 +29177,7 @@ extend(Editor, {
     PendingFormats: PendingFormats
 });
 
-})(jQuery);
+})(window.kendo.jQuery);
 (function($, undefined) {
     var kendo = window.kendo,
         keys = kendo.keys,
@@ -25766,7 +29186,6 @@ extend(Editor, {
         extractFormat = kendo._extractFormat,
         parse = kendo.parseFloat,
         placeholderSupported = kendo.support.placeholder,
-        touch = kendo.support.touch,
         getCulture = kendo.getCulture,
         CHANGE = "change",
         DISABLED = "disabled",
@@ -25775,8 +29194,8 @@ extend(Editor, {
         ns = ".kendoNumericTextBox",
         TOUCHEND = "touchend",
         MOUSELEAVE = "mouseleave" + ns,
-        MOUSEDOWN = (touch ? "touchstart": "mousedown") + ns,
-        MOUSEUP = touch ? "touchmove" + ns + " " + TOUCHEND + ns : "mouseup" + ns + " " + MOUSELEAVE,
+        MOUSEDOWN = "touchstart" + ns + " mousedown" + ns,
+        MOUSEUP = "touchcancel" + ns + " " + "touchend" + ns + " mouseup" + ns + " " + MOUSELEAVE,
         HOVEREVENTS = "mouseenter" + ns + " " + MOUSELEAVE,
         DEFAULT = "k-state-default",
         FOCUSED = "k-state-focused",
@@ -25800,10 +29219,11 @@ extend(Editor, {
              Widget.fn.init.call(that, element, options);
 
              options = that.options;
-             element = that.element.addClass(INPUT)
+             element = that.element
                            .on("keydown" + ns, proxy(that._keydown, that))
                            .on("paste" + ns, proxy(that._paste, that))
-                           .on("blur" + ns, proxy(that._focusout, that));
+                           .on("blur" + ns, proxy(that._focusout, that))
+                           .attr("role", "spinbutton");
 
              options.placeholder = options.placeholder || element.attr("placeholder");
 
@@ -25812,7 +29232,13 @@ extend(Editor, {
              that._arrows();
              that._input();
 
-             that._text.on("focus" + ns, proxy(that._click, that));
+            that._text.on(TOUCHEND + ns, function() {
+                that._toggleText(false);
+            });
+
+             if (!kendo.support.mobileOS) {
+                 that._text.on("focus" + ns, proxy(that._click, that));
+             }
 
              min = that.min(element.attr("min"));
              max = that.max(element.attr("max"));
@@ -25829,6 +29255,9 @@ extend(Editor, {
              if (!isStep && step !== NULL) {
                  options.step = step;
              }
+
+             element.attr("aria-valuemin", options.min)
+                    .attr("aria-valuemax", options.max);
 
              options.format = extractFormat(options.format);
 
@@ -25981,10 +29410,8 @@ extend(Editor, {
                 arrows.wrapAll('<span class="k-select"/>');
             }
 
-            arrows.on(MOUSEUP, function(e) {
-                if (!touch || kendo.eventTarget(e) != e.currentTarget || e.type === TOUCHEND) {
-                    clearTimeout( that._spinning );
-                }
+            arrows.on(MOUSEUP, function() {
+                clearTimeout( that._spinning );
                 arrows.removeClass(SELECTED);
             });
 
@@ -26054,9 +29481,9 @@ extend(Editor, {
 
         _focusin: function() {
             var that = this;
-            that._toggleText(false);
-            that.element.focus();
             that._inputWrapper.addClass(FOCUSED);
+            that._toggleText(false);
+            that.element[0].focus();
         },
 
         _focusout: function() {
@@ -26084,7 +29511,8 @@ extend(Editor, {
         _input: function() {
             var that = this,
                 CLASSNAME = "k-formatted-value",
-                element = that.element.show()[0],
+                element = that.element.addClass(INPUT).show()[0],
+                accessKey = element.accessKey,
                 wrapper = that.wrapper,
                 text;
 
@@ -26092,13 +29520,20 @@ extend(Editor, {
             text = wrapper.find(POINT + CLASSNAME);
 
             if (!text[0]) {
-                text = $("<input />").insertBefore(element).addClass(CLASSNAME);
+                text = $('<input type="text"/>').insertBefore(element).addClass(CLASSNAME);
             }
 
-            element.type = "text";
-            text[0].type = "text";
             text[0].style.cssText = element.style.cssText;
+            text[0].tabIndex = element.tabIndex;
+
+            element.tabIndex = 0;
+            element.type = "text";
             text.attr("placeholder", that.options.placeholder);
+
+            if (accessKey) {
+                text.attr("accesskey", accessKey);
+                element.accessKey = "";
+            }
 
             that._text = text.attr("readonly", true)
                              .addClass(element.className);
@@ -26116,7 +29551,7 @@ extend(Editor, {
                 that._change(that.element.val());
             }
 
-            if (that._prevent(key) && !e.ctrlKey) {
+            if (that._prevent(key, e.shiftKey) && !e.ctrlKey) {
                 e.preventDefault();
             }
         },
@@ -26133,7 +29568,7 @@ extend(Editor, {
             });
         },
 
-        _prevent: function(key) {
+        _prevent: function(key, shiftKey) {
             var that = this,
                 element = that.element[0],
                 value = element.value,
@@ -26144,7 +29579,7 @@ extend(Editor, {
                 precision = options.decimals,
                 idx = caret(element),
                 prevent = true,
-                end;
+                number;
 
             if (precision === NULL) {
                 precision = numberFormat.decimals;
@@ -26160,16 +29595,22 @@ extend(Editor, {
                  key == keys.RIGHT ||
                  key == keys.TAB ||
                  key == keys.BACKSPACE ||
-                 key == keys.ENTER) {
+                 key == keys.ENTER)
+            {
                 prevent = false;
+                if (shiftKey) {
+                    number = parseInt(String.fromCharCode(key), 10);
+                    if (!isNaN(number)) {
+                        element.value = value.substring(0, idx) + number + value.substring(idx);
+                        prevent = true;
+                    }
+                }
             } else if (decimals[key] === separator && precision > 0 && value.indexOf(separator) == -1) {
                 prevent = false;
-            } else if ((min === NULL || min < 0) && value.indexOf("-") == -1 && (key == 189 || key == 109) && idx === 0) { //sign
+            } else if ((min === NULL || min < 0) && value.indexOf("-") == -1 && (key == 189 || key == 109 || key == 173) && idx === 0) { //sign
                 prevent = false;
             } else if (key == 110 && precision > 0 && value.indexOf(separator) == -1) {
-                end = value.substring(idx);
-
-                element.value = value.substring(0, idx) + separator + end;
+                element.value = value.substring(0, idx) + separator + value.substring(idx);
             }
 
             return prevent;
@@ -26190,6 +29631,7 @@ extend(Editor, {
             }
 
             options[option] = that._parse(value);
+            that.element.attr("aria-value" + option, options[option]);
         },
 
         _spin: function(step, timeout) {
@@ -26222,15 +29664,12 @@ extend(Editor, {
         },
 
         _toggleHover: function(e) {
-            if (!touch) {
-                $(e.currentTarget).toggleClass(HOVER, e.type === "mouseenter");
-            }
+            $(e.currentTarget).toggleClass(HOVER, e.type === "mouseenter");
         },
 
         _toggleText: function(toggle) {
             var that = this;
 
-            toggle = !!toggle;
             that._text.toggle(toggle);
             that.element.toggle(!toggle);
         },
@@ -26262,7 +29701,8 @@ extend(Editor, {
 
             that._value = value = that._adjust(value);
             that._placeholder(kendo.toString(value, format, culture));
-            that.element.val(isNotNull ? value.toString().replace(POINT, numberFormat[POINT]) : "");
+            that.element.val(isNotNull ? value.toString().replace(POINT, numberFormat[POINT]) : "")
+                        .attr("aria-valuenow", value);
         },
 
         _placeholder: function(value) {
@@ -26275,6 +29715,7 @@ extend(Editor, {
         _wrapper: function() {
             var that = this,
                 element = that.element,
+                DOMElement = element[0],
                 wrapper;
 
             wrapper = element.parents(".k-numerictextbox");
@@ -26284,9 +29725,12 @@ extend(Editor, {
                 wrapper = wrapper.wrap("<span/>").parent();
             }
 
-            wrapper[0].style.cssText = element[0].style.cssText;
-            element[0].style.width = "";
-            that.wrapper = wrapper.addClass("k-widget k-numerictextbox").show();
+            wrapper[0].style.cssText = DOMElement.style.cssText;
+            DOMElement.style.width = "";
+            that.wrapper = wrapper.addClass("k-widget k-numerictextbox")
+                                  .addClass(DOMElement.className)
+                                  .css("display", "");
+
             that._inputWrapper = $(wrapper[0].firstChild);
         },
 
@@ -26345,15 +29789,19 @@ extend(Editor, {
     }
 
     ui.plugin(NumericTextBox);
-})(jQuery);
+})(window.kendo.jQuery);
 (function ($, undefined) {
     var kendo = window.kendo,
         ui = kendo.ui,
-        touch = kendo.support.touch,
+        touch = (kendo.support.touch && kendo.support.mobileOS),
+        mobile = touch || kendo.support.pointers,
+        MOUSEDOWN = kendo.support.mousedown,
+        CLICK = kendo.support.click,
         extend = $.extend,
         proxy = $.proxy,
         each = $.each,
         template = kendo.template,
+        keys = kendo.keys,
         Widget = ui.Widget,
         excludedNodesRegExp = /^(ul|a|div)$/i,
         NS = ".kendoMenu",
@@ -26363,18 +29811,20 @@ extend(Editor, {
         LINK = "k-link",
         LAST = "k-last",
         CLOSE = "close",
-        CLICK = touch ? "touchend" : "click",
         TIMER = "timer",
         FIRST = "k-first",
         IMAGE = "k-image",
         SELECT = "select",
         ZINDEX = "zIndex",
-        MOUSEENTER = "mouseenter",
-        MOUSELEAVE = "mouseleave",
+        MOUSEENTER = kendo.support.pointers ? "MSPointerOver" : "mouseenter",
+        MOUSELEAVE = kendo.support.pointers ? "MSPointerOut" : "mouseleave",
         KENDOPOPUP = "kendoPopup",
         DEFAULTSTATE = "k-state-default",
+        HOVERSTATE = "k-state-hover",
+        FOCUSEDSTATE = "k-state-focused",
         DISABLEDSTATE = "k-state-disabled",
         groupSelector = ".k-group",
+        ACTIVESTATE = "k-state-active",
         allItemsSelector = ":not(.k-list) > .k-item",
         disabledSelector = ".k-item.k-state-disabled",
         itemSelector = ".k-item:not(.k-state-disabled)",
@@ -26386,7 +29836,7 @@ extend(Editor, {
                 "<div class='k-content k-group'>#= content(item) #</div>"
             ),
             group: template(
-                "<ul class='#= groupCssClass(group) #'#= groupAttributes(group) #>" +
+                "<ul class='#= groupCssClass(group) #'#= groupAttributes(group) # role='menu' aria-hidden='true'>" +
                     "#= renderItems(data) #" +
                 "</ul>"
             ),
@@ -26397,7 +29847,8 @@ extend(Editor, {
                 "</#= tag(item) #>"
             ),
             item: template(
-                "<li class='#= wrapperCssClass(group, item) #'>" +
+                "<li class='#= wrapperCssClass(group, item) #' role='menuitem' #=item.items ? \"aria-haspopup='true'\": \"\"#" +
+                    "#=item.enabled === false ? \"aria-disabled='true'\" : ''#>" +
                     "#= itemWrapper(data) #" +
                     "# if (item.items) { #" +
                     "#= subGroup({ items: item.items, menu: menu, group: { expanded: item.expanded } }) #" +
@@ -26479,9 +29930,9 @@ extend(Editor, {
         return direction.replace("top", "up").replace("bottom", "down");
     }
 
-    function parseDirection(direction, root) {
+    function parseDirection(direction, root, isRtl) {
         direction = direction.split(" ")[!root+0] || direction;
-        var output = { origin: [ "bottom", "left" ], position: [ "top", "left" ] },
+        var output = { origin: ["bottom", (isRtl ? "right" : "left")], position: ["top", (isRtl ? "right" : "left")] },
             horizontal = /left|right/.test(direction);
 
         if (horizontal) {
@@ -26526,12 +29977,17 @@ extend(Editor, {
         item
             .filter("li[disabled]")
             .addClass(DISABLEDSTATE)
-            .removeAttr("disabled");
+            .removeAttr("disabled")
+            .attr("aria-disabled", true);
         item
             .children("a")
             .filter(":focus")
             .parent()
-            .addClass("k-state-active");
+            .addClass(ACTIVESTATE);
+
+        if (!item.filter("[role]").length) {
+            item.attr("role", "menuitem");
+        }
 
         if (!item.children("." + LINK).length) {
             item
@@ -26547,7 +30003,7 @@ extend(Editor, {
     function updateArrow (item) {
         item = $(item);
 
-        item.find(".k-icon").remove();
+        item.find("> .k-link > .k-icon").remove();
 
         item.filter(":has(.k-group)")
             .children(".k-link:not(:has([class*=k-i-arrow]))")
@@ -26585,27 +30041,43 @@ extend(Editor, {
             that._updateClasses();
 
             if (options.animation === false) {
-                options.animation = { open: { show: true, effects: {} }, close: { hide: true, effects: {} } };
+                options.animation = { open: { effects: {} }, close: { hide: true, effects: {} } };
             }
 
             that.nextItemZIndex = 100;
 
-            element.on(CLICK + NS, disabledSelector, false)
-                   .on(CLICK + NS, itemSelector, proxy(that._click , that));
+            that._tabindex();
 
-            if (!touch) {
-                element.on(MOUSEENTER + NS, itemSelector, proxy(that._mouseenter, that))
-                       .on(MOUSELEAVE + NS, itemSelector, proxy(that._mouseleave, that))
-                       .on(MOUSEENTER + NS + " " + MOUSELEAVE + NS, linkSelector, that._toggleHover);
-            } else {
-                options.openOnClick = true;
-                element.on("touchstart" + NS + " touchend" + NS, linkSelector, that._toggleHover);
-            }
+            element.on("touchstart", function (e) {
+                        that.element[0].blur();
+                        that.element[0].focus();
+                        setTimeout(function () {
+                            that._moveHover([], $(kendo.eventTarget(e)).closest(allItemsSelector));
+                        }, 200); // Focus happens after click in WebKit.
+                    })
+                    .on("MSPointerDown", function (e) {
+                        that._oldHoverItem = $(e.target).closest(allItemsSelector);
+                    })
+                   .on(CLICK + NS, disabledSelector, false)
+                   .on(CLICK + NS, itemSelector, proxy(that._click , that))
+                   .on("keydown" + NS, proxy(that._keydown, that))
+                   .on("focus" + NS, proxy(that._focus, that))
+                   .on("blur" + NS, proxy(that._removeHoverItem, that))
+                   .on(MOUSEENTER + NS, itemSelector, proxy(that._mouseenter, that))
+                   .on(MOUSELEAVE + NS, itemSelector, proxy(that._mouseleave, that))
+                   .on(MOUSEENTER + NS + " " + MOUSELEAVE + NS + " " +
+                       MOUSEDOWN + NS + " " + CLICK + NS, linkSelector, proxy(that._toggleHover, that));
 
             if (options.openOnClick) {
                 that.clicked = false;
                 that._documentClickHandler = proxy(that._documentClick, that);
                 $(document).click(that._documentClickHandler);
+            }
+
+            element.attr("role", "menubar");
+
+            if (element[0].id) {
+                that._ariaId = kendo.format("{0}_mn_active", element[0].id);
             }
 
             kendo.notify(that);
@@ -26621,8 +30093,7 @@ extend(Editor, {
             name: "Menu",
             animation: {
                 open: {
-                    duration: 200,
-                    show: true
+                    duration: 200
                 },
                 close: { // if close animation effects are defined, they will be used instead of open.reverse
                     duration: 100
@@ -26643,7 +30114,7 @@ extend(Editor, {
             that.element.off(NS);
 
             if (that._documentClickHandler) {
-                $(document).unbind(that._documentClickHandler);
+                $(document).unbind("click", that._documentClickHandler);
             }
         },
 
@@ -26768,7 +30239,9 @@ extend(Editor, {
             } else {
                 items = $(item);
                 groups = items.find("> ul")
-                                .addClass("k-group");
+                                .addClass("k-group")
+                                .attr("role", "menu");
+
                 items = items.filter("li");
 
                 items.add(groups.find("> li")).each(function () {
@@ -26811,11 +30284,16 @@ extend(Editor, {
             var that = this,
                 options = that.options,
                 horizontal = options.orientation == "horizontal",
-                direction = options.direction;
+                direction = options.direction,
+                isRtl = kendo.support.isRtl(that.wrapper);
             element = that.element.find(element);
 
             if (/^(top|bottom|default)$/.test(direction)) {
-                direction = horizontal ? (direction + " right").replace("default", "bottom") : "right";
+                if (isRtl) {
+                    direction = horizontal ? (direction + " left").replace("default", "bottom") : "left";
+                } else {
+                    direction = horizontal ? (direction + " right").replace("default", "bottom") : "right";
+                }
             }
 
             element.siblings()
@@ -26843,7 +30321,7 @@ extend(Editor, {
                         popup = ul.data(KENDOPOPUP);
                         var root = li.parent().hasClass(MENU),
                             parentHorizontal = root && horizontal,
-                            directions = parseDirection(direction, root),
+                            directions = parseDirection(direction, root, isRtl),
                             effects = options.animation.open.effects,
                             openEffects = effects !== undefined ? effects : "slideIn:" + getEffectDirection(direction, root);
 
@@ -26861,7 +30339,7 @@ extend(Editor, {
                                 close: function (e) {
                                     var li = e.sender.wrapper.parent();
 
-                                    if (that.trigger(CLOSE, { item: li[0] }) === false) {
+                                    if (!that.trigger(CLOSE, { item: li[0] })) {
                                         li.css(ZINDEX, li.data(ZINDEX));
                                         li.removeData(ZINDEX);
                                     } else {
@@ -26875,7 +30353,7 @@ extend(Editor, {
                             popup.options.position = directions.position;
                             popup.options.animation.open.effects = openEffects;
                         }
-
+                        ul.removeAttr("aria-hidden");
                         popup.open();
                     }
 
@@ -26905,6 +30383,7 @@ extend(Editor, {
 
                     if (popup) {
                         popup.close();
+                        popup.element.attr("aria-hidden", true);
                     }
                 }, that.options.hoverDelay));
             });
@@ -26916,15 +30395,28 @@ extend(Editor, {
             this.element.find(items).each(function () {
                 $(this)
                     .toggleClass(DEFAULTSTATE, enable)
-                    .toggleClass(DISABLEDSTATE, !enable);
+                    .toggleClass(DISABLEDSTATE, !enable)
+                    .attr("aria-disabled", !enable);
             });
         },
 
         _toggleHover: function(e) {
-            var target = $(kendo.eventTarget(e)).closest(allItemsSelector);
+            var target = $(kendo.eventTarget(e) || e.target).closest(allItemsSelector),
+                isEnter = e.type == MOUSEENTER || MOUSEDOWN.indexOf(e.type) !== -1;
 
             if (!target.parents("li." + DISABLEDSTATE).length) {
-                target.toggleClass("k-state-hover", e.type == MOUSEENTER || e.type == "touchstart");
+                target.toggleClass(HOVERSTATE, isEnter);
+            }
+
+            this._removeHoverItem();
+        },
+
+        _removeHoverItem: function() {
+            var oldHoverItem = this._oldHoverItem;
+
+            if (oldHoverItem && oldHoverItem.hasClass(FOCUSEDSTATE)) {
+                oldHoverItem.removeClass(FOCUSEDSTATE);
+                this._oldHoverItem = null;
             }
         },
 
@@ -26934,7 +30426,7 @@ extend(Editor, {
 
             element.addClass("k-widget k-reset k-header " + MENU).addClass(MENU + "-" + this.options.orientation);
 
-            element.find("li > ul").addClass("k-group");
+            element.find("li > ul").addClass("k-group").attr("role", "menu").attr("aria-hidden", element.is(":visible"));
 
             items = element.find("> li,.k-group > li");
 
@@ -26958,7 +30450,7 @@ extend(Editor, {
                 }
             }
 
-            if (that.options.openOnClick && that.clicked) {
+            if (that.options.openOnClick && that.clicked || mobile) {
                 element.siblings().each(proxy(function (_, sibling) {
                     that.close(sibling);
                 }, that));
@@ -26975,7 +30467,7 @@ extend(Editor, {
                 return;
             }
 
-            if (!that.options.openOnClick && !contains(e.currentTarget, e.relatedTarget) && hasChildren) {
+            if (!that.options.openOnClick && !touch && !(kendo.support.pointers && e.originalEvent.pointerType == 2) && !contains(e.currentTarget, e.relatedTarget) && hasChildren) {
                 that.close(element);
             }
         },
@@ -26984,6 +30476,8 @@ extend(Editor, {
             var that = this, openHandle,
                 options = that.options,
                 target = $(kendo.eventTarget(e)),
+                nodeName = target[0] ? target[0].nodeName.toUpperCase() : "",
+                formNode = (nodeName == "INPUT" || nodeName == "SELECT" || nodeName == "BUTTON"),
                 link = target.closest("." + LINK),
                 element = target.closest(allItemsSelector),
                 href = link.attr("href"), childGroup, childGroupVisible,
@@ -26998,13 +30492,7 @@ extend(Editor, {
                 return;
             }
 
-            if (touch) {
-                element.siblings().each(proxy(function (_, sibling) {
-                    that.close(sibling);
-                }, that));
-            }
-
-            if (!e.handled && that.trigger(SELECT, { item: element[0] })) { // We shouldn't stop propagation.
+            if (!e.handled && that.trigger(SELECT, { item: element[0] }) && !formNode) { // We shouldn't stop propagation and shoudn't prevent form elements.
                 e.preventDefault();
             }
 
@@ -27014,16 +30502,21 @@ extend(Editor, {
             childGroupVisible = childGroup.is(":visible");
 
             if (options.closeOnClick && !isLink && (!childGroup.length || (options.openOnClick && childGroupVisible))) {
+                element.removeClass(HOVERSTATE).css("height"); // Force refresh for Chrome
+                that._oldHoverItem = that._findRootParent(element);
                 that.close(link.parentsUntil(that.element, allItemsSelector));
                 that.clicked = false;
+                if ("touchend MSPointerUp".indexOf(e.type) != -1) {
+                    e.preventDefault();
+                }
                 return;
             }
 
-            if ((!element.parent().hasClass(MENU) || !options.openOnClick) && !touch) {
+            if ((!element.parent().hasClass(MENU) || !options.openOnClick) && !kendo.support.touch) {
                 return;
             }
 
-            if (!isLink) {
+            if (!isLink && !formNode) {
                 e.preventDefault();
             }
 
@@ -27038,7 +30531,261 @@ extend(Editor, {
             }
 
             this.clicked = false;
+        },
+
+        _focus: function (e) {
+            var that = this,
+                target = e.target,
+                hoverItem = that._hoverItem();
+
+            if (target == that.wrapper[0] && hoverItem.length) {
+                that._moveHover([], hoverItem);
+            } else if (target == that.wrapper[0] && !that._oldHoverItem) {
+                that._moveHover([], that.wrapper.children().first());
+            }
+        },
+
+        _keydown: function (e) {
+            var that = this,
+                key = e.keyCode,
+                hoverItem = that._oldHoverItem,
+                target,
+                belongsToVertical,
+                hasChildren,
+                isRtl = kendo.support.isRtl(that.wrapper);
+
+            if (e.target != e.currentTarget && key != keys.ESC) {
+                return;
+            }
+
+            if (!hoverItem) {
+                hoverItem  = that._oldHoverItem = that._hoverItem();
+            }
+
+            belongsToVertical = that._itemBelongsToVertival(hoverItem);
+            hasChildren = that._itemHasChildren(hoverItem);
+
+            if (key == keys.RIGHT) {
+                target = that[isRtl ? "_itemLeft" : "_itemRight"](hoverItem, belongsToVertical, hasChildren);
+            } else if (key == keys.LEFT) {
+                target = that[isRtl ? "_itemRight" : "_itemLeft"](hoverItem, belongsToVertical, hasChildren);
+            } else if (key == keys.DOWN) {
+                target = that._itemDown(hoverItem, belongsToVertical, hasChildren);
+            } else if (key == keys.UP) {
+                target = that._itemUp(hoverItem, belongsToVertical, hasChildren);
+            } else if (key == keys.ESC) {
+                target = that._itemEsc(hoverItem, belongsToVertical);
+            } else if (key == keys.ENTER || key == keys.SPACEBAR) {
+                target = hoverItem.children(".k-link");
+                if (target.length > 0) {
+                    that._click({ target: target[0], preventDefault: function () {} });
+                    that._moveHover(hoverItem, that._findRootParent(hoverItem));
+                }
+            } else if (key == keys.TAB) {
+                target = that._findRootParent(hoverItem);
+                that.close(target);
+                that._moveHover(hoverItem, target);
+
+                return;
+            }
+
+            if (target && target[0]) {
+                e.preventDefault();
+                e.stopPropagation(); // needed to handle ESC in column menu only when a root item is focused
+            }
+        },
+
+        _hoverItem: function() {
+            return this.wrapper.find("li.k-item.k-state-hover").filter(":visible");
+        },
+
+        _itemBelongsToVertival: function (item) {
+            var menuIsVertical = this.wrapper.hasClass("k-menu-vertical");
+
+            if (!item.length) {
+                return menuIsVertical;
+            }
+            return item.parent().hasClass("k-group") || menuIsVertical;
+        },
+
+        _itemHasChildren: function (item) {
+            if (!item.length) {
+                return false;
+            }
+            return item.children("ul.k-group, div.k-animation-container").length > 0;
+        },
+
+        _moveHover: function (item, nextItem) {
+            var that = this,
+                id = that._ariaId;
+
+            if (item.length && nextItem.length) {
+                item.removeClass(FOCUSEDSTATE);
+                if (item[0].id === id) {
+                    item.removeAttr("id");
+                }
+            }
+
+            if (nextItem.length) {
+                if (nextItem[0].id) {
+                    id = nextItem[0].id;
+                }
+
+                nextItem.addClass(FOCUSEDSTATE);
+                that._oldHoverItem = nextItem;
+
+                if (id) {
+                    that.element.removeAttr("aria-activedescendant");
+                    nextItem.attr("id", id);
+                    that.element.attr("aria-activedescendant", id);
+                }
+            }
+        },
+
+        _findRootParent: function (item) {
+            if (item.parent().hasClass("k-menu")) {
+                return item;
+            } else {
+                return item.parentsUntil(".k-menu", "li.k-item").last();
+            }
+        },
+
+        _isRootItem: function (item) {
+            return item.parent().hasClass("k-menu");
+        },
+
+        _itemRight: function (item, belongsToVertical, hasChildren) {
+            var that = this,
+                nextItem,
+                parentItem;
+
+            if (!belongsToVertical) {
+                nextItem = item.next();
+                if (nextItem.is(".k-separator")) {
+                    nextItem = nextItem.next();
+                }
+                if (!nextItem.length) {
+                    nextItem = item.parent().children().first();
+                }
+            } else if (hasChildren) {
+                that.open(item);
+                nextItem = item.find(".k-group").children().first();
+            } else if (that.options.orientation == "horizontal") {
+                parentItem = that._findRootParent(item);
+                that.close(parentItem);
+                nextItem = parentItem.next();
+                if (nextItem.is(".k-separator")) {
+                    nextItem = nextItem.next();
+                }
+            }
+
+            if (nextItem && !nextItem.length) {
+                nextItem = that.wrapper.children(".k-item").first();
+            } else if (!nextItem) {
+                nextItem = [];
+            }
+
+            that._moveHover(item, nextItem);
+            return nextItem;
+        },
+
+        _itemLeft: function (item, belongsToVertical, hasChildren) {
+            var that = this,
+                nextItem;
+
+            if (!belongsToVertical) {
+                nextItem = item.prev();
+                if (nextItem.is(".k-separator")) {
+                    nextItem = nextItem.prev();
+                }
+                if (!nextItem.length) {
+                    nextItem = item.parent().children().last();
+                }
+            } else {
+                nextItem = item.parent().closest(".k-item");
+                that.close(nextItem);
+                if (that._isRootItem(nextItem) && that.options.orientation == "horizontal") {
+                    nextItem = nextItem.prev();
+                    if (nextItem.is(".k-separator")) {
+                        nextItem = nextItem.prev();
+                    }
+                }
+            }
+
+            if (!nextItem.length) {
+                nextItem = that.wrapper.children(".k-item").last();
+            }
+
+            that._moveHover(item, nextItem);
+            return nextItem;
+        },
+
+        _itemDown: function (item, belongsToVertical, hasChildren) {
+            var that = this,
+                nextItem;
+
+            if (!belongsToVertical) {
+                if (!hasChildren || item.hasClass(DISABLEDSTATE)) {
+                    return;
+                } else {
+                    that.open(item);
+                    nextItem = item.find(".k-group").children().first();
+                }
+            } else {
+                nextItem = item.next();
+                if (nextItem.is(".k-separator")) {
+                    nextItem = nextItem.next();
+                }
+            }
+
+            if (!nextItem.length && item.length) {
+                nextItem = item.parent().children().first();
+            } else if (!item.length) {
+                nextItem = that.wrapper.children(".k-item").first();
+            }
+
+            that._moveHover(item, nextItem);
+            return nextItem;
+        },
+
+        _itemUp: function (item, belongsToVertical, hasChildren) {
+            var that = this,
+                nextItem;
+
+            if (!belongsToVertical) {
+                return;
+            } else {
+                nextItem = item.prev();
+                if (nextItem.is(".k-separator")) {
+                    nextItem = nextItem.prev();
+                }
+            }
+
+            if (!nextItem.length && item.length) {
+                nextItem = item.parent().children().last();
+            } else if (!item.length) {
+                nextItem = that.wrapper.children(".k-item").last();
+            }
+
+            that._moveHover(item, nextItem);
+            return nextItem;
+        },
+
+        _itemEsc: function (item, belongsToVertical) {
+            var that = this,
+                nextItem;
+
+            if (!belongsToVertical) {
+                return item;
+            } else {
+                nextItem = item.parent().closest(".k-item");
+                that.close(nextItem);
+                that._moveHover(item, nextItem);
+            }
+
+            return nextItem;
         }
+
     });
 
     // client-side rendering
@@ -27086,7 +30833,7 @@ extend(Editor, {
 
     kendo.ui.plugin(Menu);
 
-})(jQuery);
+})(window.kendo.jQuery);
 (function($, undefined) {
     var kendo = window.kendo,
         ui = kendo.ui,
@@ -27111,7 +30858,7 @@ extend(Editor, {
         container.find(":input:not(:button, [" + kendo.attr("role") + "=upload], [" + kendo.attr("skip") + "]), select").each(function() {
             var bindAttr = kendo.attr("bind"),
                 binding = this.getAttribute(bindAttr) || "",
-                bindingName = this.type === "checkbox" ? "checked:" : "value:",
+                bindingName = this.type === "checkbox" ||  this.type === "radio" ? "checked:" : "value:",
                 fieldName = this.name;
 
             if (binding.indexOf(bindingName) === -1 && fieldName) {
@@ -27207,7 +30954,7 @@ extend(Editor, {
         "values": function(container, options) {
             var attr = createAttributes(options);
             $('<select ' + kendo.attr("text-field") + '="text"' + kendo.attr("value-field") + '="value"' +
-                kendo.attr("source") + "=\'" + kendo.stringify(convertItems(options.values)) +
+                kendo.attr("source") + "=\'" + kendo.stringify(convertItems(options.values)).replace(/\'/g,"&apos;") +
                 "\'" + kendo.attr("role") + '="dropdownlist"/>') .attr(attr).appendTo(container);
             $('<span ' + kendo.attr("for") + '="' + options.field + '" class="k-invalid-msg"/>').hide().appendTo(container);
         }
@@ -27353,12 +31100,12 @@ extend(Editor, {
                 errorTemplate: that.options.errorTemplate || undefined,
                 rules: rules }).data("kendoValidator");
 
-            container.find(":input:visible:first").focus();
+            container.find(":focusable:first").focus();
         }
    });
 
    ui.plugin(Editable);
-})(jQuery);
+})(window.kendo.jQuery);
 (function($, undefined) {
     var kendo = window.kendo,
         ui = kendo.ui,
@@ -27476,7 +31223,9 @@ extend(Editor, {
                     link = element.prepend('<a class="k-grid-filter" href="#"><span class="k-icon k-filter"/></a>').find(".k-grid-filter");
                 }
 
-                link.on("click" + NS, proxy(that._click, that));
+                link
+                .attr("tabindex", -1)
+                .on("click" + NS, proxy(that._click, that));
 
             } else {
                 that.link = $();
@@ -27499,7 +31248,9 @@ extend(Editor, {
 
                 if (field) {
                     type = field.type || "string";
-                    that._parse = proxy(field.parse, field);
+                    if (field.parse) {
+                        that._parse = proxy(field.parse, field);
+                    }
                 }
             }
 
@@ -27508,6 +31259,14 @@ extend(Editor, {
             }
 
             operators = operators[type] || options.operators[type];
+            var initial;
+            for (initial in operators) { // get the first operator
+                break;
+            }
+
+            that._defaultFilter = function() {
+                return { field: that.field, operator: initial || "eq", value: "" };
+            };
 
             that.form = $('<form class="k-filter-menu"/>')
                             .html(kendo.template(type === "boolean" ? booleanTemplate : defaultTemplate)({
@@ -27519,22 +31278,16 @@ extend(Editor, {
                                 type: type,
                                 values: convertItems(options.values)
                             }))
+                            .on("keydown" + NS, proxy(that._keydown, that))
                             .on("submit" + NS, proxy(that._submit, that))
                             .on("reset" + NS, proxy(that._reset, that));
-
-           that.form
-                .find("[" + kendo.attr("type") + "=number]")
-                .removeClass("k-textbox")
-                [NUMERICTEXTBOX]()
-                .end()
-                .find("[" + kendo.attr("type") + "=date]")
-                .removeClass("k-textbox")
-                [DATEPICKER]();
 
             if (!options.appendToElement) {
                 that.popup = that.form[POPUP]({
                     anchor: link,
-                    open: proxy(that._open, that)
+                    open: proxy(that._open, that),
+                    activate: proxy(that._activate, that),
+                    close: that.options.closeCallback
                 }).data(POPUP);
 
                 that.link = link;
@@ -27542,6 +31295,15 @@ extend(Editor, {
                 element.append(that.form);
                 that.popup = that.element.closest(".k-popup").data(POPUP);
             }
+
+            that.form
+                 .find("[" + kendo.attr("type") + "=number]")
+                 .removeClass("k-textbox")
+                 [NUMERICTEXTBOX]()
+                 .end()
+                 .find("[" + kendo.attr("type") + "=date]")
+                 .removeClass("k-textbox")
+                 [DATEPICKER]();
 
             that.refresh();
         },
@@ -27552,7 +31314,7 @@ extend(Editor, {
 
             that.filterModel = kendo.observable({
                 logic: "and",
-                filters: [{ field: that.field, operator: "eq", value: "" }, { field: that.field, operator: "eq", value: "" }]
+                filters: [ that._defaultFilter(), that._defaultFilter()]
             });
 
             //NOTE: binding the form element directly causes weird error in IE when grid is bound through MVVM and column is sorted
@@ -27699,7 +31461,7 @@ extend(Editor, {
             that.popup.close();
         },
 
-        _reset: function(e) {
+        _reset: function() {
             this.clear();
             this.popup.close();
         },
@@ -27719,6 +31481,16 @@ extend(Editor, {
                     popup.close();
                 }
             });
+        },
+
+        _activate: function() {
+            this.form.find(":focusable:first").focus();
+        },
+
+        _keydown: function(e) {
+            if (e.keyCode == kendo.keys.ESC) {
+                this.popup.close();
+            }
         },
 
         options: {
@@ -27770,10 +31542,11 @@ extend(Editor, {
     });
 
     ui.plugin(FilterMenu);
-})(jQuery);
+})(window.kendo.jQuery);
 (function($, undefined) {
     var kendo = window.kendo,
         ui = kendo.ui,
+        keys = kendo.keys,
         extend = $.extend,
         each = $.each,
         template = kendo.template,
@@ -27784,9 +31557,11 @@ extend(Editor, {
         HREF = "href",
         LAST = "k-last",
         LINK = "k-link",
+        LINKSELECTOR = "." + LINK,
         ERROR = "error",
-        CLICK = "click",
         ITEM = ".k-item",
+        GROUP = ".k-group",
+        VISIBLEGROUP = GROUP + ":visible",
         IMAGE = "k-image",
         FIRST = "k-first",
         EXPAND = "expand",
@@ -27798,38 +31573,44 @@ extend(Editor, {
         MOUSEENTER = "mouseenter",
         MOUSELEAVE = "mouseleave",
         CONTENTLOAD = "contentLoad",
-        ACTIVECLASS = ".k-state-active",
+        ACTIVECLASS = "k-state-active",
         GROUPS = "> .k-panel",
         CONTENTS = "> .k-content",
-        SELECTEDCLASS = ".k-state-selected",
-        DISABLEDCLASS = ".k-state-disabled",
-        HIGHLIGHTEDCLASS = ".k-state-highlighted",
-        clickableItems = ITEM + ":not(.k-state-disabled) > .k-link",
+        FOCUSEDCLASS = "k-state-focused",
+        DISABLEDCLASS = "k-state-disabled",
+        SELECTEDCLASS = "k-state-selected",
+        SELECTEDSELECTOR = "." + SELECTEDCLASS,
+        HIGHLIGHTEDCLASS = "k-state-highlighted",
+        ACTIVEITEMSELECTOR = ITEM + ":not(.k-state-disabled)",
+        clickableItems = ACTIVEITEMSELECTOR + " > .k-link",
         disabledItems = ITEM + ".k-state-disabled > .k-link",
-        selectableItems = "> li > .k-state-selected, .k-panel > li > .k-state-selected",
-        highlightableItems = "> .k-state-highlighted, .k-panel > .k-state-highlighted",
+        selectableItems = "> li > " + SELECTEDSELECTOR + ", .k-panel > li > " + SELECTEDSELECTOR,
         defaultState = "k-state-default",
+        ARIA_DISABLED = "aria-disabled",
+        ARIA_EXPANDED = "aria-expanded",
+        ARIA_HIDDEN = "aria-hidden",
+        ARIA_SELECTED = "aria-selected",
         VISIBLE = ":visible",
         EMPTY = ":empty",
         SINGLE = "single",
 
         templates = {
             content: template(
-                "<div class='k-content'#= contentAttributes(data) #>#= content(item) #</div>"
+                "<div role='region' class='k-content'#= contentAttributes(data) #>#= content(item) #</div>"
             ),
             group: template(
-                "<ul class='#= groupCssClass(group) #'#= groupAttributes(group) #>" +
+                "<ul role='group' aria-hidden='true' class='#= groupCssClass(group) #'#= groupAttributes(group) #>" +
                     "#= renderItems(data) #" +
                 "</ul>"
             ),
             itemWrapper: template(
-                "<#= tag(item) # class='#= textClass(item, group) #'#= contentUrl(item) ##= textAttributes(item) #>" +
+                "<#= tag(item) # class='#= textClass(item, group) #' #= contentUrl(item) ##= textAttributes(item) #>" +
                     "#= image(item) ##= sprite(item) ##= text(item) #" +
                     "#= arrow(data) #" +
                 "</#= tag(item) #>"
             ),
             item: template(
-                "<li class='#= wrapperCssClass(group, item) #'>" +
+                "<li role='menuitem' #=aria(item)#class='#= wrapperCssClass(group, item) #'>" +
                     "#= itemWrapper(data) #" +
                     "# if (item.items) { #" +
                     "#= subGroup({ items: item.items, panelBar: panelBar, group: { expanded: item.expanded } }) #" +
@@ -27843,14 +31624,28 @@ extend(Editor, {
         },
 
         rendering = {
+            aria: function(item) {
+                var attr = "";
+
+                if (item.items || item.content || item.contentUrl) {
+                    attr += ARIA_EXPANDED + "='" + (item.expanded ? "true" : "false") + "' ";
+                }
+
+                if (item.enabled === false) {
+                    attr += ARIA_DISABLED + "='true'";
+                }
+
+                return attr;
+            },
+
             wrapperCssClass: function (group, item) {
                 var result = "k-item",
                     index = item.index;
 
                 if (item.enabled === false) {
-                    result += " k-state-disabled";
+                    result += " " + DISABLEDCLASS;
                 } else if (item.expanded === true) {
-                    result += " k-state-active";
+                    result += " " + ACTIVECLASS;
                 } else {
                     result += " k-state-default";
                 }
@@ -27865,6 +31660,7 @@ extend(Editor, {
 
                 return result;
             },
+
             textClass: function(item, group) {
                 var result = LINK;
 
@@ -27907,55 +31703,10 @@ extend(Editor, {
             }
         };
 
-    function updateItemClasses (item, panelElement) {
-        item = $(item).addClass("k-item");
-
-        item
-            .children(IMG)
-            .addClass(IMAGE);
-        item
-            .children("a")
-            .addClass(LINK)
-            .children(IMG)
-            .addClass(IMAGE);
-        item
-            .filter(":not([disabled]):not([class*=k-state])")
-            .addClass("k-state-default");
-        item
-            .filter("li[disabled]")
-            .addClass("k-state-disabled")
-            .removeAttr("disabled");
-        item
-            .filter(":not([class*=k-state])")
-            .children("a")
-            .filter(":focus")
-            .parent()
-            .addClass(ACTIVECLASS.substr(1));
-        item
-            .find(">div")
-            .addClass(CONTENT)
-            .css({ display: "none" });
-
-        item.each(function() {
-            var item = $(this);
-
-            if (!item.children("." + LINK).length) {
-                item
-                    .contents()      // exclude groups, real links, templates and empty text nodes
-                    .filter(function() { return (!this.nodeName.match(excludedNodesRegExp) && !(this.nodeType == 3 && !$.trim(this.nodeValue))); })
-                    .wrapAll("<span class='" + LINK + "'/>");
-            }
-        });
-
-        panelElement
-            .find(" > li > ." + LINK)
-            .addClass("k-header");
-    }
-
     function updateArrow (items) {
         items = $(items);
 
-        items.children(".k-link").children(".k-icon").remove();
+        items.children(LINKSELECTOR).children(".k-icon").remove();
 
         items
             .filter(":has(.k-panel),:has(.k-content)")
@@ -27964,7 +31715,7 @@ extend(Editor, {
                 var item = $(this),
                     parent = item.parent();
 
-                item.append("<span class='k-icon " + (parent.hasClass(ACTIVECLASS.substr(1)) ? "k-i-arrow-n k-panelbar-collapse" : "k-i-arrow-s k-panelbar-expand") + "'/>");
+                item.append("<span class='k-icon " + (parent.hasClass(ACTIVECLASS) ? "k-i-arrow-n k-panelbar-collapse" : "k-i-arrow-s k-panelbar-expand") + "'/>");
             });
     }
 
@@ -27977,14 +31728,6 @@ extend(Editor, {
         items.filter(":last-child").addClass(LAST);
     }
 
-    function updateSelected (element, link) {
-        element.find(selectableItems).removeClass(SELECTEDCLASS.substr(1));
-        element.find(highlightableItems).removeClass(HIGHLIGHTEDCLASS.substr(1));
-
-        link.addClass(SELECTEDCLASS.substr(1));
-        link.parentsUntil(element, ITEM).filter(":has(.k-header)").addClass(HIGHLIGHTEDCLASS.substr(1));
-    }
-
     var PanelBar = Widget.extend({
         init: function(element, options) {
             var that = this,
@@ -27992,7 +31735,7 @@ extend(Editor, {
 
             Widget.fn.init.call(that, element, options);
 
-            element = that.wrapper = that.element;
+            element = that.wrapper = that.element.addClass("k-widget k-reset k-header k-panelbar");
             options = that.options;
 
             if (options.dataSource) {
@@ -28000,27 +31743,45 @@ extend(Editor, {
                 that.append(options.dataSource, element);
             }
 
+            if (element[0].id) {
+                that._itemId = element[0].id + "_pb_active";
+            }
+
+            that._tabindex();
             that._updateClasses();
 
             if (options.animation === false) {
-                options.animation = { expand: { show: true, effects: {} }, collapse: { hide:true, effects: {} } };
+                options.animation = { expand: { effects: {} }, collapse: { hide:true, effects: {} } };
             }
 
             element
-                .on(CLICK + NS, clickableItems, $.proxy(that._click, that))
+                .on("touchend" + NS + " click" + NS, clickableItems, function(e) {
+                    if (that._click($(e.currentTarget))) {
+                        e.preventDefault();
+                    }
+                })
                 .on(MOUSEENTER  + NS + " " + MOUSELEAVE + NS, clickableItems, that._toggleHover)
-                .on(CLICK + NS, disabledItems, false);
+                .on("touchend" + NS + " click" + NS, disabledItems, false)
+                .on("keydown" + NS, $.proxy(that._keydown, that))
+                .on("focus" + NS, function() {
+                    var item = that.select();
+                    that._current(item[0] ? item : that._first());
+                })
+                .on("blur" + NS, function() {
+                    that._current(null);
+                })
+                .attr("role", "menu");
 
             if (options.contentUrls) {
                 element.find("> .k-item")
                     .each(function(index, item) {
-                        $(item).find("." + LINK).data(CONTENTURL, options.contentUrls[index]);
+                        $(item).find(LINKSELECTOR).data(CONTENTURL, options.contentUrls[index]);
                     });
             }
 
-            content = element.find("li" + ACTIVECLASS + " > ." + CONTENT);
+            content = element.find("li." + ACTIVECLASS + " > ." + CONTENT);
 
-            if (content.length > 0) {
+            if (content[0]) {
                 that.expand(content.parent(), false);
             }
 
@@ -28040,8 +31801,7 @@ extend(Editor, {
             animation: {
                 expand: {
                     effects: "expand:vertical",
-                    duration: 200,
-                    show: true
+                    duration: 200
                 },
                 collapse: { // if collapse animation effects are defined, they will be used instead of expand.reverse
                     duration: 200
@@ -28073,16 +31833,16 @@ extend(Editor, {
                         return that;
                     }
 
-                    element.find(HIGHLIGHTEDCLASS).removeClass(HIGHLIGHTEDCLASS.substr(1));
-                    item.addClass(HIGHLIGHTEDCLASS.substr(1));
+                    element.find("." + HIGHLIGHTEDCLASS).removeClass(HIGHLIGHTEDCLASS);
+                    item.addClass(HIGHLIGHTEDCLASS);
 
                     if (!useAnimation) {
                         animBackup = that.options.animation;
-                        that.options.animation = { expand: { show: true, effects: {} }, collapse: { hide:true, effects: {} } };
+                        that.options.animation = { expand: { effects: {} }, collapse: { hide: true, effects: {} } };
                     }
 
                     if (!that._triggerEvent(EXPAND, item)) {
-                        that._toggleItem(item, false, null);
+                        that._toggleItem(item, false);
                     }
 
                     if (!useAnimation) {
@@ -28105,15 +31865,15 @@ extend(Editor, {
                 var groups = item.find(GROUPS).add(item.find(CONTENTS));
 
                 if (!item.hasClass(DISABLEDCLASS) && groups.is(VISIBLE)) {
-                    item.removeClass(HIGHLIGHTEDCLASS.substr(1));
+                    item.removeClass(HIGHLIGHTEDCLASS);
 
                     if (!useAnimation) {
                         animBackup = that.options.animation;
-                        that.options.animation = { expand: { show: true, effects: {} }, collapse: { hide:true, effects: {} } };
+                        that.options.animation = { expand: { effects: {} }, collapse: { hide: true, effects: {} } };
                     }
 
                     if (!that._triggerEvent(COLLAPSE, item)) {
-                        that._toggleItem(item, true, null);
+                        that._toggleItem(item, true);
                     }
 
                     if (!useAnimation) {
@@ -28130,27 +31890,29 @@ extend(Editor, {
             element = this.element.find(element);
             element
                 .toggleClass(defaultState, enable)
-                .toggleClass(DISABLEDCLASS.substr(1), !enable);
+                .toggleClass(DISABLEDCLASS, !enable)
+                .attr(ARIA_DISABLED, !enable);
         },
 
         select: function (element) {
             var that = this;
-            element = that.element.find(element);
 
-            if (arguments.length === 0) {
+            if (element === undefined) {
                 return that.element.find(selectableItems).parent();
             }
 
-            element.each(function (index, item) {
-                item = $(item);
-                var link = item.children("." + LINK);
+            that.element
+                .find(element)
+                .each(function (index) {
+                    var item = $(this),
+                        link = item.children(LINKSELECTOR);
 
-                if (item.is(DISABLEDCLASS)) {
-                    return that;
-                }
+                    if (item.hasClass(DISABLEDCLASS)) {
+                        return that;
+                    }
 
-                updateSelected(that.element, link);
-            });
+                    that._updateSelected(link);
+                });
 
             return that;
         },
@@ -28268,22 +32030,156 @@ extend(Editor, {
             });
         },
 
+        _first: function() {
+            return this.element.children(ACTIVEITEMSELECTOR).first();
+        },
+
+        _last: function() {
+            var item = this.element.children(ACTIVEITEMSELECTOR).last(),
+                group = item.children(VISIBLEGROUP);
+
+            if (group[0]) {
+                return group.children(ACTIVEITEMSELECTOR).last();
+            }
+            return item;
+        },
+
+        _current: function(candidate) {
+            var that = this,
+                focused = that._focused,
+                id = that._itemId;
+
+            if (candidate === undefined) {
+                return focused;
+            }
+
+            that.element.removeAttr("aria-activedescendant");
+
+            if (focused) {
+                if (focused[0].id === id) {
+                    focused.removeAttr("id");
+                }
+
+                focused
+                    .children(LINKSELECTOR)
+                    .removeClass(FOCUSEDCLASS);
+            }
+
+            if (candidate) {
+                id = candidate[0].id || id;
+
+                candidate.attr("id", id)
+                         .children(LINKSELECTOR)
+                         .addClass(FOCUSEDCLASS);
+
+                that.element.attr("aria-activedescendant", id);
+            }
+
+            that._focused = candidate;
+        },
+
+        _keydown: function(e) {
+            var that = this,
+                key = e.keyCode,
+                current = that._current();
+
+            if (e.target != e.currentTarget) {
+                return;
+            }
+
+            if (key == keys.DOWN || key == keys.RIGHT) {
+                that._current(that._nextItem(current));
+                e.preventDefault();
+            } else if (key == keys.UP || key == keys.LEFT) {
+                that._current(that._prevItem(current));
+                e.preventDefault();
+            } else if (key == keys.ENTER || key == keys.SPACEBAR) {
+                that._click(current.children(LINKSELECTOR));
+                e.preventDefault();
+            } else if (key == keys.HOME) {
+                that._current(that._first());
+                e.preventDefault();
+            } else if (key == keys.END) {
+                that._current(that._last());
+                e.preventDefault();
+            }
+        },
+
+        _nextItem: function(item) {
+            if (!item) {
+                return this._first();
+            }
+
+            var group = item.children(VISIBLEGROUP),
+                next = item.next();
+
+            if (group[0]) {
+                next = group.children("." + FIRST);
+            }
+
+            if (!next[0]) {
+                next = item.parent(VISIBLEGROUP).parent(ITEM).next();
+            }
+
+            if (!next[0] || !next.is(":visible")) {
+                next = this._first();
+            }
+
+            if (next.hasClass(DISABLEDCLASS)) {
+                next = this._nextItem(next);
+            }
+
+            return next;
+        },
+
+        _prevItem: function(item) {
+            if (!item) {
+                return this._last();
+            }
+
+            var prev = item.prev(),
+                result;
+
+            if (!prev[0]) {
+                prev = item.parent(VISIBLEGROUP).parent(ITEM);
+                if (!prev[0]) {
+                    prev = this._last();
+                }
+            } else {
+                result = prev;
+                while (result[0]) {
+                    result = result.children(VISIBLEGROUP).children("." + LAST);
+                    if (result[0]) {
+                        prev = result;
+                    }
+                }
+            }
+
+            if (prev.hasClass(DISABLEDCLASS)) {
+                prev = this._prevItem(prev);
+            }
+
+            return prev;
+        },
+
         _insert: function (item, referenceItem, parent) {
             var that = this,
-                items, contents = [];
+                items, contents = [],
+                plain = $.isPlainObject(item),
+                isReferenceItem = referenceItem && referenceItem[0],
+                groupData;
 
-            if (!referenceItem || !referenceItem.length) {
+            if (!isReferenceItem) {
                 parent = that.element;
             }
 
-            var plain = $.isPlainObject(item),
-                groupData = {
-                    firstLevel: parent.hasClass("k-panelbar"),
-                    expanded: parent.parent().hasClass("k-state-active"),
-                    length: parent.children().length
-                };
+            groupData = {
+                firstLevel: parent.hasClass("k-panelbar"),
+                expanded: parent.parent().hasClass(ACTIVECLASS),
+                length: parent.children().length
+            };
 
-            if (referenceItem && !parent.length) {
+            if (isReferenceItem && !parent.length) {
                 parent = $(PanelBar.renderGroup({ group: groupData })).appendTo(referenceItem);
             }
 
@@ -28298,6 +32194,7 @@ extend(Editor, {
                                 }));
                             }
                         });
+
                 contents = $.map(plain ? [ item ] : item, function (value, idx) {
                             if (value.content || value.contentUrl) {
                                 return $(PanelBar.renderContent({
@@ -28307,10 +32204,13 @@ extend(Editor, {
                                 return false;
                             }
                         });
+
+                if (isReferenceItem) {
+                    referenceItem.attr(ARIA_EXPANDED, false);
+                }
             } else {
                 items = $(item);
-
-                updateItemClasses(items, that.element);
+                that._updateItemsClasses(items);
             }
 
             return { items: items, group: parent, contents: contents };
@@ -28319,44 +32219,111 @@ extend(Editor, {
         _toggleHover: function(e) {
             var target = $(e.currentTarget);
 
-            if (!target.parents("li" + DISABLEDCLASS).length) {
+            if (!target.parents("li." + DISABLEDCLASS).length) {
                 target.toggleClass("k-state-hover", e.type == MOUSEENTER);
             }
         },
 
         _updateClasses: function() {
-            var that = this;
+            var that = this,
+                panels, items;
 
-            that.element.addClass("k-widget k-reset k-header k-panelbar");
+            panels = that.element
+                         .find("li > ul")
+                         .not(function () { return $(this).parentsUntil(".k-panelbar", "div").length; })
+                         .addClass("k-group k-panel")
+                         .attr("role", "group");
 
-            var panels = that.element
-                                .find("li > ul")
-                                .not(function () {
-                                        return $(this).parentsUntil(".k-panelbar", "div").length;
-                                    })
-                                .addClass("k-group k-panel")
-                                .add(that.element);
+            panels.parent()
+                  .attr(ARIA_EXPANDED, false)
+                  .not("." + ACTIVECLASS)
+                  .children("ul")
+                  .attr(ARIA_HIDDEN, true)
+                  .hide();
 
-            var items = panels
-                            .find("> li:not(" + ACTIVECLASS + ") > ul")
-                            .css({ display: "none" })
-                            .end()
-                            .find("> li");
+            items = that.element.add(panels).children();
 
-            items.each(function () {
-                updateItemClasses(this, that.element);
-            });
-
+            that._updateItemsClasses(items);
             updateArrow(items);
             updateFirstLast(items);
         },
 
-        _click: function (e) {
-            var that = this,
-                target = $(e.currentTarget),
-                element = that.element;
+        _updateItemsClasses: function(items) {
+            var length = items.length,
+                idx = 0;
 
-            if (target.parents("li" + DISABLEDCLASS).length) {
+            for(; idx < length; idx++) {
+                this._updateItemClasses(items[idx]);
+            }
+        },
+
+        _updateItemClasses: function(item) {
+            var selected = this._selected,
+                link;
+
+            item = $(item).addClass("k-item").attr("role", "menuitem");
+
+            item
+                .children(IMG)
+                .addClass(IMAGE);
+
+            item
+                .children("a")
+                .addClass(LINK)
+                .children(IMG)
+                .addClass(IMAGE);
+
+            item
+                .filter(":not([disabled]):not([class*=k-state])")
+                .addClass("k-state-default");
+
+            item
+                .filter("li[disabled]")
+                .addClass("k-state-disabled")
+                .attr(ARIA_DISABLED, true)
+                .removeAttr("disabled");
+
+            item
+                .children("div")
+                .addClass(CONTENT)
+                .attr("role", "region")
+                .attr(ARIA_HIDDEN, true)
+                .hide()
+                .parent()
+                .attr(ARIA_EXPANDED, false);
+
+            link = item.children(SELECTEDSELECTOR);
+            if (link[0]) {
+                if (selected) {
+                    selected.removeAttr(ARIA_SELECTED)
+                            .children(SELECTEDSELECTOR)
+                            .removeClass(SELECTEDCLASS);
+                }
+
+                link.addClass(SELECTEDCLASS);
+                this._selected = item.attr(ARIA_SELECTED, true);
+            }
+
+            if (!item.children(LINKSELECTOR)[0]) {
+                item
+                    .contents()      // exclude groups, real links, templates and empty text nodes
+                    .filter(function() { return (!this.nodeName.match(excludedNodesRegExp) && !(this.nodeType == 3 && !$.trim(this.nodeValue))); })
+                    .wrapAll("<span class='" + LINK + "'/>");
+            }
+
+            if (item.parent(".k-panelbar")[0]) {
+                item
+                    .children(LINKSELECTOR)
+                    .addClass("k-header");
+            }
+        },
+
+        _click: function (target) {
+            var that = this,
+                element = that.element,
+                prevent;
+
+            if (target.parents("li." + DISABLEDCLASS).length) {
                 return;
             }
 
@@ -28364,10 +32331,10 @@ extend(Editor, {
                 return;
             }
 
-            var link = target.closest("." + LINK),
+            var link = target.closest(LINKSELECTOR),
                 item = link.closest(ITEM);
 
-            updateSelected(element, link);
+            that._updateSelected(link);
 
             var contents = item.find(GROUPS).add(item.find(CONTENTS)),
                 href = link.attr(HREF),
@@ -28378,11 +32345,11 @@ extend(Editor, {
             }
 
             if (that._triggerEvent(SELECT, item)) {
-                e.preventDefault();
+                prevent = true;
             }
 
             if (isAnchor || contents.length) {
-                e.preventDefault();
+                prevent = true;
             } else {
                 return;
             }
@@ -28397,30 +32364,26 @@ extend(Editor, {
                 var visibility = contents.is(VISIBLE);
 
                 if (!that._triggerEvent(!visibility ? EXPAND : COLLAPSE, item)) {
-                    that._toggleItem(item, visibility, e);
+                    prevent = that._toggleItem(item, visibility);
                 }
             }
+
+            return prevent;
         },
 
-        _toggleItem: function (element, isVisible, e) {
+        _toggleItem: function (element, isVisible) {
             var that = this,
-                childGroup = element.find(GROUPS);
+                childGroup = element.find(GROUPS),
+                prevent, content;
 
             if (childGroup.length) {
-
                 this._toggleGroup(childGroup, isVisible);
-
-                if (e) {
-                    e.preventDefault();
-                }
+                prevent = true;
             } else {
-
-                var content = element.find("> ."  + CONTENT);
+                content = element.children("."  + CONTENT);
 
                 if (content.length) {
-                    if (e) {
-                        e.preventDefault();
-                    }
+                    prevent = true;
 
                     if (!content.is(EMPTY)) {
                         that._toggleGroup(content, isVisible);
@@ -28429,6 +32392,7 @@ extend(Editor, {
                     }
                 }
             }
+            return prevent;
         },
 
         _toggleGroup: function (element, visibility) {
@@ -28444,8 +32408,10 @@ extend(Editor, {
 
             element
                 .parent()
+                .attr(ARIA_EXPANDED, !visibility)
+                .attr(ARIA_HIDDEN, visibility)
                 .toggleClass(defaultState, visibility)
-                .toggleClass(ACTIVECLASS.substr(1), !visibility)
+                .toggleClass(ACTIVECLASS, !visibility)
                 .find("> .k-link > .k-icon")
                     .toggleClass("k-i-arrow-n", !visibility)
                     .toggleClass("k-panelbar-collapse", !visibility)
@@ -28454,7 +32420,7 @@ extend(Editor, {
 
             if (visibility) {
                 animation = extend( hasCollapseAnimation ? collapse
-                                    : extend({ reverse: true }, animation), { show: false, hide: true });
+                                    : extend({ reverse: true }, animation), { hide: true });
             } else {
                 animation = extend( { complete: function (element) {
                     that._triggerEvent(ACTIVATE, element.closest(ITEM));
@@ -28469,7 +32435,7 @@ extend(Editor, {
         _collapseAllExpanded: function (item) {
             var that = this, children, stopExpand = false;
 
-            if (item.find("> ." + LINK).hasClass("k-header")) {
+            if (item.children(LINKSELECTOR).hasClass("k-header")) {
                 var groups = item.find(GROUPS).add(item.find(CONTENTS));
 
                 if (groups.is(VISIBLE)) {
@@ -28498,7 +32464,7 @@ extend(Editor, {
 
             var that = this,
                 statusIcon = element.find(".k-panelbar-collapse, .k-panelbar-expand"),
-                link = element.find("." + LINK),
+                link = element.find(LINKSELECTOR),
                 loadingIconTimeout = setTimeout(function () {
                     statusIcon.addClass("k-loading");
                 }, 100),
@@ -28536,6 +32502,26 @@ extend(Editor, {
             var that = this;
 
             return that.trigger(eventName, { item: element[0] });
+        },
+
+        _updateSelected: function(link) {
+            var that = this,
+                element = that.element,
+                item = link.parent(ITEM),
+                selected = that._selected;
+
+            if (selected) {
+                selected.removeAttr(ARIA_SELECTED);
+            }
+
+            that._selected = item.attr(ARIA_SELECTED, true);
+
+            element.find(selectableItems).removeClass(SELECTEDCLASS);
+            element.find("> .k-state-highlighted, .k-panel > .k-state-highlighted").removeClass(HIGHLIGHTEDCLASS);
+
+            link.addClass(SELECTEDCLASS);
+            link.parentsUntil(element, ITEM).filter(":has(.k-header)").addClass(HIGHLIGHTEDCLASS);
+            that._current(item);
         }
     });
 
@@ -28584,10 +32570,11 @@ extend(Editor, {
 
     kendo.ui.plugin(PanelBar);
 
-})(jQuery);
+})(window.kendo.jQuery);
 (function ($, undefined) {
     var kendo = window.kendo,
         ui = kendo.ui,
+        keys = kendo.keys,
         map = $.map,
         each = $.each,
         trim = $.trim,
@@ -28598,6 +32585,7 @@ extend(Editor, {
         NS = ".kendoTabStrip",
         IMG = "img",
         HREF = "href",
+        PREV = "prev",
         LINK = "k-link",
         LAST = "k-last",
         CLICK = "click",
@@ -28612,18 +32600,20 @@ extend(Editor, {
         MOUSEENTER = "mouseenter",
         MOUSELEAVE = "mouseleave",
         CONTENTLOAD = "contentLoad",
-        CLICKABLEITEMS = ".k-tabstrip-items > .k-item:not(.k-state-disabled)",
-        HOVERABLEITEMS = ".k-tabstrip-items > .k-item:not(.k-state-disabled):not(.k-state-active)",
-        DISABLEDLINKS = ".k-tabstrip-items > .k-state-disabled .k-link",
         DISABLEDSTATE = "k-state-disabled",
         DEFAULTSTATE = "k-state-default",
         ACTIVESTATE = "k-state-active",
+        FOCUSEDSTATE = "k-state-focused",
         HOVERSTATE = "k-state-hover",
         TABONTOP = "k-tab-on-top",
+        NAVIGATABLEITEMS = ".k-item:not(." + DISABLEDSTATE + ")",
+        CLICKABLEITEMS = ".k-tabstrip-items > " + NAVIGATABLEITEMS,
+        HOVERABLEITEMS = ".k-tabstrip-items > " + NAVIGATABLEITEMS + ":not(." + ACTIVESTATE + ")",
+        DISABLEDLINKS = ".k-tabstrip-items > .k-state-disabled .k-link",
 
         templates = {
             content: template(
-                "<div class='k-content'#= contentAttributes(data) #>#= content(item) #</div>"
+                "<div class='k-content'#= contentAttributes(data) # role='tabpanel'>#= content(item) #</div>"
             ),
             itemWrapper: template(
                 "<#= tag(item) # class='k-link'#= contentUrl(item) ##= textAttributes(item) #>" +
@@ -28631,7 +32621,7 @@ extend(Editor, {
                 "</#= tag(item) #>"
             ),
             item: template(
-                "<li class='#= wrapperCssClass(group, item) #'>" +
+                "<li class='#= wrapperCssClass(group, item) #' role='tab' #=item.active ? \"aria-selected='true'\" : ''#>" +
                     "#= itemWrapper(data) #" +
                 "</li>"
             ),
@@ -28671,7 +32661,7 @@ extend(Editor, {
                 return item.url ? "a" : "span";
             },
             contentAttributes: function(content) {
-                return content.active !== true ? " style='display:none'" : "";
+                return content.active !== true ? " style='display:none' aria-hidden='true' aria-expanded='false'" : "";
             },
             content: function(item) {
                 return item.content ? item.content : item.contentUrl ? "" : "&nbsp;";
@@ -28702,6 +32692,11 @@ extend(Editor, {
             .filter(":focus")
             .parent()
             .addClass(ACTIVESTATE + " " + TABONTOP);
+
+        tabs.attr("role", "tab");
+        tabs.filter("." + ACTIVESTATE)
+            .attr("aria-selected", true);
+
 
         tabs.each(function() {
             var item = $(this);
@@ -28742,9 +32737,20 @@ extend(Editor, {
             options = that.options;
 
             that.wrapper
-                .on(CLICK + NS, CLICKABLEITEMS, $.proxy(that._click, that))
-                .on(MOUSEENTER + NS +" " + MOUSELEAVE + NS, HOVERABLEITEMS, that._toggleHover)
-                .on(CLICK + NS, DISABLEDLINKS, false);
+                .on(CLICK + NS, DISABLEDLINKS, false)
+                .on("touchend" + NS + " click" + NS, CLICKABLEITEMS, function(e) {
+                    if (that._click($(e.currentTarget))) {
+                        e.preventDefault();
+                    }
+                })
+                .on(MOUSEENTER + NS + " " + MOUSELEAVE + NS, HOVERABLEITEMS, that._toggleHover)
+                .on("keydown" + NS, $.proxy(that._keydown, that))
+                .on("focus" + NS, $.proxy(that._active, that))
+                .on("blur" + NS, function() { that._current(null); });
+
+            that._isRtl = kendo.support.isRtl(that.wrapper);
+
+            that._tabindex();
 
             that._updateClasses();
 
@@ -28761,14 +32767,122 @@ extend(Editor, {
                     });
             }
 
-            var selectedItems = that.wrapper.find("li." + ACTIVESTATE),
-                content = $(that.contentElement(selectedItems.parent().children().index(selectedItems)));
+            var selectedItems = that.tabGroup.children("li." + ACTIVESTATE),
+                content = that.contentHolder(selectedItems.index());
 
             if (content.length > 0 && content[0].childNodes.length === 0) {
                 that.activateTab(selectedItems.eq(0));
             }
 
+            that.element.attr("role", "tablist");
+
+            if (that.element[0].id) {
+                that._ariaId = that.element[0].id + "_ts_active";
+            }
+
             kendo.notify(that);
+        },
+
+        _active: function() {
+            var item = this.tabGroup.children().filter("." + ACTIVESTATE);
+            this._current(item[0] ? item : this._endItem("first"));
+        },
+
+        _endItem: function(action) {
+            return this.tabGroup.children(NAVIGATABLEITEMS)[action]();
+        },
+
+        _item: function(item, action) {
+            var endItem;
+            if (action === PREV) {
+                endItem = "last";
+            } else {
+                endItem = "first";
+            }
+
+            if (!item) {
+                return this._endItem(endItem);
+            }
+
+            item = item[action]();
+
+            if (!item[0]) {
+                item = this._endItem(endItem);
+            }
+
+            if (item.hasClass(DISABLEDSTATE)) {
+                item = this._item(item, action);
+            }
+
+            return item;
+        },
+
+        _current: function(candidate) {
+            var that = this,
+                focused = that._focused,
+                id = that._ariaId;
+
+            if (candidate === undefined) {
+                return focused;
+            }
+
+            if (focused) {
+                if (focused[0].id === id) {
+                    focused.removeAttr("id");
+                }
+                focused.removeClass(FOCUSEDSTATE);
+            }
+
+            if (candidate) {
+                if (!candidate.hasClass(ACTIVESTATE)) {
+                    candidate.addClass(FOCUSEDSTATE);
+                }
+
+                that.element.removeAttr("aria-activedescendant");
+
+                id = candidate[0].id || id;
+
+                if (id) {
+                    candidate.attr("id", id);
+                    that.element.attr("aria-activedescendant", id);
+                }
+            }
+
+            that._focused = candidate;
+        },
+
+        _keydown: function(e) {
+            var that = this,
+                key = e.keyCode,
+                current = that._current(),
+                rtl = that._isRtl,
+                action;
+
+            if (e.target != e.currentTarget) {
+                return;
+            }
+
+            if (key == keys.DOWN || key == keys.RIGHT) {
+                action = rtl ? PREV : "next";
+            } else if (key == keys.UP || key == keys.LEFT) {
+                action = rtl ? "next" : PREV;
+            } else if (key == keys.ENTER || key == keys.SPACEBAR) {
+                that._click(current);
+                e.preventDefault();
+            } else if (key == keys.HOME) {
+                that._click(that._endItem("first"));
+                e.preventDefault();
+                return;
+            } else if (key == keys.END) {
+                that._click(that._endItem("last"));
+                e.preventDefault();
+                return;
+            }
+
+            if (action) {
+                that._click(that._item(current, action));
+                e.preventDefault();
+            }
         },
 
         _dataSource: function() {
@@ -28792,7 +32906,7 @@ extend(Editor, {
 
         _animations: function(options) {
             if (options && ("animation" in options) && !options.animation) {
-                options.animation = { open: { effects: {}, show: true }, close: { effects: {} } }; // No animation
+                options.animation = { open: { effects: {} }, close: { effects: {} } }; // No animation
             }
         },
 
@@ -28922,8 +33036,7 @@ extend(Editor, {
             animation: {
                 open: {
                     effects: "expand:vertical fadeIn",
-                    duration: 200,
-                    show: true
+                    duration: 200
                 },
                 close: { // if close animation effects are defined, they will be used instead of open.reverse
                     duration: 200
@@ -28949,17 +33062,17 @@ extend(Editor, {
             var that = this;
 
             if (arguments.length === 0) {
-                return that.wrapper.find("li." + ACTIVESTATE);
+                return that.tabGroup.children("li." + ACTIVESTATE);
             }
 
             if (!isNaN(element)) {
                 element = that.tabGroup.children().get(element);
             }
 
-            element = that.element.find(element);
+            element = that.tabGroup.find(element);
             $(element).each(function (index, item) {
                 item = $(item);
-                if (!item.hasClass(ACTIVESTATE) && !that.trigger(SELECT, { item: item[0], contentElement: that.contentElement(item.index()) })) {
+                if (!item.hasClass(ACTIVESTATE) && !that.trigger(SELECT, { item: item[0], contentElement: that.contentHolder(item.index())[0] })) {
                     that.activateTab(item);
                 }
             });
@@ -28986,7 +33099,7 @@ extend(Editor, {
             element.each(function () {
                 var item = $(this),
                     contentUrl = item.find("." + LINK).data(CONTENTURL),
-                    content = $(that.contentElement(item.index()));
+                    content = that.contentHolder(item.index());
 
                 if (contentUrl) {
                     that.ajaxRequest(item, content, null, contentUrl);
@@ -29129,7 +33242,9 @@ extend(Editor, {
                     .remove();
             }
 
-            tabs.eq(activeItem).addClass(TABONTOP);
+            if (activeItem >= 0) {
+                tabs.eq(activeItem).addClass(TABONTOP);
+            }
 
             that.contentElements = that.wrapper.children("div");
 
@@ -29157,16 +33272,21 @@ extend(Editor, {
                 var currentContent = contentElements.eq(idx),
                     id = tabStripID + "-" + (idx+1);
 
+                this.setAttribute("aria-controls", id);
+
                 if (!currentContent.length && contentUrls[idx]) {
                     $("<div id='"+ id +"' class='" + CONTENT + "'/>").appendTo(that.wrapper);
                 } else {
                     currentContent.attr("id", id);
                 }
+                currentContent.attr("role", "tabpanel");
+                currentContent.filter(":not(." + ACTIVESTATE + ")").attr("aria-hidden", true).attr("aria-expanded", false);
+                currentContent.filter("." + ACTIVESTATE).attr("aria-expanded", true);
             });
 
             that.contentElements = that.contentAnimators = that.wrapper.children("div"); // refresh the contents
 
-            if (kendo.support.touch && kendo.mobile.ui.Scroller) {
+            if (kendo.kineticScrollNeeded && kendo.mobile.ui.Scroller) {
                 kendo.touchScroller(that.contentElements);
                 that.contentElements = that.contentElements.children(".km-scroll-container");
             }
@@ -29176,49 +33296,48 @@ extend(Editor, {
             $(e.currentTarget).toggleClass(HOVERSTATE, e.type == MOUSEENTER);
         },
 
-        _click: function (e) {
+        _click: function (item) {
             var that = this,
-                item = $(e.currentTarget),
                 link = item.find("." + LINK),
                 href = link.attr(HREF),
                 collapse = that.options.collapsible,
-                content = $(that.contentElement(item.index()));
+                contentHolder = that.contentHolder(item.index()),
+                prevent, isAnchor;
 
             if (item.closest(".k-widget")[0] != that.wrapper[0]) {
                 return;
             }
 
             if (item.is("." + DISABLEDSTATE + (!collapse ? ",." + ACTIVESTATE : ""))) {
-                e.preventDefault();
-                return;
+                return true;
             }
 
             if (that.tabGroup.children("[data-animating], [data-in-request]").length) {
                 return;
             }
 
-            if (that.trigger(SELECT, { item: item[0], contentElement: content[0] })) {
-                e.preventDefault();
-            } else {
-                var isAnchor = link.data(CONTENTURL) || (href && (href.charAt(href.length - 1) == "#" || href.indexOf("#" + that.element[0].id + "-") != -1));
-
-                if (!href || isAnchor) {
-                    e.preventDefault();
-                } else {
-                    return;
-                }
-
-                if (collapse && item.is("." + ACTIVESTATE)) {
-                    that.deactivateTab(item);
-                    e.preventDefault();
-
-                    return;
-                }
-
-                if (that.activateTab(item)) {
-                    e.preventDefault();
-                }
+            if (that.trigger(SELECT, { item: item[0], contentElement: contentHolder[0] })) {
+                return true;
             }
+
+            isAnchor = link.data(CONTENTURL) || (href && (href.charAt(href.length - 1) == "#" || href.indexOf("#" + that.element[0].id + "-") != -1));
+
+            if (!href || isAnchor) {
+                prevent = true;
+            } else {
+                return;
+            }
+
+            if (collapse && item.is("." + ACTIVESTATE)) {
+                that.deactivateTab(item);
+                return true;
+            }
+
+            if (that.activateTab(item)) {
+                prevent = true;
+            }
+
+            return prevent;
         },
 
         deactivateTab: function (item) {
@@ -29229,7 +33348,7 @@ extend(Editor, {
                 hasCloseAnimation = close && "effects" in close;
             item = that.tabGroup.find(item);
 
-            close = extend( hasCloseAnimation ? close : extend({ reverse: true }, animation), { show: false, hide: true });
+            close = extend( hasCloseAnimation ? close : extend({ reverse: true }, animation), { hide: true });
 
             if (kendo.size(animation.effects)) {
                 item.kendoAddClass(DEFAULTSTATE, { duration: animation.duration });
@@ -29239,11 +33358,14 @@ extend(Editor, {
                 item.removeClass(ACTIVESTATE);
             }
 
+            item.removeAttr("aria-selected");
+
             that.contentAnimators
                     .filter("." + ACTIVESTATE)
                     .kendoStop(true, true)
                     .kendoAnimate( close )
-                    .removeClass(ACTIVESTATE);
+                    .removeClass(ACTIVESTATE)
+                    .attr("aria-hidden", true);
         },
 
         activateTab: function (item) {
@@ -29258,7 +33380,7 @@ extend(Editor, {
                 oldTab = neighbours.filter("." + ACTIVESTATE),
                 itemIndex = neighbours.index(item);
 
-            close = extend( hasCloseAnimation ? close : extend({ reverse: true }, animation), { show: false, hide: true });
+            close = extend( hasCloseAnimation ? close : extend({ reverse: true }, animation), { hide: true });
             // deactivate previously active tab
             if (kendo.size(animation.effects)) {
                 oldTab.kendoRemoveClass(ACTIVESTATE, { duration: close.duration });
@@ -29277,6 +33399,7 @@ extend(Editor, {
                     .css("z-index");
 
                 item.addClass(ACTIVESTATE);
+                that._current(item);
 
                 that.trigger("change");
 
@@ -29284,11 +33407,13 @@ extend(Editor, {
             }
 
             var visibleContents = contentAnimators.filter("." + ACTIVESTATE),
-                content = $(that.contentElement(itemIndex));
+                contentHolder = that.contentHolder(itemIndex),
+                contentElement = contentHolder.closest(".k-content");
 
-            if (content.length === 0) {
+            if (contentHolder.length === 0) {
                 visibleContents
                     .removeClass( ACTIVESTATE )
+                    .attr("aria-hidden", true)
                     .kendoStop(true, true)
                     .kendoAnimate( close );
                 return false;
@@ -29296,7 +33421,7 @@ extend(Editor, {
 
             item.attr("data-animating", true);
 
-            var isAjaxContent = (item.children("." + LINK).data(CONTENTURL) || false) && content.is(EMPTY),
+            var isAjaxContent = (item.children("." + LINK).data(CONTENTURL) || false) && contentHolder.is(EMPTY),
                 showContentElement = function () {
                     oldTab.removeClass(TABONTOP);
                     item.addClass(TABONTOP) // change these directly to bring the tab on top.
@@ -29309,23 +33434,26 @@ extend(Editor, {
                         oldTab.addClass(DEFAULTSTATE);
                         item.addClass(ACTIVESTATE);
                     }
+                    oldTab.removeAttr("aria-selected");
+                    item.attr("aria-selected", true);
 
-                    content
-                        .closest(".k-content")
+                    that._current(item);
+
+                    contentElement
                         .addClass(ACTIVESTATE)
+                        .removeAttr("aria-hidden")
                         .kendoStop(true, true)
+                        .attr("aria-expanded", true)
                         .kendoAnimate( extend({ init: function () {
-                            that.trigger(ACTIVATE, { item: item[0], contentElement: content[0] });
-                        } }, animation, { complete: function () {
-                                                        item.removeAttr("data-animating");
-                                                    } } ) );
+                            that.trigger(ACTIVATE, { item: item[0], contentElement: contentHolder[0] });
+                        } }, animation, { complete: function () { item.removeAttr("data-animating"); } } ) );
                 },
                 showContent = function() {
                     if (!isAjaxContent) {
                         showContentElement();
                         that.trigger("change");
                     } else {
-                        that.ajaxRequest(item, content, function () {
+                        that.ajaxRequest(item, contentHolder, function () {
                             showContentElement();
                             that.trigger("change");
                         });
@@ -29334,6 +33462,9 @@ extend(Editor, {
 
             visibleContents
                     .removeClass(ACTIVESTATE);
+
+            visibleContents.attr("aria-hidden", true);
+            visibleContents.attr("aria-expanded", false);
 
             if (visibleContents.length) {
                 visibleContents
@@ -29353,7 +33484,7 @@ extend(Editor, {
                 return undefined;
             }
 
-            var contentElements = this.contentElements && this.contentElements[0] ? this.contentElements : this.contentAnimators,
+            var contentElements = this.contentElements && this.contentElements[0] && !kendo.kineticScrollNeeded ? this.contentElements : this.contentAnimators,
                 idTest = new RegExp("-" + (itemIndex + 1) + "$");
 
             if (contentElements) {
@@ -29365,6 +33496,13 @@ extend(Editor, {
             }
 
             return undefined;
+        },
+
+        contentHolder: function (itemIndex) {
+            var contentElement = $(this.contentElement(itemIndex)),
+                scrollContainer = contentElement.children(".km-scroll-container");
+
+            return kendo.support.touch && scrollContainer[0] ? scrollContainer : contentElement;
         },
 
         ajaxRequest: function (element, content, complete, url) {
@@ -29441,20 +33579,20 @@ extend(Editor, {
 
     kendo.ui.plugin(TabStrip);
 
-})(jQuery);
+})(window.kendo.jQuery);
 
 (function($, undefined) {
     var kendo = window.kendo,
-        touch = kendo.support.touch,
         keys = kendo.keys,
         extractFormat = kendo._extractFormat,
+        browser = kendo.support.browser,
         ui = kendo.ui,
         Widget = ui.Widget,
         OPEN = "open",
         CLOSE = "close",
         CHANGE = "change",
         ns = ".kendoTimePicker",
-        CLICK = (touch ? "touchend" : "click") + ns,
+        CLICK = "touchend" + ns + " click" + ns,
         DEFAULT = "k-state-default",
         DISABLED = "disabled",
         LI = "li",
@@ -29467,6 +33605,11 @@ extend(Editor, {
         MS_PER_DAY = 86400000,
         SELECTED = "k-state-selected",
         STATEDISABLED = "k-state-disabled",
+        ARIA_SELECTED = "aria-selected",
+        ARIA_EXPANDED = "aria-expanded",
+        ARIA_HIDDEN = "aria-hidden",
+        ARIA_ACTIVEDESCENDANT = "aria-activedescendant",
+        ID = "id",
         isArray = $.isArray,
         extend = $.extend,
         proxy = $.proxy,
@@ -29476,12 +33619,13 @@ extend(Editor, {
     TODAY = new DATE(TODAY.getFullYear(), TODAY.getMonth(), TODAY.getDate(), 0, 0, 0);
 
     var TimeView = function(options) {
-        var that = this;
+        var that = this,
+            id = options.id;
 
         that.options = options;
 
-        that.ul = $('<ul unselectable="on" class="k-list k-reset"/>')
-                    .css({ overflow: kendo.support.touch ? "": "auto" })
+        that.ul = $('<ul tabindex="-1" role="listbox" aria-hidden="true" unselectable="on" class="k-list k-reset"/>')
+                    .css({ overflow: kendo.support.kineticScrollNeeded ? "": "auto" })
                     .on(CLICK, LI, proxy(that._click, that))
                     .on("mouseenter" + ns, LI, function() { $(this).addClass(HOVER); })
                     .on("mouseleave" + ns, LI, function() { $(this).removeClass(HOVER); });
@@ -29490,27 +33634,44 @@ extend(Editor, {
                     .append(that.ul)
                     .on(MOUSEDOWN, preventDefault);
 
+        if (id) {
+            that._timeViewID = id + "_timeview";
+            that._optionID = id + "_option_selected";
+
+            that.ul.attr(ID, that._timeViewID);
+        }
+
         that._popup();
 
-        that.template = kendo.template('<li class="k-item" unselectable="on">#=data#</li>', { useWithBlock: false });
+        that.template = kendo.template('<li tabindex="-1" role="option" class="k-item" unselectable="on">#=data#</li>', { useWithBlock: false });
     };
 
     TimeView.prototype = {
         current: function(candidate) {
-            var that = this;
+            var that = this,
+                active = that.options.active;
 
             if (candidate !== undefined) {
                 if (that._current) {
-                    that._current.removeClass(SELECTED);
+                    that._current
+                        .removeClass(SELECTED)
+                        .removeAttr(ARIA_SELECTED)
+                        .removeAttr(ID);
                 }
 
                 if (candidate) {
-                    candidate = $(candidate);
-                    candidate.addClass(SELECTED);
+                    candidate = $(candidate).addClass(SELECTED)
+                                            .attr(ID, that._optionID)
+                                            .attr(ARIA_SELECTED, true);
+
                     that.scroll(candidate[0]);
                 }
 
                 that._current = candidate;
+
+                if (active) {
+                    active(candidate);
+                }
             } else {
                 return that._current;
             }
@@ -29577,7 +33738,7 @@ extend(Editor, {
                 msInterval = options.interval * MS_PER_MINUTE,
                 toString = kendo.toString,
                 template = that.template,
-                start = new DATE(min),
+                start = new DATE(+min),
                 idx = 0, length,
                 html = "";
 
@@ -29601,7 +33762,7 @@ extend(Editor, {
                 }
 
                 if (msMax && getMilliseconds(start) > msMax) {
-                    start = new DATE(max);
+                    start = new DATE(+max);
                 }
 
                 html += template(toString(start, format, options.culture));
@@ -29740,26 +33901,45 @@ extend(Editor, {
             return value;
         },
 
+        _adjustListWidth: function() {
+            var list = this.list,
+                width = list[0].style.width,
+                wrapper = this.options.anchor,
+                computedStyle, computedWidth;
+
+            if (!list.data("width") && width) {
+                return;
+            }
+
+            computedStyle = window.getComputedStyle ? window.getComputedStyle(wrapper[0], null) : 0;
+            computedWidth = computedStyle ? parseFloat(computedStyle.width) : wrapper.outerWidth();
+
+            if (computedStyle && (browser.mozilla || browser.msie)) { // getComputedStyle returns different box in FF and IE.
+                computedWidth += parseFloat(computedStyle.paddingLeft) + parseFloat(computedStyle.paddingRight) + parseFloat(computedStyle.borderLeftWidth) + parseFloat(computedStyle.borderRightWidth);
+            }
+
+            width = computedWidth - (list.outerWidth() - list.width());
+
+            list.css({
+                fontFamily: wrapper.css("font-family"),
+                width: width
+            })
+            .data("width", width);
+        },
+
         _popup: function() {
             var that = this,
                 list = that.list,
                 options = that.options,
-                anchor = options.anchor,
-                width;
+                anchor = options.anchor;
 
             that.popup = new ui.Popup(list, extend(options.popup, {
                 anchor: anchor,
                 open: options.open,
                 close: options.close,
-                animation: options.animation
+                animation: options.animation,
+                isRtl: kendo.support.isRtl(options.anchor)
             }));
-
-            width = anchor.outerWidth() - (list.outerWidth() - list.width());
-
-            list.css({
-                fontFamily: anchor.css("font-family"),
-                width: width
-            });
 
             kendo.touchScroller(that.popup.element);
         },
@@ -29850,7 +34030,7 @@ extend(Editor, {
 
     var TimePicker = Widget.extend({
         init: function(element, options) {
-            var that = this;
+            var that = this, ul, timeView;
 
             Widget.fn.init.call(that, element, options);
 
@@ -29861,7 +34041,8 @@ extend(Editor, {
 
             that._wrapper();
 
-            that.timeView = new TimeView(extend({}, options, {
+            that.timeView = timeView = new TimeView(extend({}, options, {
+                id: element.attr(ID),
                 anchor: that.wrapper,
                 format: options.format,
                 change: function(value, trigger) {
@@ -29872,16 +34053,31 @@ extend(Editor, {
                     }
                 },
                 open: function(e) {
+                    that.timeView._adjustListWidth();
+
                     if (that.trigger(OPEN)) {
                         e.preventDefault();
+                    } else {
+                        element.attr(ARIA_EXPANDED, true);
+                        ul.attr(ARIA_HIDDEN, false);
                     }
                 },
                 close: function(e) {
                     if (that.trigger(CLOSE)) {
                         e.preventDefault();
+                    } else {
+                        element.attr(ARIA_EXPANDED, false);
+                        ul.attr(ARIA_HIDDEN, true);
+                    }
+                },
+                active: function(current) {
+                    element.removeAttr(ARIA_ACTIVEDESCENDANT);
+                    if (current) {
+                        element.attr(ARIA_ACTIVEDESCENDANT, timeView._optionID);
                     }
                 }
             }));
+            ul = timeView.ul;
 
             that._icon();
             that._reset();
@@ -29892,6 +34088,12 @@ extend(Editor, {
                 .on("blur" + ns, proxy(that._blur, that))
                 .on("focus" + ns, function() {
                     that._inputWrapper.addClass(FOCUSED);
+                })
+                .attr({
+                    "role": "textbox",
+                    "aria-haspopup": true,
+                    "aria-expanded": false,
+                    "aria-owns": timeView._timeViewID
                 });
 
             that.enable(!element.is('[disabled]'));
@@ -29920,15 +34122,22 @@ extend(Editor, {
         ],
 
         setOptions: function(options) {
-            var that = this;
+            var that = this,
+                timeView = that.timeView,
+                timeViewOptions = timeView.options;
 
             Widget.fn.setOptions.call(that, options);
 
             normalize(that.options);
 
-            extend(that.timeView.options, that.options);
+            timeView.options = extend(timeViewOptions, that.options, {
+                active: timeViewOptions.active,
+                change: timeViewOptions.change,
+                close: timeViewOptions.close,
+                open: timeViewOptions.open
+            });
 
-            that.timeView.ul[0].innerHTML = "";
+            timeView.ul[0].innerHTML = "";
         },
 
         dataBind: function(dates) {
@@ -30013,13 +34222,13 @@ extend(Editor, {
             that._inputWrapper.removeClass(FOCUSED);
         },
 
-        _click: function() {
+        _click: function(e) {
             var that = this,
                 element = that.element;
 
             that.timeView.toggle();
 
-            if (!touch && element[0] !== document.activeElement) {
+            if (e.type === "click" && element[0] !== document.activeElement) {
                 element.focus();
             }
         },
@@ -30049,7 +34258,10 @@ extend(Editor, {
                 arrow = $('<span unselectable="on" class="k-select"><span unselectable="on" class="k-icon k-i-clock">select</span></span>').insertAfter(element);
             }
 
-            that._arrow = arrow;
+            that._arrow = arrow.attr({
+                "role": "button",
+                "aria-controls": that.timeView._timeViewID
+            });
         },
 
         _keydown: function(e) {
@@ -30078,7 +34290,7 @@ extend(Editor, {
                 return;
             }
 
-            value = new DATE(value);
+            value = new DATE(+value);
 
             options[option] = value;
             that.timeView.options[option] = value;
@@ -30086,15 +34298,14 @@ extend(Editor, {
         },
 
         _toggleHover: function(e) {
-            if (!touch) {
-                $(e.currentTarget).toggleClass(HOVER, e.type === "mouseenter");
-            }
+            $(e.currentTarget).toggleClass(HOVER, e.type === "mouseenter");
         },
 
         _update: function(value) {
             var that = this,
                 options = that.options,
-                date = that.timeView._parse(value);
+                timeView = that.timeView,
+                date = timeView._parse(value);
 
             if (!isInRange(date, options.min, options.max)) {
                 date = null;
@@ -30102,7 +34313,7 @@ extend(Editor, {
 
             that._value = date;
             that.element.val(date ? kendo.toString(date, options.format, options.culture) : value);
-            that.timeView.value(date);
+            timeView.value(date);
 
             return date;
         },
@@ -30120,14 +34331,13 @@ extend(Editor, {
             }
 
             wrapper[0].style.cssText = element[0].style.cssText;
+            that.wrapper = wrapper.addClass("k-widget k-timepicker k-header")
+                                  .addClass(element[0].className);
+
             element.css({
                 width: "100%",
                 height: element[0].style.height
             });
-
-            that.wrapper = wrapper.addClass("k-widget k-timepicker k-header")
-                                  .addClass(element[0].className)
-                                  .show();
 
             that._inputWrapper = $(wrapper[0].firstChild);
         },
@@ -30163,12 +34373,11 @@ extend(Editor, {
 
     ui.plugin(TimePicker);
 
-})(jQuery);
+})(window.kendo.jQuery);
 (function($, undefined) {
 
     var kendo = window.kendo,
         TimeView = kendo.TimeView,
-        touch = kendo.support.touch,
         parse = kendo.parseDate,
         extractFormat = kendo._extractFormat,
         calendar = kendo.calendar,
@@ -30182,16 +34391,20 @@ extend(Editor, {
         CLOSE = "close",
         CHANGE = "change",
         ns = ".kendoDateTimePicker",
-        CLICK = (touch ? "touchend" : "click") + ns,
+        CLICK = "touchend" + ns + " click" + ns,
         DISABLED = "disabled",
         DEFAULT = "k-state-default",
         FOCUSED = "k-state-focused",
         HOVER = "k-state-hover",
         STATEDISABLED = "k-state-disabled",
         HOVEREVENTS = "mouseenter" + ns + " mouseleave" + ns,
-        MOUSEDOWN = (touch ? "touchstart" : "mousedown") + ns,
+        MOUSEDOWN = "touchstart" + ns + " mousedown" + ns,
         MONTH = "month",
         SPAN = "<span/>",
+        ARIA_ACTIVEDESCENDANT = "aria-activedescendant",
+        ARIA_EXPANDED = "aria-expanded",
+        ARIA_HIDDEN = "aria-hidden",
+        ARIA_OWNS = "aria-owns",
         DATE = Date,
         MIN = new DATE(1900, 0, 1),
         MAX = new DATE(2099, 11, 31),
@@ -30212,11 +34425,12 @@ extend(Editor, {
 
             that._wrapper();
 
-            that._icons();
-
             that._views();
 
+            that._icons();
+
             that._reset();
+            that._template();
 
             element[0].type = "text";
             element.addClass("k-input")
@@ -30229,7 +34443,12 @@ extend(Editor, {
                         that._change(element.val());
                         that.close("date");
                         that.close("time");
-                    });
+                    })
+                   .attr({
+                        "role": "textbox",
+                        "aria-haspopup": true,
+                        "aria-expanded": false
+                   });
 
             that._midnight = getMilliseconds(options.min) + getMilliseconds(options.max) === 0;
 
@@ -30255,7 +34474,8 @@ extend(Editor, {
             start: MONTH,
             depth: MONTH,
             animation: {},
-            month : {}
+            month : {},
+            ARIATemplate: 'Current focused date is #=kendo.toString(data.current, "G")#'
     },
 
     events: [
@@ -30280,6 +34500,7 @@ extend(Editor, {
 
             extend(timeViewOptions, options, {
                 format: options.timeFormat,
+                active: timeViewOptions.active,
                 change: timeViewOptions.change,
                 close: timeViewOptions.close,
                 open: timeViewOptions.open
@@ -30311,20 +34532,20 @@ extend(Editor, {
                     .removeAttr(DISABLED);
 
                 dateIcon.on(MOUSEDOWN, preventDefault)
-                        .on(CLICK, function() {
+                        .on(CLICK, function(e) {
                             that.toggle("date");
 
-                            if (!touch && element[0] !== document.activeElement) {
+                            if (e.type === "click" && element[0] !== document.activeElement) {
                                 element.focus();
                             }
                         });
 
 
                 timeIcon.on(MOUSEDOWN, preventDefault)
-                        .on(CLICK, function() {
+                        .on(CLICK, function(e) {
                             that.toggle("time");
 
-                            if (!touch && element[0] !== document.activeElement) {
+                            if (e.type === "click" && element[0] !== document.activeElement) {
                                 element.focus();
                             }
                         });
@@ -30427,7 +34648,7 @@ extend(Editor, {
                 return;
             }
 
-            options[option] = new DATE(value);
+            options[option] = new DATE(+value);
             that.dateView[option](value);
 
             that._midnight = getMilliseconds(options.min) + getMilliseconds(options.max) === 0;
@@ -30449,9 +34670,7 @@ extend(Editor, {
         },
 
         _toggleHover: function(e) {
-            if (!touch) {
-                $(e.currentTarget).toggleClass(HOVER, e.type === "mouseenter");
-            }
+            $(e.currentTarget).toggleClass(HOVER, e.type === "mouseenter");
         },
 
         _update: function(value) {
@@ -30459,6 +34678,7 @@ extend(Editor, {
                 options = that.options,
                 min = options.min,
                 max = options.max,
+                dates = options.dates,
                 timeView = that.timeView,
                 date = parse(value, options.parseFormats, options.culture),
                 rebind, timeViewOptions, old, skip, formattedValue;
@@ -30487,22 +34707,33 @@ extend(Editor, {
                 old = that._old;
                 timeViewOptions = timeView.options;
 
-                if (isEqualDatePart(date, min)) {
-                    timeViewOptions.min = min;
-                    timeViewOptions.max = MAX;
-                    rebind = true;
+                if (dates[0]) {
+                    dates = $.grep(dates, function(d) { return isEqualDatePart(date, d); });
+
+                    if (dates[0]) {
+                        timeView.dataBind(dates);
+                        skip = true;
+                    }
                 }
 
-                if (isEqualDatePart(date, max)) {
-                    if (that._midnight) {
-                        timeView.dataBind([MAX]);
-                        skip = true;
-                    } else {
-                        timeViewOptions.max = max;
-                        if (!rebind) {
-                            timeViewOptions.min = MIN;
-                        }
+                if (!skip) {
+                    if (isEqualDatePart(date, min)) {
+                        timeViewOptions.min = min;
+                        timeViewOptions.max = MAX;
                         rebind = true;
+                    }
+
+                    if (isEqualDatePart(date, max)) {
+                        if (that._midnight) {
+                            timeView.dataBind([MAX]);
+                            skip = true;
+                        } else {
+                            timeViewOptions.max = max;
+                            if (!rebind) {
+                                timeViewOptions.min = MIN;
+                            }
+                            rebind = true;
+                        }
                     }
                 }
 
@@ -30517,6 +34748,7 @@ extend(Editor, {
             }
 
             that.element.val(date ? kendo.toString(date, options.format, options.culture) : value);
+            that._updateARIA(date);
 
             return date;
         },
@@ -30531,6 +34763,7 @@ extend(Editor, {
                 that.toggle(isDateViewVisible ? "time" : "date");
             } else if (isDateViewVisible) {
                 dateView.move(e);
+                that._updateARIA(dateView._current);
             } else if (timeView.popup.visible()) {
                 timeView.move(e);
             } else if (e.keyCode === kendo.keys.ENTER) {
@@ -30540,19 +34773,25 @@ extend(Editor, {
 
         _views: function() {
             var that = this,
-                options = that.options;
+                element = that.element,
+                options = that.options,
+                id = element.attr("id"),
+                dateView, timeView,
+                div, ul,
+                date;
 
-            that.dateView = new kendo.DateView(extend({}, options, {
+            that.dateView = dateView = new kendo.DateView(extend({}, options, {
+                id: id,
                 anchor: that.wrapper,
                 change: function() {
-                    var value = that.dateView.calendar.value(),
+                    var value = dateView.calendar.value(),
                         msValue = +value,
                         msMin = +options.min,
                         msMax = +options.max,
                         current;
 
                     if (msValue === msMin || msValue === msMax) {
-                        current = new DATE(that._value);
+                        current = new DATE(+that._value);
                         current.setFullYear(value.getFullYear());
                         current.setMonth(value.getMonth());
                         current.setDate(value.getDate());
@@ -30568,19 +34807,40 @@ extend(Editor, {
                 close: function(e) {
                     if (that.trigger(CLOSE, dateViewParams)) {
                         e.preventDefault();
+                    } else {
+                        element.attr(ARIA_EXPANDED, false);
+                        div.attr(ARIA_HIDDEN, true);
+
+                        if (!timeView.popup.visible()) {
+                            element.removeAttr(ARIA_OWNS);
+                        }
                     }
                 },
                 open:  function(e) {
                     if (that.trigger(OPEN, dateViewParams)) {
                         e.preventDefault();
+                    } else {
+                        date = parse(element.val(), options.parseFormats, options.culture);
+                        if (!date) {
+                            that.dateView.value(date);
+                        } else {
+                            that.dateView._current = date;
+                            that.dateView.calendar._focus(date);
+                        }
+
+                        div.attr(ARIA_HIDDEN, false);
+                        element.attr(ARIA_EXPANDED, true)
+                               .attr(ARIA_OWNS, dateView._dateViewID);
                     }
                 }
             }));
+            div = dateView.div;
 
-            that.timeView = new TimeView({
+            that.timeView = timeView = new TimeView({
+                id: id,
+                value: options.value,
                 anchor: that.wrapper,
                 animation: options.animation,
-                dates: options.dates,
                 format: options.timeFormat,
                 culture: options.culture,
                 height: options.height,
@@ -30588,36 +34848,56 @@ extend(Editor, {
                 min: new DATE(MIN),
                 max: new DATE(MAX),
                 parseFormats: options.parseFormats,
-                value: options.value,
                 change: function(value, trigger) {
-                    value = that.timeView._parse(value);
+                    value = timeView._parse(value);
 
                     if (value < options.min) {
-                        value = new DATE(options.min);
-                        that.timeView.options.min = value;
+                        value = new DATE(+options.min);
+                        timeView.options.min = value;
                     } else if (value > options.max) {
-                        value = new DATE(options.max);
-                        that.timeView.options.max = value;
+                        value = new DATE(+options.max);
+                        timeView.options.max = value;
                     }
 
                     if (trigger) {
                         that._timeSelected = true;
                         that._change(value);
                     } else {
-                        that.element.val(kendo.toString(value, options.format, options.culture));
+                        element.val(kendo.toString(value, options.format, options.culture));
+                        dateView.value(value);
+                        that._updateARIA(value);
                     }
                 },
                 close: function(e) {
                     if (that.trigger(CLOSE, timeViewParams)) {
                         e.preventDefault();
+                    } else {
+                        ul.attr(ARIA_HIDDEN, true);
+                        element.attr(ARIA_EXPANDED, false);
+
+                        if (!dateView.popup.visible()) {
+                            element.removeAttr(ARIA_OWNS);
+                        }
                     }
                 },
                 open:  function(e) {
+                    timeView._adjustListWidth();
                     if (that.trigger(OPEN, timeViewParams)) {
                         e.preventDefault();
+                    } else {
+                        ul.attr(ARIA_HIDDEN, false);
+                        element.attr(ARIA_EXPANDED, true)
+                               .attr(ARIA_OWNS, timeView._timeViewID);
+                    }
+                },
+                active: function(current) {
+                    element.removeAttr(ARIA_ACTIVEDESCENDANT);
+                    if (current) {
+                        element.attr(ARIA_ACTIVEDESCENDANT, timeView._optionID);
                     }
                 }
             });
+            ul = timeView.ul;
         },
 
         _icons: function() {
@@ -30629,11 +34909,18 @@ extend(Editor, {
 
             if (!icons[0]) {
                 icons = $('<span unselectable="on" class="k-select"><span unselectable="on" class="k-icon k-i-calendar">select</span><span unselectable="on" class="k-icon k-i-clock">select</span></span>').insertAfter(element);
-                icons = icons.children();
             }
 
-            that._dateIcon = icons.eq(0);
-            that._timeIcon = icons.eq(1);
+            icons = icons.children();
+            that._dateIcon = icons.eq(0).attr({
+                "role": "button",
+                "aria-controls": that.dateView._dateViewID
+            });
+
+            that._timeIcon = icons.eq(1).attr({
+                "role": "button",
+                "aria-controls": that.timeView._timeViewID
+            });
         },
 
         _wrapper: function() {
@@ -30655,8 +34942,7 @@ extend(Editor, {
             });
 
             that.wrapper = wrapper.addClass("k-widget k-datetimepicker k-header")
-                                  .addClass(element[0].className)
-                                  .show();
+                                  .addClass(element[0].className);
 
             that._inputWrapper = $(wrapper[0].firstChild);
         },
@@ -30673,6 +34959,14 @@ extend(Editor, {
 
                 that._form = form.on("reset", that._resetHandler);
             }
+        },
+
+        _template: function() {
+            this._ariaTemplate = kendo.template(this.options.ARIATemplate);
+        },
+
+        _updateARIA: function(date) {
+            this.element.attr("aria-label", this._ariaTemplate({ current: date }));
         }
     });
 
@@ -30691,7 +34985,7 @@ extend(Editor, {
 
     ui.plugin(DateTimePicker);
 
-})(jQuery);
+})(window.kendo.jQuery);
 (function($, undefined){
     var kendo = window.kendo,
         ui = kendo.ui,
@@ -30702,8 +34996,10 @@ extend(Editor, {
         Widget = ui.Widget,
         HierarchicalDataSource = data.HierarchicalDataSource,
         proxy = $.proxy,
+        keys = kendo.keys,
         NS = ".kendoTreeView",
         SELECT = "select",
+        NAVIGATE = "navigate",
         EXPAND = "expand",
         CHANGE = "change",
         CHECKED = "checked",
@@ -30720,8 +35016,11 @@ extend(Editor, {
         KTREEVIEW = "k-treeview",
         VISIBLE = ":visible",
         NODE = ".k-item",
-        rendering, TreeView,
-        subGroup, nodeContents,
+        STRING = "string",
+        ARIASELECTED = "aria-selected",
+        ARIADISABLED = "aria-disabled",
+        TreeView,
+        subGroup, nodeContents, nodeIcon,
         bindings = {
             text: "dataTextField",
             url: "dataUrlField",
@@ -30731,7 +35030,7 @@ extend(Editor, {
         isDomElement = function (o){
             return (
                 typeof HTMLElement === "object" ? o instanceof HTMLElement : //DOM2
-                o && typeof o === "object" && o.nodeType === 1 && typeof o.nodeName === "string"
+                o && typeof o === "object" && o.nodeType === 1 && typeof o.nodeName === STRING
             );
         };
 
@@ -30749,6 +35048,9 @@ extend(Editor, {
 
     subGroup = contentChild(".k-group");
     nodeContents = contentChild(".k-group,.k-content");
+    nodeIcon = function(node) {
+        return node.children("div").children(".k-icon");
+    };
 
     function checkboxes(node) {
         return node.children("div").find(":checkbox:first");
@@ -30758,6 +35060,7 @@ extend(Editor, {
         var wrapper = node.children("div"),
             group = node.children("ul"),
             toggleButton = wrapper.children(".k-icon"),
+            checkbox = node.children(":checkbox"),
             innerWrapper = wrapper.children(".k-in"),
             currentNode, tmp;
 
@@ -30774,6 +35077,10 @@ extend(Editor, {
         } else if (!group.length || !group.children().length) {
             toggleButton.remove();
             group.remove();
+        }
+
+        if (checkbox.length) {
+            $("<span class='k-checkbox' />").appendTo(wrapper).append(checkbox);
         }
 
         if (!innerWrapper.length) {
@@ -30842,6 +35149,12 @@ extend(Editor, {
                 that.root = element.children("ul").eq(0);
             }
 
+            that._tabindex();
+
+            if (!that.wrapper.filter("[role=tree]").length) {
+                that.wrapper.attr("role", "tree");
+            }
+
             that._dataSource(inferred);
 
             that._attachEvents();
@@ -30853,10 +35166,20 @@ extend(Editor, {
             if (!inferred) {
                 if (options.autoBind) {
                     that._progress(true);
-                    that.dataSource.read();
+                    that.dataSource.fetch();
                 }
             } else {
                 that._attachUids();
+            }
+
+            if (options.checkboxes && options.checkboxes.checkChildren) {
+                that.wrapper.find(":checkbox").closest(NODE).each(function(e) {
+                    that._updateIndeterminate($(this));
+                });
+            }
+
+            if (that.element[0].id) {
+                that._ariaId = kendo.format("{0}_tv_active", that.element[0].id);
             }
         },
 
@@ -30869,11 +35192,16 @@ extend(Editor, {
                 .on(MOUSEENTER + NS, ".k-in.k-state-selected", function(e) { e.preventDefault(); })
                 .on(MOUSEENTER + NS, clickableItems, function () { $(this).addClass(KSTATEHOVER); })
                 .on("mouseleave" + NS, clickableItems, function () { $(this).removeClass(KSTATEHOVER); })
-                .on(CLICK + NS, clickableItems, proxy(that._nodeClick, that))
-                .on("dblclick" + NS, "div:not(.k-state-disabled) .k-in", proxy(that._toggleButtonClick, that))
-                .on(CLICK + NS, ".k-plus,.k-minus", proxy(that._toggleButtonClick, that))
+                .on("touchend" + NS + " " + CLICK + NS, clickableItems, proxy(that._click, that))
+                .on("dblclick" + NS, ".k-in:not(.k-state-disabled)", proxy(that._toggleButtonClick, that))
+                .on("touchend" + NS + " " + CLICK + NS, ".k-plus,.k-minus", proxy(that._toggleButtonClick, that))
+                .on("keydown" + NS, proxy(that._keydown, that))
+                .on("focus" + NS, proxy(that._focus, that))
+                .on("blur" + NS, proxy(that._blur, that))
+                .on("mousedown" + NS, ".k-in,.k-checkbox :checkbox", proxy(that._mousedown, that))
                 .on("change" + NS, ".k-checkbox :checkbox", proxy(that._checkboxChange, that))
-                .on("click" + NS, ".k-checkbox :checkbox", proxy(that._checkboxClick, that));
+                .on("click" + NS, ".k-checkbox :checkbox", proxy(that._checkboxClick, that))
+                .on("click" + NS, function() { that.focus(); });
         },
 
         _checkboxClick: function(e) {
@@ -30901,6 +35229,7 @@ extend(Editor, {
 
             root.children("li").each(function(index, item) {
                 item = $(item).attr(uidAttr, data[index].uid);
+                item.attr("role", "treeitem");
                 that._attachUids(item.children("ul"), data[index].children);
             });
         },
@@ -30911,41 +35240,166 @@ extend(Editor, {
 
             if (animationOptions === false) {
                 animationOptions = {
-                    expand: { show: true, effects: {} },
+                    expand: { effects: {} },
                     collapse: { hide: true, effects: {} }
                 };
             } else if (!animationOptions.collapse || !("effects" in animationOptions.collapse)) {
                 animationOptions.collapse = extend({ reverse: true }, animationOptions.expand);
             }
 
-            extend(animationOptions.collapse, { show: false, hide: true });
+            extend(animationOptions.collapse, { hide: true });
 
             options.animation = animationOptions;
         },
 
         _templates: function() {
             var that = this,
-                options = that.options;
+                options = that.options,
+                fieldAccessor = proxy(that._fieldAccessor, that);
 
-            if (options.template && typeof options.template == "string") {
+            if (options.template && typeof options.template == STRING) {
                 options.template = template(options.template);
             } else if (!options.template) {
-                options.template = that._textTemplate();
+                options.template = template(
+                    "# var text = " + fieldAccessor("text") + "(item); #" +
+                    "# if (typeof item.encoded != 'undefined' && item.encoded === false) {#" +
+                        "#= text #" +
+                    "# } else { #" +
+                        "#: text #" +
+                    "# } #"
+                );
             }
 
             that._checkboxes();
 
             that.templates = {
+                wrapperCssClass: function (group, item) {
+                    var result = "k-item",
+                        index = item.index;
+
+                    if (group.firstLevel && index === 0) {
+                        result += " k-first";
+                    }
+
+                    if (index == group.length-1) {
+                        result += " k-last";
+                    }
+
+                    return result;
+                },
+                cssClass: function(group, item) {
+                    var result = "",
+                        index = item.index,
+                        groupLength = group.length - 1;
+
+                    if (group.firstLevel && index === 0) {
+                        result += "k-top ";
+                    }
+
+                    if (index === 0 && index != groupLength) {
+                        result += "k-top";
+                    } else if (index == groupLength) {
+                        result += "k-bot";
+                    } else {
+                        result += "k-mid";
+                    }
+
+                    return result;
+                },
+                textClass: function(item) {
+                    var result = "k-in";
+
+                    if (item.enabled === false) {
+                        result += " k-state-disabled";
+                    }
+
+                    if (item.selected === true) {
+                        result += " k-state-selected";
+                    }
+
+                    return result;
+                },
+                toggleButtonClass: function(item) {
+                    var result = "k-icon";
+
+                    if (item.expanded !== true) {
+                        result += " k-plus";
+                    } else {
+                        result += " k-minus";
+                    }
+
+                    if (item.enabled === false) {
+                        result += "-disabled";
+                    }
+
+                    return result;
+                },
+                groupAttributes: function(group) {
+                    return group.expanded !== true ? " style='display:none'" : "";
+                },
+                groupCssClass: function(group) {
+                    var cssClass = "k-group";
+
+                    if (group.firstLevel) {
+                        cssClass += " k-treeview-lines";
+                    }
+
+                    return cssClass;
+                },
                 dragClue: template(
                     "<div class='k-header k-drag-clue'><span class='k-icon k-drag-status'></span>#= text #</div>"
                 ),
                 group: template(
-                    "<ul class='#= r.groupCssClass(group) #'#= r.groupAttributes(group) #>" +
+                    "<ul class='#= r.groupCssClass(group) #'#= r.groupAttributes(group) # role='group'>" +
                         "#= renderItems(data) #" +
                     "</ul>"
                 ),
-                item: that._itemTemplate(),
-                loading: that._loadingTemplate()
+                itemContent: template(
+                    "# var imageUrl = " + fieldAccessor("imageUrl") + "(item); #" +
+                    "# var spriteCssClass = " + fieldAccessor("spriteCssClass") + "(item); #" +
+                    "# if (imageUrl) { #" +
+                        "<img class='k-image' alt='' src='#= imageUrl #'>" +
+                    "# } #" +
+
+                    "# if (spriteCssClass) { #" +
+                        "<span class='k-sprite #= spriteCssClass #'></span>" +
+                    "# } #" +
+
+                    "#= treeview.template(data) #"
+                ),
+                itemElement: template(
+                    "# var url = " + fieldAccessor("url") + "(item); #" +
+                    "<div class='#= r.cssClass(group, item) #'>" +
+                        "# if (item.hasChildren) { #" +
+                            "<span class='#= r.toggleButtonClass(item) #' role='presentation'></span>" +
+                        "# } #" +
+
+                        "# if (treeview.checkboxes) { #" +
+                            "<span class='k-checkbox' role='presentation'>" +
+                                "#= treeview.checkboxes.template(data) #" +
+                            "</span>" +
+                        "# } #" +
+
+                        "# var tag = url ? 'a' : 'span'; #" +
+                        "# var textAttr = url ? ' href=\\'' + url + '\\'' : ''; #" +
+
+                        "<#=tag#  class='#= r.textClass(item) #'#= textAttr #>" +
+                            "#= r.itemContent(data) #" +
+                        "</#=tag#>" +
+                    "</div>"
+                ),
+                item: template(
+                    "<li role='treeitem' class='#= r.wrapperCssClass(group, item) #'" +
+                        " " + kendo.attr("uid") + "='#= item.uid #'" +
+                        "#=item.selected ? \"aria-selected='true'\" : ''#" +
+                        "#=item.enabled === false ? \"aria-disabled='true'\" : ''#" +
+                    ">" +
+                        "#= r.itemElement(data) #" +
+                    "</li>"
+                ),
+                loading: template(
+                    "<div class='k-icon k-loading' /> Loading..."
+                )
             };
         },
 
@@ -30958,7 +35412,7 @@ extend(Editor, {
 
             this._dataSource();
 
-            this.dataSource.read();
+            this.dataSource.fetch();
         },
 
         _dataSource: function(silentRead) {
@@ -30970,7 +35424,7 @@ extend(Editor, {
                 for (var i = 0; i < data.length; i++) {
                     data[i]._initChildren();
 
-                    data[i].children.read();
+                    data[i].children.fetch();
 
                     recursiveRead(data[i].children.view());
                 }
@@ -30996,7 +35450,7 @@ extend(Editor, {
             that.dataSource = HierarchicalDataSource.create(dataSource);
 
             if (silentRead) {
-                that.dataSource.read();
+                that.dataSource.fetch();
 
                 recursiveRead(that.dataSource.view());
             }
@@ -31014,7 +35468,8 @@ extend(Editor, {
 
             EXPAND,
             COLLAPSE,
-            SELECT
+            SELECT,
+            NAVIGATE
         ],
 
         options: {
@@ -31023,13 +35478,13 @@ extend(Editor, {
             animation: {
                 expand: {
                     effects: "expand:vertical",
-                    duration: 200,
-                    show: true
+                    duration: 200
                 }, collapse: {
                     duration: 100
                 }
             },
             dragAndDrop: false,
+            checkboxes: false,
             autoBind: true,
             loadOnDemand: true,
             template: ""
@@ -31076,70 +35531,12 @@ extend(Editor, {
                             }).join(",") + "];";
 
                 // generates levels[level < 3 ? level : 2](item);
-                result += "return levels[level < " + count + " ? level : " + (count-1) + "](item)";
+                result += "return levels[Math.min(level, " + count + "-1)](item)";
             }
 
             result += "})";
 
             return result;
-        },
-
-        _textTemplate: function() {
-            var that = this,
-                templateText =
-                    "# var text = " + that._fieldAccessor("text") + "(item); #" +
-                    "# if (typeof item.encoded != 'undefined' && item.encoded === false) {#" +
-                        "#= text #" +
-                    "# } else { #" +
-                        "#: text #" +
-                    "# } #";
-
-            return template(templateText);
-        },
-
-        _loadingTemplate: function() {
-            return template("<div class='k-icon k-loading' /> Loading...");
-        },
-
-        _itemTemplate: function() {
-            var that = this,
-                templateText =
-                    "# var url = " + that._fieldAccessor("url") + "(item); #" +
-                    "# var imageUrl = " + that._fieldAccessor("imageUrl") + "(item); #" +
-                    "# var spriteCssClass = " + that._fieldAccessor("spriteCssClass") + "(item); #" +
-                    "<li class='#= r.wrapperCssClass(group, item) #'" +
-                        " " + kendo.attr("uid") + "='#= item.uid #'" +
-                    ">" +
-                        "<div class='#= r.cssClass(group, item) #'>" +
-                            "# if (item.hasChildren) { #" +
-                                "<span class='#= r.toggleButtonClass(item) #'></span>" +
-                            "# } #" +
-
-                            "# if (treeview.checkboxes) { #" +
-                                "<span class='k-checkbox'>" +
-                                    "#= treeview.checkboxes.template(data) #" +
-                                "</span>" +
-                            "# } #" +
-
-                            "# var tag = url ? 'a' : 'span'; #" +
-                            "# var textAttr = url ? ' href=\\'' + url + '\\'' : ''; #" +
-
-                            "<#=tag# class='#= r.textClass(item) #'#= textAttr #>" +
-
-                                "# if (imageUrl) { #" +
-                                    "<img class='k-image' alt='' src='#= imageUrl #'>" +
-                                "# } #" +
-
-                                "# if (spriteCssClass) { #" +
-                                    "<span class='k-sprite #= spriteCssClass #'></span>" +
-                                "# } #" +
-
-                                "#= treeview.template(data) #" +
-                            "</#=tag#>" +
-                        "</div>" +
-                    "</li>";
-
-            return template(templateText);
         },
 
         setOptions: function(options) {
@@ -31163,19 +35560,24 @@ extend(Editor, {
         },
 
         _updateIndeterminate: function(node) {
-            var parentNode = node.parent().closest(NODE),
-                siblingCheckboxes, i,
+            var parentNode = this.parent(node),
+                siblingCheckboxes, i, length,
                 all = true;
 
             if (parentNode.length) {
                 siblingCheckboxes = checkboxes(node.siblings().andSelf());
+                length = siblingCheckboxes.length;
 
-                for (i = 1; i < siblingCheckboxes.length; i++) {
-                    if (siblingCheckboxes[i].checked != siblingCheckboxes[i-1].checked ||
-                        siblingCheckboxes[i].indeterminate || siblingCheckboxes[i-1].indeterminate) {
-                        all = false;
-                        break;
+                if (length > 1) {
+                    for (i = 1; i < length; i++) {
+                        if (siblingCheckboxes[i].checked != siblingCheckboxes[i-1].checked ||
+                            siblingCheckboxes[i].indeterminate || siblingCheckboxes[i-1].indeterminate) {
+                            all = false;
+                            break;
+                        }
                     }
+                } else {
+                    all = !siblingCheckboxes[0].indeterminate;
                 }
 
                 checkboxes(parentNode)
@@ -31198,7 +35600,6 @@ extend(Editor, {
                     that.dataItem(this).set(CHECKED, isChecked);
                 });
 
-                // update indeterminate state of parents
                 that._updateIndeterminate(node);
             } else {
                 that.dataItem(node).set(CHECKED, isChecked);
@@ -31209,7 +35610,192 @@ extend(Editor, {
             this.toggle($(e.target).closest(NODE));
         },
 
-        _nodeClick: function (e) {
+        _mousedown: function(e) {
+            this._clickTarget = $(e.currentTarget).closest(NODE);
+        },
+
+        _focusable: function (node) {
+            return node && node.length && node.is(":visible") && !node.find(".k-in:first").hasClass("k-state-disabled");
+        },
+
+        _focus: function(e) {
+            var current = this.select();
+
+            if (!this._focusable(current)) {
+                current = this._clickTarget;
+            }
+
+            if (!this._focusable(current)) {
+                current = this.current();
+            }
+
+            if (!this._focusable(current)) {
+                current = this._nextVisible($());
+            }
+
+            this.current(current);
+        },
+
+        focus: function() {
+            this.wrapper.focus();
+        },
+
+        _blur: function(e) {
+            this.current().find(".k-in:first").removeClass("k-state-focused");
+        },
+
+        _enabled: function(node) {
+            return !node.children("div").children(".k-in").hasClass("k-state-disabled");
+        },
+
+        parent: function(node) {
+            var wrapperRe = /\bk-treeview\b/,
+                itemRe = /\bk-item\b/,
+                result,
+                skipSelf;
+
+            if (typeof node == STRING) {
+                node = this.element.find(node);
+            }
+
+            if (!isDomElement(node)) {
+                node = node[0];
+            }
+
+            skipSelf = itemRe.test(node.className);
+
+            do {
+                node = node.parentNode;
+
+                if (itemRe.test(node.className)) {
+                    if (skipSelf) {
+                        result = node;
+                    } else {
+                        skipSelf = true;
+                    }
+                }
+            } while (!wrapperRe.test(node.className) && !result);
+
+            return $(result);
+        },
+
+        _nextVisible: function(node) {
+            var that = this,
+                expanded = that._expanded(node),
+                result;
+
+            if (!node.length || !node.is(":visible")) {
+                result = that.root.children().eq(0);
+            } else if (expanded) {
+                result = subGroup(node).children().first();
+            } else {
+                while (node.length && !node.next().length) {
+                    node = that.parent(node);
+                }
+
+                if (node.next().length) {
+                    result = node.next();
+                } else {
+                    result = node;
+                }
+            }
+
+            if (!that._enabled(result)) {
+                result = that._nextVisible(result);
+            }
+
+            return result;
+        },
+
+        _previousVisible: function(node) {
+            var that = this,
+                result;
+
+            if (!node.length || node.prev().length) {
+                if (node.length) {
+                    result = node.prev();
+                } else {
+                    result = that.root.children().last();
+                }
+
+                while (that._expanded(result)) {
+                    result = subGroup(result).children().last();
+                }
+            } else {
+                result = that.parent(node) || node;
+            }
+
+            if (!that._enabled(result)) {
+                result = that._previousVisible(result);
+            }
+
+            return result;
+        },
+
+        _keydown: function(e) {
+            var that = this,
+                key = e.keyCode,
+                target,
+                focused = that.current(),
+                expanded = that._expanded(focused),
+                checkbox = focused.find(":checkbox:first"),
+                rtl = kendo.support.isRtl(that.element);
+
+            if (e.target != e.currentTarget) {
+                return;
+            }
+
+            if ((!rtl && key == keys.RIGHT) || (rtl && key == keys.LEFT)) {
+                if (expanded) {
+                    target = that._nextVisible(focused);
+                } else {
+                    that.expand(focused);
+                }
+            } else if ((!rtl && key == keys.LEFT) || (rtl && key == keys.RIGHT)) {
+                if (expanded) {
+                    that.collapse(focused);
+                } else {
+                    target = that.parent(focused);
+
+                    if (!that._enabled(target)) {
+                        target = undefined;
+                    }
+                }
+            } else if (key == keys.DOWN) {
+                target = that._nextVisible(focused);
+            } else if (key == keys.UP) {
+                target = that._previousVisible(focused);
+            } else if (key == keys.HOME) {
+                target = that._nextVisible($());
+            } else if (key == keys.END) {
+                target = that._previousVisible($());
+            } else if (key == keys.ENTER) {
+                if (!focused.find(".k-in:first").hasClass("k-state-selected")) {
+                    if (!that._trigger(SELECT, focused)) {
+                        that.select(focused);
+                    }
+                }
+            } else if (key == keys.SPACEBAR && checkbox.length) {
+                checkbox.prop(CHECKED, !checkbox.prop(CHECKED))
+                    .data("indeterminate", false)
+                    .prop("indeterminate", false);
+
+                that._checkboxChange({ target: checkbox });
+
+                target = focused;
+            }
+
+            if (target) {
+                e.preventDefault();
+
+                if (focused[0] != target[0]) {
+                    that._trigger(NAVIGATE, target);
+                    that.current(target);
+                }
+            }
+        },
+
+        _click: function (e) {
             var that = this,
                 node = $(e.target),
                 contents = nodeContents(node.closest(NODE)),
@@ -31226,7 +35812,7 @@ extend(Editor, {
                 e.preventDefault();
             }
 
-            if (!node.hasClass(".k-state-selected") && !that._trigger("select", node)) {
+            if (!node.hasClass(".k-state-selected") && !that._trigger(SELECT, node)) {
                 that.select(node);
             }
         },
@@ -31235,7 +35821,7 @@ extend(Editor, {
             var that = this,
                 element = that.element,
                 wrapper, root,
-                wrapperClasses = "k-widget k-treeview k-reset";
+                wrapperClasses = "k-widget k-treeview";
 
             if (element.is("div")) {
                 wrapper = element;
@@ -31259,7 +35845,7 @@ extend(Editor, {
                 groupElement = item.children("ul");
 
             groupElement
-                .addClass(rendering.groupCssClass(group))
+                .addClass(that.templates.groupCssClass(group))
                 .css("display", group.expanded ? "" : "none");
 
             that._nodes(groupElement, group);
@@ -31287,16 +35873,29 @@ extend(Editor, {
         },
 
         _checkboxes: function() {
-            var that = this,
-                options = that.options,
-                checkboxOptions = options.checkboxes;
+            var options = this.options,
+                checkboxOptions = options.checkboxes,
+                checkboxTemplate;
 
             if (checkboxOptions || options.checkboxTemplate) {
+
+                if (options.checkboxTemplate) {
+                    checkboxTemplate = options.checkboxTemplate;
+                } else {
+                    checkboxTemplate = "<input type='checkbox' #= item.checked ? 'checked' : '' #";
+
+                    if (checkboxOptions.name) {
+                        checkboxTemplate += " name='" + checkboxOptions.name + "'";
+                    }
+
+                    checkboxTemplate += " />";
+                }
+
                 checkboxOptions = extend({
-                    template: options.checkboxTemplate || "<input type='checkbox' />"
+                    template: checkboxTemplate
                 }, options.checkboxes);
 
-                if (typeof checkboxOptions.template == "string") {
+                if (typeof checkboxOptions.template == STRING) {
                     checkboxOptions.template = template(checkboxOptions.template);
                 }
 
@@ -31306,7 +35905,8 @@ extend(Editor, {
 
         _updateNodeClasses: function (node, groupData, nodeData) {
             var wrapper = node.children("div"),
-                group = node.children("ul");
+                group = node.children("ul"),
+                templates = this.templates;
 
             if (node.hasClass("k-treeview")) {
                 return;
@@ -31323,20 +35923,20 @@ extend(Editor, {
 
             // li
             node.removeClass("k-first k-last")
-                .addClass(rendering.wrapperCssClass(groupData, nodeData));
+                .addClass(templates.wrapperCssClass(groupData, nodeData));
 
             // div
             wrapper.removeClass("k-top k-mid k-bot")
-                   .addClass(rendering.cssClass(groupData, nodeData));
+                   .addClass(templates.cssClass(groupData, nodeData));
 
             // span
             wrapper.children(".k-in").removeClass("k-in k-state-default k-state-disabled")
-                .addClass(rendering.textClass(nodeData));
+                .addClass(templates.textClass(nodeData));
 
             // toggle button
             if (group.length || node.attr("data-hasChildren") == "true") {
                 wrapper.children(".k-icon").removeClass("k-plus k-minus k-plus-disabled k-minus-disabled")
-                    .addClass(rendering.toggleButtonClass(nodeData));
+                    .addClass(templates.toggleButtonClass(nodeData));
 
                 group.addClass("k-group");
             }
@@ -31421,20 +36021,43 @@ extend(Editor, {
         },
 
         _updateNode: function(field, items) {
-            var that = this, i, node;
+            var that = this, i, node, item,
+                context = { treeview: that.options, item: item };
 
-            if ($.inArray(field, that.options.dataTextField) >= 0) {
-                for (i = 0; i < items.length; i++) {
-                    node = that.findByUid(items[i].uid);
-                    that.text(node, items[i][field]);
+            if (field == "selected") {
+                item = items[0];
+
+                node = that.findByUid(item.uid).find(".k-in:first")
+                        .removeClass("k-state-hover")
+                        .toggleClass("k-state-selected", item[field])
+                        .end();
+
+                if (item[field]) {
+                    that.current(node);
+                    node.attr(ARIASELECTED, true);
+                } else {
+                    node.attr(ARIASELECTED, false);
                 }
-            } else if (field == CHECKED) {
+            } else {
                 for (i = 0; i < items.length; i++) {
-                    node = that.findByUid(items[i].uid);
-                    node.children("div").find(":checkbox")
-                        .prop(CHECKED, items[i][field])
-                        .data("indeterminate", false)
-                        .prop("indeterminate", false);
+                    context.item = item = items[i];
+
+                    if (field == "spriteCssClass" || field == "imageUrl" ||
+                        $.inArray(field, that.options.dataTextField) >= 0) {
+                        that.findByUid(item.uid).find(">div>.k-in").html(that.templates.itemContent(context));
+                    } else if (field == CHECKED) {
+                        node = that.findByUid(item.uid);
+
+                        node.children("div").find(":checkbox")
+                            .prop(CHECKED, item[field])
+                            .data("indeterminate", false)
+                            .prop("indeterminate", false);
+
+                        that._updateIndeterminate(node);
+
+                    } else if (field == "expanded") {
+                        that._toggle(that.findByUid(item.uid), item, item[field]);
+                    }
                 }
             }
         },
@@ -31446,7 +36069,9 @@ extend(Editor, {
                 action = e.action,
                 items = e.items,
                 index = e.index,
-                loadOnDemand = that.options.loadOnDemand,
+                options = that.options,
+                loadOnDemand = options.loadOnDemand,
+                checkChildren = options.checkboxes && options.checkboxes.checkChildren,
                 i;
 
             function append(items, parentNode) {
@@ -31480,6 +36105,12 @@ extend(Editor, {
             if (node) {
                 parentNode = that.findByUid(node.uid);
                 that._progress(parentNode, false);
+            }
+
+            if (checkChildren && action != "remove" && node && node.checked) {
+                for (i = 0; i < items.length; i++) {
+                    items[i].checked = true;
+                }
             }
 
             if (action == "add") {
@@ -31529,20 +36160,66 @@ extend(Editor, {
             enable = arguments.length == 2 ? !!enable : true;
 
             this._processNodes(nodes, function (index, item) {
-                var isCollapsed = !nodeContents(item).is(VISIBLE);
+                var isCollapsed = !nodeContents(item).is(VISIBLE),
+                    dataItem = this.dataItem(item);
+
+                item.removeAttr(ARIADISABLED);
 
                 if (!enable) {
+                    if (dataItem.selected) {
+                        dataItem.set("selected", false);
+                    }
+
                     this.collapse(item);
                     isCollapsed = true;
-                    item.find(".k-in:first").removeClass("k-state-selected");
+                    item.removeAttr(ARIASELECTED);
+                    item.attr(ARIADISABLED, true);
                 }
 
                 this._updateNodeClasses(item, {}, { enabled: enable, expanded: !isCollapsed });
             });
         },
 
+        current: function(node) {
+            var that = this,
+                current = that._current,
+                element = that.element,
+                id = that._ariaId;
+
+            if (arguments.length > 0 && node && node.length) {
+                if (current) {
+                    if (current[0].id === id) {
+                        current.removeAttr("id");
+                    }
+
+                    current.find(".k-in:first").removeClass("k-state-focused");
+                }
+
+                current = that._current = $(node, element).closest(NODE);
+
+                current.find(".k-in:first").addClass("k-state-focused");
+
+                id = current[0].id || id;
+
+                if (id) {
+                    that.wrapper.removeAttr("aria-activedescendant");
+                    current.attr("id", id);
+                    that.wrapper.attr("aria-activedescendant", id);
+                }
+
+                return;
+            }
+
+            if (!current) {
+                current = that._nextVisible($());
+            }
+
+            return current;
+        },
+
         select: function (node) {
-            var element = this.element;
+            var that = this,
+                element = that.element;
 
             if (!arguments.length) {
                 return element.find(".k-state-selected").closest(NODE);
@@ -31551,51 +36228,47 @@ extend(Editor, {
             node = $(node, element).closest(NODE);
 
             if (node.length) {
-                element.find(".k-in").removeClass("k-state-hover k-state-selected");
+                element.find(".k-state-selected").each(function() {
+                    var dataItem = that.dataItem(this);
+                    dataItem.set("selected", false);
+                    delete dataItem.selected;
+                });
 
-                node.find(".k-in:first").addClass("k-state-selected");
+                that.dataItem(node).set("selected", true);
             }
         },
 
-        toggle: function (node, expand) {
-            node = $(node);
-
-            if (!node.find(">div>.k-icon").is(".k-minus,.k-plus,.k-minus-disabled,.k-plus-disabled")) {
-                return;
-            }
-
+        _toggle: function(node, dataItem, expand) {
             var that = this,
                 options = that.options,
                 contents = nodeContents(node),
-                isExpanding = arguments.length == 1 ? !contents.is(VISIBLE) : expand,
-                direction = isExpanding ? "expand" : "collapse",
+                direction = expand ? "expand" : "collapse",
                 animation = options.animation[direction],
-                dataItem = that.dataItem(node),
                 loaded;
 
             if (contents.data("animating")) {
                 return;
             }
 
-            if (isExpanding == that._expanded(node)) {
-                return;
-            }
-
             if (!that._trigger(direction, node)) {
-                that._expanded(node, isExpanding);
+                that._expanded(node, expand);
 
                 loaded = dataItem && dataItem.loaded();
 
                 if (loaded && contents.children().length > 0) {
-                    that._updateNodeClasses(node, {}, { expanded: isExpanding });
+                    that._updateNodeClasses(node, {}, { expanded: expand });
 
-                    if (!isExpanding) {
+                    if (contents.is(":visible") == expand) {
+                        return;
+                    }
+
+                    if (!expand) {
                         contents.css("height", contents.height()).css("height");
                     }
 
                     contents.kendoStop(true, true).kendoAnimate(extend({ reset: true }, animation, {
                         complete: function() {
-                            if (isExpanding) {
+                            if (expand) {
                                 contents.css("height", "");
                             }
                         }
@@ -31609,6 +36282,20 @@ extend(Editor, {
                     dataItem.load();
                 }
             }
+        },
+
+        toggle: function (node, expand) {
+            node = $(node);
+
+            if (!nodeIcon(node).is(".k-minus,.k-plus,.k-minus-disabled,.k-plus-disabled")) {
+                return;
+            }
+
+            if (arguments.length == 1) {
+                expand = !this._expanded(node);
+            }
+
+            this._expanded(node, expand);
         },
 
         destroy: function() {
@@ -31633,14 +36320,20 @@ extend(Editor, {
                 return node.attr(expandedAttr) === "true" || (dataItem && dataItem.expanded);
             }
 
+            if (nodeContents(node).data("animating")) {
+                return;
+            }
+
             if (dataItem) {
                 dataItem.set("expanded", value);
             }
 
             if (value) {
                 node.attr(expandedAttr, "true");
+                node.attr("aria-expanded", "true");
             } else {
                 node.removeAttr(expandedAttr);
+                node.attr("aria-expanded", "false");
             }
         },
 
@@ -31656,17 +36349,21 @@ extend(Editor, {
                     element.empty();
                 }
             } else {
-                node.find(">div>.k-icon").toggleClass("k-loading", showProgress);
+                nodeIcon(node).toggleClass("k-loading", showProgress);
             }
         },
 
         text: function (node, text) {
-            node = $(node).closest(NODE).find(">div>.k-in");
+            var dataItem = this.dataItem(node),
+                fieldBindings = this.options[bindings.text],
+                level = dataItem.level(),
+                length = fieldBindings.length,
+                field = fieldBindings[Math.min(level, length-1)];
 
             if (text) {
-                node.text(text);
+                dataItem.set(field, text);
             } else {
-                return node.text();
+                return dataItem[field];
             }
         },
 
@@ -31675,15 +36372,12 @@ extend(Editor, {
         },
 
         _dataSourceMove: function(nodeData, group, parentNode, callback) {
-            var that = this,
-                srcTreeView = that._objectOrSelf(nodeData),
-                srcDataSource,
-                dataItem,
+            var dataItem,
                 referenceDataItem, i,
-                destTreeview = that._objectOrSelf(parentNode || group),
+                destTreeview = this._objectOrSelf(parentNode || group),
                 destDataSource = destTreeview.dataSource;
 
-            if (parentNode) {
+            if (parentNode && parentNode[0] != destTreeview.element[0]) {
                 referenceDataItem = destTreeview.dataItem(parentNode);
 
                 if (!referenceDataItem.loaded()) {
@@ -31691,23 +36385,14 @@ extend(Editor, {
                     referenceDataItem.load();
                 }
 
-                if (parentNode != that.root) {
+                if (parentNode != this.root) {
                     destDataSource = referenceDataItem.children;
                 }
             }
 
-            if (nodeData instanceof $ || isDomElement(nodeData)) {
-                // move node within or between treeviews
-                nodeData = $(nodeData);
-                srcDataSource = srcTreeView.dataSource;
-                dataItem = srcDataSource.getByUid(nodeData.attr(kendo.attr("uid")));
+            nodeData = this._toObservableData(nodeData);
 
-                if (dataItem) {
-                    dataItem = srcDataSource.remove(dataItem);
-                }
-
-                dataItem = callback(destDataSource, dataItem);
-            } else if (isArray(nodeData) || nodeData instanceof data.ObservableArray){
+            if (isArray(nodeData) || nodeData instanceof data.ObservableArray){
                 // insert array of nodes
                 for (i = 0; i < nodeData.length; i++) {
                     dataItem = callback(destDataSource, nodeData[i]);
@@ -31717,7 +36402,24 @@ extend(Editor, {
                 dataItem = callback(destDataSource, nodeData);
             }
 
-            return dataItem && that.findByUid(dataItem.uid);
+            return dataItem && this.findByUid(dataItem.uid);
+        },
+
+        _toObservableData: function(node) {
+            var dataItem = node, dataSource, uid;
+
+            if (node instanceof window.jQuery || isDomElement(node)) {
+                dataSource = this._objectOrSelf(node).dataSource,
+
+                uid = $(node).attr(kendo.attr("uid"));
+                dataItem = dataSource.getByUid(uid);
+
+                if (dataItem) {
+                    dataItem = dataSource.remove(dataItem);
+                }
+            }
+
+            return dataItem;
         },
 
         insertAfter: function (nodeData, referenceNode) {
@@ -31755,18 +36457,20 @@ extend(Editor, {
             }
 
             return that._dataSourceMove(nodeData, group, parentNode, function (dataSource, model) {
-                if (parentNode) {
-                    that._expanded(parentNode, true);
+                function add() {
+                    if (parentNode) {
+                        that._expanded(parentNode, true);
+                    }
+
+                    return dataSource.add(model);
                 }
 
-                if (dataSource.data()) {
-                    return dataSource.add(model);
-                } else {
-                    dataSource.one(CHANGE, function() {
-                        dataSource.add(model);
-                    });
+                if (!dataSource.data()) {
+                    dataSource.one(CHANGE, add);
 
                     return null;
+                } else {
+                    return add();
                 }
             });
         },
@@ -31823,7 +36527,7 @@ extend(Editor, {
 
             options.treeview = this.options;
 
-            options.r = rendering;
+            options.r = this.templates;
 
             return this.templates.item(options);
         },
@@ -31850,7 +36554,7 @@ extend(Editor, {
                     return html;
                 };
 
-            options.r = rendering;
+            options.r = that.templates;
 
             return that.templates.group(options);
         }
@@ -31968,7 +36672,12 @@ extend(Editor, {
                         }
                     }
                 } else if (dropTarget[0] != that.dropHint[0]) {
-                    statusClass = "k-denied";
+                    if (closestTree[0] != treeview.element[0]) {
+                        // moving node to different treeview without children
+                        statusClass = "k-add";
+                    } else {
+                        statusClass = "k-denied";
+                    }
                 }
             }
 
@@ -31992,23 +36701,28 @@ extend(Editor, {
 
         dragcancel: function(e) {
             this.dropHint.remove();
-            //treeview.trigger("nodeDragCancelled", { item: sourceNode[0] });
         },
 
         dragend: function (e) {
             var that = this,
-            treeview = that.treeview,
-            dropPosition = "over",
-            sourceNode = that.sourceNode,
-            destinationNode,
-            dropHint = that.dropHint,
-            valid, dropPrevented;
+                treeview = that.treeview,
+                dropPosition = "over",
+                sourceNode = that.sourceNode,
+                destinationNode,
+                dropHint = that.dropHint,
+                dropTarget = that.dropTarget,
+                valid, dropPrevented;
 
             if (dropHint.css(VISIBILITY) == "visible") {
                 dropPosition = dropHint.prevAll(".k-in").length > 0 ? "after" : "before";
                 destinationNode = dropHint.closest(NODE);
-            } else if (that.dropTarget) {
-                destinationNode = that.dropTarget.closest(NODE);
+            } else if (dropTarget) {
+                destinationNode = dropTarget.closest(NODE);
+
+                // moving node to root element
+                if (!destinationNode.length) {
+                    destinationNode = dropTarget.closest(".k-treeview");
+                }
             }
 
             valid = that._hintStatus() != "k-denied";
@@ -32018,7 +36732,7 @@ extend(Editor, {
                 destinationNode: destinationNode[0],
                 valid: valid,
                 setValid: function(newValid) { valid = newValid; },
-                dropTarget: e.target,
+                dropTarget: dropTarget[0],
                 dropPosition: dropPosition
             });
 
@@ -32053,87 +36767,8 @@ extend(Editor, {
         }
     };
 
-    // client-side rendering
-
-    rendering = {
-        wrapperCssClass: function (group, item) {
-            var result = "k-item",
-                index = item.index;
-
-            if (group.firstLevel && index === 0) {
-                result += " k-first";
-            }
-
-            if (index == group.length-1) {
-                result += " k-last";
-            }
-
-            return result;
-        },
-        cssClass: function(group, item) {
-            var result = "",
-                index = item.index,
-                groupLength = group.length - 1;
-
-            if (group.firstLevel && index === 0) {
-                result += "k-top ";
-            }
-
-            if (index === 0 && index != groupLength) {
-                result += "k-top";
-            } else if (index == groupLength) {
-                result += "k-bot";
-            } else {
-                result += "k-mid";
-            }
-
-            return result;
-        },
-        textClass: function(item) {
-            var result = "k-in";
-
-            if (item.enabled === false) {
-                result += " k-state-disabled";
-            }
-
-            if (item.selected === true) {
-                result += " k-state-selected";
-            }
-
-            return result;
-        },
-        toggleButtonClass: function(item) {
-            var result = "k-icon";
-
-            if (item.expanded !== true) {
-                result += " k-plus";
-            } else {
-                result += " k-minus";
-            }
-
-            if (item.enabled === false) {
-                result += "-disabled";
-            }
-
-            return result;
-        },
-        groupAttributes: function(group) {
-            return group.expanded !== true ? " style='display:none'" : "";
-        },
-        groupCssClass: function(group) {
-            var cssClass = "k-group";
-
-            if (group.firstLevel) {
-                cssClass += " k-treeview-lines";
-            }
-
-            return cssClass;
-        }
-    };
-
     ui.plugin(TreeView);
-})(jQuery);
-
+})(window.kendo.jQuery);
 (function($, undefined) {
     var kendo = window.kendo,
         Widget = kendo.ui.Widget,
@@ -32145,17 +36780,19 @@ extend(Editor, {
         isArray = $.isArray,
         math = Math,
         support = kendo.support,
-        touch = support.touch,
         pointers = support.pointers,
         CHANGE = "change",
         SLIDE = "slide",
-        MOUSE_DOWN = touch ? "touchstart" : "mousedown",
-        TRACK_MOUSE_DOWN = touch ? "touchstart" : pointers ? "MSPointerDown" : "mousedown",
-        MOUSE_UP = touch ? "touchend" : "mouseup",
+        NS = ".slider",
+        MOUSE_DOWN = "touchstart" + NS + " mousedown" + NS,
+        TRACK_MOUSE_DOWN = pointers ? "MSPointerDown" + NS : "mousedown" + NS + " touchstart" + NS,
+        MOUSE_UP = "touchend" + NS + " mouseup" + NS,
         MOVE_SELECTION = "moveSelection",
-        KEY_DOWN = "keydown",
-        CLICK = "click",
-        MOUSE_OVER = "mouseover",
+        KEY_DOWN = "keydown" + NS,
+        CLICK = "click" + NS,
+        MOUSE_OVER = "mouseover" + NS,
+        FOCUS = "focus" + NS,
+        BLUR = "blur" + NS,
         DRAG_HANDLE = ".k-draghandle",
         TRACK_SELECTOR = ".k-slider-track",
         TICK_SELECTOR = ".k-tick",
@@ -32164,8 +36801,7 @@ extend(Editor, {
         STATE_DISABLED = "k-state-disabled",
         PRECISION = 3,
         DISABLED = "disabled",
-        UNDEFINED = "undefined",
-        NS = ".slider";
+        UNDEFINED = "undefined";
 
     var SliderBase = Widget.extend({
         init: function(element, options) {
@@ -32177,6 +36813,7 @@ extend(Editor, {
 
             that._distance = options.max - options.min;
             that._isHorizontal = options.orientation == "horizontal";
+            that._isRtl = that._isHorizontal && kendo.support.isRtl(element);
             that._position = that._isHorizontal ? "left" : "bottom";
             that._size = that._isHorizontal ? "width" : "height";
             that._outerSize = that._isHorizontal ? "outerWidth" : "outerHeight";
@@ -32203,12 +36840,16 @@ extend(Editor, {
 
             that._calculateSteps(pixelWidths);
 
+            that._tabindex(that.wrapper.find(DRAG_HANDLE));
+
             that[options.enabled ? "enable" : "disable"]();
 
+            var rtlDirectionSign = kendo.support.isRtl(that.wrapper) ? -1 : 1;
+
             that._keyMap = {
-                37: step(-options.smallStep), // left arrow
+                37: step(-1 * rtlDirectionSign * options.smallStep), // left arrow
                 40: step(-options.smallStep), // down arrow
-                39: step(+options.smallStep), // right arrow
+                39: step(+1 * rtlDirectionSign * options.smallStep), // right arrow
                 38: step(+options.smallStep), // up arrow
                 35: setValue(options.max), // end
                 36: setValue(options.min), // home
@@ -32237,7 +36878,7 @@ extend(Editor, {
 
         _setTrackDivWidth: function() {
             var that = this,
-                trackDivPosition = parseFloat(that._trackDiv.css(that._position), 10) * 2;
+                trackDivPosition = parseFloat(that._trackDiv.css(that._isRtl ? "right" : that._position), 10) * 2;
 
             that._trackDiv[that._size]((that.wrapper[that._size]() - 2) - trackDivPosition);
         },
@@ -32284,9 +36925,9 @@ extend(Editor, {
                 items = that.wrapper.find(TICK_SELECTOR),
                 titleNumber = options.min,
                 count = items.length,
-                i = that._isHorizontal ? 0 : count - 1,
-                limit = that._isHorizontal ? count : -1,
-                increment = that._isHorizontal ? 1 : -1;
+                i = that._isHorizontal && !that._isRtl ? 0 : count - 1,
+                limit = that._isHorizontal && !that._isRtl ? count : -1,
+                increment = that._isHorizontal && !that._isRtl ? 1 : -1;
 
             for (; i - limit !== 0 ; i += increment) {
                 $(items[i]).attr("title", format(options.tooltip.format, round(titleNumber)));
@@ -32303,7 +36944,7 @@ extend(Editor, {
                 step = round(options.largeStep / options.smallStep);
 
             if ((1000 * options.largeStep) % (1000 * options.smallStep) === 0) {
-                if (that._isHorizontal) {
+                if (that._isHorizontal && !that._isRtl) {
                     for (i = 0; i < items.length; i = round(i + step)) {
                         item = $(items[i]);
 
@@ -32317,8 +36958,10 @@ extend(Editor, {
                         item.addClass("k-tick-large")
                             .html("<span class='k-label'>" + item.attr("title") + "</span>");
 
-                        if (i !== 0 && i !== items.length - 1) {
-                            item.css("line-height", item[that._size]() + "px");
+                        if (!that._isRtl) {
+                            if (i !== 0 && i !== items.length - 1) {
+                                item.css("line-height", item[that._size]() + "px");
+                            }
                         }
                     }
                 }
@@ -32412,6 +37055,11 @@ extend(Editor, {
 
             that._pixelSteps[lastItem] = that._maxSelection;
             that._values[lastItem] = options.max;
+
+            if (that._isRtl) {
+                that._pixelSteps.reverse();
+                that._values.reverse();
+            }
         },
 
         _getValueFromPosition: function(mousePosition, dragableArea) {
@@ -32424,6 +37072,9 @@ extend(Editor, {
 
             if (that._isHorizontal) {
                 position = mousePosition - dragableArea.startPoint;
+                if (that._isRtl) {
+                    position = that._maxSelection - position;
+                }
             } else {
                 position = dragableArea.startPoint - mousePosition;
             }
@@ -32437,6 +37088,58 @@ extend(Editor, {
                     return round(that._values[i]);
                 }
             }
+        },
+
+        _getFormattedValue: function(val, drag) {
+            var that = this,
+                html = "",
+                tooltip = that.options.tooltip,
+                tooltipTemplate,
+                selectionStart,
+                selectionEnd;
+
+            if (isArray(val)) {
+                selectionStart = val[0];
+                selectionEnd = val[1];
+            } else if (drag && drag.type) {
+                selectionStart = drag.selectionStart;
+                selectionEnd = drag.selectionEnd;
+            }
+
+            if (drag) {
+                tooltipTemplate = drag.tooltipTemplate;
+            }
+
+            if (!tooltipTemplate && tooltip.template) {
+                tooltipTemplate = kendo.template(tooltip.template);
+            }
+
+            if (isArray(val) || (drag && drag.type)) {
+
+                if (tooltipTemplate) {
+                    html = tooltipTemplate({
+                        selectionStart: selectionStart,
+                        selectionEnd: selectionEnd
+                    });
+                } else {
+                    selectionStart = format(tooltip.format, selectionStart);
+                    selectionEnd = format(tooltip.format, selectionEnd);
+                    html = selectionStart + " - " + selectionEnd;
+                }
+            } else {
+                if (drag) {
+                    drag.val = val;
+                }
+
+                if (tooltipTemplate) {
+                    html = tooltipTemplate({
+                        value: val
+                    });
+                } else {
+                    html = format(tooltip.format, val);
+                }
+            }
+            return html;
         },
 
         _getDragableArea: function() {
@@ -32470,7 +37173,80 @@ extend(Editor, {
                        .before(createButton(options, "decrease", that._isHorizontal));
             }
 
-            element.before(createTrack(element));
+            element.before(createTrack(options, element));
+        },
+
+        _focus: function(e) {
+            var that = this,
+                target = e.target,
+                val = that.value(),
+                drag = that._drag;
+
+            if (!drag) {
+                if (target == that.wrapper.find(DRAG_HANDLE).eq(0)[0]) {
+                    drag = that._firstHandleDrag;
+                    that._activeHandle = 0;
+                } else {
+                    drag = that._lastHandleDrag;
+                    that._activeHandle = 1;
+                }
+                val = val[that._activeHandle];
+            }
+
+            $(target).addClass(STATE_SELECTED);
+
+            if (drag) {
+                that._activeHandleDrag = drag;
+
+                drag.selectionStart = that.options.selectionStart;
+                drag.selectionEnd = that.options.selectionEnd;
+
+                drag._updateTooltip(val);
+            }
+        },
+
+        _focusWithMouse: function(e) {
+            var that = this,
+                target = $(e.target),
+                idx = target.is(DRAG_HANDLE) ? target.index() : 0;
+
+            window.setTimeout(function(){
+                that.wrapper.find(DRAG_HANDLE)[idx == 2 ? 1 : 0].focus();
+            }, 1);
+
+            that._setTooltipTimeout();
+        },
+
+        _blur: function(e) {
+            var that = this,
+                drag = that._activeHandleDrag;
+
+            $(e.target).removeClass(STATE_SELECTED);
+
+            if (drag) {
+                drag._removeTooltip();
+                delete that._activeHandleDrag;
+                delete that._activeHandle;
+            }
+        },
+
+        _setTooltipTimeout: function() {
+            var that = this;
+            that._tooltipTimeout = window.setTimeout(function(){
+                var drag = that._drag || that._activeHandleDrag;
+                if (drag) {
+                    drag._removeTooltip();
+                }
+            }, 300);
+        },
+
+        _clearTooltipTimeout: function() {
+            var that = this;
+            window.clearTimeout(this._tooltipTimeout);
+            var drag = that._drag || that._activeHandleDrag;
+            if (drag && drag.tooltipDiv) {
+                drag.tooltipDiv.stop(true, false).css("opacity", 1);
+            }
         }
     });
 
@@ -32512,7 +37288,7 @@ extend(Editor, {
             i;
 
         for(i = 0; i < count; i++) {
-            result += "<li class='k-tick'>&nbsp;</li>";
+            result += "<li class='k-tick' role='presentation'>&nbsp;</li>";
         }
 
         result += "</ul>";
@@ -32520,12 +37296,13 @@ extend(Editor, {
         return result;
     }
 
-    function createTrack (element) {
-        var dragHandleCount = element.is("input") ? 1 : 2;
+    function createTrack (options, element) {
+        var dragHandleCount = element.is("input") ? 1 : 2,
+            firstDragHandleTitle = dragHandleCount == 2 ? options.leftDragHandleTitle : options.dragHandleTitle;
 
         return "<div class='k-slider-track'><div class='k-slider-selection'><!-- --></div>" +
-               "<a href='#' class='k-draghandle' title='Drag'>Drag</a>" +
-               (dragHandleCount > 1 ? "<a href='#' class='k-draghandle' title='Drag'>Drag</a>" : "") +
+               "<a href='#' class='k-draghandle' title='" + firstDragHandleTitle + "' role='slider' aria-valuemin='" + options.min + "' aria-valuemax='" + options.max + "' aria-valuenow='" + (dragHandleCount > 1 ? (options.selectionStart || options.min) : options.value || options.min) + "'>Drag</a>" +
+               (dragHandleCount > 1 ? "<a href='#' class='k-draghandle' title='" + options.rightDragHandleTitle + "'role='slider' aria-valuemin='" + options.min + "' aria-valuemax='" + options.max + "' aria-valuenow='" + (options.selectionEnd || options.max) + "'>Drag</a>" : "") +
                "</div>";
     }
 
@@ -32632,6 +37409,7 @@ extend(Editor, {
                 options.value = options.min;
                 element.val(options.min);
             }
+            options.value = math.max(math.min(options.value, options.max), options.min);
 
             dragHandle = that.wrapper.find(DRAG_HANDLE);
 
@@ -32644,6 +37422,7 @@ extend(Editor, {
             showButtons: true,
             increaseButtonTitle: "Increase",
             decreaseButtonTitle: "Decrease",
+            dragHandleTitle: "drag",
             tooltip: { format: "{0}" }
         },
 
@@ -32677,33 +37456,41 @@ extend(Editor, {
 
                 that._update(that._getValueFromPosition(mousePosition, dragableArea));
 
+                that._focusWithMouse(e);
+
                 that._drag.dragstart(e);
             };
 
             that.wrapper
                 .find(TICK_SELECTOR + ", " + TRACK_SELECTOR)
-                    .on(TRACK_MOUSE_DOWN + NS, clickHandler)
+                    .on(TRACK_MOUSE_DOWN, clickHandler)
                     .end()
-                    .on(TRACK_MOUSE_DOWN + NS, function() {
+                    .on(TRACK_MOUSE_DOWN, function() {
                         $(document.documentElement).one("selectstart", kendo.preventDefault);
                     });
 
             that.wrapper
                 .find(DRAG_HANDLE)
-                .on(MOUSE_UP + NS, function (e) {
-                    $(e.target).removeClass(STATE_SELECTED);
+                .on(MOUSE_UP, function (e) {
+                    that._setTooltipTimeout();
                 })
-                .on(CLICK + NS, function (e) {
+                .on(CLICK, function (e) {
+                    that._focusWithMouse(e);
                     e.preventDefault();
-                });
+                })
+                .on(FOCUS, proxy(that._focus, that))
+                .on(BLUR, proxy(that._blur, that));
 
             move = proxy(function (sign) {
-                that._setValueInRange(that._nextValueByIndex(that._valueIndex + (sign * 1)));
+                var newVal = that._nextValueByIndex(that._valueIndex + (sign * 1));
+                that._setValueInRange(newVal);
+                that._drag._updateTooltip(newVal);
             }, that);
 
             if (options.showButtons) {
                 var mouseDownHandler = proxy(function(e, sign) {
-                    if (e.which === 1 || (touch && e.which === 0)) {
+                    this._clearTooltipTimeout();
+                    if (e.which === 1 || (support.touch && e.which === 0)) {
                         move(sign);
 
                         this.timeout = setTimeout(proxy(function () {
@@ -32715,10 +37502,11 @@ extend(Editor, {
                 }, that);
 
                 that.wrapper.find(".k-button")
-                    .on(MOUSE_UP + NS, proxy(function (e) {
+                    .on(MOUSE_UP, proxy(function (e) {
                         this._clearTimer();
+                        that._focusWithMouse(e);
                     }, that))
-                    .on(MOUSE_OVER + NS, function (e) {
+                    .on(MOUSE_OVER, function (e) {
                         $(e.currentTarget).addClass("k-state-hover");
                     })
                     .on("mouseout" + NS, proxy(function (e) {
@@ -32726,20 +37514,22 @@ extend(Editor, {
                         this._clearTimer();
                     }, that))
                     .eq(0)
-                    .on(MOUSE_DOWN + NS, proxy(function (e) {
+                    .on(MOUSE_DOWN, proxy(function (e) {
                         mouseDownHandler(e, 1);
                     }, that))
                     .click(false)
                     .end()
                     .eq(1)
-                    .on(MOUSE_DOWN + NS, proxy(function (e) {
+                    .on(MOUSE_DOWN, proxy(function (e) {
                         mouseDownHandler(e, -1);
                     }, that))
-                    .click(false);
+                    .click(kendo.preventDefault);
             }
 
             that.wrapper
-                .find(DRAG_HANDLE).on(KEY_DOWN + NS, proxy(this._keydown, that));
+                .find(DRAG_HANDLE)
+                .off(KEY_DOWN, false)
+                .on(KEY_DOWN, proxy(this._keydown, that));
 
             options.enabled = true;
         },
@@ -32755,24 +37545,25 @@ extend(Editor, {
 
             that.wrapper
                 .find(".k-button")
-                .off(MOUSE_DOWN + NS)
-                .on(MOUSE_DOWN + NS, kendo.preventDefault)
-                .off(MOUSE_UP + NS)
-                .on(MOUSE_UP + NS, kendo.preventDefault)
+                .off(MOUSE_DOWN)
+                .on(MOUSE_DOWN, kendo.preventDefault)
+                .off(MOUSE_UP)
+                .on(MOUSE_UP, kendo.preventDefault)
                 .off("mouseleave" + NS)
                 .on("mouseleave" + NS, kendo.preventDefault)
-                .off(MOUSE_OVER + NS)
-                .on(MOUSE_OVER + NS, kendo.preventDefault);
+                .off(MOUSE_OVER)
+                .on(MOUSE_OVER, kendo.preventDefault);
 
             that.wrapper
-                .find(TICK_SELECTOR + ", " + TRACK_SELECTOR).off(TRACK_MOUSE_DOWN + NS);
+                .find(TICK_SELECTOR + ", " + TRACK_SELECTOR).off(TRACK_MOUSE_DOWN);
 
             that.wrapper
                 .find(DRAG_HANDLE)
-                .off(MOUSE_UP + NS)
-                .off(KEY_DOWN + NS)
-                .off(CLICK + NS)
-                .on(KEY_DOWN + NS, false);
+                .off(MOUSE_UP)
+                .off(KEY_DOWN)
+                .off(CLICK)
+                .off(FOCUS)
+                .off(BLUR);
 
             that.options.enabled = false;
         },
@@ -32801,6 +37592,7 @@ extend(Editor, {
                 if (options.value != value) {
                     that.element.attr("value", formatValue(value));
                     options.value = value;
+                    that._refreshAriaAttr(value);
                     that._refresh();
                 }
             }
@@ -32808,6 +37600,19 @@ extend(Editor, {
 
         _refresh: function () {
             this.trigger(MOVE_SELECTION, { value: this.options.value });
+        },
+
+        _refreshAriaAttr: function(value) {
+            var that = this,
+                drag = that._drag,
+                formattedValue;
+
+            if (drag && drag._tooltipDiv) {
+                formattedValue = drag._tooltipDiv.text();
+            } else {
+                formattedValue = that._getFormattedValue(value, null);
+            }
+            this.wrapper.find(DRAG_HANDLE).attr("aria-valuenow", value).attr("aria-valuetext", formattedValue);
         },
 
         _clearTimer: function (e) {
@@ -32819,7 +37624,9 @@ extend(Editor, {
             var that = this;
 
             if (e.keyCode in that._keyMap) {
+                that._clearTooltipTimeout();
                 that._setValueInRange(that._keyMap[e.keyCode](that.options.value));
+                that._drag._updateTooltip(that.value());
                 e.preventDefault();
             }
         },
@@ -32840,6 +37647,9 @@ extend(Editor, {
 
         _nextValueByIndex: function (index) {
             var count = this._values.length;
+            if (this._isRtl) {
+                index = count - 1 - index;
+            }
             return this._values[math.max(0, math.min(index, count - 1))];
         },
 
@@ -32866,10 +37676,11 @@ extend(Editor, {
                 index = that._valueIndex = math.ceil(round(selectionValue / options.smallStep)),
                 selection = parseInt(that._pixelSteps[index], 10),
                 selectionDiv = that._trackDiv.find(".k-slider-selection"),
-                halfDragHanndle = parseInt(dragHandle[that._outerSize]() / 2, 10);
+                halfDragHanndle = parseInt(dragHandle[that._outerSize]() / 2, 10),
+                rtlCorrection = that._isRtl ? 2 : 0;
 
-            selectionDiv[that._size](selection);
-            dragHandle.css(that._position, selection - halfDragHanndle);
+            selectionDiv[that._size](that._isRtl ? that._maxSelection - selection : selection);
+            dragHandle.css(that._position, selection - halfDragHanndle - rtlCorrection);
         }
 
         moveSelection(options.value);
@@ -32901,26 +37712,22 @@ extend(Editor, {
     Slider.Drag.prototype = {
         dragstart: function(e) {
             // HACK to initiate click on the line
-            this.draggable.drag._start(e);
+            this.draggable.userEvents._start(e);
         },
 
         _dragstart: function(e) {
             var that = this,
                 owner = that.owner,
-                options = that.options,
-                tooltip = options.tooltip,
-                html = '',
-                tooltipTemplate,
-                formattedSelectionStart,
-                formattedSelectionEnd;
+                options = that.options;
 
             if (!options.enabled) {
                 e.preventDefault();
                 return;
             }
 
-            owner.element.off(MOUSE_OVER + NS);
+            owner.element.off(MOUSE_OVER);
             that.dragHandle.addClass(STATE_SELECTED);
+            $(document.documentElement).css("cursor", "pointer");
 
             that.dragableArea = owner._getDragableArea();
             that.step = math.max(options.smallStep * (owner._maxSelection / owner._distance), 0);
@@ -32933,62 +37740,57 @@ extend(Editor, {
                 that.oldVal = that.val = options.value;
             }
 
-            if (tooltip.enabled) {
-                if (tooltip.template) {
-                    tooltipTemplate = that.tooltipTemplate = kendo.template(tooltip.template);
-                }
+            that._removeTooltip(true);
+            that._createTooltip();
+        },
 
-                that.tooltipDiv = $("<div class='k-widget k-tooltip'><!-- --></div>").appendTo(document.body);
+        _createTooltip: function() {
+            var that = this,
+                owner = that.owner,
+                tooltip = that.options.tooltip,
+                html = '',
+                tooltipTemplate;
 
-                if (that.type) {
-                    if (that.tooltipTemplate) {
-                        html = tooltipTemplate({
-                            selectionStart: that.selectionStart,
-                            selectionEnd: that.selectionEnd
-                        });
-                    } else {
-                        formattedSelectionStart = format(tooltip.format, that.selectionStart);
-                        formattedSelectionEnd = format(tooltip.format, that.selectionEnd);
-
-                        html = formattedSelectionStart + ' - ' + formattedSelectionEnd;
-                    }
-                } else {
-                    that.tooltipInnerDiv = "<div class='k-callout k-callout-" + (owner._isHorizontal ? 's' : 'e') + "'><!-- --></div>";
-                    if (that.tooltipTemplate) {
-                        html = tooltipTemplate({
-                            value: that.val
-                        });
-                    } else {
-                        html = format(tooltip.format, that.val);
-                    }
-                    html += that.tooltipInnerDiv;
-                }
-
-                that.tooltipDiv.html(html);
-
-                that.moveTooltip();
+            if (!tooltip.enabled) {
+                return;
             }
+
+            if (tooltip.template) {
+                tooltipTemplate = that.tooltipTemplate = kendo.template(tooltip.template);
+            }
+
+            $(".k-slider-tooltip").remove(); // if user changes window while tooltip is visible, a second one will be created
+            that.tooltipDiv = $("<div class='k-widget k-tooltip k-slider-tooltip'><!-- --></div>").appendTo(document.body);
+
+            html = owner._getFormattedValue(that.val || owner.value(), that);
+
+            if (!that.type) {
+                that.tooltipInnerDiv = "<div class='k-callout k-callout-" + (owner._isHorizontal ? 's' : 'e') + "'><!-- --></div>";
+                html += that.tooltipInnerDiv;
+            }
+
+            that.tooltipDiv.html(html);
+
+            that.moveTooltip();
         },
 
         drag: function (e) {
             var that = this,
                 owner = that.owner,
-                options = that.options,
                 x = e.x.location,
                 y = e.y.location,
                 startPoint = that.dragableArea.startPoint,
                 endPoint = that.dragableArea.endPoint,
-                tooltip = options.tooltip,
-                html = "",
-                tooltipTemplate = that.tooltipTemplate,
-                slideParams,
-                formattedSelectionStart,
-                formattedSelectionEnd;
+                slideParams;
 
             e.preventDefault();
 
             if (owner._isHorizontal) {
-                that.val = that.constrainValue(x, startPoint, endPoint, x >= endPoint);
+                if (owner._isRtl) {
+                    that.val = that.constrainValue(x, startPoint, endPoint, x < endPoint);
+                } else {
+                    that.val = that.constrainValue(x, startPoint, endPoint, x >= endPoint);
+                }
             } else {
                 that.val = that.constrainValue(y, endPoint, startPoint, y <= endPoint);
             }
@@ -33019,44 +37821,46 @@ extend(Editor, {
                 }
 
                 owner.trigger(SLIDE, slideParams);
-
-                if (tooltip.enabled) {
-                    if (that.type) {
-                        if (that.tooltipTemplate) {
-                            html = tooltipTemplate({
-                                selectionStart: that.selectionStart,
-                                selectionEnd: that.selectionEnd
-                        });
-                        } else {
-                            formattedSelectionStart = format(tooltip.format, that.selectionStart);
-                            formattedSelectionEnd = format(tooltip.format, that.selectionEnd);
-                            html = formattedSelectionStart + " - " + formattedSelectionEnd;
-                        }
-                    } else {
-                        if (that.tooltipTemplate) {
-                            html = tooltipTemplate({
-                                value: that.val
-                            });
-                        } else {
-                            html = format(tooltip.format, that.val);
-                        }
-
-                        html += that.tooltipInnerDiv;
-                    }
-                    that.tooltipDiv.html(html);
-                    that.moveTooltip();
-                }
             }
+
+            that._updateTooltip(that.val);
+        },
+
+        _updateTooltip: function(val) {
+            var that = this,
+                options = that.options,
+                tooltip = options.tooltip,
+                html = "";
+
+            if (!tooltip.enabled) {
+                return;
+            }
+
+            if (!that.tooltipDiv) {
+                that._createTooltip();
+            }
+
+            html = that.owner._getFormattedValue(round(val), that);
+
+            if (!that.type) {
+                html += that.tooltipInnerDiv;
+            }
+
+            that.tooltipDiv.html(html);
+            that.moveTooltip();
         },
 
         dragcancel: function(e) {
             this.owner._refresh();
+            $(document.documentElement).css("cursor", "");
             return this._end();
         },
 
         dragend: function(e) {
             var that = this,
                 owner = that.owner;
+
+            $(document.documentElement).css("cursor", "");
 
             if (that.type) {
                 owner._update(that.selectionStart, that.selectionEnd);
@@ -33071,14 +37875,28 @@ extend(Editor, {
             var that = this,
                 owner = that.owner;
 
-            if (owner.options.tooltip.enabled && owner.options.enabled) {
-                that.tooltipDiv.remove();
-            }
+            owner._focusWithMouse({"target":that.dragHandle[0]});
 
-            that.dragHandle.removeClass(STATE_SELECTED);
-            owner.element.on(MOUSE_OVER + NS);
+            owner.element.on(MOUSE_OVER);
 
             return false;
+        },
+
+        _removeTooltip: function(noAnimation) {
+            var that = this,
+                owner = that.owner;
+
+            if (that.tooltipDiv && owner.options.tooltip.enabled && owner.options.enabled) {
+                if (noAnimation) {
+                    that.tooltipDiv.remove();
+                    that.tooltipDiv = null;
+                } else {
+                    that.tooltipDiv.fadeOut("slow", function(){
+                        $(this).remove();
+                        that.tooltipDiv = null;
+                    });
+                }
+            }
         },
 
         moveTooltip: function () {
@@ -33126,12 +37944,13 @@ extend(Editor, {
 
             if (min < position && position < max) {
                 val = that.owner._getValueFromPosition(position, that.dragableArea);
-            } else
-                if (maxOverflow) {
+            } else {
+                if (maxOverflow ) {
                     val = that.options.max;
                 } else {
                     val = that.options.min;
                 }
+            }
 
             return val;
         }
@@ -33187,6 +38006,8 @@ extend(Editor, {
 
         options: {
             name: "RangeSlider",
+            leftDragHandleTitle: "drag",
+            rightDragHandleTitle: "drag",
             tooltip: { format: "{0}" }
         },
 
@@ -33211,7 +38032,8 @@ extend(Editor, {
                     mousePosition = that._isHorizontal ? location.x : location.y,
                     dragableArea = that._getDragableArea(),
                     val = that._getValueFromPosition(mousePosition, dragableArea),
-                    target = $(e.target);
+                    target = $(e.target),
+                    idx;
 
                 if (target.hasClass("k-draghandle")) {
                     target.addClass(STATE_SELECTED);
@@ -33221,45 +38043,54 @@ extend(Editor, {
                 if (val < options.selectionStart) {
                     that._setValueInRange(val, options.selectionEnd);
                     that._firstHandleDrag.dragstart(e);
+                    idx = 0;
                 } else if (val > that.selectionEnd) {
                     that._setValueInRange(options.selectionStart, val);
                     that._lastHandleDrag.dragstart(e);
+                    idx = 1;
                 } else {
                     if (val - options.selectionStart <= options.selectionEnd - val) {
                         that._setValueInRange(val, options.selectionEnd);
                         that._firstHandleDrag.dragstart(e);
+                        idx = 0;
                     } else {
                         that._setValueInRange(options.selectionStart, val);
                         that._lastHandleDrag.dragstart(e);
+                        idx = 1;
                     }
                 }
+                that._focusWithMouse({"target":that.wrapper.find(DRAG_HANDLE)[idx]});
             };
 
             that.wrapper
                 .find(TICK_SELECTOR + ", " + TRACK_SELECTOR)
-                    .on(TRACK_MOUSE_DOWN + NS, clickHandler)
+                    .on(TRACK_MOUSE_DOWN, clickHandler)
                     .end()
-                    .on(TRACK_MOUSE_DOWN + NS, function() {
+                    .on(TRACK_MOUSE_DOWN, function() {
                         $(document.documentElement).one("selectstart", kendo.preventDefault);
                     });
 
             that.wrapper
                 .find(DRAG_HANDLE)
-                .on(MOUSE_UP + NS, function (e) {
-                    $(e.target).removeClass(STATE_SELECTED);
+                .on(MOUSE_UP, function (e) {
+                    that._setTooltipTimeout();
                 })
-                .on(CLICK + NS, function (e) {
+                .on(CLICK, function (e) {
+                    that._focusWithMouse(e);
                     e.preventDefault();
-                });
+                })
+                .on(FOCUS, proxy(that._focus, that))
+                .on(BLUR, proxy(that._blur, that));
 
             that.wrapper.find(DRAG_HANDLE)
-                .eq(0).on(KEY_DOWN + NS,
+                .off(KEY_DOWN, kendo.preventDefault)
+                .eq(0).on(KEY_DOWN,
                     proxy(function(e) {
                         this._keydown(e, "firstHandle");
                     }, that)
                 )
                 .end()
-                .eq(1).on(KEY_DOWN + NS,
+                .eq(1).on(KEY_DOWN,
                     proxy(function(e) {
                         this._keydown(e, "lastHandle");
                     }, that)
@@ -33278,14 +38109,15 @@ extend(Editor, {
             that.wrapper.find("input").attr(DISABLED, DISABLED);
 
             that.wrapper
-                .find(TICK_SELECTOR + ", " + TRACK_SELECTOR).off(TRACK_MOUSE_DOWN + NS);
+                .find(TICK_SELECTOR + ", " + TRACK_SELECTOR).off(TRACK_MOUSE_DOWN);
 
             that.wrapper
                 .find(DRAG_HANDLE)
-                .off(MOUSE_UP + NS)
-                .off(KEY_DOWN + NS)
-                .off(CLICK + NS)
-                .on(KEY_DOWN + NS, kendo.preventDefault);
+                .off(MOUSE_UP)
+                .off(KEY_DOWN)
+                .off(CLICK)
+                .off(FOCUS)
+                .off(BLUR);
 
             that.options.enabled = false;
         },
@@ -33293,16 +38125,24 @@ extend(Editor, {
         _keydown: function (e, handle) {
             var that = this,
                 selectionStartValue = that.options.selectionStart,
-                selectionEndValue = that.options.selectionEnd;
+                selectionEndValue = that.options.selectionEnd,
+                dragSelectionStart,
+                dragSelectionEnd,
+                activeHandleDrag;
 
             if (e.keyCode in that._keyMap) {
+
+                that._clearTooltipTimeout();
+
                 if (handle == "firstHandle") {
+                    activeHandleDrag = that._activeHandleDrag = that._firstHandleDrag;
                     selectionStartValue = that._keyMap[e.keyCode](selectionStartValue);
 
                     if (selectionStartValue > selectionEndValue) {
                         selectionEndValue = selectionStartValue;
                     }
                 } else {
+                    activeHandleDrag = that._activeHandleDrag = that._lastHandleDrag;
                     selectionEndValue = that._keyMap[e.keyCode](selectionEndValue);
 
                     if (selectionStartValue > selectionEndValue) {
@@ -33311,6 +38151,15 @@ extend(Editor, {
                 }
 
                 that._setValueInRange(selectionStartValue, selectionEndValue);
+
+                dragSelectionStart = Math.max(selectionStartValue, that.options.selectionStart);
+                dragSelectionEnd = Math.min(selectionEndValue, that.options.selectionEnd);
+
+                activeHandleDrag.selectionEnd = Math.max(dragSelectionEnd, that.options.selectionStart);
+                activeHandleDrag.selectionStart = Math.min(dragSelectionStart, that.options.selectionEnd);
+
+                activeHandleDrag._updateTooltip(that.value()[that._activeHandle]);
+
                 e.preventDefault();
             }
         },
@@ -33363,6 +38212,7 @@ extend(Editor, {
                     options.selectionStart = start;
                     options.selectionEnd = end;
                     that._refresh();
+                    that._refreshAriaAttr(start, end);
                 }
             }
         },
@@ -33387,6 +38237,19 @@ extend(Editor, {
             if (options.selectionStart == options.max && options.selectionEnd == options.max) {
                 that._setZIndex("firstHandle");
             }
+        },
+
+        _refreshAriaAttr: function(start, end) {
+            var that = this,
+                dragHandles = that.wrapper.find(DRAG_HANDLE),
+                drag = that._activeHandleDrag,
+                formattedValue;
+
+            formattedValue = that._getFormattedValue([start, end], drag);
+
+            dragHandles.eq(0).attr("aria-valuenow", start);
+            dragHandles.eq(1).attr("aria-valuenow", end);
+            dragHandles.attr("aria-valuetext", formattedValue);
         },
 
         _setValueInRange: function (selectionStart, selectionEnd) {
@@ -33433,25 +38296,31 @@ extend(Editor, {
                 selectionEndIndex = math.ceil(round(selectionEndValue / options.smallStep)),
                 selectionStart = that._pixelSteps[selectionStartIndex],
                 selectionEnd = that._pixelSteps[selectionEndIndex],
-                halfHandle = parseInt(dragHandles.eq(0)[that._outerSize]() / 2, 10);
+                halfHandle = parseInt(dragHandles.eq(0)[that._outerSize]() / 2, 10),
+                rtlCorrection = that._isRtl ? 2 : 0;
 
-            dragHandles.eq(0).css(that._position, selectionStart - halfHandle)
+            dragHandles.eq(0).css(that._position, selectionStart - halfHandle - rtlCorrection)
                        .end()
-                       .eq(1).css(that._position, selectionEnd - halfHandle);
+                       .eq(1).css(that._position, selectionEnd - halfHandle - rtlCorrection);
 
             makeSelection(selectionStart, selectionEnd);
         }
 
         function makeSelection(selectionStart, selectionEnd) {
-            var selection = 0,
-                selectionPosition = 0,
+            var selection,
+                selectionPosition,
                 selectionDiv = that._trackDiv.find(".k-slider-selection");
 
             selection = math.abs(selectionStart - selectionEnd);
-            selectionPosition = selectionStart < selectionEnd ? selectionStart : selectionEnd;
 
             selectionDiv[that._size](selection);
-            selectionDiv.css(that._position, selectionPosition - 1);
+            if (that._isRtl) {
+                selectionPosition = math.max(selectionStart, selectionEnd);
+                selectionDiv.css("right", that._maxSelection - selectionPosition - 1);
+            } else {
+                selectionPosition = math.min(selectionStart, selectionEnd);
+                selectionDiv.css(that._position, selectionPosition - 1);
+            }
         }
 
         moveSelection(that.value());
@@ -33463,10 +38332,11 @@ extend(Editor, {
 
     kendo.ui.plugin(RangeSlider);
 
-})(jQuery);
+})(window.kendo.jQuery);
 (function ($, undefined) {
     var kendo = window.kendo,
         ui = kendo.ui,
+        keys = kendo.keys,
         extend = $.extend,
         proxy = $.proxy,
         Widget = ui.Widget,
@@ -33484,6 +38354,7 @@ extend(Editor, {
         CLICK = "click",
         PANE = "pane",
         MOUSELEAVE = "mouseleave",
+        FOCUSED = "k-state-focused",
         KPANE = "k-" + PANE,
         PANECLASS = "." + KPANE;
 
@@ -33518,15 +38389,26 @@ extend(Editor, {
 
     var Splitter = Widget.extend({
         init: function(element, options) {
-            var that = this;
+            var that = this,
+                isHorizontal;
 
             Widget.fn.init.call(that, element, options);
 
             that.wrapper = that.element;
 
-            that.orientation = that.options.orientation.toLowerCase() != VERTICAL ? HORIZONTAL : VERTICAL;
+            isHorizontal = that.options.orientation.toLowerCase() != VERTICAL;
+            that.orientation = isHorizontal ? HORIZONTAL : VERTICAL;
+            that._dimension = isHorizontal ? "width" : "height";
+            that._keys = {
+                decrease: isHorizontal ? keys.LEFT : keys.UP,
+                increase: isHorizontal ? keys.RIGHT : keys.DOWN
+            };
+
+            that._resizeStep = 10;
 
             that.bind(RESIZE, proxy(that._resize, that));
+
+            that._marker = kendo.guid().substring(0, 8);
 
             that._initPanes();
 
@@ -33557,19 +38439,24 @@ extend(Editor, {
         _attachEvents: function() {
             var that = this,
                 orientation = that.options.orientation,
-                splitbarSelector = ".k-splitbar-draggable-" + orientation,
+                splitbarSelector = ".k-splitbar-" + orientation,
+                splitbarDraggableSelector = ".k-splitbar-draggable-" + orientation,
                 expandCollapseSelector = ".k-splitbar .k-icon:not(.k-resize-handle)";
 
             that.element
-                .on(MOUSEENTER + NS, splitbarSelector, function() { $(this).addClass("k-splitbar-" + that.orientation + "-hover"); })
-                .on(MOUSELEAVE + NS, splitbarSelector, function() { $(this).removeClass("k-splitbar-" + that.orientation + "-hover"); })
-                .on("mousedown" + NS, splitbarSelector, function() { that._panes().append("<div class='k-splitter-overlay k-overlay' />"); })
-                .on("mouseup" + NS, splitbarSelector, function() { that._panes().children(".k-splitter-overlay").remove(); })
+                .on("keydown" + NS, splitbarSelector, "_keydown")
+                .on("mousedown" + NS, splitbarSelector, function(e) { e.currentTarget.focus(); })
+                .on("focus" + NS, splitbarSelector, function(e) { $(e.currentTarget).addClass(FOCUSED);  })
+                .on("blur" + NS, splitbarSelector, function(e) { $(e.currentTarget).removeClass(FOCUSED); that.resizing.end(); })
+                .on(MOUSEENTER + NS, splitbarDraggableSelector, function() { $(this).addClass("k-splitbar-" + that.orientation + "-hover"); })
+                .on(MOUSELEAVE + NS, splitbarDraggableSelector, function() { $(this).removeClass("k-splitbar-" + that.orientation + "-hover"); })
+                .on("mousedown" + NS, splitbarDraggableSelector, function() { that.resizing.end(); that._panes().append("<div class='k-splitter-overlay k-overlay' />"); })
+                .on("mouseup" + NS, splitbarDraggableSelector, function() { that._panes().children(".k-splitter-overlay").remove(); })
                 .on(MOUSEENTER + NS, expandCollapseSelector, function() { $(this).addClass("k-state-hover"); })
                 .on(MOUSELEAVE + NS, expandCollapseSelector, function() { $(this).removeClass('k-state-hover'); })
                 .on(CLICK + NS, ".k-splitbar .k-collapse-next, .k-splitbar .k-collapse-prev", that._arrowClick(COLLAPSE))
                 .on(CLICK + NS, ".k-splitbar .k-expand-next, .k-splitbar .k-expand-prev", that._arrowClick(EXPAND))
-                .on("dblclick" + NS, ".k-splitbar", proxy(that._dbclick, that))
+                .on("dblclick" + NS, ".k-splitbar", proxy(that._togglePane, that))
                 .parent().closest(".k-splitter").each(function() {
                     var parentSplitter = $(this),
                         splitter = parentSplitter.data("kendoSplitter");
@@ -33603,6 +38490,39 @@ extend(Editor, {
             kendo.destroy(that.element);
         },
 
+        _keydown: function(e) {
+            var that = this,
+                key = e.keyCode,
+                resizing = that.resizing,
+                target = $(e.currentTarget),
+                navigationKeys = that._keys,
+                increase = key === navigationKeys.increase,
+                decrease = key === navigationKeys.decrease,
+                pane;
+
+            if (increase || decrease) {
+                if (e.ctrlKey) {
+                    pane = target[decrease ? "next" : "prev"]();
+
+                    if (resizing.isResizing()) {
+                        resizing.end();
+                    }
+
+                    if (!pane[that._dimension]()) {
+                        that._triggerAction(EXPAND, pane);
+                    } else {
+                        that._triggerAction(COLLAPSE, target[decrease ? "prev" : "next"]());
+                    }
+                } else {
+                    resizing.move((decrease ? -1 : 1) * that._resizeStep, target);
+                }
+                e.preventDefault();
+            } else if (key === keys.ENTER) {
+                resizing.end();
+                e.preventDefault();
+            }
+        },
+
         _initPanes: function() {
             var that = this,
                 panesConfig = that.options.panes || [];
@@ -33610,16 +38530,15 @@ extend(Editor, {
             that.element
                 .addClass("k-widget").addClass("k-splitter")
                 .children()
-                    .addClass(KPANE)
-                    .each(function (index, pane) {
-                        var config = panesConfig && panesConfig[index];
+                .each(function (index, pane) {
+                    var config = panesConfig && panesConfig[index];
 
-                        pane = $(pane);
+                    pane = $(pane).attr("role", "group").addClass(KPANE);
 
-                        pane.data(PANE, config ? config : {})
-                            .toggleClass("k-scrollable", config ? config.scrollable !== false : true);
-                        that.ajaxRequest(pane);
-                    })
+                    pane.data(PANE, config ? config : {})
+                        .toggleClass("k-scrollable", config ? config.scrollable !== false : true);
+                    that.ajaxRequest(pane);
+                })
                 .end();
 
             that.trigger(RESIZE);
@@ -33637,7 +38556,7 @@ extend(Editor, {
                 pane.append("<span class='k-icon k-loading k-pane-loading' />");
 
                 if (kendo.isLocalUrl(url)) {
-                    $.ajax({
+                    jQuery.ajax({
                         url: url,
                         data: data || {},
                         type: "GET",
@@ -33661,7 +38580,8 @@ extend(Editor, {
                 this[type](pane[0]);
             }
         },
-        _dbclick: function(e) {
+
+        _togglePane: function(e) {
             var that = this,
                 target = $(e.target),
                 arrow;
@@ -33717,18 +38637,20 @@ extend(Editor, {
                 nextCollapsed = nextPane.collapsed;
 
             splitbar.addClass("k-splitbar k-state-default k-splitbar-" + orientation)
-                .removeClass("k-splitbar-" + orientation + "-hover")
-                .toggleClass("k-splitbar-draggable-" + orientation,
-                    draggable && !prevCollapsed && !nextCollapsed)
-                .toggleClass("k-splitbar-static-" + orientation,
-                    !draggable && !prevCollapsible && !nextCollapsible)
-                .html(
-                    catIconIf("k-collapse-prev", prevCollapsible && !prevCollapsed && !nextCollapsed) +
-                    catIconIf("k-expand-prev", prevCollapsible && prevCollapsed && !nextCollapsed) +
-                    catIconIf("k-resize-handle", draggable) +
-                    catIconIf("k-collapse-next", nextCollapsible && !nextCollapsed && !prevCollapsed) +
-                    catIconIf("k-expand-next", nextCollapsible && nextCollapsed && !prevCollapsed)
-                );
+                    .attr("role", "separator")
+                    .attr("aria-expanded", !(prevCollapsed || nextCollapsed))
+                    .removeClass("k-splitbar-" + orientation + "-hover")
+                    .toggleClass("k-splitbar-draggable-" + orientation,
+                        draggable && !prevCollapsed && !nextCollapsed)
+                    .toggleClass("k-splitbar-static-" + orientation,
+                        !draggable && !prevCollapsible && !nextCollapsible)
+                    .html(
+                        catIconIf("k-collapse-prev", prevCollapsible && !prevCollapsed && !nextCollapsed) +
+                        catIconIf("k-expand-prev", prevCollapsible && prevCollapsed && !nextCollapsed) +
+                        catIconIf("k-resize-handle", draggable) +
+                        catIconIf("k-collapse-next", nextCollapsible && !nextCollapsed && !prevCollapsed) +
+                        catIconIf("k-expand-next", nextCollapsible && nextCollapsed && !prevCollapsed)
+                    );
         },
         _updateSplitBars: function() {
             var that = this;
@@ -33760,7 +38682,9 @@ extend(Editor, {
 
             if (splitBarsCount === 0) {
                 splitBarsCount = panes.length - 1;
-                panes.slice(0, splitBarsCount).after("<div class='k-splitbar' />");
+                panes.slice(0, splitBarsCount)
+                     .after("<div tabindex='0' class='k-splitbar' data-marker='" + that._marker + "' />");
+
                 that._updateSplitBars();
                 splitBars = element.children(".k-splitbar");
             } else {
@@ -33842,6 +38766,10 @@ extend(Editor, {
             pane = $(pane);
             paneConfig = pane.data(PANE);
 
+            if (!expand && !paneConfig.collapsible) {
+                return;
+            }
+
             if (arguments.length == 1) {
                 expand = paneConfig.collapsed === undefined ? false : paneConfig.collapsed;
             }
@@ -33855,9 +38783,13 @@ extend(Editor, {
             }
 
             this.trigger(RESIZE);
+
+            this.resizing.destroy();
+            this.resizing = new PaneResizing(this);
         },
 
         collapse: function(pane) {
+
             this.toggle(pane, false);
         },
 
@@ -33902,7 +38834,7 @@ extend(Editor, {
 
         that._resizable = new kendo.ui.Resizable(splitter.element, {
             orientation: orientation,
-            handle: splitter.element.children(".k-splitbar-draggable-" + orientation),
+            handle: ".k-splitbar-draggable-" + orientation + "[data-marker=" + splitter._marker + "]",
             hint: proxy(that._createHint, that),
             start: proxy(that._start, that),
             max: proxy(that._max, that),
@@ -33913,14 +38845,36 @@ extend(Editor, {
     }
 
     PaneResizing.prototype = {
+        press: function(target) {
+            this._resizable.press(target);
+        },
+
+        move: function(delta, target) {
+            if (!this._resizable.target) {
+                this._resizable.press(target);
+            }
+
+            this._resizable.move(delta);
+        },
+
+        end: function() {
+            this._resizable.end();
+        },
+
         destroy: function() {
             this._resizable.destroy();
         },
+
+        isResizing: function() {
+            return this._resizable.resizing;
+        },
+
         _createHint: function(handle) {
             var that = this;
             return $("<div class='k-ghost-splitbar k-ghost-splitbar-" + that.orientation + " k-state-default' />")
                         .css(that.alternateSizingProperty, handle[that.alternateSizingProperty]());
         },
+
         _start: function(e) {
             var that = this,
                 splitbar = $(e.currentTarget),
@@ -33983,11 +38937,15 @@ extend(Editor, {
                 owner.trigger(RESIZE);
             }
 
+            setTimeout(function() {
+                that.press(splitbar);
+            });
+
             return false;
         }
     };
 
-})(jQuery);
+})(window.kendo.jQuery);
 (function($, undefined) {
     var kendo = window.kendo,
         Widget = kendo.ui.Widget,
@@ -34000,7 +38958,6 @@ extend(Editor, {
         ERROR = "error",
         COMPLETE = "complete",
         CANCEL = "cancel",
-        LOAD = "load",
         PROGRESS = "progress",
         REMOVE = "remove";
 
@@ -34016,7 +38973,7 @@ extend(Editor, {
 
             var activeInput = that.element;
             that.wrapper = activeInput.closest(".k-upload");
-            if (that.wrapper.length == 0) {
+            if (that.wrapper.length === 0) {
                 that.wrapper = that._wrapInput(activeInput);
             }
 
@@ -34028,7 +38985,7 @@ extend(Editor, {
                 .on("submit" + ns, $.proxy(that._onParentFormSubmit, that))
                 .on("reset" + ns, $.proxy(that._onParentFormReset, that));
 
-            if (that.options.async.saveUrl != undefined) {
+            if (that.options.async.saveUrl) {
                 that._module = that._supportsFormData() ?
                 new formDataUploadModule(that) :
                 new iframeUploadModule(that);
@@ -34090,7 +39047,7 @@ extend(Editor, {
 
             that.multiple = that.options.multiple;
 
-            activeInput.attr("multiple", that._supportsMultiple() ? that.multiple : false)
+            activeInput.attr("multiple", that._supportsMultiple() ? that.multiple : false);
             that.toggle(that.options.enabled);
         },
 
@@ -34184,7 +39141,7 @@ extend(Editor, {
                 fileEntry,
                 fileList =  $(".k-upload-files", that.wrapper);
 
-            if (fileList.length == 0) {
+            if (fileList.length === 0) {
                 fileList = $("<ul class='k-upload-files k-reset'></ul>").appendTo(that.wrapper);
                 if (!that.options.showFileList) {
                     fileList.hide();
@@ -34219,7 +39176,7 @@ extend(Editor, {
                 this._hideUploadButton();
             }
 
-            if (allFiles.length == 0) {
+            if (allFiles.length === 0) {
                 fileList.remove();
             }
         },
@@ -34263,20 +39220,20 @@ extend(Editor, {
         },
 
         _renderAction: function (actionClass, actionText) {
-            if (actionClass != "") {
+            if (actionClass !== "") {
                 return $(
                 "<button type='button' class='k-button k-button-icontext'>" +
                     "<span class='k-icon " + actionClass + "'></span>" +
                     actionText +
                 "</button>"
-                )
+                );
             }
             else {
                 return $(
                 "<button type='button' class='k-button'>" +
                     actionText +
                 "</button>"
-                )
+                );
             }
         },
 
@@ -34317,7 +39274,7 @@ extend(Editor, {
 
         _onFileProgress: function(e, percentComplete) {
             var progressBar = $(".k-progress-status", e.target);
-            if (progressBar.length == 0) {
+            if (progressBar.length === 0) {
                 progressBar =
                     $("<span class='k-progress'><span class='k-state-selected k-progress-status' style='width: 0;'></span></span>")
                         .appendTo($(".k-filename", e.target))
@@ -34359,7 +39316,7 @@ extend(Editor, {
             this._fileState(fileEntry, "failed");
             this._fileAction(fileEntry, "retry");
 
-            var prevented = this.trigger(ERROR, {
+            this.trigger(ERROR, {
                 operation: "upload",
                 files: fileEntry.data("fileNames"),
                 XMLHttpRequest: xhr
@@ -34372,9 +39329,9 @@ extend(Editor, {
 
         _showUploadButton: function() {
             var uploadButton = $(".k-upload-selected", this.wrapper);
-            if (uploadButton.length == 0) {
+            if (uploadButton.length === 0) {
                 uploadButton =
-                    this._renderAction("", this.localization["uploadSelectedFiles"])
+                    this._renderAction("", this.localization.uploadSelectedFiles)
                     .addClass("k-upload-selected");
             }
 
@@ -34425,7 +39382,7 @@ extend(Editor, {
                 isSafari = !isChrome && /safari/.test(userAgent),
                 isWindowsSafari = isSafari && /windows/.test(userAgent);
 
-            return !isWindowsSafari && this._supportsFormData() && (this.options.async.saveUrl != undefined);
+            return !isWindowsSafari && this._supportsFormData() && (this.options.async.saveUrl);
         },
 
         _userAgent: function() {
@@ -34455,7 +39412,7 @@ extend(Editor, {
         },
 
         _supportsRemove: function() {
-            return this.options.async.removeUrl != undefined;
+            return !!this.options.async.removeUrl;
         },
 
         _submitRemove: function(fileNames, data, onSuccess, onError) {
@@ -34465,7 +39422,7 @@ extend(Editor, {
 
             params[removeField] = fileNames;
 
-            $.ajax({
+            jQuery.ajax({
                   type: this.options.async.removeVerb,
                   dataType: "json",
                   url: this.options.async.removeUrl,
@@ -34485,7 +39442,7 @@ extend(Editor, {
         },
 
         _checkAllComplete: function() {
-            if ($(".k-file .k-icon.k-loading", this.wrapper).length == 0) {
+            if ($(".k-file .k-icon.k-loading", this.wrapper).length === 0) {
                 this.trigger(COMPLETE);
             }
         }
@@ -34599,7 +39556,7 @@ extend(Editor, {
                 e.data = $.extend({ }, e.data, getAntiForgeryTokens());
                 for (var key in e.data) {
                     var dataInput = form.find("input[name='" + key + "']");
-                    if (dataInput.length == 0) {
+                    if (dataInput.length === 0) {
                         dataInput = $("<input>", { type: "hidden", name: key })
                             .appendTo(form);
                     }
@@ -34634,10 +39591,11 @@ extend(Editor, {
         },
 
         onIframeLoad: function(e) {
-            var iframe = $(e.target);
+            var iframe = $(e.target),
+                responseText;
 
             try {
-                var responseText = iframe.contents().text();
+                responseText = iframe.contents().text();
             } catch (e) {
                 responseText = "Error trying to get server response: " + e;
             }
@@ -34806,17 +39764,32 @@ extend(Editor, {
         },
 
         enqueueFiles: function(files) {
-            var upload = this.upload
+            var upload = this.upload,
+                name,
+                i,
+                filesLength = files.length,
+                currentFile,
+                fileEntry,
                 fileEntries = [];
 
-            for (var i = 0; i < files.length; i++) {
-                var currentFile = files[i],
-                    name = currentFile.name;
+            if (upload.options.async.batch === true) {
+                name = $.map(files, function(file) { return file.name; })
+                       .join(", ");
 
-                var fileEntry = upload._enqueueFile(name, { "fileNames": [ currentFile ] });
-                fileEntry.data("file", currentFile);
+                fileEntry = upload._enqueueFile(name, { fileNames: files });
+                fileEntry.data("files", files);
 
                 fileEntries.push(fileEntry);
+            } else {
+                for (i = 0; i < filesLength; i++) {
+                    currentFile = files[i];
+                    name = currentFile.name;
+
+                    fileEntry = upload._enqueueFile(name, { fileNames: [ currentFile ] });
+                    fileEntry.data("files", [ currentFile ]);
+
+                    fileEntries.push(fileEntry);
+                }
             }
 
             return fileEntries;
@@ -34828,7 +39801,7 @@ extend(Editor, {
 
         performUpload: function(fileEntry) {
             var upload = this.upload,
-                formData = this.createFormData(fileEntry.data("file")),
+                formData = this.createFormData(fileEntry.data("files")),
                 e = { files: fileEntry.data("fileNames") };
 
             if (!upload.trigger(UPLOAD, e)) {
@@ -34905,11 +39878,18 @@ extend(Editor, {
             xhr.send(data);
         },
 
-        createFormData: function(fileInfo) {
+        createFormData: function(files) {
             var formData = new FormData(),
-            upload = this.upload;
+                upload = this.upload,
+                i,
+                length = files.length;
 
-            formData.append(upload.options.async.saveField || upload.name, fileInfo.rawFile);
+            for (i = 0; i < length; i++) {
+                formData.append(
+                    upload.options.async.saveField || upload.name,
+                    files[i].rawFile
+                );
+            }
 
             return formData;
         },
@@ -35027,7 +40007,7 @@ extend(Editor, {
         }
 
         var files = fileEntry.data("fileNames");
-        var fileNames = $.map(files, function(file) { return file.name });
+        var fileNames = $.map(files, function(file) { return file.name; });
 
         upload._submitRemove(fileNames, data,
             function onSuccess(data, textStatus, xhr) {
@@ -35040,8 +40020,8 @@ extend(Editor, {
                     XMLHttpRequest: xhr });
             },
 
-            function onError(xhr, textStatus, textStatus) {
-                var prevented = upload.trigger(ERROR, {
+            function onError(xhr, textStatus) {
+                upload.trigger(ERROR, {
                     operation: "remove",
                     files: files,
                     XMLHttpRequest: xhr });
@@ -35120,7 +40100,7 @@ extend(Editor, {
         return tokens;
     }
     kendo.ui.plugin(Upload);
-})(jQuery);
+})(window.kendo.jQuery);
 (function($, undefined) {
     var kendo = window.kendo,
         Widget = kendo.ui.Widget,
@@ -35135,13 +40115,15 @@ extend(Editor, {
         NS = ".kendoWindow",
         // classNames
         KWINDOW = ".k-window",
-        KWINDOWTITLEBAR = ".k-window-titlebar",
+        KWINDOWTITLE = ".k-window-title",
+        KWINDOWTITLEBAR = KWINDOWTITLE + "bar",
         KWINDOWCONTENT = ".k-window-content",
         KWINDOWRESIZEHANDLES = ".k-resize-handle",
         KOVERLAY = ".k-overlay",
         KCONTENTFRAME = "k-content-frame",
         LOADING = "k-loading",
         KHOVERSTATE = "k-state-hover",
+        KFOCUSEDSTATE = "k-state-focused",
         // constants
         VISIBLE = ":visible",
         HIDDEN = "hidden",
@@ -35159,6 +40141,7 @@ extend(Editor, {
         OVERFLOW = "overflow",
         ZINDEX = "zIndex",
         MINIMIZE_MAXIMIZE = ".k-window-actions .k-i-minimize,.k-window-actions .k-i-maximize",
+        TITLEBAR_BUTTONS = ".k-window-titlebar .k-window-action",
         isLocalUrl = kendo.isLocalUrl;
 
     function defined(x) {
@@ -35177,8 +40160,9 @@ extend(Editor, {
 
     function openedModalWindows(name) {
         return $(KWINDOW).filter(function() {
-            var wnd = $(this);
-            return wnd.is(VISIBLE) && windowObject(wnd, name).options.modal;
+            var wnd = $(this),
+                winObj = windowObject(wnd, name);
+            return winObj.options.modal && wnd.is(VISIBLE) && winObj.options.visible;
         }).sort(function(a, b){
             return +$(a).css("zIndex") - +$(b).css("zIndex");
         });
@@ -35217,7 +40201,9 @@ extend(Editor, {
                 wrapper,
                 offset, visibility, display,
                 isVisible = false,
-                content;
+                content,
+                windowContent,
+                id;
 
             Widget.fn.init.call(that, element, options);
             options = that.options;
@@ -35233,6 +40219,9 @@ extend(Editor, {
             }
 
             if (!element.parent().is(that.appendTo)) {
+                // remove script blocks to prevent double-execution
+                element.find("script").remove();
+
                 if (element.is(VISIBLE)) {
                     offset = element.offset();
                     isVisible = true;
@@ -35273,14 +40262,22 @@ extend(Editor, {
 
             that.toFront();
 
+            windowContent = wrapper.children(KWINDOWCONTENT);
+            that._tabindex(windowContent);
+
             if (options.visible && options.modal) {
                 that._overlay(wrapper.is(VISIBLE)).css({ opacity: 0.5 });
             }
 
             wrapper
-                .on("mouseenter" + NS,  ".k-window-titlebar .k-window-action", function () { $(this).addClass(KHOVERSTATE); })
-                .on("mouseleave" + NS,  ".k-window-titlebar .k-window-action", function () { $(this).removeClass(KHOVERSTATE); })
-                .on("click" + NS, ".k-window-titlebar .k-window-action", proxy(that._windowActionHandler, that));
+                .on("mouseenter" + NS, TITLEBAR_BUTTONS, function () { $(this).addClass(KHOVERSTATE); })
+                .on("mouseleave" + NS, TITLEBAR_BUTTONS, function () { $(this).removeClass(KHOVERSTATE); })
+                .on("touchend" + NS + " click" + NS, TITLEBAR_BUTTONS, proxy(that._windowActionHandler, that));
+
+            windowContent
+                .on("keydown" + NS, proxy(that._keydown, that))
+                .on("focus" + NS, function() { wrapper.addClass(KFOCUSEDSTATE); })
+                .on("blur" + NS, function() { wrapper.removeClass(KFOCUSEDSTATE); });
 
             if (options.resizable) {
                 wrapper.on("dblclick" + NS, KWINDOWTITLEBAR, proxy(that.toggleMaximization, that));
@@ -35296,8 +40293,22 @@ extend(Editor, {
                 that.dragging = new WindowDragging(that);
             }
 
+            id = element.attr("id");
+            if (id) {
+                id = id + "_wnd_title";
+                wrapper.find(KWINDOWTITLEBAR)
+                       .children(KWINDOWTITLE)
+                       .attr("id", id);
+
+                windowContent
+                    .attr({
+                        "role": "dialog",
+                        "aria-labelledby": id
+                    });
+            }
+
             wrapper.add(wrapper.find(".k-resize-handle,.k-window-titlebar"))
-                .on("mousedown" + NS, proxy(that.toFront, that));
+                    .on("mousedown" + NS, proxy(that.toFront, that));
 
             that.touchScroller = kendo.touchScroller(element);
 
@@ -35308,6 +40319,7 @@ extend(Editor, {
             $(window).on("resize", that._resizeHandler);
 
             if (options.visible) {
+                that.element.focus();
                 that.trigger(OPEN);
                 that.trigger(ACTIVATE);
             }
@@ -35347,7 +40359,7 @@ extend(Editor, {
             var options = this.options;
 
             if (options.animation === false) {
-                options.animation = { open: { show: true, effects: {} }, close: { hide:true, effects: {} } };
+                options.animation = { open: { effects: {} }, close: { hide: true, effects: {} } };
             }
         },
 
@@ -35374,8 +40386,7 @@ extend(Editor, {
             animation: {
                 open: {
                     effects: { zoom: { direction: "in" }, fade: { direction: "in" } },
-                    duration: 350,
-                    show: true
+                    duration: 350
                 },
                 close: {
                     effects: { zoom: { direction: "out", properties: { scale: 0.7 } }, fade: { direction: "out" } },
@@ -35392,6 +40403,71 @@ extend(Editor, {
             minHeight: 50,
             maxWidth: Infinity,
             maxHeight: Infinity
+        },
+
+        _closable: function() {
+            return $.inArray("close", $.map(this.options.actions, function(x) { return x.toLowerCase(); })) > -1;
+        },
+
+        _keydown: function(e) {
+            var that = this,
+                options = that.options,
+                keys = kendo.keys,
+                keyCode = e.keyCode,
+                wrapper = that.wrapper,
+                offset, handled,
+                distance = 10,
+                isMaximized = that.options.isMaximized,
+                newWidth, newHeight;
+
+            if (e.target != e.currentTarget) {
+                return;
+            }
+
+            if (keyCode == keys.ESC && that._closable()) {
+                that._close(true);
+            }
+
+            if (options.draggable && !e.ctrlKey && !isMaximized) {
+                offset = wrapper.offset();
+
+                if (keyCode == keys.UP) {
+                    handled = wrapper.css("top", offset.top - distance);
+                } else if (keyCode == keys.DOWN) {
+                    handled = wrapper.css("top", offset.top + distance);
+                } else if (keyCode == keys.LEFT) {
+                    handled = wrapper.css("left", offset.left - distance);
+                } else if (keyCode == keys.RIGHT) {
+                    handled = wrapper.css("left", offset.left + distance);
+                }
+            }
+
+            if (options.resizable && e.ctrlKey && !isMaximized) {
+                if (keyCode == keys.UP) {
+                    handled = true;
+                    newHeight = wrapper.height() - distance;
+                } else if (keyCode == keys.DOWN) {
+                    handled = true;
+                    newHeight = wrapper.height() + distance;
+                } if (keyCode == keys.LEFT) {
+                    handled = true;
+                    newWidth = wrapper.width() - distance;
+                } else if (keyCode == keys.RIGHT) {
+                    handled = true;
+                    newWidth = wrapper.width() + distance;
+                }
+
+                if (handled) {
+                    wrapper.css({
+                        width: constrain(newWidth, options.minWidth, options.maxWidth),
+                        height: constrain(newHeight, options.minHeight, options.maxHeight)
+                    });
+                }
+            }
+
+            if (handled) {
+                e.preventDefault();
+            }
         },
 
         _overlay: function (visible) {
@@ -35415,7 +40491,7 @@ extend(Editor, {
                 that = this;
 
             each({
-                "k-i-close": that.close,
+                "k-i-close": function() { that._close(true); },
                 "k-i-maximize": that.maximize,
                 "k-i-minimize": that.minimize,
                 "k-i-restore": that.restore,
@@ -35446,7 +40522,7 @@ extend(Editor, {
                 wrapper = that.wrapper,
                 options = that.options,
                 titleBar = wrapper.find(KWINDOWTITLEBAR),
-                title = titleBar.children(".k-window-title"),
+                title = titleBar.children(KWINDOWTITLE),
                 titleBarHeight = titleBar.outerHeight();
 
             if (!arguments.length) {
@@ -35493,17 +40569,15 @@ extend(Editor, {
             if (!that.trigger(OPEN)) {
                 that.toFront();
 
+                that.element.focus();
+
                 options.visible = true;
 
                 if (options.modal) {
                     overlay = that._overlay(false);
 
                     if (showOptions.duration) {
-                        overlay.kendoStop().kendoAnimate({
-                            effects: { fade: { direction: "in", properties: { opacity: 0.5 } } },
-                            duration: showOptions.duration,
-                            show: true
-                        });
+                        overlay.kendoStop().kendoAnimate({ effects: "fade:in", duration: showOptions.duration });
                     } else {
                         overlay.css("opacity", 0.5).show();
                     }
@@ -35515,6 +40589,7 @@ extend(Editor, {
                         effects: showOptions.effects,
                         duration: showOptions.duration,
                         complete: function() {
+                            that.element.focus();
                             that.trigger(ACTIVATE);
                             contentElement.css(OVERFLOW, initialOverflow);
                         }
@@ -35530,7 +40605,7 @@ extend(Editor, {
             return that;
         },
 
-        close: function () {
+        _close: function(userTriggered) {
             var that = this,
                 wrapper = that.wrapper,
                 options = that.options,
@@ -35539,12 +40614,12 @@ extend(Editor, {
                 modalWindows,
                 shouldHideOverlay, overlay;
 
-            if (wrapper.is(VISIBLE) && !that.trigger(CLOSE)) {
+            if (wrapper.is(VISIBLE) && !that.trigger(CLOSE, { userTriggered: !!userTriggered })) {
                 options.visible = false;
 
                 modalWindows = openedModalWindows(options.name);
 
-                shouldHideOverlay = options.modal && modalWindows.length == 1;
+                shouldHideOverlay = options.modal && !modalWindows.length;
 
                 overlay = options.modal ? that._overlay(true) : $(undefined);
 
@@ -35575,20 +40650,26 @@ extend(Editor, {
 
             if (that.options.isMaximized) {
                 $("html, body").css(OVERFLOW, "");
-                if (this._documentScrollTop && this._documentScrollTop > 0) {
-                    $(document).scrollTop(this._documentScrollTop);
+                if (that._documentScrollTop && that._documentScrollTop > 0) {
+                    $(document).scrollTop(that._documentScrollTop);
                 }
             }
-
-            return that;
         },
 
-        toFront: function () {
+        close: function () {
+            this._close(false);
+            return this;
+        },
+
+        toFront: function (e) {
             var that = this,
                 wrapper = that.wrapper,
                 currentWindow = wrapper[0],
                 zIndex = +wrapper.css(ZINDEX),
-                originalZIndex = zIndex;
+                originalZIndex = zIndex,
+                activeElement = document.activeElement,
+                winElement = that.element,
+                target = e && e.target ? e.target : null;
 
             $(KWINDOW).each(function(i, element) {
                 var windowObject = $(element),
@@ -35609,6 +40690,22 @@ extend(Editor, {
             if (zIndex == 10001 || originalZIndex < zIndex) {
                 wrapper.css(ZINDEX, zIndex + 2);
                 that.element.find("> .k-overlay").remove();
+            }
+
+            if (!$(activeElement).is(winElement) &&
+                !$(target).is(TITLEBAR_BUTTONS + "," + TITLEBAR_BUTTONS + " .k-icon") &&
+                (!winElement.find(activeElement).length || !winElement.find(target).length)) {
+                winElement.focus();
+
+                var scrollTop = $(window).scrollTop(),
+                    windowTop = parseInt(that.wrapper.position().top, 10);
+                if (windowTop - scrollTop < 0) {
+                    if (scrollTop > 0) {
+                        $(window).scrollTop(windowTop);
+                    } else {
+                        that.wrapper.css("top", scrollTop);
+                    }
+                }
             }
 
             return that;
@@ -35764,7 +40861,7 @@ extend(Editor, {
                     refreshIcon.addClass(LOADING);
                 }, 100);
 
-            $.ajax(extend({
+            jQuery.ajax(extend({
                 type: "GET",
                 dataType: "html",
                 cache: false,
@@ -35797,11 +40894,19 @@ extend(Editor, {
 
             Widget.fn.destroy.call(that);
 
+            kendo.destroy(that.wrapper);
+
+            if (that.resizing) {
+                that.resizing.destroy();
+            }
+
+            if (that.dragging) {
+                that.dragging.destroy();
+            }
+
             that.wrapper.remove().add(that.wrapper.find(".k-resize-handle,.k-window-titlebar")).off(NS);
 
             $(window).off("resize", that._resizeHandler);
-
-            kendo.destroy(that.wrapper);
 
             modalWindows = openedModalWindows();
 
@@ -35819,7 +40924,8 @@ extend(Editor, {
                 contentHtml = that.element,
                 options = that.options,
                 iframeSrcAttributes,
-                wrapper;
+                wrapper,
+                isRtl = kendo.support.isRtl(contentHtml);
 
             if (options.scrollable === false) {
                 contentHtml.attr("style", "overflow:hidden;");
@@ -35835,8 +40941,6 @@ extend(Editor, {
                 wrapper.append(templates.titlebar(extend(templates, options)));
             }
 
-            wrapper.toggleClass("k-rtl", !!that.element.closest(".k-rtl").length);
-
             // Collect the src attributes of all iframes and then set them to empty string.
             // This seems to fix this IE9 "feature": http://msdn.microsoft.com/en-us/library/gg622929%28v=VS.85%29.aspx?ppud=4
             iframeSrcAttributes = contentHtml.find("iframe:not(.k-content)").map(function(iframe) {
@@ -35847,12 +40951,16 @@ extend(Editor, {
 
             // Make sure the wrapper is appended to the body only once. IE9+ will throw exceptions if you move iframes in DOM
             wrapper
+                .toggleClass("k-rtl", isRtl)
                 .appendTo(that.appendTo)
                 .append(contentHtml)
                 .find("iframe:not(.k-content)").each(function(index) {
                    // Restore the src attribute of the iframes when they are part of the live DOM tree
                    this.src = iframeSrcAttributes[index];
                 });
+
+            wrapper.find(".k-window-title")
+                .css(isRtl ? "left" : "right", wrapper.find(".k-window-actions").outerWidth() + 10);
 
             contentHtml.show();
         }
@@ -35861,14 +40969,14 @@ extend(Editor, {
     templates = {
         wrapper: template("<div class='k-widget k-window' />"),
         action: template(
-            "<a href='\\#' class='k-window-action k-link'>" +
-                "<span class='k-icon k-i-#= name.toLowerCase() #'>#= name #</span>" +
+            "<a role='button' href='\\#' class='k-window-action k-link'>" +
+                "<span role='presentation' class='k-icon k-i-#= name.toLowerCase() #'>#= name #</span>" +
             "</a>"
         ),
         titlebar: template(
             "<div class='k-window-titlebar k-header'>&nbsp;" +
                 "<span class='k-window-title'>#= title #</span>" +
-                "<div class='k-window-actions k-header'>" +
+                "<div class='k-window-actions'>" +
                 "# for (var i = 0; i < actions.length; i++) { #" +
                     "#= action({ name: actions[i] }) #" +
                 "# } #" +
@@ -35987,6 +41095,9 @@ extend(Editor, {
             }
 
             return false;
+        },
+        destroy: function() {
+            this._draggable.destroy();
         }
     };
 
@@ -36068,12 +41179,15 @@ extend(Editor, {
             this.owner.trigger(DRAGEND);
 
             return false;
+        },
+        destroy: function() {
+            this._draggable.destroy();
         }
     };
 
     kendo.ui.plugin(Window);
 
-})(jQuery);
+})(window.kendo.jQuery);
 (function ($, undefined) {
 
     // Imports ================================================================
@@ -36152,6 +41266,12 @@ extend(Editor, {
             var point = this;
             point.x = round(x || 0, COORD_PRECISION);
             point.y = round(y || 0, COORD_PRECISION);
+        },
+
+        clone: function() {
+            var point = this;
+
+            return new Point2D(point.x, point.y);
         }
     });
 
@@ -36307,11 +41427,11 @@ extend(Editor, {
             };
         },
 
-        containsPoint: function(x, y) {
+        containsPoint: function(point) {
             var box = this;
 
-            return x >= box.x1 && x <= box.x2 &&
-                   y >= box.y1 && y <= box.y2;
+            return point.x >= box.x1 && point.x <= box.x2 &&
+                   point.y >= box.y1 && point.y <= box.y2;
         },
 
         points: function() {
@@ -36478,7 +41598,7 @@ extend(Editor, {
                 box = box ? box.wrap(currentChild.box) : currentChild.box.clone();
             }
 
-            element.box = box;
+            element.box = box || targetBox;
         },
 
         getViewElements: function(view) {
@@ -36496,7 +41616,8 @@ extend(Editor, {
                 child = children[i];
 
                 if (!child.discoverable) {
-                    child.options = deepExtend(child.options, { modelId: modelId });
+                    child.options = child.options || {};
+                    child.options.modelId = modelId;
                 }
 
                 viewElements.push.apply(
@@ -36513,12 +41634,28 @@ extend(Editor, {
             return viewElements;
         },
 
-        makeDiscoverable: function() {
+        enableDiscovery: function() {
             var element = this,
                 options = element.options;
 
             options.modelId = uniqueId();
             element.discoverable = true;
+        },
+
+        disableDiscovery: function() {
+            var element = this,
+                children = element.children,
+                root = element.getRoot(),
+                modelId = element.options.modelId,
+                i;
+
+            if (root && modelId) {
+                delete root.modelMap[modelId];
+            }
+
+            for (i = 0; i < children.length; i++) {
+                children[i].disableDiscovery();
+            }
         },
 
         getRoot: function() {
@@ -36598,6 +41735,7 @@ extend(Editor, {
                             strokeWidth: border.width,
                             dashType: border.dashType,
                             fill: options.background,
+                            fillOpacity: options.opacity,
                             zIndex: options.zIndex })
                     ];
 
@@ -36626,6 +41764,7 @@ extend(Editor, {
                 width: 0
             },
             background: "",
+            shrinkToFit: false,
             width: 0,
             height: 0,
             visible: true
@@ -36636,28 +41775,32 @@ extend(Editor, {
                 box,
                 contentBox,
                 options = element.options,
-                children = element.children,
                 margin = getSpacing(options.margin),
                 padding = getSpacing(options.padding),
-                border = options.border,
-                borderWidth = border.width;
+                borderWidth = options.border.width;
+
+            function reflowPaddingBox() {
+                element.align(targetBox, X, options.align);
+                element.align(targetBox, Y, options.vAlign);
+                element.paddingBox = box.clone().unpad(margin).unpad(borderWidth);
+            }
 
             ChartElement.fn.reflow.call(element, targetBox);
 
-            if (children.length === 0) {
+            if (options.width && options.height) {
                 box = element.box = new Box2D(0, 0, options.width, options.height);
             } else {
                 box = element.box;
             }
 
-            contentBox = element.contentBox = box.clone();
-
-            box.pad(padding).pad(borderWidth).pad(margin);
-
-            element.align(targetBox, X, options.align);
-            element.align(targetBox, Y, options.vAlign);
-
-            element.paddingBox = box.clone().unpad(margin).unpad(borderWidth);
+            if (options.shrinkToFit) {
+                reflowPaddingBox();
+                contentBox = element.contentBox = element.paddingBox.clone().unpad(padding);
+            } else {
+                contentBox = element.contentBox = box.clone();
+                box.pad(padding).pad(borderWidth).pad(margin);
+                reflowPaddingBox();
+            }
 
             element.translateChildren(
                 box.x1 - contentBox.x1 + margin.left + borderWidth + padding.left,
@@ -36697,6 +41840,7 @@ extend(Editor, {
             if (!options.visible) {
                 return [];
             }
+
 
             if (boxElement.hasBox()) {
                 elements.push(
@@ -36835,15 +41979,15 @@ extend(Editor, {
             var title = this;
             ChartElement.fn.init.call(title, options);
 
+            options = title.options;
             title.append(
-                new TextBox(title.options.text, deepExtend({}, title.options, {
-                    vAlign: title.options.position
+                new TextBox(options.text, deepExtend({}, options, {
+                    vAlign: options.position
                 }))
             );
         },
 
         options: {
-            text: "",
             color: BLACK,
             position: TOP,
             align: CENTER,
@@ -36858,6 +42002,23 @@ extend(Editor, {
             title.box.snapTo(targetBox, X);
         }
     });
+
+    Title.buildTitle = function(options, parent, defaultOptions) {
+        var title;
+
+        if (typeof options === "string") {
+            options = { text: options };
+        }
+
+        options = deepExtend({ visible: true }, defaultOptions, options);
+
+        if (options && options.visible && options.text) {
+            title = new Title(options);
+            parent.append(title);
+        }
+
+        return title;
+    };
 
     var AxisLabel = TextBox.extend({
         init: function(value, index, dataItem, options) {
@@ -36880,7 +42041,7 @@ extend(Editor, {
                 deepExtend({ id: uniqueId() }, options)
             );
 
-            label.makeDiscoverable();
+            label.enableDiscovery();
         },
 
         formatValue: function(value, options) {
@@ -36954,7 +42115,8 @@ extend(Editor, {
             line: {
                 width: 1,
                 color: BLACK,
-                visible: true
+                visible: true,
+                zIndex: 2
             },
             title: {
                 visible: true,
@@ -36980,9 +42142,9 @@ extend(Editor, {
             margin: 5,
             visible: true,
             reverse: false,
+            justified: true,
 
-            _alignLines: true,
-            _labelsOnTicks: true
+            _alignLines: true
         },
 
         // abstract labelsCount(): Number
@@ -37020,14 +42182,14 @@ extend(Editor, {
                 vertical = options.vertical,
                 labels = axis.labels,
                 labelSize = vertical ? HEIGHT : WIDTH,
-                labelsOnTicks = options._labelsOnTicks,
+                justified = options.justified,
                 mirror = options.labels.mirror,
                 axisX = mirror ? box.x1 : box.x2,
                 axisY = mirror ? box.y2 : box.y1,
                 startMargin = 0,
-                endMargin = 0;
+                endMargin = options.line.width;
 
-            if (labelsOnTicks && labels.length > 1) {
+            if (justified && labels.length > 1) {
                 startMargin = labels[0].box[labelSize]() / 2;
                 endMargin = last(labels).box[labelSize]() / 2;
             }
@@ -37158,7 +42320,7 @@ extend(Editor, {
                 plotBands = options.plotBands || [],
                 vertical = options.vertical,
                 result = [],
-                plotArea = axis.parent,
+                plotArea = axis.plotArea,
                 slotX,
                 slotY,
                 from,
@@ -37184,6 +42346,69 @@ extend(Editor, {
             }
 
             return result;
+        },
+
+        renderGridLines: function(view, altAxis) {
+            var axis = this,
+                modelId = axis.plotArea.options.modelId,
+                options = axis.options,
+                vertical = options.vertical,
+                lineBox = altAxis.lineBox(),
+                lineStart = lineBox[vertical ? "x1" : "y1"],
+                lineEnd = lineBox[vertical ? "x2" : "y2" ],
+                majorTicks = axis.getMajorTickPositions(),
+                gridLines = [],
+                gridLine = function (pos, options) {
+                    return {
+                        pos: pos,
+                        options: options
+                    };
+                };
+
+            if (options.majorGridLines.visible) {
+                gridLines = map(majorTicks, function(pos) {
+                                return gridLine(pos, options.majorGridLines);
+                            });
+            }
+
+            if (options.minorGridLines.visible) {
+                gridLines = gridLines.concat(
+                    map(axis.getMinorTickPositions(), function(pos) {
+                        if (options.majorGridLines.visible) {
+                            if (!inArray(pos, majorTicks)) {
+                                return gridLine(pos, options.minorGridLines);
+                            }
+                        } else {
+                            return gridLine(pos, options.minorGridLines);
+                        }
+                    }
+                ));
+            }
+
+            return map(gridLines, function(line) {
+                var gridLineOptions = {
+                        data: { modelId: modelId },
+                        strokeWidth: line.options.width,
+                        stroke: line.options.color,
+                        dashType: line.options.dashType
+                    },
+                    linePos = round(line.pos),
+                    altAxisBox = altAxis.lineBox();
+
+                if (vertical) {
+                    if (!altAxis.options.line.visible || altAxisBox.y1 !== linePos) {
+                        return view.createLine(
+                            lineStart, linePos, lineEnd, linePos,
+                            gridLineOptions);
+                    }
+                } else {
+                    if (!altAxis.options.line.visible || altAxisBox.x1 !== linePos) {
+                        return view.createLine(
+                            linePos, lineStart, linePos, lineEnd,
+                            gridLineOptions);
+                    }
+                }
+            });
         },
 
         reflow: function(box) {
@@ -37234,7 +42459,7 @@ extend(Editor, {
                 options = axis.options,
                 labelOptions = options.labels,
                 labels = axis.labels,
-                labelsBetweenTicks = !options._labelsOnTicks,
+                labelsBetweenTicks = !options.justified,
                 vertical = options.vertical,
                 lineBox = axis.lineBox(),
                 mirror = options.labels.mirror,
@@ -37357,8 +42582,9 @@ extend(Editor, {
 
         initDefaults: function(seriesMin, seriesMax, options) {
             var axis = this,
-                autoMin = axis.autoAxisMin(seriesMin, seriesMax),
-                autoMax = axis.autoAxisMax(seriesMin, seriesMax),
+                narrowRange = options.narrowRange,
+                autoMin = axis.autoAxisMin(seriesMin, seriesMax, narrowRange),
+                autoMax = axis.autoAxisMax(seriesMin, seriesMax, narrowRange),
                 majorUnit = autoMajorUnit(autoMin, autoMax),
                 autoOptions = {
                     majorUnit: majorUnit
@@ -37409,21 +42635,23 @@ extend(Editor, {
             return { min: options.min, max: options.max };
         },
 
-        autoAxisMax: function(min, max) {
+        autoAxisMax: function(min, max, narrow) {
+            var axisMax,
+                diff;
+
             if (!min && !max) {
                 return 1;
             }
 
-            var axisMax;
             if (min <= 0 && max <= 0) {
                 max = min == max ? 0 : max;
 
-                var diff = math.abs((max - min) / max);
-                if(diff > ZERO_THRESHOLD) {
+                diff = math.abs((max - min) / max);
+                if(!narrow && diff > ZERO_THRESHOLD) {
                     return 0;
                 }
 
-                axisMax = max - ((min - max) / 2);
+                axisMax = math.min(0, max - ((min - max) / 2));
             } else {
                 min = min == max ? 0 : min;
                 axisMax = max;
@@ -37432,21 +42660,23 @@ extend(Editor, {
             return axisMax;
         },
 
-        autoAxisMin: function(min, max) {
+        autoAxisMin: function(min, max, narrow) {
+            var axisMin,
+                diff;
+
             if (!min && !max) {
                 return 0;
             }
 
-            var axisMin;
             if (min >= 0 && max >= 0) {
                 min = min == max ? 0 : min;
 
-                var diff = (max - min) / max;
-                if(diff > ZERO_THRESHOLD) {
+                diff = (max - min) / max;
+                if(!narrow && diff > ZERO_THRESHOLD) {
                     return 0;
                 }
 
-                axisMin = min - ((max - min) / 2);
+                axisMin = math.max(0, min - ((max - min) / 2));
             } else {
                 max = min == max ? 0 : max;
                 axisMin = min;
@@ -37514,8 +42744,14 @@ extend(Editor, {
                 p2,
                 slotBox = new Box2D(lineBox.x1, lineBox.y1, lineBox.x1, lineBox.y1);
 
-            a = defined(a) ? a : options.axisCrossingValue;
-            b = defined(b) ? b : options.axisCrossingValue;
+            if (!defined(a)) {
+                a = b || 0;
+            }
+
+            if (!defined(b)) {
+                b = a || 0;
+            }
+
             a = math.max(math.min(a, options.max), options.min);
             b = math.max(math.min(b, options.max), options.min);
 
@@ -37559,6 +42795,32 @@ extend(Editor, {
                     min + valueOffset;
 
             return round(value, DEFAULT_PRECISION);
+        },
+
+        translateRange: function(delta) {
+            var axis = this,
+                options = axis.options,
+                lineBox = axis.lineBox(),
+                size = options.vertical ? lineBox.height() : lineBox.width(),
+                range = options.max - options.min,
+                scale = size / range,
+                offset = round(delta / scale, DEFAULT_PRECISION);
+
+            return {
+                min: options.min + offset,
+                max: options.max + offset
+            };
+        },
+
+        scaleRange: function(delta) {
+            var axis = this,
+                options = axis.options,
+                offset = -delta * options.majorUnit;
+
+            return {
+                min: options.min - offset,
+                max: options.max + offset
+            };
         },
 
         labelsCount: function() {
@@ -38651,6 +43913,7 @@ extend(Editor, {
         append: append,
         autoFormat: autoFormat,
         autoMajorUnit: autoMajorUnit,
+        boxDiff: boxDiff,
         defined: defined,
         getSpacing: getSpacing,
         inArray: inArray,
@@ -38666,12 +43929,12 @@ extend(Editor, {
         uniqueId: uniqueId
     });
 
-})(jQuery);
+})(window.kendo.jQuery);
 (function () {
 
     // Imports ================================================================
     var kendo = window.kendo,
-        dataviz = kendo.dataviz,
+        ui = kendo.dataviz.ui,
         deepExtend = kendo.deepExtend;
 
     // Constants ==============================================================
@@ -38684,7 +43947,6 @@ extend(Editor, {
         SANS16 = "16px " + SANS,
         WHITE = "#fff";
 
-    // Chart themes ============================================================
     var chartBaseTheme = {
             title: {
                 font: SANS16
@@ -38700,6 +43962,62 @@ extend(Editor, {
                 },
                 donut: {
                     margin: 1
+                },
+                line: {
+                    width: 4
+                },
+                area: {
+                    line: {
+                        opacity: 1,
+                        width: 0
+                    }
+                },
+                candlestick: {
+                    line: {
+                        width: 1,
+                        color: BLACK
+                    },
+                    border: {
+                        width: 1,
+                        _brightness: 0.8
+                    },
+                    gap: 1,
+                    spacing: 0.3,
+                    downColor: WHITE,
+                    aggregate: {
+                        "open": "max",
+                        "high": "max",
+                        "low": "min",
+                        "close": "max"
+                    },
+                    highlight: {
+                        line: {
+                            width: 2
+                        },
+                        border: {
+                            width: 2,
+                            opacity: 1
+                        }
+                    }
+                },
+                ohlc: {
+                    line: {
+                        width: 1
+                    },
+                    gap: 1,
+                    spacing: 0.3,
+                    aggregate: {
+                        "open": "max",
+                        "high": "max",
+                        "low": "min",
+                        "close": "max"
+                    },
+                    highlight: {
+                        line: {
+                            width: 3,
+                            opacity: 1
+                        }
+                    }
                 },
                 bubble: {
                     opacity: 0.6,
@@ -38719,6 +44037,11 @@ extend(Editor, {
                     spacing: BAR_SPACING
                 }
             },
+            categoryAxis: {
+                majorGridLines: {
+                    visible: true
+                }
+            },
             axisDefaults: {
                 labels: {
                     font: SANS12
@@ -38730,11 +44053,42 @@ extend(Editor, {
             },
             tooltip: {
                 font: SANS12
+            },
+            navigator: {
+                pane: {
+                    height: 90,
+                    margin: {
+                        top: 10
+                    }
+                }
             }
         };
 
-    var chartThemes = {
-        black: deepExtend({}, chartBaseTheme, {
+    var gaugeBaseTheme = {
+        scale: {
+            labels: {
+                font: SANS12
+            }
+        }
+    };
+
+    var themes = ui.themes,
+        registerTheme = ui.registerTheme = function(themeName, options) {
+            var result = {};
+            // Apply base theme
+            result.chart = deepExtend({}, chartBaseTheme, options.chart);
+            result.gauge = deepExtend({}, gaugeBaseTheme, options.gauge);
+
+            // Copy the line/area chart settings for their vertical counterparts
+            var defaults = result.chart.seriesDefaults;
+            defaults.verticalLine = deepExtend({}, defaults.line);
+            defaults.verticalArea = deepExtend({}, defaults.area);
+
+            themes[themeName] = result;
+        };
+
+    registerTheme("black", {
+        chart: {
             title: {
                 color: WHITE
             },
@@ -38778,17 +44132,33 @@ extend(Editor, {
                         visible: false,
                         size: 6
                     }
+                },
+                candlestick: {
+                    downColor: "#555",
+                    line: {
+                        color: WHITE
+                    },
+                    border: {
+                        _brightness: 1.5,
+                        opacity: 1
+                    },
+                    highlight: {
+                        border: {
+                            color: WHITE,
+                            opacity: 0.2
+                        }
+                    }
+                },
+                ohlc: {
+                    line: {
+                        color: WHITE
+                    }
                 }
             },
             chartArea: {
                 background: "#3d3d3d"
             },
             seriesColors: ["#0081da", "#3aafff", "#99c900", "#ffeb3d", "#b20753", "#ff4195"],
-            categoryAxis: {
-                majorGridLines: {
-                    visible: true
-                }
-            },
             axisDefaults: {
                 line: {
                     color: "#8e8e8e"
@@ -38811,62 +44181,32 @@ extend(Editor, {
                 color: WHITE,
                 opacity: 0.8
             }
-        }),
+        },
+        gauge: {
+            pointer: {
+                color: "#0070e4"
+            },
+            scale: {
+                rangePlaceholderColor: "#1d1d1d",
 
-        "default": deepExtend({}, chartBaseTheme, {
-            title: {
-                color: "#8e8e8e"
-            },
-            legend: {
                 labels: {
-                    color: "#232323"
-                }
-            },
-            seriesDefaults: {
-                labels: {
-                    color: BLACK,
-                    background: WHITE,
-                    opacity: 0.5
+                    color: WHITE
                 },
-                area: {
-                    opacity: 0.4,
-                    markers: {
-                        visible: false,
-                        size: 6
-                    }
-                }
-            },
-            seriesColors: ["#ff6800", "#a0a700", "#ff8d00", "#678900", "#ffb53c", "#396000"],
-            categoryAxis: {
-                majorGridLines: {
-                    visible: true
-                }
-            },
-            axisDefaults: {
+                minorTicks: {
+                    color: WHITE
+                },
+                majorTicks: {
+                    color: WHITE
+                },
                 line: {
-                    color: "#8e8e8e"
-                },
-                labels: {
-                    color: "#232323"
-                },
-                minorGridLines: {
-                    color: "#f0f0f0"
-                },
-                majorGridLines: {
-                    color: "#dfdfdf"
-                },
-                title: {
-                    color: "#232323"
+                    color: WHITE
                 }
-            },
-            tooltip: {
-                background: WHITE,
-                color: BLACK,
-                opacity: 0.8
             }
-        }),
+        }
+    });
 
-        blueopal: deepExtend({}, chartBaseTheme, {
+    registerTheme("blueopal", {
+        chart: {
             title: {
                 color: "#293135"
             },
@@ -38887,14 +44227,15 @@ extend(Editor, {
                         visible: false,
                         size: 6
                     }
+                },
+                candlestick: {
+                    downColor: "#c4d0d5",
+                    line: {
+                        color: "#9aabb2"
+                    }
                 }
             },
             seriesColors: ["#0069a5", "#0098ee", "#7bd2f6", "#ffb800", "#ff8517", "#e34a00"],
-            categoryAxis: {
-                majorGridLines: {
-                    visible: true
-                }
-            },
             axisDefaults: {
                 line: {
                     color: "#9aabb2"
@@ -38917,9 +44258,227 @@ extend(Editor, {
                 color: BLACK,
                 opacity: 0.8
             }
-        }),
+        },
+        gauge: {
+            pointer: {
+                color: "#005c83"
+            },
+            scale: {
+                rangePlaceholderColor: "#daecf4",
 
-        silver: deepExtend({}, chartBaseTheme, {
+                labels: {
+                    color: "#293135"
+                },
+                minorTicks: {
+                    color: "#293135"
+                },
+                majorTicks: {
+                    color: "#293135"
+                },
+                line: {
+                    color: "#293135"
+                }
+            }
+        }
+    });
+
+    registerTheme("highcontrast", {
+        chart: {
+            title: {
+                color: "#ffffff"
+            },
+            legend: {
+                labels: {
+                    color: "#ffffff"
+                }
+            },
+            seriesDefaults: {
+                labels: {
+                    color: "#ffffff"
+                },
+                pie: {
+                    overlay: {
+                        gradient: "sharpGlass"
+                    }
+                },
+                donut: {
+                    overlay: {
+                        gradient: "sharpGlass"
+                    }
+                },
+                line: {
+                    markers: {
+                        background: "#2c232b"
+                    }
+                },
+                scatter: {
+                    markers: {
+                        background: "#2c232b"
+                    }
+                },
+                scatterLine: {
+                    markers: {
+                        background: "#2c232b"
+                    }
+                },
+                area: {
+                    opacity: 0.5,
+                    markers: {
+                        visible: false,
+                        size: 6
+                    }
+                },
+                candlestick: {
+                    downColor: "#664e62",
+                    line: {
+                        color: "#ffffff"
+                    },
+                    border: {
+                        _brightness: 1.5,
+                        opacity: 1
+                    },
+                    highlight: {
+                        border: {
+                            color: "#ffffff",
+                            opacity: 1
+                        }
+                    }
+                },
+                ohlc: {
+                    line: {
+                        color: "#ffffff"
+                    }
+                }
+            },
+            chartArea: {
+                background: "#2c232b"
+            },
+            seriesColors: ["#a7008f", "#ffb800", "#3aafff", "#99c900", "#b20753", "#ff4195"],
+            axisDefaults: {
+                line: {
+                    color: "#ffffff"
+                },
+                labels: {
+                    color: "#ffffff"
+                },
+                majorGridLines: {
+                    color: "#664e62"
+                },
+                minorGridLines: {
+                    color: "#4f394b"
+                },
+                title: {
+                    color: "#ffffff"
+                }
+            },
+            tooltip: {
+                background: "#1b141a",
+                color: "#ffffff",
+                opacity: 1
+            }
+        },
+        gauge: {
+            pointer: {
+                color: "#a7008f"
+            },
+            scale: {
+                rangePlaceholderColor: "#2c232b",
+
+                labels: {
+                    color: "#ffffff"
+                },
+                minorTicks: {
+                    color: "#2c232b"
+                },
+                majorTicks: {
+                    color: "#664e62"
+                },
+                line: {
+                    color: "#ffffff"
+                }
+            }
+        }
+    });
+
+    registerTheme("default", {
+        chart: {
+            title: {
+                color: "#8e8e8e"
+            },
+            legend: {
+                labels: {
+                    color: "#232323"
+                }
+            },
+            seriesDefaults: {
+                labels: {
+                    color: BLACK,
+                    background: WHITE,
+                    opacity: 0.5
+                },
+                area: {
+                    opacity: 0.4,
+                    markers: {
+                        visible: false,
+                        size: 6
+                    }
+                },
+                candlestick: {
+                    downColor: "#dedede",
+                    line: {
+                        color: "#8d8d8d"
+                    }
+                }
+            },
+            seriesColors: ["#ff6800", "#a0a700", "#ff8d00", "#678900", "#ffb53c", "#396000"],
+            axisDefaults: {
+                line: {
+                    color: "#8e8e8e"
+                },
+                labels: {
+                    color: "#232323"
+                },
+                minorGridLines: {
+                    color: "#f0f0f0"
+                },
+                majorGridLines: {
+                    color: "#dfdfdf"
+                },
+                title: {
+                    color: "#232323"
+                }
+            },
+            tooltip: {
+                background: WHITE,
+                color: BLACK,
+                opacity: 0.8
+            }
+        },
+        gauge: {
+            pointer: {
+                color: "#ea7001"
+            },
+            scale: {
+                rangePlaceholderColor: "#dedede",
+
+                labels: {
+                    color: "#2e2e2e"
+                },
+                minorTicks: {
+                    color: "#2e2e2e"
+                },
+                majorTicks: {
+                    color: "#2e2e2e"
+                },
+                line: {
+                    color: "#2e2e2e"
+                }
+            }
+        }
+    });
+
+    registerTheme("silver", {
+        chart: {
             title: {
                 color: "#4e5968"
             },
@@ -38965,17 +44524,15 @@ extend(Editor, {
                         visible: false,
                         size: 6
                     }
+                },
+                candlestick: {
+                    downColor: "#a6afbe"
                 }
             },
             chartArea: {
                 background: "#eaeaec"
             },
             seriesColors: ["#007bc3", "#76b800", "#ffae00", "#ef4c00", "#a419b7", "#430B62"],
-            categoryAxis: {
-                majorGridLines: {
-                    visible: true
-                }
-            },
             axisDefaults: {
                 line: {
                     color: "#a6b1c0"
@@ -38998,9 +44555,32 @@ extend(Editor, {
                 color: "#4e5968",
                 opacity: 0.8
             }
-        }),
+        },
+        gauge: {
+            pointer: {
+                color: "#0879c0"
+            },
+            scale: {
+                rangePlaceholderColor: "#f3f3f4",
 
-        metro: deepExtend({}, chartBaseTheme, {
+                labels: {
+                    color: "#515967"
+                },
+                minorTicks: {
+                    color: "#515967"
+                },
+                majorTicks: {
+                    color: "#515967"
+                },
+                line: {
+                    color: "#515967"
+                }
+            }
+        }
+    });
+
+    registerTheme("metro", {
+        chart: {
             title: {
                 color: "#777777"
             },
@@ -39019,14 +44599,21 @@ extend(Editor, {
                         visible: false,
                         size: 6
                     }
+                },
+                candlestick: {
+                    downColor: "#c7c7c7",
+                    line: {
+                        color: "#787878"
+                    }
+                },
+                overlay: {
+                    gradient: "none"
+                },
+                border: {
+                    _brightness: 1
                 }
             },
-            seriesColors: ["#25a0da", "#309b46", "#8ebc00", "#ff6900", "#e61e26", "#d8e404", "#16aba9", "#7e51a1", "#313131", "#ed1691"],
-            categoryAxis: {
-                majorGridLines: {
-                    visible: true
-                }
-            },
+            seriesColors: ["#8ebc00", "#309b46", "#25a0da", "#ff6900", "#e61e26", "#d8e404", "#16aba9", "#7e51a1", "#313131", "#ed1691"],
             axisDefaults: {
                 line: {
                     color: "#c7c7c7"
@@ -39048,94 +44635,8 @@ extend(Editor, {
                 background: WHITE,
                 color: BLACK
             }
-        })
-    };
-
-    // Copy the line/area settings for their vertical counterparts
-    for (var themeName in chartThemes) {
-        var defaults = chartThemes[themeName].seriesDefaults;
-        defaults.verticalLine = deepExtend({}, defaults.line);
-        defaults.verticalArea = deepExtend({}, defaults.area);
-    }
-
-    // Gauge themes ===========================================================
-
-    var gaugeBaseTheme = {
-        scale: {
-            labels: {
-                font: SANS12
-            }
-        }
-    };
-
-    var gaugeThemes = {
-        black: deepExtend({}, gaugeBaseTheme, {
-            pointer: {
-                color: "#0070e4"
-            },
-            scale: {
-                rangePlaceholderColor: "#1d1d1d",
-
-                labels: {
-                    color: WHITE
-                },
-                minorTicks: {
-                    color: WHITE
-                },
-                majorTicks: {
-                    color: WHITE
-                },
-                line: {
-                    color: WHITE
-                }
-            }
-        }),
-
-        blueopal: deepExtend({}, gaugeBaseTheme, {
-            pointer: {
-                color: "#005c83"
-            },
-            scale: {
-                rangePlaceholderColor: "#daecf4",
-
-                labels: {
-                    color: "#293135"
-                },
-                minorTicks: {
-                    color: "#293135"
-                },
-                majorTicks: {
-                    color: "#293135"
-                },
-                line: {
-                    color: "#293135"
-                }
-            }
-        }),
-
-        "default": deepExtend({}, gaugeBaseTheme, {
-            pointer: {
-                color: "#ea7001"
-            },
-            scale: {
-                rangePlaceholderColor: "#dedede",
-
-                labels: {
-                    color: "#2e2e2e"
-                },
-                minorTicks: {
-                    color: "#2e2e2e"
-                },
-                majorTicks: {
-                    color: "#2e2e2e"
-                },
-                line: {
-                    color: "#2e2e2e"
-                }
-            }
-        }),
-
-        metro: deepExtend({}, gaugeBaseTheme, {
+        },
+        gauge: {
             pointer: {
                 color: "#8ebc00"
             },
@@ -39155,43 +44656,495 @@ extend(Editor, {
                     color: "#777"
                 }
             }
-        }),
-
-        silver: deepExtend({}, gaugeBaseTheme, {
-            pointer: {
-                color: "#0879c0"
-            },
-            scale: {
-                rangePlaceholderColor: "#f3f3f4",
-
-                labels: {
-                    color: "#515967"
-                },
-                minorTicks: {
-                    color: "#515967"
-                },
-                majorTicks: {
-                    color: "#515967"
-                },
-                line: {
-                    color: "#515967"
-                }
-            }
-        })
-    };
-
-    // Exports ================================================================
-    deepExtend(dataviz.ui.themes, {
-        chart: chartThemes,
-        gauge: gaugeThemes
+        }
     });
 
-})(jQuery);
+    registerTheme("metroblack", {
+        chart: {
+            title: {
+                color: "#ffffff"
+            },
+            legend: {
+                labels: {
+                    color: "#ffffff"
+                }
+            },
+            seriesDefaults: {
+                border: {
+                    _brightness: 1
+                },
+                labels: {
+                    color: "#ffffff"
+                },
+                line: {
+                    markers: {
+                        background: "#0e0e0e"
+                    }
+                },
+                bubble: {
+                    opacity: 0.6
+                },
+                scatter: {
+                    markers: {
+                        background: "#0e0e0e"
+                    }
+                },
+                scatterLine: {
+                    markers: {
+                        background: "#0e0e0e"
+                    }
+                },
+                area: {
+                    opacity: 0.4,
+                    markers: {
+                        visible: false,
+                        size: 6
+                    }
+                },
+                candlestick: {
+                    downColor: "#828282",
+                    line: {
+                        color: "#ffffff"
+                    }
+                },
+                overlay: {
+                    gradient: "none"
+                }
+            },
+            chartArea: {
+                background: "#0e0e0e"
+            },
+            seriesColors: ["#00aba9", "#309b46", "#8ebc00", "#ff6900", "#e61e26", "#d8e404", "#25a0da", "#7e51a1", "#313131", "#ed1691"],
+            axisDefaults: {
+                line: {
+                    color: "#cecece"
+                },
+                labels: {
+                    color: "#ffffff"
+                },
+                minorGridLines: {
+                    color: "#2d2d2d"
+                },
+                majorGridLines: {
+                    color: "#333333"
+                },
+                title: {
+                    color: "#ffffff"
+                }
+            },
+            tooltip: {
+                background: "#0e0e0e",
+                color: "#ffffff"
+            }
+        },
+        gauge: {
+            pointer: {
+                color: "#00aba9"
+            },
+            scale: {
+                rangePlaceholderColor: "#2d2d2d",
+
+                labels: {
+                    color: "#ffffff"
+                },
+                minorTicks: {
+                    color: "#333333"
+                },
+                majorTicks: {
+                    color: "#cecece"
+                },
+                line: {
+                    color: "#cecece"
+                }
+            }
+        }
+    });
+
+    registerTheme("moonlight", {
+        chart: {
+            title: {
+                color: "#ffffff"
+            },
+            legend: {
+                labels: {
+                    color: "#ffffff"
+                }
+            },
+            seriesDefaults: {
+                labels: {
+                    color: "#ffffff"
+                },
+                pie: {
+                    overlay: {
+                        gradient: "sharpBevel"
+                    }
+                },
+                donut: {
+                    overlay: {
+                        gradient: "sharpGlass"
+                    }
+                },
+                line: {
+                    markers: {
+                        background: "#212a33"
+                    }
+                },
+                bubble: {
+                    opacity: 0.6
+                },
+                scatter: {
+                    markers: {
+                        background: "#212a33"
+                    }
+                },
+                scatterLine: {
+                    markers: {
+                        background: "#212a33"
+                    }
+                },
+                area: {
+                    opacity: 0.3,
+                    markers: {
+                        visible: false,
+                        size: 6
+                    }
+                },
+                candlestick: {
+                    downColor: "#757d87",
+                    line: {
+                        color: "#ea9d06"
+                    },
+                    border: {
+                        _brightness: 1.5,
+                        opacity: 1
+                    },
+                    highlight: {
+                        border: {
+                            color: WHITE,
+                            opacity: 0.2
+                        }
+                    }
+                },
+                ohlc: {
+                    line: {
+                        color: "#ea9d06"
+                    }
+                }
+            },
+            chartArea: {
+                background: "#212a33"
+            },
+            seriesColors: ["#ffca08", "#ff710f", "#ed2e24", "#ff9f03", "#e13c02", "#a00201"],
+            axisDefaults: {
+                line: {
+                    color: "#8c909e"
+                },
+                minorTicks: {
+                    color: "#8c909e"
+                },
+                majorTicks: {
+                    color: "#8c909e"
+                },
+                labels: {
+                    color: "#ffffff"
+                },
+                majorGridLines: {
+                    color: "#3e424d"
+                },
+                minorGridLines: {
+                    color: "#2f3640"
+                },
+                title: {
+                    color: "#ffffff"
+                }
+            },
+            tooltip: {
+                background: "#212a33",
+                color: "#ffffff",
+                opacity: 1
+            }
+        },
+        gauge: {
+            pointer: {
+                color: "#f4af03"
+            },
+            scale: {
+                rangePlaceholderColor: "#2f3640",
+
+                labels: {
+                    color: WHITE
+                },
+                minorTicks: {
+                    color: "#8c909e"
+                },
+                majorTicks: {
+                    color: "#8c909e"
+                },
+                line: {
+                    color: "#8c909e"
+                }
+            }
+        }
+    });
+    registerTheme("uniform", {
+        chart: {
+            title: {
+                color: "#686868"
+            },
+            legend: {
+                labels: {
+                    color: "#686868"
+                }
+            },
+            seriesDefaults: {
+                labels: {
+                    color: "#686868"
+                },
+                pie: {
+                    overlay: {
+                        gradient: "sharpBevel"
+                    }
+                },
+                donut: {
+                    overlay: {
+                        gradient: "sharpGlass"
+                    }
+                },
+                line: {
+                    markers: {
+                        background: "#ffffff"
+                    }
+                },
+                bubble: {
+                    opacity: 0.6
+                },
+                scatter: {
+                    markers: {
+                        background: "#ffffff"
+                    }
+                },
+                scatterLine: {
+                    markers: {
+                        background: "#ffffff"
+                    }
+                },
+                area: {
+                    opacity: 0.3,
+                    markers: {
+                        visible: false,
+                        size: 6
+                    }
+                },
+                candlestick: {
+                    downColor: "#cccccc",
+                    line: {
+                        color: "#cccccc"
+                    },
+                    border: {
+                        _brightness: 1.5,
+                        opacity: 1
+                    },
+                    highlight: {
+                        border: {
+                            color: "#cccccc",
+                            opacity: 0.2
+                        }
+                    }
+                },
+                ohlc: {
+                    line: {
+                        color: "#cccccc"
+                    }
+                }
+            },
+            chartArea: {
+                background: "#ffffff"
+            },
+            seriesColors: ["#527aa3", "#6f91b3", "#8ca7c2", "#a8bdd1", "#c5d3e0", "#e2e9f0"],
+            axisDefaults: {
+                line: {
+                    color: "#9e9e9e"
+                },
+                minorTicks: {
+                    color: "#aaaaaa"
+                },
+                majorTicks: {
+                    color: "#888888"
+                },
+                labels: {
+                    color: "#686868"
+                },
+                majorGridLines: {
+                    color: "#dadada"
+                },
+                minorGridLines: {
+                    color: "#e7e7e7"
+                },
+                title: {
+                    color: "#686868"
+                }
+            },
+            tooltip: {
+                background: "#ffffff",
+                color: "#686868",
+                opacity: 0.8
+            }
+        },
+        gauge: {
+            pointer: {
+                color: "#527aa3"
+            },
+            scale: {
+                rangePlaceholderColor: "#e7e7e7",
+
+                labels: {
+                    color: "#686868"
+                },
+                minorTicks: {
+                    color: "#aaaaaa"
+                },
+                majorTicks: {
+                    color: "#888888"
+                },
+                line: {
+                    color: "#9e9e9e"
+                }
+            }
+        }
+    });
+
+    registerTheme("bootstrap", {
+        chart: {
+            title: {
+                color: "#343434"
+            },
+            legend: {
+                labels: {
+                    color: "#343434"
+                }
+            },
+            seriesDefaults: {
+                labels: {
+                    color: "#343434"
+                },
+                pie: {
+                    overlay: {
+                        gradient: "sharpBevel"
+                    }
+                },
+                donut: {
+                    overlay: {
+                        gradient: "sharpGlass"
+                    }
+                },
+                line: {
+                    markers: {
+                        background: "#ffffff"
+                    }
+                },
+                bubble: {
+                    opacity: 0.6
+                },
+                scatter: {
+                    markers: {
+                        background: "#ffffff"
+                    }
+                },
+                scatterLine: {
+                    markers: {
+                        background: "#ffffff"
+                    }
+                },
+                area: {
+                    opacity: 0.3,
+                    markers: {
+                        visible: false,
+                        size: 6
+                    }
+                },
+                candlestick: {
+                    downColor: "#d0d0d0",
+                    line: {
+                        color: "#d0d0d0"
+                    },
+                    border: {
+                        _brightness: 1.5,
+                        opacity: 1
+                    },
+                    highlight: {
+                        border: {
+                            color: "#b8b8b8",
+                            opacity: 0.2
+                        }
+                    }
+                },
+                ohlc: {
+                    line: {
+                        color: "#d0d0d0"
+                    }
+                }
+            },
+            chartArea: {
+                background: "#ffffff"
+            },
+            seriesColors: ["#006dcc", "#49AFCD", "#5BB75B", "#FAA732", "#DA4F49", "#363636"],
+            axisDefaults: {
+                line: {
+                    color: "#b8b8b8"
+                },
+                minorTicks: {
+                    color: "#dddddd"
+                },
+                majorTicks: {
+                    color: "#b8b8b8"
+                },
+                labels: {
+                    color: "#343434"
+                },
+                majorGridLines: {
+                    color: "#b8b8b8"
+                },
+                minorGridLines: {
+                    color: "#dddddd"
+                },
+                title: {
+                    color: "#343434"
+                }
+            },
+            tooltip: {
+                background: "#ffffff",
+                color: "#343434",
+                opacity: 0.8
+            }
+        },
+        gauge: {
+            pointer: {
+                color: "#0044cc"
+            },
+            scale: {
+                rangePlaceholderColor: "#b8b8b8",
+
+                labels: {
+                    color: "#343434"
+                },
+                minorTicks: {
+                    color: "#dddddd"
+                },
+                majorTicks: {
+                    color: "#b8b8b8"
+                },
+                line: {
+                    color: "#b8b8b8"
+                }
+            }
+        }
+    });
+
+})(window.kendo.jQuery);
 
 (function ($, undefined) {
     // Imports ================================================================
     var each = $.each,
-        grep = $.grep,
         isArray = $.isArray,
         map = $.map,
         math = Math,
@@ -39201,6 +45154,7 @@ extend(Editor, {
 
         kendo = window.kendo,
         Class = kendo.Class,
+        Observable = kendo.Observable,
         DataSource = kendo.data.DataSource,
         Widget = kendo.ui.Widget,
         template = kendo.template,
@@ -39235,11 +45189,13 @@ extend(Editor, {
         renderTemplate = dataviz.renderTemplate,
         uniqueId = dataviz.uniqueId;
 
-    var CSS_PREFIX = "k-";
-
     // Constants ==============================================================
-    var ABOVE = "above",
+    var NS = ".kendoChart",
+
+        ABOVE = "above",
         AREA = "area",
+        AUTO = "auto",
+        FIT = "fit",
         AXIS_LABEL_CLICK = dataviz.AXIS_LABEL_CLICK,
         BAR = "bar",
         BAR_BORDER_BRIGHTNESS = 0.8,
@@ -39247,14 +45203,16 @@ extend(Editor, {
         BLACK = "#000",
         BOTTOM = "bottom",
         BUBBLE = "bubble",
+        CANDLESTICK = "candlestick",
         CATEGORY = "category",
         CENTER = "center",
         CHANGE = "change",
         CIRCLE = "circle",
-        CLICK = "click",
+        CLICK_NS = "click" + NS,
         CLIP = dataviz.CLIP,
         COLUMN = "column",
         COORD_PRECISION = dataviz.COORD_PRECISION,
+        CSS_PREFIX = "k-",
         DATABOUND = "dataBound",
         DATE = "date",
         DATE_REGEXP = /^\/Date\((.*?)\)\/$/,
@@ -39266,6 +45224,9 @@ extend(Editor, {
         DEGREE = math.PI / 180,
         DONUT = "donut",
         DONUT_SECTOR_ANIM_DELAY = 50,
+        DRAG = "drag",
+        DRAG_END = "dragEnd",
+        DRAG_START = "dragStart",
         FADEIN = "fadeIn",
         GLASS = "glass",
         HOURS = "hours",
@@ -39281,30 +45242,36 @@ extend(Editor, {
         MINUTES = "minutes",
         MONTHS = "months",
         MOUSEMOVE_TRACKING = "mousemove.tracking",
-        MOUSEOVER = "mouseover",
-        NS = ".kendoChart",
+        MOUSEOVER_NS = "mouseover" + NS,
+        MOUSEWHEEL_DELAY = 150,
+        MOUSEWHEEL_NS = "DOMMouseScroll" + NS + " mousewheel" + NS,
+        OHLC = "ohlc",
         OUTSIDE_END = "outsideEnd",
         OUTLINE_SUFFIX = "_outline",
         PIE = "pie",
         PIE_SECTOR_ANIM_DELAY = 70,
         PLOT_AREA_CLICK = "plotAreaClick",
-        PRIMARY = "primary",
         RIGHT = "right",
         ROUNDED_BEVEL = "roundedBevel",
         ROUNDED_GLASS = "roundedGlass",
         SCATTER = "scatter",
         SCATTER_LINE = "scatterLine",
+        SELECT_START = "selectStart",
+        SELECT = "select",
+        SELECT_END = "selectEnd",
         SERIES_CLICK = "seriesClick",
         SERIES_HOVER = "seriesHover",
         STRING = "string",
         TIME_PER_MINUTE = 60000,
         TIME_PER_HOUR = 60 * TIME_PER_MINUTE,
         TIME_PER_DAY = 24 * TIME_PER_HOUR,
+        TIME_PER_WEEK = 7 * TIME_PER_DAY,
         TIME_PER_MONTH = 31 * TIME_PER_DAY,
         TIME_PER_YEAR = 365 * TIME_PER_DAY,
         TIME_PER_UNIT = {
             "years": TIME_PER_YEAR,
             "months": TIME_PER_MONTH,
+            "weeks": TIME_PER_WEEK,
             "days": TIME_PER_DAY,
             "hours": TIME_PER_HOUR,
             "minutes": TIME_PER_MINUTE
@@ -39314,21 +45281,34 @@ extend(Editor, {
         TOOLTIP_OFFSET = 5,
         TOOLTIP_SHOW_DELAY = 100,
         TRIANGLE = "triangle",
-        VERTICAL_LINE = "verticalLine",
+        VALUE = "value",
         VERTICAL_AREA = "verticalArea",
+        VERTICAL_LINE = "verticalLine",
+        WEEKS = "weeks",
         WHITE = "#fff",
         X = "x",
         Y = "y",
         YEARS = "years",
-        ZERO = "zero";
+        ZERO = "zero",
+        ZOOM_START = "zoomStart",
+        ZOOM = "zoom",
+        ZOOM_END = "zoomEnd",
 
-    var CATEGORICAL_CHARTS = [BAR, COLUMN, LINE, VERTICAL_LINE, AREA, VERTICAL_AREA],
-        XY_CHARTS = [SCATTER, SCATTER_LINE, BUBBLE];
+        CATEGORICAL_CHARTS = [
+            BAR, COLUMN, LINE, VERTICAL_LINE, AREA, VERTICAL_AREA, CANDLESTICK, OHLC
+        ],
+        XY_CHARTS = [
+            SCATTER, SCATTER_LINE, BUBBLE
+        ],
+        BASE_UNITS = [
+            MINUTES, HOURS, DAYS, WEEKS, MONTHS, YEARS
+        ];
 
     var DateLabelFormats = {
         minutes: "HH:mm",
         hours: "HH:mm",
         days: "M/d",
+        weeks: "M/d",
         months: "MMM 'yy",
         years: "yyyy"
     };
@@ -39339,25 +45319,32 @@ extend(Editor, {
             var chart = this,
                 options,
                 themeOptions,
-                themes = dataviz.ui.themes.chart || {},
-                dataSourceOptions = (userOptions || {}).dataSource,
-                themeName;
+                themes = dataviz.ui.themes || {},
+                theme,
+                themeName,
+                dataSourceOptions = (userOptions || {}).dataSource;
 
             Widget.fn.init.call(chart, element);
             options = deepExtend({}, chart.options, userOptions);
 
-            themeName = options.theme;
-            themeOptions = themeName ? themes[themeName] || themes[themeName.toLowerCase()] : {};
+            chart.element
+                .addClass("k-chart")
+                .css("position", "relative");
 
-            applyDefaults(options, themeOptions);
+            chart._originalOptions = deepExtend({}, options);
+
+            themeName = options.theme;
+            theme = themes[themeName] || themes[themeName.toLowerCase()];
+            themeOptions = themeName && theme ? theme.chart : {};
+
+            resolveAxisAliases(options);
+            chart._applyDefaults(options, themeOptions);
 
             chart.options = deepExtend({}, themeOptions, options);
 
             applySeriesColors(chart.options);
 
             chart.bind(chart.events, chart.options);
-
-            chart.element.addClass("k-chart");
 
             chart.wrapper = chart.element;
 
@@ -39380,10 +45367,7 @@ extend(Editor, {
         setDataSource: function(dataSource) {
             var chart = this;
 
-            if (chart.dataSource) {
-                chart.dataSource.unbind(CHANGE, chart._dataChangeHandler);
-            }
-
+            chart.dataSource.unbind(CHANGE, chart._dataChangeHandler);
             chart.dataSource = dataSource;
 
             dataSource.bind(CHANGE, chart._dataChangeHandler);
@@ -39398,7 +45382,13 @@ extend(Editor, {
             SERIES_CLICK,
             SERIES_HOVER,
             AXIS_LABEL_CLICK,
-            PLOT_AREA_CLICK
+            PLOT_AREA_CLICK,
+            DRAG_START,
+            DRAG,
+            DRAG_END,
+            ZOOM_START,
+            ZOOM,
+            ZOOM_END
         ],
 
         items: function() {
@@ -39409,16 +45399,11 @@ extend(Editor, {
             name: "Chart",
             theme: "default",
             chartArea: {},
-            title: {
-                visible: true
-            },
             legend: {
                 visible: true,
                 labels: {}
             },
-            categoryAxis: {
-                categories: []
-            },
+            categoryAxis: {},
             autoBind: true,
             seriesDefaults: {
                 type: COLUMN,
@@ -39430,28 +45415,37 @@ extend(Editor, {
             tooltip: {
                 visible: false
             },
-            transitions: true
+            transitions: true,
+            valueAxis: {},
+            plotArea: {},
+            title: {},
+            xAxis: {},
+            yAxis: {}
         },
 
         refresh: function() {
             var chart = this;
 
-            applyDefaults(chart.options);
+            chart._applyDefaults(chart.options);
 
-            if (chart.dataSource) {
-                delete chart._sourceSeries;
-                chart._onDataChanged();
+            delete chart._sourceSeries;
+            chart._onDataChanged();
+        },
+
+        redraw: function(paneName) {
+            var chart = this,
+                pane,
+                plotArea;
+
+            chart._applyDefaults(chart.options);
+
+            if (paneName) {
+                plotArea = chart._model._plotArea;
+                pane = plotArea.findPane(paneName);
+                plotArea.redraw(pane);
             } else {
                 chart._redraw();
             }
-        },
-
-        redraw: function() {
-            var chart = this;
-
-            applyDefaults(chart.options);
-
-            chart._redraw();
         },
 
         _redraw: function() {
@@ -39467,7 +45461,6 @@ extend(Editor, {
             if (viewType) {
                 view = chart._view = viewType.fromModel(model);
 
-                element.css("position", "relative");
                 chart._viewElement = view.renderTo(element[0]);
                 chart._tooltip = new dataviz.Tooltip(element, options.tooltip);
                 chart._highlight = new Highlight(view, chart._viewElement);
@@ -39481,6 +45474,11 @@ extend(Editor, {
             return view.render();
         },
 
+        _applyDefaults: function(options, themeOptions) {
+            applyAxisDefaults(options, themeOptions);
+            applySeriesDefaults(options, themeOptions);
+        },
+
         _getModel: function() {
             var chart = this,
                 options = chart.options,
@@ -39492,9 +45490,7 @@ extend(Editor, {
                     }, options.chartArea)),
                 plotArea;
 
-            if (options.title && options.title.visible && options.title.text) {
-                model.append(new Title(options.title));
-            }
+            Title.buildTitle(options.title, model);
 
             plotArea = model._plotArea = chart._createPlotArea();
             if (options.legend.visible) {
@@ -39550,8 +45546,176 @@ extend(Editor, {
             var chart = this,
                 element = chart.element;
 
-            element.on(CLICK + NS, proxy(chart._click, chart));
-            element.on(MOUSEOVER + NS, proxy(chart._mouseOver, chart));
+            element.on(CLICK_NS, proxy(chart._click, chart));
+            element.on(MOUSEOVER_NS, proxy(chart._mouseover, chart));
+            element.on(MOUSEWHEEL_NS, proxy(chart._mousewheel, chart));
+
+            if (kendo.UserEvents) {
+                chart._userEvents = new kendo.UserEvents(element, {
+                    global: true,
+                    threshold: 5,
+                    filter: ":not(.k-selector)",
+                    stopPropagation: true,
+                    multiTouch: false,
+                    start: proxy(chart._start, chart),
+                    move: proxy(chart._move, chart),
+                    end: proxy(chart._end, chart)
+                });
+            }
+        },
+
+        _start: function(e) {
+            this._startNavigation(e, DRAG_START);
+        },
+
+        _move: function(e) {
+            var chart = this,
+                state = chart._navState,
+                axes,
+                ranges = {};
+
+            if (state) {
+                e.preventDefault();
+
+                axes = state.axes;
+
+                for (var i = 0; i < axes.length; i++) {
+                    var currentAxis = axes[i];
+                    var axisName = currentAxis.options.name;
+                    if (axisName) {
+                        var axis = currentAxis.options.vertical ? e.y : e.x;
+                        var delta = axis.startLocation - axis.location;
+
+                        if (delta !== 0) {
+                            ranges[currentAxis.options.name] =
+                                currentAxis.translateRange(delta);
+                        }
+                    }
+                }
+
+                state.axisRanges = ranges;
+                chart.trigger(DRAG, {
+                   axisRanges: ranges,
+                   originalEvent: e
+                });
+            }
+        },
+
+        _end: function(e) {
+            this._endNavigation(e, DRAG_END);
+        },
+
+        _mousewheel: function(e) {
+            var chart = this,
+                origEvent = e.originalEvent,
+                prevented,
+                delta = 0,
+                totalDelta,
+                state = chart._navState,
+                axes,
+                i,
+                currentAxis,
+                axisName,
+                ranges = {};
+
+            if (origEvent.wheelDelta) {
+              delta = -origEvent.wheelDelta / 120;
+            }
+
+            if (origEvent.detail) {
+              delta = origEvent.detail / 3;
+            }
+
+            if (!state) {
+                prevented = chart._startNavigation(origEvent, ZOOM_START);
+                if (!prevented) {
+                    state = chart._navState;
+                }
+            }
+
+            if (state) {
+                totalDelta = state.totalDelta || delta;
+                state.totalDelta = totalDelta + delta;
+
+                axes = chart._navState.axes;
+
+                for (i = 0; i < axes.length; i++) {
+                    currentAxis = axes[i];
+                    axisName = currentAxis.options.name;
+                    if (axisName) {
+                        ranges[axisName] = currentAxis.scaleRange(totalDelta);
+                    }
+                }
+
+                chart.trigger(ZOOM, {
+                    delta: delta,
+                    axisRanges: ranges,
+                    originalEvent: e
+                });
+
+                if (chart._mwTimeout) {
+                    clearTimeout(chart._mwTimeout);
+                }
+
+                chart._mwTimeout = setTimeout(function() {
+                    chart._endNavigation(e, ZOOM_END);
+                }, MOUSEWHEEL_DELAY);
+            }
+        },
+
+        _startNavigation: function(e, chartEvent) {
+            var chart = this,
+                coords = chart._eventCoordinates(e),
+                plotArea = chart._model._plotArea,
+                pane = plotArea.findPointPane(coords),
+                axes = plotArea.axes.slice(0),
+                i,
+                currentAxis,
+                inAxis = false,
+                prevented;
+
+            if (!pane) {
+                return;
+            }
+
+            for (i = 0; i < axes.length; i++) {
+                currentAxis = axes[i];
+                if (currentAxis.box.containsPoint(coords)) {
+                    inAxis = true;
+                    break;
+                }
+            }
+
+            if (!inAxis && plotArea.backgroundBox().containsPoint(coords)) {
+                prevented = chart.trigger(chartEvent, {
+                    axisRanges: axisRanges(axes),
+                    originalEvent: e
+                });
+
+                if(prevented) {
+                    chart._userEvents.cancel();
+                } else {
+                    chart._suppressHover = true;
+                    chart._unsetActivePoint();
+                    chart._navState = {
+                        pane: pane,
+                        axes: axes
+                    };
+                }
+            }
+        },
+
+        _endNavigation: function(e, chartEvent) {
+            var chart = this;
+
+            if (chart._navState) {
+                chart.trigger(chartEvent, {
+                    axisRanges: chart._navState.axisRanges,
+                    originalEvent: e
+                });
+                chart._suppressHover = false;
+                chart._navState = null;
+            }
         },
 
         _getChartElement: function(e) {
@@ -39572,6 +45736,15 @@ extend(Editor, {
         },
 
         _eventCoordinates: function(e) {
+            var chart = this,
+                isTouch = defined((e.x || {}).client),
+                clientX = isTouch ? e.x.client : e.clientX,
+                clientY = isTouch ? e.y.client : e.clientY;
+
+            return chart._toModelCoordinates(clientX, clientY);
+        },
+
+        _toModelCoordinates: function(clientX, clientY) {
             var element = this.element,
                 offset = element.offset(),
                 paddingLeft = parseInt(element.css("paddingLeft"), 10),
@@ -39579,8 +45752,8 @@ extend(Editor, {
                 win = $(window);
 
             return {
-                x: e.clientX - offset.left - paddingLeft + win.scrollLeft(),
-                y: e.clientY - offset.top - paddingTop + win.scrollTop()
+                x: clientX - offset.left - paddingLeft + win.scrollLeft(),
+                y: clientY - offset.top - paddingTop + win.scrollTop()
             };
         },
 
@@ -39597,14 +45770,14 @@ extend(Editor, {
             }
         },
 
-        _mouseOver: function(e) {
+        _mouseover: function(e) {
             var chart = this,
                 tooltip = chart._tooltip,
                 highlight = chart._highlight,
                 tooltipOptions,
                 point;
 
-            if (!highlight || highlight.overlayElement === e.target) {
+            if (chart._suppressHover || !highlight || highlight.overlayElement === e.target) {
                 return;
             }
 
@@ -39634,7 +45807,7 @@ extend(Editor, {
                 owner,
                 seriesPoint;
 
-            if (chart._plotArea.box.containsPoint(coords.x, coords.y)) {
+            if (chart._plotArea.box.containsPoint(coords)) {
                 if (point && point.series && (point.series.type === LINE || point.series.type === AREA)) {
                     owner = point.parent;
                     seriesPoint = owner.getNearestPoint(coords.x, coords.y, point.seriesIx);
@@ -39651,9 +45824,22 @@ extend(Editor, {
                 }
             } else {
                 $(doc.body).off(MOUSEMOVE_TRACKING);
+                chart._unsetActivePoint();
+            }
+        },
 
-                delete chart._activePoint;
+        _unsetActivePoint: function() {
+            var chart = this,
+                tooltip = chart._tooltip,
+                highlight = chart._highlight;
+
+            chart._activePoint = null;
+
+            if (tooltip) {
                 tooltip.hide();
+            }
+
+            if (highlight) {
                 highlight.hide();
             }
         },
@@ -39672,10 +45858,10 @@ extend(Editor, {
             for (seriesIx = 0; seriesIx < seriesLength; seriesIx++) {
                 currentSeries = series[seriesIx];
 
-                if (currentSeries.field || (currentSeries.xField && currentSeries.yField)) {
+                if (chart.isBindable(currentSeries)) {
                     currentSeries.data = data;
 
-                    [].push.apply(processedSeries, grouped ?
+                    append(processedSeries, grouped ?
                         chart._createGroupedSeries(currentSeries, data) :
                         [ currentSeries ]
                     );
@@ -39689,10 +45875,33 @@ extend(Editor, {
 
             applySeriesColors(chart.options);
 
-            chart._bindCategories(grouped ? data[0].items : data);
+            chart._categoriesData = grouped ? data[0].items : data;
+            bindCategories(chart.options, chart._categoriesData);
 
             chart.trigger(DATABOUND);
             chart._redraw();
+        },
+
+        isBindable: function(series) {
+            var valueFields = valueFieldsByChartType(series.type),
+                result = true,
+                field, i;
+
+            for (i = 0; i < valueFields.length; i++) {
+                field = valueFields[i];
+                if (field === VALUE) {
+                    field = "field";
+                } else {
+                    field = field + "Field";
+                }
+
+                if (!series[field]) {
+                    result = false;
+                    break;
+                }
+            }
+
+            return result;
         },
 
         _createGroupedSeries: function(series, data) {
@@ -39725,35 +45934,16 @@ extend(Editor, {
             return groupSeries;
         },
 
-        _bindCategories: function(data) {
-            var categoryAxis = this.options.categoryAxis,
-                i,
-                category,
-                row,
-                length = data.length;
-
-            if (categoryAxis.field) {
-                for (i = 0; i < length; i++) {
-                    row = data[i];
-
-                    category = getField(categoryAxis.field, row);
-                    if (i === 0) {
-                        categoryAxis.categories = [category];
-                        categoryAxis.dataItems = [row];
-                    } else {
-                        categoryAxis.categories.push(category);
-                        categoryAxis.dataItems.push(row);
-                    }
-                }
-            }
-        },
-
         destroy: function() {
             var chart = this,
                 dataSource = chart.dataSource;
 
-            chart.wrapper.off(NS);
+            chart.element.off(NS);
             dataSource.unbind(CHANGE, chart._dataChangeHandler);
+
+            if (chart._userEvents) {
+                chart._userEvents.destroy();
+            }
 
             Widget.fn.destroy.call(chart);
         }
@@ -40122,8 +46312,7 @@ extend(Editor, {
                 color: BLACK
             },
             zIndex: 1,
-
-            _labelsOnTicks: false
+            justified: false
         },
 
         range: function() {
@@ -40134,9 +46323,13 @@ extend(Editor, {
             var axis = this,
                 options = axis.options,
                 vertical = options.vertical,
-                size = vertical ? axis.box.height() : axis.box.width(),
-                step = size / itemsCount,
-                pos = vertical ? axis.box.y1 : axis.box.x1,
+                justified = options.justified,
+                lineBox = axis.lineBox(),
+                size = vertical ? lineBox.height() : lineBox.width(),
+                intervals = itemsCount - (justified ? 1 : 0),
+                step = size / intervals,
+                dim = vertical ? Y : X,
+                pos = lineBox[dim + 1],
                 positions = [],
                 i;
 
@@ -40145,7 +46338,9 @@ extend(Editor, {
                 pos += step;
             }
 
-            positions.push(vertical ? axis.box.y2 : axis.box.x2);
+            if (!justified) {
+                positions.push(lineBox[dim + 2]);
+            }
 
             return options.reverse ? positions.reverse() : positions;
         },
@@ -40165,28 +46360,41 @@ extend(Editor, {
         getSlot: function(from, to) {
             var axis = this,
                 options = axis.options,
+                majorTicks = axis.getMajorTickPositions(),
                 reverse = options.reverse,
-                vertical = options.vertical,
-                valueAxis = vertical ? Y : X,
+                justified = options.justified,
+                valueAxis = options.vertical ? Y : X,
                 lineBox = axis.lineBox(),
-                slotBox = new Box2D(lineBox.x1, lineBox.y1, lineBox.x1, lineBox.y1),
                 lineStart = lineBox[valueAxis + (reverse ? 2 : 1)],
-                size = vertical ? lineBox.height() : lineBox.width(),
-                categoriesLength = math.max(1, options.categories.length),
-                step = (reverse ? -1 : 1) * (size / categoriesLength),
+                lineEnd = lineBox[valueAxis + (reverse ? 1 : 2)],
+                slotBox = lineBox.clone(),
+                intervals = math.max(1, majorTicks.length - (justified ? 0 : 1)),
                 p1,
                 p2,
                 slotSize;
 
-            from = math.min(math.max(0, from), categoriesLength);
+            from = defined(from) ? from : 0;
             to = defined(to) ? to : from;
-            to = math.max(math.min(categoriesLength, to), from);
-            p1 = lineStart + (from * step);
-            p2 = p1 + step;
+            from = clipValue(from, 0, intervals);
+            to = clipValue(to - 1, from, intervals);
+            // Fixes transient bug caused by iOS 6.0 JIT
+            // (one can never be too sure)
+            to = math.max(from, to);
+
+            p1 = from === 0 ? lineStart : majorTicks[from];
+            p2 = justified ? p1 : majorTicks[to];
             slotSize = to - from;
 
-            if (slotSize > 0 || (from == to && categoriesLength == from)) {
-                p2 = p1 + (slotSize * step);
+            if (slotSize > 0 || (from === to)) {
+                p2 = majorTicks[to + 1] || lineEnd;
+            }
+
+            if (justified) {
+                if (from === intervals) {
+                    p1 = p2;
+                } else {
+                    p2 = p1;
+                }
             }
 
             slotBox[valueAxis + 1] = reverse ? p2 : p1;
@@ -40195,30 +46403,87 @@ extend(Editor, {
             return slotBox;
         },
 
-        getCategory: function(point) {
+        getCategoryIndex: function(point) {
             var axis = this,
                 options = axis.options,
                 reverse = options.reverse,
                 vertical = options.vertical,
                 valueAxis = vertical ? Y : X,
                 lineBox = axis.lineBox(),
-                lineStart = lineBox[valueAxis + (reverse ? 2 : 1)],
-                lineSize = vertical ? lineBox.height() : lineBox.width(),
-                intervals = math.max(1, options.categories.length - 1),
-                offset = (reverse ? -1 : 1) * (point[valueAxis] - lineStart),
-                step = intervals / lineSize,
-                categoriesOffset = round(offset * step),
+                lineStart = lineBox[valueAxis + 1],
+                lineEnd = lineBox[valueAxis + 2],
+                position = point[valueAxis],
+                majorTicks = axis.getMajorTickPositions(),
+                tickPos,
+                nextTickPos,
+                i,
                 categoryIx;
 
-            if (offset < 0 || offset > lineSize) {
+            if (position < lineStart || position > lineEnd) {
                 return null;
             }
 
-            categoryIx = vertical ?
-                intervals - categoriesOffset:
-                categoriesOffset;
+            for (i = 0; i < majorTicks.length; i++) {
+                tickPos = majorTicks[i];
+                nextTickPos = majorTicks[i + 1];
 
-            return options.categories[categoryIx];
+                if (!defined(nextTickPos)) {
+                    nextTickPos = reverse ? lineStart : lineEnd;
+                }
+
+                if (reverse) {
+                    tickPos = nextTickPos;
+                    nextTickPos = majorTicks[i];
+                }
+
+                if (options.justified && position === nextTickPos) {
+                    categoryIx = math.max(0, vertical ? majorTicks.length - i - 1 : i + 1);
+                    break;
+                }
+
+                if (position >= tickPos && position <= nextTickPos) {
+                    categoryIx = math.max(0, vertical ? majorTicks.length - i - 2: i);
+                    break;
+                }
+            }
+
+            return categoryIx;
+        },
+
+        getCategory: function(point) {
+            var index = this.getCategoryIndex(point);
+
+            if (index === null) {
+                return null;
+            }
+            return this.options.categories[index];
+        },
+
+        translateRange: function(delta) {
+            var axis = this,
+                options = axis.options,
+                lineBox = axis.lineBox(),
+                size = options.vertical ? lineBox.height() : lineBox.width(),
+                range = options.categories.length,
+                scale = size / range,
+                offset = round(delta / scale, DEFAULT_PRECISION);
+
+            return {
+                min: offset,
+                max: range + offset
+            };
+        },
+
+        scaleRange: function(scale) {
+            var axis = this,
+                options = axis.options,
+                range = options.categories.length,
+                delta = scale * range;
+
+            return {
+                min: -delta,
+                max: range + delta
+            };
         },
 
         labelsCount: function() {
@@ -40243,18 +46508,30 @@ extend(Editor, {
 
     var DateCategoryAxis = CategoryAxis.extend({
         init: function(options) {
-            var axis = this;
+            var axis = this,
+                baseUnit,
+                useDefault;
 
             options = options || {};
 
-            deepExtend(options, {
+            options = deepExtend({
+                roundToBaseUnit: true
+            }, options, {
                 min: toDate(options.min),
                 max: toDate(options.max)
             });
 
-            options = axis.applyDefaults(options);
+            if (options.categories && options.categories.length > 0) {
+                baseUnit = (options.baseUnit || "").toLowerCase();
+                useDefault = baseUnit !== FIT && !inArray(baseUnit, BASE_UNITS);
+                if (useDefault) {
+                    options.baseUnit = axis.defaultBaseUnit(options);
+                }
 
-            if (options.categories.length > 0) {
+                if (baseUnit === FIT || options.baseUnitStep === AUTO) {
+                    axis.autoBaseUnit(options);
+                }
+
                 axis.groupCategories(options);
             }
 
@@ -40265,12 +46542,59 @@ extend(Editor, {
             type: DATE,
             labels: {
                 dateFormats: DateLabelFormats
-            }
+            },
+            autoBaseUnitSteps: {
+                minutes: [1, 2, 5, 15, 30],
+                hours: [1, 2, 3],
+                days: [1, 2, 3],
+                weeks: [1, 2],
+                months: [1, 2, 3, 6],
+                years: [1, 2, 3, 5, 10, 25, 50]
+            },
+            maxDateGroups: 10
         },
 
-        applyDefaults: function(options) {
+        translateRange: function(delta) {
+            var axis = this,
+                range = CategoryAxis.fn.translateRange.call(axis, delta),
+                options = axis.options,
+                baseUnit = options.baseUnit,
+                offset = math.round(range.min),
+                weekStartDay = options.weekStartDay;
+
+            return {
+                min: addDuration(options.min, offset, baseUnit, weekStartDay),
+                max: addDuration(options.max, offset, baseUnit, weekStartDay)
+            };
+        },
+
+        scaleRange: function(delta) {
+            var axis = this,
+                options = axis.options,
+                rounds = math.abs(delta),
+                from = options.min,
+                to = options.max,
+                range,
+                step;
+
+            while (rounds--) {
+                range = dateDiff(from, to);
+                step = math.round(range * 0.1);
+                if (delta < 0) {
+                    from = addTicks(from, step);
+                    to = addTicks(to, -step);
+                } else {
+                    from = addTicks(from, -step);
+                    to = addTicks(to, step);
+                }
+            }
+
+            return { min: from, max: to };
+        },
+
+        defaultBaseUnit: function(options) {
             var categories = options.categories,
-                count = categories.length,
+                count = defined(categories) ? categories.length : 0,
                 categoryIx,
                 cat,
                 diff,
@@ -40290,6 +46614,8 @@ extend(Editor, {
                             unit = YEARS;
                         } else if (minDiff >= TIME_PER_MONTH - TIME_PER_DAY * 3) {
                             unit = MONTHS;
+                        } else if (minDiff >= TIME_PER_WEEK) {
+                            unit = WEEKS;
                         } else if (minDiff >= TIME_PER_DAY) {
                             unit = DAYS;
                         } else if (minDiff >= TIME_PER_HOUR) {
@@ -40303,60 +46629,182 @@ extend(Editor, {
                 lastCat = cat;
             }
 
-            if (!options.baseUnit) {
-                delete options.baseUnit;
+            return unit || DAYS;
+        },
+
+        range: function(options) {
+            options = options || this.options;
+
+            var categories = toDate(options.categories),
+                autoUnit = options.baseUnit === FIT,
+                baseUnit = autoUnit ? BASE_UNITS[0] : options.baseUnit,
+                min = toTime(options.min),
+                max = toTime(options.max),
+                categoryLimits = sparseArrayLimits(categories),
+                minCategory = toTime(categoryLimits.min),
+                maxCategory = toTime(categoryLimits.max);
+
+            if (options.roundToBaseUnit) {
+                return { min: addDuration(min || minCategory, 0, baseUnit, options.weekStartDay),
+                         max: addDuration(max || maxCategory, 1, baseUnit, options.weekStartDay) };
+            } else {
+                return { min: toDate(min || minCategory),
+                         max: toDate(max || maxCategory) };
+            }
+        },
+
+        autoBaseUnit: function(options) {
+            var axis = this,
+                range = axis.range(options),
+                autoUnit = options.baseUnit === FIT,
+                autoUnitIx = 0,
+                baseUnit = autoUnit ? BASE_UNITS[autoUnitIx++] : options.baseUnit,
+                span = range.max - range.min,
+                units = span / TIME_PER_UNIT[baseUnit],
+                totalUnits = units,
+                maxDateGroups = options.maxDateGroups || axis.options.maxDateGroups,
+                autoBaseUnitSteps = deepExtend(
+                    {}, axis.options.autoBaseUnitSteps, options.autoBaseUnitSteps
+                ),
+                unitSteps,
+                step,
+                nextStep;
+
+            while (units > maxDateGroups) {
+                unitSteps = unitSteps || autoBaseUnitSteps[baseUnit].slice(0);
+                nextStep = unitSteps.shift();
+
+                if (nextStep) {
+                    step = nextStep;
+                    units = totalUnits / step;
+                } else if (autoUnit) {
+                    baseUnit = BASE_UNITS[autoUnitIx++] || last(BASE_UNITS);
+                    totalUnits = span / TIME_PER_UNIT[baseUnit];
+                    unitSteps = null;
+                } else {
+                    if (units > maxDateGroups) {
+                        step = math.ceil(totalUnits / maxDateGroups);
+                    }
+                    break;
+                }
             }
 
-            return deepExtend({ baseUnit: unit || DAYS }, options);
+            options.baseUnitStep = step;
+            options.baseUnit = baseUnit;
+        },
+
+        getMajorTickPositions: function() {
+            var axis = this,
+                options = axis.options,
+                categories = options.categories,
+                positions = [];
+
+            if (options.roundToBaseUnit || categories.length === 0) {
+                positions = CategoryAxis.fn.getMajorTickPositions.call(axis);
+            } else {
+                var vertical = options.vertical,
+                    reverse = options.reverse,
+                    lineBox = axis.lineBox(),
+                    lineSize = vertical ? lineBox.height() : lineBox.width(),
+                    startTime = categories[0].getTime(),
+                    range = axis.range(axis.options),
+                    timeRange = range.max - range.min,
+                    scale = lineSize / timeRange,
+                    divisions = categories.length,
+                    dir = (vertical ? -1 : 1) * (reverse ? -1 : 1),
+                    startEdge = dir === 1 ? 1 : 2,
+                    endEdge = dir === 1 ? 2 : 1,
+                    startPos = lineBox[(vertical ? Y : X) + startEdge],
+                    endPos = lineBox[(vertical ? Y : X) + endEdge],
+                    pos = startPos,
+                    i,
+                    timePos;
+
+                for (i = 0; i < divisions; i++) {
+                    timePos = categories[i] - startTime;
+                    pos = startPos + timePos * scale * dir;
+                    positions.push(round(pos, COORD_PRECISION));
+                }
+
+                if (last(positions) !== endPos) {
+                    positions.push(endPos);
+                }
+            }
+
+            return positions;
         },
 
         groupCategories: function(options) {
             var axis = this,
                 categories = toDate(options.categories),
                 baseUnit = options.baseUnit,
-                min = toTime(options.min),
-                max = toTime(options.max),
-                minCategory = toTime(sparseArrayMin(categories)),
-                maxCategory = toTime(sparseArrayMax(categories)),
-                start = floorDate(min || minCategory, baseUnit),
-                end = ceilDate((max || maxCategory) + 1, baseUnit),
+                baseUnitStep = options.baseUnitStep || 1,
+                range = axis.range(options),
+                round = options.roundToBaseUnit,
+                end,
                 date,
                 nextDate,
                 groups = [],
-                categoryMap = [],
+                categoryMap = axis.categoryMap = [],
                 categoryIndicies,
+                lastCategoryIndicies = [],
                 categoryIx,
                 categoryDate;
 
-            for (date = start; date < end; date = nextDate) {
-                groups.push(date);
-                nextDate = addDuration(date, 1, baseUnit);
+            end = round ?
+                addDuration(range.max, baseUnitStep - 1, baseUnit, options.weekStartDay) :
+                range.max;
 
+            for (date = range.min; date < end; date = nextDate) {
+                nextDate = addDuration(date, baseUnitStep, baseUnit, options.weekStartDay);
+
+                groups.push(date);
                 categoryIndicies = [];
-                for (categoryIx = 0; categoryIx < categories.length; categoryIx++) {
-                    categoryDate = toDate(categories[categoryIx]);
-                    if (categoryDate && categoryDate >= date && categoryDate < nextDate) {
-                        categoryIndicies.push(categoryIx);
+
+                for (categoryIx = lteDateIndex(categories, date);
+                     categoryIx < categories.length; categoryIx++) {
+
+                    categoryDate = categories[categoryIx];
+                    if (categoryDate && categoryDate >= date) {
+                        if (categoryDate < nextDate) {
+                            if (options.justified && dateEquals(categoryDate, end)) {
+                                lastCategoryIndicies.push(categoryIx);
+                            } else {
+                                categoryIndicies.push(categoryIx);
+                            }
+                        } else {
+                            break;
+                        }
                     }
                 }
 
                 categoryMap.push(categoryIndicies);
             }
 
+            if (lastCategoryIndicies.length) {
+                groups.push(end);
+                categoryMap.push(lastCategoryIndicies);
+            }
+
             options.min = groups[0];
-            options.max = last(groups);
+            options.max = round ? last(groups) : end;
             options.categories = groups;
-            axis.categoryMap = categoryMap;
         },
 
         createAxisLabel: function(index, labelOptions) {
             var options = this.options,
                 dataItem = options.dataItems ? options.dataItems[index] : null,
                 date = options.categories[index],
-                unitFormat = labelOptions.dateFormats[options.baseUnit];
+                baseUnit = options.baseUnit,
+                visible = true,
+                unitFormat = labelOptions.dateFormats[baseUnit];
 
-            labelOptions.format = labelOptions.format || unitFormat;
+            if (options.justified) {
+                var roundedDate = floorDate(date, baseUnit, options.weekStartDay);
+                visible = dateEquals(roundedDate, date);
+            }
 
+            labelOptions = deepExtend({ format: unitFormat }, labelOptions, { visible: visible });
             return new AxisDateLabel(date, index, dataItem, labelOptions);
         }
     });
@@ -40370,7 +46818,9 @@ extend(Editor, {
             deepExtend(options, {
                 min: toDate(options.min),
                 max: toDate(options.max),
-                axisCrossingValue: toDate(options.axisCrossingValue)
+                axisCrossingValue: toDate(
+                    options.axisCrossingValues || options.axisCrossingValue
+                )
             });
 
             options = axis.applyDefaults(toDate(seriesMin), toDate(seriesMax), options);
@@ -40503,6 +46953,8 @@ extend(Editor, {
                 unit = YEARS;
             } else if (delta >= TIME_PER_MONTH) {
                 unit = MONTHS;
+            } else if (delta >= TIME_PER_WEEK) {
+                unit = WEEKS;
             } else if (delta >= TIME_PER_DAY) {
                 unit = DAYS;
             }
@@ -40640,7 +47092,7 @@ extend(Editor, {
 
             bar.value = value;
             bar.options.id = uniqueId();
-            bar.makeDiscoverable();
+            bar.enableDiscovery();
         },
 
         options: {
@@ -40768,11 +47220,13 @@ extend(Editor, {
             var bar = this,
                 options = bar.options,
                 color = options.color,
-                borderColor = options.border.color;
+                border = options.border,
+                borderColor = border.color,
+                brightness = border._brightness || BAR_BORDER_BRIGHTNESS;
 
             if (!defined(borderColor)) {
                 borderColor =
-                    new Color(color).brightness(BAR_BORDER_BRIGHTNESS).toHex();
+                    new Color(color).brightness(brightness).toHex();
             }
 
             return borderColor;
@@ -40818,6 +47272,7 @@ extend(Editor, {
             ChartElement.fn.init.call(chart, options);
 
             chart.plotArea = plotArea;
+            chart.categoryAxis = plotArea.seriesCategoryAxis(options.series[0]);
 
             // Value axis ranges grouped by axis name, e.g.:
             // primary: { min: 0, max: 1 }
@@ -40875,10 +47330,10 @@ extend(Editor, {
 
         updateRange: function(value, categoryIx, series) {
             var chart = this,
-                axisName = series.axis || PRIMARY,
+                axisName = series.axis,
                 axisRange = chart.valueAxisRanges[axisName];
 
-            if (defined(value)) {
+            if (defined(value) && !isNaN(value)) {
                 axisRange = chart.valueAxisRanges[axisName] =
                     axisRange || { min: MAX_VALUE, max: MIN_VALUE };
 
@@ -40888,18 +47343,27 @@ extend(Editor, {
         },
 
         seriesValueAxis: function(series) {
-            return this.plotArea.namedValueAxes[(series || {}).axis || PRIMARY];
+            var plotArea = this.plotArea,
+                axisName = series.axis,
+                axis = axisName ?
+                    plotArea.namedValueAxes[axisName] :
+                    plotArea.valueAxis;
+
+            if (!axis) {
+                throw new Error("Unable to locate value axis with name " + axisName);
+            }
+
+            return axis;
         },
 
         reflow: function(targetBox) {
             var chart = this,
                 options = chart.options,
                 invertAxes = options.invertAxes,
-                plotArea = chart.plotArea,
                 pointIx = 0,
                 categorySlots = chart.categorySlots = [],
                 chartPoints = chart.points,
-                categoryAxis = plotArea.categoryAxis,
+                categoryAxis = chart.categoryAxis,
                 valueAxis,
                 axisCrossingValue,
                 point;
@@ -40908,7 +47372,7 @@ extend(Editor, {
                 var value = data.value;
 
                 valueAxis = chart.seriesValueAxis(currentSeries);
-                axisCrossingValue = valueAxis.options.axisCrossingValue;
+                axisCrossingValue = chart.categoryAxisCrossingValue(valueAxis);
                 point = chartPoints[pointIx++];
 
                 if (point && point.plotValue) {
@@ -40916,7 +47380,7 @@ extend(Editor, {
                 }
 
                 var categorySlot = chart.categorySlot(categoryAxis, categoryIx, valueAxis),
-                    valueSlot = chart.valueSlot(valueAxis, value),
+                    valueSlot = chart.valueSlot(valueAxis, value, axisCrossingValue),
                     slotX = invertAxes ? valueSlot : categorySlot,
                     slotY = invertAxes ? categorySlot : valueSlot,
                     pointSlot = new Box2D(slotX.x1, slotY.y1, slotX.x2, slotY.y2),
@@ -40938,10 +47402,20 @@ extend(Editor, {
             chart.box = targetBox;
         },
 
+        categoryAxisCrossingValue: function(valueAxis) {
+            var categoryAxis = this.categoryAxis,
+                options = valueAxis.options,
+                crossingValues = [].concat(
+                    options.axisCrossingValues || options.axisCrossingValue
+                );
+
+            return crossingValues[categoryAxis.axisIndex || 0] || 0;
+        },
+
         reflowCategories: function() { },
 
-        valueSlot: function(valueAxis, value) {
-            return valueAxis.getSlot(value);
+        valueSlot: function(valueAxis, value, axisCrossingValue) {
+            return valueAxis.getSlot(value, axisCrossingValue);
         },
 
         categorySlot: function(categoryAxis, categoryIx) {
@@ -40952,9 +47426,8 @@ extend(Editor, {
             var chart = this,
                 options = chart.options,
                 series = options.series,
-                categories = chart.plotArea.options.categoryAxis.categories || [],
+                categories = chart.categoryAxis.options.categories || [],
                 count = categoriesCount(series),
-                valueFields = chart.valueFields(),
                 bindableFields = chart.bindableFields(),
                 categoryIx,
                 seriesIx,
@@ -40967,15 +47440,11 @@ extend(Editor, {
                 for (seriesIx = 0; seriesIx < seriesCount; seriesIx++) {
                     currentCategory = categories[categoryIx];
                     currentSeries = series[seriesIx];
-                    pointData = bindPoint(currentSeries, categoryIx, valueFields, bindableFields);
+                    pointData = bindPoint(currentSeries, categoryIx, bindableFields);
 
                     callback(pointData, currentCategory, categoryIx, currentSeries, seriesIx);
                 }
             }
-        },
-
-        valueFields: function() {
-            return ["value"];
         },
 
         bindableFields: function() {
@@ -41122,7 +47591,7 @@ extend(Editor, {
                 categoryTotals;
 
             if (isStacked) {
-                axisName = chart.options.series[0].axis || PRIMARY;
+                axisName = chart.options.series[0].axis;
                 categoryTotals = chart.categoryTotals();
                 chart.valueAxisRanges[axisName] = {
                     min: sparseArrayMin(categoryTotals.negative.concat(0)),
@@ -41141,8 +47610,8 @@ extend(Editor, {
             );
         },
 
-        valueSlot: function(valueAxis, value) {
-            return valueAxis.getSlot(value, this.options.isStacked ? 0 : undefined);
+        valueSlot: function(valueAxis, value, axisCrossingValue) {
+            return valueAxis.getSlot(value, this.options.isStacked ? 0 : axisCrossingValue);
         },
 
         categorySlot: function(categoryAxis, categoryIx, valueAxis) {
@@ -41308,7 +47777,7 @@ extend(Editor, {
 
             point.value = value;
             point.options.id = uniqueId();
-            point.makeDiscoverable();
+            point.enableDiscovery();
         },
 
         options: {
@@ -41358,7 +47827,7 @@ extend(Editor, {
 
             point.marker = new ShapeElement({
                 id: point.options.id,
-                visible: markers.visible,
+                visible: markers.visible && markers.size,
                 type: markers.type,
                 width: markers.size,
                 height: markers.size,
@@ -41533,7 +48002,6 @@ extend(Editor, {
             })[0];
 
             marker.refresh(doc.getElementById(this.options.id));
-
         }
     });
 
@@ -41548,7 +48016,7 @@ extend(Editor, {
             segment.seriesIx = seriesIx;
             segment.options.id = uniqueId();
 
-            segment.makeDiscoverable();
+            segment.enableDiscovery();
         },
 
         options: {},
@@ -41563,6 +48031,7 @@ extend(Editor, {
 
             for (i = 0; i < length; i++) {
                 pointCenter = linePoints[i].markerBox().center();
+
                 points.push(new Point2D(pointCenter.x, pointCenter.y));
             }
 
@@ -41623,7 +48092,7 @@ extend(Editor, {
                     point = currentSeriesPoints[pointIx];
                     if (point) {
                         linePoints.push(point);
-                    } else if (currentSeries.missingValues !== INTERPOLATE) {
+                    } else if (chart.seriesMissingValues(currentSeries) !== INTERPOLATE) {
                         if (linePoints.length > 1) {
                             segments.push(
                                 chart.createSegment(
@@ -41646,6 +48115,13 @@ extend(Editor, {
 
             chart._segments = segments;
             chart.append.apply(chart, segments);
+        },
+
+        seriesMissingValues: function(series) {
+            var missingValues = series.missingValues,
+                assumeZero = !missingValues && this.options.isStacked;
+
+            return assumeZero ? ZERO : missingValues;
         },
 
         createSegment: function(linePoints, currentSeries, seriesIx) {
@@ -41690,7 +48166,7 @@ extend(Editor, {
 
             chart._stackAxisRange = { min: MAX_VALUE, max: MIN_VALUE };
             chart._categoryTotals = [];
-            chart.makeDiscoverable();
+            chart.enableDiscovery();
 
             CategoricalChart.fn.init.call(chart, plotArea, options);
         },
@@ -41710,11 +48186,13 @@ extend(Editor, {
                 options = chart.options,
                 isStacked = options.isStacked,
                 categoryPoints = chart.categoryPoints[categoryIx],
+                missingValues = chart.seriesMissingValues(series),
                 stackPoint,
-                plotValue = 0;
+                plotValue = 0,
+                fields = data.fields;
 
             if (!defined(value) || value === null) {
-                if (series.missingValues === ZERO) {
+                if (missingValues === ZERO) {
                     value = 0;
                 } else {
                     return null;
@@ -41729,7 +48207,14 @@ extend(Editor, {
                             color: series.color
                         }
                     }
-                }, series)
+                }, series, {
+                    color: fields.color,
+                    markers: {
+                        border: {
+                            color: fields.color
+                        }
+                    }
+                })
             );
 
             if (isStacked) {
@@ -41750,14 +48235,16 @@ extend(Editor, {
             var chart = this,
                 isStacked = chart.options.isStacked,
                 stackAxisRange = chart._stackAxisRange,
-                totals = chart._categoryTotals;
+                totals = chart._categoryTotals,
+                totalsLimits;
 
             if (defined(value)) {
                 if (isStacked) {
                     incrementSlot(totals, categoryIx, value);
 
-                    stackAxisRange.min = math.min(stackAxisRange.min, sparseArrayMin(totals));
-                    stackAxisRange.max = math.max(stackAxisRange.max, sparseArrayMax(totals));
+                    totalsLimits = sparseArrayLimits(totals);
+                    stackAxisRange.min = math.min(stackAxisRange.min, totalsLimits.min);
+                    stackAxisRange.max = math.max(stackAxisRange.max, totalsLimits.max);
                 } else {
                     CategoricalChart.fn.updateRange.apply(chart, arguments);
                 }
@@ -41770,7 +48257,7 @@ extend(Editor, {
                 axisName;
 
             if (isStacked) {
-                axisName = chart.options.series[0].axis || PRIMARY;
+                axisName = chart.options.series[0].axis;
                 chart.valueAxisRanges[axisName] = chart._stackAxisRange;
             }
         },
@@ -41786,6 +48273,10 @@ extend(Editor, {
 
             group.children = elements;
             return [group];
+        },
+
+        bindableFields: function() {
+            return ["color"];
         }
     });
     deepExtend(LineChart.fn, LineChartMixin);
@@ -41805,12 +48296,21 @@ extend(Editor, {
                 stack = chart.options.isStacked && segment.seriesIx > 0,
                 plotArea = chart.plotArea,
                 invertAxes = chart.options.invertAxes,
-                axisLineBox = plotArea.categoryAxis.lineBox(),
-                end = invertAxes ? axisLineBox.x1 : axisLineBox.y1,
+                valueAxis = chart.seriesValueAxis(segment.series),
+                valueAxisLineBox = valueAxis.lineBox(),
+                categoryAxis = plotArea.seriesCategoryAxis(segment.series),
+                categoryAxisLineBox = categoryAxis.lineBox(),
+                end = invertAxes ? categoryAxisLineBox.x1 : categoryAxisLineBox.y1,
                 stackPoints = segment.stackPoints,
                 points = LineSegment.fn.points.call(segment, stackPoints),
                 firstPoint,
                 lastPoint;
+
+            if (invertAxes) {
+                end = clipValue(end, valueAxisLineBox.x1, valueAxisLineBox.x2);
+            } else {
+                end = clipValue(end, valueAxisLineBox.y1, valueAxisLineBox.y2);
+            }
 
             if (!stack && points.length > 1) {
                 firstPoint = points[0];
@@ -41835,21 +48335,29 @@ extend(Editor, {
                         color: series.color,
                         opacity: series.opacity
                     }, series.line
-                );
+                ),
+                linePoints = LineSegment.fn.points.call(segment),
+                areaPoints = segment.points();
 
             ChartElement.fn.getViewElements.call(segment, view);
 
             return [
-                view.createPolyline(segment.points(), true, {
+                view.createPolyline(areaPoints, false, {
+                    id: segment.options.id,
+                    fillOpacity: series.opacity,
+                    fill: series.color,
+                    stack: series.stack,
+                    data: { modelId: segment.options.modelId },
+                    zIndex: -1
+                }),
+                view.createPolyline(linePoints, false, {
                     id: segment.options.id,
                     stroke: lineOptions.color,
                     strokeWidth: lineOptions.width,
                     strokeOpacity: lineOptions.opacity,
                     dashType: lineOptions.dashType,
-                    fillOpacity: series.opacity,
-                    fill: series.color,
-                    stack: series.stack,
                     data: { modelId: segment.options.modelId },
+                    strokeLineCap: "butt",
                     zIndex: -1
                 })
             ];
@@ -41862,11 +48370,15 @@ extend(Editor, {
                 options = chart.options,
                 stackPoints;
 
-            if (options.isStacked && seriesIx > 0) {
+            if (options.isStacked && seriesIx > 0 && prevSegment) {
                 stackPoints = prevSegment.linePoints.slice(0).reverse();
             }
 
             return new AreaSegment(linePoints, stackPoints, currentSeries, seriesIx);
+        },
+
+        seriesMissingValues: function(series) {
+            return series.missingValues || ZERO;
         }
     });
 
@@ -41930,8 +48442,8 @@ extend(Editor, {
             var chart = this,
                 x = value.x,
                 y = value.y,
-                xAxisName = series.xAxis || PRIMARY,
-                yAxisName = series.yAxis || PRIMARY,
+                xAxisName = series.xAxis,
+                yAxisName = series.yAxis,
                 xAxisRange = chart.xAxisRanges[xAxisName],
                 yAxisRange = chart.yAxisRanges[yAxisName];
 
@@ -41952,7 +48464,7 @@ extend(Editor, {
             }
         },
 
-        createPoint: function(value, series, seriesIx) {
+        createPoint: function(value, series, seriesIx, fields) {
             var chart = this,
                 point;
 
@@ -41970,7 +48482,14 @@ extend(Editor, {
                     labels: {
                         format: chart.options.labels.format
                     }
-                }, series)
+                }, series, {
+                    color: fields.color,
+                    markers: {
+                        border: {
+                            color: fields.color
+                        }
+                    }
+                })
             );
 
             chart.append(point);
@@ -41980,12 +48499,26 @@ extend(Editor, {
 
         seriesAxes: function(series) {
             var plotArea = this.plotArea,
-                xAxis = series.xAxis || PRIMARY,
-                yAxis = series.yAxis || PRIMARY;
+                xAxisName = series.xAxis,
+                xAxis = xAxisName ?
+                        plotArea.namedXAxes[xAxisName] :
+                        plotArea.axisX,
+                yAxisName = series.yAxis,
+                yAxis = yAxisName ?
+                        plotArea.namedYAxes[yAxisName] :
+                        plotArea.axisY;
+
+            if (!xAxis) {
+                throw new Error("Unable to locate X axis with name " + xAxisName);
+            }
+
+            if (!yAxis) {
+                throw new Error("Unable to locate Y axis with name " + yAxisName);
+            }
 
             return {
-                x: plotArea.namedXAxes[xAxis],
-                y: plotArea.namedYAxes[yAxis]
+                x: xAxis,
+                y: yAxis
             };
         },
 
@@ -42030,7 +48563,6 @@ extend(Editor, {
                 options = chart.options,
                 series = options.series,
                 seriesPoints = chart.seriesPoints,
-                valueFields = chart.valueFields(),
                 bindableFields = chart.bindableFields(),
                 pointIx,
                 seriesIx,
@@ -42049,7 +48581,7 @@ extend(Editor, {
                 }
 
                 for (pointIx = 0; pointIx < currentSeries.data.length; pointIx++) {
-                    pointData = bindPoint(currentSeries, pointIx, valueFields, bindableFields);
+                    pointData = bindPoint(currentSeries, pointIx, bindableFields);
                     value = pointData.value;
                     fields = pointData.fields;
 
@@ -42064,12 +48596,8 @@ extend(Editor, {
             }
         },
 
-        valueFields: function() {
-            return ["x", "y"];
-        },
-
         bindableFields: function() {
-            return [];
+            return ["color"];
         },
 
         formatPointValue: function(point, format) {
@@ -42149,8 +48677,7 @@ extend(Editor, {
                         animation: animationOptions
                     }
                 },
-                series,
-                {
+                series, {
                     color: fields.color,
                     markers: {
                         type: CIRCLE,
@@ -42220,23 +48747,382 @@ extend(Editor, {
             return max;
         },
 
-        valueFields: function() {
-            return ["x", "y", "size"];
-        },
-
         bindableFields: function() {
             return ["color", "category", "visibleInLegend"];
         },
 
         getViewElements: function(view) {
-            var chart = this;
+            var chart = this,
+                elements = ChartElement.fn.getViewElements.call(chart, view),
+                group = view.createGroup();
 
-            return ChartElement.fn.getViewElements.call(chart, view);
+            group.children = elements;
+            return [group];
         },
 
         formatPointValue: function(point, format) {
             var value = point.value;
             return autoFormat(format, value.x, value.y, value.size, point.category);
+        }
+    });
+
+    var Candlestick = ChartElement.extend({
+        init: function(value, options) {
+            var point = this;
+
+            ChartElement.fn.init.call(point, options);
+            point.value = value;
+            point.options.id = uniqueId();
+            point.enableDiscovery();
+        },
+
+        options: {
+            border: {},
+            line: {
+                width: 2
+            },
+            overlay: {
+                gradient: GLASS
+            },
+            tooltip: {
+                format: "<table style='text-align: left;'>" +
+                        "<th colspan='2'>{4:d}</th>" +
+                        "<tr><td>Open:</td><td>{0:C}</td></tr>" +
+                        "<tr><td>High:</td><td>{1:C}</td></tr>" +
+                        "<tr><td>Low:</td><td>{2:C}</td></tr>" +
+                        "<tr><td>Close:</td><td>{3:C}</td></tr>" +
+                        "</table>"
+            }
+        },
+
+        reflow: function(box) {
+            var point = this,
+                options = point.options,
+                chart = point.owner,
+                value = point.value,
+                valueAxis = chart.seriesValueAxis(options),
+                points = [], mid, ocSlot, lhSlot;
+
+            ocSlot = valueAxis.getSlot(value.open, value.close);
+            lhSlot = valueAxis.getSlot(value.low, value.high);
+
+            ocSlot.x1 = lhSlot.x1 = box.x1;
+            ocSlot.x2 = lhSlot.x2 = box.x2;
+
+            point.realBody = ocSlot;
+
+            mid = lhSlot.center().x;
+            points.push([ new Point2D(mid, lhSlot.y1), new Point2D(mid, ocSlot.y1) ]);
+            points.push([ new Point2D(mid, ocSlot.y2), new Point2D(mid, lhSlot.y2) ]);
+
+            point.lowHighLinePoints = points;
+
+            point.box = lhSlot.clone().wrap(ocSlot);
+        },
+
+        getViewElements: function(view) {
+            var point = this,
+                options = point.options,
+                elements = [],
+                border = options.border.width > 0 ? {
+                    stroke: point.getBorderColor(),
+                    strokeWidth: options.border.width,
+                    dashType: options.border.dashType,
+                    strokeOpacity: defined(options.border.opacity) ? options.border.opacity : options.opacity
+                } : {},
+                rectStyle = deepExtend({
+                    id: options.id,
+                    fill: point.color,
+                    fillOpacity: options.opacity
+                }, border),
+                lineStyle = {
+                    id: options.id,
+                    strokeOpacity: defined(options.line.opacity) ? options.line.opacity : options.opacity,
+                    strokeWidth: options.line.width,
+                    stroke: options.line.color || point.color,
+                    dashType: options.line.dashType,
+                    strokeLineCap: "butt"
+                },
+                group = view.createGroup({
+                    animation: {
+                        type: CLIP
+                    }
+                });
+
+            if (options.overlay) {
+                rectStyle.overlay = deepExtend({
+                    rotation: 0
+                }, options.overlay);
+            }
+
+            elements.push(view.createRect(point.realBody, rectStyle));
+            elements.push(view.createPolyline(point.lowHighLinePoints[0], false, lineStyle));
+            elements.push(view.createPolyline(point.lowHighLinePoints[1], false, lineStyle));
+            elements.push(point.createOverlayRect(view, options));
+
+            append(elements,
+                ChartElement.fn.getViewElements.call(point, view)
+            );
+
+            group.children = elements;
+
+            return [group];
+        },
+
+        getBorderColor: function() {
+            var point = this,
+                options = point.options,
+                color = point.color,
+                border = options.border,
+                borderColor = border.color;
+
+            if (!defined(borderColor)) {
+                borderColor =
+                    new Color(color).brightness(border._brightness).toHex();
+            }
+
+            return borderColor;
+        },
+
+        createOverlayRect: function(view, options) {
+            return view.createRect(this.box, {
+                id: options.id,
+                data: { modelId: options.modelId },
+                fill: "#fff",
+                fillOpacity: 0
+            });
+        },
+
+        highlightOverlay: function(view, options) {
+            var point = this,
+                pointOptions = point.options,
+                highlight = pointOptions.highlight,
+                border = highlight.border || {},
+                data = { data: { modelId: pointOptions.modelId } },
+                rectStyle = deepExtend(data, options, {
+                    stroke: point.getBorderColor(),
+                    strokeOpacity: border.opacity,
+                    strokeWidth: border.width
+                }),
+                lineStyle = deepExtend(data, {
+                    stroke: point.getBorderColor(),
+                    strokeWidth: highlight.line.width,
+                    strokeLineCap: "butt"
+                }),
+                group = view.createGroup();
+
+            group.children.push(view.createRect(point.realBody, rectStyle));
+            group.children.push(view.createPolyline(point.lowHighLinePoints[0], false, lineStyle));
+            group.children.push(view.createPolyline(point.lowHighLinePoints[1], false, lineStyle));
+
+            return group;
+        },
+
+        tooltipAnchor: function(tooltipWidth, tooltipHeight) {
+            var point = this,
+                box = point.box;
+
+            return new Point2D(box.x2 + TOOLTIP_OFFSET, box.y1 + TOOLTIP_OFFSET);
+        },
+
+        formatValue: function(format) {
+            var point = this;
+            return point.owner.formatPointValue(point, format);
+        }
+    });
+    deepExtend(Candlestick.fn, PointEventsMixin);
+
+    var CandlestickChart = CategoricalChart.extend({
+        options: {},
+
+        bindableFields: function() {
+            return ["color", "downColor"];
+        },
+
+        reflowCategories: function(categorySlots) {
+            var chart = this,
+                children = chart.children,
+                childrenLength = children.length,
+                i;
+
+            for (i = 0; i < childrenLength; i++) {
+                children[i].reflow(categorySlots[i]);
+            }
+        },
+
+        addValue: function(data, category, categoryIx, series, seriesIx) {
+            var chart = this,
+                options = chart.options,
+                value = data.value,
+                children = chart.children,
+                pointColor = data.fields.color || series.color,
+                point,
+                valueParts = this.splitValue(value),
+                hasValue = validNumbers(valueParts),
+                cluster;
+
+            if (hasValue) {
+                point = chart.createPoint(value, series);
+            }
+
+            cluster = children[categoryIx];
+            if (!cluster) {
+                cluster = new ClusterLayout({
+                    vertical: options.invertAxes,
+                    gap: options.gap,
+                    spacing: options.spacing
+                });
+                chart.append(cluster);
+            }
+
+            if (point) {
+                chart.updateRange(value, categoryIx, series);
+
+                cluster.append(point);
+
+                if (series.type == CANDLESTICK) {
+                    if (value.open > value.close) {
+                        pointColor = data.fields.downColor || series.downColor;
+                    }
+                }
+
+                point.color = pointColor;
+                point.categoryIx = categoryIx;
+                point.category = category;
+                point.series = series;
+                point.seriesIx = seriesIx;
+                point.owner = chart;
+                point.dataItem = series.data[categoryIx];
+            }
+
+            chart.points.push(point);
+        },
+
+        createPoint: function(value, series) {
+            return new Candlestick(value, series);
+        },
+
+        splitValue: function(value) {
+            return [value.low, value.open, value.close, value.high];
+        },
+
+        updateRange: function(value, categoryIx, series) {
+            var chart = this,
+                axisName = series.axis,
+                axisRange = chart.valueAxisRanges[axisName],
+                parts = chart.splitValue(value);
+
+            axisRange = chart.valueAxisRanges[axisName] =
+                axisRange || { min: MAX_VALUE, max: MIN_VALUE };
+
+            axisRange = chart.valueAxisRanges[axisName] = {
+                min: math.min.apply(math, parts.concat([axisRange.min])),
+                max: math.max.apply(math, parts.concat([axisRange.max]))
+            };
+        },
+
+        formatPointValue: function(point, format) {
+            var value = point.value;
+
+            return autoFormat(format,
+                value.open, value.high,
+                value.low, value.close, point.category
+            );
+        }
+    });
+
+    var OHLCPoint = Candlestick.extend({
+        reflow: function(box) {
+            var point = this,
+                options = point.options,
+                chart = point.owner,
+                value = point.value,
+                valueAxis = chart.seriesValueAxis(options),
+                oPoints = [], cPoints = [], lhPoints = [],
+                mid, oSlot, cSlot, lhSlot;
+
+            lhSlot = valueAxis.getSlot(value.low, value.high);
+            oSlot = valueAxis.getSlot(value.open, value.open);
+            cSlot = valueAxis.getSlot(value.close, value.close);
+
+            oSlot.x1 = cSlot.x1 = lhSlot.x1 = box.x1;
+            oSlot.x2 = cSlot.x2 = lhSlot.x2 = box.x2;
+
+            mid = lhSlot.center().x;
+
+            oPoints.push(new Point2D(oSlot.x1, oSlot.y1));
+            oPoints.push(new Point2D(mid, oSlot.y1));
+            cPoints.push(new Point2D(mid, cSlot.y1));
+            cPoints.push(new Point2D(cSlot.x2, cSlot.y1));
+            lhPoints.push(new Point2D(mid, lhSlot.y1));
+            lhPoints.push(new Point2D(mid, lhSlot.y2));
+
+            point.oPoints = oPoints;
+            point.cPoints = cPoints;
+            point.lhPoints = lhPoints;
+
+            point.box = lhSlot.clone().wrap(oSlot.clone().wrap(cSlot));
+        },
+
+        getViewElements: function(view) {
+            var point = this,
+                options = point.options,
+                elements = [],
+                lineStyle = {
+                    id: options.id,
+                    strokeOpacity: options.opacity,
+                    zIndex: -1,
+                    strokeWidth: options.width,
+                    stroke: point.color,
+                    dashType: options.dashType
+                },
+                group = view.createGroup({
+                    animation: {
+                        type: CLIP
+                    }
+                });
+
+            elements.push(point.createOverlayRect(view, options));
+            elements.push(view.createPolyline(point.oPoints, true, lineStyle));
+            elements.push(view.createPolyline(point.cPoints, true, lineStyle));
+            elements.push(view.createPolyline(point.lhPoints, true, lineStyle));
+
+            append(elements,
+                ChartElement.fn.getViewElements.call(point, view)
+            );
+
+            group.children = elements;
+
+            return [group];
+        },
+
+        highlightOverlay: function(view, options) {
+            var point = this,
+                pointOptions = point.options,
+                highlight = pointOptions.highlight,
+                data = { data: { modelId: pointOptions.modelId } },
+                lineStyle = deepExtend(data, {
+                    strokeWidth: highlight.line.width,
+                    strokeOpacity: highlight.line.opacity,
+                    stroke: point.color
+                }),
+                group = view.createGroup();
+
+            group.children.push(view.createPolyline(point.oPoints, true, lineStyle));
+            group.children.push(view.createPolyline(point.cPoints, true, lineStyle));
+            group.children.push(view.createPolyline(point.lhPoints, true, lineStyle));
+
+            return group;
+        }
+    });
+
+    var OHLCChart = CandlestickChart.extend({
+        createPoint: function(value, series) {
+            return new OHLCPoint(value, series);
+        },
+
+        bindableFields: function() {
+            return ["color"];
         }
     });
 
@@ -42246,7 +49132,7 @@ extend(Editor, {
 
             segment.value = value;
             segment.sector = sector;
-            segment.makeDiscoverable();
+            segment.enableDiscovery();
 
             ChartElement.fn.init.call(segment, options);
         },
@@ -42513,7 +49399,6 @@ extend(Editor, {
                 series = options.series,
                 seriesCount = series.length,
                 overlayId = uniqueId(),
-                valueFields = chart.valueFields(),
                 bindableFields = chart.bindableFields(),
                 currentSeries,
                 pointData,
@@ -42541,7 +49426,7 @@ extend(Editor, {
                 }
 
                 for (i = 0; i < data.length; i++) {
-                    pointData = bindPoint(currentSeries, i, valueFields, bindableFields);
+                    pointData = bindPoint(currentSeries, i, bindableFields);
                     value = pointData.value;
                     fields = pointData.fields;
                     angle = round(value * anglePerValue, DEFAULT_PRECISION);
@@ -42568,10 +49453,6 @@ extend(Editor, {
                     currentAngle += angle;
                 }
             }
-        },
-
-        valueFields: function() {
-            return ["value"];
         },
 
         bindableFields: function() {
@@ -42620,15 +49501,13 @@ extend(Editor, {
         },
 
         pointsTotal: function(series) {
-            var chart = this,
-                valueFields = chart.valueFields(),
-                data = series.data,
+            var data = series.data,
                 length = data.length,
                 sum = 0,
                 i;
 
             for(i = 0; i < length; i++) {
-                sum += bindPoint(series, i, valueFields).value;
+                sum += bindPoint(series, i).value;
             }
 
             return sum;
@@ -43115,6 +49994,147 @@ extend(Editor, {
         }
     });
 
+    var Pane = BoxElement.extend({
+        init: function(options) {
+            var pane = this;
+
+            BoxElement.fn.init.call(pane, options);
+
+            options = pane.options;
+            options.id = uniqueId();
+
+            pane.title = Title.buildTitle(options.title, pane, Pane.fn.options.title);
+
+            pane.content = new ChartElement();
+            pane.append(pane.content);
+
+            pane.axes = [];
+            pane.charts = [];
+        },
+
+        options: {
+            zIndex: -1,
+            shrinkToFit: true,
+            title: {
+                align: LEFT
+            }
+        },
+
+        appendAxis: function(axis) {
+            var pane = this;
+
+            pane.content.append(axis);
+            pane.axes.push(axis);
+            axis.pane = pane;
+        },
+
+        appendChart: function(chart) {
+            var pane = this;
+
+            pane.charts.push(chart);
+            pane.content.append(chart);
+            chart.pane = pane;
+        },
+
+        empty: function() {
+            var pane = this,
+                plotArea = pane.parent,
+                i;
+
+            if (plotArea) {
+                for (i = 0; i < pane.axes.length; i++) {
+                    plotArea.removeAxis(pane.axes[i]);
+                }
+
+                for (i = 0; i < pane.charts.length; i++) {
+                    plotArea.removeChart(pane.charts[i]);
+                }
+            }
+
+            pane.axes = [];
+            pane.charts = [];
+
+            pane.content.disableDiscovery();
+            pane.content.children = [];
+        },
+
+        reflow: function(targetBox) {
+            var pane = this;
+
+            // Content (such as charts) is rendered, but excluded from reflows
+            if (last(pane.children) === pane.content) {
+                pane.children.pop();
+            }
+
+            BoxElement.fn.reflow.call(pane, targetBox);
+
+            if(pane.title) {
+                pane.contentBox.y1 += pane.title.box.height();
+            }
+        },
+
+        getViewElements: function(view) {
+            var pane = this,
+                elements = CategoricalChart.fn.getViewElements.call(pane, view),
+                group = view.createGroup({
+                    id: pane.options.id
+                });
+
+            group.children = elements.concat(
+                pane.renderGridLines(view),
+                pane.content.getViewElements(view)
+            );
+
+            pane.view = view;
+
+            return [group];
+        },
+
+        renderGridLines: function(view) {
+            var pane = this,
+                axes = pane.axes,
+                allAxes = axes.concat(pane.parent.axes),
+                vGridLines = [],
+                hGridLines = [],
+                gridLines,
+                i,
+                j,
+                axis,
+                vertical,
+                altAxis;
+
+            for (i = 0; i < axes.length; i++) {
+                axis = axes[i];
+                vertical = axis.options.vertical;
+                gridLines = vertical ? vGridLines : hGridLines;
+
+                for (j = 0; j < allAxes.length; j++) {
+                    if (gridLines.length === 0) {
+                        altAxis = allAxes[j];
+                        if (vertical !== altAxis.options.vertical) {
+                            append(gridLines, axis.renderGridLines(view, altAxis, axis));
+                        }
+                    }
+                }
+            }
+
+            return vGridLines.concat(hGridLines);
+        },
+
+        refresh: function() {
+            var pane = this,
+                view = pane.view,
+                element = document.getElementById(pane.options.id);
+
+            if (view && element) {
+                element.parentNode.replaceChild(
+                    view.renderElement(pane.getViewElements(view)[0]),
+                    element
+                );
+            }
+        }
+    });
+
     var PlotAreaBase = ChartElement.extend({
         init: function(series, options) {
             var plotArea = this;
@@ -43127,7 +50147,9 @@ extend(Editor, {
             plotArea.axes = [];
 
             plotArea.options.id = uniqueId();
-            plotArea.makeDiscoverable();
+            plotArea.enableDiscovery();
+
+            plotArea.createPanes();
             plotArea.render();
         },
 
@@ -43144,12 +50166,108 @@ extend(Editor, {
             legend: {}
         },
 
-        appendChart: function(chart) {
+        createPanes: function() {
+            var plotArea = this,
+                panes = [],
+                paneOptions = plotArea.options.panes || [],
+                i,
+                panesLength = math.max(paneOptions.length, 1),
+                currentPane;
+
+            for (i = 0; i < panesLength; i++) {
+                currentPane = new Pane(paneOptions[i]);
+                currentPane.paneIndex = i;
+
+                panes.push(currentPane);
+                plotArea.append(currentPane);
+            }
+
+            plotArea.panes = panes;
+        },
+
+        findPane: function(name) {
+            var plotArea = this,
+                panes = plotArea.panes,
+                i,
+                matchingPane;
+
+            for (i = 0; i < panes.length; i++) {
+                if (panes[i].options.name === name) {
+                    matchingPane = panes[i];
+                    break;
+                }
+            }
+
+            return matchingPane || panes[0];
+        },
+
+        findPointPane: function(point) {
+            var plotArea = this,
+                panes = plotArea.panes,
+                i,
+                matchingPane;
+
+            for (i = 0; i < panes.length; i++) {
+                if (panes[i].box.containsPoint(point)) {
+                    matchingPane = panes[i];
+                    break;
+                }
+            }
+
+            return matchingPane;
+        },
+
+        appendAxis: function(axis) {
+            var plotArea = this,
+                pane = plotArea.findPane(axis.options.pane);
+
+            pane.appendAxis(axis);
+            plotArea.axes.push(axis);
+            axis.plotArea = plotArea;
+        },
+
+        removeAxis: function(axisToRemove) {
+            var plotArea = this,
+                i,
+                axis,
+                filteredAxes = [];
+
+            for (i = 0; i < plotArea.axes.length; i++) {
+                axis = plotArea.axes[i];
+                if (axisToRemove !== axis) {
+                    filteredAxes.push(axis);
+                }
+            }
+
+            plotArea.axes = filteredAxes;
+        },
+
+        appendChart: function(chart, pane) {
             var plotArea = this;
 
             plotArea.charts.push(chart);
             plotArea.addToLegend(chart);
-            plotArea.append(chart);
+            if (pane) {
+                pane.appendChart(chart);
+            } else {
+                plotArea.append(chart);
+            }
+        },
+
+        removeChart: function(chartToRemove) {
+            var plotArea = this,
+                i,
+                chart,
+                filteredCharts = [];
+
+            for (i = 0; i < plotArea.charts.length; i++) {
+                chart = plotArea.charts[i];
+                if (chart !== chartToRemove) {
+                    filteredCharts.push(chart);
+                }
+            }
+
+            plotArea.charts = filteredCharts;
         },
 
         addToLegend: function(chart) {
@@ -43181,24 +50299,104 @@ extend(Editor, {
             append(this.options.legend.items, data);
         },
 
+        groupAxes: function(panes) {
+            var xAxes = [],
+                yAxes = [],
+                paneAxes,
+                axis,
+                paneIx,
+                axisIx;
+
+            for (paneIx = 0; paneIx < panes.length; paneIx++) {
+                paneAxes = panes[paneIx].axes;
+                for (axisIx = 0; axisIx < paneAxes.length; axisIx++) {
+                    axis = paneAxes[axisIx];
+                    if (axis.options.vertical) {
+                        yAxes.push(axis);
+                    } else {
+                        xAxes.push(axis);
+                    }
+                }
+            }
+
+            return { x: xAxes, y: yAxes, any: xAxes.concat(yAxes) };
+        },
+
+        groupSeriesByPane: function() {
+            var plotArea = this,
+                series = plotArea.series,
+                seriesByPane = {},
+                i,
+                pane,
+                currentSeries;
+
+            for (i = 0; i < series.length; i++) {
+                currentSeries = series[i];
+                pane = plotArea.seriesPaneName(currentSeries);
+
+                if (seriesByPane[pane]) {
+                    seriesByPane[pane].push(currentSeries);
+                } else {
+                    seriesByPane[pane] = [currentSeries];
+                }
+            }
+
+            return seriesByPane;
+        },
+
+        filterSeriesByType: function(series, types) {
+            var i,
+                currentSeries,
+                result = [];
+
+            types = [].concat(types);
+            for (i = 0; i < series.length; i++) {
+                currentSeries = series[i];
+                if (inArray(currentSeries.type, types)) {
+                    result.push(currentSeries);
+                }
+            }
+
+            return result;
+        },
+
         reflow: function(targetBox) {
             var plotArea = this,
                 options = plotArea.options.plotArea,
+                panes = plotArea.panes,
                 margin = getSpacing(options.margin);
 
             plotArea.box = targetBox.clone().unpad(margin);
+            plotArea.reflowPanes();
 
-            if (plotArea.axes.length > 0) {
-                plotArea.reflowAxes();
-                plotArea.box = plotArea.axisBox();
+            plotArea.reflowAxes(panes);
+            plotArea.reflowCharts(panes);
+        },
+
+        redraw: function(panes) {
+            var plotArea = this,
+                i;
+
+            panes = [].concat(panes);
+
+            for (i = 0; i < panes.length; i++) {
+                panes[i].empty();
             }
 
-            plotArea.reflowCharts();
+            plotArea.render(panes);
+            plotArea.reflowAxes(panes);
+            plotArea.reflowCharts(panes);
+
+            for (i = 0; i < panes.length; i++) {
+                panes[i].refresh();
+            }
         },
 
         axisCrossingValues: function(axis, crossingAxes) {
             var options = axis.options,
-                crossingValues = [].concat(options.axisCrossingValue),
+                crossingValues = [].concat(
+                    options.axisCrossingValues || options.axisCrossingValue
+                ),
                 valuesToAdd = crossingAxes.length - crossingValues.length,
                 defaultValue = crossingValues[0] || 0,
                 i;
@@ -43214,14 +50412,17 @@ extend(Editor, {
             var slot = axis.getSlot(crossingValue, crossingValue),
                 slotEdge = axis.options.reverse ? 2 : 1,
                 targetSlot = targetAxis.getSlot(targetCrossingValue, targetCrossingValue),
-                targetEdge = targetAxis.options.reverse ? 2 : 1;
-
-            axis.reflow(
-                axis.box.translate(
+                targetEdge = targetAxis.options.reverse ? 2 : 1,
+                axisBox = axis.box.translate(
                     targetSlot[X + targetEdge] - slot[X + slotEdge],
                     targetSlot[Y + targetEdge] - slot[Y + slotEdge]
-                )
-            );
+                );
+
+            if (axis.pane !== targetAxis.pane) {
+                axisBox.translate(0, axis.pane.box.y1 - targetAxis.pane.box.y1);
+            }
+
+            axis.reflow(axisBox);
         },
 
         alignAxes: function(xAxes, yAxes) {
@@ -43230,27 +50431,30 @@ extend(Editor, {
                 yAnchor = yAxes[0],
                 xAnchorCrossings = plotArea.axisCrossingValues(xAnchor, yAxes),
                 yAnchorCrossings = plotArea.axisCrossingValues(yAnchor, xAxes),
-                leftAnchor,
-                rightAnchor,
-                topAnchor,
-                bottomAnchor,
+                leftAnchors = {},
+                rightAnchors = {},
+                topAnchors = {},
+                bottomAnchors = {},
+                pane,
+                paneId,
                 axis,
                 i;
 
-            // TODO: Refactor almost-identical loops
             for (i = 0; i < yAxes.length; i++) {
                 axis = yAxes[i];
+                pane = axis.pane;
+                paneId = pane.options.id;
                 plotArea.alignAxisTo(axis, xAnchor, yAnchorCrossings[i], xAnchorCrossings[i]);
 
                 if (round(axis.lineBox().x1) === round(xAnchor.lineBox().x1)) {
-                    if (leftAnchor) {
+                    if (leftAnchors[paneId]) {
                         axis.reflow(axis.box
-                            .alignTo(leftAnchor.box, LEFT)
+                            .alignTo(leftAnchors[paneId].box, LEFT)
                             .translate(-axis.options.margin, 0)
                         );
                     }
 
-                    leftAnchor = axis;
+                    leftAnchors[paneId] = axis;
                 }
 
                 if (round(axis.lineBox().x2) === round(xAnchor.lineBox().x2)) {
@@ -43260,23 +50464,25 @@ extend(Editor, {
                     }
                     plotArea.alignAxisTo(axis, xAnchor, yAnchorCrossings[i], xAnchorCrossings[i]);
 
-                    if (rightAnchor) {
+                    if (rightAnchors[paneId]) {
                         axis.reflow(axis.box
-                            .alignTo(rightAnchor.box, RIGHT)
+                            .alignTo(rightAnchors[paneId].box, RIGHT)
                             .translate(axis.options.margin, 0)
                         );
                     }
 
-                    rightAnchor = axis;
+                    rightAnchors[paneId] = axis;
                 }
 
-                if (i !== 0) {
+                if (i !== 0 && yAnchor.pane === axis.pane) {
                     axis.alignTo(yAnchor);
                 }
             }
 
             for (i = 0; i < xAxes.length; i++) {
                 axis = xAxes[i];
+                pane = axis.pane;
+                paneId = pane.options.id;
                 plotArea.alignAxisTo(axis, yAnchor, xAnchorCrossings[i], yAnchorCrossings[i]);
 
                 if (round(axis.lineBox().y1) === round(yAnchor.lineBox().y1)) {
@@ -43286,25 +50492,25 @@ extend(Editor, {
                     }
                     plotArea.alignAxisTo(axis, yAnchor, xAnchorCrossings[i], yAnchorCrossings[i]);
 
-                    if (topAnchor) {
+                    if (topAnchors[paneId]) {
                         axis.reflow(axis.box
-                            .alignTo(topAnchor.box, TOP)
+                            .alignTo(topAnchors[paneId].box, TOP)
                             .translate(0, -axis.options.margin)
                         );
                     }
 
-                    topAnchor = axis;
+                    topAnchors[paneId] = axis;
                 }
 
                 if (round(axis.lineBox().y2, COORD_PRECISION) === round(yAnchor.lineBox().y2, COORD_PRECISION)) {
-                    if (bottomAnchor) {
+                    if (bottomAnchors[paneId]) {
                         axis.reflow(axis.box
-                            .alignTo(bottomAnchor.box, BOTTOM)
+                            .alignTo(bottomAnchors[paneId].box, BOTTOM)
                             .translate(0, axis.options.margin)
                         );
                     }
 
-                    bottomAnchor = axis;
+                    bottomAnchors[paneId] = axis;
                 }
 
                 if (i !== 0) {
@@ -43313,195 +50519,211 @@ extend(Editor, {
             }
         },
 
-        axisBox: function() {
+        shrinkAxisWidth: function(panes) {
             var plotArea = this,
-                axes = plotArea.axes,
-                box = axes[0].box.clone(),
+                axes = plotArea.groupAxes(panes).any,
+                axisBox = axisGroupBox(axes),
+                overflowX = 0,
                 i,
-                length = axes.length;
+                currentPane,
+                currentAxis;
 
-            for (i = 1; i < length; i++) {
-                box.wrap(axes[i].box);
+            for (i = 0; i < panes.length; i++) {
+                currentPane = panes[i];
+
+                if (currentPane.axes.length > 0) {
+                    overflowX = math.max(
+                        overflowX,
+                        axisBox.width() - currentPane.contentBox.width()
+                    );
+                }
             }
 
-            return box;
-        },
-
-        shrinkAxes: function() {
-            var plotArea = this,
-                box = plotArea.box,
-                axisBox = plotArea.axisBox(),
-                overflowY = axisBox.height() - box.height(),
-                overflowX = axisBox.width() - box.width(),
-                axes = plotArea.axes,
-                currentAxis,
-                vertical,
-                i,
-                length = axes.length;
-
-            // Shrink all axes so they don't overflow out of the bounding box
-            for (i = 0; i < length; i++) {
+            for (i = 0; i < axes.length; i++) {
                 currentAxis = axes[i];
-                vertical = currentAxis.options.vertical;
 
-                currentAxis.reflow(
-                    currentAxis.box.shrink(
-                        vertical ? 0 : overflowX,
-                        vertical ? overflowY : 0
-                    )
-                );
+                if (!currentAxis.options.vertical) {
+                    currentAxis.reflow(currentAxis.box.shrink(overflowX, 0));
+                }
             }
         },
 
-        shrinkAdditionalAxes: function(xAxes, yAxes) {
-            var plotArea = this,
-                axes = plotArea.axes,
-                xAnchor = xAxes[0],
-                yAnchor = yAxes[0],
-                anchorLineBox = xAnchor.lineBox().clone().wrap(yAnchor.lineBox()),
-                overflowX,
+        shrinkAxisHeight: function(panes) {
+            var i,
+                currentPane,
+                axes,
                 overflowY,
+                j,
+                currentAxis;
+
+            for (i = 0; i < panes.length; i++) {
+                currentPane = panes[i];
+                axes = currentPane.axes,
+                overflowY = math.max(
+                    0,
+                    axisGroupBox(axes).height() - currentPane.contentBox.height()
+                );
+
+                for (j = 0; j < axes.length; j++) {
+                    currentAxis = axes[j];
+
+                    if (currentAxis.options.vertical) {
+                        currentAxis.reflow(
+                            currentAxis.box.shrink(0, overflowY)
+                        );
+                    }
+                }
+            }
+        },
+
+        fitAxes: function(panes) {
+            var plotArea = this,
+                axes = plotArea.groupAxes(panes).any,
+                paneAxes,
+                paneBox,
+                axisBox,
+                offsetX = 0,
+                offsetY,
+                currentPane,
                 currentAxis,
-                vertical,
-                lineBox,
                 i,
-                length = axes.length;
+                j;
 
-            for (i = 0; i < length; i++) {
+            for (i = 0; i < panes.length; i++) {
+                currentPane = panes[i];
+                paneAxes = currentPane.axes;
+                paneBox = currentPane.contentBox;
+
+                if (paneAxes.length > 0) {
+                    axisBox = axisGroupBox(paneAxes);
+
+                    // OffsetX is calculated and applied globally
+                    offsetX = math.max(offsetX, paneBox.x1 - axisBox.x1);
+
+                    // OffsetY is calculated and applied per pane
+                    offsetY = math.max(paneBox.y1 - axisBox.y1, paneBox.y2 - axisBox.y2);
+
+                    for (j = 0; j < paneAxes.length; j++) {
+                        currentAxis = paneAxes[j];
+
+                        currentAxis.reflow(
+                            currentAxis.box.translate(0, offsetY)
+                        );
+                    }
+                }
+            }
+
+            for (i = 0; i < axes.length; i++) {
                 currentAxis = axes[i];
-                vertical = currentAxis.options.vertical;
-                lineBox = currentAxis.lineBox();
-
-                overflowX = math.max(0, lineBox.x2 - anchorLineBox.x2) +
-                            math.max(0, anchorLineBox.x1 - lineBox.x1);
-
-                overflowY = math.max(0, lineBox.y2 - anchorLineBox.y2) +
-                            math.max(0, anchorLineBox.y1 - lineBox.y1);
 
                 currentAxis.reflow(
-                    currentAxis.box.shrink(
-                        vertical ? 0 : overflowX,
-                        vertical ? overflowY : 0
-                    )
+                    currentAxis.box.translate(offsetX, 0)
                 );
             }
         },
 
-        fitAxes: function() {
+        reflowAxes: function(panes) {
             var plotArea = this,
-                axes = plotArea.axes,
-                box = plotArea.box,
-                axisBox = plotArea.axisBox(),
-                offsetX = box.x1 - axisBox.x1,
-                offsetY = box.y1 - axisBox.y1,
-                currentAxis,
                 i,
-                length = axes.length;
+                axes = plotArea.groupAxes(panes);
 
-            for (i = 0; i < length; i++) {
-                currentAxis = axes[i];
+            for (i = 0; i < panes.length; i++) {
+                plotArea.reflowPaneAxes(panes[i]);
+            }
 
-                currentAxis.reflow(
-                    currentAxis.box.translate(offsetX, offsetY)
-                );
+            if (axes.x.length > 0 && axes.y.length > 0) {
+                plotArea.alignAxes(axes.x, axes.y);
+                plotArea.shrinkAxisWidth(panes);
+                plotArea.alignAxes(axes.x, axes.y);
+                plotArea.shrinkAxisHeight(panes);
+                plotArea.alignAxes(axes.x, axes.y);
+                plotArea.fitAxes(panes);
             }
         },
 
-        reflowAxes: function() {
-            var plotArea = this,
-                axes = plotArea.axes,
-                xAxes = grep(axes, (function(axis) { return !axis.options.vertical; })),
-                yAxes = grep(axes, (function(axis) { return axis.options.vertical; })),
+        reflowPaneAxes: function(pane) {
+            var axes = pane.axes,
                 i,
                 length = axes.length;
 
-            for (i = 0; i < length; i++) {
-                axes[i].reflow(plotArea.box);
+            if (length > 0) {
+                for (i = 0; i < length; i++) {
+                    axes[i].reflow(pane.contentBox);
+                }
             }
-
-            plotArea.alignAxes(xAxes, yAxes);
-            plotArea.shrinkAdditionalAxes(xAxes, yAxes);
-            plotArea.alignAxes(xAxes, yAxes);
-            plotArea.shrinkAxes();
-            plotArea.alignAxes(xAxes, yAxes);
-            plotArea.fitAxes();
         },
 
-        reflowCharts: function() {
+        reflowCharts: function(panes) {
             var plotArea = this,
                 charts = plotArea.charts,
                 count = charts.length,
                 box = plotArea.box,
+                chartPane,
                 i;
 
             for (i = 0; i < count; i++) {
-                charts[i].reflow(box);
+                chartPane = charts[i].pane;
+                if (!chartPane || inArray(chartPane, panes)) {
+                    charts[i].reflow(box);
+                }
             }
-
-            plotArea.box = box;
         },
 
-        renderGridLines: function(view, axis, secondaryAxis) {
+        reflowPanes: function() {
             var plotArea = this,
-                options = axis.options,
-                vertical = options.vertical,
-                crossingSlot = axis.getSlot(options.axisCrossingValue),
-                secAxisPos = round(crossingSlot[vertical ? "y1" : "x1"]),
-                lineBox = secondaryAxis.lineBox(),
-                lineStart = lineBox[vertical ? "x1" : "y1"],
-                lineEnd = lineBox[vertical ? "x2" : "y2" ],
-                majorTicks = axis.getMajorTickPositions(),
-                gridLines = [],
-                gridLine = function (pos, options) {
-                    return {
-                        pos: pos,
-                        options: options
-                    };
-                };
+                box = plotArea.box,
+                panes = plotArea.panes,
+                i,
+                panesLength = panes.length,
+                currentPane,
+                paneBox,
+                remainingHeight = box.height(),
+                remainingPanes = panesLength,
+                autoHeightPanes = 0,
+                top = box.y1,
+                height,
+                percents;
 
-            if (options.majorGridLines.visible) {
-                gridLines = map(majorTicks, function(pos) {
-                                return gridLine(pos, options.majorGridLines);
-                            });
-            }
+            for (i = 0; i < panesLength; i++) {
+                currentPane = panes[i];
+                height = currentPane.options.height;
 
-            if (options.minorGridLines.visible) {
-                gridLines = gridLines.concat(
-                    map(axis.getMinorTickPositions(), function(pos) {
-                        if (options.majorGridLines.visible) {
-                            if (!inArray(pos, majorTicks)) {
-                                return gridLine(pos, options.minorGridLines);
-                            }
-                        } else {
-                            return gridLine(pos, options.minorGridLines);
-                        }
-                    }
-                ));
-            }
+                currentPane.options.width = box.width();
 
-            return map(gridLines, function(line) {
-                var gridLineOptions = {
-                        data: { modelId: plotArea.options.modelId },
-                        strokeWidth: line.options.width,
-                        stroke: line.options.color,
-                        dashType: line.options.dashType
-                    },
-                    linePos = round(line.pos);
-
-                if (secAxisPos === linePos && secondaryAxis.options.line.visible) {
-                    return null;
-                }
-
-                if (vertical) {
-                    return view.createLine(
-                        lineStart, linePos, lineEnd, linePos,
-                        gridLineOptions);
+                if (!currentPane.options.height) {
+                    autoHeightPanes++;
                 } else {
-                    return view.createLine(
-                        linePos, lineStart, linePos, lineEnd,
-                        gridLineOptions);
+                    if (height.indexOf && height.indexOf("%")) {
+                        percents = parseInt(height, 10) / 100;
+                        currentPane.options.height = percents * box.height();
+                    }
+
+                    currentPane.reflow(box.clone());
+
+                    remainingHeight -= currentPane.options.height;
                 }
-            });
+            }
+
+            for (i = 0; i < panesLength; i++) {
+                currentPane = panes[i];
+
+                if (!currentPane.options.height) {
+                    currentPane.options.height = remainingHeight / autoHeightPanes;
+                }
+            }
+
+            for (i = 0; i < panesLength; i++) {
+                currentPane = panes[i];
+
+                paneBox = box
+                    .clone()
+                    .move(box.x1, top);
+
+                currentPane.reflow(paneBox);
+
+                remainingPanes--;
+                top += currentPane.options.height;
+            }
         },
 
         backgroundBox: function() {
@@ -43541,32 +50763,29 @@ extend(Editor, {
                 bgBox = plotArea.backgroundBox(),
                 options = plotArea.options,
                 userOptions = options.plotArea,
-                axisY = plotArea.axisY,
-                axisX = plotArea.axisX,
-                gridLinesY = axisY ? plotArea.renderGridLines(view, axisY, axisX) : [],
-                gridLinesX = axisX ? plotArea.renderGridLines(view, axisX, axisY) : [],
-                childElements = ChartElement.fn.getViewElements.call(plotArea, view),
                 border = userOptions.border || {},
-                elements = [
-                    view.createRect(bgBox, {
-                        fill: userOptions.background,
-                        fillOpacity: userOptions.opacity,
-                        zIndex: -2,
-                        strokeWidth: 0.1
-                    }),
-                    view.createRect(bgBox, {
-                        id: options.id,
-                        data: { modelId: options.modelId },
-                        stroke: border.width ? border.color : "",
-                        strokeWidth: border.width,
-                        fill: WHITE,
-                        fillOpacity: 0,
-                        zIndex: -1,
-                        dashType: border.dashType
-                    })
-                ];
+                elements = ChartElement.fn.getViewElements.call(plotArea, view);
 
-            return [].concat(gridLinesY, gridLinesX, childElements, elements);
+            append(elements, [
+                view.createRect(bgBox, {
+                    fill: userOptions.background,
+                    fillOpacity: userOptions.opacity,
+                    zIndex: -2,
+                    strokeWidth: 0.1
+                }),
+                view.createRect(bgBox, {
+                    id: options.id,
+                    data: { modelId: options.modelId },
+                    stroke: border.width ? border.color : "",
+                    strokeWidth: border.width,
+                    fill: WHITE,
+                    fillOpacity: 0,
+                    zIndex: -1,
+                    dashType: border.dashType
+                })
+            ]);
+
+            return elements;
         }
     });
 
@@ -43575,6 +50794,7 @@ extend(Editor, {
             var plotArea = this,
                 axisOptions = deepExtend({}, plotArea.options, options);
 
+            plotArea.namedCategoryAxes = {};
             plotArea.namedValueAxes = {};
             plotArea.valueAxisRangeTracker = new AxisGroupRangeTracker(axisOptions.valueAxis);
 
@@ -43594,39 +50814,89 @@ extend(Editor, {
             valueAxis: {}
         },
 
-        render: function() {
-            var plotArea = this,
-                series = plotArea.series;
+        render: function(panes) {
+            var plotArea = this;
 
-            plotArea.createCategoryAxis();
+            panes = panes || plotArea.panes;
 
-            if (equalsIgnoreCase(plotArea.categoryAxis.options.type, DATE)) {
-                plotArea.aggregateDateSeries();
-            }
-
-            series = plotArea.series;
-            plotArea.createAreaChart(grep(series, function(s) {
-                return inArray(s.type, [AREA, VERTICAL_AREA]);
-            }));
-
-            plotArea.createBarChart(grep(series, function(s) {
-                return inArray(s.type, [BAR, COLUMN]);
-            }));
-
-            plotArea.createLineChart(grep(series, function(s) {
-                return inArray(s.type, [LINE, VERTICAL_LINE]);
-            }));
-
-            plotArea.createValueAxes();
+            plotArea.createCategoryAxes(panes);
+            plotArea.aggregateDateSeries(panes);
+            plotArea.createCharts(panes);
+            plotArea.createValueAxes(panes);
         },
 
-        aggregateDateSeries: function() {
+        removeAxis: function(axis) {
             var plotArea = this,
-                series = plotArea.series,
+                axisName = axis.options.name;
+
+            PlotAreaBase.fn.removeAxis.call(plotArea, axis);
+
+            if (axis instanceof CategoryAxis) {
+                delete plotArea.namedCategoryAxes[axisName];
+            } else {
+                plotArea.valueAxisRangeTracker.reset(axisName);
+                delete plotArea.namedValueAxes[axisName];
+            }
+
+            if (axis === plotArea.categoryAxis) {
+                delete plotArea.categoryAxis;
+            }
+
+            if (axis === plotArea.valueAxis) {
+                delete plotArea.valueAxis;
+            }
+        },
+
+        createCharts: function(panes) {
+            var plotArea = this,
+                seriesByPane = plotArea.groupSeriesByPane(),
+                i,
+                pane,
+                paneSeries;
+
+            for (i = 0; i < panes.length; i++) {
+                pane = panes[i];
+                paneSeries = seriesByPane[pane.options.name || "default"];
+
+                if (!paneSeries) {
+                    continue;
+                }
+
+                plotArea.createAreaChart(
+                    plotArea.filterSeriesByType(paneSeries, [AREA, VERTICAL_AREA]),
+                    pane
+                );
+
+                plotArea.createBarChart(
+                    plotArea.filterSeriesByType(paneSeries, [COLUMN, BAR]),
+                    pane
+                );
+
+                plotArea.createLineChart(
+                    plotArea.filterSeriesByType(paneSeries, [LINE, VERTICAL_LINE]),
+                    pane
+                );
+
+                plotArea.createCandlestickChart(
+                    plotArea.filterSeriesByType(paneSeries, CANDLESTICK),
+                    pane
+                );
+
+                plotArea.createOHLCChart(
+                    plotArea.filterSeriesByType(paneSeries, OHLC),
+                    pane
+                );
+            }
+        },
+
+        aggregateDateSeries: function(panes) {
+            var plotArea = this,
+                series = plotArea.srcSeries || plotArea.series,
                 processedSeries = [],
-                categoryAxis = plotArea.categoryAxis,
-                categories = categoryAxis.options.categories,
-                categoryMap = categoryAxis.categoryMap,
+                categoryAxis,
+                axisPane,
+                categories,
+                categoryMap,
                 groupIx,
                 categoryIndicies,
                 seriesIx,
@@ -43634,7 +50904,6 @@ extend(Editor, {
                 seriesClone,
                 srcData,
                 data,
-                aggregate,
                 srcValues,
                 i,
                 categoryIx,
@@ -43644,63 +50913,90 @@ extend(Editor, {
             for (seriesIx = 0; seriesIx < series.length; seriesIx++) {
                 currentSeries = series[seriesIx];
                 seriesClone = deepExtend({}, currentSeries);
-                aggregate = plotArea.seriesAggregate(seriesClone);
+                categoryAxis = plotArea.seriesCategoryAxis(currentSeries);
+                axisPane = plotArea.findPane(categoryAxis.options.pane);
 
-                srcData = seriesClone.data;
+                if (inArray(axisPane, panes) && equalsIgnoreCase(categoryAxis.options.type, DATE)) {
+                    categories = categoryAxis.options.categories;
+                    categoryMap = categoryAxis.categoryMap;
 
-                seriesClone.data = data = [];
+                    srcData = seriesClone.data;
+                    seriesClone.data = data = [];
 
-                for (groupIx = 0; groupIx < categories.length; groupIx++) {
-                    categoryIndicies = categoryMap[groupIx];
-                    srcValues = [];
+                    for (groupIx = 0; groupIx < categories.length; groupIx++) {
+                        categoryIndicies = categoryMap[groupIx];
+                        srcValues = [];
 
-                    for (i = 0; i < categoryIndicies.length; i++) {
-                        categoryIx = categoryIndicies[i];
-                        pointData = bindPoint(currentSeries, categoryIx, ["value"]);
-                        value = pointData.value;
+                        for (i = 0; i < categoryIndicies.length; i++) {
+                            categoryIx = categoryIndicies[i];
+                            pointData = bindPoint(currentSeries, categoryIx);
+                            value = pointData.value;
 
-                        if (defined(value)) {
-                            srcValues.push(pointData.value);
+                            if (defined(value)) {
+                                srcValues.push(pointData.value);
+                            }
                         }
-                    }
 
-                    if (srcValues.length > 1) {
-                        data[groupIx] = aggregate(srcValues, currentSeries);
-                    } else {
-                        data[groupIx] = srcData[categoryIndicies[0]];
+                        if (srcValues.length > 1) {
+                            data[groupIx] = calculateAggregates(srcValues, currentSeries);
+                        } else {
+                            data[groupIx] = srcData[categoryIndicies[0]];
+                        }
                     }
                 }
 
                 processedSeries.push(seriesClone);
             }
 
+            plotArea.srcSeries = series;
             plotArea.series = processedSeries;
         },
 
-        seriesAggregate: function(series) {
-            var aggregate = series.aggregate;
-            if (typeof aggregate === STRING) {
-                aggregate = Aggregates[aggregate];
-            }
-
-            return aggregate || Aggregates.max;
-        },
-
-        appendChart: function(chart) {
+        appendChart: function(chart, pane) {
             var plotArea = this,
-                options = plotArea.options,
                 series = chart.options.series,
-                categories = options.categoryAxis.categories,
+                categoryAxis = plotArea.seriesCategoryAxis(series[0]),
+                categories = categoryAxis.options.categories,
                 categoriesToAdd = math.max(0, categoriesCount(series) - categories.length);
 
-            append(categories, new Array(categoriesToAdd));
+            while (categoriesToAdd--) {
+                categories.push("");
+            }
 
             plotArea.valueAxisRangeTracker.update(chart.valueAxisRanges);
 
-            PlotAreaBase.fn.appendChart.call(plotArea, chart);
+            PlotAreaBase.fn.appendChart.call(plotArea, chart, pane);
         },
 
-        createBarChart: function(series) {
+        // TODO: Refactor, optionally use series.pane option
+        seriesPaneName: function(series) {
+            var plotArea = this,
+                options = plotArea.options,
+                axisName = series.axis,
+                axisOptions = [].concat(options.valueAxis),
+                axis = $.grep(axisOptions, function(a) { return a.name === axisName; })[0],
+                panes = options.panes || [{}],
+                defaultPaneName = (panes[0] || {}).name || "default",
+                paneName = (axis || {}).pane || defaultPaneName;
+
+            return paneName;
+        },
+
+        seriesCategoryAxis: function(series) {
+            var plotArea = this,
+                axisName = series.categoryAxis,
+                axis = axisName ?
+                    plotArea.namedCategoryAxes[axisName] :
+                    plotArea.categoryAxis;
+
+            if (!axis) {
+                throw new Error("Unable to locate category axis with name " + axisName);
+            }
+
+            return axis;
+        },
+
+        createBarChart: function(series, pane) {
             if (series.length === 0) {
                 return;
             }
@@ -43715,10 +51011,10 @@ extend(Editor, {
                     spacing: firstSeries.spacing
                 });
 
-            plotArea.appendChart(barChart);
+            plotArea.appendChart(barChart, pane);
         },
 
-        createLineChart: function(series) {
+        createLineChart: function(series, pane) {
             if (series.length === 0) {
                 return;
             }
@@ -43731,10 +51027,10 @@ extend(Editor, {
                     series: series
                 });
 
-            plotArea.appendChart(lineChart);
+            plotArea.appendChart(lineChart, pane);
         },
 
-        createAreaChart: function(series) {
+        createAreaChart: function(series, pane) {
             if (series.length === 0) {
                 return;
             }
@@ -43747,79 +51043,171 @@ extend(Editor, {
                     series: series
                 });
 
-            plotArea.appendChart(areaChart);
+            plotArea.appendChart(areaChart, pane);
         },
 
-        createCategoryAxis: function() {
-            var plotArea = this,
-                options = plotArea.options,
-                invertAxes = plotArea.invertAxes,
-                categoryAxisOptions = options.categoryAxis,
-                categories = categoryAxisOptions.categories,
-                categoriesCount = categories.length,
-                axisType  = categoryAxisOptions.type || "",
-                dateCategory = categories[0] instanceof Date,
-                categoryAxis;
+        createOHLCChart: function(series, pane) {
+            if (series.length === 0) {
+                return;
+            }
 
-            if (equalsIgnoreCase(axisType, DATE) || (!axisType && dateCategory)) {
-                categoryAxis = new DateCategoryAxis(deepExtend({
-                        vertical: invertAxes
-                    },
-                    categoryAxisOptions)
-                );
-            } else {
-                categoryAxis = new CategoryAxis(deepExtend({
+            var plotArea = this,
+                firstSeries = series[0],
+                chart = new OHLCChart(plotArea, {
+                    invertAxes: plotArea.invertAxes,
+                    gap: firstSeries.gap,
+                    series: series,
+                    spacing: firstSeries.spacing
+                });
+
+            plotArea.appendChart(chart, pane);
+        },
+
+        createCandlestickChart: function(series, pane) {
+            if (series.length === 0) {
+                return;
+            }
+
+            var plotArea = this,
+                firstSeries = series[0],
+                chart = new CandlestickChart(plotArea, {
+                    invertAxes: plotArea.invertAxes,
+                    gap: firstSeries.gap,
+                    series: series,
+                    spacing: firstSeries.spacing
+                });
+
+            plotArea.appendChart(chart, pane);
+        },
+
+        axisRequiresRounding: function(categoryAxisName, categoryAxisIndex) {
+            var plotArea = this,
+                centeredSeries = plotArea.filterSeriesByType(
+                    plotArea.series, [BAR, COLUMN, OHLC, CANDLESTICK]
+                ),
+                seriesIx,
+                seriesAxis;
+
+            for (seriesIx = 0; seriesIx < centeredSeries.length; seriesIx++) {
+                seriesAxis = centeredSeries[seriesIx].categoryAxis || "";
+                if (seriesAxis === categoryAxisName || (!seriesAxis && categoryAxisIndex === 0)) {
+                    return true;
+                }
+            }
+        },
+
+        createCategoryAxes: function(panes) {
+            var plotArea = this,
+                invertAxes = plotArea.invertAxes,
+                definitions = [].concat(plotArea.options.categoryAxis),
+                i,
+                axisOptions,
+                axisPane,
+                categories,
+                type,
+                name,
+                dateCategory,
+                categoryAxis,
+                axes = [],
+                primaryAxis;
+
+            for (i = 0; i < definitions.length; i++) {
+                axisOptions = definitions[i];
+                axisPane = plotArea.findPane(axisOptions.pane);
+
+                if (inArray(axisPane, panes)) {
+                    name = axisOptions.name;
+                    categories = axisOptions.categories || [];
+                    dateCategory = categories[0] instanceof Date;
+                    type  = axisOptions.type || "";
+                    axisOptions = deepExtend({
                         vertical: invertAxes,
-                        axisCrossingValue: invertAxes ? categoriesCount : 0
-                    },
-                    categoryAxisOptions)
-                );
+                        axisCrossingValue: invertAxes ? categories.length : 0
+                    }, axisOptions);
+
+                    if (plotArea.axisRequiresRounding(name, i)) {
+                        axisOptions.justified = false;
+                        axisOptions.roundToBaseUnit = true;
+                    }
+
+                    if ((!type && dateCategory) || equalsIgnoreCase(type, DATE)) {
+                        categoryAxis = new DateCategoryAxis(axisOptions);
+                    } else {
+                        categoryAxis = new CategoryAxis(axisOptions);
+                    }
+
+                    if (name) {
+                        if (plotArea.namedCategoryAxes[name]) {
+                            throw new Error(
+                                "Category axis with name " + name + " is already defined"
+                            );
+                        }
+                        plotArea.namedCategoryAxes[name] = categoryAxis;
+                    }
+
+                    categoryAxis.axisIndex = i;
+                    axes.push(categoryAxis);
+                    plotArea.appendAxis(categoryAxis);
+                }
             }
+
+            primaryAxis = plotArea.categoryAxis || axes[0];
+            plotArea.categoryAxis = primaryAxis;
 
             if (invertAxes) {
-                plotArea.axisY = categoryAxis;
+                plotArea.axisY = primaryAxis;
             } else {
-                plotArea.axisX = categoryAxis;
+                plotArea.axisX = primaryAxis;
             }
-
-            plotArea.categoryAxis = categoryAxis;
-            plotArea.axes.push(categoryAxis);
-            plotArea.append(plotArea.categoryAxis);
         },
 
-        createValueAxes: function() {
+        createValueAxes: function(panes) {
             var plotArea = this,
-                options = plotArea.options,
-                range,
+                definitions = [].concat(plotArea.options.valueAxis),
                 invertAxes = plotArea.invertAxes,
-                axis,
-                axisName,
-                namedValueAxes = plotArea.namedValueAxes,
-                valueAxisOptions = [].concat(options.valueAxis),
-                primaryValueAxis;
+                baseOptions = { vertical: !invertAxes },
+                axisOptions,
+                axisPane,
+                valueAxis,
+                primaryAxis,
+                axes = [],
+                range,
+                name,
+                i;
 
-            each(valueAxisOptions, function() {
-                axisName = this.name || PRIMARY;
-                range = plotArea.valueAxisRangeTracker.query(axisName);
+            for (i = 0; i < definitions.length; i++) {
+                axisOptions = definitions[i];
+                axisPane = plotArea.findPane(axisOptions.pane);
 
-                axis = namedValueAxes[axisName] =
-                    new NumericAxis(range.min, range.max, deepExtend({
-                        vertical: !invertAxes
-                    },
-                    this)
-                );
+                if (inArray(axisPane, panes)) {
+                    name = axisOptions.name;
+                    range = plotArea.valueAxisRangeTracker.query(name);
 
-                plotArea.axes.push(axis);
-                plotArea.append(axis);
-            });
+                    valueAxis = new NumericAxis(range.min, range.max,
+                        deepExtend({}, baseOptions, axisOptions)
+                    );
 
-            primaryValueAxis = plotArea.getPrimaryValueAxis();
+                    if (name) {
+                        if (plotArea.namedValueAxes[name]) {
+                            throw new Error(
+                                "Value axis with name " + name + " is already defined"
+                            );
+                        }
+                        plotArea.namedValueAxes[name] = valueAxis;
+                    }
 
-            // TODO: Consider removing axisX and axisY aliases
+                    axes.push(valueAxis);
+                    plotArea.appendAxis(valueAxis);
+                }
+            }
+
+            primaryAxis = plotArea.valueAxis || axes[0];
+            plotArea.valueAxis = primaryAxis;
+
             if (invertAxes) {
-                plotArea.axisX = primaryValueAxis;
+                plotArea.axisX = primaryAxis;
             } else {
-                plotArea.axisY = primaryValueAxis;
+                plotArea.axisY = primaryAxis;
             }
         },
 
@@ -43827,51 +51215,54 @@ extend(Editor, {
             var plotArea = this,
                 coords = chart._eventCoordinates(e),
                 point = new Point2D(coords.x, coords.y),
-                categoryAxis = plotArea.categoryAxis,
-                allAxes = plotArea.axes,
+                pane = plotArea.pointPane(point),
+                allAxes,
                 i,
-                length = allAxes.length,
                 axis,
-                currentValue,
-                category = categoryAxis.getCategory(point),
+                categories = [],
                 values = [];
 
-            for (i = 0; i < length; i++) {
+            if (!pane) {
+                return;
+            }
+
+            allAxes = pane.axes;
+            for (i = 0; i < allAxes.length; i++) {
                 axis = allAxes[i];
-                if (axis != categoryAxis) {
-                    currentValue = axis.getValue(point);
-                    if (currentValue !== null) {
-                        values.push(currentValue);
-                    }
+                if (axis.getValue) {
+                    appendIfNotNull(values, axis.getValue(point));
+                } else {
+                    appendIfNotNull(categories, axis.getCategory(point));
                 }
             }
 
-            if (defined(category) && values.length > 0) {
+            if (categories.length === 0) {
+                appendIfNotNull(
+                    categories, plotArea.categoryAxis.getCategory(point)
+                );
+            }
+
+            if (categories.length > 0 && values.length > 0) {
                 chart.trigger(PLOT_AREA_CLICK, {
                     element: $(e.target),
-                    category: category,
+                    category: singleItemOrArray(categories),
                     value: singleItemOrArray(values)
                 });
             }
         },
 
-        getPrimaryValueAxis: function() {
+        pointPane: function(point) {
             var plotArea = this,
-                axes = plotArea.axes,
-                primaryValueAxis = plotArea.namedValueAxes[PRIMARY],
-                axesCount = axes.length,
-                axis, i;
+                panes = plotArea.panes,
+                currentPane,
+                i;
 
-            for (i = 0; i < axesCount && !primaryValueAxis; i++) {
-                axis = axes[i];
-
-                if (!equalsIgnoreCase(axis.options.type, CATEGORY)) {
-                    primaryValueAxis = axis;
-                    break;
+            for (i = 0; i < panes.length; i++) {
+                currentPane = panes[i];
+                if (currentPane.contentBox.containsPoint(point)) {
+                    return currentPane;
                 }
             }
-
-            return primaryValueAxis;
         }
     });
 
@@ -43901,7 +51292,7 @@ extend(Editor, {
 
             for (i = 0; i < length; i++) {
                 axis = axisOptions[i];
-                axisName = axis.name || PRIMARY;
+                axisName = axis.name;
                 range = axisRanges[axisName];
                 chartRange = chartAxisRanges[axisName];
                 if (chartRange) {
@@ -43912,6 +51303,10 @@ extend(Editor, {
                     range.max = math.max(range.max, chartRange.max);
                 }
             }
+        },
+
+        reset: function(axisName) {
+            delete this.axisRanges[axisName];
         },
 
         query: function(axisName) {
@@ -43940,67 +51335,127 @@ extend(Editor, {
             yAxis: {}
         },
 
-        render: function() {
+        render: function(panes) {
             var plotArea = this,
-                series = plotArea.series;
+                seriesByPane = plotArea.groupSeriesByPane(),
+                i,
+                pane,
+                paneSeries;
 
-            plotArea.createScatterChart(grep(series, function(s) {
-                return s.type === SCATTER;
-            }));
+            panes = panes || plotArea.panes;
 
-            plotArea.createScatterLineChart(grep(series, function(s) {
-                return s.type === SCATTER_LINE;
-            }));
+            for (i = 0; i < panes.length; i++) {
+                pane = panes[i];
+                paneSeries = seriesByPane[pane.options.name || "default"];
 
-            plotArea.createBubbleChart(grep(series, function(s) {
-                return s.type === BUBBLE;
-            }));
+                if (!paneSeries) {
+                    continue;
+                }
 
-            plotArea.createAxes();
+                plotArea.createScatterChart(
+                    plotArea.filterSeriesByType(paneSeries, SCATTER),
+                    pane
+                );
+
+                plotArea.createScatterLineChart(
+                    plotArea.filterSeriesByType(paneSeries, SCATTER_LINE),
+                    pane
+                );
+
+                plotArea.createBubbleChart(
+                    plotArea.filterSeriesByType(paneSeries, BUBBLE),
+                    pane
+                );
+            }
+
+            plotArea.createAxes(panes);
         },
 
-        appendChart: function(chart) {
+        appendChart: function(chart, pane) {
             var plotArea = this;
 
             plotArea.xAxisRangeTracker.update(chart.xAxisRanges);
             plotArea.yAxisRangeTracker.update(chart.yAxisRanges);
 
-            PlotAreaBase.fn.appendChart.call(plotArea, chart);
+            PlotAreaBase.fn.appendChart.call(plotArea, chart, pane);
         },
 
-        createScatterChart: function(series) {
+        removeAxis: function(axis) {
+            var plotArea = this,
+                axisName = axis.options.name;
+
+            PlotAreaBase.fn.removeAxis.call(plotArea, axis);
+
+            if (axis.options.vertical) {
+                plotArea.yAxisRangeTracker.reset(axisName);
+                delete plotArea.namedYAxes[axisName];
+            } else {
+                plotArea.xAxisRangeTracker.reset(axisName);
+                delete plotArea.namedXAxes[axisName];
+            }
+
+            if (axis === plotArea.axisX) {
+                delete plotArea.axisX;
+            }
+
+            if (axis === plotArea.axisY) {
+                delete plotArea.axisY;
+            }
+        },
+
+        // TODO: Refactor, optionally use series.pane option
+        seriesPaneName: function(series) {
+            var plotArea = this,
+                options = plotArea.options,
+                xAxisName = series.xAxis,
+                xAxisOptions = [].concat(options.xAxis),
+                xAxis = $.grep(xAxisOptions, function(a) { return a.name === xAxisName; })[0],
+                yAxisName = series.yAxis,
+                yAxisOptions = [].concat(options.yAxis),
+                yAxis = $.grep(yAxisOptions, function(a) { return a.name === yAxisName; })[0],
+                panes = options.panes || [{}],
+                defaultPaneName = panes[0].name || "default",
+                paneName = (xAxis || {}).pane || (yAxis || {}).pane || defaultPaneName;
+
+            return paneName;
+        },
+
+        createScatterChart: function(series, pane) {
             var plotArea = this;
 
             if (series.length > 0) {
                 plotArea.appendChart(
-                    new ScatterChart(plotArea, { series: series })
+                    new ScatterChart(plotArea, { series: series }),
+                    pane
                 );
             }
         },
 
-        createScatterLineChart: function(series) {
+        createScatterLineChart: function(series, pane) {
             var plotArea = this;
 
             if (series.length > 0) {
                 plotArea.appendChart(
-                    new ScatterLineChart(plotArea, { series: series })
+                    new ScatterLineChart(plotArea, { series: series }),
+                    pane
                 );
             }
         },
 
-        createBubbleChart: function(series) {
+        createBubbleChart: function(series, pane) {
             var plotArea = this;
 
             if (series.length > 0) {
                 plotArea.appendChart(
-                    new BubbleChart(plotArea, { series: series })
+                    new BubbleChart(plotArea, { series: series }),
+                    pane
                 );
             }
         },
 
         createXYAxis: function(options, vertical) {
             var plotArea = this,
-                axisName = options.name || PRIMARY,
+                axisName = options.name,
                 namedAxes = vertical ? plotArea.namedYAxes : plotArea.namedXAxes,
                 rangeTracker = vertical ? plotArea.yAxisRangeTracker : plotArea.xAxisRangeTracker,
                 range = rangeTracker.query(axisName),
@@ -44015,7 +51470,7 @@ extend(Editor, {
             for (seriesIx = 0; seriesIx < series.length; seriesIx++) {
                 currentSeries = series[seriesIx];
                 if (currentSeries[vertical ? "yAxis" : "xAxis"] == axisOptions.name) {
-                    firstPointValue = bindPoint(currentSeries, 0, ["x", "y"]).value;
+                    firstPointValue = bindPoint(currentSeries, 0).value;
                     dateData = firstPointValue[vertical ? "y" : "x"] instanceof Date;
 
                     break;
@@ -44027,28 +51482,47 @@ extend(Editor, {
             } else {
                 axis = new NumericAxis(range.min, range.max, axisOptions);
             }
-            namedAxes[axisName] = axis;
-            plotArea.append(axis);
-            plotArea.axes.push(axis);
+
+            if (axisName) {
+                if (namedAxes[axisName]) {
+                    throw new Error(
+                        (vertical ? "Y" : "X") +
+                        " axis with name " + axisName + " is already defined"
+                    );
+                }
+                namedAxes[axisName] = axis;
+            }
+
+            plotArea.appendAxis(axis);
+
+            return axis;
         },
 
-        createAxes: function() {
+        createAxes: function(panes) {
             var plotArea = this,
                 options = plotArea.options,
+                axisPane,
                 xAxesOptions = [].concat(options.xAxis),
-                yAxesOptions = [].concat(options.yAxis);
+                xAxes = [],
+                yAxesOptions = [].concat(options.yAxis),
+                yAxes = [];
 
             each(xAxesOptions, function() {
-                plotArea.createXYAxis(this, false);
+                axisPane = plotArea.findPane(this.pane);
+                if (inArray(axisPane, panes)) {
+                    xAxes.push(plotArea.createXYAxis(this, false));
+                }
             });
 
             each(yAxesOptions, function() {
-                plotArea.createXYAxis(this, true);
+                axisPane = plotArea.findPane(this.pane);
+                if (inArray(axisPane, panes)) {
+                    yAxes.push(plotArea.createXYAxis(this, true));
+                }
             });
 
-            // TODO: Remove axisX and axisY aliases
-            plotArea.axisX = plotArea.namedXAxes.primary || plotArea.namedXAxes[xAxesOptions[0].name];
-            plotArea.axisY = plotArea.namedYAxes.primary || plotArea.namedYAxes[yAxesOptions[0].name];
+            plotArea.axisX = plotArea.axisX || xAxes[0];
+            plotArea.axisY = plotArea.axisY || yAxes[0];
         },
 
         click: function(chart, e) {
@@ -44349,6 +51823,7 @@ extend(Editor, {
                 .css({
                    backgroundColor: tooltipOptions.background,
                    borderColor: tooltipOptions.border.color || point.options.color,
+                   font: tooltipOptions.font,
                    color: tooltipOptions.color,
                    opacity: tooltipOptions.opacity,
                    borderWidth: tooltipOptions.border.width
@@ -44379,20 +51854,34 @@ extend(Editor, {
 
     var Aggregates = {
         max: function(values) {
-            return math.max.apply(math, values);
+            var result = math.max.apply(math, values);
+            if (isNaN(result)) {
+                return sparseArrayMax(values);
+            } else {
+                return result;
+            }
         },
 
         min: function(values) {
-            return math.min.apply(math, values);
+            var result = math.min.apply(math, values);
+            if (isNaN(result)) {
+                return sparseArrayMin(values);
+            } else {
+                return result;
+            }
         },
 
         sum: function(values) {
             var i,
                 length = values.length,
-                sum = 0;
+                sum = 0,
+                n;
 
             for (i = 0; i < length; i++) {
-                sum += values[i];
+                n = values[i];
+                if (defined(n) && !isNaN(n)) {
+                    sum += n;
+                }
             }
 
             return sum;
@@ -44406,6 +51895,376 @@ extend(Editor, {
             return Aggregates.sum(values) / Aggregates.count(values);
         }
     };
+
+    var Selection = Observable.extend({
+        init: function(chart, categoryAxis, options) {
+            var that = this,
+                chartElement = chart.element,
+                categoryAxisLineBox = categoryAxis.lineBox(),
+                valueAxis = that.getValueAxis(categoryAxis),
+                valueAxisLineBox = valueAxis.lineBox(),
+                selectorPrefix = "." + CSS_PREFIX,
+                wrapper, padding;
+
+            Observable.fn.init.call(that);
+
+            that.options = deepExtend({}, that.options, options);
+            options = that.options;
+            that.chart = chart;
+            that.chartElement = chartElement;
+            that.categoryAxis = categoryAxis;
+            that.valueAxis = valueAxis;
+
+            that.template = Selection.template;
+            if (!that.template) {
+                that.template = Selection.template = renderTemplate(
+                    "<div class='" + CSS_PREFIX + "selector' " +
+                    "style='width: #= d.width #px; height: #= d.height #px;" +
+                    " top: #= d.offset.top #px; left: #= d.offset.left #px;'>" +
+                    "<div class='" + CSS_PREFIX + "mask'></div>" +
+                    "<div class='" + CSS_PREFIX + "mask'></div>" +
+                    "<div class='" + CSS_PREFIX + "selection'>" +
+                    "<div class='" + CSS_PREFIX + "handle " + CSS_PREFIX + "leftHandle'><div></div></div>" +
+                    "<div class='" + CSS_PREFIX + "handle " + CSS_PREFIX + "rightHandle'><div></div></div>" +
+                    "</div></div>"
+                );
+            }
+
+            padding = {
+                left: parseInt(chartElement.css("paddingLeft"), 10),
+                right: parseInt(chartElement.css("paddingTop"), 10)
+            };
+
+            that.options = deepExtend({}, {
+                width: categoryAxisLineBox.width(),
+                height: valueAxisLineBox.height(),
+                padding: padding,
+                offset: {
+                    left: valueAxisLineBox.x2 + padding.left,
+                    top: valueAxisLineBox.y1 + padding.right
+                },
+                from: options.min,
+                to: options.max
+            }, options);
+
+            that.wrapper = wrapper = $(that.template(that.options)).appendTo(chartElement);
+
+            that.selection = wrapper.find(selectorPrefix + "selection");
+            that.leftMask = wrapper.find(selectorPrefix + "mask").first();
+            that.rightMask = wrapper.find(selectorPrefix + "mask").last();
+            that.leftHandle = wrapper.find(selectorPrefix + "leftHandle");
+            that.rightHandle = wrapper.find(selectorPrefix + "rightHandle");
+            that.options.selection = {
+                border: {
+                    left: parseFloat(that.selection.css("border-left-width"), 10),
+                    right: parseFloat(that.selection.css("border-right-width"), 10)
+                }
+            };
+
+            that.leftHandle.css("top", (that.selection.height() - that.leftHandle.height()) / 2);
+            that.rightHandle.css("top", (that.selection.height() - that.rightHandle.height()) / 2);
+
+            that.move(options.from, options.to);
+
+            that.bind(that.events, that.options);
+            that.wrapper[0].style.cssText = that.wrapper[0].style.cssText;
+
+            if (kendo.UserEvents) {
+                that.userEvents = new kendo.UserEvents(that.wrapper, {
+                    global: true,
+                    threshold: 5,
+                    stopPropagation: true,
+                    multiTouch: true,
+                    start: proxy(that._start, that),
+                    move: proxy(that._move, that),
+                    end: proxy(that._end, that),
+                    tap: proxy(that._tap, that),
+                    gesturestart: proxy(that._gesturechange, that),
+                    gesturechange: proxy(that._gesturechange, that)
+                });
+            } else {
+                that.leftHandle.add(that.rightHandle).removeClass(CSS_PREFIX + "handle");
+            }
+        },
+
+        events: [
+            SELECT_START,
+            SELECT,
+            SELECT_END
+        ],
+
+        options: {
+            min: MIN_VALUE,
+            max: MAX_VALUE
+        },
+
+        _start: function(e) {
+            var that = this,
+                options = that.options,
+                target = $(e.event.target);
+
+            if (that._state || !target) {
+                return;
+            }
+
+            that.chart._unsetActivePoint();
+            that._state = {
+                moveTarget: target.parents(".k-handle").add(target).first(),
+                startLocation: e.x.location,
+                range: {
+                    from: options.from,
+                    to: options.to
+                }
+            };
+
+            that.trigger(SELECT_START);
+        },
+
+        _move: function(e) {
+            if (!this._state) {
+                return;
+            }
+
+            var that = this,
+                state = that._state,
+                options = that.options,
+                fullSpan = options.max - options.min,
+                delta = state.startLocation - e.x.location,
+                range = state.range,
+                span = range.to - range.from,
+                target = state.moveTarget,
+                scale = that.wrapper.width() / fullSpan,
+                offset = math.round(delta / scale);
+
+            if (!target) {
+                return;
+            }
+
+            e.preventDefault();
+
+            if (target.is(".k-selection")) {
+                range.from = math.min(
+                    math.max(options.min, options.from - offset),
+                    options.max - span
+                );
+                range.to = math.min(
+                    range.from + span,
+                    options.max
+                );
+            } else if (target.is(".k-leftHandle")) {
+                range.from = math.min(
+                    math.max(options.min, options.from - offset),
+                    options.max - 1
+                );
+                range.to = math.max(range.from + 1, range.to);
+            } else if (target.is(".k-rightHandle")) {
+                range.to = math.min(
+                    math.max(options.min + 1, options.to - offset),
+                    options.max
+                );
+                range.from = math.min(range.to - 1, range.from);
+            }
+
+            that.move(range.from, range.to);
+
+            that.trigger(SELECT, {
+                from: range.from,
+                to: range.to
+            });
+        },
+
+        _end: function(e) {
+            var that = this,
+                range = that._state.range;
+
+            delete that._state;
+            that.set(range.from, range.to);
+            that.trigger(SELECT_END);
+        },
+
+        _gesturechange: function(e) {
+            if (!this._state) {
+                return;
+            }
+
+            var that = this,
+                chart = that.chart,
+                state = that._state,
+                options = that.options,
+                categoryAxis = that.categoryAxis,
+                range = state.range,
+                p0 = chart._toModelCoordinates(e.touches[0].x.location).x,
+                p1 = chart._toModelCoordinates(e.touches[1].x.location).x,
+                left = math.min(p0, p1),
+                right = math.max(p0, p1);
+
+            e.preventDefault();
+            state.moveTarget = null;
+
+            range.from =
+                categoryAxis.getCategoryIndex(new dataviz.Point2D(left)) ||
+                options.min;
+
+            range.to =
+                categoryAxis.getCategoryIndex(new dataviz.Point2D(right)) ||
+                options.max;
+
+            that.move(range.from, range.to);
+        },
+
+        _tap: function(e) {
+            var that = this,
+                options = that.options,
+                coords = that.chart._eventCoordinates(e),
+                categoryAxis = that.categoryAxis,
+                categoryIx = categoryAxis.getCategoryIndex(
+                    new dataviz.Point2D(coords.x, categoryAxis.box.y1)
+                ),
+                span = options.to - options.from,
+                mid = options.from + span / 2,
+                offset = math.round(mid - categoryIx),
+                from,
+                to;
+
+            if (that._state) {
+                return;
+            }
+
+            e.preventDefault();
+            that.chart._unsetActivePoint();
+
+            from = math.min(
+                math.max(options.min, options.from - offset),
+                options.max - span
+            );
+            to = math.min(
+                from + span,
+                options.max
+            );
+
+            that.set(from, to);
+            that.trigger(SELECT_END);
+        },
+
+        move: function(from, to) {
+            var that = this,
+                options = that.options,
+                offset = options.offset,
+                padding = options.padding,
+                border = options.selection.border,
+                categoryAxis = that.categoryAxis,
+                leftMaskWidth,
+                rightMaskWidth,
+                box,
+                distance;
+
+            box = categoryAxis.getSlot(from);
+            leftMaskWidth = round(box.x1 - offset.left + padding.left);
+            that.leftMask.width(leftMaskWidth);
+            that.selection.css("left", leftMaskWidth);
+
+            box = categoryAxis.getSlot(to);
+            rightMaskWidth = round(options.width - (box.x1 - offset.left + padding.left));
+            that.rightMask.width(rightMaskWidth);
+            distance = options.width - rightMaskWidth;
+            if (distance != options.width) {
+                distance += border.right;
+            }
+
+            that.rightMask.css("left", distance);
+            that.selection.width(math.max(
+                options.width - (leftMaskWidth + rightMaskWidth) - border.right,
+                0
+            ));
+        },
+
+        set: function(from, to) {
+            var that = this,
+                options = that.options;
+
+            from = clipValue(from, options.min, options.max);
+            to = clipValue(to, from + 1, options.max);
+
+            that.move(from, to);
+
+            options.from = from;
+            options.to = to;
+        },
+
+        expandLeft: function(delta) {
+            var selection = this,
+                options = selection.options;
+
+            selection.set(
+                math.min(options.from - delta, options.to - 1),
+                options.to
+            );
+        },
+
+        getValueAxis: function(categoryAxis) {
+            var axes = categoryAxis.pane.axes,
+                axesCount = axes.length,
+                i, axis;
+
+            for (i = 0; i < axesCount; i++) {
+                axis = axes[i];
+
+                if (axis.options.vertical !== categoryAxis.options.vertical) {
+                    return axis;
+                }
+            }
+        }
+    });
+
+    function calculateAggregates(values, series) {
+        var aggregate = series.aggregate,
+            result;
+
+        function execSimple(values, aggregate, series) {
+            var result,
+                aggregateType = typeof aggregate;
+
+            if (aggregateType === STRING) {
+                result = Aggregates[aggregate](values);
+            } else if (aggregateType === "function") {
+                result = aggregate(values, series);
+            } else {
+                result = Aggregates.max(values);
+            }
+
+            return result;
+        }
+
+        function execComposite(values, aggregate, series) {
+            var valueFields = valueFieldsByChartType(series.type),
+                valueFieldsCount = valueFields.length,
+                count = values.length,
+                i,
+                j,
+                field,
+                result = [],
+                data = [];
+
+            for (i = 0; i < valueFieldsCount; i++) {
+                field = valueFields[i];
+                for (j = 0; j < count; j++) {
+                    data.push(values[j][field]);
+                }
+                result.push(execSimple(data, aggregate[field], series));
+                data = [];
+            }
+
+            return result;
+        }
+
+        if (typeof aggregate === "object") {
+            result = execComposite(values, aggregate, series);
+        } else {
+            result = execSimple(values, aggregate, series);
+        }
+
+        return result;
+    }
 
     function sparseArrayMin(arr) {
         return sparseArrayLimits(arr).min;
@@ -44424,7 +52283,7 @@ extend(Editor, {
 
         for (i = 0; i < length; i++) {
             n = arr[i];
-            if (defined(n)) {
+            if (n !== null && isFinite(n)) {
                 min = math.min(min, n);
                 max = math.max(max, n);
             }
@@ -44489,6 +52348,8 @@ extend(Editor, {
         delete seriesDefaults.scatter;
         delete seriesDefaults.scatterLine;
         delete seriesDefaults.bubble;
+        delete seriesDefaults.candlestick;
+        delete seriesDefaults.ohlc;
     }
 
     function applySeriesColors(options) {
@@ -44502,20 +52363,38 @@ extend(Editor, {
         }
     }
 
-    function applyAxisDefaults(options, themeOptions) {
-        var themeAxisDefaults = deepExtend({}, (themeOptions || {}).axisDefaults);
+    function resolveAxisAliases(options) {
+        var alias;
 
-        each(["category", "value", "x", "y"], function() {
+        each([CATEGORY, VALUE, X, Y], function() {
+            alias = this + "Axes";
+            if (options[alias]) {
+                options[this + "Axis"] = options[alias];
+                delete options[alias];
+            }
+        });
+    }
+
+    function applyAxisDefaults(options, themeOptions) {
+        var themeAxisDefaults = ((themeOptions || {}).axisDefaults) || {};
+
+        each([CATEGORY, VALUE, X, Y], function() {
             var axisName = this + "Axis",
-                axes = [].concat(options[axisName]);
+                axes = [].concat(options[axisName]),
+                axisDefaults = options.axisDefaults || {};
 
             axes = $.map(axes, function(axisOptions) {
                 var axisColor = (axisOptions || {}).color;
                 return deepExtend({},
                     themeAxisDefaults,
                     themeAxisDefaults[axisName],
-                    options.axisDefaults,
-                    { line: { color: axisColor }, labels: { color: axisColor }, title: { color: axisColor } },
+                    axisDefaults,
+                    axisDefaults[axisName],
+                    {
+                        line: { color: axisColor },
+                        labels: { color: axisColor },
+                        title: { color: axisColor }
+                    },
                     axisOptions
                 );
             });
@@ -44524,9 +52403,31 @@ extend(Editor, {
         });
     }
 
-    function applyDefaults(options, themeOptions) {
-        applyAxisDefaults(options, themeOptions);
-        applySeriesDefaults(options, themeOptions);
+    function bindCategories(options, data) {
+        var definitions = [].concat(options.categoryAxis),
+            axisIx,
+            axis,
+            categoryIx,
+            category,
+            row;
+
+        for (axisIx = 0; axisIx < definitions.length; axisIx++) {
+            axis = definitions[axisIx];
+            if (axis.field) {
+                for (categoryIx = 0; categoryIx < data.length; categoryIx++) {
+                    row = data[categoryIx];
+
+                    category = getField(axis.field, row);
+                    if (categoryIx === 0) {
+                        axis.categories = [category];
+                        axis.dataItems = [row];
+                    } else {
+                        axis.categories.push(category);
+                        axis.dataItems.push(row);
+                    }
+                }
+            }
+        }
     }
 
     function incrementSlot(slots, index, value) {
@@ -44593,20 +52494,27 @@ extend(Editor, {
     getField.cache = {};
 
     function toDate(value) {
-        if (isArray(value)) {
-            return map(value, toDate);
+        var result,
+            aspDate,
+            i;
+
+        if (value instanceof Date) {
+            result = value;
+        } else if (typeof value === STRING) {
+            aspDate = DATE_REGEXP.exec(value);
+            result = new Date(aspDate ? parseInt(aspDate[1], 10) : value);
         } else if (value) {
-            if (value instanceof Date) {
-                return value;
-            } else {
-                if (typeof value === STRING) {
-                    var date = DATE_REGEXP.exec(value);
-                    return new Date(date ? parseInt(date[1], 10) : value);
-                } else {
-                    return new Date(value);
+            if (value.length) {
+                result = [];
+                for (i = 0; i < value.length; i++) {
+                    result.push(toDate(value[i]));
                 }
+            } else {
+                result = new Date(value);
             }
         }
+
+        return result;
     }
 
     function toTime(value) {
@@ -44617,13 +52525,20 @@ extend(Editor, {
         }
     }
 
-    function addDuration(date, value, unit) {
+    function addDuration(date, value, unit, weekStartDay) {
+        if (!date) {
+            return date;
+        }
+
         date = toDate(date);
 
         if (unit === YEARS) {
             return new Date(date.getFullYear() + value, 0, 1);
         } else if (unit === MONTHS) {
             return new Date(date.getFullYear(), date.getMonth() + value, 1);
+        } else if (unit === WEEKS) {
+            var weekStart = startOfWeek(date, weekStartDay);
+            return addDuration(weekStart, value * 7, DAYS);
         } else if (unit === DAYS) {
             return new Date(date.getFullYear(), date.getMonth(), date.getDate() + value);
         } else if (unit === HOURS) {
@@ -44637,20 +52552,38 @@ extend(Editor, {
         return date;
     }
 
-    function floorDate(date, unit) {
-        date = toDate(date);
+    function startOfWeek(date, weekStartDay) {
+        var day = date.getDay(),
+            daysToSubtract = 0;
 
-        return addDuration(date, 0, unit);
+        weekStartDay = weekStartDay || 0;
+        while (day !== weekStartDay) {
+            if (day === 0) {
+                day = 6;
+            } else {
+                day--;
+            }
+
+            daysToSubtract++;
+        }
+
+        return addTicks(date, -daysToSubtract * TIME_PER_DAY);
     }
 
-    function ceilDate(date, unit) {
+    function floorDate(date, unit, weekStartDay) {
         date = toDate(date);
 
-        if (floorDate(date, unit).getTime() === date.getTime()) {
+        return addDuration(date, 0, unit, weekStartDay);
+    }
+
+    function ceilDate(date, unit, weekStartDay) {
+        date = toDate(date);
+
+        if (floorDate(date, unit, weekStartDay).getTime() === date.getTime()) {
             return date;
         }
 
-        return addDuration(date, 1, unit);
+        return addDuration(date, 1, unit, weekStartDay);
     }
 
     function dateDiff(a, b) {
@@ -44658,6 +52591,14 @@ extend(Editor, {
             offsetDiff = a.getTimezoneOffset() - b.getTimezoneOffset();
 
         return diff - (offsetDiff * TIME_PER_MINUTE);
+    }
+
+    function addTicks(date, ticks) {
+        var tzOffsetBefore = date.getTimezoneOffset(),
+            result = new Date(date.getTime() + ticks),
+            tzOffsetDiff = result.getTimezoneOffset() - tzOffsetBefore;
+
+        return new Date(result.getTime() + tzOffsetDiff * TIME_PER_MINUTE);
     }
 
     function duration(a, b, unit) {
@@ -44676,17 +52617,32 @@ extend(Editor, {
         return diff;
     }
 
-    function bindPoint(series, pointIx, valueFields, pointFields) {
+    function valueFieldsByChartType(type) {
+        var result = [VALUE];
+
+        if (inArray(type, [CANDLESTICK, OHLC])){
+            result = ["open", "high", "low", "close"];
+        } else if (inArray(type, XY_CHARTS)) {
+            result = [X, Y];
+            if (type === BUBBLE) {
+                result.push("size");
+            }
+        }
+
+        return result;
+    }
+
+    function bindPoint(series, pointIx, pointFields) {
         var pointData = series.data[pointIx],
             fieldData,
             fields = {},
             srcValueFields,
             srcPointFields,
+            valueFields = valueFieldsByChartType(series.type),
             value,
             result = { value: pointData };
 
-        if (defined(pointData))
-        {
+        if (defined(pointData)) {
             if (isArray(pointData)) {
                 fieldData = pointData.slice(valueFields.length);
                 value = bindFromArray(pointData, valueFields);
@@ -44765,7 +52721,7 @@ extend(Editor, {
 
             for (i = 0; i < length; i++) {
                 fieldName = fields[i];
-                sourceFieldName = fieldName === "value" ? "field" : fieldName + "Field";
+                sourceFieldName = fieldName === VALUE ? "field" : fieldName + "Field";
 
                 sourceFields.push(series[sourceFieldName] || fieldName);
             }
@@ -44778,9 +52734,42 @@ extend(Editor, {
         return array.length === 1 ? array[0] : array;
     }
 
+    function clipValue(value, min, max) {
+        return math.max(math.min(value, max), min);
+    }
+
+    function axisGroupBox(axes) {
+        var box = new Box2D(),
+            i,
+            length = axes.length,
+            currentAxis;
+
+        if (length > 0) {
+            for (i = 0; i < length; i++) {
+                currentAxis = axes[i];
+
+                if (i === 0) {
+                    box = currentAxis.box.clone();
+                } else {
+                    box.wrap(currentAxis.box);
+                }
+            }
+        }
+
+        return box;
+    }
+
     function equalsIgnoreCase(a, b) {
         if (a && b) {
             return a.toLowerCase() === b.toLowerCase();
+        }
+
+        return a === b;
+    }
+
+    function dateEquals(a, b) {
+        if (a && b) {
+            return toTime(a) === toTime(b);
         }
 
         return a === b;
@@ -44798,8 +52787,77 @@ extend(Editor, {
         }
     }
 
-    // Exports ================================================================
+    function appendIfNotNull(array, element) {
+        if (element !== null) {
+            array.push(element);
+        }
+    }
 
+    function lteDateIndex(sortedDates, date) {
+        var low = 0,
+            high = sortedDates.length - 1,
+            i,
+            currentDate;
+
+        while (low <= high) {
+            i = math.floor((low + high) / 2);
+            currentDate = sortedDates[i];
+
+            if (currentDate < date) {
+                low = i + 1;
+                continue;
+            }
+
+            if (currentDate > date) {
+                high = i - 1;
+                continue;
+            }
+
+            return i;
+        }
+
+        if (sortedDates[i] <= date) {
+            return i;
+        } else {
+            return i - 1;
+        }
+    }
+
+    function validNumbers(values) {
+        var valid = true,
+            i,
+            val,
+            length = values.length;
+
+        for (i = 0; i < length; i++) {
+            val = values[i];
+            if (typeof val !== "number" || isNaN(val)) {
+                valid = false;
+                break;
+            }
+        }
+
+        return valid;
+    }
+
+    function axisRanges(axes) {
+        var i,
+            axis,
+            axisName,
+            ranges = {};
+
+        for (i = 0; i < axes.length; i++) {
+            axis = axes[i];
+            axisName = axis.options.name;
+            if (axisName) {
+                ranges[axisName] = axis.range();
+            }
+        }
+
+        return ranges;
+    }
+
+    // Exports ================================================================
     dataviz.ui.plugin(Chart);
 
     deepExtend(dataviz, {
@@ -44811,6 +52869,8 @@ extend(Editor, {
         BarLabel: BarLabel,
         BubbleAnimationDecorator: BubbleAnimationDecorator,
         BubbleChart: BubbleChart,
+        CandlestickChart: CandlestickChart,
+        Candlestick: Candlestick,
         CategoricalPlotArea: CategoricalPlotArea,
         CategoryAxis: CategoryAxis,
         ClusterLayout: ClusterLayout,
@@ -44823,6 +52883,7 @@ extend(Editor, {
         Legend: Legend,
         LineChart: LineChart,
         LinePoint: LinePoint,
+        Pane: Pane,
         PieAnimation: PieAnimation,
         PieAnimationDecorator: PieAnimationDecorator,
         PieChart: PieChart,
@@ -44830,21 +52891,28 @@ extend(Editor, {
         PieSegment: PieSegment,
         ScatterChart: ScatterChart,
         ScatterLineChart: ScatterLineChart,
+        Selection: Selection,
         ShapeElement: ShapeElement,
         StackLayout: StackLayout,
         Tooltip: Tooltip,
+        OHLCChart: OHLCChart,
+        OHLCPoint: OHLCPoint,
         XYPlotArea: XYPlotArea,
 
         addDuration: addDuration,
+        axisGroupBox: axisGroupBox,
+        validNumbers: validNumbers,
+        bindPoint: bindPoint,
         categoriesCount: categoriesCount,
         ceilDate: ceilDate,
         duration: duration,
         floorDate: floorDate,
-        bindPoint: bindPoint,
-        toDate: toDate
+        lteDateIndex: lteDateIndex,
+        toDate: toDate,
+        toTime: toTime
     });
 
-})(jQuery);
+})(window.kendo.jQuery);
 (function ($, undefined) {
 
     // Imports ================================================================
@@ -46040,16 +54108,19 @@ extend(Editor, {
                 options,
                 themeOptions,
                 themeName,
-                themes = dataviz.ui.themes.gauge || {};
+                themes = dataviz.ui.themes || {},
+                theme;
 
             Widget.fn.init.call(gauge, element);
 
             gauge.wrapper = gauge.element;
 
+            gauge._originalOptions = deepExtend({}, userOptions);
             options = deepExtend({}, gauge.options, userOptions);
 
             themeName = options.theme;
-            themeOptions = themeName ? themes[themeName] || themes[themeName.toLowerCase()] : {};
+            theme = themes[themeName] || themes[themeName.toLowerCase()];
+            themeOptions = themeName && theme ? theme.gauge : {};
 
             gauge.options = deepExtend({}, themeOptions, options);
 
@@ -46241,7 +54312,583 @@ extend(Editor, {
         BarIndicatorAnimationDecorator: BarIndicatorAnimationDecorator
     });
 
-})(jQuery);
+})(window.kendo.jQuery);
+(function ($, undefined) {
+    // Imports ================================================================
+    var kendo = window.kendo,
+        Class = kendo.Class,
+        deepExtend = kendo.deepExtend,
+        math = Math,
+        proxy = $.proxy,
+
+        dataviz = kendo.dataviz,
+        Chart = dataviz.ui.Chart,
+        Selection = dataviz.Selection,
+        duration = dataviz.duration,
+        lteDateIndex = dataviz.lteDateIndex,
+        renderTemplate = dataviz.renderTemplate,
+        toDate = dataviz.toDate,
+        toTime = dataviz.toTime;
+
+    // Constants =============================================================
+    var AUTO_CATEGORY_WIDTH = 28,
+        CSS_PREFIX = "k-",
+        DRAG = "drag",
+        DRAG_END = "dragEnd",
+        NAVIGATOR_PANE = "_navigator",
+        NAVIGATOR_AXIS = NAVIGATOR_PANE,
+        ZOOM_ACCELERATION = 3,
+        ZOOM = "zoom",
+        ZOOM_END = "zoomEnd";
+
+    // Stock chart ===========================================================
+    var StockChart = Chart.extend({
+        init: function(element, options) {
+            var chart = this;
+
+            Chart.fn.init.call(chart, element, options);
+        },
+
+        _applyDefaults: function(options, themeOptions) {
+            var chart = this,
+                width = chart.element.width() || dataviz.DEFAULT_WIDTH;
+
+            var stockDefaults = {
+                axisDefaults: {
+                    categoryAxis: {
+                        name: "default",
+                        field: options.dateField,
+                        majorGridLines: {
+                            visible: false
+                        },
+                        labels: {
+                            step: 2
+                        },
+                        majorTicks: {
+                            visible: false
+                        },
+                        maxDateGroups: Math.floor(width / AUTO_CATEGORY_WIDTH)
+                    }
+                }
+            };
+
+            if (themeOptions) {
+                themeOptions = deepExtend({}, themeOptions, stockDefaults);
+            }
+
+            if (!chart._navigator) {
+                Navigator.setup(options, themeOptions);
+            }
+
+            Chart.fn._applyDefaults.call(chart, options, themeOptions);
+        },
+
+        options: {
+            name: "StockChart",
+            dateField: "date",
+            axisDefaults: {
+                categoryAxis: {
+                    type: "date",
+                    baseUnit: "fit",
+                    justified: true
+                },
+                valueAxis: {
+                    narrowRange: true,
+                    labels: {
+                        format: "C"
+                    }
+                }
+            },
+            navigator: {
+                select: {},
+                seriesDefaults: {
+                    markers: {
+                        visible: false
+                    },
+                    tooltip: {
+                        visible: true,
+                        template: "#= kendo.toString(category, 'd') #"
+                    },
+                    line: {
+                        width: 2
+                    }
+                }
+            },
+            tooltip: {
+                visible: true
+            },
+            legend: {
+                visible: false
+            }
+        },
+
+        _redraw: function() {
+            var chart = this,
+                navigator = chart._navigator;
+
+            if (!navigator) {
+                navigator = chart._navigator = new Navigator(chart);
+            }
+
+            navigator.applySelection();
+            Chart.fn._redraw.call(chart);
+            navigator.redraw();
+        }
+    });
+
+    var Navigator = Class.extend({
+        init: function(chart) {
+            var navi = this;
+
+            navi.chart = chart;
+            navi.options = chart.options.navigator;
+
+            chart.bind(DRAG, proxy(navi._drag, navi));
+            chart.bind(DRAG_END, proxy(navi._dragEnd, navi));
+            chart.bind(ZOOM, proxy(navi._zoom, navi));
+            chart.bind(ZOOM_END, proxy(navi._zoomEnd, navi));
+        },
+
+        redraw: function() {
+            var navi = this,
+                chart = navi.chart,
+                axis = navi.mainAxis(),
+                groups = axis.options.categories,
+                select = navi.options.select || {},
+                min = 0,
+                max = groups.length - 1,
+                from = min,
+                to = max;
+
+            if (groups.length > 0) {
+                if (select.from) {
+                    from = lteDateIndex(groups, toDate(select.from));
+                }
+
+                if (select.to) {
+                    to = lteDateIndex(groups, toDate(select.to));
+                }
+
+                chart._selection = new Selection(chart, axis, {
+                    from: from,
+                    to: to,
+                    min: min,
+                    max: max,
+                    select: $.proxy(navi._select, navi),
+                    selectEnd: $.proxy(navi._selectEnd, navi)
+                });
+
+                navi.hint = new NavigatorHint(chart.element, { min: groups[0], max: dataviz.last(groups) });
+            }
+        },
+
+        _drag: function(e) {
+            var navi = this,
+                chart = navi.chart,
+                coords = chart._eventCoordinates(e.originalEvent),
+                navigatorAxis = navi.mainAxis(),
+                inNavigator = navigatorAxis.pane.box.containsPoint(coords),
+                groups = navigatorAxis.options.categories,
+                axis = chart._plotArea.categoryAxis,
+                baseUnit = axis.options.baseUnit,
+                range = e.axisRanges[axis.options.name],
+                selection = chart._selection,
+                selectionDuration = duration(
+                    axis.options.min, axis.options.max, axis.options.baseUnit
+                ),
+                from,
+                to;
+
+            if (!range || inNavigator) {
+                return;
+            }
+
+            from = toDate(math.min(
+                math.max(groups[0], range.min),
+                dataviz.addDuration(
+                    dataviz.last(groups), -selectionDuration, baseUnit
+                )
+            ));
+
+            to = toDate(math.min(
+                dataviz.addDuration(from, selectionDuration, baseUnit),
+                dataviz.last(navigatorAxis.options.categories)
+            ));
+
+            navi.options.select = { from: from, to: to };
+
+            if (navi._realtimeDrag()) {
+                navi.applySelection();
+                navi.redrawSlaves();
+            }
+
+            selection.set(
+                lteDateIndex(
+                    navigatorAxis.options.categories,
+                    from
+                ),
+                lteDateIndex(
+                    navigatorAxis.options.categories,
+                    to
+            ));
+
+            navi.showHint(from, to);
+        },
+
+        _dragEnd: function() {
+            var navi = this;
+
+            navi.applySelection();
+            navi.redrawSlaves();
+            navi.hint.hide();
+        },
+
+        _realtimeDrag: function() {
+            var support = kendo.support,
+                isTouch = support.touch,
+                browser = support.browser,
+                isFirefox = browser.mozilla,
+                isOldIE = browser.msie && browser.version < 9;
+
+            return !isTouch && !isFirefox && !isOldIE;
+        },
+
+        readSelection: function() {
+            var navi = this,
+                axis = navi.mainAxis(),
+                groups = axis.options.categories,
+                chart = navi.chart,
+                selection = chart._selection,
+                src = selection.options,
+                dst = navi.options.select;
+
+            dst.from = groups[src.from];
+            dst.to = groups[src.to];
+        },
+
+        indexToDate: function(index) {
+            var navi = this,
+                axis = navi.mainAxis(),
+                groups = axis.options.categories;
+
+            return groups[index];
+        },
+
+        applySelection: function() {
+            var navi = this,
+                select = navi.options.select || {},
+                chart = navi.chart,
+                slaveAxes = chart.options.categoryAxis,
+                i,
+                axis;
+
+            for (i = 0; i < slaveAxes.length; i++) {
+                axis = slaveAxes[i];
+                if (axis.pane !== NAVIGATOR_PANE) {
+                    axis.min = select.from;
+                    axis.max = select.to;
+                }
+            }
+        },
+
+        redrawSlaves: function() {
+            var navi = this,
+                chart = navi.chart,
+                plotArea = chart._plotArea,
+                slavePanes = plotArea.panes.slice(0, -1);
+
+            chart._plotArea.redraw(slavePanes);
+        },
+
+        _zoom: function(e) {
+            var navi = this,
+                chart = navi.chart,
+                delta = e.delta,
+                navigatorAxis = navi.mainAxis(),
+                axis = chart._plotArea.categoryAxis,
+                select = navi.options.select,
+                selection = chart._selection,
+                selectionLength = selection.options.to - selection.options.from;
+
+            e.originalEvent.preventDefault();
+
+            if (math.abs(delta) > 1) {
+                delta *= ZOOM_ACCELERATION;
+            }
+
+            if (selectionLength > 1) {
+                selection.expandLeft(delta);
+                navi.readSelection();
+            } else {
+                axis.options.min = select.from;
+                select.from = axis.scaleRange(-e.delta).min;
+            }
+
+            if (!kendo.support.touch) {
+                navi.applySelection();
+                navi.redrawSlaves();
+            }
+            navi.showHint(navi.options.select.from, navi.options.select.to);
+
+            selection.set(
+                lteDateIndex(
+                    navigatorAxis.options.categories,
+                    navi.options.select.from
+                ),
+                lteDateIndex(
+                    navigatorAxis.options.categories,
+                    navi.options.select.to
+            ));
+        },
+
+        _zoomEnd: function(e) {
+            this._dragEnd(e);
+        },
+
+        showHint: function(from, to) {
+            var navi = this,
+                chart = navi.chart,
+                plotArea = chart._plotArea;
+
+            navi.hint.show(
+                from,
+                to,
+                plotArea.backgroundBox()
+            );
+        },
+
+        _select: function(e) {
+            var navi = this;
+
+            navi.showHint(
+                navi.indexToDate(e.from),
+                navi.indexToDate(e.to)
+            );
+        },
+
+        _selectEnd: function(e) {
+            var navi = this;
+
+            navi.hint.hide();
+            navi.readSelection();
+            navi.applySelection();
+            navi.redrawSlaves();
+        },
+
+        mainAxis: function() {
+            return this.chart._plotArea.namedCategoryAxes[NAVIGATOR_AXIS];
+        }
+    });
+
+    Navigator.setup = function(options, themeOptions) {
+        options = options || {};
+        themeOptions = themeOptions || {};
+
+        var naviOptions = deepExtend({}, themeOptions.navigator, options.navigator),
+            panes = options.panes = [].concat(options.panes);
+
+        panes.push(deepExtend(
+            {}, naviOptions.pane, { name: NAVIGATOR_PANE })
+        );
+
+        Navigator.attachAxes(options);
+        Navigator.attachSeries(options, naviOptions, themeOptions);
+    };
+
+    Navigator.attachAxes = function(options) {
+        var categoryAxes,
+            valueAxes;
+
+        categoryAxes = options.categoryAxis = [].concat(options.categoryAxis);
+        valueAxes = options.valueAxis = [].concat(options.valueAxis);
+
+        var base = {
+            type: "date",
+            pane: NAVIGATOR_PANE,
+            roundToBaseUnit: false,
+            justified: true,
+            tooltip: { visible: false },
+            labels: { step: 1 }
+        };
+
+        categoryAxes.push(
+            deepExtend({}, base, {
+                name: NAVIGATOR_AXIS,
+                baseUnit: "fit",
+                // TODO: Width based
+                maxDateGroups: 200,
+                baseUnitStep: "auto",
+                labels: { visible: false },
+                majorTicks: { visible: false }
+            }), deepExtend({}, base, {
+                name: NAVIGATOR_AXIS + "_labels",
+                // TODO: Width based
+                maxDateGroups: 20,
+                baseUnitStep: "auto",
+                autoBaseUnitSteps: {
+                    minutes: [],
+                    hours: [1],
+                    days: [1],
+                    weeks: [],
+                    months: [1],
+                    years: [1]
+                },
+                majorTicks: { visible: true }
+            }), deepExtend({}, base, {
+                name: NAVIGATOR_AXIS + "_ticks",
+                // TODO: Width based
+                maxDateGroups: 200,
+                autoBaseUnitSteps: {
+                    minutes: [1],
+                    hours: [1],
+                    days: [1],
+                    weeks: [],
+                    months: [1],
+                    years: [1]
+                },
+                majorTicks: {
+                    visible: true,
+                    width: 0.5
+                },
+                labels: { visible: false, mirror: true }
+            })
+        );
+
+        valueAxes.push({
+            // TODO: Extend navigaor.valueAxis
+            name: NAVIGATOR_AXIS,
+            pane: NAVIGATOR_PANE,
+            majorGridLines: {
+                visible: false
+            },
+            visible: false
+        });
+    };
+
+    Navigator.attachSeries = function(options, naviOptions, themeOptions) {
+        var series = options.series = options.series || [],
+            navigatorSeries = [].concat(naviOptions.series),
+            seriesColors = themeOptions.seriesColors,
+            defaults = naviOptions.seriesDefaults,
+            i;
+
+        for (i = 0; i < navigatorSeries.length; i++) {
+            series.push(
+                deepExtend({
+                    color: seriesColors[i % seriesColors.length],
+                    visibleInLegend: false,
+                    tooltip: {
+                        visible: false
+                    }
+                }, defaults, navigatorSeries[i], {
+                    axis: NAVIGATOR_AXIS,
+                    categoryAxis: NAVIGATOR_AXIS
+                })
+            );
+        }
+    };
+
+    var NavigatorHint = Class.extend({
+        init: function(container, options) {
+            var hint = this;
+
+            hint.options = deepExtend({}, hint.options, options);
+
+            hint.container = container;
+            hint.chartPadding = {
+                top: parseInt(container.css("paddingTop"), 10),
+                left: parseInt(container.css("paddingLeft"), 10)
+            };
+
+            hint.template = hint.template;
+            if (!hint.template) {
+                hint.template = hint.template = renderTemplate(
+                    "<div class='" + CSS_PREFIX + "navigator-hint' " +
+                    "style='display: none; position: absolute; top: 1px; left: 1px;'>" +
+                        "<div class='" + CSS_PREFIX + "tooltip'>&nbsp;</div>" +
+                        "<div class='" + CSS_PREFIX + "scroll' />" +
+                    "</div>"
+                );
+            }
+
+            hint.element = $(hint.template()).appendTo(container);
+        },
+
+        options: {
+            format: "{0:d} - {1:d}",
+            hideDelay: 500
+        },
+
+        show: function(from, to, bbox) {
+            var hint = this,
+                middle = toDate(toTime(from) + toTime(to - from) / 2),
+                options = hint.options,
+                text = kendo.format(hint.options.format, from, to),
+                tooltip = hint.element.find("." + CSS_PREFIX + "tooltip"),
+                scroll = hint.element.find("." + CSS_PREFIX + "scroll"),
+                scrollWidth = bbox.width() * 0.4,
+                minPos = bbox.center().x - scrollWidth,
+                maxPos = bbox.center().x,
+                posRange = maxPos - minPos,
+                range = options.max - options.min,
+                scale = posRange / range,
+                offset = middle - options.min;
+
+            if (hint._hideTimeout) {
+                clearTimeout(hint._hideTimeout);
+            }
+
+            if (!hint._visible) {
+                hint.element
+                    .stop(false, true)
+                    .css("visibility", "hidden")
+                    .show();
+                hint._visible = true;
+            }
+
+
+            tooltip
+                .text(text)
+                .css({
+                    left: bbox.center().x - tooltip.outerWidth() / 2,
+                    top: bbox.y1
+                });
+
+            scroll
+                .css({
+                    width: scrollWidth,
+                    left: minPos + offset * scale,
+                    top: bbox.y1 +
+                         parseInt(tooltip.css("margin-top"), 10) +
+                         parseInt(tooltip.css("border-top-width"), 10) +
+                         tooltip.height() / 2
+                });
+
+            hint.element.css("visibility", "visible");
+        },
+
+        hide: function() {
+            var hint = this;
+
+            if (hint._hideTimeout) {
+                clearTimeout(hint._hideTimeout);
+            }
+
+            hint._hideTimeout = setTimeout(function() {
+                hint._visible = false;
+                hint.element.fadeOut("slow");
+            }, hint.options.hideDelay);
+        }
+    });
+
+    // Exports ================================================================
+
+    dataviz.ui.plugin(StockChart);
+
+    deepExtend(dataviz, {
+    });
+
+})(window.kendo.jQuery);
 (function () {
 
     // Imports ================================================================
@@ -46565,7 +55212,8 @@ extend(Editor, {
             fill: "",
             fillOpacity: 1,
             strokeOpacity: 1,
-            rotation: [0,0,0]
+            rotation: [0,0,0],
+            strokeLineCap: SQUARE
         },
 
         refresh: function(domElement) {
@@ -46595,9 +55243,11 @@ extend(Editor, {
         },
 
         renderLinecap: function() {
-            var dashType = this.options.dashType;
+            var options = this.options,
+                dashType = options.dashType,
+                strokeLineCap = options.strokeLineCap;
 
-            return (dashType && dashType != SOLID) ? BUTT : SQUARE;
+            return (dashType && dashType != SOLID) ? BUTT : strokeLineCap;
         },
 
         renderFill: function() {
@@ -47218,7 +55868,7 @@ extend(Editor, {
         SVGView: SVGView
     });
 
-})(jQuery);
+})(window.kendo.jQuery);
 (function () {
 
     // Imports ================================================================
@@ -48168,7 +56818,7 @@ extend(Editor, {
         blendGradient: blendGradient
     });
 
-})(jQuery);
+})(window.kendo.jQuery);
 (function($, undefined) {
     var kendo = window.kendo,
         location = window.location,
@@ -48320,11 +56970,13 @@ extend(Editor, {
     });
 
     kendo.history = new History();
-})(jQuery);
+})(window.kendo.jQuery);
 (function($, undefined) {
     var kendo = window.kendo,
-        abs = Math.abs;
-
+        Widget = kendo.ui.Widget,
+        proxy = $.proxy,
+        abs = Math.abs,
+        MAX_DOUBLE_TAP_DISTANCE = 8;
 
     var Swipe = kendo.Class.extend({
         init: function(element, callback, options) {
@@ -48334,7 +56986,7 @@ extend(Editor, {
                 maxDuration: 1000
             }, options);
 
-            new kendo.Drag(element, {
+            new kendo.UserEvents(element, {
                 surface: options.surface,
                 allowSelection: true,
 
@@ -48345,32 +56997,185 @@ extend(Editor, {
                 },
 
                 move: function(e) {
-                    var drag = e.sender,
-                    duration = e.event.timeStamp - drag.startTime,
-                    direction = e.x.initialDelta > 0 ? "right" : "left";
+                    var touch = e.touch,
+                    duration = e.event.timeStamp - touch.startTime,
+                    direction = touch.x.initialDelta > 0 ? "right" : "left";
 
                     if (
-                        abs(e.x.initialDelta) >= options.minXDelta &&
-                        abs(e.y.initialDelta) < options.maxYDelta &&
+                        abs(touch.x.initialDelta) >= options.minXDelta &&
+                        abs(touch.y.initialDelta) < options.maxYDelta &&
                     duration < options.maxDuration)
                     {
                         callback({
                             direction: direction,
-                            drag: drag,
-                            target: $(drag.currentTarget)
+                            touch: touch,
+                            target: touch.target
                         });
 
-                        drag.cancel();
+                        touch.cancel();
                     }
                 }
             });
         }
     });
 
-    $.fn.kendoMobileSwipe = function(callback, options) {
-        new Swipe(this, callback, options);
+    var Touch = Widget.extend({
+        init: function(element, options) {
+            var that = this;
+
+            Widget.fn.init.call(that, element, options);
+            options = that.options;
+
+            element = that.element;
+
+            function eventProxy(name) {
+                return function(e) {
+                    that._triggerTouch(name, e);
+                };
+            }
+
+            function gestureEventProxy(name) {
+                return function(e) {
+                    that.trigger(name, { touches: e.touches, distance: e.distance, center: e.center });
+                };
+            }
+
+            that.events = new kendo.UserEvents(element, {
+                surface: options.surface,
+                multiTouch: options.multiTouch,
+                allowSelection: true,
+                press: proxy(that, "_touchstart"),
+                tap: proxy(that, "_tap"),
+                gesturestart: gestureEventProxy("gesturestart"),
+                gesturechange: gestureEventProxy("gesturechange"),
+                gestureend: gestureEventProxy("gestureend")
+            });
+
+            if (options.enableSwipe) {
+                that.events.bind("start", proxy(that, "_swipestart"));
+                that.events.bind("move", proxy(that, "_swipemove"));
+            } else {
+                that.events.bind("start", proxy(that, "_dragstart"));
+                that.events.bind("move", eventProxy("drag"));
+                that.events.bind("end", eventProxy("dragend"));
+            }
+
+            kendo.notify(that);
+        },
+
+        events: [
+            "touchstart",
+            "dragstart",
+            "drag",
+            "dragend",
+            "tap",
+            "doubletap",
+            "hold",
+            "swipe",
+            "gesturestart",
+            "gesturechange",
+            "gestureend"
+        ],
+
+        options: {
+            name: "Touch",
+            surface: null,
+            global: false,
+            multiTouch: false,
+            enableSwipe: false,
+            minXDelta: 30,
+            maxYDelta: 20,
+            maxDuration: 1000,
+            minHold: 800,
+            doubleTapTimeout: 800
+        },
+
+        _cancelHold: function() {
+            clearTimeout(this.holdTimeout);
+        },
+
+        _triggerTouch: function(type, e) {
+            this.trigger(type, { touch: e.touch });
+        },
+
+        _touchstart: function(e) {
+            var that = this;
+
+            that._triggerTouch("touchstart", e);
+
+            that._cancelHold();
+            that.holdTimeout = setTimeout(function() {
+                that._triggerTouch("hold", e);
+            }, that.options.minHold);
+        },
+
+        _tap: function(e) {
+            var that = this,
+                lastTap = that.lastTap,
+                touch = e.touch;
+
+            that._cancelHold();
+
+
+            if (lastTap &&
+                (touch.endTime - lastTap.endTime < that.options.doubleTapTimeout) &&
+                kendo.touchDelta(touch, lastTap).distance < MAX_DOUBLE_TAP_DISTANCE
+                ) {
+
+               that._triggerTouch("doubletap", e);
+               that.lastTap = null;
+            } else {
+                that._triggerTouch("tap", e);
+                that.lastTap = touch;
+            }
+        },
+
+        _dragstart: function(e) {
+            this._cancelHold();
+            this._triggerTouch("dragstart", e);
+        },
+
+        _swipestart: function(e) {
+            this._cancelHold();
+            if (abs(e.x.velocity) * 2 >= abs(e.y.velocity)) {
+                e.sender.capture();
+            }
+        },
+
+        _swipemove: function(e) {
+            var that = this,
+                options = that.options,
+                touch = e.touch,
+                duration = e.event.timeStamp - touch.startTime,
+                direction = touch.x.initialDelta > 0 ? "right" : "left";
+
+            that._cancelHold();
+
+            if (
+                abs(touch.x.initialDelta) >= options.minXDelta &&
+                abs(touch.y.initialDelta) < options.maxYDelta &&
+                duration < options.maxDuration
+                )
+            {
+                that.trigger("swipe", {
+                    direction: direction,
+                    touch: e.touch
+                });
+
+                touch.cancel();
+            }
+        }
+    });
+
+
+    window.jQuery.fn.kendoMobileSwipe = function(callback, options) {
+        this.each(function() {
+            new Swipe(this, callback, options);
+        });
     };
-})(jQuery);
+
+    kendo.ui.plugin(Touch);
+})(window.kendo.jQuery);
 (function($, undefined) {
     var kendo = window.kendo,
         mobile = kendo.mobile,
@@ -48492,6 +57297,10 @@ extend(Editor, {
             popup.open();
         },
 
+        target: function() {
+            return this.popup.options.anchor;
+        },
+
         hide: function() {
             this.popup.close();
         },
@@ -48525,19 +57334,20 @@ extend(Editor, {
             var that = this,
                 popupOptions;
 
+            that.initialOpen = false;
+
             Widget.fn.init.call(that, element, options);
 
             options = that.options;
 
             popupOptions = $.extend({
-                "show": function() { that.trigger(OPEN); },
+                "show": function() { that.trigger(OPEN, { target: that.popup.target() }); },
                 "hide": function() { that.trigger(CLOSE); }
             }, this.options.popup);
 
             that.popup = new Popup(that.element, popupOptions);
 
             that.pane = new ui.Pane(that.element, this.options.pane);
-            that.pane.navigate("");
 
             kendo.notify(that, ui);
         },
@@ -48553,8 +57363,16 @@ extend(Editor, {
             CLOSE
         ],
 
+        open: function(target) {
+            this.openFor(target);
+        },
+
         openFor: function(target) {
             this.popup.show(target);
+            if (!this.initialOpen) {
+                this.pane.navigate("");
+                this.initialOpen = true;
+            }
         },
 
         close: function() {
@@ -48572,7 +57390,7 @@ extend(Editor, {
 
     ui.plugin(Popup);
     ui.plugin(PopOver);
-})(jQuery);
+})(window.kendo.jQuery);
 (function($, undefined) {
     var kendo = window.kendo,
         ui = kendo.mobile.ui,
@@ -48644,15 +57462,13 @@ extend(Editor, {
     });
 
     ui.plugin(Loader);
-})(jQuery);
-
+})(window.kendo.jQuery);
 (function($, undefined) {
     var kendo = window.kendo,
         ui = kendo.mobile.ui,
         Popup = kendo.ui.Popup,
         SHIM = '<div class="km-shim"/>',
-        Widget = ui.Widget,
-        MOUSEUP = kendo.support.mouseup + ".kendoMobileShim";
+        Widget = ui.Widget;
 
     var Shim = Widget.extend({
         init: function(element, options) {
@@ -48661,7 +57477,7 @@ extend(Editor, {
                 align = options.align || (ios ?  "bottom center" : "center center"),
                 position = options.position || (ios ? "bottom center" : "center center"),
                 effect = options.effect || (ios ? "slideIn:up" : "fade:in"),
-                shim = $(SHIM).hide();
+                shim = $(SHIM).handler(that).hide();
 
             Widget.fn.init.call(that, element, options);
 
@@ -48669,7 +57485,7 @@ extend(Editor, {
             that.element = element;
 
             if (!that.options.modal) {
-                that.shim.on(MOUSEUP, $.proxy(that.hide, that));
+                that.shim.on("up", "hide");
             }
 
             kendo.mobile.application.element.append(shim);
@@ -48718,13 +57534,13 @@ extend(Editor, {
 
         destroy: function() {
             Widget.fn.destroy.call(this);
-            this.shim.off(MOUSEUP);
+            this.shim.kendoDestroy();
             this.popup.destroy();
         }
     });
 
     ui.plugin(Shim);
-})(jQuery);
+})(window.kendo.jQuery);
 (function($, undefined) {
     var kendo = window.kendo,
         mobile = kendo.mobile,
@@ -48770,6 +57586,7 @@ extend(Editor, {
             title: "",
             defaultTransition: "",
             stretch: false,
+            zoom: false,
             model: null
         },
 
@@ -48795,10 +57612,6 @@ extend(Editor, {
             if (that.layout) {
                 that.layout.attach(that);
             }
-
-            that._eachWidget(function(widget) {
-                widget.viewShow(that);
-            });
 
             that.trigger(SHOW, {view: that});
         },
@@ -48878,7 +57691,7 @@ extend(Editor, {
             if (that.options.stretch) {
                 that.content.addClass("km-stretched-view");
             } else {
-                that.content.kendoMobileScroller();
+                that.content.kendoMobileScroller({zoom: that.options.zoom});
 
                 that.scroller = that.content.data("kendoMobileScroller");
                 that.scrollerContent = that.scroller.scrollElement;
@@ -48933,16 +57746,6 @@ extend(Editor, {
             if (that.layout) {
                 that.layout.setup(that);
             }
-        },
-
-        _eachWidget: function(callback) {
-            var widget;
-            this.element.find("[data-" + kendo.ns + "role]").each(function() {
-                widget = kendo.widgetInstance($(this), ui);
-                if (widget) {
-                    callback(widget);
-                }
-            });
         }
     });
 
@@ -49130,7 +57933,7 @@ extend(Editor, {
             that.rootView = views.first();
 
             if (!that.rootView[0]) {
-                throw new Error("No root view found. Make sure that the kendo mobile application element directly contains one or more elements with data-role='view' attribute set.");
+                throw new Error('Your kendo mobile application element does not contain any direct child elements with data-role="view" attribute set. Make sure that you instantiate the mobile application using the correct container.');
             }
             that._view = null;
 
@@ -49155,13 +57958,14 @@ extend(Editor, {
             var that = this,
                 container = that.container,
                 params = urlParams(url),
-                firstChar = url.charAt(0),
-                local = firstChar === "#",
-                remote = firstChar === "/",
+                //FOUNDOPS changes (hopefully temporary: http://www.kendoui.com/forums/mobile/general-discussions/view-duplication-when-using-url-parameters.aspx#2426148)
+                //local = url.charAt(0) === "#",
+                //remote = !local && !url.match(/^([\w\-\?=]+)$/),
+                local = false,
+                remote = false,
                 view,
-                element;
-
-            url = url.split("?")[0];
+                element,
+                urlPath = url.split("?")[0];
 
             if (url === that.url) {
                 return;
@@ -49173,10 +57977,11 @@ extend(Editor, {
             if (!url) {
                 element = that.rootView;
             } else {
-                element = container.children("[" + attr("url") + "='" + url + "']");
+                //FOUNDOPS changes (hopefully temporary: http://www.kendoui.com/forums/mobile/general-discussions/view-duplication-when-using-url-parameters.aspx#2426148)
+                element = container.children("[" + attr("url") + "='" + urlPath + "']");
 
                 if (!element[0] && !remote) {
-                    element = container.children(local ? url : "#" + url);
+                    element = container.children(local ? urlPath : "#" + urlPath);
                 }
             }
 
@@ -49304,7 +58109,7 @@ extend(Editor, {
 
     ui.plugin(View);
     ui.plugin(Layout);
-})(jQuery);
+})(window.kendo.jQuery);
 (function($, undefined) {
     var kendo = window.kendo,
         ui = kendo.mobile.ui,
@@ -49322,8 +58127,8 @@ extend(Editor, {
             element = that.element;
             options = that.options;
 
-            width = parseFloat(element.css("width"));
-            height = parseFloat(element.css("height"));
+            width = element[0].style.width || element.css("width");
+            height = element[0].style.height || element.css("height");
 
             element.addClass("km-modalview").wrap(WRAP);
 
@@ -49331,6 +58136,7 @@ extend(Editor, {
                 width: options.width || width || 300,
                 height: options.height || height || 300
             });
+
             element.css({ width: "", height: "" });
 
             that.shim = new Shim(that.wrapper, {
@@ -49372,17 +58178,14 @@ extend(Editor, {
         },
 
         open: function(target) {
-            var that = this;
-            that.trigger(OPEN);
-            that.target = $(target);
-            that.shim.show();
+            this.target = $(target);
+            this.shim.show();
         },
 
+        // Interface implementation, called from the pane click handlers
         openFor: function(target) {
-            var that = this;
-            that.target = target;
-            that.trigger(OPEN, { target: that.target });
-            that.shim.show();
+            this.open(target);
+            this.trigger(OPEN, { target: target });
         },
 
         close: function() {
@@ -49391,7 +58194,7 @@ extend(Editor, {
     });
 
     ui.plugin(ModalView);
-})(jQuery);
+})(window.kendo.jQuery);
 (function($, undefined) {
     var kendo = window.kendo,
         ui = kendo.mobile.ui,
@@ -49462,10 +58265,9 @@ extend(Editor, {
     });
 
     ui.plugin(SplitView);
-})(jQuery);
+})(window.kendo.jQuery);
 (function($, undefined) {
     var kendo = window.kendo,
-        support = kendo.support,
         mobile = kendo.mobile,
         roleSelector = kendo.roleSelector,
         ui = mobile.ui,
@@ -49483,20 +58285,19 @@ extend(Editor, {
         WIDGET_RELS = /popover|actionsheet|modalview/,
         BACK = "#:back",
 
-        proxy = $.proxy,
-
         attrValue = kendo.attrValue,
         // navigation element roles
         buttonRoles = "button backbutton detailbutton listview-link",
-        linkRoles = "tab",
-        NS = ".kendoMobilePane",
-        MOUSEDOWN = support.mousedown + NS,
-        MOUSEUP = support.mouseup + NS,
-        CLICK = "click" + NS,
-        TOUCHSTART = "touchstart" + NS;
+        linkRoles = "tab";
 
     function appLinkClick(e) {
         if(attrValue($(e.currentTarget), "rel") != EXTERNAL) {
+            e.preventDefault();
+        }
+    }
+
+    function captureGhostClick(e) {
+        if (attrValue($(e.currentTarget), "rel") !== EXTERNAL) {
             e.preventDefault();
         }
     }
@@ -49545,8 +58346,6 @@ extend(Editor, {
         destroy: function() {
             Widget.fn.destroy.call(this);
 
-            this.element.off(NS);
-
             kendo.destroy(this.element);
         },
 
@@ -49578,21 +58377,12 @@ extend(Editor, {
         },
 
         _setupAppLinks: function() {
-            var that = this,
-                mouseup = proxy(that, "_mouseup");
-
-            that.element
-                .on(MOUSEDOWN, roleSelector(linkRoles), mouseup)
-                .on(MOUSEUP, roleSelector(buttonRoles), mouseup)
-                .on(CLICK, roleSelector(linkRoles + " " + buttonRoles), appLinkClick)
-                .on(TOUCHSTART, roleSelector(buttonRoles), proxy(that, "_captureGhostClick"))
-                .on(TOUCHSTART, ".km-popup .k-item", false); // Prevent ghost clicks in DropDownList
-        },
-
-        _captureGhostClick: function(e) {
-            if (attrValue($(e.currentTarget), "rel") !== EXTERNAL) {
-                e.preventDefault();
-            }
+            this.element.handler(this)
+                .on("down", roleSelector(linkRoles), "_mouseup")
+                .on("up", roleSelector(buttonRoles), "_mouseup")
+                .on("click", roleSelector(linkRoles + " " + buttonRoles), appLinkClick)
+                .on("touchstart", roleSelector(buttonRoles), captureGhostClick)
+                .on("touchstart", ".km-popup .k-item", kendo.preventDefault); // Prevent ghost clicks in DropDownList
         },
 
         _mouseup: function(e) {
@@ -49633,7 +58423,7 @@ extend(Editor, {
     });
 
     ui.plugin(Pane);
-})(jQuery);
+})(window.kendo.jQuery);
 (function($, undefined) {
     var kendo = window.kendo,
         mobile = kendo.mobile,
@@ -49643,24 +58433,24 @@ extend(Editor, {
 
         DEFAULT_OS = "ios",
         OS = support.mobileOS,
-        OS_NAME_TEMPLATE = kendo.template("km-#=data.name##if(data.device){# km-on-#=data.device##}##if(data.version){# #=data.name##=data.version.major# km-#=data.version.major# km-m#=data.version.minor# #=data.version.appMode?'km-app':'km-web'##}#", {usedWithBlock: false}),
+        OS_NAME_TEMPLATE = kendo.template("km-#=data.name##if(data.device){# km-on-#=data.device##}##if(data.version){# km-#=data.name##=data.version.major# km-#=data.version.major# km-m#=data.version.minor# #=data.version.appMode?'km-app':'km-web'##}#", {usedWithBlock: false}),
         BERRYPHONEGAP = OS.device == "blackberry" && OS.flatVersion >= 600 && OS.flatVersion < 1000 && OS.appMode,
         VERTICAL = "km-vertical",
         HORIZONTAL = "km-horizontal",
 
         MOBILE_PLATFORMS = {
-            ios: { ios: true, appMode: false, browser: "default", device: "iphone", flatVersion: "430", majorVersion: "4", minorVersion: "3.0", name: "ios", tablet: false },
+            ios: { ios: true, appMode: false, browser: "default", device: "iphone", flatVersion: "500", majorVersion: "5", minorVersion: "0.0", name: "ios", tablet: false },
             android: { android: true, appMode: false, browser: "default", device: "android", flatVersion: "233", majorVersion: "2", minorVersion: "3.3", name: "android", tablet: false },
             blackberry: { blackberry: true, appMode: false, browser: "default", device: "blackberry", flatVersion: "710", majorVersion: "7", minorVersion: "1.0", name: "blackberry", tablet: false },
             meego: { meego: true, appMode: false, browser: "default", device: "meego", flatVersion: "850", majorVersion: "8", minorVersion: "5.0", name: "meego", tablet: false }
         },
 
-        viewportTemplate = kendo.template('<meta content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no, width=device-width#=data.height#" name="viewport" />', {usedWithBlock: false}),
+        viewportTemplate = kendo.template('<meta content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no#=data.height#" name="viewport" />', {usedWithBlock: false}),
         systemMeta = '<meta name="apple-mobile-web-app-capable" content="yes" /> ' +
                      '<meta name="apple-mobile-web-app-status-bar-style" content="black" /> ',
         viewportMeta = viewportTemplate({ height: "" }),
 
-        iconMeta = kendo.template('<link rel="apple-touch-icon' + (support.mobileOS.android ? '-precomposed' : '') + '" # if(data.size) { # sizes="#=data.size#" #}# href="#=data.icon#" />', {usedWithBlock: false}),
+        iconMeta = kendo.template('<link rel="apple-touch-icon' + (OS.android ? '-precomposed' : '') + '" # if(data.size) { # sizes="#=data.size#" #}# href="#=data.icon#" />', {usedWithBlock: false}),
 
         DEVICE = OS.name,
         HIDEBAR = (OS.device == "iphone" || OS.device == "ipod") && OS.browser == "mobilesafari",
@@ -49695,21 +58485,33 @@ extend(Editor, {
 
             mobile.application = that; // global reference to current application
 
-            that.options = $.extend({ hideAddressBar: true, transition: "" }, options);
+            that.options = $.extend({
+                hideAddressBar: true,
+                transition: "",
+                updateDocumentTitle: true
+            }, options);
             kendo.Observable.fn.init.call(that, that.options);
-            that.element = $(element ? element : document.body);
 
             $(function(){
+                that.element = $(element ? element : document.body);
                 that._setupPlatform();
                 that._attachHideBarHandlers();
                 that.pane = new Pane(that.element, that.options);
                 that._setupElementClass();
                 that._attachMeta();
-                that._setupDocumentTitle();
+
+                if (that.options.updateDocumentTitle) {
+                    that._setupDocumentTitle();
+                }
+
                 that._startHistory();
 
-                if (support.touch) {
-                    $(document.documentElement).on("touchmove", false);
+                if (support.kineticScrollNeeded) {
+                    $(document.documentElement).on("touchmove", function(e){
+                        if (!$(e.target).is("textarea")) {
+                            kendo.preventDefault(e);
+                        }
+                    });
                 }
             });
         },
@@ -49747,7 +58549,7 @@ extend(Editor, {
                     os = platform;
                 }
 
-                support.mobileOS = OS = os;
+                OS = os;
             }
 
             if (os) {
@@ -49848,7 +58650,7 @@ extend(Editor, {
             if (HIDEBAR) {
                 WINDOW.on("load", hideBar);
                 kendo.onResize(hideBar);
-                that.element[0].addEventListener(support.mousedown, hideBar, true);
+                that.element[0].addEventListener("touchstart", hideBar, true);
             }
         },
 
@@ -49884,21 +58686,18 @@ extend(Editor, {
     });
 
     kendo.mobile.Application = Application;
-})(jQuery);
+})(window.kendo.jQuery);
 (function($, undefined) {
     var kendo = window.kendo,
         ui = kendo.mobile.ui,
         Shim = ui.Shim,
         Popup = ui.Popup,
         Widget = ui.Widget,
-        ns = ".kendoMobileActionSheet",
         OPEN = "open",
         BUTTONS = "li>a",
         CONTEXT_DATA = "actionsheetContext",
         WRAP = '<div class="km-actionsheet-wrapper" />',
-        cancelTemplate = kendo.template('<li class="km-actionsheet-cancel"><a href="\\#">#:cancel#</a></li>'),
-        MOUSEUP = kendo.support.mouseup + ns,
-        CLICK = "click" + ns;
+        cancelTemplate = kendo.template('<li class="km-actionsheet-cancel"><a href="\\#">#:cancel#</a></li>');
 
     var ActionSheet = Widget.extend({
         init: function(element, options) {
@@ -49914,8 +58713,8 @@ extend(Editor, {
                 .addClass("km-actionsheet")
                 .append(cancelTemplate({cancel: that.options.cancel}))
                 .wrap(WRAP)
-                .on(MOUSEUP, BUTTONS, $.proxy(that._click, that))
-                .on(CLICK, BUTTONS, kendo.preventDefault);
+                .on("up", BUTTONS, "_click")
+                .on("click", BUTTONS, kendo.preventDefault);
 
             that.wrapper = element.parent();
             that.shim = new ShimClass(that.wrapper, $.extend({modal: !(os.android || os.meego)}, that.options.popup) );
@@ -49947,9 +58746,8 @@ extend(Editor, {
             var that = this;
             that.target = $(target);
             that.context = context;
-            that.shim.show();
+            that.shim.show(target);
         },
-
 
         close: function() {
             this.context = this.target = null;
@@ -49957,16 +58755,15 @@ extend(Editor, {
         },
 
         openFor: function(target) {
-            var that = this;
-            that.target = target;
-            that.context = target.data(CONTEXT_DATA);
-            that.trigger(OPEN, { target: that.target, context: that.context });
-            that.shim.show(target);
+            var that = this,
+                context = target.data(CONTEXT_DATA);
+
+            that.open(target, context);
+            that.trigger(OPEN, { target: target, context: context });
         },
 
         destroy: function() {
             Widget.fn.destroy.call(this);
-            this.element.off(ns);
             this.shim.destroy();
         },
 
@@ -49990,7 +58787,7 @@ extend(Editor, {
     });
 
     ui.plugin(ActionSheet);
-})(jQuery);
+})(window.kendo.jQuery);
 (function($, undefined) {
     var kendo = window.kendo,
         mobile = kendo.mobile,
@@ -49999,18 +58796,15 @@ extend(Editor, {
         support = kendo.support,
         os = support.mobileOS,
         ANDROID3UP = os.android && os.flatVersion >= 300,
-        ns = ".kendoMobileButton",
-        MOUSECANCEL = support.mousecancel + ns,
-        MOUSEMOVE = support.mousemove + ns,
-        MOUSEUP = support.mouseup + ns,
-        MOUSEDOWN = support.mousedown,
-        MOUSEDOWN_NS = MOUSEDOWN + ns,
-        CLICK = "click",
-        removeActiveID = 0,
-        proxy = $.proxy;
+        CLICK = "click";
 
-    function hideDeviceKeyboard() {
-        document.activeElement.blur();
+    function highlightButton(widget, event, highlight) {
+        $(event.target).closest(".km-button,.km-detail").toggleClass("km-state-active", highlight);
+
+        if (ANDROID3UP && widget.deactivateTimeoutID) {
+            clearTimeout(widget.deactivateTimeoutID);
+            widget.deactivateTimeoutID = 0;
+        }
     }
 
     var Button = Widget.extend({
@@ -50018,24 +58812,17 @@ extend(Editor, {
             var that = this;
 
             Widget.fn.init.call(that, element, options);
-            element = that.element;
 
             that._wrap();
             that._style();
 
-            that._releaseProxy = proxy(that._release, that);
-            that._removeProxy = proxy(that._removeActive, that);
-
-            element.on(MOUSEUP, that._releaseProxy);
-            element.on(MOUSEDOWN_NS + " " + MOUSECANCEL + " " + MOUSEUP, that._removeProxy);
-            element.on(MOUSEDOWN_NS, hideDeviceKeyboard);
+            that.element
+                .on("up", "_release")
+                .on("down", "_activate")
+                .on("up cancel", "_deactivate");
 
             if (ANDROID3UP) {
-                element.on(MOUSEMOVE, function (e) {
-                    if (!removeActiveID) {
-                        removeActiveID = setTimeout(that._removeProxy, 500, e);
-                    }
-                });
+                that.element.on("move", "_timeoutDeactivate");
             }
         },
 
@@ -50049,18 +58836,19 @@ extend(Editor, {
             style: ""
         },
 
-        destroy: function() {
-            Widget.fn.destroy.call(this);
-            this.element.off(ns);
+        _timeoutDeactivate: function(e) {
+            if (!this.deactivateTimeoutID) {
+                this.deactivateTimeoutID = setTimeout(highlightButton, 500, this, e, false);
+            }
         },
 
-        _removeActive: function (e) {
-            $(e.target).closest(".km-button,.km-detail").toggleClass("km-state-active", e.type == MOUSEDOWN);
+        _activate: function(e) {
+            highlightButton(this, e, true);
+            document.activeElement.blur(); // Hide device keyboard
+        },
 
-            if (ANDROID3UP) {
-                clearTimeout(removeActiveID);
-                removeActiveID = 0;
-            }
+        _deactivate: function(e) {
+            highlightButton(this, e, false);
         },
 
         _release: function(e) {
@@ -50069,22 +58857,19 @@ extend(Editor, {
                 return;
             }
 
-            // that.element[0].blur();
-
-
             if (that.trigger(CLICK, {target: $(e.target), button: that.element})) {
                 e.preventDefault();
             }
         },
 
-        _style: function () {
+        _style: function() {
             var style = this.options.style,
                 element = this.element,
                 styles;
 
             if (style) {
                 styles = style.split(" ");
-                $.each(styles, function () {
+                $.each(styles, function() {
                     element.addClass("km-" + this);
                 });
             }
@@ -50137,13 +58922,13 @@ extend(Editor, {
             Button.fn.init.call(this, element, options);
         },
 
-        _style: function () {
+        _style: function() {
             var style = this.options.style + " detail",
                 element = this.element;
 
             if (style) {
                 var styles = style.split(" ");
-                $.each(styles, function () {
+                $.each(styles, function() {
                     element.addClass("km-" + this);
                 });
             }
@@ -50170,16 +58955,14 @@ extend(Editor, {
     ui.plugin(Button);
     ui.plugin(BackButton);
     ui.plugin(DetailButton);
-})(jQuery);
+})(window.kendo.jQuery);
 (function($, undefined) {
     var kendo = window.kendo,
         ui = kendo.mobile.ui,
         Widget = ui.Widget,
         ACTIVE = "km-state-active",
         SELECT = "select",
-        SELECTOR = "li:not(." + ACTIVE +")",
-        ns = ".kendoMobileButtonGroup",
-        MOUSEDOWN = kendo.support.mousedown + ns;
+        SELECTOR = "li:not(." + ACTIVE +")";
 
     var ButtonGroup = Widget.extend({
         init: function(element, options) {
@@ -50187,9 +58970,9 @@ extend(Editor, {
 
             Widget.fn.init.call(that, element, options);
 
-            that.element.addClass("km-buttongroup")
-                .on(MOUSEDOWN, SELECTOR, $.proxy(that._mousedown, that))
-                .find("li").each(that._button);
+            that.element.addClass("km-buttongroup").find("li").each(that._button);
+
+            that.element.on("down", SELECTOR, "_mousedown");
 
             that.select(that.options.index);
         },
@@ -50205,11 +58988,6 @@ extend(Editor, {
 
         current: function() {
             return this.element.find("." + ACTIVE);
-        },
-
-        destroy: function() {
-            Widget.fn.destroy.call(this);
-            this.element.off(ns);
         },
 
         select: function (li) {
@@ -50263,7 +59041,7 @@ extend(Editor, {
     });
 
     ui.plugin(ButtonGroup);
-})(jQuery);
+})(window.kendo.jQuery);
 (function($, undefined) {
     var kendo = window.kendo,
         Node = window.Node,
@@ -50272,8 +59050,8 @@ extend(Editor, {
         support = kendo.support,
         DataSource = kendo.data.DataSource,
         Widget = ui.Widget,
-        ITEM_SELECTOR = ".km-list > li",
-        HIGHLIGHT_SELECTOR = ".km-list > li > .km-listview-link, .km-list > li > .km-listview-label",
+        ITEM_SELECTOR = ".km-list > li, > li:not(.km-group-container)",
+        HIGHLIGHT_SELECTOR = ".km-listview-link, .km-listview-label",
         proxy = $.proxy,
         attrValue = kendo.attrValue,
         GROUP_CLASS = "km-group-title",
@@ -50283,22 +59061,34 @@ extend(Editor, {
         WRAPPER = '<div class="km-listview-wrapper" />',
 
         NS = ".kendoMobileListView",
-        MOUSEUP = support.mouseup,
-        MOUSEUP_NS = MOUSEUP + NS,
-        MOUSEDOWN = support.mousedown,
-        MOUSEDOWN_NS = MOUSEDOWN + NS,
-        MOUSEMOVE = support.mousemove + NS,
-        MOUSECANCEL = support.mousecancel + NS,
         LAST_PAGE_REACHED = "lastPageReached",
         CLICK = "click",
         CLICK_NS = CLICK + NS,
 
         CHANGE = "change",
-        REQUEST_START = "requestStart",
+        PROGRESS = "progress",
         FUNCTION = "function",
 
         whitespaceRegExp = /^\s+$/,
         buttonRegExp = /button/;
+
+    function toggleiOSLabel(e) {
+        var target = $(e.target),
+            input = target.is("input") ? target : target.find("input"),
+            value = !input[0].checked;
+
+        if (support.touch && e.type === CLICK) {
+            e.preventDefault();
+            return;
+        }
+
+        if (input.is(":radio")) {
+            value = true;
+        }
+
+        input.attr("checked", value) // check the input
+             .trigger("change"); // trigger the change event for any listeners (MVVM)
+    }
 
     function whitespace() {
         return this.nodeType === Node.TEXT_NODE && this.nodeValue.match(whitespaceRegExp);
@@ -50349,27 +59139,20 @@ extend(Editor, {
 
             Widget.fn.init.call(that, element, options);
 
+            element = that.element;
+
             options = that.options;
 
-            that.element
-                .on([MOUSEDOWN_NS, MOUSEUP_NS, MOUSEMOVE, MOUSECANCEL].join(" "), HIGHLIGHT_SELECTOR, that._toggleItemActiveClass)
-                .on(MOUSEUP_NS, ".km-listview-label", function (e) {
-                    // on touch devices clicking a label will not check the inner input
-                    if (kendo.support.touch) {
-                        var input = $(e.target).find("input"),
-                            value = !input[0].checked;
+            element
+                .on("down", HIGHLIGHT_SELECTOR, "_highlight")
+                .on("move up cancel", HIGHLIGHT_SELECTOR, "_dim")
+                .on("touchend click", ITEM_SELECTOR, "_click");
 
-                        if (input.is(":radio")) {
-                            value = true;
-                        }
+            if (support.touch) {
+                element.on("touchend click", ".km-listview-label", toggleiOSLabel);
+            }
 
-                        input.attr("checked", value) // check the input
-                             .trigger("change"); // trigger the change event for any listeners (MVVM)
-                    }
-                })
-                .on(MOUSEUP_NS, ITEM_SELECTOR, proxy(that._click, that));
-
-            that.element.wrap(WRAPPER);
+            element.wrap(WRAPPER);
             that.wrapper = that.element.parent();
 
             that._footer();
@@ -50435,8 +59218,6 @@ extend(Editor, {
             that.stopEndlessScrolling();
             that.stopLoadMore();
 
-            that.element.off(NS);
-
             kendo.destroy(that.element);
         },
 
@@ -50491,7 +59272,9 @@ extend(Editor, {
                 appendMethod = "prepend";
             }
 
+            contents = $(contents);
             element[appendMethod](contents);
+            mobile.init(contents);
 
             if (loading) {
                 that.loading = false;
@@ -50502,8 +59285,6 @@ extend(Editor, {
             if (options.pullToRefresh) {
                 that._scroller().pullHandled();
             }
-
-            mobile.init(element.children());
 
             that._hideLoading();
 
@@ -50575,7 +59356,15 @@ extend(Editor, {
            }
         },
 
-        _toggleItemActiveClass: function(e) {
+        _dim: function(e) {
+            this._toggle(e, false);
+        },
+
+        _highlight: function(e) {
+            this._toggle(e, true);
+        },
+
+        _toggle: function(e, highlight) {
             if (e.which > 1) {
                 return;
             }
@@ -50587,7 +59376,7 @@ extend(Editor, {
                 prevented = e.isDefaultPrevented();
 
             if (plainItem) {
-                item.toggleClass(ACTIVE_CLASS, e.type === MOUSEDOWN && !prevented);
+                item.toggleClass(ACTIVE_CLASS, highlight && !prevented);
             }
         },
 
@@ -50595,7 +59384,7 @@ extend(Editor, {
             var that = this;
 
             that.dataSource.unbind(CHANGE, that._refreshHandler)
-                           .unbind(REQUEST_START, that._requestStartHandler);
+                           .unbind(PROGRESS, that._progressHandler);
         },
 
         _dataSource: function() {
@@ -50606,14 +59395,14 @@ extend(Editor, {
                 that._unbindDataSource();
             } else {
                 that._refreshHandler = proxy(that.refresh, that);
-                that._requestStartHandler = proxy(that._showLoading, that);
+                that._progressHandler = proxy(that._showLoading, that);
             }
 
             that.dataSource = DataSource.create(options.dataSource)
                                         .bind(CHANGE, that._refreshHandler);
 
             if (!options.pullToRefresh && !options.loadMore && !options.endlessScroll) {
-                that.dataSource.bind(REQUEST_START, that._requestStartHandler);
+                that.dataSource.bind(PROGRESS, that._progressHandler);
             }
         },
 
@@ -50687,7 +59476,6 @@ extend(Editor, {
         _bindScroller: function() {
             var that = this,
                 options = that.options,
-                dataSource = that.dataSource,
                 scroller = that._scroller();
 
             if (!scroller) {
@@ -50706,7 +59494,7 @@ extend(Editor, {
                         }
 
                         that._pulled = true;
-                        dataSource.read(params);
+                        that.dataSource.read(params);
                     },
                     pullTemplate: options.pullTemplate,
                     releaseTemplate: options.releaseTemplate,
@@ -50828,7 +59616,9 @@ extend(Editor, {
                     .addClass("km-list");
 
                 element.children("li").each(function() {
-                    var groupHeader = $(this).contents().first();
+                    var li = $(this),
+                        groupHeader = li.contents().first();
+                    li.addClass("km-group-container");
                     if (!groupHeader.is("ul") && !groupHeader.is("div." + GROUP_CLASS)) {
                         groupHeader.wrap(GROUP_WRAPPER);
                     }
@@ -50931,7 +59721,7 @@ extend(Editor, {
     });
 
     ui.plugin(ListView);
-})(jQuery);
+})(window.kendo.jQuery);
 (function($, undefined) {
     var kendo = window.kendo,
         ui = kendo.mobile.ui,
@@ -50947,23 +59737,28 @@ extend(Editor, {
         }
     }
 
+    function toggleTitle(centerElement) {
+        var siblings = centerElement.siblings();
+
+        centerElement.toggleClass("km-show-title", (!!siblings[0] && $.trim(centerElement.text()) === ""));
+        centerElement.toggleClass("km-no-title", !!centerElement.children("ul")[0]);
+        centerElement.toggleClass("km-hide-title", centerElement.css("visibility") == "hidden" && !siblings.children().is(":visible"));
+    }
+
     var NavBar = Widget.extend({
         init: function(element, options) {
-            var that = this,
-                centerElement;
+            var that = this;
 
             Widget.fn.init.call(that, element, options);
 
             element = that.element;
 
+            that.container().bind("show", $.proxy(this, "viewShow"));
+
             element.addClass("km-navbar").wrapInner($('<div class="km-view-title" />'));
             createContainer("left", element);
             createContainer("right", element);
-            centerElement = element.find(".km-view-title");
-
-            if(!element.find(roleSelector("view-title"))[0]) {
-               centerElement.append($("<span>&nbsp;</span>"));
-            }
+            that.centerElement = element.find(".km-view-title");
         },
 
         options: {
@@ -50972,10 +59767,16 @@ extend(Editor, {
 
         title: function(value) {
             this.element.find(roleSelector("view-title")).text(value);
+            toggleTitle(this.centerElement);
         },
 
-        viewShow: function(view) {
-            this.title(view.options.title);
+        viewShow: function(e) {
+            var view = e.view;
+            if (view.options.title) {
+                this.title(view.options.title);
+            } else {
+                toggleTitle(this.centerElement);
+            }
         },
 
         destroy: function() {
@@ -50985,7 +59786,7 @@ extend(Editor, {
     });
 
     ui.plugin(NavBar);
-})(jQuery);
+})(window.kendo.jQuery);
 (function($, undefined) {
     var kendo = window.kendo,
         mobile = kendo.mobile,
@@ -51024,9 +59825,12 @@ extend(Editor, {
             that.pager = element.children().last();
             that.page = 0;
 
+            that.inner.css("height", that.options.contentHeight);
+            that.container().bind("show", $.proxy(this, "viewShow"));
+
             var movable,
                 transition,
-                drag,
+                userEvents,
                 dimensions,
                 dimension,
                 pane;
@@ -51039,12 +59843,12 @@ extend(Editor, {
                 onEnd: proxy(that._transitionEnd, that)
             });
 
-            drag = new kendo.Drag(element, {
-                start: function() {
-                    if (abs(drag.x.velocity) * 2 >= abs(drag.y.velocity)) {
-                        drag.capture();
+            userEvents = new kendo.UserEvents(element, {
+                start: function(e) {
+                    if (abs(e.x.velocity) * 2 >= abs(e.y.velocity)) {
+                        userEvents.capture();
                     } else {
-                        drag.cancel();
+                        userEvents.cancel();
                     }
 
                     transition.cancel();
@@ -51063,7 +59867,7 @@ extend(Editor, {
 
             pane = new Pane({
                 dimensions: dimensions,
-                drag: drag,
+                userEvents: userEvents,
                 movable: movable,
                 elastic: true
             });
@@ -51071,7 +59875,7 @@ extend(Editor, {
             $.extend(that, {
                 movable: movable,
                 transition: transition,
-                drag: drag,
+                userEvents: userEvents,
                 dimensions: dimensions,
                 dimension: dimension,
                 pane: pane
@@ -51085,6 +59889,7 @@ extend(Editor, {
             page: 0,
             duration: 300,
             velocityThreshold: 0.8,
+            contentHeight: "auto",
             bounceVelocityThreshold: 1.6
         },
 
@@ -51095,7 +59900,7 @@ extend(Editor, {
         destroy: function() {
             Widget.fn.destroy.call(this);
 
-            this.drag.destroy();
+            this.userEvents.destroy();
 
             kendo.destroy(this.element);
         },
@@ -51109,25 +59914,29 @@ extend(Editor, {
                 pageHTML = "",
                 dimension = that.dimension,
                 width = dimension.getSize(),
-                pages;
+                pages,
+                pageElements = that.element.find("[data-role=page]");
 
-            that.element.find("[data-role=page]").width(width);
-            dimension.update(true);
+                pageElements.width(width);
+                dimension.update(true);
 
-            that.page = Math.floor((-that.movable.x) / width);
-            that.scrollTo(that.page);
+                // if no pages present, try to retain the current position
+                if (!pageElements[0]) {
+                    that.page = Math.floor((-that.movable.x) / width);
+                    that.scrollTo(that.page);
+                }
 
-            pages = that.pages = ceil(dimension.getTotal() / width);
+                pages = that.pages = ceil(dimension.getTotal() / width);
 
-            that.minSnap = - (pages - 1) * width;
-            that.maxSnap = 0;
+                that.minSnap = - (pages - 1) * width;
+                that.maxSnap = 0;
 
-            for (var idx = 0; idx < pages; idx ++) {
-                pageHTML += "<li/>";
-            }
+                for (var idx = 0; idx < pages; idx ++) {
+                    pageHTML += "<li/>";
+                }
 
-            that.pager.html(pageHTML);
-            that._updatePager();
+                that.pager.html(pageHTML);
+                that._updatePager();
         },
 
         content: function(html) {
@@ -51186,7 +59995,7 @@ extend(Editor, {
     });
 
     ui.plugin(ScrollView);
-})(jQuery);
+})(window.kendo.jQuery);
 (function($, undefined) {
     var kendo = window.kendo,
         ui = kendo.mobile.ui,
@@ -51262,7 +60071,7 @@ extend(Editor, {
 
         destroy: function() {
             Widget.fn.destroy.call(this);
-            this.drag.destroy();
+            this.userEvents.destroy();
         },
 
         toggle: function() {
@@ -51289,7 +60098,7 @@ extend(Editor, {
         },
 
         _start: function(e) {
-            this.drag.capture();
+            this.userEvents.capture();
             this.handle.addClass(ACTIVE_STATE);
         },
 
@@ -51317,7 +60126,7 @@ extend(Editor, {
             if (that._animateBackground) {
                 that.background
                     .kendoStop(true, true)
-                    .kendoAnimate({ effects: "slideMargin", offset: distance, reset: true, reverse: !checked, axis: "left", duration: duration, ease: "linear" });
+                    .kendoAnimate({ effects: "slideMargin", offset: distance, reset: true, reverse: !checked, axis: "left", duration: duration });
             }
 
             handle
@@ -51375,7 +60184,7 @@ extend(Editor, {
         _drag: function() {
             var that = this;
 
-            that.drag = new kendo.Drag(that.wrapper, {
+            that.userEvents = new kendo.UserEvents(that.wrapper, {
                 tap: function() {
                     that._toggle(!that.element[0].checked);
                 },
@@ -51387,32 +60196,27 @@ extend(Editor, {
     });
 
     ui.plugin(Switch);
-})(jQuery);
+})(window.kendo.jQuery);
 (function($, undefined) {
     var kendo = window.kendo,
         ui = kendo.mobile.ui,
         Widget = ui.Widget,
-        support = kendo.support,
         ACTIVE_STATE_CLASS = "km-state-active",
-        SELECT = "select",
-        NS = ".kendoMobileTabStrip",
-        MOUSEDOWN = support.mousedown + NS,
-        proxy = $.proxy;
+        SELECT = "select";
 
     var TabStrip = Widget.extend({
         init: function(element, options) {
             var that = this;
 
             Widget.fn.init.call(that, element, options);
+            that.container().bind("show", $.proxy(this, "viewShow"));
 
-            that.element.addClass("km-tabstrip");
+            that.element
+               .addClass("km-tabstrip")
+               .find("a").each(that._buildButton)
+               .eq(that.options.selectedIndex).addClass(ACTIVE_STATE_CLASS);
 
-            that._releaseProxy = proxy(that._release, that);
-
-            that.element.find("a")
-                            .each(that._buildButton)
-                            .on(MOUSEDOWN, that._releaseProxy)
-                            .eq(that.options.selectedIndex).addClass(ACTIVE_STATE_CLASS);
+            that.element.on("down", "a", "_release");
         },
 
         events: [
@@ -51421,6 +60225,10 @@ extend(Editor, {
 
         switchTo: function(url) {
             this._setActiveItem(this.element.find('a[href$="' + url + '"]'));
+        },
+
+        clear: function() {
+            this.currentItem().removeClass(ACTIVE_STATE_CLASS);
         },
 
         currentItem: function() {
@@ -51450,7 +60258,7 @@ extend(Editor, {
             if (!item[0]) {
                 return;
             }
-            this.currentItem().removeClass(ACTIVE_STATE_CLASS);
+            this.clear();
             item.addClass(ACTIVE_STATE_CLASS);
         },
 
@@ -51476,14 +60284,12 @@ extend(Editor, {
             }
         },
 
-        viewShow: function(view) {
-            var that = this;
-            that.switchTo(view.id);
+        viewShow: function(e) {
+            this.switchTo(e.view.id);
         },
 
         destroy: function() {
             Widget.fn.destroy.call(this);
-            this.element.find("a").off(NS);
         },
 
         options: {
@@ -51494,4 +60300,4 @@ extend(Editor, {
     });
 
     ui.plugin(TabStrip);
-})(jQuery);
+})(window.kendo.jQuery);
