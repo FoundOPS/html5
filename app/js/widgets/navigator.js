@@ -614,7 +614,7 @@ define(["jquery", "ui/popup", "lib/doT.min", "jmousewheel", "jscrollpane"], func
                 $("#popupContentWrapper").data('jsp').reinitialise();
             });
 
-            $(document).on("popupEvent", function (e, data) {
+            $(document).on("popup.action", function (e, data) {
                 //console.log(data);
                 if (($(data).attr("id") === "navClient") && roles.length <= 1) {
                     $("#changeBusiness").css("display", "none");

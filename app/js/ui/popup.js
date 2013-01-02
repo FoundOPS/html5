@@ -176,7 +176,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         //Update content
         this.populate(identifierList);
 
-        clickedDiv.trigger("popupEvent", clickedDiv);
+        clickedDiv.trigger("popup.action", clickedDiv);
 
         if(Popup.backgroundColor!==null){
             $("#popupHeader").css("backgroundColor", Popup.backgroundColor);
@@ -185,7 +185,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
 
         if(Popup.fontColor!==null){
             $("#popup").css("color", Popup.fontColor);
-            //TODO: OPTIONSPOPUP REFACTOR: Possibly push this into new optionsPopup.
+            //TODO: Trigger color change event and move to OptionsPopup.
             $("#popup a").css("color", Popup.fontColor);
         }
 
@@ -345,7 +345,6 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
                 var clicked = $(e.target);
                 //TODO: Return if not visible.
                 var popupHeaderLen = clicked.parents("#popupHeader").length + clicked.is("#popupHeader") ? 1 : 0;
-                //TODO: Find better listener for this.
                 var popupContentLen = (clicked.parents("#popupContentWrapper").length && !clicked.parent().is("#popupContentWrapper")) ? 1 : 0;
                 //console.log("popupListenerID: "+Popup.lastPopupClicked.popupListenerID);
                 var isListener = clicked.parents("."+Popup.lastPopupClicked.popupListenerID).length + clicked.is("."+Popup.lastPopupClicked.popupListenerID) ? 1 : 0;
@@ -371,8 +370,6 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
                 popupContentWrapperDiv.trigger("popup.resize");
             }
         });
-
-        //TODO: Is this the safest way?
         popupContentWrapperDiv.trigger("popup.created");
 
         //Function also returns the popup div for ease of use.
@@ -519,9 +516,8 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
     Popup.prototype.setContent = function (cont) {
         Popup.content = cont;
         //popupContentDiv.data('jsp').getContentPane().find("#popupContent").html(content);
-        //TODO: Is setting the content w/o using the jScrollPane api safe to do?
+        //Note: Popup content set without using jscrollpane api.
         $("#popupContent").html(cont);
-        //TODO: Change event namespace.
         $("#popupContentWrapper").trigger("popup.setContent", $(this));
     };
 
@@ -591,7 +587,6 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
 
     /**     PROTOTYPE FUNCTIONS     **/
     //Run-once function for listeners
-    //TODO: Possibly change to static? Will that increase mem usage?
     OptionsPopup.prototype.init = function(){
         var thisOptionsPopup = this;
         $(document)
@@ -608,9 +603,8 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
                 var newId = [];
                 newId.push($(this).attr('id'));
 
-                //TODO: Prefix all events triggered
                 if ($(this).hasClass("popupEvent")) {
-                    $(this).trigger("popupEvent", $(this));
+                    $(this).trigger("popup.action", $(this));
                 }
 
                 var keepOpen = thisOptionsPopup.populate(newId);
