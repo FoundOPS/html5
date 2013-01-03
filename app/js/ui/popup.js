@@ -1,9 +1,11 @@
-!function ($) {
+"use strict";
+define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
     ////////////////////////////////////////////////////////////
     //          jQuery Plugin Block
     ////////////////////////////////////////////////////////////
+    (function ($) {
             var popup = null;
-            this.p = Popup;
+            //this.p = Popup;
             var methods = {
                 init: function(options) {
                     if(typeof(options.backgroundColor) !== 'undefined'){
@@ -89,7 +91,8 @@
 
             return this.each(function () {
             });
-        }
+        };
+    })(jQuery);
 
     ////////////////////////////////////////////////////////////
     //          Popup Block
@@ -669,4 +672,4 @@
             this.setCaretPosition(Popup.caretLeftOffset);
         }*/
     };
-}(window.jQuery);
+});

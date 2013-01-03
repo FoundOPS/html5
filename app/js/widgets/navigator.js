@@ -1,6 +1,9 @@
 "use strict";
-
-!function ($) {
+define(["jquery", "ui/popup", "lib/doT.min", "jmousewheel", "jscrollpane"], function ($, Popup, doT) {
+    ////////////////////////////////////////////////////////////
+    //          jQuery Plugin Block
+    ////////////////////////////////////////////////////////////
+    (function ($) {
         var navigator = null;
         var methods = {
             init: function (conf, options) {
@@ -57,7 +60,7 @@
 
             return this.each(function () {});
         };
-
+    })(jQuery);
     /**
      * Initializes the navigator
      * @param config Example below
@@ -357,6 +360,15 @@
             }
 
             $('#nav').after(sideBarWrapperDiv);
+
+            $("#slideMenu").on({
+                mouseenter: function(){
+                    $(this).find(".iconExpand").addClass("halfOpacity");
+                },
+                mouseleave: function(){
+                    $(this).find(".iconExpand").removeClass("halfOpacity");
+                }
+            });
 
             setSideBarSections(allSections, initialAvailableSections);
 
@@ -722,4 +734,4 @@
         initSideBar();
         initPopup();
     }
-}(window.jQuery);
+});
