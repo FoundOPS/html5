@@ -1,66 +1,65 @@
-define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
+!function ($) {
     ////////////////////////////////////////////////////////////
     //          jQuery Plugin Block
     ////////////////////////////////////////////////////////////
-    (function ($) {
-        var popup = null;
-        this.p = Popup;
-        var methods = {
-            init: function(options) {
-                if(typeof(options.backgroundColor) !== 'undefined'){
-                    Popup.setBackgroundColor(options.backgroundColor);
-                }
+            var popup = null;
+            this.p = Popup;
+            var methods = {
+                init: function(options) {
+                    if(typeof(options.backgroundColor) !== 'undefined'){
+                        Popup.setBackgroundColor(options.backgroundColor);
+                    }
 
-                if(typeof(options.fontColor) !== 'undefined'){
-                    Popup.setFontColor(options.fontColor);
-                }
+                    if(typeof(options.fontColor) !== 'undefined'){
+                        Popup.setFontColor(options.fontColor);
+                    }
 
-                if(typeof(options.borderColor) !== 'undefined'){
-                    Popup.setBorderColor(options.borderColor);
-                }
+                    if(typeof(options.borderColor) !== 'undefined'){
+                        Popup.setBorderColor(options.borderColor);
+                    }
 
-                if(typeof(options.disableHeader) !== 'undefined'){
+                    if(typeof(options.disableHeader) !== 'undefined'){
                     if(options.disableHeader)popup.disableHeader();
+                    }
+
+                    popup.addMenu(options.id, options.title, options.contents);
+                },
+                popupInit: function(options) {
+                    popup = new Popup(this.selector);
+                    methods.init(options);
+                },
+                optionsPopupInit: function (options) {
+                    popup = new OptionsPopup(this.selector);
+
+                    if(typeof(options.disableBackButton) !== 'undefined'){
+                        popup.disableBackButton();
+                    }
+
+                    methods.init(options);
+                },
+                lockPopup: function() {
+                    Popup.lockPopup();
+                },
+                unlockPopup: function() {
+                    Popup.unlockPopup();
+                },
+                disableHeader: function() {
+                    popup.disableHeader();
+                },
+                addMenu: function (menu) {
+                    if (popup === null)return;
+                    popup.addMenu(menu.id, menu.title, menu.contents);
+                },
+                closePopup: function () {
+                    popup.closePopup();
+                },
+                test: function() {
+                    console.log(Popup.title);
+                    console.log(Popup.menus);
                 }
+            };
 
-                popup.addMenu(options.id, options.title, options.contents);
-            },
-            popupInit: function(options) {
-                popup = new Popup(this.selector);
-                methods.init(options);
-            },
-            optionsPopupInit: function (options) {
-                popup = new OptionsPopup(this.selector);
-
-                if(typeof(options.disableBackButton) !== 'undefined'){
-                    popup.disableBackButton();
-                }
-
-                methods.init(options);
-            },
-            lockPopup: function() {
-                Popup.lockPopup();
-            },
-            unlockPopup: function() {
-                Popup.unlockPopup();
-            },
-            disableHeader: function() {
-                popup.disableHeader();
-            },
-            addMenu: function (menu) {
-                if (popup === null)return;
-                popup.addMenu(menu.id, menu.title, menu.contents);
-            },
-            closePopup: function () {
-                popup.closePopup();
-            },
-            test: function() {
-                console.log(Popup.title);
-                console.log(Popup.menus);
-            }
-        };
-
-        $.fn.optionsPopup = function (method) {
+            $.fn.optionsPopup = function (method) {
             // Create some defaults, extending them with any options that were provided
             //var settings = $.extend({}, options);
             // Method calling logic
@@ -91,7 +90,6 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
             return this.each(function () {
             });
         }
-    })(jQuery);
 
     ////////////////////////////////////////////////////////////
     //          Popup Block
@@ -114,9 +112,9 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
     }
 
     Popup.prototype.updatePositions = function(target){
-        this.updateLeftPosition(target);
         var top = this.getTop(target);
         $("#popupWrapper").css("padding-top", top + "px");
+        this.updateLeftPosition(target);
     };
 
     Popup.prototype.disableHeader = function() {
@@ -233,8 +231,12 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
 
     Popup.prototype.getTop = function(target){
         var caretHeight =  $("#popupArrow").height();
-        var targetTop = target.offset().top;
-        var targetBottom = targetTop + target.outerHeight() - $(window).scrollTop();
+        //TODO: Make more readable.
+        //If absolute position from mobile css, don't offset from scroll.
+        var scrollTop = ($("#popupWrapper").css("position")==="absolute")?0:$(window).scrollTop();
+        //console.log("scrollTop: "+scrollTop);
+        var targetTop = target.offset().top - scrollTop;
+        var targetBottom = targetTop + target.outerHeight();
         var popupTop = targetBottom + caretHeight;
         var windowHeight = $(window).height();
         var popupContentHeight = $("#popupContent").height();
@@ -292,6 +294,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
     };
 
     Popup.prototype.setCaretPosition = function(offset){
+        //console.log("LOG: Setting caret position.");
         var caretPos = "50%";
         var caret = $("#popupArrow");
         if (Popup.offScreenX) {
@@ -300,8 +303,9 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         //Moves carrot on popup div.
         caret.css("left", caretPos);
 
+        //console.log("LOG: Popup.above: "+Popup.above);
         if(Popup.above){
-            var popupHeight = $("#popupHeader").outerHeight() + $("#popupContent").outerHeight() - 2;
+            var popupHeight = $("#popupContent").outerHeight() - 2;
             $("#popupArrow").css("margin-top", popupHeight+"px");
             $("#popupArrow").addClass("flipArrow");
         }else{
@@ -510,6 +514,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         this.setAction(data.id);
         this.setTitle(data.title);
         this.setContent(data.contents);
+        //this.updatePositions(Popup.currentTarget);
     };
 
     //Public setter function for private var content and sets content of the html popup element.
@@ -656,12 +661,12 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         this.setTitle(data.title);
         this.setContent(c);
 
-        if(Popup.above){
+        /*if(Popup.above){
             var newPopupHeight = $("#popupArrow").height() + $("#popupContent").height() + $("#popupHeader").height();
             var popupTop = oldPopupTop - (newPopupHeight - oldPopupHeight);
             //console.log("New top: "+popupTop);
             $("#popupWrapper").css("padding-top", popupTop + "px");
             this.setCaretPosition(Popup.caretLeftOffset);
-        }
+        }*/
     };
-});
+}(window.jQuery);

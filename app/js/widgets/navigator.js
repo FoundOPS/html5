@@ -1,7 +1,6 @@
 "use strict";
 
-define(["jquery", "ui/popup", "lib/doT.min", "jmousewheel", "jscrollpane"], function ($, Popup, doT) {
-    (function ($) {
+!function ($) {
         var navigator = null;
         var methods = {
             init: function (conf, options) {
@@ -58,7 +57,6 @@ define(["jquery", "ui/popup", "lib/doT.min", "jmousewheel", "jscrollpane"], func
 
             return this.each(function () {});
         };
-    })(jQuery);
 
     /**
      * Initializes the navigator
@@ -724,6 +722,4 @@ define(["jquery", "ui/popup", "lib/doT.min", "jmousewheel", "jscrollpane"], func
         initSideBar();
         initPopup();
     }
-
-    return Navigator;
-});
+}(window.jQuery);

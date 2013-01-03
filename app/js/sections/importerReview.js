@@ -1,7 +1,8 @@
 'use strict';
 
-define(["jquery", "underscore", "sections/importerUpload", "sections/importerSelect", "db/services", "tools/generalTools", "tools/dateTools", "widgets/location", "widgets/contactInfo", "widgets/repeat",
-    "ui/popup", "widgets/selectBox"], function ($, _, importerUpload, importerSelect, dbServices, generalTools, dateTools) {
+//requires: kendo, underscore
+define(["sections/importerUpload", "sections/importerSelect", "db/services", "tools/generalTools", "tools/dateTools", "widgets/location", "widgets/contactInfo", "widgets/repeat",
+    "widgets/selectBox"], function (importerUpload, importerSelect, dbServices, generalTools, dateTools) {
     var importerReview = {}, dataSource, grid, clients = {}, locations = {}, contactInfoSets = {};
 
     //an editor which automatically switches back to read view
