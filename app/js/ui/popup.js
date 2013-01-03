@@ -1,67 +1,67 @@
 "use strict";
 define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
-    ////////////////////////////////////////////////////////////
-    //          jQuery Plugin Block
-    ////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+//          jQuery Plugin Block
+////////////////////////////////////////////////////////////
     (function ($) {
-            var popup = null;
-            //this.p = Popup;
-            var methods = {
-                init: function(options) {
-                    if(typeof(options.backgroundColor) !== 'undefined'){
-                        Popup.setBackgroundColor(options.backgroundColor);
-                    }
-
-                    if(typeof(options.fontColor) !== 'undefined'){
-                        Popup.setFontColor(options.fontColor);
-                    }
-
-                    if(typeof(options.borderColor) !== 'undefined'){
-                        Popup.setBorderColor(options.borderColor);
-                    }
-
-                    if(typeof(options.disableHeader) !== 'undefined'){
-                    if(options.disableHeader)popup.disableHeader();
-                    }
-
-                    popup.addMenu(options.id, options.title, options.contents);
-                },
-                popupInit: function(options) {
-                    popup = new Popup(this.selector);
-                    methods.init(options);
-                },
-                optionsPopupInit: function (options) {
-                    popup = new OptionsPopup(this.selector);
-
-                    if(typeof(options.disableBackButton) !== 'undefined'){
-                        popup.disableBackButton();
-                    }
-
-                    methods.init(options);
-                },
-                lockPopup: function() {
-                    Popup.lockPopup();
-                },
-                unlockPopup: function() {
-                    Popup.unlockPopup();
-                },
-                disableHeader: function() {
-                    popup.disableHeader();
-                },
-                addMenu: function (menu) {
-                    if (popup === null)return;
-                    popup.addMenu(menu.id, menu.title, menu.contents);
-                },
-                closePopup: function () {
-                    popup.closePopup();
-                },
-                test: function() {
-                    console.log(Popup.title);
-                    console.log(Popup.menus);
+        var popup = null;
+        //this.p = Popup;
+        var methods = {
+            init: function(options) {
+                if(typeof(options.backgroundColor) !== 'undefined'){
+                    Popup.setBackgroundColor(options.backgroundColor);
                 }
-            };
 
-            $.fn.optionsPopup = function (method) {
+                if(typeof(options.fontColor) !== 'undefined'){
+                    Popup.setFontColor(options.fontColor);
+                }
+
+                if(typeof(options.borderColor) !== 'undefined'){
+                    Popup.setBorderColor(options.borderColor);
+                }
+
+                if(typeof(options.disableHeader) !== 'undefined'){
+                    if(options.disableHeader)popup.disableHeader();
+                }
+
+                popup.addMenu(options.id, options.title, options.contents);
+            },
+            popupInit: function(options) {
+                popup = new Popup(this.selector);
+                methods.init(options);
+            },
+            optionsPopupInit: function (options) {
+                popup = new OptionsPopup(this.selector);
+
+                if(typeof(options.disableBackButton) !== 'undefined'){
+                    popup.disableBackButton();
+                }
+
+                methods.init(options);
+            },
+            lockPopup: function() {
+                Popup.lockPopup();
+            },
+            unlockPopup: function() {
+                Popup.unlockPopup();
+            },
+            disableHeader: function() {
+                popup.disableHeader();
+            },
+            addMenu: function (menu) {
+                if (popup === null)return;
+                popup.addMenu(menu.id, menu.title, menu.contents);
+            },
+            closePopup: function () {
+                popup.closePopup();
+            },
+            test: function() {
+                console.log(Popup.title);
+                console.log(Popup.menus);
+            }
+        };
+
+        $.fn.optionsPopup = function (method) {
             // Create some defaults, extending them with any options that were provided
             //var settings = $.extend({}, options);
             // Method calling logic
@@ -73,8 +73,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
                 $.error('Method ' + method + ' does not exist on jQuery.popup');
             }
 
-            return this.each(function () {
-            });
+            return this.each(function () {});
         };
 
         $.fn.popup = function (method) {
@@ -89,14 +88,13 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
                 $.error('Method ' + method + ' does not exist on jQuery.popup');
             }
 
-            return this.each(function () {
-            });
+            return this.each(function () {});
         };
     })(jQuery);
 
-    ////////////////////////////////////////////////////////////
-    //          Popup Block
-    ////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+//          Popup Block
+////////////////////////////////////////////////////////////
     /**     Popup CONSTRUCTOR    **/
     function Popup(popupListener) {
         //Set this popup's number and increment Popup count.
@@ -210,7 +208,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         Popup.lastElementClick = clickedDiv.attr("id");
     };
 
-    //Function returns the left offset of the popup and target element.
+//Function returns the left offset of the popup and target element.
     Popup.prototype.getLeft = function (target) {
         var popupWrapperDiv = $("#popupWrapper");
         Popup.currentTarget = target;
@@ -318,7 +316,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         Popup.caretLeftOffset = caretPos;
     };
 
-    // createPopup: Prepends popup to dom
+// createPopup: Prepends popup to dom
     Popup.prototype.createPopup = function () {
         var thisPopup = this;
         //Creates popup div that will be populated in the future.
@@ -326,12 +324,12 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         popupWrapperDiv.attr("id", "popupWrapper");
 
         var s = "<div id='popup'>" +
-                    "<div id='popupArrow'></div>" +
-                    "<div id='currentPopupAction' style='display: none;'></div>" +
-                    "<div id='popupContentWrapper'>" +
-                        "<div id='popupContent'></div>" +
-                    "</div>" +
-                "</div>";
+            "<div id='popupArrow'></div>" +
+            "<div id='currentPopupAction' style='display: none;'></div>" +
+            "<div id='popupContentWrapper'>" +
+            "<div id='popupContent'></div>" +
+            "</div>" +
+            "</div>";
         popupWrapperDiv.html(s);
         popupWrapperDiv.find("#popup").css("display", "none");
 
@@ -342,6 +340,12 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         $(window).on('resize', function () {
                 if ($("#popup").is(":visible")) {
                     thisPopup.updatePositions(Popup.currentTarget);
+                }
+                var popupWrapperDiv = $("#popupWrapper");
+                if(popupWrapperDiv.css("position")==="absolute"){
+                    popupWrapperDiv.css("height", $(document).height());
+                }else{
+                    popupWrapperDiv.css("height", "");
                 }
             }
         );
@@ -383,7 +387,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         return popupWrapperDiv;
     };
 
-    //Closes the popup
+//Closes the popup
     Popup.prototype.closePopup = function () {
         if(Popup.isLocked)return;
         Popup.lastElementClick = null;
@@ -411,19 +415,19 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         this.setData(Popup.history[Popup.history.length - 1]);
     };
 
-    //Public setter function for private var title and sets title of the html popup element.
+//Public setter function for private var title and sets title of the html popup element.
     Popup.prototype.setTitle = function (t) {
         Popup.title = t;
         $("#popupTitle").html(t);
     };
 
-    // Public getter function that returns a popup data object.
-    // Returns: Popup data object if found, null if not.
-    // Identifiers in object:
-    //      id: Same as html id used if static
-    //      title: Display text for popup header
-    //      contents: Array of objects, included identifiers below
-    //          name: Display text for links
+// Public getter function that returns a popup data object.
+// Returns: Popup data object if found, null if not.
+// Identifiers in object:
+//      id: Same as html id used if static
+//      title: Display text for popup header
+//      contents: Array of objects, included identifiers below
+//          name: Display text for links
     Popup.prototype.getMenu = function (id) {
         //Searches for a popup data object by the id passed, returns data object if found.
         var i;
@@ -442,7 +446,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         Popup.menus.push({'id': id, 'title': title, 'contents': contents});
     };
 
-    //Public void function that populates setTitle and setContent with data found by id passed.
+//Public void function that populates setTitle and setContent with data found by id passed.
     Popup.prototype.populate = function (identifierList) {
         var newMenu = null;
         var i=0;
@@ -470,9 +474,9 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
 
     Popup.prototype.insertHeader = function (){
         var header = "<div id='popupHeader'>" +
-                        "<div id='popupTitle'></div>" +
-                        "<a id='popupClose'></a>" +
-                     "</div>";
+            "<div id='popupTitle'></div>" +
+            "<a id='popupClose'></a>" +
+            "</div>";
 
         $("#popupContentWrapper").before(header);
 
@@ -520,7 +524,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         //this.updatePositions(Popup.currentTarget);
     };
 
-    //Public setter function for private var content and sets content of the html popup element.
+//Public setter function for private var content and sets content of the html popup element.
     Popup.prototype.setContent = function (cont) {
         Popup.content = cont;
         //popupContentDiv.data('jsp').getContentPane().find("#popupContent").html(content);
@@ -569,9 +573,9 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         Popup.isLocked = false;
     };
 
-    ////////////////////////////////////////////////////////////
-    //          OptionsPopup Block
-    ////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+//          OptionsPopup Block
+////////////////////////////////////////////////////////////
 
     /**   OptionsPopup CONSTRUCTOR  **/
     function OptionsPopup(popupListener){
@@ -586,7 +590,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
             OptionsPopup.hasRun = true;
         }
     }
-    //Inherit Popup
+//Inherit Popup
     OptionsPopup.prototype = new Popup();
     OptionsPopup.constructor = OptionsPopup;
 
@@ -594,7 +598,7 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
     OptionsPopup.hasRun = false;
 
     /**     PROTOTYPE FUNCTIONS     **/
-    //Run-once function for listeners
+//Run-once function for listeners
     OptionsPopup.prototype.init = function(){
         var thisOptionsPopup = this;
         $(document)
@@ -665,11 +669,11 @@ define(["jquery", "jmousewheel", "jscrollpane"], function ($) {
         this.setContent(c);
 
         /*if(Popup.above){
-            var newPopupHeight = $("#popupArrow").height() + $("#popupContent").height() + $("#popupHeader").height();
-            var popupTop = oldPopupTop - (newPopupHeight - oldPopupHeight);
-            //console.log("New top: "+popupTop);
-            $("#popupWrapper").css("padding-top", popupTop + "px");
-            this.setCaretPosition(Popup.caretLeftOffset);
-        }*/
+         var newPopupHeight = $("#popupArrow").height() + $("#popupContent").height() + $("#popupHeader").height();
+         var popupTop = oldPopupTop - (newPopupHeight - oldPopupHeight);
+         //console.log("New top: "+popupTop);
+         $("#popupWrapper").css("padding-top", popupTop + "px");
+         this.setCaretPosition(Popup.caretLeftOffset);
+         }*/
     };
 });

@@ -1,8 +1,8 @@
 "use strict";
 define(["jquery", "ui/popup", "lib/doT.min", "jmousewheel", "jscrollpane"], function ($, Popup, doT) {
-    ////////////////////////////////////////////////////////////
-    //          jQuery Plugin Block
-    ////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+//          jQuery Plugin Block
+////////////////////////////////////////////////////////////
     (function ($) {
         var navigator = null;
         var methods = {
@@ -379,8 +379,8 @@ define(["jquery", "ui/popup", "lib/doT.min", "jmousewheel", "jscrollpane"], func
                     var offset = -1 * (sideBarDiv.offset().top + sideBarDiv.outerHeight());
                     sideBarDiv.css("top", offset);
                 } /* else {
-                    $(".iconShow").addClass("rotateIcon");
-                } */
+                 $(".iconShow").addClass("rotateIcon");
+                 } */
             });
 
             //Add showMenuSpan to topNav.
@@ -402,7 +402,7 @@ define(["jquery", "ui/popup", "lib/doT.min", "jmousewheel", "jscrollpane"], func
             initSideBarScrollBar();
 
             /** Sidebar event listeners **/
-            //Listens for clicks outside of elements
+                //Listens for clicks outside of elements
             $(document).on('click touchend', function (e) {
                 var clicked = $(e.target);
                 //console.log("Clicked on: " + clicked.html());
