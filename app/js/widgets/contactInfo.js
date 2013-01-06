@@ -303,7 +303,7 @@ define(["tools/generalTools", "tools/parserTools", "tools/analytics", "widgets/s
             }
 
             //get the selected label
-            var label = $(contactInfo.element).find(".editWrapper .contactInfoSearchSelect").searchSelect("textSelection");
+            var label = $(contactInfo.element).find(".editWrapper .contactInfoSearchSelect").searchSelect("text");
             var sameLabels;
             if (contactInfo._options._currentLabels === labels) {
                 sameLabels = true;
@@ -314,7 +314,7 @@ define(["tools/generalTools", "tools/parserTools", "tools/analytics", "widgets/s
             contactInfo._setupLabelDropdown();
             //if the labels are the same as before, reset to the original selected label
             if (sameLabels) {
-                $(contactInfo.element).find(".editWrapper .contactInfoSearchSelect").searchSelect("dataSelected", label);
+                $(contactInfo.element).find(".editWrapper .contactInfoSearchSelect").searchSelect("data", label);
             }
 
             //change the selected category icon
