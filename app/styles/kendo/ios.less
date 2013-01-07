@@ -1,18 +1,51 @@
-/*
-* Kendo UI Complete v2012.2.1002 (http://kendoui.com)
-* Copyright 2012 Telerik AD. All rights reserved.
-*
-* Kendo UI Complete commercial licenses may be obtained at
-* https://www.kendoui.com/purchase/license-agreement/kendo-ui-complete-commercial.aspx
-* If you do not own a commercial license, this file shall be governed by the trial license terms.
-*/
 /* Platform specific iOS CSS */
+
+/* Variables */
+
+@ios-list-border-radius: 7px;
+@ios-list-link-border-radius: @ios-list-border-radius - 1;
+
+@default-background-color: #7185a2;
+@button-background-color: #496b9a;
+@button-active-background-color: #264e8c;
+
+@ios-list-border-color: #b1b3b8;
+@ios-list-background-color: #f0f0f0;
+
+@pull-to-refresh-color: #788193;
+@pull-to-refresh-shadow: rgba(255,255,255,.5);
+
+@tabstrip-icon-color: rgba(255,255,255,.3);
+@ios-tabstrip-active-icon-color: #43c5f5;
+@button-icon-gradient: top, rgba(255,255,255,.7), rgba(255,255,255,.9);
+@buttongroup-icon-gradient: top, rgba(0,0,0,.5), rgba(0,0,0,.3);
+@tabstrip-icon-gradient: top, rgba(255,255,255,.4), rgba(255,255,255,0);
+@tabstrip-active-icon-gradient: top, rgba(255,255,255,.6) 0, rgba(255,255,255,0) 50%, rgba(255,255,255,.3) 100%;
+
+@button-active-shadow: ~"inset 0 0 0 1px rgba(0,0,0,.3), inset 0 1px 3px rgba(0,0,0,.5), inset 0 0 0 1000px rgba(0,0,0,.2)";
+@buttongroup-active-shadow: ~"0 1px 0 0 rgba(255,255,255,.4), inset 0 0 0 1000px rgba(0, 0, 0, 0.2)";
+@ios-detail-shadow: ~"inset 0 0 0 .16rem #fff, 0 1px 3px rgba(0,0,0,.5)";
+@ios-detail-active-shadow: ~"inset 0 0 0 .16rem #fff, 0 1px 3px rgba(0,0,0,.5), inset 0 0 0 1000px rgba(0,0,0,.2)";
+
+/* Support for iOS6 */
+@media only screen and (height : 320px) and (orientation : landscape) {
+    .km-ios6 {
+        height: 100% !important;
+    }
+}
+
+/* CSS */
+
+.km-ios:after
+{
+     content: url("images/back.png");
+     display: none;
+}
 
 .km-ios
 {
     background: #fff;
-    font: bold .9em HelveticaNeue, sans-serif;
-    font-size: .9rem;
+    font: bold .9rem HelveticaNeue, sans-serif;
 }
 
 .km-ios .km-view
@@ -28,12 +61,17 @@
     text-align: center;
     color: #fff;
     font-size: 1.4em;
-    line-height: 1.4em;
-    border: 1px solid transparent;
+    line-height: 2.3em;
     font-weight: bold;
     text-shadow: 0 -1px rgba(0,0,0,.3);
     margin-left: auto;
     margin-right: auto;
+    .box-shadow(inset 0 -1px 0 rgba(0,0,0,.3));
+}
+
+.km-ios.km-horizontal .km-view-title
+{
+    line-height: 2em;
 }
 
 .km-ios .km-toolbar,
@@ -47,12 +85,12 @@
     -webkit-tap-highlight-color: rgba(0,0,0,0);
     color: #FFF;
     overflow: visible;
-    .border-radius(5pt);
+    .border-radius(5px);
     text-shadow: 0 -1px rgba(0,0,0,.3);
     text-decoration: none;
     border: 1px solid #394d68;
     border-color: #2f3740 #394d68 #375073;
-    background-color: #7185a2;
+    background-color: @default-background-color;
 }
 
 .km-ios .km-button
@@ -61,18 +99,16 @@
     border-width: 0;
     border-bottom: 1px solid rgba(255,255,255,.5);
     padding: .4em .8em;
-    background: transparent, #496b9a;
-    .linear-gradient-image(top, rgba(0,0,0,.3), rgba(0,0,0,0) 10%, rgba(0,0,0,0) 98%, rgba(70,70,70,.5),
-                     top, rgba(255,255,255,0.35), rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 50%, rgba(255,255,255,0));
-    .box-shadow(inset 0 0 0 1px rgba(0,0,0,.3));
+    background: transparent, @button-background-color;
+    .linear-gradient-image(top, rgba(255,255,255,0.35), rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 50%, rgba(255,255,255,0));
+    .box-shadow(~"inset 0 0 0 1px rgba(0,0,0,.3), inset 0 1px 3px rgba(0,0,0,.5)");
 }
 
 .km-ios .km-button:active,
 .km-ios .km-button.km-state-active
 {
-    background-color: #264e8c;
-    -webkit-box-shadow: inset 0 0 0 1px rgba(0,0,0,.3), inset 0 0 0 1000px rgba(0,0,0,.2);
-    box-shadow: inset 0 0 0 1px rgba(0,0,0,.3), inset 0 0 0 1000px rgba(0,0,0,.2);
+    background-color: @button-active-background-color;
+    .box-shadow(@button-active-shadow);
 }
 
 .km-ios li.km-state-active
@@ -81,12 +117,12 @@
     color: white;
 }
 
-.km-ios .km-back
+.km-ios :-webkit-any(.km-back)
 {
     overflow: hidden;
     margin-left: -1em;
     padding-left: 2.1em;
-    -webkit-mask-image: url("images/icons.png");
+    -webkit-mask-image: url("images/back.png");
     -webkit-mask-size: auto 100%;
     -webkit-mask-repeat: no-repeat;
     -webkit-mask-position-x: 1em;
@@ -95,7 +131,7 @@
 .km-ios .km-back:after
 {
     content: "\a0";
-    display: block;
+    display: none;
     position: absolute;
     left: 1em;
     top: 0;
@@ -107,25 +143,43 @@
     background-repeat: no-repeat;
 }
 
+.km-ios :-webkit-any(.km-back):after
+{
+    display: block;
+}
+
 .km-ios :-moz-any(.km-back)
 {
+    overflow: hidden;
     margin-left: 0;
     padding-left: 1.4em;
     background-size: auto 100%;
-    clip-path: url("images/iconmasks.svg#backbutton");
+    clip-path: ~"url('data:image/svg+xml;utf-8,<svg xmlns=%22http:%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox=%220 0 1 1%22><clipPath id=%22backbutton%22 clipPathUnits=%22objectBoundingBox%22><path fill=%22black%22 d=%22M8.7,1c0,0-8,0-8,0C0,1,0.2,1,0,0.5 C0.2-0,0,0,0.5,0H9V1z%22%2F><%2FclipPath><%2Fsvg>#backbutton')";
 }
 
 .km-ios :-moz-any(.km-back):after
 {
+    display: block;
     left: 0;
 }
 
 .km-ios .km-switch
 {
+    width: 5rem;
+    height: 1.8rem;
+    line-height: 1.65rem;
+    overflow: hidden;
     font-family: HelveticaNeue, Arial, sans-serif;
 }
 
-.km-ios5 .km-switch-wrapper
+.km-ios4 .km-switch
+{
+    width: 6.4rem;
+    height: 2rem;
+    line-height: 2rem;
+}
+
+.km-ios .km-switch-wrapper
 {
     overflow: hidden;
     background-color: #f0f0f0;
@@ -134,41 +188,49 @@
 .km-ios .km-switch-background,
 .km-ios .km-slider-background
 {
-    background: 6.4em 0 no-repeat #3074e7;
+    background: 4.25em 0 no-repeat #007EE9;
     .linear-gradient-image(top, rgb(219, 219, 219), rgb(238, 238, 238) 50%);
+    margin-left: -3.4rem;
 }
 
-.km-ios5 .km-switch-background
+.km-ios4 .km-switch-background
 {
-    background-color: #007EE9;
-    background-position: 3.8rem 0;
-    margin-left: ~"-3rem";
+    background-color: #3074e7;
+    background-position: 6.4em 0;
+    margin-left: -6rem;
 }
 
 .km-ios .km-switch-background:after
 {
     content: "\a0";
     display: inline-block;
-    margin: 0;
-    width: 100%;
+    margin: 0 0 0 .3rem;
+    width: 78%;
     height: 50%;
     line-height: 100%;
     vertical-align: bottom;
     .linear-gradient-image(top,  rgba(255,255,255,.14) 0, rgba(255,255,255,.4));
 }
 
-.km-ios5 .km-switch-background:after
+.km-ios4 .km-switch-background:after
 {
-    margin: 0 0 0 .3rem;
-    width: 78%;
+    margin: 0;
+    width: 100%;
+    height: 58%;
 }
 
 .km-ios .km-switch-container
 {
+    padding: 1px 0 1px 1px;
+    border-width: 0;
+    .box-shadow(~"inset 0 2px 2px 0 rgba(0,0,0,.3), inset 0 -1px 1px 0 rgba(0,0,0,.2)");
+    .linear-gradient-image(top, rgba(0,0,0,0), rgba(0,0,0,0) 95%, rgba(0,0,0,.2));
+}
+
+.km-ios4 .km-switch-container
+{
     padding: 0;
     border: 1px solid #999;
-    .box-shadow(inset 0 2px 2px 0 rgba(0,0,0,.3));
-    .linear-gradient-image(top, rgba(0,0,0,0), rgba(0,0,0,0) 95%, rgba(0,0,0,.2));
 }
 
 .km-ios .km-checkbox
@@ -187,78 +249,92 @@
     .box-shadow(0 2px 3px #333);
 }
 
-.km-ios .km-checkbox-checked:after
-{
-    background: transparent url("images/ios-sprite.png") 2px -117px no-repeat;
-}
-
 .km-ios .km-switch-handle
 {
-    margin: -1px 1px 0 -1px;
-    border: 1px solid #969696;
+    width: 1.6em;
+    margin: -1px 3px 0 -1px;
+    border: 1px solid rgba(102,102,102,.8);
+    .box-shadow(~"inset 0 0 0 1px #fff");
     .linear-gradient-image(top, rgb(255, 255, 255), rgb(215, 215, 215) 5%, rgb(255, 255, 255));
+}
+
+.km-ios4 .km-switch-handle
+{
+    width: 2.72em;
+    margin: -1px 0 0 -1px;
 }
 
 .km-ios .km-switch-label-off
 {
+    left: 1.5em;
     color: #7f7f7f;
 }
 
 .km-ios .km-switch-label-on
 {
+    left: -3em;
     color: #fff;
 }
 
-.km-ios5 .km-switch
+.km-ios .km-switch-label-on,
+.km-ios .km-switch-label-off
 {
-    width: 4.6rem;
-    height: 1.6rem;
-    line-height: 1.65rem;
-    overflow: hidden;
+    width: 195%;
+    font-size: 1em;
+    line-height: 1.5em;
+    vertical-align: middle;
 }
 
-.km-ios5 .km-switch-container
+.km-ios4 .km-switch-label-on,
+.km-ios4 .km-switch-label-off
 {
-    padding: 1px 0 1px 1px;
-    border-width: 0;
+    width: 130%;
+    line-height: 1.8em;
 }
 
-.km-ios5 .km-switch-handle
+.km-ios4 .km-switch-label-off
 {
-    width: 1.5rem;
-    margin: -1px 1px 0 -1px;
-    .box-shadow(~"inset 0 0 0 1px #fff");
+    left: 104%;
 }
 
-.km-ios5 .km-switch-handle,
-.km-ios5 .km-switch-wrapper,
-.km-ios5 .km-switch-container,
-.km-ios5 .km-switch-background:after
+.km-ios4 .km-switch-label-on
 {
-    .border-radius(~"1rem");
+    left: -134%;
 }
 
-.km-ios5 .km-switch-background:after
+.km-ios .km-switch-handle,
+.km-ios .km-switch-wrapper,
+.km-ios .km-switch-container,
+.km-ios .km-switch-background
 {
-    .border-radius(~"1rem 1rem .5rem .5rem");
+    .border-radius(1.3em);
 }
 
-.km-ios5 .km-switch-label-on,
-.km-ios5 .km-switch-label-off
+.km-ios .km-switch-container,
+.km-ios .km-switch-wrapper
 {
-    width: 200%;
-    font-size: 1.05rem;
-    line-height: 1.5rem;
+    .border-radius(1.5em);
+    .box-sizing(border-box);
+    border: 1px solid #f0f0f0;
+    background-clip: content-box;
 }
 
-.km-ios5 .km-switch-label-off
+.km-ios4 .km-switch-handle,
+.km-ios4 .km-switch-wrapper,
+.km-ios4 .km-switch-container,
+.km-ios4 .km-switch-background
 {
-    left: 1.4rem;
+    .border-radius(5px);
 }
 
-.km-ios5 .km-switch-label-on
+.km-ios .km-switch-background:after
 {
-    left: ~"-2.9rem";
+    .border-radius(~"1em 1em .5em .5em");
+}
+
+.km-ios4 .km-switch-background:after
+{
+    .border-radius(none);
 }
 
 .km-ios .km-badge,
@@ -266,57 +342,55 @@
 {
     .linear-gradient-image(top, rgba(255,255,255,.5), rgba(255,255,255,.2) 50%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0));
     color: #FFF;
-    border: .3em solid #FFF;
-    font-size: .72em;
-    font-size: .82rem;
-    line-height: 1.6em;
-    line-height: 1rem;
     padding: 0;
     background-color: #bc0404;
-    .box-shadow(0 3px 3px #000);
-    .border-radius(2em);
-    background-clip: padding-box;
+    .border-radius(3em);
+    .box-shadow(@ios-detail-shadow);
+    background-clip: content-box;
+}
+
+.km-ios .km-badge
+{
+    font-size: .82rem;
+    line-height: 1rem;
 }
 
 .km-ios .km-detail
 {
-    line-height: 1.4em;
-    line-height: .8rem;
-    border: .2em solid #FFF;
-    border-width: .15rem;
-    .box-shadow(0 1px 3px rgba(0,0,0,.5));
+    border: 0;
     background-color: #1F6DD8;
 }
 
 .km-ios .km-detail:active,
 .km-ios .km-detail.km-state-active
 {
-    -webkit-box-shadow: 0 1px 3px rgba(0,0,0,.5), inset 0 0 0 1000px rgba(0,0,0,.2);
-    box-shadow: 0 1px 3px rgba(0,0,0,.5), inset 0 0 0 1000px rgba(0,0,0,.2);
+    -webkit-box-shadow: @ios-detail-active-shadow;
+    box-shadow: @ios-detail-active-shadow;
 }
 
-.km-ios5 .km-listview .km-switch
+.km-ios .km-listview .km-switch
 {
-    margin-top: ~"-.85rem";
+    margin-top: -.85rem;
+}
+
+.km-ios4 .km-listview .km-switch
+{
+    margin-top: -1rem;
 }
 
 .km-ios .km-list .km-icon
 {
-    background-color: #000;
+    color: #000;
 }
 
 .km-ios li.km-state-active .km-icon
 {
-    background-color: #fff;
+    color: #fff;
 }
 
 .km-ios .km-detail .km-icon
 {
-    left: 5%;
-    top: 10%;
-    width: 90%;
-    height: 90%;
-    background-color: #fff;
+    color: #fff;
 }
 
 .km-ios :-moz-any(.km-detail) .km-icon
@@ -364,7 +438,8 @@
 .km-ios .km-footer > .km-buttongroup .km-button,
 .km-ios .km-content .km-buttongroup .km-button
 {
-    .linear-gradient-image(top, rgb(251,251,251), rgb(225,225,225) 50%, rgb(200,200,200));
+    background-color: #fff;
+    .linear-gradient-image(top, rgba(0,0,0,0), rgba(0,0,0,.12) 50%, rgba(0,0,0,.25));
 }
 
 .km-ios .km-navbar .km-buttongroup .km-button:not(.km-state-active)
@@ -381,8 +456,8 @@
 {
     text-shadow: none;
     border-width: 1px 0 1px 1px;
-    -webkit-box-shadow: 0 1px 0 0 rgba(255,255,255,.4), inset 0 0 0 1000px rgba(0, 0, 0, 0.2);
-    box-shadow: 0 1px 0 0 rgba(255,255,255,.4), inset 0 0 0 1000px rgba(0, 0, 0, 0.2);
+    -webkit-box-shadow: @buttongroup-active-shadow;
+    box-shadow: @buttongroup-active-shadow;
 }
 
 .km-ios .km-header > .km-buttongroup .km-state-active,
@@ -407,6 +482,20 @@
     overflow: hidden;
 }
 
+.km-ios6 .km-navbar,
+.km-ios6 .km-toolbar
+{
+    .linear-gradient-image(top, rgba(255,255,255,.65), rgba(255,255,255,0));
+    background-color: #506D93;
+    .box-shadow(inset 0 1px 0 rgba(255,255,255,.3));
+    overflow: visible;
+}
+
+.km-ios6 .km-view-title
+{
+    .box-shadow(~"rgba(0,0,0,.3) 0px -1px 0px inset, rgba(0,0,0,.3) 0px 1px 3px");
+}
+
 .km-ios .km-navbar,
 .km-ios .km-toolbar,
 .km-ios .km-tabstrip
@@ -420,9 +509,34 @@
     padding: .1em 0;
     border-top: 1px solid rgba(255,255,255,.2);
     background-color: #222;
-    .linear-gradient-image(top, rgba(46, 46, 46, 0.8), rgba(21, 21, 21, 0.5) 50%, rgba(0, 0, 0, 0.8) 50%, rgba(0, 0, 0, 0.8));
+    .linear-gradient-image(top, rgba(46,46,46,.8), rgba(21,21,21,.5) 50%, rgba(0,0,0,.8) 50%, rgba(0,0,0,.8));
     .box-shadow(0 -1px 0 0 #000);
     text-shadow: none;
+}
+
+.km-ios6 .km-tabstrip
+{
+    background-color: #1A1A1A;
+    text-shadow: 0 1px 1px #000;
+    .linear-gradient-image(top, rgba(255,255,255,.18), rgba(255,255,255,0));
+}
+
+.km-phone .km-ios .km-tabstrip
+{
+    display: table;
+    border-collapse: separate;
+    border-spacing: 3px 0;
+}
+
+.km-phone .km-ios .km-tabstrip .km-button
+{
+    display: table-cell;
+}
+
+.km-root .km-ios6 .km-tabstrip
+{
+    border-spacing: 0;
+    padding: 0;
 }
 
 .km-ios .km-tabstrip .km-button
@@ -433,10 +547,25 @@
     border: 0;
     font-size: .7em;
     padding: 0 .3em;
-    min-width: 5em;
+    min-width: 6em;
     margin: 0 .5%;
     text-shadow: inherit;
     color: #777;
+}
+
+.km-ios6 .km-tabstrip .km-button
+{
+    margin: 0;
+    overflow: hidden;
+    padding: .1em .3em .4em;
+    color: #d1d1d1;
+    .border-radius(0);
+    .box-shadow(~"1px 0 0 rgba(255,255,255,.2), 2px 0 0 rgba(0,0,0,.5)");
+}
+
+.km-ios6 .km-tabstrip .km-button:last-child
+{
+    .box-shadow(none);
 }
 
 .km-ios .km-tabstrip .km-badge
@@ -451,6 +580,17 @@
     background: rgba(100,100,100,.3);
 }
 
+.km-ios6 .km-tabstrip .km-button:active,
+.km-ios6 .km-tabstrip .km-state-active,
+.km-ios6 .km-tabstrip .km-state-active:last-child,
+.km-ios6 .km-tabstrip .km-button:active:last-child
+{
+    background-color: #1A1A1A;
+    .box-shadow(~"0 0 2px rgba(255,255,255,.4)");
+    .linear-gradient-image(top, rgba(255,255,255,0), rgba(255,255,255,.18),
+                           left, rgba(0,0,0,.6), rgba(0,0,0,0) 3%, rgba(0,0,0,0) 97%, rgba(0,0,0,.6));
+}
+
 .km-ios .km-list
 {
     overflow: visible;
@@ -459,42 +599,41 @@
 .km-ios .km-listinset > li:first-child,
 .km-ios .km-listgroupinset .km-list > li:first-child
 {
-    border: 1px solid #999;
+    border: 1px solid @ios-list-border-color;
     border-width: 1px 1px 0;
-    border-color: #999;
-    .border-radius(10px 10px 0 0);
-    box-shadow: 0 1px 0 0 rgba(255,255,255,.4), inset 0 1px 0 0 rgba(200,200,200,.4), inset 0 -1px 0 rgba(0,0,0,.1);
-    -moz-box-shadow: 0 1px 0 0 rgba(255,255,255,.4), inset 0 1px 0 0 rgba(200,200,200,.4), inset 0 -1px 0 rgba(0,0,0,.1);
-    -webkit-box-shadow: 0 1px 0 0 rgba(255,255,255,.4), inset 0 1px 0 0 rgba(200,200,200,.4), inset 0 -1px 0 rgba(0,0,0,.1);
+    border-color: @ios-list-border-color;
+    .border-radius(@ios-list-border-radius @ios-list-border-radius 0 0);
+    .box-shadow(~"0 1px 0 0 rgba(255,255,255,.4), inset 0 1px 0 0 rgba(200,200,200,.4), inset 0 -1px 0 rgba(0,0,0,.2)");
 }
 
 .km-ios .km-list > li
 {
+    border-top: 1px solid rgba(255,255,255,.1);
     border-bottom: 1px solid rgba(0,0,0,.1);
 }
 
 .km-ios .km-listinset > li,
 .km-ios .km-listgroupinset .km-list > li
 {
-    border: 1px solid #999;
+    border: 1px solid @ios-list-border-color;
     border-width: 0 1px;
-    .box-shadow(inset 0 -1px 0 rgba(0,0,0,.1));
+    .box-shadow(~"inset 0 -1px 0 rgba(0,0,0,.2), inset 0 1px 0 rgba(255,255,255,.4)");
 }
 
 .km-ios .km-listinset > li:last-child,
 .km-ios .km-listgroupinset .km-list > li:last-child
 {
-    border: 1px solid #999;
+    border: 1px solid @ios-list-border-color;
     border-width: 0 1px 1px 1px;
-    .border-radius(0 0 10px 10px);
-    .box-shadow(0 1px 0 0 rgba(255,255,255,.4));
+    .border-radius(0 0 @ios-list-border-radius @ios-list-border-radius);
+    .box-shadow(~"0 1px 0 0 rgba(255,255,255,.4), inset 0 1px 0 rgba(255,255,255,.4)");
 }
 
 .km-ios .km-listinset > li:first-child:last-child,
 .km-ios .km-listgroupinset .km-list > li:first-child:last-child
 {
     border-width: 1px;
-    .border-radius(10px);
+    .border-radius(@ios-list-border-radius);
 }
 
 .km-ios li.km-state-active .km-listview-link,
@@ -505,9 +644,23 @@
     .linear-gradient-image(top, rgba(255,255,255,.28), rgba(255,255,255,.1) 50%, rgba(255,255,255,0));
 }
 
+.km-ios .km-listview-link:after
+{
+    color: #7b7b7b;
+}
+
 .km-ios .km-state-active .km-listview-link:after
 {
-    border-color: #fff;
+    color: #fff;
+    border-color: inherit;
+}
+
+.km-on-ios.km-ios6 .km-listview-link:after
+{
+    width: .66rem;
+    height: .64rem;
+    border-width: 0;
+    box-shadow: inset -.2rem .2rem 0;
 }
 
 .km-ios .km-listinset > li:first-child,
@@ -517,9 +670,9 @@
 .km-ios .km-listinset li:first-child > .km-listview-label,
 .km-ios .km-listgroupinset li:first-child > .km-listview-label
 {
-    -webkit-border-top-left-radius: 9px;
-    -webkit-border-top-right-radius: 9px;
-    .border-radius(9px 9px 0 0);
+    -webkit-border-top-left-radius: @ios-list-link-border-radius;
+    -webkit-border-top-right-radius: @ios-list-link-border-radius;
+    .border-radius(@ios-list-link-border-radius @ios-list-link-border-radius 0 0);
 }
 
 .km-ios .km-listinset li:last-child > .km-listview-link,
@@ -527,9 +680,9 @@
 .km-ios .km-listinset li:last-child > .km-listview-label,
 .km-ios .km-listgroupinset li:last-child > .km-listview-label
 {
-    -webkit-border-bottom-left-radius: 9px;
-    -webkit-border-bottom-right-radius: 9px;
-    .border-radius(0 0 9px 9px);
+    -webkit-border-bottom-left-radius: @ios-list-link-border-radius;
+    -webkit-border-bottom-right-radius: @ios-list-link-border-radius;
+    .border-radius(0 0 @ios-list-link-border-radius @ios-list-link-border-radius);
 }
 
 .km-ios .km-listinset li:first-child:last-child > .km-listview-link,
@@ -537,22 +690,25 @@
 .km-ios .km-listinset li:first-child:last-child > .km-listview-label,
 .km-ios .km-listgroupinset li:first-child:last-child > .km-listview-label
 {
-    .border-radius(9px);
+    .border-radius(@ios-list-link-border-radius);
 }
 
 .km-ios .km-group-title
 {
     color: #FFF;
     text-shadow: 0 1px 1px rgba(100,100,100,.8);
-    border-top: 1px solid rgba(255,255,255,.5);
-    background-color: #8d9daa;
-    .box-shadow(0 -1px 0 #78858e);
+    border-top: 1px solid rgba(255,255,255,.2);
+    border-bottom: 1px solid rgba(0,0,0,0);
+    background-color: #94A3AE;
+    .linear-gradient-image(top, rgba(255,255,255,0), rgba(255,255,255,.3));
+    .box-shadow(0 -1px 0 #86929A);
+    position: relative;
 }
 
 .km-ios .km-listgroupinset .km-group-title
 {
     font-size: 1.2em;
-    color: #373e50;
+    color: #4C566C;
     padding: 0;
     background: none;
     border: none;
@@ -568,13 +724,13 @@
     font-size: 1.2em;
     font-weight: bold;
     overflow: hidden;
-    background: #f9f9f9;
+    background: @ios-list-background-color;
 }
 
 .km-ios,
 .km-ios .km-content
 {
-    background: #f9f9f9;
+    background: @ios-list-background-color;
     color: #000;
 }
 
@@ -588,54 +744,93 @@
     background: #c4ccd5 url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAABCAYAAAASC7TOAAAAGklEQVR4Xm3DMREAAACCQKPYvySeO8MHML0BOrEVLMJmdzAAAAAASUVORK5CYII=");
 }
 
-.km-ios label.km-item-checked:after
-{
-    background: transparent url("images/ios-sprite.png") 0 -10px no-repeat;
-}
-
 .km-ios .km-button .km-icon,
 .km-ios .km-button.km-state-active .km-icon
 {
-    .linear-gradient-image(top, rgba(255,255,255,.7), rgba(255,255,255,.9));
+    text-shadow: none;
+    .linear-gradient-image(@button-icon-gradient);
 }
 
 .km-ios .km-buttongroup .km-icon
 {
     margin-top: .1em;
-    .linear-gradient-image(top, rgba(0,0,0,.5), rgba(0,0,0,.3));
+    .linear-gradient-image(@buttongroup-icon-gradient);
 }
 
 .km-ios .km-tabstrip .km-icon
 {
-    background: rgba(255,255,255,.3);
-    .linear-gradient-image(top, rgba(255,255,255,.2), rgba(255,255,255,0));
+    color: @tabstrip-icon-color;
+    .linear-gradient-image(@tabstrip-icon-gradient);
+}
+
+.km-ios6 .km-tabstrip .km-icon
+{
+    color: #666666;
 }
 
 .km-ios .km-tabstrip .km-state-active .km-icon
 {
-    background: #3F99D2;
-    .linear-gradient-image(top, rgba(255,255,255,.6) 0, rgba(255,255,255,0) 50%, rgba(255,255,255,.3) 100%);
+    color: @ios-tabstrip-active-icon-color;
+    .linear-gradient-image(@tabstrip-active-icon-gradient);
+}
+
+.km-ios6 .km-tabstrip .km-state-active .km-icon
+{
+    color: #00B0FF;
+}
+
+:-webkit-any(.km-root) .km-ios .km-icon:after
+{
+    background-color: currentcolor;
+}
+
+.km-ios .km-tabstrip .km-icon:before
+{
+    display: block;
+    margin-top: 1px;
+}
+
+.km-ios .km-tabstrip .km-state-active .km-icon:before
+{
+    margin-top: 2px;
 }
 
 /* Pull To Refresh */
 
+.km-ios .km-load-more,
 .km-ios .km-scroller-pull
 {
-    color: #788193;
+    color: @pull-to-refresh-color;
+    text-shadow: 0 1px 1px @pull-to-refresh-shadow;
 }
 
 .km-ios .km-load-more .km-icon,
 .km-ios .km-scroller-pull .km-icon
 {
-    background: #788193;
     width: 2.4rem;
     height: 2.4rem;
+    font-size: 2.4rem;
+}
+
+.km-ios .km-load-more .km-icon,
+.km-ios .km-scroller-pull .km-icon
+{
+    color: @pull-to-refresh-color;
+    text-shadow: 0 1px 1px @pull-to-refresh-shadow;
+}
+
+.km-ios :-webkit-any(.km-load-more) .km-icon:after,
+.km-ios :-webkit-any(.km-scroller-pull) .km-icon:after
+{
+    background: @pull-to-refresh-shadow;
+    text-shadow: 0 1px 1px @pull-to-refresh-color;
 }
 
 .km-ios .km-scroller-refresh .km-icon
 {
     width: 2rem;
     height: 2rem;
+    font-size: 2rem;
 }
 
 /* ScrollView */
@@ -719,7 +914,8 @@
 
 .km-ios .km-list input:not([type=button]):not([type=submit]):not([type=reset]):not([type=image]):not([type=checkbox]):not([type=radio]):not(.k-input):not(.k-button),
 .km-ios .km-list select:not([multiple]),
-.km-ios .km-list .k-dropdown-wrap
+.km-ios .km-list .k-dropdown-wrap,
+.km-ios .km-list textarea
 {
     .appearance(none);
     font-size: 1.1rem;
@@ -731,6 +927,11 @@
     background: transparent;
 }
 
+.km-ios .km-list .k-dropdown-wrap
+{
+	padding: .2em;
+}
+
 .km-ios .km-list .k-dropdown-wrap .k-input
 {
     color: #385487;
@@ -739,7 +940,7 @@
 .km-ios .km-list .k-dropdown
 {
     right: .4em;
-    margin-top: -1.2em;
+    margin-top: -1.05em;
     font-weight: normal;
 }
 
@@ -768,7 +969,8 @@
 }
 
 .km-ios .km-content .km-list .km-state-active input:not([type=button]):not([type=submit]):not([type=reset]):not([type=image]):not([type=checkbox]):not([type=radio]):not(.k-input):not(.k-button),
-.km-ios .km-content .km-list .km-state-active select:not([multiple])
+.km-ios .km-content .km-list .km-state-active select:not([multiple]),
+.km-ios .km-content .km-list .km-state-active textarea
 {
     color: #fff;
 }
@@ -786,11 +988,14 @@
 .km-ios .km-popup .k-item,
 .km-ios .km-actionsheet > li > a
 {
-    background: transparent, #fff;
+    overflow: hidden;
+    background: #fff;
     .linear-gradient-image(top, rgba(0,0,0,.3), rgba(0,0,0,0) 5%, rgba(0,0,0,0) 98%, rgba(70,70,70,.5),
                      top, rgba(0,0,0,0), rgba(0,0,0,0.1) 50%, rgba(0,0,0,.2) 50%, rgba(0,0,0,.2));
     padding: .3em 0 .3em .6em;
     color: #000;
+    border-width: 3px;
+    border-color: rgba(0,0,0,.8);
     .border-radius(.6em);
     .box-shadow(~"inset 0 1px 1px rgba(255,255,255,.5), 0 1px 1px rgba(255,255,255,.5)");
     .box-sizing(border-box);
@@ -800,7 +1005,7 @@
 
 .km-root .km-ios .km-popup .k-item
 {
-    border: 3px solid #32353a;
+    border: 3px solid rgba(0,0,0,.8);
 }
 
 .km-ios .km-popup .k-item,
@@ -839,9 +1044,10 @@
 .km-ios .km-actionsheet > li > a:hover,
 .km-ios li.km-actionsheet-cancel > a
 {
-    background: transparent, #0b47a2;
+    background: #072398;
     .linear-gradient-image(top, rgba(0,0,0,.3), rgba(0,0,0,0) 5%, rgba(0,0,0,0) 98%, rgba(70,70,70,.5),
-                     top, rgba(255,255,255,0.35), rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 50%, rgba(255,255,255,0));
+                     top, rgba(255,255,255,.6), rgba(255,255,255,.1) 50%, rgba(255,255,255,0) 50%, rgba(255,255,255,.15));
+    background-clip: padding-box;
     color: #fff;
     text-shadow: 0 -1px rgba(0,0,0,.3);
 }
@@ -864,7 +1070,6 @@
 .km-ios .km-popup .k-list-container
 {
     width: 100% !important;
-    height: auto !important;
 }
 
 .km-ios .km-actionsheet,
@@ -925,28 +1130,39 @@
 
 .km-tablet .km-ios .km-tabstrip
 {
-    padding: .4em 0 .2em;
+    padding: .2rem 0 .2rem;
 }
 
 .km-tablet .km-ios.km-horizontal .km-tabstrip
 {
-    padding: .2em 0 0;
+    padding: .2rem 0 0;
+}
+
+.km-tablet .km-pane.km-ios6 .km-tabstrip
+{
+    padding: 0;
 }
 
 .km-tablet .km-ios .km-tabstrip .km-icon
 {
-    margin: .3em auto;
+    margin: .3rem auto;
 }
 
 .km-tablet .km-ios.km-horizontal .km-tabstrip .km-icon
 {
-    margin: 0 auto;
+    margin: .1rem auto;
 }
 
 .km-tablet .km-ios .km-tabstrip .km-button
 {
     padding: .1rem .3rem;
     margin: 0 1.5%;
+}
+
+.km-tablet .km-ios6 .km-tabstrip .km-button
+{
+    margin: 0;
+    min-width: 8em;
 }
 
 .km-tablet .km-ios.km-horizontal .km-tabstrip .km-button
@@ -957,16 +1173,25 @@
 .km-tablet .km-ios .km-view-title,
 .km-tablet .km-ios .km-modalview .km-view-title
 {
-    line-height: 1.75rem;
+    line-height: 2.2em;
     color: #848B92;
     text-shadow: 0 1px rgba(255,255,255,.8);
 }
 
-.km-tablet .km-ios .km-navbar .km-button,
-.km-tablet .km-ios :not(.km-tabstrip):not(.km-buttongroup) > .km-button
+.km-tablet .km-ios *:not(.km-tabstrip):not(.km-buttongroup) > .km-button
 {
-    background: #606060;
+    background: #6A727D;
+}
+
+.km-ios6 *:not(.km-tabstrip):not(.km-buttongroup) > .km-button,
+.km-tablet .km-ios *:not(.km-tabstrip):not(.km-buttongroup) > .km-button
+{
     .linear-gradient-image(top, rgba(255,255,255,.5), rgba(255,255,255,0));
+}
+
+.km-ios6 *:not(.km-tabstrip):not(.km-buttongroup) > .km-button,
+{
+    background-color: #44648f;
 }
 
 .km-tablet .km-ios .km-navbar,
@@ -975,12 +1200,11 @@
 {
     background: #A8ACB9;
     .linear-gradient-image(top, rgba(255,255,255,.9), rgba(255,255,255,0));
-    border-bottom: 1px solid rgba(0, 0, 0, 0.6);
 }
 
 .km-tablet .km-ios .km-content
 {
-    background: #BCC1C5 none;
+    background: #D7D9DF none;
 }
 
 .km-tablet .km-ios .km-actionsheet-title,
@@ -1143,7 +1367,7 @@
 
 .km-ios .km-modalview
 {
-    background-color: #7185a2;
+    background-color: @default-background-color;
     .box-sizing(border-box);
     .box-shadow(~"0 0 15px rgba(0,0,0,.5), 0 0 2px rgba(0,0,0,.5)");
 }

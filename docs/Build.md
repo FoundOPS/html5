@@ -1,4 +1,4 @@
-## Setup ##
+## Setup NEED TO UPDATE ##
 
 1. Install Node (make sure it is in your system path)
 - [windows](https://github.com/marcelklehr/nodist) 

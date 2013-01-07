@@ -4,11 +4,14 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-replace');
 
     //TODO figure out how to choose based on the current arg (all/dist/etc.)
+    //may need to wait till v1 https://github.com/yeoman/yeoman/wiki/Customization
+
     //uncomment for local/mobile
     var resourcesRoot = "../";
     //uncomment for dist
     //var resourcesRoot = "http://bp.foundops.com/app/";
     var imgRoot = resourcesRoot + "img/";
+    var stylesRoot = "../" + resourcesRoot + "styles/";
 
     //
     // Grunt configuration:
@@ -125,13 +128,9 @@ module.exports = function (grunt) {
             'styles/main.css': ['styles/**/*.css']
         },
 
-        //may need to wait till v1 https://github.com/yeoman/yeoman/wiki/Customization
         // fix css url references
         fixCss: {
-            server: {
-                imagesUrl: resourcesRoot + "img",
-                stylesUrl: resourcesRoot + "styles"
-            }
+            all: {}
         },
 
         // renames JS/CSS to prepend a hash of their contents for easier
@@ -312,17 +311,23 @@ module.exports = function (grunt) {
     grunt.registerMultiTask('fixCss', 'Fix the css url references', function () {
         // Merge task-specific and/or target-specific options with these defaults.
         var path = require('path'),
-            imagesUrl = grunt.template.process(this.data.imagesUrl),
-            stylesUrl = grunt.template.process(this.data.stylesUrl),
             files = grunt.file.expandFiles(['app/styles/main.css', 'app/styles/login.css', 'app/styles/requirements.css'])
 
         //grunt.log.writeln(imagesUrl);
 
         files.forEach(function (f) {
             var contents = grunt.file.read(f);
-            contents = contents.replace(/images/g, imagesUrl);
-            contents = contents.replace(/textures/g, imagesUrl);
-            contents = contents.replace(/styles/g, stylesUrl);
+
+            //TODO finish this regex and undo kendo/icon.less comment
+            //contents.replace(/^@font-face/, "");
+
+            contents = contents.replace(/images/g, imgRoot);
+            contents = contents.replace(/styles/g, stylesRoot);
+
+            //Kendo
+            contents = contents.replace(/textures/g, imgRoot + "textures");
+            contents = contents.replace(/Default/g, imgRoot + "Default");
+
             grunt.file.write(f, contents);
         });
     });
