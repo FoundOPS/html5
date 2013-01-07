@@ -38,7 +38,7 @@
 
 .km-ios:after
 {
-     content: url("../../img/images/back.png");
+     content: url("images/back.png");
      display: none;
 }
 
@@ -122,7 +122,7 @@
     overflow: hidden;
     margin-left: -1em;
     padding-left: 2.1em;
-    -webkit-mask-image: url("../../img/images/back.png");
+    -webkit-mask-image: url("images/back.png");
     -webkit-mask-size: auto 100%;
     -webkit-mask-repeat: no-repeat;
     -webkit-mask-position-x: 1em;
@@ -927,6 +927,11 @@
     background: transparent;
 }
 
+.km-ios .km-list .k-dropdown-wrap
+{
+	padding: .2em;
+}
+
 .km-ios .km-list .k-dropdown-wrap .k-input
 {
     color: #385487;
@@ -1173,22 +1178,18 @@
     text-shadow: 0 1px rgba(255,255,255,.8);
 }
 
-.km-tablet .km-ios .km-navbar .km-button,
-.km-tablet .km-ios :not(.km-tabstrip):not(.km-buttongroup) > .km-button
+.km-tablet .km-ios *:not(.km-tabstrip):not(.km-buttongroup) > .km-button
 {
     background: #6A727D;
 }
 
-.km-ios6 .km-navbar .km-button,
-.km-ios6 :not(.km-tabstrip):not(.km-buttongroup) > .km-button,
-.km-tablet .km-ios .km-navbar .km-button,
-.km-tablet .km-ios :not(.km-tabstrip):not(.km-buttongroup) > .km-button
+.km-ios6 *:not(.km-tabstrip):not(.km-buttongroup) > .km-button,
+.km-tablet .km-ios *:not(.km-tabstrip):not(.km-buttongroup) > .km-button
 {
     .linear-gradient-image(top, rgba(255,255,255,.5), rgba(255,255,255,0));
 }
 
-.km-ios6 .km-navbar .km-button,
-.km-ios6 :not(.km-tabstrip):not(.km-buttongroup) > .km-button,
+.km-ios6 *:not(.km-tabstrip):not(.km-buttongroup) > .km-button,
 {
     background-color: #44648f;
 }

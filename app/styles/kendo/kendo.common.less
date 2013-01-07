@@ -1,6 +1,6 @@
 /*
-* Kendo UI Complete v2012.3.1210 (http://kendoui.com)
-* Copyright 2012 Telerik AD. All rights reserved.
+* Kendo UI Complete v2012.3.1304 (http://kendoui.com)
+* Copyright 2013 Telerik AD. All rights reserved.
 *
 * Kendo UI Complete commercial licenses may be obtained at
 * https://www.kendoui.com/purchase/license-agreement/kendo-ui-complete-commercial.aspx
@@ -219,6 +219,14 @@ html body .k-button-bare
 {
     cursor: default;
     outline: 0;
+}
+
+@media print {
+	.k-state-disabled,
+	.k-state-disabled .k-input
+	{
+		opacity:1 !important;
+	}
 }
 
 .k-state-error
@@ -2353,7 +2361,6 @@ div.k-treeview
 .k-treeview .k-plus-disabled,
 .k-treeview .k-minus-disabled
 {
-    float: left;  /* Opera */
     margin-top: 3px;
     margin-left: -16px;
     cursor: pointer;
@@ -3114,6 +3121,11 @@ div.k-slider
     right: 120%;
 }
 
+.k-slider-tooltip
+{
+	top:-4444px; /*prevent window resize in IE8 when appending*/
+}
+
 /* Tooltip */
 
 .k-tooltip
@@ -3457,7 +3469,7 @@ html .k-upload
 }
 
 .k-upload .k-upload-files .k-delete,
-.k-upload .k-upload-files .k-i-cancel
+.k-upload .k-upload-files .k-cancel
 {
     background-position: -164px -116px;
 }

@@ -1,6 +1,6 @@
 /*
-* Kendo UI Complete v2012.3.1210 (http://kendoui.com)
-* Copyright 2012 Telerik AD. All rights reserved.
+* Kendo UI Complete v2012.3.1304 (http://kendoui.com)
+* Copyright 2013 Telerik AD. All rights reserved.
 *
 * Kendo UI Complete commercial licenses may be obtained at
 * https://www.kendoui.com/purchase/license-agreement/kendo-ui-complete-commercial.aspx
@@ -1267,6 +1267,10 @@ function pad(number, digits, end) {
             value.setFullYear(year);
         }
 
+        if (value.getDate() !== day) {
+            return null;
+        }
+
         return value;
     }
 
@@ -1630,9 +1634,12 @@ function pad(number, digits, end) {
         support.transitions = transitions;
 
         support.devicePixelRatio = window.devicePixelRatio === undefined ? 1 : window.devicePixelRatio;
+        support.screenWidth = window.outerWidth || window.screen ? window.screen.availWidth : window.innerWidth;
+        support.screenHeight = window.outerHeight || window.screen ? window.screen.availHeight : window.innerHeight;
 
         support.detectOS = function (ua) {
             var os = false, minorVersion, match = [],
+                notAndroidPhone = !/mobile safari/i.test(ua),
                 agentRxs = {
                     fire: /(Silk)\/(\d+)\.(\d+(\.\d+)?)/,
                     android: /(Android|Android.*(?:Opera|Firefox).*?\/)\s*(\d+)\.(\d+(\.\d+)?)/,
@@ -1682,7 +1689,7 @@ function pad(number, digits, end) {
                         os.flatVersion = os.majorVersion + minorVersion + (new Array(3 - (minorVersion.length < 3 ? minorVersion.length : 2)).join("0"));
                         os.appMode = window.navigator.standalone || (/file|local/).test(window.location.protocol) || typeof window.PhoneGap !== UNDEFINED || typeof window.cordova !== UNDEFINED; // Use file protocol to detect appModes.
 
-                        if (os.android && support.devicePixelRatio < 1.5 && (window.outerWidth > 800 || window.outerHeight > 800 || (window.screen && (window.screen.availWidth > 800 || window.screen.availHeight > 800)))) {
+                        if (os.android && (support.devicePixelRatio < 1.5 && os.flatVersion < 400 || notAndroidPhone) && (support.screenWidth > 800 || support.screenHeight > 800)) {
                             os.tablet = agent;
                         }
 
@@ -4497,6 +4504,7 @@ function pad(number, digits, end) {
             var that = this,
                 total = options.total,
                 model = options.model,
+                parse = options.parse,
                 data = options.data;
 
             if (model) {
@@ -4526,37 +4534,54 @@ function pad(number, digits, end) {
             }
 
             if (total) {
-                total = that.getter(total);
-                that.total = function(data) {
-                    return parseInt(total(data), 10);
-                };
+                if (typeof total == "string") {
+                    total = that.getter(total);
+                    that.total = function(data) {
+                        return parseInt(total(data), 10);
+                    };
+                } else if (typeof total == "function"){
+                    that.total = total;
+                }
             }
 
             if (data) {
-                data = that.xpathToMember(data);
-                that.data = function(value) {
-                    var result = that.evaluate(value, data),
-                        modelInstance;
+                if (typeof data == "string") {
+                    data = that.xpathToMember(data);
+                    that.data = function(value) {
+                        var result = that.evaluate(value, data),
+                            modelInstance;
 
-                    result = isArray(result) ? result : [result];
+                        result = isArray(result) ? result : [result];
 
-                    if (that.model && model.fields) {
-                        modelInstance = new that.model();
+                        if (that.model && model.fields) {
+                            modelInstance = new that.model();
 
-                        return map(result, function(value) {
-                            if (value) {
-                                var record = {}, field;
+                            return map(result, function(value) {
+                                if (value) {
+                                    var record = {}, field;
 
-                                for (field in model.fields) {
-                                    record[field] = modelInstance._parse(field, model.fields[field].field(value));
+                                    for (field in model.fields) {
+                                        record[field] = modelInstance._parse(field, model.fields[field].field(value));
+                                    }
+
+                                    return record;
                                 }
+                            });
+                        }
 
-                                return record;
-                            }
-                        });
-                    }
+                        return result;
+                    };
+                } else if (typeof data == "function") {
+                    that.data = data;
+                }
+            }
 
-                    return result;
+            if (typeof parse == "function") {
+                var xmlParse = that.parse;
+
+                that.parse = function(data) {
+                    var xml = parse.call(that, data);
+                    return xmlParse.call(that, xml);
                 };
             }
         },
@@ -4731,6 +4756,7 @@ function pad(number, digits, end) {
         toString = {}.toString,
         stableSort = kendo.support.stableSort,
         dateRegExp = /^\/Date\((.*?)\)\/$/,
+        newLineRegExp = /(\r+|\n+)/g,
         quoteRegExp = /(?=['\\])/g;
 
     var ObservableArray = Observable.extend({
@@ -5302,11 +5328,11 @@ function pad(number, digits, end) {
                     return 0;
                 }
 
-                if ((a && !b) || b == null) {
+                if ((a && !b && a > 0) || b == null) {
                     return 1;
                 }
 
-                if (b && !a) {
+                if (b && !a && b > 0) {
                     return -1;
                 }
 
@@ -5324,11 +5350,11 @@ function pad(number, digits, end) {
                     return 0;
                 }
 
-                if ((a && !b) || b == null) {
+                if ((a && !b && a > 0) || b == null) {
                     return -1;
                 }
 
-                if ((b && !a) || a == null) {
+                if ((b && !a && b > 0) || a == null) {
                     return 1;
                 }
 
@@ -5412,7 +5438,7 @@ function pad(number, digits, end) {
     var operators = (function(){
 
         function quote(value) {
-            return value.replace(quoteRegExp, "\\");
+            return value.replace(quoteRegExp, "\\").replace(newLineRegExp, "");
         }
 
         function operator(op, a, b, ignore) {
@@ -6482,6 +6508,24 @@ function pad(number, digits, end) {
                 });
         },
 
+        hasChanges: function() {
+            var idx,
+                length,
+                data = this._data;
+
+            if (this._destroyed.length) {
+                return true;
+            }
+
+            for (idx = 0, length = data.length; idx < length; idx++) {
+                if (data[idx].isNew() || data[idx].dirty) {
+                    return true;
+                }
+            }
+
+            return false;
+        },
+
         _accept: function(result) {
             var that = this,
                 models = result.models,
@@ -6853,14 +6897,19 @@ function pad(number, digits, end) {
 
             that._data = that._observe(data);
 
-            var start = that._skip || 0,
-            end = start + that._data.length;
-
-            that._ranges.push({ start: start, end: end, data: that._data });
-            that._ranges.sort( function(x, y) { return x.start - y.start; } );
+            that._addRange(that._data);
 
             that._dequeueRequest();
             that._process(that._data);
+        },
+
+        _addRange: function(data) {
+            var that = this,
+                start = that._skip || 0,
+                end = start + data.length;
+
+            that._ranges.push({ start: start, end: end, data: data });
+            that._ranges.sort( function(x, y) { return x.start - y.start; } );
         },
 
         _observe: function(data) {
@@ -6972,6 +7021,9 @@ function pad(number, digits, end) {
             var that = this;
             if (value !== undefined) {
                 that._data = this._observe(value);
+
+                that._ranges = [];
+                that._addRange(that._data);
 
                 that._total = that._data.length;
 
@@ -7831,7 +7883,7 @@ function pad(number, digits, end) {
         Model: Model
     });
 })(window.kendo.jQuery);
-(function ($, unefined) {
+(function ($, undefined) {
     var kendo = window.kendo,
         Observable = kendo.Observable,
         ObservableObject = kendo.data.ObservableObject,
@@ -9878,10 +9930,6 @@ function pad(number, digits, end) {
             }).length;
         },
 
-        _isPressed: function() {
-            return this.touches.length;
-        },
-
         _start: function(e) {
             var that = this,
                 idx = 0,
@@ -11236,7 +11284,7 @@ function pad(number, digits, end) {
             Widget.fn.init.call(that, element, options);
 
             that.draggable = draggable = that.options.draggable || new kendo.ui.Draggable(that.element, {
-                filter: that.options.filter,
+                filter: that.options.draggableElements,
                 hint: hint,
                 group: group
             });
@@ -11385,6 +11433,7 @@ function pad(number, digits, end) {
         options: {
             name: "Groupable",
             filter: "th",
+            draggableElements: "th",
             messages: {
                 empty: "Drag a column header and drop it here to group by that column"
             }
@@ -12970,7 +13019,7 @@ function pad(number, digits, end) {
                 that._currentWidth = width;
             }
 
-            if (!that._hovered) {
+            if (!that._hovered && !contains(that.element[0], document.activeElement)) {
                 that.close();
             }
         },
@@ -14471,7 +14520,7 @@ function pad(number, digits, end) {
                         position: "relative",
                         width: viewWidth * 2,
                         "float": LEFT,
-                        left: future ? 0 : -viewWidth
+                        "margin-left": future ? 0 : -viewWidth
                     });
 
                 to[future ? "insertAfter" : "insertBefore"](from);
@@ -14483,7 +14532,7 @@ function pad(number, digits, end) {
                         to.unwrap();
 
                         that._focusView(active);
-                    }
+                   }
                 });
 
                 from.parent().kendoStop(true, true).kendoAnimate(horizontal);
@@ -17376,7 +17425,7 @@ function pad(number, digits, end) {
                     that._placeholder();
                 }
 
-                that._old = that._accessor();
+                that._prev = that._old = that._accessor();
                 that._oldIndex = that.selectedIndex;
             } else {
                 return that._accessor();
@@ -18475,6 +18524,29 @@ function pad(number, digits, end) {
         table.prepend(colgroup);
     }
 
+    function convertToObject(array) {
+        var result = {},
+            item,
+            idx,
+            length;
+
+        for (idx = 0, length = array.length; idx < length; idx++) {
+            item = array[idx];
+            result[item.value] = item.text;
+        }
+
+        return result;
+    }
+
+    function formatGroupValue(value, format, columnValues) {
+        var isForiegnKey = columnValues && columnValues.length && isPlainObject(columnValues[0]) && "value" in columnValues[0],
+            groupValue = isForiegnKey ? convertToObject(columnValues)[value] : value;
+
+        groupValue = groupValue != null ? groupValue : "";
+
+        return format ? kendo.format(format, groupValue) : groupValue;
+    }
+
     var Grid = Widget.extend({
         init: function(element, options) {
             var that = this;
@@ -18607,24 +18679,7 @@ function pad(number, digits, end) {
                 that.virtualScrollable.destroy();
             }
 
-            that.thead.find("th").each(function(){
-                var th = $(this),
-                    filterMenu = th.data("kendoFilterMenu"),
-                    sortable = th.data("kendoSortable"),
-                    columnMenu = th.data("kendoColumnMenu");
-
-                if (filterMenu) {
-                    filterMenu.destroy();
-                }
-
-                if (sortable) {
-                    sortable.destroy();
-                }
-
-                if (columnMenu) {
-                    columnMenu.destroy();
-                }
-            });
+            that._destroyColumnAttachments();
 
             that._destroyEditable();
 
@@ -18659,6 +18714,29 @@ function pad(number, digits, end) {
 
         items: function() {
             return this.tbody.children(':not(.k-grouping-row,.k-detail-row,.k-group-footer)');
+        },
+
+        _destroyColumnAttachments: function() {
+            var that = this;
+
+            that.thead.find("th").each(function(){
+                var th = $(this),
+                    filterMenu = th.data("kendoFilterMenu"),
+                    sortable = th.data("kendoSortable"),
+                    columnMenu = th.data("kendoColumnMenu");
+
+                if (filterMenu) {
+                    filterMenu.destroy();
+                }
+
+                if (sortable) {
+                    sortable.destroy();
+                }
+
+                if (columnMenu) {
+                    columnMenu.destroy();
+                }
+            });
         },
 
         _attachCustomCommandsEvent: function() {
@@ -19186,7 +19264,7 @@ function pad(number, digits, end) {
 
                 container = that._editContainer;
 
-                container.on("touchend" + NS + " " + CLICK + NS, "a.k-grid-cancel", function(e) {
+                container.on(CLICK + NS, "a.k-grid-cancel", function(e) {
                     e.preventDefault();
                     e.stopPropagation();
 
@@ -19200,7 +19278,7 @@ function pad(number, digits, end) {
                     }
                 });
 
-                container.on("touchend" + NS + " " + CLICK + NS, "a.k-grid-update", function(e) {
+                container.on(CLICK + NS, "a.k-grid-update", function(e) {
                     e.preventDefault();
                     e.stopPropagation();
 
@@ -19510,9 +19588,9 @@ function pad(number, digits, end) {
                 }
 
                 if (editable && editable.create !== false) {
-                    container.on("touchend" + NS + " " + CLICK + NS, ".k-grid-add", function(e) { e.preventDefault(); that.addRow(); })
-                        .on("touchend" + NS + " " + CLICK + NS, ".k-grid-cancel-changes", function(e) { e.preventDefault(); that.cancelChanges(); })
-                        .on("touchend" + NS + " " + CLICK + NS, ".k-grid-save-changes", function(e) { e.preventDefault(); that.saveChanges(); });
+                    container.on(CLICK + NS, ".k-grid-add", function(e) { e.preventDefault(); that.addRow(); })
+                        .on(CLICK + NS, ".k-grid-cancel-changes", function(e) { e.preventDefault(); that.cancelChanges(); })
+                        .on(CLICK + NS, ".k-grid-save-changes", function(e) { e.preventDefault(); that.saveChanges(); });
                 }
             }
         },
@@ -19588,7 +19666,7 @@ function pad(number, digits, end) {
 
             if (groupable) {
                 if(!wrapper.has("div.k-grouping-header")[0]) {
-                    $("<div />").addClass("k-grouping-header").prependTo(wrapper);
+                    $("<div>&nbsp;</div>").addClass("k-grouping-header").prependTo(wrapper);
                 }
 
                 if (that.groupable) {
@@ -19599,7 +19677,8 @@ function pad(number, digits, end) {
                     draggable: that._draggableInstance,
                     groupContainer: ">div.k-grouping-header",
                     dataSource: that.dataSource,
-                    filter: ".k-header:not(.k-group-cell,.k-hierarchy-cell):visible[" + kendo.attr("field") + "]",
+                    draggableElements: ".k-header:not(.k-group-cell,.k-hierarchy-cell):visible[" + kendo.attr("field") + "]",
+                    filter: ".k-header:not(.k-group-cell,.k-hierarchy-cell)[" + kendo.attr("field") + "]",
                     allowDrag: that.options.reorderable
                 }));
             }
@@ -20158,10 +20237,22 @@ function pad(number, digits, end) {
         },
 
         _averageRowHeight: function() {
-            var rowHeight = this._rowHeight;
+            var that = this,
+                rowHeight = that._rowHeight;
 
-            this._rowHeight = rowHeight = this.table.outerHeight() / this.table[0].rows.length;
+            if (!that._rowHeight) {
+                that._rowHeight = rowHeight = that.table.outerHeight() / that.table[0].rows.length;
+                that._sum = rowHeight;
+                that._measures = 1;
+            }
 
+            var currentRowHeight = that.table.outerHeight() / that.table[0].rows.length;
+
+            if (rowHeight !== currentRowHeight) {
+                that._measures ++;
+                that._sum += currentRowHeight;
+                that._rowHeight = that._sum / that._measures;
+            }
             return rowHeight;
         },
 
@@ -20417,6 +20508,8 @@ function pad(number, digits, end) {
             var that = this,
                 columns = that.columns,
                 column,
+                cell,
+                sortableInstance,
                 sortable = that.options.sortable;
 
             if (sortable) {
@@ -20425,9 +20518,16 @@ function pad(number, digits, end) {
                     .each(function(index) {
                         column = columns[index];
                         if (column.sortable !== false && !column.command && column.field) {
-                            $(this)
-                            .attr("data-" + kendo.ns +"field", column.field)
-                            .kendoSortable(extend({}, sortable, { dataSource: that.dataSource, aria: true }));
+                            cell = $(this);
+
+                            sortableInstance = cell.data("kendoSortable");
+
+                            if (sortableInstance) {
+                                sortableInstance.destroy();
+                            }
+
+                            cell.attr("data-" + kendo.ns +"field", column.field)
+                                .kendoSortable(extend({}, sortable, { dataSource: that.dataSource, aria: true }));
                         }
                     });
             }
@@ -20594,21 +20694,16 @@ function pad(number, digits, end) {
                 state.count ++;
             } else if (type === STRING) {
                 html += template;
-            } else if (columnValues && columnValues.length && isPlainObject(columnValues[0]) && "value" in columnValues[0]) {
-                html += "#var v =" + kendo.stringify(columnValues) + "#";
-                html += "#for (var idx=0,length=v.length;idx<length;idx++) {#";
-                html += "#if (v[idx].value == ";
+            } else if (columnValues && columnValues.length && isPlainObject(columnValues[0]) && "value" in columnValues[0] && field) {
+                html += "#var v =" + kendo.stringify(convertToObject(columnValues)) + "#";
+                html += "#var f = v[";
 
                 if (!settings.useWithBlock) {
                     html += paramName + ".";
                 }
 
-                html += field;
-                html += ") { #";
-                html += "${v[idx].text}";
-                html += "#break;#";
-                html += "#}#";
-                html += "#}#";
+                html += field + "]#";
+                html += "${f != null ? f : ''}";
             } else {
                 html += column.encoded ? "${" : "#=";
 
@@ -20881,6 +20976,10 @@ function pad(number, digits, end) {
 
             tr.find("script").remove().end().appendTo(thead);
 
+            if (that.thead) {
+                that._destroyColumnAttachments();
+            }
+
             that.thead = thead;
 
             that._sortable();
@@ -20961,9 +21060,8 @@ function pad(number, digits, end) {
                 length,
                 field = group.field,
                 column = grep(that.columns, function(column) { return column.field == field; })[0] || { },
-                value = column.format ? kendo.format(column.format, group.value) : group.value,
                 template = column.groupHeaderTemplate,
-                text =  (column.title || field) + ': ' + value,
+                text =  (column.title || field) + ': ' + formatGroupValue(group.value, column.format, column.values),
                 data = extend({}, { field: group.field, value: group.value }, group.aggregates[group.field]),
                 footerDefaults = that._groupAggregatesDefaultObject || {},
                 groupItems = group.items;
@@ -21350,7 +21448,10 @@ function pad(number, digits, end) {
                 } else {
                     that.current(that.thead.find("th:not(.k-group-cell)").eq(currentIndex));
                 }
-                that._current.closest("table")[0].focus();
+
+                if (that._current) {
+                    that._current.closest("table")[0].focus();
+                }
             }
 
             that.trigger(DATABOUND);
@@ -26969,10 +27070,15 @@ var FontTool = Tool.extend({
     willDelayExecution: inlineFormatWillDelayExecution,
 
     update: function(ui, nodes, pendingFormats) {
-        var that = this,
-            list = ui.data(that.type),
-            pendingFormat = pendingFormats.getPending(that.name),
-            format = (pendingFormat && pendingFormat.params) ? pendingFormat.params.value : that.finder.getFormat(nodes);
+        var list = ui.data(this.type),
+            pendingFormat = pendingFormats.getPending(this.name),
+            format;
+
+        if (pendingFormat && pendingFormat.options.params) {
+            format = pendingFormat.options.params.value;
+        } else {
+            format = this.finder.getFormat(nodes);
+        }
 
         list.close();
         list.value(format);
@@ -28256,9 +28362,9 @@ var LinkCommand = Command.extend({
 
         var dialog = EditorUtils.createDialog(that._dialogTemplate(showText), that.editor, extend({}, that.editor.options.dialogOptions, {
             title: "Insert link",
-            close: close
+            close: close,
+            visible: false
         }))
-            .hide()
             .find(".k-dialog-insert").click(apply).end()
             .find(".k-dialog-close").click(close).end()
             .find(".k-form-text-row input").keydown(function (e) {
@@ -28274,9 +28380,8 @@ var LinkCommand = Command.extend({
             .find("#k-editor-link-text").val(nodes.length > 0 ? (nodes.length == 1 ? nodes[0].nodeValue : nodes[0].nodeValue + nodes[1].nodeValue) : "").end()
             .find("#k-editor-link-title").val(a ? a.title : "").end()
             .find("#k-editor-link-target").attr("checked", a ? a.target == "_blank" : false).end()
-            .show()
             .data("kendoWindow")
-            .center();
+            .center().open();
 
         if (showText && nodes.length > 0) {
             initialText = $("#k-editor-link-text", dialog.element).val();
@@ -28422,9 +28527,11 @@ var ImageCommand = Command.extend({
             options = that.editor.options;
 
         function apply(e) {
+            var element = dialog.element;
+
             that.attributes = {
-                src: $(KEDITORIMAGEURL, dialog.element).val(),
-                alt: $(KEDITORIMAGETITLE, dialog.element).val()
+                src: element.find(KEDITORIMAGEURL).val().replace(/ /g, "%20"),
+                alt: element.find(KEDITORIMAGETITLE).val()
             };
 
             applied = that.insertImage(img, range);
@@ -28463,6 +28570,7 @@ var ImageCommand = Command.extend({
         dialog = EditorUtils.createDialog(that._dialogTemplate(showBrowser), that.editor, extend(dialogWidth, options.dialogOptions, {
             title: INSERTIMAGE,
             close: close,
+            visible: false,
             resizable: showBrowser,
             activate: function() {
                 if (showBrowser) {
@@ -28480,16 +28588,14 @@ var ImageCommand = Command.extend({
                 }
             }
         }))
-                .hide()
                 .find(".k-dialog-insert").click(apply).end()
                 .find(".k-dialog-close").click(close).end()
                 .find(".k-form-text-row input").keydown(keyDown).end()
                 // IE < 8 returns absolute url if getAttribute is not used
                 .find(KEDITORIMAGEURL).val(img ? img.getAttribute("src", 2) : "http://").end()
                 .find(KEDITORIMAGETITLE).val(img ? img.alt : "").end()
-                .show()
                 .data("kendoWindow")
-                .center();
+                .center().open();
 
         $(KEDITORIMAGEURL, dialog.element).focus().select();
     }
@@ -28704,6 +28810,11 @@ var ColorPicker = Widget.extend({
             that.element.find(SELECTEDCOLORCLASS)
                         .css(BACKGROUNDCOLOR, value);
         }
+    },
+
+    destroy: function() {
+        this.popup.destroy();
+        Widget.fn.destroy.call(this);
     }
 });
 
@@ -28734,6 +28845,9 @@ var SelectBox = DropDownList.extend({
         }
     }
 });
+
+kendo.ui.plugin(ColorPicker);
+kendo.ui.plugin(SelectBox);
 
 kendo.ui.editor.ColorPicker = ColorPicker;
 kendo.ui.editor.SelectBox = SelectBox;
@@ -28923,14 +29037,9 @@ var OutdentCommand = Command.extend({
 
 var OutdentTool = Tool.extend({
     init: function(options) {
-        Tool.fn.init.call(this, extend(options, {command:OutdentCommand}));
+        Tool.fn.init.call(this, options);
 
         this.finder = new BlockFormatFinder([{tags:blockElements}]);
-    },
-
-    initialize: function(ui) {
-        ui.attr("unselectable", "on")
-           .addClass("k-state-disabled");
     },
 
     update: function (ui, nodes) {
@@ -28964,7 +29073,7 @@ extend(Editor, {
 });
 
 registerTool("indent", new Tool({ command: IndentCommand, template: new ToolTemplate({template: EditorUtils.buttonTemplate, title: "Indent"}) }));
-registerTool("outdent", new OutdentTool({template: new ToolTemplate({template: EditorUtils.buttonTemplate, title: "Outdent"})}));
+registerTool("outdent", new OutdentTool({ command: OutdentCommand, template: new ToolTemplate({template: EditorUtils.buttonTemplate, title: "Outdent"})}));
 
 })(window.kendo.jQuery);
 (function($, undefined) {
@@ -29091,7 +29200,7 @@ var PendingFormats = Class.extend({
 
             range.setStart(target, target.nodeValue.length - 1);
         } else {
-            range.setStart(target, 0);
+            range.setStart(range.startContainer, range.startOffset);
         }
 
         marker.add(range);
@@ -30033,16 +30142,11 @@ extend(Editor, {
             element = that.wrapper = that.element;
             options = that.options;
 
-            if (options.dataSource) {
-                that.element.empty();
-                that.append(options.dataSource, element);
-            }
+            that._initData(options);
 
             that._updateClasses();
 
-            if (options.animation === false) {
-                options.animation = { open: { effects: {} }, close: { hide: true, effects: {} } };
-            }
+            that._animations(options);
 
             that.nextItemZIndex = 100;
 
@@ -30106,6 +30210,29 @@ extend(Editor, {
             hoverDelay: 100
         },
 
+        _initData: function(options) {
+            var that = this;
+
+            if (options.dataSource) {
+                that.element.empty();
+                that.append(options.dataSource, that.element);
+            }
+        },
+
+        setOptions: function(options) {
+            var animation = this.options.animation;
+
+            this._animations(options);
+
+            options.animation = extend(true, animation, options.animation);
+
+            if ("dataSource" in options) {
+                this._initData(options);
+            }
+
+            Widget.fn.setOptions.call(this, options);
+        },
+
         destroy: function() {
             var that = this;
 
@@ -30133,7 +30260,7 @@ extend(Editor, {
         append: function (item, referenceItem) {
             referenceItem = this.element.find(referenceItem);
 
-            var inserted = this._insert(item, referenceItem, referenceItem.length ? referenceItem.find("> .k-group, .k-animation-container > .k-group") : null);
+            var inserted = this._insert(item, referenceItem, referenceItem.length ? referenceItem.find("> .k-group, > .k-animation-container > .k-group") : null);
 
             each(inserted.items, function (idx) {
                 inserted.group.append(this);
@@ -30784,6 +30911,12 @@ extend(Editor, {
             }
 
             return nextItem;
+        },
+
+        _animations: function(options) {
+            if (options && ("animation" in options) && !options.animation) {
+                options.animation = { open: { effects: {} }, close: { hide: true, effects: {} } };
+            }
         }
 
     });
@@ -31129,8 +31262,10 @@ extend(Editor, {
                     '<input type="radio" data-#=ns#bind="checked: filters[0].value" value="false" name="filters[0].value"/>' +
                     '#=messages.isFalse#' +
                 '</label>' +
+                '<div>' +
                 '<button type="submit" class="k-button">#=messages.filter#</button>'+
                 '<button type="reset" class="k-button">#=messages.clear#</button>'+
+                '</div>' +
             '</div>';
 
     var defaultTemplate =
@@ -31164,8 +31299,10 @@ extend(Editor, {
                         '<input data-#=ns#bind="value: filters[1].value" class="k-textbox" type="text" data-#=ns#type="#=type#"/>'+
                     '#}#' +
                 '#}#'+
+                '<div>'+
                 '<button type="submit" class="k-button">#=messages.filter#</button>'+
                 '<button type="reset" class="k-button">#=messages.clear#</button>'+
+                '</div>'+
             '</div>';
 
     function removeFiltersForField(expression, field) {
@@ -31738,30 +31875,26 @@ extend(Editor, {
             element = that.wrapper = that.element.addClass("k-widget k-reset k-header k-panelbar");
             options = that.options;
 
-            if (options.dataSource) {
-                that.element.empty();
-                that.append(options.dataSource, element);
-            }
-
             if (element[0].id) {
                 that._itemId = element[0].id + "_pb_active";
             }
 
             that._tabindex();
+
+            that._initData(options);
+
             that._updateClasses();
 
-            if (options.animation === false) {
-                options.animation = { expand: { effects: {} }, collapse: { hide:true, effects: {} } };
-            }
+            that._animations(options);
 
             element
-                .on("touchend" + NS + " click" + NS, clickableItems, function(e) {
+                .on("click" + NS, clickableItems, function(e) {
                     if (that._click($(e.currentTarget))) {
                         e.preventDefault();
                     }
                 })
                 .on(MOUSEENTER  + NS + " " + MOUSELEAVE + NS, clickableItems, that._toggleHover)
-                .on("touchend" + NS + " click" + NS, disabledItems, false)
+                .on("touchend" + NS + " mouseup" + NS, disabledItems, false)
                 .on("keydown" + NS, $.proxy(that._keydown, that))
                 .on("focus" + NS, function() {
                     var item = that.select();
@@ -31817,6 +31950,30 @@ extend(Editor, {
 
             kendo.destroy(this.element);
         },
+
+        _initData: function(options) {
+            var that = this;
+
+            if (options.dataSource) {
+                that.element.empty();
+                that.append(options.dataSource, that.element);
+            }
+        },
+
+        setOptions: function(options) {
+            var animation = this.options.animation;
+
+            this._animations(options);
+
+            options.animation = extend(true, animation, options.animation);
+
+            if ("dataSource" in options) {
+                this._initData(options);
+            }
+
+            Widget.fn.setOptions.call(this, options);
+        },
+
         expand: function (element, useAnimation) {
             var that = this,
                 animBackup = {};
@@ -32341,7 +32498,7 @@ extend(Editor, {
                 isAnchor = link.data(CONTENTURL) || (href && (href.charAt(href.length - 1) == "#" || href.indexOf("#" + that.element[0].id + "-") != -1));
 
             if (contents.data("animating")) {
-                return;
+                return true;
             }
 
             if (that._triggerEvent(SELECT, item)) {
@@ -32356,7 +32513,7 @@ extend(Editor, {
 
             if (that.options.expandMode == SINGLE) {
                 if (that._collapseAllExpanded(item)) {
-                    return;
+                    return prevent;
                 }
             }
 
@@ -32522,7 +32679,14 @@ extend(Editor, {
             link.addClass(SELECTEDCLASS);
             link.parentsUntil(element, ITEM).filter(":has(.k-header)").addClass(HIGHLIGHTEDCLASS);
             that._current(item);
+        },
+
+        _animations: function(options) {
+            if (options && ("animation" in options) && !options.animation) {
+                options.animation = { expand: { effects: {} }, collapse: { hide: true, effects: {} } };
+            }
         }
+
     });
 
     // client-side rendering
@@ -32738,7 +32902,7 @@ extend(Editor, {
 
             that.wrapper
                 .on(CLICK + NS, DISABLEDLINKS, false)
-                .on("touchend" + NS + " click" + NS, CLICKABLEITEMS, function(e) {
+                .on("touchend" + NS + " mouseup" + NS, CLICKABLEITEMS, function(e) {
                     if (that._click($(e.currentTarget))) {
                         e.preventDefault();
                     }
@@ -35201,7 +35365,11 @@ extend(Editor, {
                 .on("mousedown" + NS, ".k-in,.k-checkbox :checkbox", proxy(that._mousedown, that))
                 .on("change" + NS, ".k-checkbox :checkbox", proxy(that._checkboxChange, that))
                 .on("click" + NS, ".k-checkbox :checkbox", proxy(that._checkboxClick, that))
-                .on("click" + NS, function() { that.focus(); });
+                .on("click" + NS, function(e) {
+                    if (!$(e.target).is(":focusable")) {
+                        that.focus();
+                    }
+                });
         },
 
         _checkboxClick: function(e) {
@@ -35347,7 +35515,10 @@ extend(Editor, {
                     return cssClass;
                 },
                 dragClue: template(
-                    "<div class='k-header k-drag-clue'><span class='k-icon k-drag-status'></span>#= text #</div>"
+                    "<div class='k-header k-drag-clue'>" +
+                        "<span class='k-icon k-drag-status'></span>" +
+                        "#= treeview.template(data) #" +
+                    "</div>"
                 ),
                 group: template(
                     "<ul class='#= r.groupCssClass(group) #'#= r.groupAttributes(group) # role='group'>" +
@@ -35620,6 +35791,11 @@ extend(Editor, {
 
         _focus: function(e) {
             var current = this.select();
+
+            // suppress initial focus state on touch devices (until keyboard is used)
+            if (kendo.support.touch) {
+                return;
+            }
 
             if (!this._focusable(current)) {
                 current = this._clickTarget;
@@ -36258,7 +36434,7 @@ extend(Editor, {
                 if (loaded && contents.children().length > 0) {
                     that._updateNodeClasses(node, {}, { expanded: expand });
 
-                    if (contents.is(":visible") == expand) {
+                    if (contents.css("display") == (expand ? "block" : "none")) {
                         return;
                     }
 
@@ -36569,7 +36745,10 @@ extend(Editor, {
         that._draggable = new ui.Draggable(treeview.element, {
            filter: "div:not(.k-state-disabled) .k-in",
            hint: function(node) {
-               return treeview.templates.dragClue({ text: node.text() });
+               return treeview.templates.dragClue({
+                   item: treeview.dataItem(node),
+                   treeview: treeview.options
+               });
            },
            cursorOffset: {
                left: 10,
@@ -37405,7 +37584,7 @@ extend(Editor, {
 
             SliderBase.fn.init.call(that, element, options);
             options = that.options;
-            if (!defined(options.value)) {
+            if (!defined(options.value) || options.value === null) {
                 options.value = options.min;
                 element.val(options.min);
             }
@@ -37423,7 +37602,8 @@ extend(Editor, {
             increaseButtonTitle: "Increase",
             decreaseButtonTitle: "Decrease",
             dragHandleTitle: "drag",
-            tooltip: { format: "{0}" }
+            tooltip: { format: "{0}" },
+            value: null
         },
 
         enable: function (enable) {
@@ -37699,7 +37879,7 @@ extend(Editor, {
         that.type = type;
 
         that.draggable = new Draggable(dragHandle, {
-            threshold: 0,
+            distance: 0,
             dragstart: proxy(that._dragstart, that),
             drag: proxy(that.drag, that),
             dragend: proxy(that.dragend, that),
@@ -37987,12 +38167,12 @@ extend(Editor, {
 
             SliderBase.fn.init.call(that, element, options);
             options = that.options;
-            if (!defined(options.selectionStart)) {
+            if (!defined(options.selectionStart) || options.selectionStart === null) {
                 options.selectionStart = options.min;
                 inputs.eq(0).val(options.min);
             }
 
-            if (!defined(options.selectionEnd)) {
+            if (!defined(options.selectionEnd) || options.selectionEnd === null) {
                 options.selectionEnd = options.max;
                 inputs.eq(1).val(options.max);
             }
@@ -38008,7 +38188,9 @@ extend(Editor, {
             name: "RangeSlider",
             leftDragHandleTitle: "drag",
             rightDragHandleTitle: "drag",
-            tooltip: { format: "{0}" }
+            tooltip: { format: "{0}" },
+            selectionStart: null,
+            selectionEnd: null
         },
 
         enable: function (enable) {
@@ -38439,8 +38621,8 @@ extend(Editor, {
         _attachEvents: function() {
             var that = this,
                 orientation = that.options.orientation,
-                splitbarSelector = ".k-splitbar-" + orientation,
-                splitbarDraggableSelector = ".k-splitbar-draggable-" + orientation,
+                splitbarSelector = " > .k-splitbar-" + orientation,
+                splitbarDraggableSelector = " > .k-splitbar-draggable-" + orientation,
                 expandCollapseSelector = ".k-splitbar .k-icon:not(.k-resize-handle)";
 
             that.element
@@ -38450,7 +38632,7 @@ extend(Editor, {
                 .on("blur" + NS, splitbarSelector, function(e) { $(e.currentTarget).removeClass(FOCUSED); that.resizing.end(); })
                 .on(MOUSEENTER + NS, splitbarDraggableSelector, function() { $(this).addClass("k-splitbar-" + that.orientation + "-hover"); })
                 .on(MOUSELEAVE + NS, splitbarDraggableSelector, function() { $(this).removeClass("k-splitbar-" + that.orientation + "-hover"); })
-                .on("mousedown" + NS, splitbarDraggableSelector, function() { that.resizing.end(); that._panes().append("<div class='k-splitter-overlay k-overlay' />"); })
+                .on("mousedown" + NS, splitbarDraggableSelector, function() { that._panes().append("<div class='k-splitter-overlay k-overlay' />"); })
                 .on("mouseup" + NS, splitbarDraggableSelector, function() { that._panes().children(".k-splitter-overlay").remove(); })
                 .on(MOUSEENTER + NS, expandCollapseSelector, function() { $(this).addClass("k-state-hover"); })
                 .on(MOUSELEAVE + NS, expandCollapseSelector, function() { $(this).removeClass('k-state-hover'); })
@@ -38850,6 +39032,11 @@ extend(Editor, {
         },
 
         move: function(delta, target) {
+            if (!this.pressed) {
+                this.press(target);
+                this.pressed = true;
+            }
+
             if (!this._resizable.target) {
                 this._resizable.press(target);
             }
@@ -38859,6 +39046,7 @@ extend(Editor, {
 
         end: function() {
             this._resizable.end();
+            this.pressed = false;
         },
 
         destroy: function() {
@@ -38884,7 +39072,7 @@ extend(Editor, {
                 nextPaneConfig = nextPane.data(PANE),
                 prevBoundary = parseInt(previousPane[0].style[that.positioningProperty], 10),
                 nextBoundary = parseInt(nextPane[0].style[that.positioningProperty], 10) + nextPane[0][that.sizingDomProperty] - splitbar[0][that.sizingDomProperty],
-                totalSize = that._element.css(that.sizingProperty),
+                totalSize = parseInt(that._element.css(that.sizingProperty), 10),
                 toPx = function (value) {
                     var val = parseInt(value, 10);
                     return (isPixelSize(value) ? val : (totalSize * val) / 100) || 0;
@@ -38936,10 +39124,6 @@ extend(Editor, {
 
                 owner.trigger(RESIZE);
             }
-
-            setTimeout(function() {
-                that.press(splitbar);
-            });
 
             return false;
         }
@@ -39689,7 +39873,6 @@ extend(Editor, {
                 frame.stop();
             } else if (frame.document) {
                 frame.document.execCommand("Stop");
-                frame.contentWindow.location.href = frame.contentWindow.location.href;
             }
         },
 
@@ -40462,6 +40645,8 @@ extend(Editor, {
                         width: constrain(newWidth, options.minWidth, options.maxWidth),
                         height: constrain(newHeight, options.minHeight, options.maxHeight)
                     });
+
+                    that.trigger(RESIZE);
                 }
             }
 
@@ -40617,6 +40802,16 @@ extend(Editor, {
             if (wrapper.is(VISIBLE) && !that.trigger(CLOSE, { userTriggered: !!userTriggered })) {
                 options.visible = false;
 
+                $(KWINDOW).each(function(i, element) {
+                    var windowObject = $(element),
+                        contentElement = windowObject.find(KWINDOWCONTENT);
+
+                    // Remove overlay set by toFront
+                    if (element != wrapper && contentElement.find("> ." + KCONTENTFRAME).length > 0) {
+                        contentElement.children(".k-overlay").remove();
+                    }
+                });
+
                 modalWindows = openedModalWindows(options.name);
 
                 shouldHideOverlay = options.modal && !modalWindows.length;
@@ -40634,7 +40829,7 @@ extend(Editor, {
                         overlay.hide();
                     }
                 } else if (modalWindows.length) {
-                    windowObject(modalWindows.eq(modalWindows.length - 2), options.name)._overlay(true);
+                    windowObject(modalWindows.eq(modalWindows.length - 1), options.name)._overlay(true);
                 }
 
                 wrapper.kendoStop().kendoAnimate({
@@ -40689,8 +40884,8 @@ extend(Editor, {
 
             if (zIndex == 10001 || originalZIndex < zIndex) {
                 wrapper.css(ZINDEX, zIndex + 2);
-                that.element.find("> .k-overlay").remove();
             }
+            that.element.find("> .k-overlay").remove();
 
             if (!$(activeElement).is(winElement) &&
                 !$(target).is(TITLEBAR_BUTTONS + "," + TITLEBAR_BUTTONS + " .k-icon") &&
@@ -40699,7 +40894,7 @@ extend(Editor, {
 
                 var scrollTop = $(window).scrollTop(),
                     windowTop = parseInt(that.wrapper.position().top, 10);
-                if (windowTop - scrollTop < 0) {
+                if (windowTop > 0 && windowTop - scrollTop < 0) {
                     if (scrollTop > 0) {
                         $(window).scrollTop(windowTop);
                     } else {
@@ -45388,7 +45583,10 @@ extend(Editor, {
             DRAG_END,
             ZOOM_START,
             ZOOM,
-            ZOOM_END
+            ZOOM_END,
+            SELECT_START,
+            SELECT,
+            SELECT_END
         ],
 
         items: function() {
@@ -45565,7 +45763,11 @@ extend(Editor, {
         },
 
         _start: function(e) {
-            this._startNavigation(e, DRAG_START);
+            var chart = this;
+
+            if (defined(chart._events[DRAG_START])) {
+                chart._startNavigation(e, DRAG_START);
+            }
         },
 
         _move: function(e) {
@@ -45619,11 +45821,12 @@ extend(Editor, {
                 ranges = {};
 
             if (origEvent.wheelDelta) {
-              delta = -origEvent.wheelDelta / 120;
+                delta = -origEvent.wheelDelta / 120;
+                delta = delta > 0 ? math.ceil(delta) : math.floor(delta);
             }
 
             if (origEvent.detail) {
-              delta = origEvent.detail / 3;
+              delta = round(origEvent.detail / 3);
             }
 
             if (!state) {
@@ -47966,7 +48169,8 @@ extend(Editor, {
             highlight: {
                 opacity: 1,
                 border: {
-                    width: 1
+                    width: 1,
+                    opacity: 1
                 }
             }
         },
@@ -47980,14 +48184,14 @@ extend(Editor, {
                 center = element.box.center(),
                 radius = markers.size / 2 - borderWidth / 2,
                 borderColor =
-                    new Color(markers.background)
-                    .brightness(BAR_BORDER_BRIGHTNESS)
-                    .toHex();
+                    highlight.border.color ||
+                    new Color(markers.background).brightness(BAR_BORDER_BRIGHTNESS).toHex();
 
             return view.createCircle(center, radius, {
                 data: { modelId: element.options.modelId },
                 stroke: borderColor,
-                strokeWidth: borderWidth
+                strokeWidth: borderWidth,
+                strokeOpacity: highlight.border.opacity
             });
         },
 
@@ -48777,7 +48981,9 @@ extend(Editor, {
         },
 
         options: {
-            border: {},
+            border: {
+                _brightness: 0.8
+            },
             line: {
                 width: 2
             },
@@ -48792,6 +48998,17 @@ extend(Editor, {
                         "<tr><td>Low:</td><td>{2:C}</td></tr>" +
                         "<tr><td>Close:</td><td>{3:C}</td></tr>" +
                         "</table>"
+            },
+            highlight: {
+                opacity: 1,
+                border: {
+                    width: 1,
+                    opacity: 1
+                },
+                line: {
+                    width: 1,
+                    opacity: 1
+                }
             }
         },
 
@@ -48897,16 +49114,19 @@ extend(Editor, {
             var point = this,
                 pointOptions = point.options,
                 highlight = pointOptions.highlight,
-                border = highlight.border || {},
+                border = highlight.border,
+                borderColor = point.getBorderColor(),
+                line = highlight.line,
                 data = { data: { modelId: pointOptions.modelId } },
-                rectStyle = deepExtend(data, options, {
-                    stroke: point.getBorderColor(),
+                rectStyle = deepExtend({}, data, options, {
+                    stroke: borderColor,
                     strokeOpacity: border.opacity,
                     strokeWidth: border.width
                 }),
-                lineStyle = deepExtend(data, {
-                    stroke: point.getBorderColor(),
-                    strokeWidth: highlight.line.width,
+                lineStyle = deepExtend({}, data, {
+                    stroke: line.color || borderColor,
+                    strokeWidth: line.width,
+                    strokeOpacity: line.opacity,
                     strokeLineCap: "butt"
                 }),
                 group = view.createGroup();
@@ -49104,7 +49324,7 @@ extend(Editor, {
                 lineStyle = deepExtend(data, {
                     strokeWidth: highlight.line.width,
                     strokeOpacity: highlight.line.opacity,
-                    stroke: point.color
+                    stroke: highlight.line.color || point.color
                 }),
                 group = view.createGroup();
 
@@ -52017,7 +52237,7 @@ extend(Editor, {
                 }
             };
 
-            that.trigger(SELECT_START);
+            that.trigger(SELECT_START, that._state.range);
         },
 
         _move: function(e) {
@@ -52067,10 +52287,7 @@ extend(Editor, {
 
             that.move(range.from, range.to);
 
-            that.trigger(SELECT, {
-                from: range.from,
-                to: range.to
-            });
+            that.trigger(SELECT, range);
         },
 
         _end: function(e) {
@@ -52079,7 +52296,7 @@ extend(Editor, {
 
             delete that._state;
             that.set(range.from, range.to);
-            that.trigger(SELECT_END);
+            that.trigger(SELECT_END, range);
         },
 
         _gesturechange: function(e) {
@@ -54131,7 +54348,10 @@ extend(Editor, {
 
         options: {
             plotArea: {},
-            theme: "default"
+            theme: "default",
+            pointer: {},
+            scale: {},
+            gaugeArea: {}
         },
 
         value: function(value) {
@@ -54337,6 +54557,9 @@ extend(Editor, {
         DRAG_END = "dragEnd",
         NAVIGATOR_PANE = "_navigator",
         NAVIGATOR_AXIS = NAVIGATOR_PANE,
+        SELECT_START = "selectStart",
+        SELECT = "select",
+        SELECT_END = "selectEnd",
         ZOOM_ACCELERATION = 3,
         ZOOM = "zoom",
         ZOOM_END = "zoomEnd";
@@ -54474,6 +54697,7 @@ extend(Editor, {
                     to: to,
                     min: min,
                     max: max,
+                    selectStart: $.proxy(navi._selectStart, navi),
                     select: $.proxy(navi._select, navi),
                     selectEnd: $.proxy(navi._selectEnd, navi)
                 });
@@ -54657,6 +54881,13 @@ extend(Editor, {
             );
         },
 
+        _selectStart: function(e) {
+            this.chart.trigger(SELECT_START, {
+                from: e.from,
+                to: e.to
+            });
+        },
+
         _select: function(e) {
             var navi = this;
 
@@ -54664,6 +54895,11 @@ extend(Editor, {
                 navi.indexToDate(e.from),
                 navi.indexToDate(e.to)
             );
+
+            navi.chart.trigger(SELECT, {
+                from: e.from,
+                to: e.to
+            });
         },
 
         _selectEnd: function(e) {
@@ -54673,6 +54909,11 @@ extend(Editor, {
             navi.readSelection();
             navi.applySelection();
             navi.redrawSlaves();
+
+            navi.chart.trigger(SELECT_END, {
+                from: e.from,
+                to: e.to
+            });
         },
 
         mainAxis: function() {
@@ -57556,6 +57797,16 @@ extend(Editor, {
         attrValue = kendo.attrValue,
         roleSelector = kendo.roleSelector;
 
+    function initPopOvers(element) {
+        var popovers = element.find(roleSelector("popover")),
+            idx, length,
+            roles = ui.roles;
+
+        for (idx = 0, length = popovers.length; idx < length; idx ++) {
+            kendo.initWidget(popovers[idx], {}, roles);
+        }
+    }
+
     var View = Widget.extend({
         init: function(element, options) {
             var that = this;
@@ -57709,10 +57960,7 @@ extend(Editor, {
 
             that.model = model;
 
-            // PopOver widgets have to be initialized first, as they move their element out of the DOM.
-            element.find(roleSelector("popover")).each(function(){
-                kendo.initWidget(this, {}, ui.roles);
-            });
+            initPopOvers(element);
 
             if (model) {
                 kendo.bind(element.children(), model, ui, kendo.ui, kendo.dataviz.ui);
@@ -57846,6 +58094,9 @@ extend(Editor, {
             that.header = element.children(roleSelector("header")).addClass("km-header");
             that.footer = element.children(roleSelector("footer")).addClass("km-footer");
             that.elements = that.header.add(that.footer);
+
+            initPopOvers(element);
+
             kendo.mobile.init(that.element.children());
             that.trigger(INIT, {layout: that});
         },
@@ -57958,11 +58209,6 @@ extend(Editor, {
             var that = this,
                 container = that.container,
                 params = urlParams(url),
-                //FOUNDOPS changes (hopefully temporary: http://www.kendoui.com/forums/mobile/general-discussions/view-duplication-when-using-url-parameters.aspx#2426148)
-                //local = url.charAt(0) === "#",
-                //remote = !local && !url.match(/^([\w\-\?=]+)$/),
-                local = false,
-                remote = false,
                 view,
                 element,
                 urlPath = url.split("?")[0];
@@ -57977,11 +58223,12 @@ extend(Editor, {
             if (!url) {
                 element = that.rootView;
             } else {
-                //FOUNDOPS changes (hopefully temporary: http://www.kendoui.com/forums/mobile/general-discussions/view-duplication-when-using-url-parameters.aspx#2426148)
+                //FOUNDOPS CHANGE
                 element = container.children("[" + attr("url") + "='" + urlPath + "']");
 
-                if (!element[0] && !remote) {
-                    element = container.children(local ? urlPath : "#" + urlPath);
+                // do not try to search for "#/foo/bar" id, jQuery throws error
+                if (!element[0] && urlPath.indexOf("/") === -1) {
+                    element = container.children(urlPath.charAt(0) === "#" ? urlPath : "#" + urlPath);
                 }
             }
 
@@ -59063,7 +59310,8 @@ extend(Editor, {
         NS = ".kendoMobileListView",
         LAST_PAGE_REACHED = "lastPageReached",
         CLICK = "click",
-        CLICK_NS = CLICK + NS,
+        TRIGGER = "touchend click",
+        TRIGGER_NS = TRIGGER.split(" ").join(NS + " ") + NS,
 
         CHANGE = "change",
         PROGRESS = "progress",
@@ -59146,10 +59394,10 @@ extend(Editor, {
             element
                 .on("down", HIGHLIGHT_SELECTOR, "_highlight")
                 .on("move up cancel", HIGHLIGHT_SELECTOR, "_dim")
-                .on("touchend click", ITEM_SELECTOR, "_click");
+                .on(TRIGGER, ITEM_SELECTOR, "_click");
 
             if (support.touch) {
-                element.on("touchend click", ".km-listview-label", toggleiOSLabel);
+                element.on(TRIGGER, ".km-listview-label", toggleiOSLabel);
             }
 
             element.wrap(WRAPPER);
@@ -59349,7 +59597,7 @@ extend(Editor, {
            if (that._loadButton) {
                that.loading = false;
                that._loadButton
-                   .off(CLICK_NS)
+                   .off(TRIGGER_NS)
                    .parent().hide();
 
                that.trigger(LAST_PAGE_REACHED);
@@ -59669,7 +59917,7 @@ extend(Editor, {
 
                 if (loadMore) {
                     that._loadButton = $('<button class="km-load km-button">' + options.loadMoreText + '</button>')
-                                        .on(CLICK_NS, proxy(that._nextPage, that));
+                                        .on(TRIGGER_NS, proxy(that._nextPage, that));
 
                     loadWrapper.append(that._loadButton);
                 }

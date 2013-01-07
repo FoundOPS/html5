@@ -317,12 +317,16 @@ module.exports = function (grunt) {
 
         files.forEach(function (f) {
             var contents = grunt.file.read(f);
+
+            //TODO finish this regex and undo kendo/icon.less comment
+            //contents.replace(/^@font-face/, "");
+
             contents = contents.replace(/images/g, imgRoot);
             contents = contents.replace(/styles/g, stylesRoot);
 
             //Kendo
-            contents = contents.replace(/textures/g, imgRoot + "textures/");
-            contents = contents.replace(/Default/g, imgRoot + "Default/");
+            contents = contents.replace(/textures/g, imgRoot + "textures");
+            contents = contents.replace(/Default/g, imgRoot + "Default");
 
             grunt.file.write(f, contents);
         });
