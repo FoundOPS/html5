@@ -4,7 +4,7 @@ var TestTools = function () {
      * @param section
      */
     var selectSection = function (section) {
-        var button = $('#sideBarSections a[href$="' + section + '.html"]').get(0);
+        var button = $('#sideBarSections a[href$="' + section + '"]').get(0);
         jasmineui.simulate(button, 'click');
     };
 

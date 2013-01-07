@@ -1,4 +1,4 @@
-jasmineui.loadUi("/app/navigator-test.html", function () {
+jasmineui.loadUi("../../index.html", function () {
     describe('navigator', function () {
         it("should show the popup when the icon is clicked", function () {
             runs(function () {
