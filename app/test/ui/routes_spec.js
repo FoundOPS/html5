@@ -1,4 +1,4 @@
-jasmineui.loadUi("/app/navigator-test.html", function () {
+jasmineui.loadUi("../../index.html", function () {
     describe('Routes section', function () {
         var routeLinks = "#routes-listview li a", destinationLinks = "#routeDestinations-listview li a";
 
@@ -15,7 +15,7 @@ jasmineui.loadUi("/app/navigator-test.html", function () {
         describe("after choosing a route", function () {
             beforeEach(function () {
                 runs(function () {
-                    TestTools.selectItem(routeLinks);
+                    TestTools.clickItem(routeLinks);
                 });
             });
 
@@ -43,10 +43,10 @@ jasmineui.loadUi("/app/navigator-test.html", function () {
         describe("after choosing a destination", function () {
             beforeEach(function () {
                 runs(function () {
-                    TestTools.selectItem(routeLinks);
+                    TestTools.clickItem(routeLinks);
 
                     setTimeout(function () {
-                        TestTools.selectItem(destinationLinks);
+                        TestTools.clickItem(destinationLinks);
                     }, 750);
                 });
             });

@@ -161,6 +161,10 @@ module.exports = function (grunt) {
                         'views': '<%= grunt.file.read("app/compiledViews.html") %>',
                         'kendoTemplates': '<%= grunt.file.read("app/templates/kendoTemplates.html") %>',
                         'imgSrc': imgRoot,
+                        //uncomment for testing
+                        'testing': '<script type="text/javascript">\n       eval(sessionStorage.jasmineui);\n    </script>',
+                        //uncomment for everything else (local / deploying)
+                        //'testing': '',
                         'mobileOptimizationTags': '<meta name="HandheldFriendly" content="True">\n\t<meta name="MobileOptimized" content="320">\n\t<meta ' +
                             'name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>\n\t<link ' +
                             'rel="apple-touch-icon-precomposed" sizes="114x114" href="' + imgRoot + 'Icon-96x96.png">\n\t<link rel="apple-touch-icon-precomposed" ' +
