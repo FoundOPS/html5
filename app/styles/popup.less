@@ -105,9 +105,10 @@ html{
 }
 
 .flipArrow{
-    -webkit-transform: rotate(180deg);
-    -moz-transform: rotate(180deg);
-    filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=2);
+    background: url('../img/popupArrowBot.png') no-repeat !important;
+    //-webkit-transform: rotate(180deg);
+    //-moz-transform: rotate(180deg);
+    //filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=2);
 }
 
 .hover(){
@@ -190,13 +191,6 @@ html{
     background: @darkGrey;
 }
 
-@media only screen and (max-width:800px) {
-    #popupWrapper {
-        //NOTE: Fixed position is completely broken on 2.3.
-        position: absolute;
-    }
-}
-
 @media only screen and (max-width:390px) {
     #popupWrapper {
         //width: 90%;
@@ -235,5 +229,9 @@ html{
 }
 
 #popupWrapper .jspPane{
+    pointer-events: auto;
+}
+
+#popupWrapper .jspVerticalBar{
     pointer-events: auto;
 }
