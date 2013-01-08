@@ -8,7 +8,7 @@ module.exports = function (grunt) {
 
     //uncomment for local/mobile
     var resourcesRoot = "../";
-    //uncomment for dist
+    //uncomment for deploying
     //var resourcesRoot = "http://bp.foundops.com/app/";
     var imgRoot = resourcesRoot + "img/";
     var stylesRoot = "../" + resourcesRoot + "styles/";
