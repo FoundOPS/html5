@@ -143,7 +143,9 @@ module.exports = function (grunt) {
 
         // fix css url references
         fixCss: {
-            all: {}
+            all: {
+                src: ['app/styles/main.css', 'app/styles/login.css', 'app/styles/requirements.css']
+            }
         },
 
         // renames JS/CSS to prepend a hash of their contents for easier
@@ -353,7 +355,7 @@ module.exports = function (grunt) {
 
     grunt.registerMultiTask('fixCss', 'Fix the css url references', function () {
         var path = require('path'),
-            files = grunt.file.expandFiles(['app/styles/main.css', 'app/styles/login.css', 'app/styles/requirements.css']);
+            files = grunt.file.expandFiles(this.file.src);
 
         //grunt.log.writeln(imagesUrl);
 
@@ -363,12 +365,12 @@ module.exports = function (grunt) {
             //TODO finish this regex and undo kendo/icon.less comment
             //contents.replace(/^@font-face/, "");
 
-            contents = contents.replace(/images/g, imgRoot);
-            contents = contents.replace(/styles/g, stylesRoot);
-
             //Kendo
-            contents = contents.replace(/textures/g, imgRoot + "textures");
-            contents = contents.replace(/Default/g, imgRoot + "Default");
+            contents = contents.replace(/textures\//g, imgRoot + "textures/");
+            contents = contents.replace(/Default\//g, imgRoot + "Default/");
+
+            contents = contents.replace(/images\//g, imgRoot);
+            contents = contents.replace(/styles\//g, stylesRoot);
 
             grunt.file.write(f, contents);
         });
