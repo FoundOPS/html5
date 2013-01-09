@@ -725,6 +725,8 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
                 return vm.get("selectedService");
             }
         });
+        //needed in case changes are made
+        reloadServices();
     };
 
     //endregion
