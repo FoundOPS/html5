@@ -323,6 +323,10 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
      * Reload the services
      */
     var reloadServices = _.debounce(function () {
+        if (!serviceHoldersDataSource) {
+            return;
+        }
+
         serviceHoldersDataSource.options.transport.read.data.startDate = dateTools.stripDate(vm.get("startDate"));
         serviceHoldersDataSource.options.transport.read.data.endDate = dateTools.stripDate(vm.get("endDate"));
         serviceHoldersDataSource.read();
@@ -626,7 +630,7 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
 
                     //disable the delete button and hide the service details
                     $("#services").find(".k-grid-delete").attr("style", "display:none");
-                    
+
                     //hide the serviceDetailsWrapper
                     $("#serviceDetailsWrapper").attr("style", "display:none");
                 }
@@ -725,6 +729,7 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
                 return vm.get("selectedService");
             }
         });
+
         //needed in case changes are made
         reloadServices();
     };
