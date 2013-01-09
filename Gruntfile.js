@@ -1,17 +1,30 @@
 module.exports = function (grunt) {
+    var deployment = {
+        local: 0,
+        mobile: 1,
+        server: 2
+    };
+
     'use strict';
     grunt.loadNpmTasks('grunt-contrib-less');
     grunt.loadNpmTasks('grunt-replace');
 
     //TODO figure out how to choose based on the current arg (all/dist/etc.)
     //may need to wait till v1 https://github.com/yeoman/yeoman/wiki/Customization
+    var deploying = deployment.local;
 
-    //uncomment for local/mobile
-    var resourcesRoot = "../";
-    //uncomment for deploying
-    //var resourcesRoot = "http://bp.foundops.com/app/";
+    var resourcesRoot = "../"; //for local / mobile
+    if (deploying === deployment.server) {
+        resourcesRoot = "http://bp.foundops.com/app/";
+    }
+
     var imgRoot = resourcesRoot + "img/";
     var stylesRoot = "../" + resourcesRoot + "styles/";
+
+    var testingTag = "";
+    if (deploying === deployment.local) {
+        testingTag = '<script type="text/javascript">\n       eval(sessionStorage.jasmineui);\n    </script>';
+    }
 
     //
     // Grunt configuration:
@@ -161,10 +174,7 @@ module.exports = function (grunt) {
                         'views': '<%= grunt.file.read("app/compiledViews.html") %>',
                         'kendoTemplates': '<%= grunt.file.read("app/templates/kendoTemplates.html") %>',
                         'imgSrc': imgRoot,
-                        //uncomment for testing
-                        'testing': '<script type="text/javascript">\n       eval(sessionStorage.jasmineui);\n    </script>',
-                        //uncomment for everything else (local / deploying)
-                        //'testing': '',
+                        'testing': testingTag,
                         'mobileOptimizationTags': '<meta name="HandheldFriendly" content="True">\n\t<meta name="MobileOptimized" content="320">\n\t<meta ' +
                             'name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>\n\t<link ' +
                             'rel="apple-touch-icon-precomposed" sizes="114x114" href="' + imgRoot + 'Icon-96x96.png">\n\t<link rel="apple-touch-icon-precomposed" ' +
@@ -230,6 +240,12 @@ module.exports = function (grunt) {
 
         min: {
             dist: ''
+        },
+
+        cleanupDist: {
+            all: {
+                delete: ["dist/js", "dist/styles/**/*.less", "dist/styles/kendo", "dist/templates", "dist/test", "dist/view", "dist/compiledViews.html"]
+            }
         }
     });
 
@@ -239,7 +255,6 @@ module.exports = function (grunt) {
             async = require('async'),
             path = require('path'),
             htmlparser = require('htmlparser'),
-            $ = require('jquery'),
             destination = this.data.dest,
             files = grunt.file.expandFiles(this.file.src),
             sep = grunt.utils.linefeed,
@@ -266,29 +281,53 @@ module.exports = function (grunt) {
                 callback(null, view);
             };
 
+            /**
+             * Converts a dom element to an attribute object
+             * @param element DOM element to get attributes from
+             * @param callback (object) Parameter is an object with keys for each attribute name, and corresponding values
+             */
+            var getAttributeObject = function (element, callback) {
+                (new htmlparser.Parser(new htmlparser.DefaultHandler(function (error, dom) {
+                    var attributeObject = {};
+                    var attributes = dom[0].attribs;
+                    for (var k in attributes) {
+                        attributeObject[k] = attributes[k];
+                    }
+
+                    callback(attributeObject);
+                }))).parseComplete(element);
+            };
+
             //check if the user defined any custom attributes for the header
             //ex. ^id="personal" data-title="Personal Settings"^
             //if there is replace all attributes with the custom defined ones
-            var headerAttributes = contents.match(metadataMatcher);
-            if (!headerAttributes) {
+            var customAttributes = contents.match(metadataMatcher);
+            if (!customAttributes) {
                 wrapFile(header);
             } else {
                 //remove the ^
-                headerAttributes = headerAttributes[0].replace(/\^/g, "");
+                customAttributes = customAttributes[0].replace(/\^/g, "");
 
-                //parse the passed attributes
-                (new htmlparser.Parser(new htmlparser.DefaultHandler(function (error, dom) {
-                    var headerElement = $(header);
+                //parse the initial header object
+                getAttributeObject(header, function (headerAttributes) {
+                    //parse the custom attributes
+                    getAttributeObject("<div " + customAttributes + "></div>", function (customAttributes) {
+                        //set/replace existing headers for each custom attributes
+                        for (var c in customAttributes) {
+                            headerAttributes[c] = customAttributes[c];
+                        }
 
-                    //update the attributes
-                    var attributes = dom[0].attribs;
-                    for (var k in attributes) {
-                        headerElement.attr(k, attributes[k]);
-                    }
+                        var newHeader =  "<div ";
+                        //setup the header from the object
+                        for (var c in headerAttributes){
+                            newHeader += c + "='" + headerAttributes[c] + "' ";
+                        }
 
-                    var updatedHeader = headerElement.get()[0].outerHTML.replace("</div>", "");
-                    wrapFile(updatedHeader);
-                }))).parseComplete("<div " + headerAttributes + "></div>");
+                        newHeader += ">";
+
+                        wrapFile(newHeader);
+                    });
+                });
             }
         }, function (err, result) {
             if (err) {
@@ -313,9 +352,8 @@ module.exports = function (grunt) {
     grunt.registerTask('test', 'server:phantom mocha');
 
     grunt.registerMultiTask('fixCss', 'Fix the css url references', function () {
-        // Merge task-specific and/or target-specific options with these defaults.
         var path = require('path'),
-            files = grunt.file.expandFiles(['app/styles/main.css', 'app/styles/login.css', 'app/styles/requirements.css'])
+            files = grunt.file.expandFiles(['app/styles/main.css', 'app/styles/login.css', 'app/styles/requirements.css']);
 
         //grunt.log.writeln(imagesUrl);
 
@@ -336,6 +374,20 @@ module.exports = function (grunt) {
         });
     });
 
+    grunt.registerMultiTask('cleanupDist', 'Cleanup the built distribution', function () {
+        var path = require('path'),
+            fs = require('fs'),
+            rimraf = require('rimraf'),
+            filesDirsToDelete = grunt.file.expand(this.data.delete);
+
+        filesDirsToDelete.forEach(function (p) {
+            //delete the file
+            rimraf.sync(p);
+        });
+    });
+
     // Alias the `compass` task to run the `less` task instead
     grunt.registerTask('compass', 'less fixCss');
+
+    //grunt.registerTask('usemin', 'usemin cleanupDist');
 };
