@@ -23,11 +23,10 @@
                         popup.enableHeader();
                     }
                     }
-
-                    popup.addMenu(options.id, options.title, options.contents);
+                    Popup.addMenu(options.id, options.title, options.contents);
                 },
             popupInit: function(options, popup) {
-                    popup = new Popup(this.selector);
+                popup = new Popup(this.selector);
                 methods.init(options, popup);
                 return popup;
                 },
@@ -50,9 +49,8 @@
             disableHeader: function(popup) {
                     popup.disableHeader();
                 },
-            addMenu: function (menu, popup) {
-                    if (!popup)return;
-                    popup.addMenu(menu.id, menu.title, menu.contents);
+            addMenu: function (menu) {
+                    Popup.addMenu(menu.id, menu.title, menu.contents);
                 },
             closePopup: function (popup) {
                     popup.closePopup();
@@ -444,6 +442,7 @@ Popup.prototype.getMenu = function (id) {
     //Searches for a popup data object by the id passed, returns data object if found.
     var i;
     for (i = 0; i < Popup.menus.length; i += 1) {
+        //console.log("Popup.menus["+i+"]: "+Popup.menus[i].id);
         if (Popup.menus[i].id === id) {
             return Popup.menus[i];
         }
@@ -454,7 +453,7 @@ Popup.prototype.getMenu = function (id) {
     return null;
 };
 
-Popup.prototype.addMenu = function (id, title, contents) {
+Popup.addMenu = function (id, title, contents) {
     Popup.menus.push({'id': id, 'title': title, 'contents': contents});
 };
 
@@ -486,6 +485,7 @@ Popup.prototype.populateByMenu = function(menu){
 
 //Public void function that populates setTitle and setContent with data found by id passed.
 Popup.prototype.populate = function(identifierList){
+    //console.log(identifierList);
     var newMenu = null;
     var i=0;
     for(i; i<identifierList.length; i++){
