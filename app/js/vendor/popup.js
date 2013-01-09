@@ -51,7 +51,7 @@
                     popup.disableHeader();
                 },
             addMenu: function (menu, popup) {
-                    if (popup === null)return;
+                    if (!popup)return;
                     popup.addMenu(menu.id, menu.title, menu.contents);
                 },
             closePopup: function (popup) {
@@ -131,7 +131,7 @@ Popup.prototype.enableHeader = function() {
 Popup.prototype.toggleVisible = function (e, clicked) {
     Popup.lastPopupClicked = this;
     var clickedDiv = $(clicked);
-    if (clickedDiv === null) {
+    if (!clickedDiv) {
         console.log("ERROR: No element clicked!");
         return;
     }
@@ -156,7 +156,7 @@ Popup.prototype.toggleVisible = function (e, clicked) {
     //console.log("List: "+identifierList);
 
     //TODO: Fix repetition.
-    if ($("#popup").is(":visible") && Popup.lastElementClick !== null) {
+    if ($("#popup").is(":visible") && Popup.lastElementClick) {
         if (clickedDiv.is("#" + Popup.lastElementClick)) {
             console.log("Clicked on same element!");
             console.log("Last clicked: " + Popup.lastElementClick);
@@ -179,18 +179,18 @@ Popup.prototype.toggleVisible = function (e, clicked) {
 
     clickedDiv.trigger("popup.action", clickedDiv);
 
-    if(Popup.backgroundColor!==null){
+    if(Popup.backgroundColor){
         $("#popupHeader").css("backgroundColor", Popup.backgroundColor);
         $("#popupContent").css("backgroundColor", Popup.backgroundColor);
     }
 
-    if(Popup.fontColor!==null){
+    if(Popup.fontColor){
         $("#popup").css("color", Popup.fontColor);
         //TODO: Trigger color change event and move to OptionsPopup.
         $("#popup a").css("color", Popup.fontColor);
     }
 
-    if(Popup.borderColor!==null){
+    if(Popup.borderColor){
         $("#popupHeader").css("border-color", Popup.borderColor);
         $("#popupContent").css("border-color", Popup.borderColor);
         $(".popupContentRow").css("border-color", Popup.borderColor);
@@ -490,13 +490,13 @@ Popup.prototype.populate = function(identifierList){
     var i=0;
     for(i; i<identifierList.length; i++){
         newMenu = this.getMenu(identifierList[i]);
-        if(newMenu!==null){
+        if(newMenu){
             //console.log("Found menu! id: "+identifierList[i]);
             break;
         }
     }
 
-    if (newMenu === null) {
+    if (!newMenu) {
         console.log("ID not found.");
         return false;
     }

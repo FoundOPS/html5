@@ -45,7 +45,7 @@
         // Method calling logic
 
         if (methods[method]) {
-            if(method!=='init'&&navigator===null){
+            if(method!=='init'&&!navigator){
                 $.error('Navigator not initialized!');
                 return;
             }
@@ -628,7 +628,7 @@ function Navigator(config) {
             }
             var name = $(data).text();
             var role = getRole(name);
-            if (role !== null) {
+            if (role) {
                 $(e.target).trigger("roleSelected", role);
             }
 
@@ -648,7 +648,7 @@ function Navigator(config) {
         //var businessId = clicked.attr("id");
         var name = clicked.text();
         var business = getBusiness(name);
-        if (business === null) {
+        if (!business) {
             console.log("Business not found!");
             return;
         }
