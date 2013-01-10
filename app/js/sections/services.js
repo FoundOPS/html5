@@ -63,9 +63,8 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
                     }
 
                     var destinationField = models.getDestinationField(service);
-
                     //initialize the location widget with the destination
-                    var destination = destinationField.Location;
+                    var destination = destinationField.Value;
 
                     var clientId = clientSelector.select2("data").Id;
                     locationSelector.location({
@@ -73,11 +72,16 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
                         clientId: clientId,
                         change: function (location) {
                             //update the Destination Field
+                            destinationField = models.getDestinationField(vm.get("selectedService"));
                             destinationField.Value = location;
+
                             dbServices.locationFields.update({
                                 body: destinationField,
                                 params: {serviceId: vm.get("selectedService.Id"), recurringServiceId: vm.get("selectedService.RecurringServiceId"), clientId: clientId, occurDate: vm.get("selectedService.ServiceDate")}
-                            });
+                            }).done(function () {
+                                    destinationField.Value.IsNew = false;
+                                });
+
                             vm.syncServiceHolder();
                         }
                     });
@@ -184,7 +188,7 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
                     //remove the trailing comma and space
                     val = val.substr(0, val.length - 2);
                 } else if (field.Type === "LocationField" && field.Value) {
-                    val = field.Value.AddressLineOne + " " + field.Value.AddressLineTwo;
+                    val = field.Value.Name + ", " + field.Value.AddressLineOne + " " + field.Value.AddressLineTwo;
                 }
                 //replace spaces with _
                 var columnName = field.Name.split(' ').join('_');

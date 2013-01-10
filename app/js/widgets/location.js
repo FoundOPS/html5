@@ -2,7 +2,7 @@
 
 'use strict';
 
-define(["db/services", "ui/ui", "tools/generalTools", "db/models"], function (dbServices, ui, generalTools, models) {
+define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], function (dbServices, ui, generalTools, tools) {
     $.widget("ui.location", {
         options: {
             //Callback functions, each passed the location
@@ -106,8 +106,15 @@ define(["db/services", "ui/ui", "tools/generalTools", "db/models"], function (db
                         locationWidget._allowMapClick = true;
                         locationWidget._clearMarkers();
                         locationWidget._enableFields();
-                        //if a location was selected
-                    } else {
+
+                        //generate a new guid
+                        widgetElement.find(".id").val(tools.newGuid());
+                    }
+                    //if a location was selected
+                    else {
+                        //update the location in the list with the selected one
+                        locationWidget.options.data[locationWidget.editIndex] = selectedData;
+
                         locationWidget._disableFields();
                         locationWidget._populateFields(selectedData);
                         locationWidget._showMarker(selectedData);
@@ -150,6 +157,7 @@ define(["db/services", "ui/ui", "tools/generalTools", "db/models"], function (db
                 if (locationWidget._allowMapClick) {
                     //add a marker at the location
                     locationWidget._showMarker({Latitude: e.latlng.lat, Longitude: e.latlng.lng});
+
                     //save the lat/lng
                     widgetElement.find(".lat").val(e.latlng.lat);
                     widgetElement.find(".lng").val(e.latlng.lng);
@@ -162,8 +170,8 @@ define(["db/services", "ui/ui", "tools/generalTools", "db/models"], function (db
 
             widgetElement.find(".saveBtn").on("click", function () {
                 //create a location with the values from the inputs
-                var newLocation = {
-                    Id: widgetElement.find(".id").val() != "" ? widgetElement.find(".id").val() : models.newId,
+                var updatedLocation = {
+                    Id: widgetElement.find(".id").val(),
                     Name: widgetElement.find(".nickname").val(),
                     AddressLineOne: widgetElement.find(".line1").val(),
                     AddressLineTwo: widgetElement.find(".line2").val(),
@@ -177,25 +185,27 @@ define(["db/services", "ui/ui", "tools/generalTools", "db/models"], function (db
 
                 //if adding a new location
                 if (locationWidget.newLocation) {
-                    //add the new location to the list
-                    locationWidget.options.data.push(newLocation);
+                    updatedLocation.IsNew = true;
 
-                    locationWidget.options.add(newLocation);
+                    //add the new location to the list
+                    locationWidget.options.data.push(updatedLocation);
+
+                    locationWidget.options.add(updatedLocation);
                     //if editing an already existing location
                 } else {
                     var location = locationWidget.options.data[locationWidget.editIndex];
 
                     //update the properties of the existing location that could have changed
-                    location.Name = newLocation.Name;
-                    location.Id = newLocation.Id;
-                    location.AddressLineOne = newLocation.AddressLineOne;
-                    location.AddressLineTwo = newLocation.AddressLineTwo;
-                    location.AdminDistrictOne = newLocation.AdminDistrictOne;
-                    location.AdminDistrictTwo = newLocation.AdminDistrictTwo;
-                    location.PostalCode = newLocation.PostalCode;
-                    location.CountryCode = newLocation.CountryCode;
-                    location.Latitude = newLocation.Latitude;
-                    location.Longitude = newLocation.Longitude;
+                    location.Name = updatedLocation.Name;
+                    location.Id = updatedLocation.Id;
+                    location.AddressLineOne = updatedLocation.AddressLineOne;
+                    location.AddressLineTwo = updatedLocation.AddressLineTwo;
+                    location.AdminDistrictOne = updatedLocation.AdminDistrictOne;
+                    location.AdminDistrictTwo = updatedLocation.AdminDistrictTwo;
+                    location.PostalCode = updatedLocation.PostalCode;
+                    location.CountryCode = updatedLocation.CountryCode;
+                    location.Latitude = updatedLocation.Latitude;
+                    location.Longitude = updatedLocation.Longitude;
 
                     locationWidget.options.change(location);
                 }
@@ -418,6 +428,11 @@ define(["db/services", "ui/ui", "tools/generalTools", "db/models"], function (db
                 //http://stackoverflow.com/questions/9303757/how-to-change-color-of-an-image-using-jquery
                 var i = 0;
                 $(".leaflet-marker-pane").find("img").each(function () {
+                    //prevent a canvas error
+                    if (this.height === 0 || this.width === 0) {
+                        return;
+                    }
+
                     var canvas = document.createElement("canvas");
                     var ctx = canvas.getContext("2d");
                     canvas.width = this.width;
