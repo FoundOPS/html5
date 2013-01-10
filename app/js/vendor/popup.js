@@ -161,7 +161,6 @@ Popup.prototype.toggleVisible = function (e, clicked) {
 
     //If popup is locked, don't continue actions.
     if(Popup.isLocked)return;
-
     //Update content
     this.populate(identifierList);
 
@@ -188,7 +187,6 @@ Popup.prototype.toggleVisible = function (e, clicked) {
     $("#popup").stop(false, true).fadeIn('fast');
     $("#popupWrapper").css("visibility", "visible");
     $("#popup").promise().done(function () {});
-
     popupWrapperDiv.trigger("popup.visible");
 
     //Update left, right and caret positions for popup.
@@ -205,19 +203,19 @@ Popup.updatePositions = function(target){
 };
 
 Popup.updateTopPosition = function(target){
-    var top = this.getTop(target);
+    var top = Popup.getTop(target);
     $("#popupWrapper").css("padding-top", top + "px");
 };
 
 Popup.updateLeftPosition = function(target){
-    var offset = this.getLeft(target);
+    var offset = Popup.getLeft(target);
     $("#popupWrapper").css("left", offset.popupLeft);
     Popup.setCaretPosition(offset.targetLeft - offset.popupLeft + Popup.padding);
 };
 
 
 //Function returns the left offset of the popup and target element.
-Popup.prototype.getLeft = function (target) {
+Popup.getLeft = function (target) {
     var popupWrapperDiv = $("#popupWrapper");
     Popup.currentTarget = target;
     var targetLeft = target.offset().left + target.outerWidth() / 2;
@@ -238,7 +236,7 @@ Popup.prototype.getLeft = function (target) {
     return {targetLeft: targetLeft, popupLeft: offset};
 };
 
-Popup.prototype.getTop = function(target){
+Popup.getTop = function(target){
     var caretHeight =  $("#popupArrow").height();
     //TODO: Make more readable.
     //If absolute position from mobile css, don't offset from scroll.
@@ -322,7 +320,6 @@ Popup.setCaretPosition = function(offset){
 
 // createPopup: Prepends popup to dom
 Popup.prototype.createPopup = function () {
-    var thisPopup = this;
     //Creates popup div that will be populated in the future.
     var popupWrapperDiv = $(document.createElement("div"));
     popupWrapperDiv.attr("id", "popupWrapper");
@@ -456,6 +453,7 @@ Popup.prototype.populateByMenu = function(menu){
     $(document).trigger('popup.populating');
 
     this.lastContentHeight = Popup.getPopupContentHeight();
+
     this.clearData();
     if(!this.isHeaderDisabled) {
         this.insertHeader();
@@ -474,7 +472,6 @@ Popup.prototype.populateByMenu = function(menu){
         $("#popupWrapper").css("padding-top", popupTop + "px");
         Popup.setCaretPosition(Popup.caretLeftOffset);
     }
-
     return true;
 };
 
@@ -562,7 +559,8 @@ Popup.setContent = function (cont) {
     //$("#popupContentWrapper").data('jsp').getContentPane().find("#popupContent").html(cont);
     //Note: Popup content set without using jscrollpane api.
     $("#popupContent").html(cont);
-    $("#popupContentWrapper").trigger("popup.setContent", $(this));
+    //Note: Removed 'this' reference passed.
+    $("#popupContentWrapper").trigger("popup.setContent");
 };
 
 /**     STATIC VARIABLES     **/
