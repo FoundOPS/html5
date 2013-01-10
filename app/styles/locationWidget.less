@@ -1,8 +1,6 @@
 .locationWidget{
     position: relative;
-    width: 250px;
-    height: 285px;
-    overflow: hidden;
+    min-height: 150px;
     padding: 15px 20px;
     font-size: 15px;
     h3{
@@ -13,78 +11,53 @@
         line-height: 1.5em;
     }
     #locationWidgetMap{
-        width: 250px;
-        height: 250px;
+        position:relative;
+        width: 100%;
+        min-height: 150px;
+        margin-bottom: 6px;
         .leaflet-popup-content {
             margin: 10px;
         }
     }
-    #locationWidgetMap.shown {
-        opacity: 1;
-    }
-    #locationWidgetMap.hidden {
-        opacity: .3;
-    }
-    .buttonPane{
-        position: relative;
-        top: -250px;
-        left: 0;
-        width: 250px;
-        height: 2px;
-        background:none;
-        border: 1px solid transparent;
-        .navigateBtn{
-            display: none;
-            position: absolute;
-            top:5px;
-            right: 5px;
-            width: 22px;
-            height: 22px;
-            background: url("images/navigateBtn.png") no-repeat;
-        }
-        .k-grid-edit{
-            position: absolute;
-            top:5px;
-            left: 5px;
-            width: 22px;
-            height: 22px;
-            background-position: 0 -66px;
-            &:hover{
-                background-position: 0 -44px;
-            }
-        }
-    }
-    .buttonPane.shown{
-        left: 0;
-    }
-    .buttonPane.hidden{
-        left: 300px;
+    .colorBar{
+        width: 4px;
+        height: 53px;
+        position: absolute;
     }
     .editPane{
-        position: relative;
-        top: -250px;
-        left: -300px;
-        ul{
-            li{
-                #previousLocation {
-                    height: 18px;
-                    width: 22px;
-                    float: left;
-                    background: url("images/previousLocation.png") no-repeat left center;
-                }
-                #manuallyDropPin {
-                    height: 18px;
-                    width: 22px;
-                    float: left;
-                    background: url("images/markerIcon.png") no-repeat left center;
-                }
+        display: none;
+        input{
+            margin-bottom: 5px;
+        }
+        .zipCodeWrapper{
+            width: 44%;
+        }
+        .stateWrapper{
+            width: 54%;
+            float: right;
+        }
+        .deleteBtn{
+            display: none;
+        }
+    }
+    .locationSearchSelect input{
+        margin-bottom: 3px;
+    }
+    .addButtonWrapper{
+        display: none;
+        width: 82px;
+        margin: 10px auto 0 auto;
+        .add {
+            width: 95px;
+            font-size: 14px;
+            color: @green;
+            span{
+                background-position: -115px -180px;
             }
         }
     }
-    .editPane.shown{
-        left: 0px;
-    }
-    .editPane.hidden{
-        left: -300px;
+    .saveDeleteButtonWrapper{
+        width: 150px;
+        margin: 10px auto 0 auto;
     }
 }

@@ -3,6 +3,7 @@
     background:none;
     background-color: @green;
 }
+//should these three lines be here?
 .km-root select:not([multiple]){
     font-size: 1em;
 }
@@ -138,7 +139,9 @@
     font-family: PTSans;
     src: url('styles/PTS55F.ttf');  /* TTF file for CSS3 browsers */
 }
-
+.k-splitter .k-scrollable{
+    overflow: inherit;
+}
 .km-view {
     z-index: 1;
     -webkit-box-sizing: border-box;

@@ -76,7 +76,7 @@ module.exports = function (grunt) {
                 files: [
                     'app/styles/**/*.less'
                 ],
-                tasks: 'less reload'
+                tasks: 'less fixCss reload'
             },
             reload: {
                 files: [
@@ -367,7 +367,7 @@ module.exports = function (grunt) {
 
             //Kendo
             contents = contents.replace(/textures\//g, imgRoot + "textures/");
-            contents = contents.replace(/Default\//g, imgRoot + "Default/");
+            contents = contents.replace(/Default\//g, imgRoot);
 
             contents = contents.replace(/images\//g, imgRoot);
             contents = contents.replace(/styles\//g, stylesRoot);

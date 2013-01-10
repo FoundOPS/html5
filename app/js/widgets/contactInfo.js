@@ -1,4 +1,3 @@
-//OLD - importerV2
 // Copyright 2012 FoundOPS LLC. All Rights Reserved.
 
 'use strict';
@@ -49,7 +48,7 @@ define(["tools/generalTools", "tools/parserTools", "tools/analytics", "widgets/s
             var contactInfo = this;
             var _contactInfo = $('<h3>Contact Info</h3>' +
                 //list pane(first view)
-                '<ul class="contactList"></ul>' +
+                '<ul class="splitBtnList"></ul>' +
                 '<div class="addButtonWrapper">' +
                     '<button class="k-button k-button-icontext add"><span class="k-icon k-add"></span>Add New</button>' +
                 '</div>' +
@@ -103,7 +102,8 @@ define(["tools/generalTools", "tools/parserTools", "tools/analytics", "widgets/s
                 //save the old value to be used to check for changes
                 var oldContact = generalTools.deepClone(contactInfo.options.contacts[contactInfo._options._editIndex]);
                 //get the value of the selected label
-                var selectedLabel = $(contactInfo.element).find(".editWrapper .contactInfoSearchSelect").searchSelect("text");
+                //TODO: should this be used? was: var selectedLabel = $(contactInfo.element).find(".editWrapper .contactInfoSearchSelect").searchSelect("text");
+                var selectedLabel = $(contactInfo.element).find(".editWrapper .contactInfoSearchSelect input").val();
                 //set the value
                 contactInfo.options.contacts[contactInfo._options._editIndex].Data = $(contactInfo.element).find(".editWrapper .value").val();
                 //set the label
@@ -173,7 +173,7 @@ define(["tools/generalTools", "tools/parserTools", "tools/analytics", "widgets/s
         renderContactList: function (contacts) {
             var contactInfo = this, list, category, label, value;
 
-            list = $(contactInfo.element).find(".contactList");
+            list = $(contactInfo.element).find(".splitBtnList");
             list[0].innerHTML = "";
 
             for (var i = 0; i < contacts.length; i++) {
@@ -193,13 +193,13 @@ define(["tools/generalTools", "tools/parserTools", "tools/analytics", "widgets/s
                 }
 
                 //setup the individual contact element
-                var element = "<li id='" + i + "'><div class='editBtn'><span></span></div><a class='info' target='_blank'>" +
+                var element = "<li id='" + i + "'><div class='splitEditBtn'><span></span></div><a class='info' target='_blank'>" +
                     "<span class='" + category + "'></span><p class='label'>" + label + "</p><p class='value'>" + value + "</p></a></li>";
                 //add it to the lists
                 list.append(element);
             }
 
-            $(contactInfo.element).find(".contactList a").on("click touchend", function (e) {
+            $(contactInfo.element).find(".splitBtnList a").on("click touchend", function (e) {
                 if (e.currentTarget.children[0].className === "Phone") {
                     analytics.track("Phone Contact Click");
                     //TODO remove any non-numbers
@@ -214,10 +214,10 @@ define(["tools/generalTools", "tools/parserTools", "tools/analytics", "widgets/s
             });
 
             //on edit button click
-            $(contactInfo.element).find(".editBtn").on("click touchend", function (e) {
+            $(contactInfo.element).find(".splitEditBtn").on("click touchend", function (e) {
                 var index;
                 //get the id of the list item that was clicked on(need to check if the span or div element was clicked on)
-                if (e.target.className === "editBtn") {
+                if (e.target.className === "splitEditBtn") {
                     index = e.target.parentNode.id;
                 } else {
                     index = e.target.parentNode.parentElement.id;
@@ -228,7 +228,7 @@ define(["tools/generalTools", "tools/parserTools", "tools/analytics", "widgets/s
                 contactInfo._edit(contactInfo.options.contacts[index]);
             });
 
-            contactInfo._changePane();
+            contactInfo._changePane("");
         },
 
         //creates a select2 dropdown for the list of labels
@@ -332,7 +332,7 @@ define(["tools/generalTools", "tools/parserTools", "tools/analytics", "widgets/s
             var contactInfo = this;
             //if moving to edit pane
             if (newPane === "edit") {
-                $(contactInfo.element).find(".contactList").animate({
+                $(contactInfo.element).find(".splitBtnList").animate({
                     height: 'hide'
                 }, "swing", function () {
                     $(contactInfo.element).find(".addButtonWrapper").attr("style", "display:none");
@@ -342,7 +342,7 @@ define(["tools/generalTools", "tools/parserTools", "tools/analytics", "widgets/s
                     }, "swing");
                 });
                 //make sure the label dropdown is correct width
-                contactInfo._setLabelWidth(".contactList");
+                contactInfo._setLabelWidth(".splitBtnList");
 
                 //if moving to list pane
             } else {
@@ -351,7 +351,7 @@ define(["tools/generalTools", "tools/parserTools", "tools/analytics", "widgets/s
                 }, "swing", function () {
                     $(contactInfo.element).find(".save, .delete").attr("style", "display:none");
                     $(contactInfo.element).find(".addButtonWrapper").attr("style", "display:block");
-                    $(contactInfo.element).find(".contactList").animate({
+                    $(contactInfo.element).find(".splitBtnList").animate({
                         height: 'show'
                     }, "swing");
                 });

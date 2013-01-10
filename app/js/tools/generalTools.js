@@ -91,17 +91,50 @@ define(["developer", 'tools/dateTools'], function (developer, dateTools) {
     };
 
     //create a display string from a location object
-    generalTools.getLocationDisplayString = function (location) {
+    generalTools.getLocationDisplayString = function (location, includeName) {
         if (!location) {
             return "";
         }
         var lineOne = location.AddressLineOne ? location.AddressLineOne + " " : "";
-        var lineTwo = location.AddressLineTwo ? location.AddressLineTwo + ", " : "";
+        var lineTwo = location.AddressLineTwo ? location.AddressLineTwo : "";
+
         var adminDistrictTwo = location.AdminDistrictTwo ? location.AdminDistrictTwo + ", " : "";
-        var adminDistrictOne = location.AdminDistrictOne ? location.AdminDistrictOne + " " : "";
+        var adminDistrictOne = location.AdminDistrictOne ? location.AdminDistrictOne : "";
         var postalCode = location.PostalCode ? location.PostalCode : "";
         //display any parts of the location that exist
-        var displayString = lineOne + lineTwo + adminDistrictTwo + adminDistrictOne + postalCode;
+        var displayString = "";
+
+        if (includeName) {
+            //put the name on a separate line above the address
+            displayString = location.Name ? location.Name + "<br/>\n" : "";
+        }
+
+        displayString += lineOne + lineTwo;
+
+        if (displayString !== "") {
+            //if name should be included, but there is no name(i.e. there are 2 lines available), put the second half of the address on the next line
+            if (includeName && location.Name === "") {
+                displayString += "<br/>\n";
+            } else {
+                displayString += ", ";
+            }
+        }
+
+        displayString += adminDistrictTwo + adminDistrictOne;
+
+        //if location is not in US, show country code
+        if (location.CountryCode !== "US") {
+            //add a comma if neccesary
+            if (displayString !== "") {
+                displayString += ", ";
+            }
+            displayString += location.CountryCode + " ";
+        } else {
+            displayString += " ";
+        }
+
+        displayString += postalCode;
+
         if (displayString !== "") {
             return displayString;
         } else {
@@ -280,6 +313,16 @@ define(["developer", 'tools/dateTools'], function (developer, dateTools) {
         element.css("height", newH + "px");
     };
 
+    generalTools.hexToRGB = function (Hex)
+    {
+        var Long = parseInt(Hex.replace(/^#/, ""), 16);
+        return {
+            R: (Long >>> 16) & 0xff,
+            G: (Long >>> 8) & 0xff,
+            B: Long & 0xff
+        };
+    };
+
     $.fn.delayKeyup = function (callback, ms) {
         var timer = 0;
         var el = $(this);
@@ -331,6 +374,31 @@ define(["developer", 'tools/dateTools'], function (developer, dateTools) {
             return (window.cordova ? true : false);
         }
     }
+
+    generalTools.getDirections = function (location) {
+        var navigateQuery;
+
+        //check if there is a usable address
+        if (location.AddressLineOne && location.AdminDistrictOne && location.AdminDistrictTwo) {
+            //replace spaces with "+" to format for search query
+            var lineOneFormatted = location.AddressLineOne.replace(/\s/g, "+");
+            var adminDistrictTwoFormatted = location.AdminDistrictTwo.replace(/\s/g, "+");
+            var adminDistrictOneFormatted = location.AdminDistrictOne.replace(/\s/g, "+");
+            navigateQuery = lineOneFormatted + ',+' + adminDistrictTwoFormatted + ',+' + adminDistrictOneFormatted + '&z=13&ll=' + location.Latitude + ',' + location.Longitude;
+            //if not, use the latitude and longitude
+        } else {
+            navigateQuery = location.Latitude + ',+' + location.Longitude + '&z=13&ll=' + location.Latitude + ',' + location.Longitude;
+        }
+
+        //get the user's location
+        navigator.geolocation.getCurrentPosition(function (position) {
+            // If geolocation is successful get directions to the location from current position.
+            generalTools.goToUrl("http://maps.google.com/maps?saddr=" + position.coords.latitude + "," + position.coords.longitude + "&daddr=" + navigateQuery);
+        }, function () {
+            // If geolocation is NOT successful just show the location.
+            generalTools.goToUrl("http://maps.google.com/maps?q=" + navigateQuery);
+        }, {timeout: 10000, enableHighAccuracy: true});
+    };
 
     generalTools.goToUrl = function (url) {
         if (url.substr(0, 7) !== "http://" && url.substr(0, 8) !== "https://") {

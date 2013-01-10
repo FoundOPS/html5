@@ -28,7 +28,7 @@ define(["sections/importerUpload", "sections/importerSelect", "db/services", "to
         },
         {
             field: "Location",
-            template: "<div class='Location'>#= generalTools.getLocationDisplayString(Location) #</div>",
+            template: "<div class='Location'>#= generalTools.getLocationDisplayString(Location, false) #</div>",
             //disable editing by having empty custom editor
             editor: closeCurrentCell,
             width: "200px"

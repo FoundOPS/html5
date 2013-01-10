@@ -14,16 +14,16 @@ define(function () {
      * @type {Array.<object>}
      */
     ui.ITEM_COLORS = [
-        {name: "darkblue", color: "#194A91"},
-        {name: "red", color: "#ff0000"},
-        {name: "limegreen", color: "#03EA03"},
-        {name: "brown", color: "#663300"},
-        {name: "purple", color: "#660099"},
-        {name: "orange", color: "#FF9900"},
-        {name: "lightblue", color: "#0099ff"},
-        {name: "darkgreen", color: "#006600"},
-        {name: "darkred", color: "#990000"},
-        {name: "pink", color: "#FF00CC"}
+        {name: "green", color: "#5bad52"},
+        {name: "darkred", color: "#872025"},
+        {name: "yellow", color: "#d9ca20"},
+        {name: "purple", color: "#542093"},
+        {name: "orange", color: "#d95920"},
+        {name: "darkgreen", color: "#043300"},
+        {name: "red", color: "#d91c21"},
+        {name: "pink", color: "#e779f2"},
+        {name: "brown", color: "#884411"},
+        {name: "blue", color: "#115588"}
     ];
 
     /**

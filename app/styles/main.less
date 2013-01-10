@@ -49,11 +49,13 @@ table {
 @green: #5aad52;
 @red: #d06268;
 @charcoal: #333335;
-@white:#ffffff;
-@grey: rgb(230,230,230); //inner background
-.hoverColor (@color: @white, @strength: 10%){
+@white: #ffffff;
+@grey: rgb(230, 230, 230);
+//inner background
+.hoverColor(@color: @white, @strength: 10%) {
     background-color: darken(@color, @strength);
 }
+
 @darkBlue: #36C3E3;
 @buttonLight: #a7ff6c;
 @buttonDark: #8dd85b;
@@ -61,16 +63,17 @@ table {
 @buttonHoverDark: #7ec152;
 @textColor: #222222;
 //used for repeat widget weekdays
-.bgGradient(@top, @bottom){
+.bgGradient(@top, @bottom) {
     background-color: @top;
     background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0, @bottom), color-stop(0.5, @top));
     background-image: -webkit-linear-gradient(center bottom, @bottom 0%, @top 50%);
     background-image: -moz-linear-gradient(center bottom, @bottom 0%, @top 50%);
     background-image: -o-linear-gradient(bottom, @bottom 0%, @top 50%);
     background-image: -ms-linear-gradient(top, @bottom 0%, @top 50%);
-    filter: progid:dximagetransform.microsoft.gradient(startColorstr=@bottom, endColorstr=@top, GradientType=0);
+    filter: progid:dximagetransform.microsoft.gradient(startColorstr = @bottom, endColorstr = @top, GradientType = 0);
     background-image: linear-gradient(top, @bottom 0%, @top 50%);
 }
+
 /*endregion*/
 
 @import url("kendo/kendo.mobile.all.less");
@@ -83,103 +86,182 @@ table {
 h1, h2, h3, td, p {
     cursor: default;
 }
+
 h1.title {
     width: 500px;
     color: @charcoal;
 }
-h2{
+
+h2 {
     color: @charcoal;
 }
+
 body {
     font-family: PTSans;
     background-color: @grey;
     color: @charcoal;
 }
+
 hr {
     border: 1px solid #666;
 }
+
 .wrap {
     margin: 15px 40px 0 290px;
     padding: 0 0 15px;
-    h1{
-        margin:20px 0 5px 0;
+    h1 {
+        margin: 20px 0 5px 0;
         padding: 4px 0 3px 0;
         font-size: 1.7em;
         font-weight: normal;
         color: @green;
     }
 }
-.wrap.top{
+
+.wrap.top {
     margin-top: 25px;
 }
+
+.k-splitter .k-splitbar-horizontal {
+    border: none;
+    background: none;
+    .k-icon {
+        height: 26px;
+        background-position: -121px -277px;
+    }
+}
+
 /*region scrollbars*/
 ::-webkit-scrollbar {
     width: 12px;
     height: 12px;
 }
-::-webkit-scrollbar-track{
+
+::-webkit-scrollbar-track {
     background-color: @white;
-    &:horizontal{
+    &:horizontal {
         border-top: 4px solid @grey;
     }
-    &:vertical{
+    &:vertical {
         border-left: 4px solid @grey;
     }
 }
-::-webkit-scrollbar-thumb{
+
+::-webkit-scrollbar-thumb {
     background-color: @green;
-    &:horizontal{
+    &:horizontal {
         border-top: 4px solid @grey;
     }
-    &:vertical{
+    &:vertical {
         border-left: 4px solid @grey;
     }
 }
-::-webkit-scrollbar-thumb:hover{
+
+::-webkit-scrollbar-thumb:hover {
     .hoverColor(@green);
 }
-::-webkit-scrollbar-corner{
+
+::-webkit-scrollbar-corner {
     background: @white;
 }
-#services ::-webkit-scrollbar-corner{
+
+#services ::-webkit-scrollbar-corner {
     background: @grey;
 }
+
 /*endregion*/
 /*region save/cancel/add/delete/edit buttons*/
 .addDeleteBtns .k-grid-delete, .addDeleteBtns .k-grid-add {
     padding-right: 6px;
 }
+
 .addDeleteBtns .k-grid-delete {
     margin: 0;
 }
+
 button[disabled], .k-grid-update[disabled], .k-grid-cancel[disabled] {
     cursor: default;
 }
-button[disabled]:hover{
+
+button[disabled]:hover {
     background: @white;
 }
+
 button[disabled], button[disabled]:hover {
     opacity: .5;
 }
-.saveBtn, .saveBtn:active, .cancelBtn{
+
+.splitBtnList {
+    background: @white;
+    li {
+        margin: 0 !important;
+        padding: 0 !important;
+        border-bottom: 2px solid #e6e6e6;
+        cursor: pointer;
+        a {
+            display: block;
+            height: 45px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            padding: 4px 8px;
+        }
+        .splitEditBtn {
+            float: right;
+            width: 50px;
+            padding-bottom: 10px;
+            cursor: pointer;
+            span {
+                width: 35px;
+                height: 35px;
+                display: block;
+                margin: 9px 0 0 6px;
+                background: url("images/combinedSprites.png") no-repeat -37px -267px;
+            }
+        }
+        &:hover {
+            .hoverColor(@white, 15%);
+        }
+        &:hover > div, &:hover > a {
+            background-color: #eee;
+        }
+        &:hover > div:hover, &:hover > a:hover {
+            background-color: #dfdfdf;
+        }
+        &:last-child {
+            border-bottom: none;
+        }
+    }
+}
+
+.saveBtn, .saveBtn:active, .cancelBtn {
     border-radius: 0;
     border: none;
     background: @white;
     color: @green;
-    span{
+    .k-update {
         background-image: url("images/sprite.png");
     }
     filter: none;
 }
-.saveBtn{
-    span{
+
+.cancelBtn, .cancelBtn:hover {
+    .k-delete {
+        background-image: url("images/sprite.png");
+    }
+}
+
+.saveBtn, .saveBtn:hover {
+    .k-update {
         background-position: -114px -157px;
     }
 }
-.cancelBtn, .cancelBtn:active {
+
+.cancelBtn, .cancelBtn:active, .deleteBtn, .deleteBtn:active {
     margin-left: 4px;
     color: @red;
 }
+
 .k-grid-edit, .k-grid-edit:hover, .k-grid-delete, .k-grid-delete:hover, .k-grid-add,
 .k-grid-add:hover, .k-grid-delete[disabled], .k-grid-delete[disabled]:hover, .csvBtn, .csvBtn:hover {
     background: url("images/combinedSprites.png") no-repeat;
@@ -209,6 +291,12 @@ button[disabled], button[disabled]:hover {
     background-position: 0 -56px;
 }
 
+.cancelBtn, .cancelBtn:hover, .deleteBtn, .deleteBtn:hover{
+    .k-delete {
+        background-position: -115px -135px;
+    }
+}
+
 .k-grid-delete:hover {
     background-position: 0 -84px;
 }
@@ -231,13 +319,18 @@ button[disabled], button[disabled]:hover {
 .optionsMenu:hover {
     background-position: 0 -199px;
 }
+
+button:active, .saveBtn:active, .cancelBtn:active, .deleteBtn:active {
+    .hoverColor(@white, 20%);
+}
+
 /*endregion*/
 
-#personal, #business, #users, #dispatcher, #changePassword{
+#personal, #business, #users, #dispatcher, #changePassword {
     min-width: 550px;
 }
 
-.k-invalid-msg{
+.k-invalid-msg {
     top: -32px;
     left: 258px;
     margin-bottom: -39px;
@@ -246,26 +339,26 @@ button[disabled], button[disabled]:hover {
     background: none;
     text-align: left;
     color: @red;
-    .k-warning{
+    .k-warning {
         display: none;
     }
 }
 
 @media only screen and (max-width:840px) {
-    .k-invalid-msg{
+    .k-invalid-msg {
         top: 0;
         left: -4px;
         margin-bottom: 0;
     }
 }
 
-.k-grid{
+.k-grid {
     border: none;
     border-left: 2px solid @grey;
-    .k-grid-header-wrap{
+    .k-grid-header-wrap {
         border: none;
     }
-    .k-grid-header{
+    .k-grid-header {
         margin-top: 5px;
         margin-bottom: 3px;
         padding-right: 13px;
@@ -280,16 +373,16 @@ button[disabled], button[disabled]:hover {
             border-left: 1px solid @grey;
             color: @white;
             padding: 5px 0 6px 4px;
-            a{
+            a {
                 color: @white;
-                span{
+                span {
                     vertical-align: middle;
                 }
             }
-            &:hover{
+            &:hover {
                 .hoverColor (@green, 8%);
             }
-            span.k-i-arrow-n, span.k-i-arrow-s{
+            span.k-i-arrow-n, span.k-i-arrow-s {
                 float: right;
                 margin-right: 15px;
                 margin-top: 7px;
@@ -298,20 +391,20 @@ button[disabled], button[disabled]:hover {
                 background-position: -118px -200px;
                 opacity: 1;
             }
-            span.k-i-arrow-s{
+            span.k-i-arrow-s {
                 background-position: -118px -214px;
             }
-            .k-header-column-menu{
+            .k-header-column-menu {
                 margin-right: 0;
-                padding-left:8px;
-                padding-right:8px;
-                .k-icon{
+                padding-left: 8px;
+                padding-right: 8px;
+                .k-icon {
                     width: 11px;
                     height: 10px;
                     opacity: 1;
                     background-position: -118px -231px;
                 }
-                &:hover{
+                &:hover {
                     .hoverColor (@green, 15%);
                 }
             }
@@ -323,30 +416,30 @@ button[disabled], button[disabled]:hover {
             border-right: none;
         }
     }
-    .k-grid-content{
+    .k-grid-content {
         overflow-y: auto;
         min-height: 40px;
     }
-    tr{
+    tr {
         background-color: @grey;
-        &:hover{
+        &:hover {
             .hoverColor(@grey);
             cursor: pointer;
         }
-        &:last-child td{
+        &:last-child td {
             border-bottom: none;
         }
     }
-    tr.k-state-selected{
-        td{
+    tr.k-state-selected {
+        td {
             border-left: 1px solid @white;
             border-right: 1px solid @white;
         }
-        td:first-child{
-            border-left: 2px solid @white;
+        td:first-child {
+            border-left: none;
         }
-        td:last-child{
-            border-right: 2px solid @white;
+        td:last-child {
+            border-right: none;
         }
     }
     td {
@@ -354,39 +447,40 @@ button[disabled], button[disabled]:hover {
         padding: 5px 7px 5px 3px;
         border: 1px solid @grey;
     }
-    tr:first-child td{
+    tr:first-child td {
         border-top: none;
     }
-    tr:last-child td{
+    tr:last-child td {
         border-bottom: none;
     }
-    tr:last-child.k-state-selected td{
+    tr:last-child.k-state-selected td {
         border-bottom: 2px solid @white;
     }
-    td:first-child{
+    td:first-child {
         border-left: none;
         border-right: 1px solid @grey;
     }
-    td:last-child{
+    td:last-child {
         border-right: none;
         border-left: 1px solid @grey;
     }
-    .k-grid-pager{
+    .k-grid-pager {
         margin-top: 5px;
         background: @grey;
         border: none;
-        .k-link{
+        .k-link {
             border-color: @grey;
-            &:hover{
+            &:hover {
                 .hoverColor(@grey);
             }
         }
-        span.k-state-selected{
+        span.k-state-selected {
             background: @green;
             color: @white;
         }
     }
 }
+
 /*endregion*/
 
 @import "settingsMenu.less";
@@ -400,135 +494,143 @@ button[disabled], button[disabled]:hover {
 @import "locationWidget.less";
 
 .contactInfoSearchSelect {
-  max-height:26px;
-  width:100%;
-  margin: 0 auto;
-  min-height: 20px;
-  background-color: @white;
-  display: inline-block;
-  input{
-    display:block;
-    width:100%;
-    padding: 2px 15px 2px 6px;
-    margin: 3px 3px 3px -1px;
-    border: none;
-    font-family: PTSans;
-    background: url("images/select-closed.png") no-repeat right center;
-    //Allows true 100% width without overflowing due to margins, borders or padding.
-    box-sizing: border-box; /* css3 rec */
-    -moz-box-sizing: border-box; /* ff2 */
-    -ms-box-sizing: border-box; /* ie8 */
-    -webkit-box-sizing: border-box; /* safari3 */
-    -khtml-box-sizing: border-box; /* konqueror */
-  }
-  #optionListScroller {
-    position: absolute !important;
-    z-index:1;
-  }
-  ul{
-    li{
-      font-size: 14px;
-      background-color: @white;
-      cursor: pointer;
-      &:hover{
-        .hoverColor();
-        color: @white;
-      }
-      &:not(:last-child){
-        border-bottom: 0;
-      }
-      span{
-        padding: 5px;
-        display: table-cell;
-      }
-      .name{
-        vertical-align: middle;
-      }
-      #previousSelection {
-        width: 20px;
-        vertical-align: middle;
-        padding-left: 25px;
-        background: url("images/previousLocation.png") no-repeat left center;
-      }
+    max-height: 26px;
+    width: 100%;
+    margin: 0 auto;
+    min-height: 20px;
+    background-color: @white;
+    display: inline-block;
+    input {
+        display: block;
+        width: 100%;
+        padding: 2px 15px 2px 6px;
+        margin: 3px 3px 3px -1px;
+        border: none;
+        font-family: PTSans;
+        background: url("images/select-closed.png") no-repeat right center; //Allows true 100% width without overflowing due to margins, borders or padding.
+        box-sizing: border-box; /* css3 rec */
+        -moz-box-sizing: border-box; /* ff2 */
+        -ms-box-sizing: border-box; /* ie8 */
+        -webkit-box-sizing: border-box; /* safari3 */
+        -khtml-box-sizing: border-box; /* konqueror */
     }
-    li.singleLine .name{
-      padding-top: 9px;
+    #optionListScroller {
+        position: absolute !important;
+        z-index: 1;
     }
-    li.tripleLine .name{
-      font-size: 11px;
+    ul {
+        li {
+            font-size: 14px;
+            background-color: @white;
+            cursor: pointer;
+            &:hover {
+                .hoverColor();
+                color: @white;
+            }
+            &:not(:last-child) {
+                border-bottom: 0;
+            }
+            span {
+                padding: 5px;
+                display: table-cell;
+            }
+            .name {
+                vertical-align: middle;
+            }
+        }
+        li.singleLine .name {
+            padding-top: 9px;
+        }
+        li.tripleLine .name {
+            font-size: 11px;
+        }
     }
-  }
 }
+
 .locationSearchSelect {
-  margin: 0 auto;
-  width: 240px;
-  text-align: center;
-  min-height: 20px;
-  border: 1px solid #aaaaaa;
-  background-color: @white;
-  input{
-    width: 215px;
-    margin: 3px 3px 3px 0px;
-    padding: 2px 21px 2px 2px;
-    border: none;
-    font-family: PTSans;
-    background: url("images/smallSearch.png") no-repeat right center;
-  }
-  #optionListScroller {
-    position: absolute !important;
-    max-height: 215px;
-  }
-  ul{
-    width: 240px;
-    max-height: 215px;
-    span{
-      display: table-cell;
+    text-align: center;
+    min-height: 20px;
+    margin-bottom: 5px;
+    background-color: @white;
+    input {
+        margin: 3px 3px 3px 0px;
+        padding: 2px 26px 2px 2px;
+        border: none;
+        font-family: PTSans;
+        background: url("images/smallSearch.png") no-repeat right center;
     }
-    span.name{
-      height: 36px;
-      vertical-align: middle;
+    #optionListScroller {
+        max-height: 115px;
     }
-    li{
-      text-align: left;
-      padding: 5px 4px 5px 4px;
-      font-size: 14px;
-      background-color: #efefef;
-      cursor: pointer;
-      border: 1px solid #aaaaaa;
-      &:hover{
-                    background-color: @green;
-        color: @white;
-      }
-      &:not(:last-child){
-        border-bottom: 0;
-      }
-      span{
-        display: table-cell;
-      }
-      .name{
-        height: 36px;
-        padding-left: 3px;
-        vertical-align: middle;
-      }
-      #previousSelection {
-        width: 20px;
-        vertical-align: middle;
-        padding-left: 25px;
-        background: url("images/previousLocation.png") no-repeat left center;
-      }
+    ul {
+        max-height: 115px;
+        span {
+            display: table-cell;
+        }
+        span.name {
+            height: 36px;
+            vertical-align: middle;
+        }
+        li {
+            text-align: left;
+            padding: 5px 4px 5px 4px !important;
+            margin: 0 !important;
+            font-size: 14px;
+            background-color: @white;
+            cursor: pointer;
+            border-top: 1px solid #aaaaaa;
+            &:hover {
+                .hoverColor(@white, 15%);
+            }
+            &:not(:last-child) {
+                border-bottom: 0;
+            }
+            span {
+                display: table-cell;
+            }
+            .name {
+                height: 36px;
+                padding-left: 3px;
+                vertical-align: middle;
+            }
+            .fromWeb, .previousSelection, .manuallyPlacePin, .clientLocation {
+                width: 20px;
+                height: 36px;
+                vertical-align: middle;
+                padding-right: 4px;
+                background: url("images/previousSelection.png") no-repeat left center;
+            }
+            .manuallyPlacePin {
+                background: url("images/markerIcon.png") no-repeat left center;
+            }
+            .clientLocation {
+                background: url("images/clientLocation.png") no-repeat left center;
+            }
+            .fromWeb {
+                background: url("images/webIcon.png") no-repeat left center;
+            }
+        }
+        li.singleLine .name {
+            padding-top: 9px;
+        }
+        li.tripleLine .name {
+            font-size: 11px;
+        }
+        #noOptions {
+            padding: 5px;
+            background-color: #E6E6E6;
+            border: 1px solid #AAA;
+            line-height: 10px;
+            cursor: default;
+        }
     }
-    li.singleLine .name{
-      padding-top: 9px;
-    }
-    li.tripleLine .name{
-      font-size: 11px;
-    }
-  }
 }
+
 /*region ImageUploadButton */
 .imageupload-button:hover {
     background-image: url("images/highlight.png");
 }
+
 .imageupload-cropbox {
     margin-bottom: 10px;
 }
@@ -549,26 +651,29 @@ button[disabled], button[disabled]:hover {
 #tooltip h3, #tooltip div {
     margin: 0;
 }
+
 /*endregion*/
 @import "noty.less";
 @import "colorPicker.less";
 /*region Overrides for select2*/
-.select2-container .select2-choice, .select2-dropdown-open .select2-choice, .select2-drop{
+.select2-container .select2-choice, .select2-dropdown-open .select2-choice, .select2-drop {
     border: none;
     border-radius: 0;
     background-color: @white;
-    background-image:none;
+    background-image: none;
     color: @textColor;
     font-size: 14px;
-    div{
+    div {
         border: none;
         border-radius: 0;
-        background-image:none;
+        background-image: none;
     }
 }
-.iconDropdown.select2-drop{
+
+.iconDropdown.select2-drop {
     font-size: 16px;
 }
+
 //remove shadows
 .select2-drop, .select2-container-active .select2-choice, .select2-container-active .select2-choices {
     -webkit-box-shadow: none;
@@ -576,64 +681,79 @@ button[disabled], button[disabled]:hover {
     -o-box-shadow: none;
     box-shadow: none;
 }
+
 .select2-container-multi.select2-container-active .select2-choices {
     -webkit-box-shadow: 0 0 0px;
-    -moz-box-shadow   : 0 0 0px;
-    -o-box-shadow     : 0 0 0px;
-    box-shadow        : 0 0 0px;
+    -moz-box-shadow: 0 0 0px;
+    -o-box-shadow: 0 0 0px;
+    box-shadow: 0 0 0px;
     border: none;
     outline: none;
 }
-.select2-container .select2-choice div{
+
+.select2-container .select2-choice div {
     background-color: @white;
 }
-.select2-results .select2-highlighted{
+
+.select2-results .select2-highlighted {
     background: @green;
 }
+
 //next 2 styles make the dropdown arrow blue
 .select2-container .select2-choice div b {
     background: url('images/select-closed.png') no-repeat right;
 }
+
 .select2-dropdown-open .select2-choice div b {
     background-position: 1px 8px;
 }
-.select2-drop-active{
+
+.select2-drop-active {
     border: 1px solid #ddd;
     border-top: none;
 }
+
 .select2-results {
     min-height: 18px;
     max-height: 250px;
     display: block;
-    li{
+    li {
         display: block;
     }
 }
-.select2-result-unselectable .select2-result-label{
+
+.select2-result-unselectable .select2-result-label {
     font-weight: bold;
 }
-.select2-result-selectable .select2-result-label{
+
+.select2-result-selectable .select2-result-label {
     font-weight: normal;
 }
+
 .select2-results .select2-no-results, .select2-results .select2-searching, .select2-results .select2-selection-limit {
     background: @white;
 }
+
 .select2-container .select2-choice span {
     font-size: 14px;
 }
-.select2-search input{
+
+.select2-search input {
     border: 1px solid @grey;
 }
-.labelDropdown, .iconDropdown{
+
+.labelDropdown, .iconDropdown {
     border: 2px solid @grey;
     border-top: none;
     margin-top: 0;
     margin-left: -1px;
     z-index: 11;
 }
-.endDateDropdown, .frequencyDropdown{
+
+.endDateDropdown, .frequencyDropdown {
     z-index: 11;
 }
+
 .iconContainer {
     .select2-choice {
         background-color: transparent;
@@ -645,49 +765,61 @@ button[disabled], button[disabled]:hover {
         }
     }
 }
+
 .iconDropdown {
-    .select2-results{
+    .select2-results {
         margin: 4px 2px 4px -1px;
     }
-    ul{
+    ul {
         padding: 0;
     }
 }
-.EmailSmall, .WebsiteSmall, .PhoneSmall, .OtherSmall, .iconDropdown .select2-results .select2-highlighted{
+
+.EmailSmall, .WebsiteSmall, .PhoneSmall, .OtherSmall, .iconDropdown .select2-results .select2-highlighted {
     background: url("images/combinedSprites.png") no-repeat -40px 0;
 }
-.select2-results .EmailSmall{
+
+.select2-results .EmailSmall {
     background-position: -40px -140px;
 }
-.select2-results .WebsiteSmall{
+
+.select2-results .WebsiteSmall {
     background-position: -40px -175px;
 }
-.select2-results .PhoneSmall{
+
+.select2-results .PhoneSmall {
     background-position: -40px -210px;
 }
-.select2-results .OtherSmall{
+
+.select2-results .OtherSmall {
     background-position: -40px -245px;
 }
-.EmailSmall, .select2-results .EmailSmall.select2-highlighted{
+
+.EmailSmall, .select2-results .EmailSmall.select2-highlighted {
     background-position: -40px 0;
 }
-.WebsiteSmall, .select2-results .WebsiteSmall.select2-highlighted{
+
+.WebsiteSmall, .select2-results .WebsiteSmall.select2-highlighted {
     background-position: -40px -35px;
 }
-.PhoneSmall, .select2-results .PhoneSmall.select2-highlighted{
+
+.PhoneSmall, .select2-results .PhoneSmall.select2-highlighted {
     background-position: -40px -70px;
 }
-.OtherSmall, .select2-results .OtherSmall.select2-highlighted{
+
+.OtherSmall, .select2-results .OtherSmall.select2-highlighted {
     background-position: -40px -105px;
 }
+
 /*endregion*/
 /*region SelectBox*/
-.styled-select{
+.styled-select {
     width: 100%;
     height: 28px;
     overflow: hidden;
     background: url("images/select-closed.png") no-repeat right @white;
 }
+
 .selectBox {
     width: 100%;
     height: 28px;
@@ -698,15 +830,17 @@ button[disabled], button[disabled]:hover {
     font-family: PTSans;
     -webkit-appearance: none;
     background: transparent;
-    option:hover{
+    option:hover {
         background: @green;
     }
 }
-#importerUpload{
-    .styled-select{
+
+#importerUpload {
+    .styled-select {
         width: 200px;
     }
 }
+
 /*endregion*/
 /*region Toggle Switch*/
 .toggleSwitch {
@@ -727,10 +861,10 @@ button[disabled], button[disabled]:hover {
         margin: 2px 0 0 2px;
         z-index: 2;
     }
-    a.off{
+    a.off {
         margin-right: 2px;
     }
-    a:not(.active):hover{
+    a:not(.active):hover {
         background: @grey;
     }
     a.active {
@@ -738,4 +872,5 @@ button[disabled], button[disabled]:hover {
         background: @green;
     }
 }
+
 /*endregion*/

@@ -2,7 +2,7 @@
 
 "use strict";
 
-define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tools/dateTools", "widgets/settingsMenu"], function (dbServices, session, saveHistory, parameters, dateTools) {
+define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "db/models", "tools/dateTools", "widgets/settingsMenu"], function (dbServices, session, saveHistory, parameters, models, dateTools) {
     var usersSettings = {}, usersDataSource, grid;
 
     usersSettings.setupSaveHistory = function () {
@@ -40,7 +40,7 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
             },
             EmployeeId: {
                 //for new entities, default to creating a new employee
-                defaultValue: "10000000-0000-0000-0000-000000000000"
+                defaultValue: models.newId
             }
 //            TimeZone: {
 //                defaultValue: ""
@@ -274,11 +274,11 @@ define(["db/services", "db/session", "db/saveHistory", "tools/parameters", "tool
             var employees = data;
 
             //add a create new option
-            var createNew = {Id: "10000000-0000-0000-0000-000000000000", DisplayName: "Create New", FirstName: "", LastName: "", LinkedUserAccountId: ""};
+            var createNew = {Id: models.newId, DisplayName: "Create New", FirstName: "", LastName: "", LinkedUserAccountId: ""};
             employees.splice(0, 0, createNew);
 
             //add a none option above create new
-            var none = {Id: "00000000-0000-0000-0000-000000000000", DisplayName: "None", FirstName: "", LastName: "", LinkedUserAccountId: ""};
+            var none = {Id: models.emptyId, DisplayName: "None", FirstName: "", LastName: "", LinkedUserAccountId: ""};
             employees.splice(0, 0, none);
 
             usersSettings.availableEmployees = employees;
