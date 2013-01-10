@@ -104,6 +104,9 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
                     if (e.target.innerText === "Manually Place Pin") {
                         //allow the marker to move on map click
                         locationWidget._allowMapClick = true;
+                        //disable the save button
+                        widgetElement.find(".saveBtn").attr("disabled", "disabled");
+
                         locationWidget._clearMarkers();
                         locationWidget._enableFields();
 
@@ -118,6 +121,8 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
                         locationWidget._disableFields();
                         locationWidget._populateFields(selectedData);
                         locationWidget._showMarker(selectedData);
+                        //enable the save button
+                        widgetElement.find(".saveBtn").removeAttr("disabled");
                     }
                 },
                 queryDelay: 750,
@@ -161,6 +166,9 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
                     //save the lat/lng
                     widgetElement.find(".lat").val(e.latlng.lat);
                     widgetElement.find(".lng").val(e.latlng.lng);
+
+                    //enable the save button
+                    widgetElement.find(".saveBtn").removeAttr("disabled");
                 }
             });
 
@@ -229,6 +237,9 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
                 locationWidget.showList();
 
                 locationWidget._allowMapClick = false;
+
+                //enable the save button
+                widgetElement.find(".saveBtn").removeAttr("disabled");
             });
 
             //check there is at least one location

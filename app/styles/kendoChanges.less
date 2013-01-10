@@ -254,6 +254,22 @@ span.k-tooltip {
     margin-left: 4px;
 }
 
+//BUG FIX: on splitter click, an overlay gets added, so you can't click on anything
+.k-splitter-overlay {
+    display: none;
+}
+
+.k-numeric-wrap.k-state-hover {
+    background: none;
+    .k-input {
+        cursor: text;
+    }
+}
+
+.km-listview-label:hover {
+    cursor: pointer;
+}
+
 //override the orange selected row highlight with blue
 .k-grid .k-state-selected, .k-list > .k-grid .k-state-selected, .k-list > .k-state-focused,
 .k-panelbar > .k-grid .k-state-selected, .k-panel > .k-grid .k-state-selected,
