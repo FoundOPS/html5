@@ -23,7 +23,7 @@
         "grunt-replace": "0.3.x",
 		"async": "0.1.x",
 		"htmlparser": "1.7.x",
-		"jquery" : "1.8.x"
+        "rimraf": "2.1.x"
 	},
     "keywords": [
         "FoundOPS"

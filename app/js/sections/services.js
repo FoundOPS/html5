@@ -430,6 +430,10 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
      * Reload the services
      */
     var reloadServices = _.debounce(function () {
+        if (!serviceHoldersDataSource) {
+            return;
+        }
+
         serviceHoldersDataSource.options.transport.read.data.startDate = dateTools.stripDate(vm.get("startDate"));
         serviceHoldersDataSource.options.transport.read.data.endDate = dateTools.stripDate(vm.get("endDate"));
         serviceHoldersDataSource.read();
@@ -776,7 +780,7 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
             //make sure dropdownlist has service type selected
             var i, options = $("#serviceTypes > .selectBox").children("*");
             for (i = 0; i < options.length; i++) {
-                if (options[i].dataset.value === serviceTypeId) {
+                if (options[i].value === serviceTypeId) {
                     options[i].selected = true;
                 }
             }
@@ -856,6 +860,9 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
                 return vm.get("selectedService");
             }
         });
+
+        //needed in case changes are made
+        reloadServices();
     };
 
     //endregion
