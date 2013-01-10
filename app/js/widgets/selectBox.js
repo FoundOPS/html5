@@ -49,7 +49,7 @@
                 //call the onSelect function with the selected item
                 for (i = 0; i < optionsHTML.length; i++) {
                     var option = optionsHTML[i];
-                    option.value = optionsHTML[i].dataset.value;
+                    option.value = optionsHTML[i].value;
 
                     if (option.selected) {
                         config.onSelect({index: option.index, name: option.text, value: option.value, selected: option.selected });

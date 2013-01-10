@@ -673,7 +673,7 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
             //make sure dropdownlist has service type selected
             var i, options = $("#serviceTypes > .selectBox").children("*");
             for (i = 0; i < options.length; i++) {
-                if (options[i].dataset.value === serviceTypeId) {
+                if (options[i].value === serviceTypeId) {
                     options[i].selected = true;
                 }
             }

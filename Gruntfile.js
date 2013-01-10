@@ -392,4 +392,10 @@ module.exports = function (grunt) {
     grunt.registerTask('compass', 'less fixCss');
 
     //grunt.registerTask('usemin', 'usemin cleanupDist');
+
+    //for turning off LiveReload. need to do this when testing IE
+//    grunt.registerHelper('reload:inject', function () {
+//        return function inject(req, res, next) {
+//            return next();
+//        }});
 };
