@@ -730,5 +730,6 @@ function Navigator(config) {
     initTopNav();
     initSideBar();
     initPopup();
+    $(document).trigger("navigator.loaded");
 }
 }(window.jQuery);
