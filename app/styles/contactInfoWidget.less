@@ -18,18 +18,11 @@
         width: 150px;
         margin: 0 auto;
     }
-    .contactList {
-        margin-bottom: 15px;
+    .splitBtnList {
+        margin-bottom: 10px;
         li {
-            height: 60px;
-            background-color: @white;
-            border-bottom:1px solid @grey;
             .info {
-                height: 45px;
-                overflow: hidden;
-                display: block;
                 padding: 10px 5px 5px 5px;
-                cursor: pointer;
                 span{
                     width: 35px;
                     height: 35px;
@@ -59,33 +52,13 @@
                 }
                 p{
                     padding-left: 5px;
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    cursor: pointer;
                 }
             }
-            .editBtn {
-                float: right;
-                width: 50px;
-                height: 100%;
-                cursor: pointer;
+            .splitEditBtn{
+                padding-bottom: 13px;
                 span{
-                    width: 35px;
-                    height: 35px;
-                    display: block;
                     margin: 13px 0 0 6px;
-                    background: url("images/combinedSprites.png") no-repeat -37px -267px;
                 }
-            }
-            &:hover > div, &:hover > a {
-                background-color: #eee;
-            }
-            &:hover > div:hover, &:hover > a:hover {
-                background-color: #dfdfdf;
-            }
-            &:last-child {
-                margin-bottom: 10px;
             }
         }
     }

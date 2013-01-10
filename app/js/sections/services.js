@@ -2,9 +2,9 @@
 
 'use strict';
 
-require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db/saveHistory", "tools/kendoTools", "tools/analytics", "widgets/serviceDetails",
-    "widgets/selectBox"], function (session, dbServices, parameters, dateTools, saveHistory, kendoTools, analytics) {
-    var services = {}, serviceHoldersDataSource, grid, handleChange, selectedServiceHolder, vm;
+require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db/saveHistory", "tools/kendoTools", "tools/analytics", "db/models", "widgets/serviceDetails",
+    "widgets/selectBox"], function (session, dbServices, parameters, dateTools, saveHistory, kendoTools, analytics, models) {
+    var services = {}, serviceHoldersDataSource, grid, handleChange, selectedServiceHolder, vm, setLocationView;
 
     //region Public
     services.vm = vm = kendo.observable({
@@ -45,8 +45,96 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
             saveHistory.resetHistory();
 
             if (service) {
-                //show the serviceDetailsWrapper
-                $("#serviceDetailsWrapper").attr("style", "display:block");
+                //show the serviceSelectorsWrapper
+                $("#serviceSelectorsWrapper").attr("style", "display:block");
+
+                //Initialize client and location selectors.
+                var clientSelector = $("#clientSelector"), locationSelector = $("#locationSelector");
+
+                var formatClientName = function (client) {
+                    return client.Name;
+                };
+
+                //updates the location's comboBox to the current client's locations
+                var updateLocations = function () {
+                    //remove the location widget if it exists
+                    if (locationSelector.data("location")) {
+                        locationSelector.data("location").removeWidget();
+                    }
+
+                    var destinationField = models.getDestinationField(service);
+
+                    //initialize the location widget with the destination
+                    var destination = destinationField.Location;
+
+                    var clientId = clientSelector.select2("data").Id;
+                    locationSelector.location({
+                        data: [destination],
+                        clientId: clientId,
+                        change: function (location) {
+                            //update the Destination Field
+                            destinationField.Value = location;
+                            dbServices.locationFields.update({
+                                body: destinationField,
+                                params: {serviceId: vm.get("selectedService.Id"), recurringServiceId: vm.get("selectedService.RecurringServiceId"), clientId: clientId, occurDate: vm.get("selectedService.ServiceDate")}
+                            });
+                            vm.syncServiceHolder();
+                        }
+                    });
+                };
+
+                //Add the Client selector w auto-complete and infinite scrolling
+                clientSelector.select2({
+                    placeholder: "Choose a client",
+                    minimumInputLength: 1,
+                    ajax: {
+                        url: dbServices.API_URL + "Clients/Get?roleId=" + session.get("role.id"),
+                        dataType: 'jsonp',
+                        quietMillis: 100,
+                        data: function (term, page) { // page is the one-based page number tracked by Select2
+                            return {
+                                search: term,
+                                skip: (page - 1) * 10,
+                                take: 10 // page size
+                            };
+                        },
+                        results: function (data, page) {
+                            // whether or not there are more results available
+                            var more = data.length > 9;
+                            return {results: data, more: more};
+                        }
+                    },
+                    id: function (client) {
+                        return client.Id;
+                    },
+                    formatSelection: formatClientName,
+                    formatResult: formatClientName,
+                    dropdownCssClass: "bigdrop"
+                }).on("change", function () {
+                        var client = clientSelector.select2("data");
+                        vm.get("selectedService").set("Client", client);
+                        vm.get("selectedService").set("ClientId", client.Id);
+                        //get the first location for this client
+                        dbServices.locations.read({params: {clientId: client.Id}}).done(function (locations) {
+                            if (locations.length > 0) {
+                                if (locations[0]) {
+                                    //update the location widget with this new location
+                                    locationSelector.data("location").options.data = [locations[0]];
+                                    locationSelector.data("location").showList();
+                                }
+                            }
+                        });
+                    });
+
+                if (service.Client) {
+                    //set the initial selection
+                    clientSelector.select2("data", service.Client);
+                    updateLocations();
+                }
+
+                locationSelector.css("padding", "0");
+                locationSelector.find("h3").replaceWith("<h1>Location</h1>");
+                locationSelector.find("h1").css("padding", "0");
             }
         },
         deleteSelectedService: function () {
@@ -54,8 +142,8 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
             if (answer) {
                 grid.dataSource.remove(selectedServiceHolder);
                 dbServices.services.destroy({body: this.get("selectedService")});
-                //hide the serviceDetailsWrapper
-                $("#serviceDetailsWrapper").attr("style", "display:none");
+                //hide the serviceSelectorsWrapper
+                $("#serviceSelectorsWrapper").attr("style", "display:none");
 
                 analytics.track("Delete Service");
             }
@@ -164,6 +252,25 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
                 $('html').off('click');
             }
         });
+    };
+
+    setLocationView = function () {
+        var location = $("#locationSelector");
+        if (services.rightWidth > 557) {
+            var newWidth = services.rightWidth - 57 - 280;
+            var newHeight = location[0].clientWidth > 500 ? location.height() : location.height() - 150;
+            location.find("#locationWidgetMap").attr("style", "float: right; width:" + newWidth + "px; height:" + newHeight + "px; border-left: 2px solid #e6e6e6;");
+            location.find(".splitBtnList")[0].style.width = "278px";
+            location.find(".editPane")[0].style.width = "278px";
+            location.find(".addButtonWrapper")[0].style.margin = "10px 0 0 92px";
+        } else {
+            location.find("#locationWidgetMap").attr("style", "float: none; width: 100%; height: 150px; border-left: none;");
+            if (location.find(".splitBtnList")[0]) {
+                location.find(".splitBtnList")[0].style.width = "100%";
+                location.find(".editPane")[0].style.width = "100%";
+                location.find(".addButtonWrapper")[0].style.margin = "10px auto 0 auto";
+            }
+        }
     };
     //endregion
 
@@ -357,7 +464,7 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
         var contentHeight = windowHeight - extraMargin;
         $('#grid').css("max-height", contentHeight + 19 + 'px');
         $('#grid .k-grid-content').css("max-height", contentHeight - 15 + 'px');
-        $("#serviceDetails").css("max-height", contentHeight + 63 + 'px');
+        $("#serviceSelectorsScroller").css("max-height", contentHeight + 63 + 'px');
     };
 
     var setupGrid = function (fields) {
@@ -383,7 +490,7 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
             }
             else if (column.type === "signature") {
                 column.template = "# if (!" + key + ") { # #= '' # # } else { # "
-                    + "<a href='#=" + key + "#' target='_blank'><img src='img/JohnHancock.png' width='90'></a># } #";
+                    + "<a href='#=" + key + "#' target='_blank'><img src='img/JohnHancock.png' width='80%' style='margin-left: 10%'></a># } #";
             }
 
             //calculate the width based on number off characters
@@ -458,11 +565,11 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
                 }}).done(function (services) {
                         vm.setSelectedService(services[0]);
                         resizeGrid();
+                        setLocationView();
                     });
             },
             columns: columns,
             columnMenu: true,
-            dataBound: resizeGrid,
             dataSource: serviceHoldersDataSource,
             filterable: true,
             pageable: true,
@@ -626,9 +733,9 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
 
                     //disable the delete button and hide the service details
                     $("#services").find(".k-grid-delete").attr("style", "display:none");
-                    
-                    //hide the serviceDetailsWrapper
-                    $("#serviceDetailsWrapper").attr("style", "display:none");
+
+                    //hide the serviceSelectorsWrapper
+                    $("#serviceSelectorsWrapper").attr("style", "display:none");
                 }
             });
 
@@ -699,17 +806,41 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
 
         setupServiceSelector();
 
+        var servicesPage = $("#services");
+
         //hookup the add & delete buttons
-        $("#services").find(".k-grid-add").on("click", function () {
+        servicesPage.find(".k-grid-add").on("click", function () {
             vm.addNewService();
         });
-        $("#services").find(".k-grid-delete").on("click", function () {
+        servicesPage.find(".k-grid-delete").on("click", function () {
             vm.deleteSelectedService();
         });
 
         //setup resizing
         $(window).resize(function () {
             resizeGrid();
+        });
+
+        //setup the splitter
+        servicesPage.find(".km-content").kendoSplitter({
+            orientation: "horizontal",
+            panes: [
+                { collapsible: false, min: "390px"},
+                { collapsible: false, size: "325px", min: "325px" }
+            ],
+            resize: function () {
+                //adjusts the map to fill the new space
+                var locWidget = $("#locationSelector").data("location");
+                if (locWidget) {
+                    _.delay(function () {
+                        locWidget._map.invalidateSize(false);
+                    }, 200);
+                }
+                //move the location list to the left of map if wide enough
+                var width = this.options.panes[1].size;
+                services.rightWidth = parseInt(width.substring(0, width.length - 2));
+                setLocationView();
+            }
         });
 
         handleParameterChanges();

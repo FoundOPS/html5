@@ -35,6 +35,12 @@ define(function () {
         UNDEFINED: "undefined"
     };
 
+    //Id for new entities
+    models.newId = "10000000-0000-0000-0000-000000000000";
+
+    //Id for empty associations (Ex. User's Settings, None for Employee)
+    models.emptyId = "00000000-0000-0000-0000-000000000000";
+
     /**
      * Creates a TrackPoint to send to the API server.
      * @param {Number} accuracy In meters.

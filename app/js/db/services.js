@@ -211,6 +211,9 @@ define(["developer", "tools/dateTools", "db/saveHistory", "tools/parameters", "t
             update: {disableNotifications: true}
         },
         locations: {},
+        locationFields: {
+            update: {}
+        },
         routeTasks: {
             update: {}
         },

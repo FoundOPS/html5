@@ -27,134 +27,6 @@ define(["db/services", "db/session", "db/models", "tools/parameters", "tools/ken
                 return this.element.children();
             },
 
-            /**
-             * Add the client and location selectors
-             * @param service
-             * @private
-             */
-            _createClientLocation: function (service) {
-                var that = this, clientSelector, locationSelector, locationSelected;
-
-                var formatClientName = function (client) {
-                    return client.Name;
-                };
-
-                //updates the location's comboBox to the current client's locations
-                var updateLocations = function (client) {
-                    //clear & disable the locations combobox
-                    if (locationSelector) {
-                        locationSelector.select2("data", {AddressLineOne: "", AddressLineTwo: ""});
-                        locationSelector.select2("disable");
-                    }
-
-                    if (client) {
-                        //load the client's locations
-                        dbServices.locations.read({params: {clientId: client.Id}}).done(function (locations) {
-                            that._locations = locations;
-
-                            // select the selected destination
-                            var destinationField = models.getDestinationField(service);
-                            if (locations.length > 0) {
-                                var destination = models.firstFromId(locations, destinationField.LocationId);
-                                if (destination) {
-                                    locationSelector.select2("data", destination);
-
-                                    //trigger location selected because it does not happen by default
-                                    locationSelected();
-                                } else {
-                                    //set the destination to the first location
-                                    //in serviceDetails
-                                    locationSelector.select2("data", locations[0]);
-
-                                    //trigger location selected because it does not happen by default
-                                    locationSelected();
-                                }
-
-                                locationSelector.select2("enable");
-                            }
-                        });
-                    }
-                };
-
-                //Add the Client selector w auto-complete and infinite scrolling
-                clientSelector = $(inputTemplate).attr("type", "hidden")
-                    //For validation message
-                    .attr("name", "Client").attr("required", "required")
-                .appendTo(that.element).wrap("<h1>Client</h1>");
-                clientSelector.select2({
-                    placeholder: "Choose a client",
-                    minimumInputLength: 1,
-                    ajax: {
-                        url: dbServices.API_URL + "Clients/Get?roleId=" + session.get("role.id"),
-                        dataType: 'jsonp',
-                        quietMillis: 100,
-                        data: function (term, page) { // page is the one-based page number tracked by Select2
-                            return {
-                                search: term,
-                                skip: (page - 1) * 10,
-                                take: 10 // page size
-                            };
-                        },
-                        results: function (data, page) {
-                            // whether or not there are more results available
-                            var more = data.length > 9;
-                            return {results: data, more: more};
-                        }
-                    },
-                    id: function (client) {
-                        return client.Id;
-                    },
-                    formatSelection: formatClientName,
-                    formatResult: formatClientName,
-                    dropdownCssClass: "bigdrop"
-                }).on("change", function () {
-                        var client = clientSelector.select2("data");
-                        service.set("Client", client);
-                        service.set("ClientId", client.Id);
-                        updateLocations(client);
-                    });
-
-                if (service.Client) {
-                    //set the initial selection
-                    clientSelector.select2("data", service.Client);
-                    updateLocations(service.Client);
-                }
-
-                //Add the Location selector
-                var formatLocationName = function (location) {
-                    return location.AddressLineOne + " " + location.AddressLineTwo;
-                };
-
-                locationSelected = function () {
-                    var location = locationSelector.select2("data");
-                    var destinationField = models.getDestinationField(service);
-                    //Used for updating the grid
-                    destinationField.Value = location;
-                    destinationField.set("LocationId", location.Id);
-                };
-
-                locationSelector = $(inputTemplate).attr("type", "hidden")
-                    //For validation message
-                    .attr("name", "Location").attr("required", "required")
-                .appendTo(that.element).wrap("<h1>Location</h1>");
-                locationSelector.select2({
-                    placeholder: "Choose a location",
-                    id: function (location) {
-                        return location.Id;
-                    },
-                    query: function (query) {
-                        if (!that._locations) {
-                            that._locations = [];
-                        }
-                        var data = {results: that._locations};
-                        query.callback(data);
-                    },
-                    formatSelection: formatLocationName,
-                    formatResult: formatLocationName,
-                    dropdownCssClass: "bigdrop"
-                }).on("change", locationSelected);
-            },
-
             //region Field Factories
 
             _fieldFactories: {
@@ -264,11 +136,11 @@ define(["db/services", "db/session", "db/models", "tools/parameters", "tools/ken
                 },
                 "SignatureField": function (field, fieldIndex, elementToAppendTo, options) {
                     var fieldElement = $('<div class="fieldLabel" style="margin-left:0"><span>' + field.Name + '</span></div>' +
-                                            '<ul data-role="listview" data-style="inset">' +
-                                                '<li id="sigPadOpener">' +
-                                                    '<img id="sigDisplay"/>' +
-                                                '</li>' +
-                                            '</ul>').appendTo(elementToAppendTo);
+                        '<ul data-role="listview" data-style="inset">' +
+                        '<li id="sigPadOpener">' +
+                        '<img id="sigDisplay"/>' +
+                        '</li>' +
+                        '</ul>').appendTo(elementToAppendTo);
 
                     if (!options.signatureIsReadOnly) {
                         var query, goToSigPad = function () {
@@ -319,12 +191,8 @@ define(["db/services", "db/session", "db/models", "tools/parameters", "tools/ken
                     return;
                 }
 
-                if (!that.options.clientIsReadOnly) {
-                    that._createClientLocation(service);
-                }
-
                 //Add all the fields
-            $('<h1 class="serviceFields">Service Fields</h1>').appendTo(that.element);
+                $('<h1 class="serviceFields">Service Fields</h1>').appendTo(that.element);
                 var fieldsListView = $('<ul id="fields"></ul>').appendTo(that.element);
                 var checkLists = $('<ul id="checkLists"></ul>').appendTo(that.element);
                 var sigListView = $('<ul id="sigListView"></ul>').appendTo(that.element);
