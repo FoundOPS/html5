@@ -9,6 +9,8 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
             add: null,
             change: null,
             delete: null,
+            //the element in which the location widget is attached to
+            element: null,
             //Will return locations for this Client in queries
             clientId: null,
             //Locations array to display initially
@@ -330,8 +332,8 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
                 }
                 //create a location list item
                 li = "<li><span class='colorBar' style='background: " + ui.ITEM_COLORS[num].color + "'></span>" +
-                    "<div class='splitEditBtn' onclick='$(\"#locationSelector\").data(\"location\")._editLocation(" + i + ", false)'><span></span></div>" +
-                    "<a class='navigateBtn' target='_blank' onclick='$(\"#locationSelector\").data(\"location\")._navigateToLink(" + i + ")'>" +
+                    "<div class='splitEditBtn' onclick='$(\"" + locationWidget.options.element + "\").data(\"location\")._editLocation(" + i + ", false)'><span></span></div>" +
+                    "<a class='navigateBtn' target='_blank' onclick='$(\"" + locationWidget.options.element + "\").data(\"location\")._navigateToLink(" + i + ")'>" +
                     generalTools.getLocationDisplayString(location, true) + "</a></li>";
 
                 //add the location to the location list

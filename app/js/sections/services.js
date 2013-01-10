@@ -70,6 +70,7 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
                     locationSelector.location({
                         data: [destination],
                         clientId: clientId,
+                        element: "#locationSelector",
                         change: function (location) {
                             //update the Destination Field
                             destinationField = models.getDestinationField(vm.get("selectedService"));
