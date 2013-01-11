@@ -9,7 +9,6 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
             add: null,
             change: null,
             delete: null,
-            element: null,
             //Will return locations for this Client in queries
             clientId: null,
             //Locations array to display initially
@@ -17,15 +16,15 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
         },
 
         _init: function () {
-            var locationWidget = this, widgetElement = $(locationWidget.element);
+            var widget = this, element = $(widget.element);
 
-            if (!locationWidget.options.data instanceof Array) {
+            if (!widget.options.data instanceof Array) {
                 throw Error("Locations must be an array");
             }
 
             //"locationInput" class is used for all inputs so that their values can be cleared
             //"geocoded" class is used for the inputs that get disabled and enabled based on if "Manually Place Pin" was selected
-            locationWidget._location = $('<div id="locationWidgetMap"></div>' +
+            widget._location = $('<div id="locationWidgetMap"></div>' +
                 '<ul class="splitBtnList"></ul>' +
                 '<div class="addButtonWrapper">' +
                 '<button class="k-button k-button-icontext add"><span class="k-icon k-add"></span>Add New</button>' +
@@ -64,7 +63,7 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
                 '</div>'
             );
 
-            widgetElement.append(locationWidget._location);
+            element.append(widget._location);
 
             var states = ["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "DC", "FL", "GA", "HI", "ID", "IL",
                 "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH",
@@ -74,56 +73,54 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
             //populate the options list with states
             _.each(states, function (value) {
                 var option = $("<option value='" + value + "'>" + value + "</option>");
-                option.appendTo(widgetElement.find(".state"));
+                option.appendTo(element.find(".state"));
             });
 
             //if multiple locations, show the delete button
-            if (locationWidget.options.delete) {
-                locationWidget.multiple = true;
-                widgetElement.find(".deleteBtn")[0].style.display = "inline-block";
-                widgetElement.find(".saveDeleteButtonWrapper")[0].style.width = "220px";
+            if (widget.options.delete) {
+                widget.multiple = true;
+                element.find(".deleteBtn")[0].style.display = "inline-block";
+                element.find(".saveDeleteButtonWrapper")[0].style.width = "220px";
             }
 
             //setup searchSelect
-            widgetElement.find(".locationSearchSelect").searchSelect({
+            element.find(".locationSearchSelect").searchSelect({
                 query: function (searchTerm, callback) {
                     //get the list of location matches
                     if (searchTerm) {
                         //show the loading image
-                        widgetElement.find(".locationSearchSelect input").css("background-image", "url('img/spinner.gif')").css("background-position", "98% 50%").css("background-repeat", "no-repeat");
+                        element.find(".locationSearchSelect input").css("background-image", "url('img/spinner.gif')").css("background-position", "98% 50%").css("background-repeat", "no-repeat");
                         //get the search results
-                        dbServices.locations.read({params: {search: searchTerm, ClientId: locationWidget.options.clientId}}).done(function (locations) {
+                        dbServices.locations.read({params: {search: searchTerm, ClientId: widget.options.clientId}}).done(function (locations) {
                             //hide the loading image
-                            widgetElement.find("input").css("background", "");
+                            element.find("input").css("background", "");
                             callback(locations);
                         });
                     }
                 },
                 formatOption: generalTools.getLocationDisplayString,
                 onSelect: function (e, selectedData) {
+                    var element = $(widget.element);
                     //if "Manually Place Pin" was selected
                     if (e.target.innerText === "Manually Place Pin") {
                         //allow the marker to move on map click
-                        locationWidget._allowMapClick = true;
+                        widget._allowMapClick = true;
                         //disable the save button
-                        widgetElement.find(".saveBtn").attr("disabled", "disabled");
+                        element.find(".saveBtn").attr("disabled", "disabled");
 
-                        locationWidget._clearMarkers();
-                        locationWidget._enableFields();
+                        widget._clearMarkers();
+                        widget._enableFields();
 
                         //generate a new guid
-                        widgetElement.find(".id").val(tools.newGuid());
+                        element.find(".id").val(tools.newGuid());
                     }
                     //if a location was selected
                     else {
-                        //update the location in the list with the selected one
-                        locationWidget.options.data[locationWidget.editIndex] = selectedData;
-
-                        locationWidget._disableFields();
-                        locationWidget._populateFields(selectedData);
-                        locationWidget._showMarker(selectedData);
+                        widget._disableFields();
+                        widget._populateFields(selectedData);
+                        widget._showMarker(selectedData);
                         //enable the save button
-                        widgetElement.find(".saveBtn").removeAttr("disabled");
+                        element.find(".saveBtn").removeAttr("disabled");
                     }
                 },
                 queryDelay: 750,
@@ -135,7 +132,7 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
             });
 
             //initialize the map on the "locationWidgetMap" div with a given center and zoom
-            locationWidget._map = L.map('locationWidgetMap', {
+            widget._map = L.map('locationWidgetMap', {
                 //center on 'merica!
                 center: [40, -89],
                 zoom: 4,
@@ -144,13 +141,13 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
             });
 
             //create a CloudMade tile layer and add it to the map
-            locationWidget._cloudmade = L.tileLayer('http://{s}.tile.cloudmade.com/57cbb6ca8cac418dbb1a402586df4528/997/256/{z}/{x}/{y}.png', {
+            widget._cloudmade = L.tileLayer('http://{s}.tile.cloudmade.com/57cbb6ca8cac418dbb1a402586df4528/997/256/{z}/{x}/{y}.png', {
                 maxZoom: 18
             });
-            locationWidget._map.addLayer(locationWidget._cloudmade);
+            widget._map.addLayer(widget._cloudmade);
 
             //create an icon to be used for all map markers
-            locationWidget.icon = L.icon({
+            widget.icon = L.icon({
                 iconUrl: ui.ImageUrls.MARKER,
                 iconAnchor: [13, 30],
                 popupAnchor: [0, -30],
@@ -158,51 +155,51 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
             });
 
             //if "Manually Place Pin" mode move the marker on map click
-            locationWidget._map.on('click', function (e) {
+            widget._map.on('click', function (e) {
                 //check if in "Manually Place Pin" mode
-                if (locationWidget._allowMapClick) {
+                if (widget._allowMapClick) {
                     //add a marker at the location
-                    locationWidget._showMarker({Latitude: e.latlng.lat, Longitude: e.latlng.lng});
+                    widget._showMarker({Latitude: e.latlng.lat, Longitude: e.latlng.lng});
 
                     //save the lat/lng
-                    widgetElement.find(".lat").val(e.latlng.lat);
-                    widgetElement.find(".lng").val(e.latlng.lng);
+                    element.find(".lat").val(e.latlng.lat);
+                    element.find(".lng").val(e.latlng.lng);
 
                     //enable the save button
-                    widgetElement.find(".saveBtn").removeAttr("disabled");
+                    element.find(".saveBtn").removeAttr("disabled");
                 }
             });
 
-            widgetElement.find(".add").on("click", function () {
-                locationWidget._editLocation(null, true);
+            element.find(".add").on("click", function () {
+                widget._editLocation(null, true);
             });
 
-            widgetElement.find(".saveBtn").on("click", function () {
+            element.find(".saveBtn").on("click", function () {
                 //create a location with the values from the inputs
                 var updatedLocation = {
-                    Id: widgetElement.find(".id").val(),
-                    Name: widgetElement.find(".nickname").val(),
-                    AddressLineOne: widgetElement.find(".line1").val(),
-                    AddressLineTwo: widgetElement.find(".line2").val(),
-                    AdminDistrictOne: widgetElement.find(".state").val(),
-                    AdminDistrictTwo: widgetElement.find(".city").val(),
-                    PostalCode: widgetElement.find(".zipCode").val(),
-                    CountryCode: widgetElement.find(".countryCode").val(),
-                    Latitude: widgetElement.find(".lat").val(),
-                    Longitude: widgetElement.find(".lng").val()
+                    Id: element.find(".id").val(),
+                    Name: element.find(".nickname").val(),
+                    AddressLineOne: element.find(".line1").val(),
+                    AddressLineTwo: element.find(".line2").val(),
+                    AdminDistrictOne: element.find(".state").val(),
+                    AdminDistrictTwo: element.find(".city").val(),
+                    PostalCode: element.find(".zipCode").val(),
+                    CountryCode: element.find(".countryCode").val(),
+                    Latitude: element.find(".lat").val(),
+                    Longitude: element.find(".lng").val()
                 };
 
                 //if adding a new location
-                if (locationWidget.newLocation) {
+                if (widget.newLocation) {
                     updatedLocation.IsNew = true;
 
                     //add the new location to the list
-                    locationWidget.options.data.push(updatedLocation);
+                    widget.options.data.push(updatedLocation);
 
-                    locationWidget.options.add(updatedLocation);
+                    widget.options.add(updatedLocation);
                     //if editing an already existing location
                 } else {
-                    var location = locationWidget.options.data[locationWidget.editIndex];
+                    var location = widget.options.data[widget.editIndex];
 
                     //update the properties of the existing location that could have changed
                     location.Name = updatedLocation.Name;
@@ -216,39 +213,39 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
                     location.Latitude = updatedLocation.Latitude;
                     location.Longitude = updatedLocation.Longitude;
 
-                    locationWidget.options.change(location);
+                    widget.options.change(location);
                 }
                 //switch to the location list
-                locationWidget.showList();
+                widget.showList();
 
-                locationWidget._allowMapClick = false;
+                widget._allowMapClick = false;
             });
 
-            widgetElement.find(".deleteBtn").on("click", function () {
+            element.find(".deleteBtn").on("click", function () {
                 var answer = confirm("Are you sure you want to delete this location?");
                 if (answer) {
-                    locationWidget.options.data.splice(locationWidget.editIndex, 1);
-                    locationWidget.options.delete(locationWidget.options.data[locationWidget.editIndex]);
-                    locationWidget.showList();
+                    widget.options.data.splice(widget.editIndex, 1);
+                    widget.options.delete(widget.options.data[widget.editIndex]);
+                    widget.showList();
                 }
             });
 
-            widgetElement.find(".cancelBtn").on("click", function () {
+            element.find(".cancelBtn").on("click", function () {
                 //switch to the location list
-                locationWidget.showList();
+                widget.showList();
 
-                locationWidget._allowMapClick = false;
+                widget._allowMapClick = false;
 
                 //enable the save button
-                widgetElement.find(".saveBtn").removeAttr("disabled");
+                element.find(".saveBtn").removeAttr("disabled");
             });
 
             //check there is at least one location
-            if (!locationWidget.options.data || !locationWidget.options.data[0]) {
-                locationWidget._editLocation(null, false);
+            if (!widget.options.data || !widget.options.data[0]) {
+                widget._editLocation(null, false);
                 return;
             }
-            locationWidget.showList();
+            widget.showList();
         },
 
         /**
@@ -258,71 +255,73 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
          * @private
          */
         _editLocation: function (index, newLocation) {
-            var locationWidget = this, widgetElement = $(locationWidget.element);
-            locationWidget.newLocation = newLocation;
-            locationWidget.editIndex = index;
+            var widget = this, element = $(widget.element);
+            widget.newLocation = newLocation;
+            widget.editIndex = index;
+
+            element.find(".locationSearchSelect input").val("");
 
             //switch to edit screen
-            widgetElement.find(".addButtonWrapper")[0].style.display = "none";
+            element.find(".addButtonWrapper")[0].style.display = "none";
             //only animate if in skinny mode
-            if (widgetElement[0].clientWidth > 500) {
-                widgetElement.find(".splitBtnList")[0].style.display = "none";
-                widgetElement.find(".editPane")[0].style.display = "block";
+            if (element[0].clientWidth > 500) {
+                element.find(".splitBtnList")[0].style.display = "none";
+                element.find(".editPane")[0].style.display = "block";
                 //keep the map height equal to the edit pane height
-                $("#locationWidgetMap")[0].style.height = widgetElement.find(".editPane").height() + "px";
+                $("#locationWidgetMap")[0].style.height = element.find(".editPane").height() + "px";
             } else {
-                widgetElement.find(".splitBtnList").animate({
+                element.find(".splitBtnList").animate({
                     height: 'hide'
                 }, "swing", function () {
-                    widgetElement.find(".editPane").animate({
+                    element.find(".editPane").animate({
                         height: 'show'
                     }, "swing");
                 });
             }
 
-            var location = locationWidget.options.data[index];
+            var location = widget.options.data[index];
 
             if (location) {
-                locationWidget._populateFields(location);
+                widget._populateFields(location);
 
                 //we don't need to refresh the marker if there's only one location
-                if (!locationWidget.options.data.AddressLineOne) {
-                    locationWidget._showMarker(location);
+                if (!widget.options.data.AddressLineOne) {
+                    widget._showMarker(location);
                 }
 
             } else {
                 //clear the inputs
-                widgetElement.find(".locationInput").val("");
-                locationWidget._clearMarkers();
+                element.find(".locationInput").val("");
+                widget._clearMarkers();
             }
 
-            locationWidget._disableFields();
+            widget._disableFields();
 
             //TODO: add an option to do this, or just always do this if multiple locations
-            //widgetElement.find(".locationSearchSelect").searchSelect("open", []);
+            //element.find(".locationSearchSelect").searchSelect("open", []);
         },
 
         //repopulate the list, show it, and place the corresponding markers on the map
         showList: function () {
-            var locationWidget = this, widgetElement = $(this.element), li;
-            var locations = locationWidget.options.data;
+            var widget = this, element = $(this.element), li;
+            var locations = widget.options.data;
             //clear current list
-            widgetElement.find(".splitBtnList")[0].innerHTML = "";
+            element.find(".splitBtnList")[0].innerHTML = "";
 
-            locationWidget._clearMarkers();
+            widget._clearMarkers();
 
-            locationWidget._markers = L.layerGroup();
+            widget._markers = L.layerGroup();
 
             //re-populate the list
             for (var i in locations) {
                 var location = locations[i];
 
                 //add a marker at the location
-                locationWidget._marker = L.marker([location.Latitude, location.Longitude], {
-                    icon: locationWidget.icon
+                widget._marker = L.marker([location.Latitude, location.Longitude], {
+                    icon: widget.icon
                 });
 
-                locationWidget._marker.addTo(locationWidget._markers);
+                widget._marker.addTo(widget._markers);
 
                 //keep "num" between 0 and 9 because there are only 10 colors
                 var num = i;
@@ -331,18 +330,30 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
                 }
                 //create a location list item
                 li = "<li><span class='colorBar' style='background: " + ui.ITEM_COLORS[num].color + "'></span>" +
-                    "<div class='splitEditBtn' onclick='$(\"#locationSelector\").data(\"location\")._editLocation(" + i + ", false)'><span></span></div>" +
-                    "<a class='navigateBtn' target='_blank' onclick='$(\"#locationSelector\").data(\"location\")._navigateToLink(" + i + ")'>" +
+                    "<div class='splitEditBtn' id='index" + i + "'><span></span></div>" +
+                    "<a class='navigateBtn' id='index" + i + "'>" +
                     generalTools.getLocationDisplayString(location, true) + "</a></li>";
 
                 //add the location to the location list
-                $(li).appendTo(widgetElement.find(".splitBtnList"));
+                $(li).appendTo(element.find(".splitBtnList"));
             }
 
-            //add the marker(s) to the map
-            locationWidget._map.addLayer(locationWidget._markers);
+            //edit button click
+            element.find(".splitEditBtn").on("click", function () {
+                var index = parseInt(this.id.substring(5));
+                widget._editLocation(index, false);
+            });
 
-            locationWidget._colorMarkers(null);
+            //navigate button click
+            element.find(".navigateBtn").on("click", function () {
+                var index = parseInt(this.id.substring(5));
+                widget._navigateToLink(index);
+            });
+
+            //add the marker(s) to the map
+            widget._map.addLayer(widget._markers);
+
+            widget._colorMarkers(null);
 
             //center the map on the locations
             if (locations && (locations[0] && locations[0].Latitude && locations[0].Longitude)) {
@@ -358,33 +369,33 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
 
                 //pan/zoom to a view that fits all the locations
                 if (locations.length > 1) {
-                    locationWidget._map.fitBounds([bounds]);
+                    widget._map.fitBounds([bounds]);
                 } else {
-                    locationWidget._map.setView([locations[0].Latitude, locations[0].Longitude], 15);
+                    widget._map.setView([locations[0].Latitude, locations[0].Longitude], 15);
                 }
 
-                locationWidget.invalidateMap(50);
+                widget.invalidateMap(50);
 
                 //zoom out one more level
                 //TODO: not working
-                //locationWidget._map.zoomOut();
+                //widget._map.zoomOut();
             }
 
             //don't show add button unless there are multiple locations
-            if (locationWidget.options.delete) {
-                widgetElement.find(".addButtonWrapper")[0].style.display = "block";
+            if (widget.options.delete) {
+                element.find(".addButtonWrapper")[0].style.display = "block";
             }
             //only animate if in skinny mode
             if ($("#locationSelector")[0].clientWidth > 500) {
-                widgetElement.find(".editPane")[0].style.display = "none";
-                widgetElement.find(".splitBtnList")[0].style.display = "block";
+                element.find(".editPane")[0].style.display = "none";
+                element.find(".splitBtnList")[0].style.display = "block";
                 //keep the map height equal to the list height(plus 38 to account for add button)
-                $("#locationWidgetMap")[0].style.height = widgetElement.find(".splitBtnList").height() + 38 + "px";
+                $("#locationWidgetMap")[0].style.height = element.find(".splitBtnList").height() + 38 + "px";
             } else {
-                widgetElement.find(".editPane").animate({
+                element.find(".editPane").animate({
                     height: 'hide'
                 }, "swing", function () {
-                    widgetElement.find(".splitBtnList").animate({
+                    element.find(".splitBtnList").animate({
                         height: 'show'
                     }, "swing");
                 });
@@ -393,34 +404,34 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
 
         //add a marker to the map at the given location
         _showMarker: function (location) {
-            var locationWidget = this;
+            var widget = this;
 
-            locationWidget._clearMarkers();
+            widget._clearMarkers();
 
-            locationWidget._markers = L.layerGroup();
+            widget._markers = L.layerGroup();
 
             //add a marker at the location
-            locationWidget._marker = L.marker([location.Latitude, location.Longitude], {
-                icon: locationWidget.icon
+            widget._marker = L.marker([location.Latitude, location.Longitude], {
+                icon: widget.icon
             });
 
-            locationWidget._marker.addTo(locationWidget._markers);
+            widget._marker.addTo(widget._markers);
             //add the marker to the map
-            locationWidget._map.addLayer(locationWidget._markers);
+            widget._map.addLayer(widget._markers);
             //center the map at the location being edited
-            locationWidget._map.setView([location.Latitude, location.Longitude], 15);
+            widget._map.setView([location.Latitude, location.Longitude], 15);
 
-            locationWidget._colorMarkers(ui.ITEM_COLORS[0].color);
+            widget._colorMarkers(ui.ITEM_COLORS[0].color);
 
-            locationWidget.invalidateMap(50);
+            widget.invalidateMap(50);
         },
 
         //remove any markers from the map
         _clearMarkers: function () {
-            var locationWidget = this;
+            var widget = this;
 
-            if (locationWidget._markers) {
-                locationWidget._map.removeLayer(locationWidget._markers);
+            if (widget._markers) {
+                widget._map.removeLayer(widget._markers);
             }
         },
 
@@ -481,68 +492,68 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
 
         //populate the inputs with the data from the given location
         _populateFields: function (location) {
-            var widgetElement = $(this.element);
-            widgetElement.find(".nickname").val(location.Name);
-            widgetElement.find(".line1").val(location.AddressLineOne);
-            widgetElement.find(".line2").val(location.AddressLineTwo);
-            widgetElement.find(".city").val(location.AdminDistrictTwo);
-            widgetElement.find(".state").val(location.AdminDistrictOne);
-            widgetElement.find(".zipCode").val(location.PostalCode);
-            widgetElement.find(".countryCode").val(location.CountryCode);
-            widgetElement.find(".lat").val(location.Latitude);
-            widgetElement.find(".lng").val(location.Longitude);
-            widgetElement.find(".id").val(location.Id);
+            var element = $(this.element);
+            element.find(".nickname").val(location.Name);
+            element.find(".line1").val(location.AddressLineOne);
+            element.find(".line2").val(location.AddressLineTwo);
+            element.find(".city").val(location.AdminDistrictTwo);
+            element.find(".state").val(location.AdminDistrictOne);
+            element.find(".zipCode").val(location.PostalCode);
+            element.find(".countryCode").val(location.CountryCode);
+            element.find(".lat").val(location.Latitude);
+            element.find(".lng").val(location.Longitude);
+            element.find(".id").val(location.Id);
         },
 
         //disable the address fields
         _disableFields: function () {
-            var widgetElement = $(this.element);
-            widgetElement.find(".geocoded").attr("disabled", "disabled");
+            var element = $(this.element);
+            element.find(".geocoded").attr("disabled", "disabled");
             var color = "#999";
-            widgetElement.find(".line1")[0].style.color = color;
-            widgetElement.find(".city")[0].style.color = color;
-            widgetElement.find(".zipCode")[0].style.color = color;
-            widgetElement.find(".state")[0].style.color = color;
+            element.find(".line1")[0].style.color = color;
+            element.find(".city")[0].style.color = color;
+            element.find(".zipCode")[0].style.color = color;
+            element.find(".state")[0].style.color = color;
         },
 
         //enable the address fields
         _enableFields: function () {
-            var widgetElement = $(this.element);
-            widgetElement.find(".geocoded").removeAttr("disabled");
+            var element = $(this.element);
+            element.find(".geocoded").removeAttr("disabled");
             var color = "#000";
-            widgetElement.find(".line1")[0].style.color = color;
-            widgetElement.find(".city")[0].style.color = color;
-            widgetElement.find(".zipCode")[0].style.color = color;
-            widgetElement.find(".state")[0].style.color = color;
+            element.find(".line1")[0].style.color = color;
+            element.find(".city")[0].style.color = color;
+            element.find(".zipCode")[0].style.color = color;
+            element.find(".state")[0].style.color = color;
         },
 
         invalidateMap: function (delay) {
-            var locationWidget = this;
+            var widget = this;
             _.delay(function () {
-                locationWidget._map.invalidateSize(false);
+                widget._map.invalidateSize(false);
             }, delay);
         },
 
         //switch to list on the left
         wideView: function (rightWidth) {
-            var widgetElement = $(this.element);
+            var element = $(this.element);
             var newWidth = rightWidth - 57 - 280;
-            var newHeight = widgetElement[0].clientWidth > 500 ? widgetElement.height() : widgetElement.height() - 150;
+            var newHeight = element[0].clientWidth > 500 ? element.height() : element.height() - 150;
             $("#locationWidgetMap").attr("style", "float: right; width:" + newWidth + "px; height:" + newHeight + "px; border-left: 2px solid #e6e6e6;");
-            widgetElement.find(".splitBtnList")[0].style.width = "278px";
-            widgetElement.find(".editPane")[0].style.width = "278px";
-            widgetElement.find(".addButtonWrapper")[0].style.margin = "10px 0 0 92px";
+            element.find(".splitBtnList")[0].style.width = "278px";
+            element.find(".editPane")[0].style.width = "278px";
+            element.find(".addButtonWrapper")[0].style.margin = "10px 0 0 92px";
         },
 
         //switch to list on the bottom
         narrowView: function () {
-            var widgetElement = $(this.element);
+            var element = $(this.element);
 
             $("#locationWidgetMap").attr("style", "float: none; width: 100%; height: 150px; border-left: none;");
-            if (widgetElement.find(".splitBtnList")[0]) {
-                widgetElement.find(".splitBtnList")[0].style.width = "100%";
-                widgetElement.find(".editPane")[0].style.width = "100%";
-                widgetElement.find(".addButtonWrapper")[0].style.margin = "10px auto 0 auto";
+            if (element.find(".splitBtnList")[0]) {
+                element.find(".splitBtnList")[0].style.width = "100%";
+                element.find(".editPane")[0].style.width = "100%";
+                element.find(".addButtonWrapper")[0].style.margin = "10px auto 0 auto";
             }
         },
 
@@ -552,21 +563,21 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
          * @private
          */
         _navigateToLink: function (index) {
-            var locationWidget = this;
-            var location = locationWidget.options.data[index];
+            var widget = this;
+            var location = widget.options.data[index];
 
             generalTools.getDirections(location);
         },
 
         //remove all traces of the map
         removeWidget: function () {
-            var locationWidget = this;
-            if (locationWidget._map) {
-                locationWidget._clearMarkers();
-                locationWidget._map.removeLayer(locationWidget._cloudmade);
-                locationWidget._map = null;
+            var widget = this;
+            if (widget._map) {
+                widget._clearMarkers();
+                widget._map.removeLayer(widget._cloudmade);
+                widget._map = null;
             }
-            $(locationWidget.element)[0].innerHTML = "";
+            $(widget.element)[0].innerHTML = "";
         }
     });
 });

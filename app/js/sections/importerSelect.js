@@ -1,6 +1,6 @@
 'use strict';
 
-define(["sections/importerUpload", "db/services", "tools/generalTools", "widgets/toggleSwitch"], function (importerUpload, dbServices, generalTools) {
+define(["sections/importerUpload", "db/services", "tools/generalTools", "tools/parameters", "widgets/toggleSwitch"], function (importerUpload, dbServices, generalTools, parameters) {
         var importerSelect = {},
         //a jquery selector for this page
             page,
@@ -464,7 +464,7 @@ define(["sections/importerUpload", "db/services", "tools/generalTools", "widgets
                 //submit data to be validated, then redirect to review page
                 dbServices.suggestions.update({body: {rowsWithHeaders: importerSelect.dataToValidate}}).done(function (suggestions) {
                     importerSelect.gridData = suggestions;
-                    window.viewImporterReview();
+                    window.application.navigate('importerReview');
                 });
             });
 
@@ -476,7 +476,8 @@ define(["sections/importerUpload", "db/services", "tools/generalTools", "widgets
         importerSelect.show = function () {
             //make sure there is a selected service type
             if (!importerUpload.selectedService) {
-                application.navigate('importerUpload');
+                //redirect to upload page
+                parameters.set({section: {name: "importerUpload"}});
                 return;
             }
 

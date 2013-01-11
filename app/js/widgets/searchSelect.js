@@ -8,7 +8,7 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
          * A jquery widget that uses a textbox input to search for options in a list that is automatically generated from developer defined data.
          * *****NOTE: Setting a max height for option list in order to enable scrolling will only work along side KendoUI Mobile.
          */
-        var searchSelect = {
+        var widget = {
             /**
              * options - {
              *     query {function(string, callback())}
@@ -38,7 +38,9 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                     return JSON.stringify(data);
                 },
                 onSelect: function (event, selectedData) {
-                    this._trigger("selected", event, selectedData);
+                    if (this._trigger) {
+                        this._trigger("selected", event, selectedData);
+                    }
                 },
                 queryDelay: null,
                 minimumInputLength: 1,
@@ -46,8 +48,9 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                 additionalListItem: null,
                 dontCloseOn: null
             },
+
             _create: function () {
-                var searchSelect = this;
+                var widget = this, element = widget.element;
                 /**
                  * Model for searchSelect widget elements.
                  * <div id="" class=""> <-- This is the element that searchSelect is created on (id/class can be whatever user desires).
@@ -66,65 +69,63 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                  *     </div>
                  * </div>
                  */
-                var element = searchSelect.element.context;
+                var context = element.context;
 
-                element.appendChild(document.createElement("div"));
-                element.children[0].appendChild(document.createElement("input"));
-                element.children[0].children[0].setAttribute("type", "text");
-                element.appendChild(document.createElement("div"));
-                element.children[1].setAttribute("id", "optionListScroller");
-                element.children[1].setAttribute("data-role", "scroller");
-                element.children[1].setAttribute("data-elastic", "false");
-                element.children[1].setAttribute("class", "scroller-content");
-                element.children[1].appendChild(document.createElement("ul"));
-                element.children[1].children[0].setAttribute("class", "optionList");
+                context.appendChild(document.createElement("div"));
+                context.children[0].appendChild(document.createElement("input"));
+                context.children[0].children[0].setAttribute("type", "text");
+                context.appendChild(document.createElement("div"));
+                context.children[1].setAttribute("id", "optionListScroller");
+                context.children[1].setAttribute("data-role", "scroller");
+                context.children[1].setAttribute("data-elastic", "false");
+                context.children[1].setAttribute("class", "scroller-content");
+                context.children[1].appendChild(document.createElement("ul"));
+                context.children[1].children[0].setAttribute("class", "optionList");
 
                 //Listen to input in search box and update the widget accordingly.
-                generalTools.observeInput(searchSelect.element.find("input"), $.proxy(searchSelect._getOptions, searchSelect), searchSelect.options.queryDelay || 1);
+                generalTools.observeInput(element.find("input"), $.proxy(widget._getOptions, widget), widget.options.queryDelay || 1);
 
                 try {
                     document.createEvent("TouchEvent");
-                    searchSelect.isTouchDevice = true;
+                    widget.isTouchDevice = true;
                 } catch (e) {
-                    searchSelect.isTouchDevice = false;
+                    widget.isTouchDevice = false;
                 }
 
-                if (!searchSelect.isTouchDevice) {
-                    searchSelect.element.find(".optionList").css("overflow-y", "auto");
+                if (!widget.isTouchDevice) {
+                    element.find(".optionList").css("overflow-y", "auto");
                 }
 
                 //These variables act as flags in order to stop behavior from certain listeners when other listeners fire.
                 var _scrolling;
 
                 //Event Listeners
-                searchSelect.element.find("input").on("click touchstart", searchSelect.element.find("input"), function (e) {
-                    if (searchSelect.selectedOptionTempText) {
-                        this.value = searchSelect.selectedOptionTempText;
-                    } else {
-                        this.value = "";
+                element.find("input").on("click touchstart", element.find("input"), function (e) {
+                    if (widget.selectedOptionTempText) {
+                        this.value = widget.selectedOptionTempText;
                     }
-                    searchSelect.selectedOptionTempText = searchSelect.element.find("input").val();
-                    searchSelect._getOptions(this.value);
+                    widget.selectedOptionTempText = element.find("input").val();
+                    widget._getOptions(this.value);
                 });
                 //Select an option on click or touchend. Does not occur if user is scrolling instead of selecting.
-                searchSelect.element.find(".optionList").on("click touchend", searchSelect.element.find(".optionList li"), function (e) {
+                element.find(".optionList").on("click touchend", element.find(".optionList li"), function (e) {
                     //Wait for scrolling flag to get set if user is scrolling.
                     setTimeout(function () {
                         if (!_scrolling) {
-                            searchSelect.selectedData = $(e.target).parent().data().selectedData || $(e.target).data().selectedData;
+                            widget.selectedData = $(e.target).parent().data().selectedData || $(e.target).data().selectedData;
                             if (e.target.nodeName === "SPAN") {
-                                searchSelect.selectedOptionText = $(e.target).parent()[0].innerText
+                                widget.selectedOptionText = $(e.target).parent()[0].innerText
                             } else {
-                                searchSelect.selectedOptionText = $(e.target)[0].innerText;
+                                widget.selectedOptionText = $(e.target)[0].innerText;
                             }
-                            searchSelect.element.find("input")[0].value = searchSelect.selectedOptionText === "Manually Place Pin" ? "" : searchSelect.selectedOptionText;
-                            searchSelect.selectedOptionTempText = "";
-                            searchSelect.options.onSelect(e, searchSelect.selectedData);
+                            element.find("input")[0].value = widget.selectedOptionText === "Manually Place Pin" ? "" : widget.selectedOptionText;
+                            widget.selectedOptionTempText = "";
+                            widget.options.onSelect(e, widget.selectedData);
 //                            //Wait for listeners from other widgets to use the selected option before removing it from the DOM.
 //                            setTimeout(function () {
-                                searchSelect.clearList();
+                                widget.clearList();
 //                            }, 200);
-                            if (searchSelect.isTouchDevice) {
+                            if (widget.isTouchDevice) {
                                 $(".km-scroll-wrapper").kendoMobileScroller("reset");
                             }
                         }
@@ -132,31 +133,22 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                     _scrolling = false;
                 });
                 //Set the scrolling flag to on.
-                searchSelect.element.find(".optionList").on("touchmove", searchSelect.element.find(".optionList"), function (e) {
-                    console.log("Scrolling...");
+                element.find(".optionList").on("touchmove", element.find(".optionList"), function (e) {
                     _scrolling = true;
                 });
                 $(document.body).on('touchmove', function (e) {
-                    console.log("Scrolling...");
                     _scrolling = true;
                 });
                 //When clicking outside of the select widget, close the option list and handle text inside the textbox.
                 $(document.body).on('click touchend', function (e) {
                     //This if statement creates an xor logic gate. If there is a dontCloseOn option provided by the user it will use it to check if it should clear the option list.
-                    //TODO: Find a way to do this without relying on searchSelect element's class name (searchSelect.element.context.className).
-                    if ($(e.target).parents().filter("."+searchSelect.element.context.className).length === 0 || searchSelect.options.dontCloseOn && e.target.className ? e.target.className.indexOf(searchSelect.options.dontCloseOn) === -1 : false) {
+                    //TODO: Find a way to do this without relying on searchSelect element's class name (element.context.className).
+                    if ($(e.target).parents().filter("." + element.context.className).length === 0 || widget.options.dontCloseOn && e.target.className ? e.target.className.indexOf(widget.options.dontCloseOn) === -1 : false) {
                         setTimeout(function () {
                             if (!_scrolling) {
-                                if (searchSelect.selectedOptionText) {
-                                    searchSelect.element.find("input")[0].value = searchSelect.selectedOptionText === "Manually Place Pin" ? "" : searchSelect.selectedOptionText;
-                                } else {
-                                    searchSelect.selectedOptionTempText = searchSelect.element.find("input")[0].value;
-                                    //TODO: don't do in location widget
-                                    searchSelect.element.find("input")[0].value = "";
-                                }
-                                //TODO: don't do in location widget
-                                searchSelect.clearList();
-                                if (searchSelect.isTouchDevice) {
+                                widget.selectedOptionTempText = widget.selectedData = element.find("input")[0].value;
+                                widget.clearList();
+                                if (widget.isTouchDevice) {
                                     $(".km-scroll-wrapper").kendoMobileScroller("reset");
                                 }
                             }
@@ -164,6 +156,7 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                     }
                 });
             },
+
             // Private functions
             //Disable touch scrolling of the view when user is scrolling whatever element is passed.
             _disableTouchScroll: function (element) {
@@ -180,33 +173,34 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                 }
             },
             _getOptions: function (searchTerm) {
-                var searchSelect = this, matches = [];
-                if (searchSelect.options.data) {
+                var widget = this, element = widget.element, matches = [];
+                if (widget.options.data) {
                     //get the list of location matches
                     var dataItem, i;
-                    if (searchTerm.length >= searchSelect.options.minimumInputLength) {
-                        for (i = 0; i < searchSelect.options.data.length; i++) {
-                            dataItem = searchSelect.options.data[i];
-                            if (searchSelect.options.formatOption(dataItem).toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1) {
+                    if (searchTerm.length >= widget.options.minimumInputLength) {
+                        for (i = 0; i < widget.options.data.length; i++) {
+                            dataItem = widget.options.data[i];
+                            if (widget.options.formatOption(dataItem).toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1) {
                                 matches.push(dataItem);
                             }
                         }
                     } else {
-                        matches = searchSelect.options.data;
+                        matches = widget.options.data;
                     }
-                    searchSelect.open(matches);
+                    widget.open(matches);
                 } else {
-                    searchSelect.open(matches);
-                    searchSelect.options.query(searchTerm, $.proxy(searchSelect.open, searchSelect));
+                    widget.open(matches);
+                    widget.options.query(searchTerm, $.proxy(widget.open, widget));
                 }
 
-                if (searchSelect.isTouchDevice) {
-                    $(".km-scroll-wrapper").kendoMobileScroller("scrollTo", 0, -(searchSelect.element.height()));
-                    searchSelect.element.find(".optionList").css("-webkit-transform", "translate3d(0px, " +
-                        (searchSelect.element.height()) + "px, 0)").css("position", "relative").css("top", -searchSelect.element.height());
+                if (widget.isTouchDevice) {
+                    $(".km-scroll-wrapper").kendoMobileScroller("scrollTo", 0, - (element.height()));
+                    element.find(".optionList").css("-webkit-transform", "translate3d(0px, " +
+                        (element.height()) + "px, 0)").css("position", "relative").css("top", - element.height());
                     $(".km-scroll-container").css("-webkit-transform", "translate3d(0px, -1px, 0)");
                 }
             },
+
             // Public functions
             clearList: function () {
                 var optionList = this.element.find(".optionList")[0];
@@ -215,16 +209,15 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                     optionList.removeChild(optionList.lastChild);
                 }
             },
-            /**
-             * Opens the list of items the user can select.
-             */
+
+            //Opens the list of items the user can select.
             open: function (options) {
-                var searchSelect = this,
-                    optionList = searchSelect.element.find(".optionList"),
+                var widget = this, element = widget.element,
+                    optionList = element.find(".optionList"),
                     i;
-                searchSelect.clearList();
+                widget.clearList();
                 //Set option list to same width as input box.
-                searchSelect.element.find("#optionListScroller").width(searchSelect.element.find("input").parent().width());
+                element.find("#optionListScroller").width(element.find("input").parent().width());
                 if (options) {
                     if (options.length) {
                         //Add each option item to the list.
@@ -237,20 +230,20 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                                 className = "fromWeb";
                             }
 
-                            optionList.append($('<li id="' + i + '"><span class="' + className + '"></span><span class="name">' + searchSelect.options.formatOption(options[i]) +
+                            optionList.append($('<li id="' + i + '"><span class="' + className + '"></span><span class="name">' + widget.options.formatOption(options[i]) +
                                 '</span></li>').data("selectedData", options[i]));
                         }
                     } else {
                         //optionList.append($('<div id="noOptions"><span>No Options Found</span></div>'));
                     }
                 }
-                if (searchSelect.options.showPreviousSelection && searchSelect.selectedData) {
+                if (widget.options.showPreviousSelection && widget.selectedData) {
                     optionList.append($('<li><span class="previousSelection"></span><span id="previousSelection" class="name">' +
-                        searchSelect.options.formatOption(searchSelect.selectedData) + '</span></li>').data("selectedData", searchSelect.selectedData));
+                        widget.options.formatOption(widget.selectedData) + '</span></li>').data("selectedData", widget.selectedData));
                 }
 
-                if (searchSelect.options.additionalListItem) {
-                    optionList.append($(searchSelect.options.additionalListItem));
+                if (widget.options.additionalListItem) {
+                    optionList.append($(widget.options.additionalListItem));
                 }
 
                 //adjust the text to make sure everything is vertically centered
@@ -264,28 +257,30 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                     }
                 });
             },
+
             //Returns the selected data. If a parameter is supplied it set the current selection to the corresponding data.
             data: function (selectData) {
-                var searchSelect = this;
+                var widget = this;
 
                 if (selectData) {
-                    searchSelect.selectedData = selectData;
-                    searchSelect.selectedOptionText = searchSelect.options.formatOption(selectData);
-                    searchSelect.element.find("input")[0].value = searchSelect.selectedOptionText === "Manually Place Pin" ? "" : searchSelect.selectedOptionText;
-                    searchSelect.selectedOptionTempText = "";
-                    searchSelect.options.onSelect(null, searchSelect.selectedData);
+                    widget.selectedData = selectData;
+                    widget.selectedOptionText = widget.options.formatOption(selectData);
+                    widget.element.find("input")[0].value = widget.selectedOptionText === "Manually Place Pin" ? "" : widget.selectedOptionText;
+                    widget.selectedOptionTempText = "";
+                    widget.options.onSelect(null, widget.selectedData);
                     //Wait for listeners from other widgets to use the selected option before removing it from the DOM.
                 }
 
-                return searchSelect.selectedData;
+                return widget.selectedData;
             },
+
             //Returns the current selected data's text.
             text: function () {
-                var searchSelect = this;
-                return searchSelect.selectedOptionText ? searchSelect.selectedOptionText : "";
+                var widget = this;
+                return widget.selectedOptionText ? widget.selectedOptionText : "";
             }
         };
 
-        $.widget("ui.searchSelect", searchSelect);
+        $.widget("ui.searchSelect", widget);
     })(jQuery, window);
 });
