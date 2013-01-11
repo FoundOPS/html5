@@ -165,6 +165,26 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
                 servicesPage.find(".k-grid-add").attr("style", "display:inline-block");
             }
         }).data("servicesGrid");
+
+        servicesGrid.kendoGrid.bind("columnShow", function () {
+            var kendoGrid = servicesGrid.kendoGrid;
+            //get the width of the table
+            var maxWidth = kendoGrid.table[0].clientWidth + 59;
+            //change the max width of the left splitter pane
+            servicesPage.find(".km-content").data("kendoSplitter").max("#left-pane", maxWidth + "px");
+        });
+        servicesGrid.kendoGrid.bind("columnHide", function () {
+            var kendoGrid = servicesGrid.kendoGrid;
+
+            //if the table is less wide than the grid
+            if (kendoGrid.table[0].clientWidth < kendoGrid.element[0].clientWidth) {
+                //get the width of the table
+                var maxWidth = kendoGrid.table[0].clientWidth + 59;
+                //change the width of the left splitter pane
+                servicesPage.find(".km-content").data("kendoSplitter").size("#left-pane", maxWidth + "px");
+                servicesPage.find(".km-content").data("kendoSplitter").max("#left-pane", maxWidth + "px");
+            }
+        });
     };
     //resize the grid based on the current window's height
     var resizeGrid = function () {

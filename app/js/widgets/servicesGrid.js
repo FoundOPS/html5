@@ -235,7 +235,7 @@ define(["db/services", "ui/ui", "tools/dateTools", "tools/kendoTools", "tools/pa
             //configure the columns based on the user's stored configuration
             columns = kendoTools.configureColumns(columns, widget.options.serviceType.Id);
 
-            widget._kendoGrid = element.kendoGrid({
+            widget.kendoGrid = element.kendoGrid({
                 autoBind: false,
                 change: function () {
                     //whenever a field is changed, the grid needs to be reselected. handleChange is set to prevent triggering a reload
@@ -310,7 +310,7 @@ define(["db/services", "ui/ui", "tools/dateTools", "tools/kendoTools", "tools/pa
             }
 
             //Keep track of any changes to the columns, and store the configuration
-            kendoTools.storeConfiguration(widget._kendoGrid, widget.options.serviceType.Id);
+            kendoTools.storeConfiguration(widget.kendoGrid, widget.options.serviceType.Id);
 
             if (widget.options.initialized) {
                 widget.options.initialized();
@@ -327,7 +327,7 @@ define(["db/services", "ui/ui", "tools/dateTools", "tools/kendoTools", "tools/pa
 
         destroy: function () {
             var widget = this;
-            widget._kendoGrid.destroy();
+            widget.kendoGrid.destroy();
             $(widget.element).empty();
         },
 
@@ -345,7 +345,7 @@ define(["db/services", "ui/ui", "tools/dateTools", "tools/kendoTools", "tools/pa
             widget._handleChange = true;
 
             //select the new service holder it in the grid
-            widget._kendoGrid.select(widget._kendoGrid.table.find('tr[data-uid="' + widget._selectedServiceHolder.uid + '"]'));
+            widget.kendoGrid.select(widget.kendoGrid.table.find('tr[data-uid="' + widget._selectedServiceHolder.uid + '"]'));
 
             //TODO replace
             //update the selected service
@@ -382,7 +382,7 @@ define(["db/services", "ui/ui", "tools/dateTools", "tools/kendoTools", "tools/pa
 
             //store the selected row, to reselect it
             var selectedService = vm.get("selectedService");
-            if (!widget._selectedServiceHolder || !widget._kendoGrid) {
+            if (!widget._selectedServiceHolder || !widget.kendoGrid) {
                 return;
             }
 
@@ -421,7 +421,7 @@ define(["db/services", "ui/ui", "tools/dateTools", "tools/kendoTools", "tools/pa
 
             //reselect the row, and prevent change from reloading the service
             widget._handleChange = true;
-            widget._kendoGrid.select(widget._kendoGrid.table.find('tr[data-uid="' + widget._selectedServiceHolder.uid + '"]'));
+            widget.kendoGrid.select(widget.kendoGrid.table.find('tr[data-uid="' + widget._selectedServiceHolder.uid + '"]'));
         },
 
         /**
