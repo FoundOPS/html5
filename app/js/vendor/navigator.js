@@ -75,7 +75,6 @@
      * @constructor
      */
     function Navigator(config) {
-        console.log("Loading nav.");
         /** STATIC FINAL VARIABLES **/
         //Logic values
         var MOBILE_WIDTH = "800";
