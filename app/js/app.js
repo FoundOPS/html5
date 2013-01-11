@@ -145,7 +145,7 @@ require(["developer", "db/services", "db/session", "tools/parameters", "tools/si
             parameters.set({section: initialSection, replace: true});
         }
 
-        $().status({
+        $("#nav").status({
             undoLastFunction: function(){ saveHistory.undo(false)},
             undoAllFunction: function(){ saveHistory.undo(true)}
         });

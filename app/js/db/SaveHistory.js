@@ -55,16 +55,16 @@ define(['tools/generalTools'], function (generalTools) {
 
             if (numChanges > 1) {
                 text += "&nbsp;&nbsp;&nbsp;<br/><a onclick='saveHistory.undo(true)' style='position:relative; top:3px;'>Undo All Changes to " + saveHistory.options.page + "</a>&nbsp;&nbsp;&nbsp;<br/><a onclick='saveHistory.undo(false)' style='position:relative; top:4px;'>Undo Last Change</a>";
-                $().status('setUndoMode', 2);
+                $("#nav").status('setUndoMode', 2);
             } else {
                 text += "&nbsp;&nbsp;&nbsp;<a onclick='saveHistory.undo(true)'>Undo</a>";
-                $().status('setUndoMode', 1);
+                $("#nav").status('setUndoMode', 1);
             }
 
             timeout = 5000;
         } else {
             timeout = 5000;
-            $().status('setUndoMode', 0);
+            $("#nav").status('setUndoMode', 0);
         }
 
         /*$.noty({
@@ -78,7 +78,7 @@ define(['tools/generalTools'], function (generalTools) {
         });*/
 
         //Set status - done
-        $().status("setState", 0);
+        $("#nav").status("setState", 0);
     };
 
     /**
@@ -100,7 +100,7 @@ define(['tools/generalTools'], function (generalTools) {
         });*/
 
         //Set status - error
-        $().status("setState", 2);
+        $("#nav").status("setState", 2);
     };
 
     saveHistory.close = function () {
@@ -138,7 +138,7 @@ define(['tools/generalTools'], function (generalTools) {
 
     saveHistory.save = _.debounce(function () {
         //Set status - busy
-        $().status("setState", 1);
+        $("#nav").status("setState", 1);
 
         //save the state (if there is a function to get it)
         if (saveHistory.options.state) {

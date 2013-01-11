@@ -568,6 +568,16 @@ Popup.prototype.setData = function (data) {
     Popup.setContent(data.contents);
 };
 
+Popup.prototype.replaceMenu = function (menu, newMenu){
+    var property;
+    for(property in menu){
+        delete menu[property];
+    }
+    for(property in newMenu){
+        menu[property] = newMenu[property];
+    }
+};
+
 //Public setter function for private var content and sets content of the html popup element.
 Popup.setContent = function (cont) {
     Popup.content = cont;

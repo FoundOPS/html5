@@ -7,12 +7,12 @@
             console.log("Init.");
             var loadStatus = function(){
                 console.log("Status loaded.");
-                var navDiv = $("#nav");
+                var navDiv = config.selector;
 
-                var undoLast = null;
+                var undoLast = function(){};
                 if(config.undoLastFunction)undoLast = config.undoLastFunction;
 
-                var undoAll = null;
+                var undoAll = function(){};
                 if(config.undoAllFunction)undoAll = config.undoAllFunction;
 
                 return status = new Statuses(navDiv, undoLast, undoAll);
@@ -33,19 +33,22 @@
             //console.log("Setting mode.");
             status.setUndoMode(mode);
         },
-        setUndoLastFunction: function(f){
-            status.onUndoLast = f;
+        setUndoLastFunction: function(callback){
+            status.onUndoLast = callback;
         },
-        setUndoAllFunction: function(f){
-            status.onUndoAll = f;
+        setUndoAllFunction: function(callback){
+            status.onUndoAll = callback;
         }
-
     };
 
     $.fn.status = function (method) {
         // Create some defaults, extending them with any options that were provided
         //var settings = $.extend({}, options);
         // Method calling logic
+        if(!this.selector){
+            $.error("Selector required!");
+            return;
+        }
 
         if (methods[method]) {
             if(method!=='init'&&!navigator){
@@ -54,6 +57,7 @@
             }
             return methods[ method ].apply(this, Array.prototype.slice.call(arguments, 1));
         } else if (typeof method === 'object' || !method) {
+            arguments[0].selector = this.selector;
             return methods.init.apply(this, arguments);
         } else {
             $.error('Method ' + method + ' does not exist on jQuery.navigator');
@@ -156,6 +160,9 @@
     //  Functions
     //////////////////////////
     Statuses.prototype.setState = function(state){
+        //Minimum time busy icon is visible.
+        var MIN_TIME_VISIBLE = 800;
+
         var timeNow = new Date().getTime();
         var timeSince = (timeNow-this.lastStateChangeTime);
         //console.log("Time: "+ timeSince);
@@ -163,14 +170,14 @@
         var previousState = this.currentState;
         this.currentState = state;
 
-        if(previousState===states.busy&&timeSince<800){
+        //If the last state was the busy state, and less than min time has passed; keep image as busy until delay fn.
+        //Otherwise, just switch to the state passed.
+        if( previousState === states.busy && (timeSince < MIN_TIME_VISIBLE) ){
             $("#navStatus .navIcon").attr("src", statusImages[states.busy]);
-            //console.log("Busy.");
             _.delay(function(){
-                //console.log("Fired.");
                 $("#navStatus .navIcon").attr("src", statusImages[state]);
                 $(document).trigger("status.stateChange");
-            }, (800-timeSince));
+            }, (MIN_TIME_VISIBLE-timeSince));
         }else{
             $("#navStatus .navIcon").attr("src", statusImages[state]);
             $(document).trigger("status.stateChange");
@@ -200,14 +207,8 @@
         newMenu = createStatusMenu(this, mode);
         //console.log("currentUndoMode: "+mode);
 
-        //Overwrite properties //TODO: Move into popup function, replaceMenu(oldMenu, newMenu).
-        var property;
-        for(property in menu){
-            delete menu[property];
-        }
-        for(property in newMenu){
-            menu[property] = newMenu[property];
-        }
+        //Replace menu in popup
+        this.statusPopup.replaceMenu(menu, newMenu);
 
         $(document).trigger("status.undoModeChange");
     };
