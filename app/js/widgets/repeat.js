@@ -329,7 +329,7 @@ define(["tools/generalTools", "tools/dateTools"], function (generalTools, dateTo
             //get the value of the Repeat Every widget
             var repeat = widgetElement.find(".repeatEveryNum").val();
             //get a reference to the Repeat Every field
-            var repeatEvery = widgetElement.find('.repeatEveryNum:not(.k-formatted-value)').data("kendoNumericTextBox");
+            var repeatEvery = widgetElement.find('input.repeatEveryNum:not(.k-formatted-value)').data("kendoNumericTextBox");
             //show/hide the correct Repeat On field
             //daily
             if (frequency == 2) {
@@ -389,14 +389,15 @@ define(["tools/generalTools", "tools/dateTools"], function (generalTools, dateTo
             //get the selected frequency
             var frequency = widgetElement.find(".frequency:not(.select2-container)").val();
             //get the value of the Repeat Every field
-            var repeat = widgetElement.find(".repeatEveryNum").val();
+            var repeat = widgetElement.find('input.repeatEveryNum:not(.k-formatted-value)').val();
             //get a reference to the Repeat Every widget
-            var repeatEvery = widgetElement.find(".repeatEveryNum:not(.k-formatted-value)").data("kendoNumericTextBox");
+            var repeatEvery = widgetElement.find('input.repeatEveryNum:not(.k-formatted-value)').data("kendoNumericTextBox");
             //use the frequency int to get the frequency name(ex. 2 -> "Day")
             var frequencyName = generalTools.repeatFrequencies[frequency];
             //add "s" to the frequency name if repeat number is more than one and frequency exists
             if (frequencyName) {
-                if (repeat.match(/^([0-9]*)\s/)[1] > 1) {
+                var match = repeat.match(/^([0-9]*)\s/);
+                if ((match && match[1] > 1) || repeat > 1) {
                     frequencyName += "s";
                 }
             }

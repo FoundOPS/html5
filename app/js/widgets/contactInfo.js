@@ -102,8 +102,7 @@ define(["tools/generalTools", "tools/parserTools", "tools/analytics", "widgets/s
                 //save the old value to be used to check for changes
                 var oldContact = generalTools.deepClone(contactInfo.options.contacts[contactInfo._options._editIndex]);
                 //get the value of the selected label
-                //TODO: should this be used? was: var selectedLabel = $(contactInfo.element).find(".editWrapper .contactInfoSearchSelect").searchSelect("text");
-                var selectedLabel = $(contactInfo.element).find(".editWrapper .contactInfoSearchSelect input").val();
+                var selectedLabel = $(contactInfo.element).find(".contactInfoSearchSelect input").val();
                 //set the value
                 contactInfo.options.contacts[contactInfo._options._editIndex].Data = $(contactInfo.element).find(".editWrapper .value").val();
                 //set the label
@@ -149,6 +148,7 @@ define(["tools/generalTools", "tools/parserTools", "tools/analytics", "widgets/s
 
                 contactInfo._options._isNew = false;
             });
+
             //automatically update the category as the value changes
             generalTools.observeInput($(contactInfo.element).find(".editWrapper .value"), function (string) {
                 var category;
@@ -231,33 +231,25 @@ define(["tools/generalTools", "tools/parserTools", "tools/analytics", "widgets/s
             contactInfo._changePane("");
         },
 
-        //creates a select2 dropdown for the list of labels
+        //creates a dropdown for the list of labels
         _setupLabelDropdown: function () {
             var contactInfo = this;
 
-            //function to format the option names of the dropdown
-            var formatItemName = function (item) {
-                return item.value;
-            };
-
-            $(contactInfo.element).find(".editWrapper .contactInfoSearchSelect").searchSelect({
+            $(contactInfo.element).find(".contactInfoSearchSelect").searchSelect({
                 formatOption: function (item) {
                     return item.value;
                 },
                 query: function (searchTerm, callback) {
-                    var data = contactInfo._options._currentLabels.slice() //clone the phone labels
+                    var data = contactInfo._options._currentLabels.slice(); //clone the phone labels
                     if (searchTerm !== "") {
                         data.unshift({value: searchTerm});
                     }
-                    return data;
-                },
-                onSelect: function (e, selectedData) {
-                    console.log(e);
-                    console.log(selectedData);
+                    callback(data);
                 },
                 minimumInputLength: 0
             });
         },
+
         /**
          * A function to setup edit mode
          * @param {object} contact
@@ -267,6 +259,7 @@ define(["tools/generalTools", "tools/parserTools", "tools/analytics", "widgets/s
             var contactInfo = this, type;
             //set the value in the textbox
             $(contactInfo.element).find(".editWrapper .value").val(contact.Data);
+
             //set the category
             if (contact.Type === "Phone Number") {
                 type = "Phone"
@@ -276,11 +269,14 @@ define(["tools/generalTools", "tools/parserTools", "tools/analytics", "widgets/s
                 type = contact.Type
             }
             contactInfo._changeType(type, true);
+
             //set the label
-            $(contactInfo.element).find(".editWrapper .contactInfoSearchSelect").searchSelect("data", {value: contact.Label});
+            $(contactInfo.element).find(".contactInfoSearchSelect").searchSelect("data", {value: contact.Label});
+
             //show the edit pane
             contactInfo._changePane("edit");
         },
+
         /**
          * Changes the category dropdown and sets up the correct label dropdown list
          * @param {string} category
@@ -290,7 +286,7 @@ define(["tools/generalTools", "tools/parserTools", "tools/analytics", "widgets/s
         _changeType: function (category, manuallySelect) {
             var contactInfo = this, labels = [];
             //remove the select2 from the label dropdown
-//            $(contactInfo.element).find(".editWrapper .contactInfoSearchSelect").searchSelect("destroy");
+//            $(contactInfo.element).find(".contactInfoSearchSelect").searchSelect("destroy");
             //set the correct label list based on the category
             if (category === "Phone") {
                 labels = phoneLabels;
@@ -303,7 +299,7 @@ define(["tools/generalTools", "tools/parserTools", "tools/analytics", "widgets/s
             }
 
             //get the selected label
-            var label = $(contactInfo.element).find(".editWrapper .contactInfoSearchSelect").searchSelect("text");
+            var label = $(contactInfo.element).find(".contactInfoSearchSelect").searchSelect("text");
             var sameLabels;
             if (contactInfo._options._currentLabels === labels) {
                 sameLabels = true;
@@ -314,12 +310,13 @@ define(["tools/generalTools", "tools/parserTools", "tools/analytics", "widgets/s
             contactInfo._setupLabelDropdown();
             //if the labels are the same as before, reset to the original selected label
             if (sameLabels) {
-                $(contactInfo.element).find(".editWrapper .contactInfoSearchSelect").searchSelect("data", label);
+                $(contactInfo.element).find(".contactInfoSearchSelect").searchSelect("data", label);
             }
 
             //change the selected category icon
             //get reference to the icon category dropdown
             var container = $(contactInfo.element).find(".iconContainer")[0];
+
             //replace the select2 container's class name with the new class
             $(container)[0].className = "select2-container iconContainer " + category.replace(/\s/g, "") + "Small";
 
@@ -328,6 +325,7 @@ define(["tools/generalTools", "tools/parserTools", "tools/analytics", "widgets/s
                 $(contactInfo.element).find(".labelIcon").select2("val", category);
             }
         },
+
         _changePane: function (newPane) {
             var contactInfo = this;
             //if moving to edit pane
@@ -358,12 +356,14 @@ define(["tools/generalTools", "tools/parserTools", "tools/analytics", "widgets/s
 
             }
         },
+
         //make sure the label dropdown is correct width
         _setLabelWidth: function (guideElement) {
             var contactInfo = this;
             var containerWidth = $(contactInfo.element).find(guideElement).width();
-            $(contactInfo.element).find(".editWrapper .contactInfoSearchSelect").width(containerWidth - 28);
+            $(contactInfo.element).find(".contactInfoSearchSelect").width(containerWidth - 28);
         },
+
         //remove the widget
         removeWidget: function () {
             var contactInfo = this;

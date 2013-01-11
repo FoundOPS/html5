@@ -21,7 +21,7 @@ define(["db/session"], function (session) {
                 '<li><a>Business</a></li>' +
                 '<li><a>Users</a></li>' +
                 '<li><a>Dispatcher</a></li>' +
-                '<li><a>Import</a></li>' +
+//                '<li><a>Import</a></li>' +
 //                '<li><a>Privacy Policy</a></li>' +
 //                '<li><a>Terms of Service</a></li>' +
                 '</ul>' +
@@ -31,7 +31,7 @@ define(["db/session"], function (session) {
             var businessLi = _menu.find("li:nth-child(2)");
             var usersLi = _menu.find("li:nth-child(3)");
             var dispatcherLi = _menu.find("li:nth-child(4)");
-            var importerLi = _menu.find("li:nth-child(5)");
+//            var importerLi = _menu.find("li:nth-child(5)");
 //            var privacyLi = _menu.find("li:nth-child(5)");
 //            var termsLi = _menu.find("li:nth-child(6)");
 
@@ -47,9 +47,9 @@ define(["db/session"], function (session) {
             dispatcherLi.click(function () {
                 application.navigate("dispatcherSettings");
             });
-            importerLi.click(function () {
-                application.navigate("importerUpload");
-            });
+//            importerLi.click(function () {
+//                application.navigate("importerUpload");
+//            });
 //            privacyLi.click(function () {
 //                application.navigate("view/privacyPolicy.html");
 //            });
@@ -65,8 +65,8 @@ define(["db/session"], function (session) {
                 usersLi.addClass('active');
             } else if (options.selectedItem === "Dispatcher") {
                 dispatcherLi.addClass('active');
-            } else if (options.selectedItem === "Importer") {
-                importerLi.addClass('active');
+//            } else if (options.selectedItem === "Importer") {
+//                importerLi.addClass('active');
 //            } else if (options.selectedItem === "Privacy") {
 //                privacyLi.addClass('active');
 //            } else if (options.selectedItem === "Terms") {
@@ -84,7 +84,7 @@ define(["db/session"], function (session) {
                     businessLi.css("display", "block");
                     usersLi.css("display", "block");
                     dispatcherLi.css("display", "block");
-                    importerLi.css("display", "block");
+//                    importerLi.css("display", "block");
                 }
             });
 

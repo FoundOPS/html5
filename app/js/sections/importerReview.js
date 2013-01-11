@@ -10,7 +10,7 @@ define(["sections/importerUpload", "sections/importerSelect", "db/services", "to
 
     // left: 37, up: 38, right: 39, down: 40,
     // spacebar: 32, pageup: 33, pagedown: 34, end: 35, home: 36
-    var keys = [32, 33, 34, 37, 38, 39, 40];
+    var keys = [33, 34, 38, 40];
 
     var preventDefault = function (e) {
         e = e || window.event;
@@ -203,6 +203,7 @@ define(["sections/importerUpload", "sections/importerSelect", "db/services", "to
 
             newRow["Location"] = location;
             newRow["ContactInfo"] = contactInfo;
+            //TODO x3 remove s[0]
             newRow["Repeat"] = row.Repeats[0];
 
             //repeat status

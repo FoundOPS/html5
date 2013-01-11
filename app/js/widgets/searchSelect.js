@@ -38,7 +38,9 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                     return JSON.stringify(data);
                 },
                 onSelect: function (event, selectedData) {
-                    this._trigger("selected", event, selectedData);
+                    if (this._trigger) {
+                        this._trigger("selected", event, selectedData);
+                    }
                 },
                 queryDelay: null,
                 minimumInputLength: 1,
@@ -46,6 +48,7 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                 additionalListItem: null,
                 dontCloseOn: null
             },
+
             _create: function () {
                 var searchSelect = this;
                 /**
@@ -100,8 +103,6 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                 searchSelect.element.find("input").on("click touchstart", searchSelect.element.find("input"), function (e) {
                     if (searchSelect.selectedOptionTempText) {
                         this.value = searchSelect.selectedOptionTempText;
-                    } else {
-                        this.value = "";
                     }
                     searchSelect.selectedOptionTempText = searchSelect.element.find("input").val();
                     searchSelect._getOptions(this.value);
@@ -133,11 +134,9 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                 });
                 //Set the scrolling flag to on.
                 searchSelect.element.find(".optionList").on("touchmove", searchSelect.element.find(".optionList"), function (e) {
-                    console.log("Scrolling...");
                     _scrolling = true;
                 });
                 $(document.body).on('touchmove', function (e) {
-                    console.log("Scrolling...");
                     _scrolling = true;
                 });
                 //When clicking outside of the select widget, close the option list and handle text inside the textbox.
@@ -147,14 +146,7 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                     if ($(e.target).parents().filter("."+searchSelect.element.context.className).length === 0 || searchSelect.options.dontCloseOn && e.target.className ? e.target.className.indexOf(searchSelect.options.dontCloseOn) === -1 : false) {
                         setTimeout(function () {
                             if (!_scrolling) {
-                                if (searchSelect.selectedOptionText) {
-                                    searchSelect.element.find("input")[0].value = searchSelect.selectedOptionText === "Manually Place Pin" ? "" : searchSelect.selectedOptionText;
-                                } else {
-                                    searchSelect.selectedOptionTempText = searchSelect.element.find("input")[0].value;
-                                    //TODO: don't do in location widget
-                                    searchSelect.element.find("input")[0].value = "";
-                                }
-                                //TODO: don't do in location widget
+                                searchSelect.selectedOptionTempText = searchSelect.selectedData = searchSelect.element.find("input")[0].value;
                                 searchSelect.clearList();
                                 if (searchSelect.isTouchDevice) {
                                     $(".km-scroll-wrapper").kendoMobileScroller("reset");
@@ -164,6 +156,7 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                     }
                 });
             },
+
             // Private functions
             //Disable touch scrolling of the view when user is scrolling whatever element is passed.
             _disableTouchScroll: function (element) {
@@ -207,6 +200,7 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                     $(".km-scroll-container").css("-webkit-transform", "translate3d(0px, -1px, 0)");
                 }
             },
+
             // Public functions
             clearList: function () {
                 var optionList = this.element.find(".optionList")[0];
@@ -215,9 +209,8 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                     optionList.removeChild(optionList.lastChild);
                 }
             },
-            /**
-             * Opens the list of items the user can select.
-             */
+
+            //Opens the list of items the user can select.
             open: function (options) {
                 var searchSelect = this,
                     optionList = searchSelect.element.find(".optionList"),
@@ -264,6 +257,7 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                     }
                 });
             },
+
             //Returns the selected data. If a parameter is supplied it set the current selection to the corresponding data.
             data: function (selectData) {
                 var searchSelect = this;
@@ -279,6 +273,7 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
 
                 return searchSelect.selectedData;
             },
+
             //Returns the current selected data's text.
             text: function () {
                 var searchSelect = this;
