@@ -1,9 +1,50 @@
 'use strict';
 
 //requires: kendo, underscore
-define(["sections/importerUpload", "sections/importerSelect", "db/services", "tools/generalTools", "tools/dateTools", "widgets/location", "widgets/contactInfo", "widgets/repeat",
-    "widgets/selectBox"], function (importerUpload, importerSelect, dbServices, generalTools, dateTools) {
+define(["sections/importerUpload", "sections/importerSelect", "db/services", "tools/generalTools", "tools/dateTools", "tools/parameters", "widgets/location", "widgets/contactInfo", "widgets/repeat",
+    "widgets/selectBox"], function (importerUpload, importerSelect, dbServices, generalTools, dateTools, parameters) {
     var importerReview = {}, dataSource, grid, clients = {}, locations = {}, contactInfoSets = {};
+
+    //region enable/disable scrolling
+    //used for grid while popup is open
+
+    // left: 37, up: 38, right: 39, down: 40,
+    // spacebar: 32, pageup: 33, pagedown: 34, end: 35, home: 36
+    var keys = [33, 34, 38, 40];
+
+    var preventDefault = function (e) {
+        e = e || window.event;
+        if (e.preventDefault)
+            e.preventDefault();
+        e.returnValue = false;
+    };
+
+    var wheel = function (e) {
+        preventDefault(e);
+    };
+
+    var disable_scroll = function () {
+        if (window.addEventListener) {
+            window.addEventListener('DOMMouseScroll', wheel, false);
+        }
+        window.onmousewheel = document.onmousewheel = wheel;
+        document.onkeydown = function (e) {
+            for (var i = keys.length; i--;) {
+                if (e.keyCode === keys[i]) {
+                    preventDefault(e);
+                    return;
+                }
+            }
+        }
+    };
+
+    var enable_scroll = function () {
+        if (window.removeEventListener) {
+            window.removeEventListener('DOMMouseScroll', wheel, false);
+        }
+        window.onmousewheel = document.onmousewheel = document.onkeydown = null;
+    };
+    //endregion
 
     //an editor which automatically switches back to read view
     var closeCurrentCell = function (container) {
@@ -162,6 +203,7 @@ define(["sections/importerUpload", "sections/importerSelect", "db/services", "to
 
             newRow["Location"] = location;
             newRow["ContactInfo"] = contactInfo;
+            //TODO x3 remove s[0]
             newRow["Repeat"] = row.Repeats[0];
 
             //repeat status
@@ -223,8 +265,8 @@ define(["sections/importerUpload", "sections/importerSelect", "db/services", "to
         var locationWidget = reviewElement.find(".Location");
         var repeatWidget = reviewElement.find(".Repeat");
 
-        contactInfoWidget.popup({id:"ContactInfo", contents: $("<div class='contactInfoWidget'></div>")});
         locationWidget.popup({id:"Location", contents: $("<div class='locationWidget'></div>")});
+        contactInfoWidget.popup({id:"ContactInfo", contents: $("<div class='contactInfoWidget'></div>")});
         repeatWidget.popup({id:"Repeat", contents: $("<div class='repeatWidget'></div>")});
 
         /**
@@ -240,19 +282,27 @@ define(["sections/importerUpload", "sections/importerSelect", "db/services", "to
             return dataSource.view()[importerReview.editRowIndex];
         };
 
+        locationWidget.on("click", function (e) {
+            //disable grid scrolling
+            disable_scroll();
+            //initialize the location widget with the data from the grid dataSource
+            var data = updateEditIndexes(e);
+
+            $("#popupContent").find(".locationWidget").location({
+                data: [data.get("Location")],
+                clientId: data.get("Location").ClientId,
+                element: ".locationWidget",
+                change: function (location) {
+                    data.set("Location", location);
+                }
+            });
+        });
+
         //create the correct widget inside each popup
         contactInfoWidget.on("click", function (e) {
             //initialize the contact info widget with the data from the grid dataSource
             var data = updateEditIndexes(e);
             $("#popupContent").find(".contactInfoWidget").contactInfo({contacts: data.get("ContactInfo")});
-        });
-
-        locationWidget.on("click", function (e) {
-            //initialize the location widget with the data from the grid dataSource
-            var data = updateEditIndexes(e);
-            $("#popupContent").find(".locationWidget").location({initialLocation: data.get("Location"), change: function (location) {
-                data.set("Location", location);
-            }});
         });
 
         repeatWidget.on("click", function (e) {
@@ -324,8 +374,8 @@ define(["sections/importerUpload", "sections/importerSelect", "db/services", "to
         //if not, then no data has been loaded
         //TODO: ask if sure to reload page?
         if (!importerUpload.uploadedData) {
-            //redirect to last page
-            window.viewImporterSelect();
+            //redirect to upload page
+            parameters.set({section: {name: "importerUpload"}});
             return;
         }
 
@@ -357,26 +407,23 @@ define(["sections/importerUpload", "sections/importerSelect", "db/services", "to
             var grid = $("#importerReview").find(".grid").data("kendoGrid");
 
             var locationWidget = $(e.target).find(".locationWidget").data("location");
-            var repeatWidget = $(e.target).find(".repeatWidget").data("repeat");
             var contactInfoWidget = $(e.target).find(".contactInfoWidget").data("contactInfo");
+            var repeatWidget = $(e.target).find(".repeatWidget").data("repeat");
+
+            var row = grid.element.find("tr:nth-child(" + (importerReview.editRowIndex + 1) + ")");
+            var cell = row.find("td:nth-child(" + (importerReview.editCellIndex + 1) + ") div");
 
             //check which widget is active and remove it
             if (locationWidget) {
                 locationWidget.removeWidget();
-            } else if (repeatWidget) {
-                repeatWidget.removeWidget();
+                cell.popup({id:"Location", contents: $("<div class='locationWidget'></div>")});
             } else if (contactInfoWidget) {
                 contactInfoWidget.removeWidget();
+            } else if (repeatWidget) {
+                repeatWidget.removeWidget();
             }
 
-            //force refresh cell text
-            var selectedCell = grid.tbody.find('tr:eq(' + importerReview.editRowIndex + ') td:eq(' + importerReview.editCellIndex + ')');
-            grid.editCell(selectedCell);
-            if (grid._editContainer) {
-                grid.closeCell();
-            }
-
-            //TODO add back popup listener
+            enable_scroll();
         });
     };
 

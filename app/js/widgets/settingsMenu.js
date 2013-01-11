@@ -48,7 +48,7 @@ define(["db/session"], function (session) {
                 application.navigate("dispatcherSettings");
             });
 //            importerLi.click(function () {
-//                application.navigate("view/importerUpload.html");
+//                application.navigate("importerUpload");
 //            });
 //            privacyLi.click(function () {
 //                application.navigate("view/privacyPolicy.html");
@@ -65,8 +65,8 @@ define(["db/session"], function (session) {
                 usersLi.addClass('active');
             } else if (options.selectedItem === "Dispatcher") {
                 dispatcherLi.addClass('active');
-            } else if (options.selectedItem === "Importer") {
-                //importerLi.addClass('active');
+//            } else if (options.selectedItem === "Importer") {
+//                importerLi.addClass('active');
 //            } else if (options.selectedItem === "Privacy") {
 //                privacyLi.addClass('active');
 //            } else if (options.selectedItem === "Terms") {
@@ -84,7 +84,7 @@ define(["db/session"], function (session) {
                     businessLi.css("display", "block");
                     usersLi.css("display", "block");
                     dispatcherLi.css("display", "block");
-                    //importerLi.css("display", "block");
+//                    importerLi.css("display", "block");
                 }
             });
 

@@ -99,7 +99,7 @@ define(["developer", 'tools/dateTools'], function (developer, dateTools) {
         var lineTwo = location.AddressLineTwo ? location.AddressLineTwo : "";
 
         var adminDistrictTwo = location.AdminDistrictTwo ? location.AdminDistrictTwo + ", " : "";
-        var adminDistrictOne = location.AdminDistrictOne ? location.AdminDistrictOne : "";
+        var adminDistrictOne = location.AdminDistrictOne && location.AdminDistrictOne !== "Select a State" ? location.AdminDistrictOne : "";
         var postalCode = location.PostalCode ? location.PostalCode : "";
         //display any parts of the location that exist
         var displayString = "";
@@ -113,7 +113,7 @@ define(["developer", 'tools/dateTools'], function (developer, dateTools) {
 
         if (displayString !== "") {
             //if name should be included, but there is no name(i.e. there are 2 lines available), put the second half of the address on the next line
-            if (includeName && location.Name === "") {
+            if (includeName && location.Name == null) {
                 displayString += "<br/>\n";
             } else {
                 displayString += ", ";

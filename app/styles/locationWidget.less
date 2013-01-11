@@ -1,14 +1,16 @@
 .locationWidget{
     position: relative;
     min-height: 150px;
-    padding: 15px 20px;
+    padding: 10px 15px;
     font-size: 15px;
+    background: @grey;
     h3{
         font-size: 20px;
         margin: 0 0 5px 0;
     }
-    label{
+    label, .navigateBtn{
         line-height: 1.5em;
+        font-family: "PTSans";
     }
     #locationWidgetMap{
         position:relative;
@@ -39,9 +41,21 @@
         .deleteBtn{
             display: none;
         }
-    }
-    .locationSearchSelect input{
-        margin-bottom: 3px;
+        input[type="text"] {
+            height: 26px;
+            width: 100%;
+            padding-left: 2px;
+            font-size: 14px;
+            font-family: "PTSans";
+            border: none;
+            border-radius: 0;
+            background-color: @white;
+        }
+        .locationSearchSelect input[type="text"]{
+            height: 20px;
+            padding: 1px 26px 1px 0;
+            -webkit-box-sizing: border-box;
+        }
     }
     .addButtonWrapper{
         display: none;
@@ -57,7 +71,7 @@
         }
     }
     .saveDeleteButtonWrapper{
-        width: 150px;
+        width: 155px;
         margin: 10px auto 0 auto;
     }
 }
