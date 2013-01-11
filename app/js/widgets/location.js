@@ -9,6 +9,7 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
             add: null,
             change: null,
             delete: null,
+            element: null,
             //Will return locations for this Client in queries
             clientId: null,
             //Locations array to display initially
@@ -362,10 +363,7 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
                     locationWidget._map.setView([locations[0].Latitude, locations[0].Longitude], 15);
                 }
 
-
-                _.delay(function () {
-                    locationWidget._map.invalidateSize(false);
-                }, 50);
+                locationWidget.invalidateMap(50);
 
                 //zoom out one more level
                 //TODO: not working
@@ -414,9 +412,7 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
 
             locationWidget._colorMarkers(ui.ITEM_COLORS[0].color);
 
-            _.delay(function () {
-                locationWidget._map.invalidateSize(false);
-            }, 50);
+            locationWidget.invalidateMap(50);
         },
 
         //remove any markers from the map
@@ -518,6 +514,36 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
             widgetElement.find(".city")[0].style.color = color;
             widgetElement.find(".zipCode")[0].style.color = color;
             widgetElement.find(".state")[0].style.color = color;
+        },
+
+        invalidateMap: function (delay) {
+            var locationWidget = this;
+            _.delay(function () {
+                locationWidget._map.invalidateSize(false);
+            }, delay);
+        },
+
+        //switch to list on the left
+        wideView: function (rightWidth) {
+            var widgetElement = $(this.element);
+            var newWidth = rightWidth - 57 - 280;
+            var newHeight = widgetElement[0].clientWidth > 500 ? widgetElement.height() : widgetElement.height() - 150;
+            $("#locationWidgetMap").attr("style", "float: right; width:" + newWidth + "px; height:" + newHeight + "px; border-left: 2px solid #e6e6e6;");
+            widgetElement.find(".splitBtnList")[0].style.width = "278px";
+            widgetElement.find(".editPane")[0].style.width = "278px";
+            widgetElement.find(".addButtonWrapper")[0].style.margin = "10px 0 0 92px";
+        },
+
+        //switch to list on the bottom
+        narrowView: function () {
+            var widgetElement = $(this.element);
+
+            $("#locationWidgetMap").attr("style", "float: none; width: 100%; height: 150px; border-left: none;");
+            if (widgetElement.find(".splitBtnList")[0]) {
+                widgetElement.find(".splitBtnList")[0].style.width = "100%";
+                widgetElement.find(".editPane")[0].style.width = "100%";
+                widgetElement.find(".addButtonWrapper")[0].style.margin = "10px auto 0 auto";
+            }
         },
 
         /**

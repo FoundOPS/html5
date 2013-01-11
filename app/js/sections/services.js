@@ -4,7 +4,122 @@
 
 require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db/saveHistory", "tools/kendoTools", "tools/analytics", "db/models", "widgets/serviceDetails",
     "widgets/selectBox"], function (session, dbServices, parameters, dateTools, saveHistory, kendoTools, analytics, models) {
-    var services = {}, serviceHoldersDataSource, grid, handleChange, selectedServiceHolder, vm, setLocationView;
+    var services = {}, serviceHoldersDataSource, grid, handleChange, selectedServiceHolder, vm,
+        servicesPage = $("#services"), clientSelector = $("#clientSelector"), locationSelector = $("#locationSelector");
+
+    //region Client / Location widget
+
+    var setupLocationWidget = function (service) {
+        //remove the location widget if it exists
+        if (locationSelector.data("location")) {
+            locationSelector.data("location").removeWidget();
+        }
+
+        var destinationField = models.getDestinationField(service);
+        //initialize the location widget with the destination
+        var destination = destinationField.Value ? destinationField.Value : {};
+
+        var client = clientSelector.select2("data"), clientId;
+        if (client) {
+            clientId = client.Id;
+        }
+
+        locationSelector.location({
+            data: [destination],
+            clientId: clientId,
+            change: function (location) {
+                //update and save the destination field
+                destinationField = models.getDestinationField(vm.get("selectedService"));
+                destinationField.Value = location;
+                var destinationField = models.getDestinationField(vm.get("selectedService"));
+                dbServices.locationFields.update({
+                    body: destinationField,
+                    params: {serviceId: vm.get("selectedService.Id"), recurringServiceId: vm.get("selectedService.RecurringServiceId"), clientId: clientId, occurDate: vm.get("selectedService.ServiceDate")}
+                }).done(function () {
+                        destinationField.Value.IsNew = false;
+                    });
+
+                //update the grid
+                vm.syncServiceHolder();
+            }
+        });
+    };
+
+    var setLocationView = function () {
+        var location = $("#locationSelector").data("location");
+        //determine what location widget view should be set
+        if (location) {
+            var width = servicesPage.find(".km-content").data("kendoSplitter").options.panes[1].size;
+
+            //move the location list to the left of map if wide enough
+            var rightWidth = parseInt(width.substring(0, width.length - 2));
+
+            if (rightWidth > 557) {
+                location.wideView(rightWidth);
+            } else {
+                location.narrowView();
+            }
+        }
+    };
+
+    var clientChanged = function () {
+        var client = clientSelector.select2("data");
+        vm.get("selectedService").set("Client", client);
+        vm.get("selectedService").set("ClientId", client.Id);
+
+        //get the first location for this client
+        dbServices.locations.read({params: {clientId: client.Id}}).done(function (locations) {
+            if (locations.length > 0) {
+                if (locations[0]) {
+                    //update the location widget with this new location
+                    locationSelector.data("location").options.data = [locations[0]];
+                    locationSelector.data("location").showList();
+
+                    //wait until the service has been saved then
+                    saveHistory.save(true, function () {
+                        //trigger change to save the destination
+                        locationSelector.data("location").options.change(locations[0]);
+                    });
+                }
+            }
+        });
+    };
+    var setupClientWidget = function () {
+        var formatClientName = function (client) {
+            return client.Name;
+        };
+
+        //Add the Client selector w auto-complete and infinite scrolling
+        clientSelector.select2({
+            placeholder: "Choose a client",
+            minimumInputLength: 1,
+            ajax: {
+                url: dbServices.API_URL + "Clients/Get?roleId=" + session.get("role.id"),
+                dataType: 'jsonp',
+                quietMillis: 100,
+                data: function (term, page) { // page is the one-based page number tracked by Select2
+                    return {
+                        search: term,
+                        skip: (page - 1) * 10,
+                        take: 10 // page size
+                    };
+                },
+                results: function (data, page) {
+                    // whether or not there are more results available
+                    var more = data.length > 9;
+                    return {results: data, more: more};
+                }
+            },
+            id: function (client) {
+                return client.Id;
+            },
+            formatSelection: formatClientName,
+            formatResult: formatClientName,
+            dropdownCssClass: "bigdrop"
+        }).on("change", clientChanged);
+    };
+
+    //endregion
 
     //region Public
     services.vm = vm = kendo.observable({
@@ -18,8 +133,9 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
                     serviceTemplateId: vm.get("serviceType.Id"),
                     serviceDate: dateTools.stripDate(vm.get("startDate"))
                 }}).done(function (services) {
+                    //commented out because undo is currently disabled always
                     //disable undo for new entities
-                    saveHistory.setUndoEnabled(false);
+                    //saveHistory.setUndoEnabled(false);
 
                     var service = services[0];
                     //add a new service holder
@@ -48,97 +164,14 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
                 //show the serviceSelectorsWrapper
                 $("#serviceSelectorsWrapper").attr("style", "display:block");
 
-                //Initialize client and location selectors.
-                var clientSelector = $("#clientSelector"), locationSelector = $("#locationSelector");
-
-                var formatClientName = function (client) {
-                    return client.Name;
-                };
-
-                //updates the location's comboBox to the current client's locations
-                var updateLocations = function () {
-                    //remove the location widget if it exists
-                    if (locationSelector.data("location")) {
-                        locationSelector.data("location").removeWidget();
-                    }
-
-                    var destinationField = models.getDestinationField(service);
-                    //initialize the location widget with the destination
-                    var destination = destinationField.Value;
-
-                    var clientId = clientSelector.select2("data").Id;
-                    locationSelector.location({
-                        data: [destination],
-                        clientId: clientId,
-                        change: function (location) {
-                            //update the Destination Field
-                            destinationField = models.getDestinationField(vm.get("selectedService"));
-                            destinationField.Value = location;
-
-                            dbServices.locationFields.update({
-                                body: destinationField,
-                                params: {serviceId: vm.get("selectedService.Id"), recurringServiceId: vm.get("selectedService.RecurringServiceId"), clientId: clientId, occurDate: vm.get("selectedService.ServiceDate")}
-                            }).done(function () {
-                                    destinationField.Value.IsNew = false;
-                                });
-
-                            vm.syncServiceHolder();
-                        }
-                    });
-                };
-
-                //Add the Client selector w auto-complete and infinite scrolling
-                clientSelector.select2({
-                    placeholder: "Choose a client",
-                    minimumInputLength: 1,
-                    ajax: {
-                        url: dbServices.API_URL + "Clients/Get?roleId=" + session.get("role.id"),
-                        dataType: 'jsonp',
-                        quietMillis: 100,
-                        data: function (term, page) { // page is the one-based page number tracked by Select2
-                            return {
-                                search: term,
-                                skip: (page - 1) * 10,
-                                take: 10 // page size
-                            };
-                        },
-                        results: function (data, page) {
-                            // whether or not there are more results available
-                            var more = data.length > 9;
-                            return {results: data, more: more};
-                        }
-                    },
-                    id: function (client) {
-                        return client.Id;
-                    },
-                    formatSelection: formatClientName,
-                    formatResult: formatClientName,
-                    dropdownCssClass: "bigdrop"
-                }).on("change", function () {
-                        var client = clientSelector.select2("data");
-                        vm.get("selectedService").set("Client", client);
-                        vm.get("selectedService").set("ClientId", client.Id);
-                        //get the first location for this client
-                        dbServices.locations.read({params: {clientId: client.Id}}).done(function (locations) {
-                            if (locations.length > 0) {
-                                if (locations[0]) {
-                                    //update the location widget with this new location
-                                    locationSelector.data("location").options.data = [locations[0]];
-                                    locationSelector.data("location").showList();
-                                }
-                            }
-                        });
-                    });
+                setupClientWidget(service);
 
                 if (service.Client) {
                     //set the initial selection
                     clientSelector.select2("data", service.Client);
-                    updateLocations();
                 }
 
-                locationSelector.css("padding", "0");
-                locationSelector.find("h3").replaceWith("<h1>Location</h1>");
-                locationSelector.find("h1").css("padding", "0");
+                setupLocationWidget(service);
             }
         },
         deleteSelectedService: function () {
@@ -212,16 +245,17 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
     /**
      * Save the selected service
      * @param skipValidation Skip validation
+     * @param callback Called on complete
      */
-    services.save = function (skipValidation) {
+    services.save = function (skipValidation, callback) {
         var service = vm.get("selectedService");
 
-        if (skipValidation || services.validator.validate()) {
+        if (skipValidation || (vm.get("selectedService.Client") && services.validator.validate())) {
             dbServices.services.update({body: service}).done(function () {
                 vm.syncServiceHolder();
-                //re-enable undo after a service is saved (in case it was disabled for a new service)
-                saveHistory.setUndoEnabled(true);
-
+                if (callback) {
+                    callback();
+                }
                 analytics.track("Update Field");
             });
         } else {
@@ -258,24 +292,6 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
         });
     };
 
-    setLocationView = function () {
-        var location = $("#locationSelector");
-        if (services.rightWidth > 557) {
-            var newWidth = services.rightWidth - 57 - 280;
-            var newHeight = location[0].clientWidth > 500 ? location.height() : location.height() - 150;
-            location.find("#locationWidgetMap").attr("style", "float: right; width:" + newWidth + "px; height:" + newHeight + "px; border-left: 2px solid #e6e6e6;");
-            location.find(".splitBtnList")[0].style.width = "278px";
-            location.find(".editPane")[0].style.width = "278px";
-            location.find(".addButtonWrapper")[0].style.margin = "10px 0 0 92px";
-        } else {
-            location.find("#locationWidgetMap").attr("style", "float: none; width: 100%; height: 150px; border-left: none;");
-            if (location.find(".splitBtnList")[0]) {
-                location.find(".splitBtnList")[0].style.width = "100%";
-                location.find(".editPane")[0].style.width = "100%";
-                location.find(".addButtonWrapper")[0].style.margin = "10px auto 0 auto";
-            }
-        }
-    };
     //endregion
 
     //region Data/DataSource
@@ -445,7 +461,7 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
 
     //endregion
 
-    //region Grid
+    //region Details/Grid
 
     /**
      * Disable the filter's: and/or, before/after/equal to... drop downs, and clear button
@@ -497,7 +513,7 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
                 column.template = "#= (" + key + "== null) ? ' ' : moment.utc(" + key + ").format('LL') #";
             }
             else if (column.type === "signature") {
-                column.template = "# if (!" + key + ") { # #= '' # # } else { # "
+                column.template = "# if (data." + key + "== null) { # #= '' # # } else { # "
                     + "<a href='#=" + key + "#' target='_blank'><img src='img/JohnHancock.png' width='80%' style='margin-left: 10%'></a># } #";
             }
 
@@ -536,23 +552,20 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
         //configure the columns based on the user's stored configuration
         columns = kendoTools.configureColumns(columns, vm.get("serviceType.Id"));
 
-        var servicesSection = $("#services");
-
-        grid = servicesSection.find("#grid").data("kendoGrid");
+        grid = servicesPage.find("#grid").data("kendoGrid");
         if (grid) {
             grid.destroy();
         }
-        servicesSection.find("#grid").empty();
+        servicesPage.find("#grid").empty();
 
-        grid = servicesSection.find("#grid").kendoGrid({
+        grid = servicesPage.find("#grid").kendoGrid({
             autoBind: false,
             change: function () {
                 //show the delete button only if a row is selected
-                var servicesSection = $("#services");
-                if (servicesSection.find("tr.k-state-selected")[0]) {
-                    servicesSection.find(".k-grid-delete").attr("style", "display:inline-block");
+                if (servicesPage.find("tr.k-state-selected")[0]) {
+                    servicesPage.find(".k-grid-delete").attr("style", "display:inline-block");
                 } else {
-                    servicesSection.find(".k-grid-delete").attr("style", "display:none");
+                    servicesPage.find(".k-grid-delete").attr("style", "display:none");
                 }
 
                 //whenever a field is changed, the grid needs to be reselected. handleChange is set to prevent triggering a reload
@@ -740,7 +753,7 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
                     vm.set("serviceType", {Id: selectedOption.value, Name: selectedOption.name});
 
                     //disable the delete button and hide the service details
-                    $("#services").find(".k-grid-delete").attr("style", "display:none");
+                    servicesPage.find(".k-grid-delete").attr("style", "display:none");
 
                     //hide the serviceSelectorsWrapper
                     $("#serviceSelectorsWrapper").attr("style", "display:none");
@@ -762,8 +775,8 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
      * @param e
      */
     var vmChanged = function (e) {
-        //save changes whenever the selected service has a change
-        if (e.field.indexOf("selectedService.") > -1) {
+        //save changes whenever the selected service's Fields change (except DestinationField)
+        if (e.field.indexOf("selectedService.Fields") > -1) {
             saveHistory.save();
         }
         //re-setup the data source/grid whenever the service type changes
@@ -779,7 +792,6 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
             createDataSourceAndGrid();
 
             var serviceTypeId = vm.get("serviceType.Id");
-            var serviceTypeName = vm.get("serviceType.Name");
 
             //make sure dropdownlist has service type selected
             var i, options = $("#serviceTypes > .selectBox").children("*");
@@ -814,8 +826,6 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
 
         setupServiceSelector();
 
-        var servicesPage = $("#services");
-
         //hookup the add & delete buttons
         servicesPage.find(".k-grid-add").on("click", function () {
             vm.addNewService();
@@ -840,13 +850,8 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
                 //adjusts the map to fill the new space
                 var locWidget = $("#locationSelector").data("location");
                 if (locWidget) {
-                    _.delay(function () {
-                        locWidget._map.invalidateSize(false);
-                    }, 200);
+                    locWidget.invalidateMap(200);
                 }
-                //move the location list to the left of map if wide enough
-                var width = this.options.panes[1].size;
-                services.rightWidth = parseInt(width.substring(0, width.length - 2));
                 setLocationView();
             }
         });
@@ -858,11 +863,12 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
         parameters.parse();
         saveHistory.setCurrentSection({
             page: "Services",
-            save: services.save,
-            undo: services.undo,
-            state: function () {
-                return vm.get("selectedService");
-            }
+            save: services.save
+            //undo disabled for now because it is not setup for LocationField changes
+//            undo: services.undo,
+//            state: function () {
+//                return vm.get("selectedService");
+//            }
         });
 
         //needed in case changes are made

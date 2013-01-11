@@ -1,210 +1,213 @@
 #services {
-    min-width: 710px;
-    #left-pane {
-        top: 15px !important;
-        max-height: 100%;
-        margin: 0 0 15px 20px;
-        label {
-            position: relative;
-            top: -2px;
-            margin-right: 5px;
-            padding-left: 6px;
-            color: @green;
-            font-size: 1.7em;
-        }
-        .addDeleteBtns {
-            position: absolute;
-            top: 8px;
-            right: 55px;
-        }
-        #serviceOptions{
-            display: none;
-            position: absolute;
-            top: 37px;
-            right: 45px;
-            width: 150px;
-            z-index: 2;
-            background: #fff;
-            border: 2px solid #c0c0c0;
-            li{
-                padding: 5px 10px;
-                &:hover{
-                    background-color: @grey;
-                    cursor: pointer;
-                }
-            }
-        }
-        .k-grid{
-            padding-right: 35px;
-            background: @grey;
-            td {
-                line-height: 1.3em;
-                font-size: 14px;
-            }
-        }
-        input[type="checkbox"] {
-            vertical-align: middle;
-        }
-        .k-grid-content {
-            overflow: auto;
-        }
-        #serviceTypes {
-            display: inline-block;
-            width: 140px;
-            position: relative;
-            top: -4px;
-        }
+  min-width: 710px;
+  #left-pane {
+    top: 15px !important;
+    max-height: 100%;
+    margin: 0 0 15px 20px;
+    label {
+      position: relative;
+      top: -2px;
+      margin-right: 5px;
+      padding-left: 6px;
+      color: @green;
+      font-size: 1.7em;
     }
+    .addDeleteBtns {
+      position: absolute;
+      top: 8px;
+      right: 55px;
+    }
+    #serviceOptions {
+      display: none;
+      position: absolute;
+      top: 37px;
+      right: 45px;
+      width: 150px;
+      z-index: 2;
+      background: #fff;
+      border: 2px solid #c0c0c0;
+      li {
+        padding: 5px 10px;
+        &:hover {
+          background-color: @grey;
+          cursor: pointer;
+        }
+      }
+    }
+    .k-grid {
+      padding-right: 35px;
+      background: @grey;
+      td {
+        line-height: 1.3em;
+        font-size: 14px;
+      }
+    }
+    input[type="checkbox"] {
+      vertical-align: middle;
+    }
+    .k-grid-content {
+      overflow: auto;
+    }
+    #serviceTypes {
+      display: inline-block;
+      width: 140px;
+      position: relative;
+      top: -4px;
+    }
+  }
 }
 
 #serviceSelectorsWrapper, #taskServiceDetails {
-    font-family: "PTSans";
+  font-family: "PTSans";
+  color: @textColor;
+  h1 {
+    margin-left: 0;
+    margin-right: 0;
+    padding-bottom: 5px;
+    color: @green;
+    font-size: 1.7em;
+  }
+  h1.serviceFields {
+    padding-bottom: 0;
+  }
+  input, label {
     color: @textColor;
-    h1{
-        margin-left: 0;
-        margin-right: 0;
-        padding-bottom: 5px;
-        color: @green;
-        font-size: 1.7em;
+  }
+  label, li {
+    line-height: 22px;
+  }
+  li {
+    margin-bottom: 5px;
+    padding: 3px 0 1px 0;
+    line-height: 1.5em;
+    .percentSign {
+      position: absolute;
+      margin-top: 5px;
+      font-size: 15px;
     }
-    h1.serviceFields{
-        padding-bottom: 0;
+    .dollarSign {
+      position: absolute;
+      margin-top: 4px;
+      font-size: 16px;
+      margin-left: 2px;
     }
-    input, label{
-        color: @textColor;
+  }
+  li.textarea {
+    vertical-align: top;
+    margin-bottom: 0;
+  }
+  .k-timepicker, .k-datepicker, .k-combobox, input[type="text"], input[type="number"], .select2-container, .k-numerictextbox {
+    width: 100%;
+    font-size: 14px;
+  }
+  .k-numeric-wrap, input[type="text"], .k-state-hover, textarea, .km-listview li {
+    border: none;
+    border-radius: 0;
+    background-color: @white;
+  }
+  input[type="number"], input[type="text"] {
+    height: 28px;
+    padding-left: 0px;
+    font-family: "PTSans";
+  }
+  .locationSearchSelect {
+    input[type="text"] {
+      height: 22px;
     }
-    label, li {
-        line-height: 22px;
-    }
-    li {
-        margin-bottom: 5px;
-        padding: 3px 0 1px 0;
-        line-height: 1.5em;
-        .percentSign {
-            position: absolute;
-            margin-top: 5px;
-            font-size: 15px;
-        }
-        .dollarSign {
-            position: absolute;
-            margin-top: 4px;
-            font-size: 16px;
-            margin-left: 2px;
-        }
-    }
-    li.textarea {
-        vertical-align: top;
-        margin-bottom: 0;
-    }
-    .k-timepicker, .k-datepicker, .k-combobox, input[type="text"], input[type="number"], .select2-container, .k-numerictextbox {
-        width: 100%;
-        font-size: 14px;
-    }
-    .k-numeric-wrap, input[type="text"], .k-state-hover, textarea, .km-listview li{
-        border: none;
-        border-radius: 0;
-        background-color: @white;
-    }
-    input[type="number"], input[type="text"] {
-        height: 28px;
-        padding-left: 0px;
-        font-family: "PTSans";
-    }
-    .locationSearchSelect{
-        input[type="text"]{
-            height: 22px;
-        }
-    }
+  }
 //this fixes a large border bug in IE
-    input[type="checkbox"] {
-        border: none;
-        outline: none;
-        padding: 0;
-        &:checked {
-            background-color: @green;
-        }
-    }
-    .k-numeric-wrap .k-input {
-        width: 100%;
-    }
-    .k-numeric-wrap .k-formatted-value {
-        width: 99%;
-    }
-    .k-numerictextbox .k-select {
-        padding-top: 3px;
-    }
-    input[type="text"].k-input {
-        height: 19px;
-    }
-    input[type="text"]:not(.k-input) {
-        padding-left: 5px;
-        box-sizing: border-box;
-        -webkit-box-sizing: border-box;
-        -moz-box-sizing: border-box;
-    }
-    .k-combobox input[type="text"] {
-        height: 21px;
-    }
-    .k-picker-wrap {
-        padding: 1px 22px 1px 1px;
-    }
-    textarea {
-        width: 100% !important;
-        margin: 0;
-        min-width: 6em;
-        padding-left: 5px !important;
-        outline: 0;
-        background: @white;
-        color: @textColor;
-        font-family: "PTSans";
-        font-size: 14px;
-        box-sizing: border-box;
-        -webkit-box-sizing: border-box;
-        -moz-box-sizing: border-box;
-    }
-    .km-listview-wrapper ul {
-        width: 100%;
-        margin: 0 0 5px 0;
-        font-size: 16px;
-        li {
-            background-color: @white;
-            margin-bottom: 0;
-        }
-    }
-    .km-listview-label {
-        font-size: 14px;
-        padding-left: 15px;
-    }
-    .k-dropdown{
-        font-size: 1em;
-        width: 100%;
-    }
-    .locationWidget{
-        #locationWidgetMap{
-            height: 150px;
-        }
-    }
-}
-
-#taskServiceDetails{
+  input[type="checkbox"] {
+    border: none;
+    outline: none;
     padding: 0;
-    margin: auto;
+    &:checked {
+      background-color: @green;
+    }
+  }
+  .k-numeric-wrap .k-input {
+    width: 100%;
+  }
+  .k-numeric-wrap .k-formatted-value {
+    width: 99%;
+  }
+  .k-numerictextbox .k-select {
+    padding-top: 3px;
+  }
+  input[type="text"].k-input {
+    height: 19px;
+  }
+  input[type="text"]:not(.k-input) {
+    padding-left: 5px;
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+  }
+  .k-combobox input[type="text"] {
+    height: 21px;
+  }
+  .k-picker-wrap {
+    padding: 1px 22px 1px 1px;
+  }
+  textarea {
+    width: 100% !important;
+    margin: 0;
+    min-width: 6em;
+    padding-left: 5px !important;
+    outline: 0;
+    background: @white;
+    color: @textColor;
+    font-family: "PTSans";
+    font-size: 14px;
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+  }
+  .km-listview-wrapper ul {
+    width: 100%;
+    margin: 0 0 5px 0;
+    font-size: 16px;
+    li {
+      background-color: @white;
+      margin-bottom: 0;
+    }
+  }
+  .km-listview-label {
+    font-size: 14px;
+    padding-left: 15px;
+  }
+  .k-dropdown {
+    font-size: 1em;
+    width: 100%;
+  }
+  .locationWidget {
+    #locationWidgetMap {
+      height: 150px;
+    }
+  }
 }
 
-#serviceSelectorsWrapper{
-    display: none;
-    top: 0;
-    height: 100%;
-    padding: 20px 15px 20px 15px;
-    background-color: @grey;
-    .locationWidget{
-        margin-bottom: 5px;
-    }
+#taskServiceDetails {
+  padding: 0;
+  margin: auto;
+}
+
+#serviceSelectorsWrapper {
+  display: none;
+  top: 0;
+  height: 100%;
+  padding: 20px 15px 20px 15px;
+  background-color: @grey;
+  #locationSelector {
+    padding: 0;
+  }
+  .locationWidget {
+    margin-bottom: 5px;
+  }
 }
 
 #serviceSelectorsScroller {
-    overflow-y: auto;
-    padding-right: 15px;
+  overflow-y: auto;
+  padding-right: 15px;
 }
 
 #services {
