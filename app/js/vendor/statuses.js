@@ -1,12 +1,21 @@
 "use strict";
 !function ($) {
+    //TODO: Change away from last status instantiated.
+    var status = null;
     var methods = {
-        init: function () {
+        init: function (config) {
             console.log("Init.");
             var loadStatus = function(){
                 console.log("Status loaded.");
                 var navDiv = $("#nav");
-                return new Statuses(navDiv, null, null);
+
+                var undoLast = null;
+                if(config.undoLastFunction)undoLast = config.undoLastFunction;
+
+                var undoAll = null;
+                if(config.undoAllFunction)undoAll = config.undoAllFunction;
+
+                return status = new Statuses(navDiv, undoLast, undoAll);
             };
             if($("#nav").length===0){
                 $(document).on("navigator.loaded", function(){
@@ -16,16 +25,22 @@
                 return loadStatus();
             }
         },
-        setState: function(status, state){
-            console.log("Setting state.");
+        setState: function(state){
+            //console.log("Setting state.");
             status.setState(state);
         },
-        setUndoMode: function(status, mode){
-            console.log("Setting mode.");
+        setUndoMode: function(mode){
+            //console.log("Setting mode.");
             status.setUndoMode(mode);
+        },
+        setUndoLastFunction: function(f){
+            status.onUndoLast = f;
+        },
+        setUndoAllFunction: function(f){
+            status.onUndoAll = f;
         }
-    };
 
+    };
 
     $.fn.status = function (method) {
         // Create some defaults, extending them with any options that were provided
@@ -73,7 +88,7 @@
 
     var INIT_STATUS_IMG = statusImages[states.idle];
 
-    var createStatusMenu = function(status, mode){
+    var createStatusMenu = function(status){
         var popupClass = $(document).popup("getPopupClass");
         var contents = [];
         var menu = {
@@ -100,62 +115,79 @@
     function Statuses(targetDiv, undoLast, undoAll){
         var thisStatus = this;
         this.targetDiv = targetDiv;
-        this.currentState = states.idle;
-        this.currentUndoMode = undoMode.all;
+        var INIT_STATE = states.idle;
+        var INIT_UNDO_MODE = undoMode.none;
+        this.currentState = INIT_STATE;
+        this.currentUndoMode = INIT_UNDO_MODE;
         this.statusPopup = null;
+        this.lastStateChangeTime = 0;
 
-        this.onUndoLast = function(){};
-        this.onUndoAll = function(){};
+        this.onUndoLast = undoLast;
+        this.onUndoAll = undoAll;
 
-        var initializeStatuses = function(targetDiv){
-            //Add status to target.
-            var statusDiv = '<div id="statusesContainer">' +
-                '<div id="navStatus" class="navElement">' +
-                '<a><img class="navIcon" src="'+ INIT_STATUS_IMG +'"></img></a>' +
-                '</div>' +
-                '</div>';
-            $(targetDiv).append(statusDiv);
+        //Init
+        //Add status to target.
+        var statusDiv = '<div id="statusesContainer">' +
+            '<div id="navStatus" class="navElement">' +
+            '<a><img class="navIcon" src="'+ INIT_STATUS_IMG +'"></img></a>' +
+            '</div>' +
+            '</div>';
+        $(targetDiv).append(statusDiv);
 
-            //Init Popup.
-            var menu = createStatusMenu(thisStatus, thisStatus.currentUndoMode);
-            thisStatus.statusPopup = $("#navStatus").optionsPopup(menu);
+        //Init Popup.
+        var menu = createStatusMenu(thisStatus);
+        thisStatus.statusPopup = $("#navStatus").optionsPopup(menu);
 
-            $(document).on("click", "#undoLast", function(){
-                $(document).trigger("status.undoLast");
-                thisStatus.onUndoLast();
-            });
+        this.setState(INIT_STATE);
+        this.setUndoMode(INIT_UNDO_MODE);
 
-            $(document).on("click", "#undoAll", function(){
-                $(document).trigger("status.undoAll");
-                thisStatus.onUndoAll();
-            });
-        };
+        $(document).on("click", "#undoLast", function(){
+            $(document).trigger("status.undoLast");
+            thisStatus.onUndoLast();
+        });
 
-        initializeStatuses(targetDiv);
+        $(document).on("click", "#undoAll", function(){
+            $(document).trigger("status.undoAll");
+            thisStatus.onUndoAll();
+        });
     }
 
     //////////////////////////
     //  Functions
     //////////////////////////
     Statuses.prototype.setState = function(state){
+        var timeNow = new Date().getTime();
+        var timeSince = (timeNow-this.lastStateChangeTime);
+        //console.log("Time: "+ timeSince);
+        this.lastStateChangeTime = timeNow;
+        var previousState = this.currentState;
         this.currentState = state;
 
-        $("#navStatus .navIcon").attr("src", statusImages[state]);
+        if(previousState===states.busy&&timeSince<800){
+            $("#navStatus .navIcon").attr("src", statusImages[states.busy]);
+            //console.log("Busy.");
+            _.delay(function(){
+                //console.log("Fired.");
+                $("#navStatus .navIcon").attr("src", statusImages[state]);
+                $(document).trigger("status.stateChange");
+            }, (800-timeSince));
+        }else{
+            $("#navStatus .navIcon").attr("src", statusImages[state]);
+            $(document).trigger("status.stateChange");
+        }
 
-        $(document).trigger("status.stateChange");
     };
 
     Statuses.prototype.setUndoMode = function(mode){
         var previousMode = this.currentUndoMode;
         this.currentUndoMode = mode;
-
         var popupClass = this.statusPopup.superConstructor;
         var menu = popupClass.getMenu("navStatus");
         var newMenu = null;
 
-        if(previousMode === mode){
+        /*if(previousMode === mode){
             return;
-        }
+        }*/
 
         popupClass.closePopup();
 
@@ -166,7 +198,7 @@
         }
 
         newMenu = createStatusMenu(this, mode);
-        console.log("currentUndoMode: "+mode);
+        //console.log("currentUndoMode: "+mode);
 
         //Overwrite properties //TODO: Move into popup function, replaceMenu(oldMenu, newMenu).
         var property;

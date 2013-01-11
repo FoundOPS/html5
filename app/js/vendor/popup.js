@@ -123,10 +123,12 @@ Popup.prototype.enableHeader = function() {
 
 Popup.prototype.disablePopup = function() {
     this.isDisabled = true;
+    //console.log("Popup disabled.");
 };
 
 Popup.prototype.enablePopup = function() {
     this.isDisabled = false;
+    //console.log("Popup not disabled.");
 };
 
 Popup.prototype.toggleVisible = function (e, clicked) {
