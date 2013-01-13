@@ -44,6 +44,8 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
                 servicesGrid.invalidateSelectedService();
             }
         });
+
+        setLocationView();
     };
     var setLocationView = function () {
         var location = $("#locationSelector").data("location");
@@ -131,38 +133,64 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
                 data: serviceTypes,
                 dataTextField: "Name",
                 onSelect: function (selectedOption) {
-                    vm.set("serviceType", {Id: selectedOption.value, Name: selectedOption.name});
-
-                    //disable the delete button and hide the service details
-                    servicesPage.find(".k-grid-delete").attr("style", "display:none");
-
-                    //hide the serviceSelectorsWrapper
-                    $("#serviceSelectorsWrapper").attr("style", "display:none");
+                    vm.set("serviceType", selectedOption.data);
                 }
             });
 
             //now that the service types are loaded,
-            //setup the grid by reparsing the hash
+            //setup the grid by re-parsing the hash
             parameters.parse();
         });
         $("#serviceDetails").kendoServiceDetails({signatureIsReadOnly: true});
     };
 
     //Grid
+
+    //Used while setting up the grid
+    var clearScreen = function () {
+        //TODO call is loading
+
+        //disable the add, delete and options buttons
+        servicesPage.find(".k-grid-add,.k-grid-delete,.k-grid-edit.optionsMenu").attr("style", "display:none");
+
+        //hide the service details
+        $("#serviceSelectorsWrapper").attr("style", "display:none");
+    };
     var setupGrid = function (serviceType, fields) {
         servicesGrid = $("#services").find("#grid").servicesGrid({
             serviceType: serviceType,
             serviceFields: fields,
-            initialized: resizeGrid,
-            serviceSelected: function (service) {
-                //disable the delete button if no service is selected
-                var style = service ? "display:inline-block" : "display:none";
-                servicesPage.find(".k-grid-delete").attr("style", style);
+            initialized: function () {
+                //enable the options menu now that the grid is setup
+                servicesPage.find(".k-grid-edit.optionsMenu").attr("style", "");
 
-                setLocationView();
+                resizeGrid();
+            },
+            serviceSelected: function (service) {
+                vm.set("selectedService", service);
+
+                saveHistory.close();
+                saveHistory.resetHistory();
+
+                resizeGrid();
+
+                if (service) {
+                    //show service details
+                    $("#serviceSelectorsWrapper").attr("style", "display:block");
+
+                    setupClientWidget(service);
+
+                    if (service.Client) {
+                        //set the initial selection
+                        clientSelector.select2("data", service.Client);
+                    }
+
+                    setupLocationWidget(service);
+                }
             },
             addEnabledChange: function (addIsEnabled) {
-                servicesPage.find(".k-grid-add").attr("style", "display:inline-block");
+                servicesPage.find(".k-grid-add").attr("style", addIsEnabled
+                    ? "display:inline-block" : "display:none");
             }
         }).data("servicesGrid");
 
@@ -223,29 +251,7 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
         /**
          * The selected service type
          */
-        serviceType: null,
-        setSelectedService: function (service) {
-            vm.set("selectedService", service);
-
-            saveHistory.close();
-            saveHistory.resetHistory();
-
-            resizeGrid();
-
-            if (service) {
-                //show the serviceSelectorsWrapper
-                $("#serviceSelectorsWrapper").attr("style", "display:block");
-
-                setupClientWidget(service);
-
-                if (service.Client) {
-                    //set the initial selection
-                    clientSelector.select2("data", service.Client);
-                }
-
-                setupLocationWidget(service);
-            }
-        }
+        serviceType: null
     });
 
     /**
@@ -338,6 +344,8 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
                 return st.Name === query.service;
             });
             vm.set("serviceType", serviceType);
+
+            //update the service selector
         }
     };
 
@@ -354,6 +362,9 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
         }
         //re-setup the grid whenever the service type changes
         else if (e.field === "serviceType") {
+            //clear the screen while setting up the grid
+            clearScreen();
+
             var serviceType = vm.get("serviceType");
 
             //update the service name in the parameters
@@ -373,16 +384,17 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
             dbServices.serviceHolders.read({params: {
                 single: true,
                 serviceType: serviceType.Name
-            }}).done(function (fields) {
-                    setupGrid(serviceType, fields);
+            }}).done(function (data) {
+                    setupGrid(serviceType, _.first(data));
                     //TODO set is loading on navigator = false
                     //(although eventually new data manager should manage is loading)
                 });
 
+            //TODO move into ServiceSelector .select
             //make sure the service type selector has the right one selected
             var i, options = $("#serviceTypes > .selectBox").children("*");
             for (i = 0; i < options.length; i++) {
-                if (options[i].value === serviceType.Id) {
+                if (options[i].value === serviceType.Name) {
                     options[i].selected = true;
                 }
             }

@@ -11,45 +11,38 @@ define(["db/services", "ui/ui", "tools/dateTools", "tools/kendoTools", "tools/pa
             //the service template fields to create the datasource from
             serviceFields: null,
 
-            //called when the grid is initialized
-            initialized: null,
-
-            //called when a service is selected. passed the service
+            //(Optional) Callback when a service is selected. Parameters: selectedService (ObservableObject)
             serviceSelected: null,
 
-            //called when adding is enabled / disabled. parameter is isAddEnabled
+            //(Optional) Called when the grid is initialized
+            initialized: null,
+
+            //(Optional) Callback when adding is enabled / disabled. Parameters: isAddEnabled
             addEnabledChange: null
         },
 
         _init: function () {
-            var widget = this;
+            var widget = this, options = widget.options;
+
+            if (!options.serviceType || !options.serviceFields || !options.serviceSelected) {
+                throw new Exception("")
+            }
 
             //set the initial start date to today and end date in two weeks
             var today = session.today().toDate();
             var twoWeeks = session.today().add('weeks', 2).toDate();
             widget._setDateRange(today, twoWeeks);
 
-            //TODO
-            //load a template for the service for generating new services
-//            dbServices.services.read({
-//                params: {
-//                    serviceTemplateId: widget.options.serviceType.Id,
-//                    serviceDate: dateTools.stripDate(widget.options.startDate)
-//                }}).done(function (services) {
-//                    widget._serviceTemplate = services[0];
-//                    widget.options.addEnabledChange(true);
-//                });
-
             //for loading set of service holders
             var setParams = {
                 roleId: parameters.get().roleId,
-                startDate: dateTools.stripDate(widget.options.startDate),
-                endDate: dateTools.stripDate(widget.options.endDate),
-                serviceType: widget.options.serviceType.Name
+                startDate: dateTools.stripDate(options.startDate),
+                endDate: dateTools.stripDate(options.endDate),
+                serviceType: options.serviceType.Name
             };
 
             //TODO? decouple data source from widget
-            var fields = widget._getFields(widget.options.serviceFields);
+            var fields = widget._getFields(options.serviceFields);
             widget.dataSource = new kendo.data.DataSource({
                 schema: {
                     model: {
@@ -74,8 +67,17 @@ define(["db/services", "ui/ui", "tools/dateTools", "tools/kendoTools", "tools/pa
 
             //create the grid
             widget._initializeGrid(fields);
-        },
 
+            //load a template for generating new services
+            dbServices.services.read({
+                params: {
+                    serviceTemplateId: options.serviceType.Id,
+                    serviceDate: dateTools.stripDate(options.startDate)
+                }}).done(function (services) {
+                    widget._serviceTemplate = services[0];
+                    widget.options.addEnabledChange(true);
+                });
+        },
 
         /**
          * Watch filter and parameter changes:
@@ -173,7 +175,7 @@ define(["db/services", "ui/ui", "tools/dateTools", "tools/kendoTools", "tools/pa
         },
 
         _initializeGrid: function (fields) {
-            var widget = this, element = $(widget.element);
+            var widget = this, element = $(widget.element), options = widget.options;
 
             //Setup the columns based on the fields
             var columns = [];
@@ -233,7 +235,7 @@ define(["db/services", "ui/ui", "tools/dateTools", "tools/kendoTools", "tools/pa
             });
 
             //configure the columns based on the user's stored configuration
-            columns = kendoTools.configureColumns(columns, widget.options.serviceType.Id);
+            columns = kendoTools.configureColumns(columns, options.serviceType.Id);
 
             widget.kendoGrid = element.kendoGrid({
                 autoBind: false,
@@ -244,18 +246,18 @@ define(["db/services", "ui/ui", "tools/dateTools", "tools/kendoTools", "tools/pa
                         return;
                     }
 
-                    widget._selectedServiceHolder = this.dataItem(this.select());
-                    if (!widget._selectedServiceHolder) {
-                        widget.options.setSelectedService(null);
+                    var serviceHolder = widget._selectedServiceHolder = this.dataItem(this.select());
+                    if (!serviceHolder) {
+                        widget._selectService(null);
                         return;
                     }
                     //load the service details, then update the selected service
                     dbServices.services.read({params: {
-                        serviceId: widget._selectedServiceHolder.get("ServiceId"),
-                        serviceDate: dateTools.stripDate(selectedServiceHolder.get("OccurDate")),
-                        recurringServiceId: widget._selectedServiceHolder.get("RecurringServiceId")
+                        serviceId: serviceHolder.get("ServiceId"),
+                        serviceDate: dateTools.stripDate(serviceHolder.get("OccurDate")),
+                        recurringServiceId: serviceHolder.get("RecurringServiceId")
                     }}).done(function (services) {
-                            widget.options.setSelectedService(services[0])
+                            widget._selectService(services[0])
                         });
                 },
                 columns: columns,
@@ -310,10 +312,10 @@ define(["db/services", "ui/ui", "tools/dateTools", "tools/kendoTools", "tools/pa
             }
 
             //Keep track of any changes to the columns, and store the configuration
-            kendoTools.storeConfiguration(widget.kendoGrid, widget.options.serviceType.Id);
+            kendoTools.storeConfiguration(widget.kendoGrid, options.serviceType.Id);
 
-            if (widget.options.initialized) {
-                widget.options.initialized();
+            if (options.initialized) {
+                options.initialized();
             }
         },
 
@@ -323,6 +325,20 @@ define(["db/services", "ui/ui", "tools/dateTools", "tools/kendoTools", "tools/pa
             widget.options.startDate = startDate;
             widget.options.endDate = endDate;
             widget.reloadServices();
+        },
+
+        //call the service selected callback
+        _selectService: function (service) {
+            var widget = this;
+
+            //create an observable object
+            if (service) {
+                service = kendo.observable(service);
+            }
+
+            widget._selectedService = service;
+
+            widget.options.serviceSelected(service);
         },
 
         destroy: function () {
@@ -349,8 +365,7 @@ define(["db/services", "ui/ui", "tools/dateTools", "tools/kendoTools", "tools/pa
 
             //TODO replace
             //update the selected service
-            widget.setSelectedService(service);
-            widget.invalidateSelectedService();
+            widget._selectService(service);
 
             //this will trigger validation
             saveHistory.save();
@@ -366,7 +381,7 @@ define(["db/services", "ui/ui", "tools/dateTools", "tools/kendoTools", "tools/pa
             var answer = confirm("Are you sure you want to delete the selected service?");
             if (answer) {
                 widget.dataSource.remove(widget._selectedServiceHolder);
-                dbServices.services.destroy({body: this.get("selectedService")});
+                dbServices.services.destroy({body: widget.options.selectedService});
                 //hide the serviceSelectorsWrapper
                 $("#serviceSelectorsWrapper").attr("style", "display:none");
 
@@ -378,22 +393,21 @@ define(["db/services", "ui/ui", "tools/dateTools", "tools/kendoTools", "tools/pa
          * Update the service holder to the selected Service's info
          */
         invalidateSelectedService: function () {
-            var widget = this;
+            var widget = this, service = widget._selectedService, serviceHolder = widget._selectedServiceHolder;
 
-            //store the selected row, to reselect it
-            var selectedService = vm.get("selectedService");
-            if (!widget._selectedServiceHolder || !widget.kendoGrid) {
-                return;
-            }
+            //TODO remove?
+//            if (!serviceHolder || !serviceHolder || !widget.kendoGrid) {
+//                return;
+//            }
 
             //change the current row's ServiceId to match the Id in case this was a newly inserted service
-            widget._selectedServiceHolder.set("ServiceId", selectedService.Id);
+            serviceHolder.set("ServiceId", service.Id);
 
             //update the client name
-            widget._selectedServiceHolder.set("ClientName", selectedService.get("Client.Name"));
+            serviceHolder.set("ClientName", service.Client.Name);
 
             //update all the field columns
-            var fields = selectedService.Fields;
+            var fields = service.get("Fields");
 
             var i;
             for (i = 0; i < fields.length; i++) {
@@ -416,12 +430,12 @@ define(["db/services", "ui/ui", "tools/dateTools", "tools/kendoTools", "tools/pa
                 }
                 //replace spaces with _
                 var columnName = field.Name.split(' ').join('_');
-                widget._selectedServiceHolder.set(columnName, val);
+                serviceHolder.set(columnName, val);
             }
 
             //reselect the row, and prevent change from reloading the service
             widget._handleChange = true;
-            widget.kendoGrid.select(widget.kendoGrid.table.find('tr[data-uid="' + widget._selectedServiceHolder.uid + '"]'));
+            widget.kendoGrid.select(widget.kendoGrid.table.find('tr[data-uid="' + serviceHolder.uid + '"]'));
         },
 
         /**
@@ -444,7 +458,7 @@ define(["db/services", "ui/ui", "tools/dateTools", "tools/kendoTools", "tools/pa
          * @param data
          */
         _getFields: function (data) {
-            var types = _.first(data);
+            var types = data;
 
             var fieldTypes = {
                 "number": {type: "number"},
@@ -487,7 +501,7 @@ define(["db/services", "ui/ui", "tools/dateTools", "tools/kendoTools", "tools/pa
                 data = JSON.parse(data);
             }
 
-            var fields = widget._getFields(data);
+            var fields = widget._getFields(_.first(data));
 
             //format the data
             var formattedData = [];
