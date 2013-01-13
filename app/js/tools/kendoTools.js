@@ -25,27 +25,8 @@ define(['db/session', 'db/services', 'tools/parameters'], function (session, dbS
         //save the column configuration when it changes
         grid.bind("columnReorder", saveConfiguration);
         grid.bind("columnResize", saveConfiguration);
-        grid.bind("columnShow", function () {
-            saveConfiguration();
-            var servicesPage = $("#services");
-            //get the width of the table
-            var maxWidth = grid.table[0].clientWidth + 59;
-            //change the max width of the left splitter pane
-            servicesPage.find(".km-content").data("kendoSplitter").max("#left-pane", maxWidth + "px");
-        });
-        grid.bind("columnHide", function () {
-            saveConfiguration();
-            var servicesPage = $("#services");
-            //if the table is less wide than the grid
-            if (grid.table[0].clientWidth < grid.element[0].clientWidth) {
-                //get the width of the table
-                var maxWidth = grid.table[0].clientWidth + 59;
-                //change the width of the left splitter pane
-                servicesPage.find(".km-content").data("kendoSplitter").size("#left-pane", maxWidth + "px");
-                servicesPage.find(".km-content").data("kendoSplitter").max("#left-pane", maxWidth + "px");
-            }
-
-        });
+        grid.bind("columnShow", saveConfiguration);
+        grid.bind("columnHide", saveConfiguration);
     };
 
     //save the configurations to the DB
@@ -263,7 +244,7 @@ define(['db/session', 'db/services', 'tools/parameters'], function (session, dbS
 
         var filtered = _.debounce(function (args) {
             dataSource.trigger("filtered", args);
-        }, 200);
+        }, 250); //prevents calls too often and gives enough time for filters to set on datasource
 
         // Replace the original filter function.
         dataSource.filter = function () {
@@ -285,7 +266,12 @@ define(['db/session', 'db/services', 'tools/parameters'], function (session, dbS
      * @dataSource The dataSource to sync the filters with
      */
     kendoTools.updateHashToFilters = function (section, dataSource) {
-        var filterSet = dataSource.filter().filters;
+        var filter = dataSource.filter();
+        if (!filter || !filter.filters) {
+            return;
+        }
+
+        var filterSet = filter.filters;
 
         var currentParams = parameters.get();
 

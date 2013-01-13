@@ -51,8 +51,9 @@
                     var option = optionsHTML[i];
                     option.value = optionsHTML[i].value;
 
+                    var data = config.data[i];
                     if (option.selected) {
-                        config.onSelect({index: option.index, name: option.text, value: option.value, selected: option.selected });
+                        config.onSelect({index: option.index, name: option.text, data: data, value: option.value, selected: option.selected });
                     }
                 }
             });
