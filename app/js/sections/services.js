@@ -10,6 +10,21 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
 
     //region UI initialization
 
+    //region show / hide
+    var showAdd = function (show) {
+        servicesPage.find(".k-grid-add").attr("style", show ? "display:inline-block" : "display:none");
+    };
+    var showDelete = function (show) {
+        servicesPage.find(".k-grid-delete").attr("style", show ? "display:inline-block" : "display:none");
+    };
+    var showOptions = function (show) {
+        servicesPage.find(".k-grid-edit.optionsMenu").attr("style", show ? "" : "display:none");
+    };
+    var showServiceDetails = function (show) {
+        $("#serviceSelectorsWrapper").attr("style", show ? "display:block" : "display:none");
+    };
+    //endregion
+
     //Location widget
     var setupLocationWidget = function (service) {
         //remove the location widget if it exists
@@ -145,16 +160,20 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
     };
 
     //Grid
-
     //Used while setting up the grid
     var clearScreen = function () {
         //TODO call is loading
 
-        //disable the add, delete and options buttons
-        servicesPage.find(".k-grid-add,.k-grid-delete,.k-grid-edit.optionsMenu").attr("style", "display:none");
+        //destroy grid if it exists
+        if (servicesGrid) {
+            servicesGrid.destroy();
+        }
 
-        //hide the service details
-        $("#serviceSelectorsWrapper").attr("style", "display:none");
+        //disable the add, delete and options buttons
+        showAdd(false);
+        showDelete(false);
+        showOptions(false);
+        showServiceDetails(false);
     };
     var setupGrid = function (serviceType, fields) {
         servicesGrid = $("#services").find("#grid").servicesGrid({
@@ -162,21 +181,16 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
             serviceFields: fields,
             initialized: function () {
                 //enable the options menu now that the grid is setup
-                servicesPage.find(".k-grid-edit.optionsMenu").attr("style", "");
-
+                showOptions(true);
                 resizeGrid();
             },
             serviceSelected: function (service) {
                 vm.set("selectedService", service);
 
                 saveHistory.close();
-                saveHistory.resetHistory();
-
                 resizeGrid();
 
                 if (service) {
-                    //show service details
-                    $("#serviceSelectorsWrapper").attr("style", "display:block");
 
                     setupClientWidget(service);
 
@@ -187,10 +201,13 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
 
                     setupLocationWidget(service);
                 }
+
+                //enable the delete button and show service details if a service is selected
+                showDelete(service);
+                showServiceDetails(service);
             },
             addEnabledChange: function (addIsEnabled) {
-                servicesPage.find(".k-grid-add").attr("style", addIsEnabled
-                    ? "display:inline-block" : "display:none");
+                showAdd(addIsEnabled);
             }
         }).data("servicesGrid");
 
@@ -281,13 +298,17 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
     };
 
     services.exportToCSV = function () {
+        if (!servicesGrid) {
+            return;
+        }
+
         var form = $("#csvForm");
 
         form.find("input[name=roleId]").val(session.get("role.id"));
         form.find("input[name=serviceType]").val(vm.get("serviceType.Name"));
 
-        form.find("input[name=startDate]").val(dateTools.stripDate(vm.get("startDate")));
-        form.find("input[name=endDate]").val(dateTools.stripDate(vm.get("endDate")));
+        form.find("input[name=startDate]").val(dateTools.stripDate(servicesGrid.options.startDate));
+        form.find("input[name=endDate]").val(dateTools.stripDate(servicesGrid.options.endDate));
 
         form[0].action = dbServices.ROOT_API_URL + "serviceHolders/GetCsv";
         form.submit();
@@ -309,7 +330,6 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
 
     /**
      * Handle parameter changes:
-     * whenever the url parameters change:
      * 1) update the service type (if it changed)
      * 2) update the grid's filters (if they changed)
      */
@@ -326,7 +346,7 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
 
         //1) update the service type (if it changed)
 
-        //if there is none, choose the vm's selected service
+        //if there is no parameter set it to the vm's
         if (!query.service) {
             //if it is not chosen choose the first one
             if (!serviceType) {
@@ -338,14 +358,12 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
             //update the query parameters
             parameters.set({params: query, replace: true});
         }
-        //if it changed, update it
+        //if the service type parameter is different than the vm's, update the vm
         else if (!serviceType || query.service !== serviceType.Name) {
             serviceType = _.find(services.serviceTypes, function (st) {
                 return st.Name === query.service;
             });
             vm.set("serviceType", serviceType);
-
-            //update the service selector
         }
     };
 
@@ -362,21 +380,19 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
         }
         //re-setup the grid whenever the service type changes
         else if (e.field === "serviceType") {
+            var serviceType = vm.get("serviceType");
+            if (!serviceType) {
+                return;
+            }
+
             //clear the screen while setting up the grid
             clearScreen();
-
-            var serviceType = vm.get("serviceType");
 
             //update the service name in the parameters
             var currentParams = parameters.get();
             if (currentParams.service !== serviceType.Name) {
                 currentParams.service = serviceType.Name;
                 parameters.set({params: currentParams, replace: true});
-            }
-
-            //destroy grid if it exists
-            if (servicesGrid) {
-                servicesGrid.destroy();
             }
 
             //TODO set is loading on navigator = true
@@ -431,20 +447,27 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
                 servicesGrid.deleteService();
             }
         });
+
+        sectionChanged(parameters.getSection());
     };
 
-    services.show = function () {
-        parameters.parse();
+    var sectionChanged = function (section) {
+        if (!section || section.name !== "services") {
+            return;
+        }
+
         saveHistory.setCurrentSection({
             page: "Services",
             save: services.save
         });
 
-        //reload in case changes were made
-        if (servicesGrid) {
+        //reload all services in case changes have been made
+        if (servicesGrid) {  //prevents double load initially
             servicesGrid.reloadServices();
         }
     };
+
+    parameters.section.changed.add(sectionChanged);
 
     //endregion
 

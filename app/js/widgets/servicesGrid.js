@@ -337,7 +337,6 @@ define(["db/services", "ui/ui", "tools/dateTools", "tools/kendoTools", "tools/pa
             }
 
             widget._selectedService = service;
-
             widget.options.serviceSelected(service);
         },
 
@@ -381,7 +380,7 @@ define(["db/services", "ui/ui", "tools/dateTools", "tools/kendoTools", "tools/pa
             var answer = confirm("Are you sure you want to delete the selected service?");
             if (answer) {
                 widget.dataSource.remove(widget._selectedServiceHolder);
-                dbServices.services.destroy({body: widget.options.selectedService});
+                dbServices.services.destroy({body: widget._selectedService});
                 //hide the serviceSelectorsWrapper
                 $("#serviceSelectorsWrapper").attr("style", "display:none");
 
@@ -446,6 +445,9 @@ define(["db/services", "ui/ui", "tools/dateTools", "tools/kendoTools", "tools/pa
             if (!widget.dataSource) {
                 return;
             }
+
+            //clear selected service
+            widget._selectService(null);
 
             widget.dataSource.options.transport.read.data.startDate = dateTools.stripDate(widget.options.startDate);
             widget.dataSource.options.transport.read.data.endDate = dateTools.stripDate(widget.options.endDate);

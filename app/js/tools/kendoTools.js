@@ -244,7 +244,7 @@ define(['db/session', 'db/services', 'tools/parameters'], function (session, dbS
 
         var filtered = _.debounce(function (args) {
             dataSource.trigger("filtered", args);
-        }, 200);
+        }, 250); //prevents calls too often and gives enough time for filters to set on datasource
 
         // Replace the original filter function.
         dataSource.filter = function () {
@@ -266,7 +266,12 @@ define(['db/session', 'db/services', 'tools/parameters'], function (session, dbS
      * @dataSource The dataSource to sync the filters with
      */
     kendoTools.updateHashToFilters = function (section, dataSource) {
-        var filterSet = dataSource.filter().filters;
+        var filter = dataSource.filter();
+        if (!filter || !filter.filters) {
+            return;
+        }
+
+        var filterSet = filter.filters;
 
         var currentParams = parameters.get();
 
