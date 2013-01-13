@@ -6,7 +6,7 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
     "widgets/selectBox", "widgets/servicesGrid"], function (session, dbServices, parameters, dateTools, saveHistory, kendoTools, analytics, models) {
     var services = {}, vm,
         servicesPage = $("#services"), clientSelector = $("#clientSelector"), locationSelector = $("#locationSelector"),
-        servicesGrid;
+        locationWidget, servicesGrid;
 
     //region UI initialization
 
@@ -28,8 +28,8 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
     //Location widget
     var setupLocationWidget = function (service) {
         //remove the location widget if it exists
-        if (locationSelector.data("location")) {
-            locationSelector.data("location").removeWidget();
+        if (locationWidget) {
+            locationWidget.removeWidget();
         }
 
         var destinationField = models.getDestinationField(service);
@@ -41,40 +41,53 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
             clientId = client.Id;
         }
 
-        locationSelector.location({
-            data: [destination],
-            clientId: clientId,
-            change: function (location) {
-                //update and save the destination field
-                destinationField = models.getDestinationField(vm.get("selectedService"));
-                destinationField.Value = location;
-                var destinationField = models.getDestinationField(vm.get("selectedService"));
+        var addChangeLocation = function (location) {
+            //update and save the destination field
+            destinationField = models.getDestinationField(vm.get("selectedService"));
+            destinationField.Value = location;
+            var destinationField = models.getDestinationField(vm.get("selectedService"));
+
+            //wait until the service has been saved then
+            //trigger change to save the destination
+            services.save(true, function () {
                 dbServices.locationFields.update({
                     body: destinationField,
-                    params: {serviceId: vm.get("selectedService.Id"), recurringServiceId: vm.get("selectedService.RecurringServiceId"), clientId: clientId, occurDate: vm.get("selectedService.ServiceDate")}
+                    params: {
+                        serviceId: vm.get("selectedService.Id"),
+                        recurringServiceId: vm.get("selectedService.RecurringServiceId"),
+                        clientId: locationWidget.options.clientId,
+                        occurDate: vm.get("selectedService.ServiceDate")
+                    }
                 }).done(function () {
                         destinationField.Value.IsNew = false;
                     });
 
                 servicesGrid.invalidateSelectedService();
-            }
+            });
+        };
+
+        locationSelector.location({
+            data: [destination],
+            clientId: clientId,
+            add: addChangeLocation,
+            change: addChangeLocation
         });
 
+        locationWidget = locationSelector.data("location");
         setLocationView();
     };
     var setLocationView = function () {
-        var location = $("#locationSelector").data("location");
         //determine what location widget view should be set
-        if (location) {
+        if (locationWidget) {
             var width = servicesPage.find(".km-content").data("kendoSplitter").options.panes[1].size;
 
             //move the location list to the left of map if wide enough
             var rightWidth = parseInt(width.substring(0, width.length - 2));
 
             if (rightWidth > 557) {
-                location.wideView(rightWidth);
+                locationWidget.wideView(rightWidth);
             } else {
-                location.narrowView();
+                locationWidget.narrowView();
             }
         }
     };
@@ -82,23 +95,26 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
     //Client widget
     var clientChanged = function () {
         var client = clientSelector.select2("data");
+
         vm.get("selectedService").set("Client", client);
         vm.get("selectedService").set("ClientId", client.Id);
+
+        locationWidget.options.clientId = client.Id;
 
         //get the first location for this client
         dbServices.locations.read({params: {clientId: client.Id}}).done(function (locations) {
             if (locations.length > 0) {
-                if (locations[0]) {
-                    //update the location widget with this new location
-                    locationSelector.data("location").options.data = [locations[0]];
-                    locationSelector.data("location").showList();
-
-                    //wait until the service has been saved then
-                    saveHistory.save(true, function () {
-                        //trigger change to save the destination
-                        locationSelector.data("location").options.change(locations[0]);
-                    });
-                }
+                //update the location widget with this new location
+                locationWidget.options.data = [locations[0]];
+                locationWidget.showList();
+                locationWidget.options.change(locations[0]);
+            } else {
+                //show the edit screen
+                locationWidget.options.data = [
+                    {}
+                ];
+                locationWidget.showList();
+                locationWidget.edit(0, true);
             }
         });
     };
@@ -206,6 +222,12 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
                 showDelete(service);
                 showServiceDetails(service);
             },
+            add: function (service) {
+                //this will trigger validation
+                saveHistory.save();
+
+                analytics.track("Add Service");
+            },
             addEnabledChange: function (addIsEnabled) {
                 showAdd(addIsEnabled);
             }
@@ -251,9 +273,8 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
             ],
             resize: function () {
                 //adjusts the map to fill the new space
-                var locWidget = $("#locationSelector").data("location");
-                if (locWidget) {
-                    locWidget.invalidateMap(200);
+                if (locationWidget) {
+                    locationWidget.invalidateMap(200);
                 }
                 setLocationView();
             }

@@ -171,13 +171,14 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
             });
 
             element.find(".add").on("click", function () {
-                widget._editLocation(null, true);
+                widget.edit(null, true);
             });
 
             element.find(".saveBtn").on("click", function () {
                 //create a location with the values from the inputs
                 var updatedLocation = {
                     Id: element.find(".id").val(),
+                    ClientId: widget.options.clientId,
                     Name: element.find(".nickname").val(),
                     AddressLineOne: element.find(".line1").val(),
                     AddressLineTwo: element.find(".line2").val(),
@@ -242,19 +243,18 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
 
             //check there is at least one location
             if (!widget.options.data || !widget.options.data[0]) {
-                widget._editLocation(null, false);
+                widget.edit(null, false);
                 return;
             }
             widget.showList();
         },
 
         /**
-         * animate to the edit screen
+         * Animate to the edit screen
          * @param {number} index
          * @param {boolean} newLocation if this is a new location
-         * @private
          */
-        _editLocation: function (index, newLocation) {
+        edit: function (index, newLocation) {
             var widget = this, element = $(widget.element);
             widget.newLocation = newLocation;
             widget.editIndex = index;
@@ -284,11 +284,11 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
             if (location) {
                 widget._populateFields(location);
 
-                //we don't need to refresh the marker if there's only one location
-                if (!widget.options.data.AddressLineOne) {
-                    widget._showMarker(location);
-                }
-
+                //TODO remove?
+//                //we don't need to refresh the marker if there's only one location
+//                if (!widget.options.data.AddressLineOne) {
+//                    widget._showMarker(location);
+//                }
             } else {
                 //clear the inputs
                 element.find(".locationInput").val("");
@@ -316,6 +316,10 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
             for (var i in locations) {
                 var location = locations[i];
 
+                if (!location.Latitude || !location.Longitude) {
+                    continue;
+                }
+
                 //add a marker at the location
                 widget._marker = L.marker([location.Latitude, location.Longitude], {
                     icon: widget.icon
@@ -341,7 +345,7 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
             //edit button click
             element.find(".splitEditBtn").on("click", function () {
                 var index = parseInt(this.id.substring(5));
-                widget._editLocation(index, false);
+                widget.edit(index, false);
             });
 
             //navigate button click

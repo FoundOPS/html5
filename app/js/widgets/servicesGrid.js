@@ -18,7 +18,10 @@ define(["db/services", "ui/ui", "tools/dateTools", "tools/kendoTools", "tools/pa
             initialized: null,
 
             //(Optional) Callback when adding is enabled / disabled. Parameters: isAddEnabled
-            addEnabledChange: null
+            addEnabledChange: null,
+
+            //(Optional) Callback after a service is added
+            add: null
         },
 
         _init: function () {
@@ -366,10 +369,9 @@ define(["db/services", "ui/ui", "tools/dateTools", "tools/kendoTools", "tools/pa
             //update the selected service
             widget._selectService(service);
 
-            //this will trigger validation
-            saveHistory.save();
-
-            analytics.track("Add Service");
+            if (widget.options.add) {
+                widget.options.add(service);
+            }
         },
 
         /**
