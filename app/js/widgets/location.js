@@ -31,6 +31,7 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
                 '</div>' +
                 '<div class="editPane">' +
                 '<div class="locationSearchSelect"></div>' +
+                '<div id="addressWrapper">' +
                 '<label for="nickname">Name</label><br />' +
                 '<input name="nickname" class="nickname locationInput" type="text" /><br />' +
                 '<label for="line1">Line 1</label><br />' +
@@ -54,6 +55,7 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
                 '<div class="zipCodeWrapper">' +
                 '<label for="zipCode">Zip Code</label><br />' +
                 '<input name="zipCode" class="zipCode locationInput geocoded" type="text" />' +
+                '</div>' +
                 '</div>' +
                 '<div class="saveDeleteButtonWrapper">' +
                 '<button class="k-button k-button-icontext saveBtn"><span class="k-icon k-update"></span>Save</button>' +
@@ -87,7 +89,7 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
             element.find(".locationSearchSelect").searchSelect({
                 query: function (searchTerm, callback) {
                     //get the list of location matches
-                    if (searchTerm) {
+                    //if (searchTerm) {
                         //show the loading image
                         element.find(".locationSearchSelect input").css("background-image", "url('img/spinner.gif')").css("background-position", "98% 50%").css("background-repeat", "no-repeat");
                         //get the search results
@@ -96,7 +98,7 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
                             element.find("input").css("background", "");
                             callback(locations);
                         });
-                    }
+                    //}
                 },
                 formatOption: generalTools.getLocationDisplayString,
                 onSelect: function (e, selectedData) {
@@ -283,12 +285,6 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
 
             if (location) {
                 widget._populateFields(location);
-
-                //TODO remove?
-//                //we don't need to refresh the marker if there's only one location
-//                if (!widget.options.data.AddressLineOne) {
-//                    widget._showMarker(location);
-//                }
             } else {
                 //clear the inputs
                 element.find(".locationInput").val("");
