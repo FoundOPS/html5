@@ -1,6 +1,6 @@
 {
     "name": "FoundOPS",
-    "description": "The FoundOPS's fleet managment software.",
+    "description": "The FoundOPS fleet management software.",
     "version": "0.9.0",
     "homepage": "https://play.google.com/store/apps/details?id=foundOps.mobile",
     "private": true,
@@ -14,7 +14,7 @@
     },
     "licenses": [
         {
-            "type": "Copyright FoundOPS LLC.",
+            "type": "Copyright FoundOPS LLC",
             "url": "https://docs.google.com/a/foundops.com/document/pub?id=1lxcX0LHrZfq_a3IAoW9ysqrKkI20glnVllV_Xk88bx4"
         }
     ],

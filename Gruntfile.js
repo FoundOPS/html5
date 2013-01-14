@@ -41,7 +41,7 @@ module.exports = function (grunt) {
             dir: 'app/components'
         },
 
-        // compile .less to .css using Recess
+        // compile .less to .css using less
         less: {
             dist: {
                 options: {

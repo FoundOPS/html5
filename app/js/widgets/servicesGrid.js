@@ -2,7 +2,7 @@
 
 'use strict';
 
-define(["db/services", "ui/ui", "tools/dateTools", "tools/kendoTools", "tools/parameters"], function (dbServices, ui, dateTools, kendoTools, parameters) {
+define(["db/services", "ui/ui", "tools/dateTools", "tools/generalTools", "tools/kendoTools", "tools/parameters"], function (dbServices, ui, dateTools, generalTools, kendoTools, parameters) {
     $.widget("ui.servicesGrid", {
         options: {
             //the service type
@@ -357,7 +357,8 @@ define(["db/services", "ui/ui", "tools/dateTools", "tools/kendoTools", "tools/pa
             //add a new service holder
             //TODO update selected
             widget._selectedServiceHolder = widget.dataSource.add();
-            var service = widget._serviceTemplate;
+            var service = generalTools.deepClone(widget._serviceTemplate);
+            service.Id = generalTools.newGuid();
 
             //prevent loading service details after the row is selected (this is a new service)
             widget._handleChange = true;
