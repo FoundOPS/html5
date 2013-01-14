@@ -31,10 +31,10 @@ define(["db/services", "ui/ui", "tools/dateTools", "tools/generalTools", "tools/
                 throw new Exception("")
             }
 
-            //set the initial start date to today and end date in two weeks
-            var today = session.today().toDate();
-            var twoWeeks = session.today().add('weeks', 2).toDate();
-            widget._setDateRange(today, twoWeeks);
+            //set the initial start date to the first of the month and end date to the last of the month
+            var firstMonth = session.today().date(1).toDate();
+            var lastMonth = session.today().date(1).add('months', 1).subtract('days', 1).toDate();
+            widget._setDateRange(firstMonth, lastMonth);
 
             //for loading set of service holders
             var setParams = {
@@ -242,26 +242,35 @@ define(["db/services", "ui/ui", "tools/dateTools", "tools/generalTools", "tools/
 
             widget.kendoGrid = element.kendoGrid({
                 autoBind: false,
+                dataBound: function () {
+                    widget.kendoGrid.select(widget.kendoGrid.table.find('tr:first'));
+                },
                 change: function () {
-                    //whenever a field is changed, the grid needs to be reselected. handleChange is set to prevent triggering a reload
-                    if (widget._handleChange) {
-                        widget._handleChange = false;
+                    var selected = this.select();
+                    if (!selected[0]) {
+                        widget._selectedServiceHolder = null;
+                        widget._selectedService = null;
+                        widget.options.serviceSelected(null);
                         return;
                     }
 
-                    var serviceHolder = widget._selectedServiceHolder = this.dataItem(this.select());
-                    if (!serviceHolder) {
-                        widget._selectService(null);
-                        return;
+                    var serviceHolder = widget._selectedServiceHolder = this.dataItem(selected[0]);
+
+                    //skip load is used when the service is already loaded
+                    if (widget._skipLoad) {
+                        widget._skipLoad = false;
+                        widget.options.serviceSelected(widget._selectedService);
+                    } else {
+                        //load the service details then trigger that it has been selected
+                        dbServices.services.read({params: {
+                            serviceId: serviceHolder.get("ServiceId"),
+                            serviceDate: dateTools.stripDate(serviceHolder.get("OccurDate")),
+                            recurringServiceId: serviceHolder.get("RecurringServiceId")
+                        }}).done(function (services) {
+                                widget._selectedService = kendo.observable(services[0]);
+                                widget.options.serviceSelected(widget._selectedService);
+                            });
                     }
-                    //load the service details, then update the selected service
-                    dbServices.services.read({params: {
-                        serviceId: serviceHolder.get("ServiceId"),
-                        serviceDate: dateTools.stripDate(serviceHolder.get("OccurDate")),
-                        recurringServiceId: serviceHolder.get("RecurringServiceId")
-                    }}).done(function (services) {
-                            widget._selectService(services[0])
-                        });
                 },
                 columns: columns,
                 columnMenu: true,
@@ -330,17 +339,23 @@ define(["db/services", "ui/ui", "tools/dateTools", "tools/generalTools", "tools/
             widget.reloadServices();
         },
 
-        //call the service selected callback
-        _selectService: function (service) {
+        //clear the grids selection
+        _clearSelection: function () {
+            this.kendoGrid.clearSelection();
+        },
+
+        //Select and scroll to the associated service holder in the grid
+        _selectServiceHolder: function (serviceHolder, reloadDetails) {
             var widget = this;
+            widget._selectedServiceHolder = serviceHolder;
 
-            //create an observable object
-            if (service) {
-                service = kendo.observable(service);
+            if (!reloadDetails) {
+                widget._skipLoad = true;
             }
+            //select the service holder in the grid
+            widget.kendoGrid.select(widget.kendoGrid.table.find('tr[data-uid="' + widget._selectedServiceHolder.uid + '"]'));
 
-            widget._selectedService = service;
-            widget.options.serviceSelected(service);
+            //TODO scroll to it
         },
 
         destroy: function () {
@@ -355,20 +370,11 @@ define(["db/services", "ui/ui", "tools/dateTools", "tools/generalTools", "tools/
         addService: function () {
             var widget = this;
             //add a new service holder
-            //TODO update selected
-            widget._selectedServiceHolder = widget.dataSource.add();
-            var service = generalTools.deepClone(widget._serviceTemplate);
+            var service = kendo.observable(generalTools.deepClone(widget._serviceTemplate));
             service.Id = generalTools.newGuid();
+            widget._selectedService = service;
 
-            //prevent loading service details after the row is selected (this is a new service)
-            widget._handleChange = true;
-
-            //select the new service holder it in the grid
-            widget.kendoGrid.select(widget.kendoGrid.table.find('tr[data-uid="' + widget._selectedServiceHolder.uid + '"]'));
-
-            //TODO replace
-            //update the selected service
-            widget._selectService(service);
+            widget._selectServiceHolder(widget.dataSource.add());
 
             if (widget.options.add) {
                 widget.options.add(service);
@@ -397,16 +403,13 @@ define(["db/services", "ui/ui", "tools/dateTools", "tools/generalTools", "tools/
         invalidateSelectedService: function () {
             var widget = this, service = widget._selectedService, serviceHolder = widget._selectedServiceHolder;
 
-            //TODO remove?
-//            if (!serviceHolder || !serviceHolder || !widget.kendoGrid) {
-//                return;
-//            }
-
             //change the current row's ServiceId to match the Id in case this was a newly inserted service
             serviceHolder.set("ServiceId", service.Id);
 
             //update the client name
-            serviceHolder.set("ClientName", service.Client.Name);
+            if (service.Client) {
+                serviceHolder.set("ClientName", service.Client.Name);
+            }
 
             //update all the field columns
             var fields = service.get("Fields");
@@ -435,9 +438,8 @@ define(["db/services", "ui/ui", "tools/dateTools", "tools/generalTools", "tools/
                 serviceHolder.set(columnName, val);
             }
 
-            //reselect the row, and prevent change from reloading the service
-            widget._handleChange = true;
-            widget.kendoGrid.select(widget.kendoGrid.table.find('tr[data-uid="' + serviceHolder.uid + '"]'));
+            //reselect the row
+            widget._selectServiceHolder(serviceHolder);
         },
 
         /**
@@ -450,7 +452,7 @@ define(["db/services", "ui/ui", "tools/dateTools", "tools/generalTools", "tools/
             }
 
             //clear selected service
-            widget._selectService(null);
+            widget._clearSelection();
 
             widget.dataSource.options.transport.read.data.startDate = dateTools.stripDate(widget.options.startDate);
             widget.dataSource.options.transport.read.data.endDate = dateTools.stripDate(widget.options.endDate);

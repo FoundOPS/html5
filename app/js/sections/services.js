@@ -256,6 +256,7 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
             }
         });
     };
+
     //resize the grid based on the current window's height
     var resizeGrid = function () {
         var extraMargin = 158;
