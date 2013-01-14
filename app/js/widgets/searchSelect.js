@@ -100,7 +100,7 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                 var _scrolling;
 
                 //Event Listeners
-                element.find("input").on("click touchstart", element.find("input"), function (e) {
+                element.find("input").on("click touchstart", element.find("input"), function () {
                     if (widget.selectedOptionTempText) {
                         this.value = widget.selectedOptionTempText;
                     }
@@ -114,7 +114,7 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                         if (!_scrolling) {
                             widget.selectedData = $(e.target).parent().data().selectedData || $(e.target).data().selectedData;
                             if (e.target.nodeName === "SPAN") {
-                                widget.selectedOptionText = $(e.target).parent()[0].innerText
+                                widget.selectedOptionText = $(e.target).parent()[0].innerText;
                             } else {
                                 widget.selectedOptionText = $(e.target)[0].innerText;
                             }
@@ -133,10 +133,10 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                     _scrolling = false;
                 });
                 //Set the scrolling flag to on.
-                element.find(".optionList").on("touchmove", element.find(".optionList"), function (e) {
+                element.find(".optionList").on("touchmove", element.find(".optionList"), function () {
                     _scrolling = true;
                 });
-                $(document.body).on('touchmove', function (e) {
+                $(document.body).on('touchmove', function () {
                     _scrolling = true;
                 });
                 //When clicking outside of the select widget, close the option list and handle text inside the textbox.
@@ -146,7 +146,7 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                     if ($(e.target).parents().filter("." + element.context.className).length === 0 || widget.options.dontCloseOn && e.target.className ? e.target.className.indexOf(widget.options.dontCloseOn) === -1 : false) {
                         setTimeout(function () {
                             if (!_scrolling) {
-                                widget.selectedOptionTempText = widget.selectedData = element.find("input")[0].value;
+                                widget.selectedOptionTempText = element.find("input")[0].value;
                                 widget.clearList();
                                 if (widget.isTouchDevice) {
                                     $(".km-scroll-wrapper").kendoMobileScroller("reset");
@@ -184,11 +184,9 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                                 matches.push(dataItem);
                             }
                         }
-                    } else {
-                        matches = widget.options.data;
+                        widget.open(matches);
                     }
-                    widget.open(matches);
-                } else {
+                } else if (searchTerm.length >= widget.options.minimumInputLength) {
                     widget.open(matches);
                     widget.options.query(searchTerm, $.proxy(widget.open, widget));
                 }

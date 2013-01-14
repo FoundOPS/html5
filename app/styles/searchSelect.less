@@ -68,10 +68,10 @@
         background: url("images/smallSearch.png") no-repeat right center;
     }
     #optionListScroller {
-        max-height: 115px;
+        position: absolute;
     }
     ul {
-        max-height: 115px;
+        max-height: 275px;
         span {
             display: table-cell;
         }
@@ -116,6 +116,9 @@
             }
             .fromWeb {
                 background: url("images/webIcon.png") no-repeat left center;
+            }
+            &:last-child{
+                border-bottom: 1px solid #aaa;
             }
         }
         li.singleLine .name {
