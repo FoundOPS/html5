@@ -265,7 +265,9 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                 if (selectData) {
                     widget.selectedData = selectData;
                     widget.selectedOptionText = widget.options.formatOption(selectData);
+                    //TODO AP this should not be part of search select
                     widget.element.find("input")[0].value = widget.selectedOptionText === "Manually Place Pin" ? "" : widget.selectedOptionText;
+                    //TODO private var
                     widget.selectedOptionTempText = "";
                     widget.options.onSelect(null, widget.selectedData);
                     //Wait for listeners from other widgets to use the selected option before removing it from the DOM.

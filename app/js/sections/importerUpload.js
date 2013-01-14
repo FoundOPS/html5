@@ -4,8 +4,8 @@ define(["db/services", "widgets/selectBox"], function (dbServices) {
     var importerUpload = {};
 
     //checks for .csv file type
-    var checkFileType = function (file){
-        if(!file.name.match(/(.*\.csv$)/)){
+    var checkFileType = function (file) {
+        if (!file.name.match(/(.*\.csv$)/)) {
             alert("Only .CSV files types allowed!");
             return false;
         }
@@ -26,7 +26,7 @@ define(["db/services", "widgets/selectBox"], function (dbServices) {
         uploadButton.on('change', function (evt) {
             var csvFile = evt.target.files[0];
             //if file is a .csv
-            if(checkFileType(csvFile)){
+            if (checkFileType(csvFile)) {
                 var reader = new FileReader();
                 reader.onload = function () {
                     //after the csv file has been loaded, parse it
@@ -40,15 +40,17 @@ define(["db/services", "widgets/selectBox"], function (dbServices) {
             $("#importerUpload").find("#uploadBtn").removeAttr('disabled');
         });
 
-        //listen to change event of the serviceType dropdown
-        var onSelect = function (selectedService) {
-            importerUpload.selectedService = {Id: selectedService.value, Name: selectedService.name};
-        };
-
         //get the available service templates
         dbServices.serviceTemplates.read().done(function (serviceTypes) {
             //create the service types dropdown
-            $("#importerUpload").find("#serviceType").selectBox({data: serviceTypes, dataTextField: "Name", onSelect: onSelect});
+            $("#importerUpload").find("#serviceType").selectBox({
+                data: serviceTypes,
+                dataTextField: "Name",
+                //listen to change event of the serviceType dropdown
+                onSelect: function (selectedService) {
+                    importerUpload.selectedService = selectedService;
+                }
+            });
 
             importerUpload.selectedService = serviceTypes[0];
         });

@@ -1,69 +1,90 @@
 'use strict';
+$.widget("ui.selectBox", {
+    options: {
+        //Array.<Object> Array of data for use in selectBox. Need to pass this or options
+        data: null,
+        //{string} The key in data to display
+        dataTextField: null,
+        //(Optional) {string} The key in data to determine if the value is selected
+        dataSelectedField: null,
+        //Array.<{name: string, value: string, selected: boolean}> Pre-formatted data for use in the selectBox.
+        options: null,
+        //(Optional) {function(Object, number)} A callback function that gets sent the selected option and index upon selection
+        onSelect: null,
+        //(Optional) {function(Object, Object)} Used in the select function to compare items. If not underscores deep comparison will used
+        isEqual: _.isEqual
+    },
 
-    /**
-     * A dynamic drop down list jquery widget that uses a <select> element for mobile compatibility.
-     * @param config - {
-     *          data: array,
-     *              Unformatted data for use in selectBox, if non-existent will use config.options.
-     *          dataTextField: string,
-     *              The key in data who's value will be displayed as an option.
-     *          dataSelectedIdentifier: string,
-     *              The key in data who's value determines the selected status of an option.
-     *          options: [{name: string, value: string, selected: boolean}, ...],
-     *              Preformatted data for use in the selectBox.
-     *          onSelect: {function(number, string, string, boolean)}
-     *              A callback function that gets sent the selected option upon selection.
-     *        }
-     * @return {*} Returns the jquery widget (allows widget to be chainable).
-     */
-    $.fn.selectBox = function (config) {
-        return this.each(function () {
-            var i, textField = config.dataTextField, optionsArray = [];
-            if (config.data) {
-                for (i=0; i<config.data.length; i++) {
-                    optionsArray[i] = {
-                        name: config.data[i][textField],
-                        value: _.values(_.omit(config.data[i], textField, config.dataSelectedIdentifier)),
-                        selected: config.data[i][config.dataSelectedIdentifier]
-                    };
+    _init: function () {
+        var widget = this, element = $(widget.element), options = widget.options;
+
+        var textField = options.dataTextField, selectOptions = [];
+        //format data into select options
+        if (options.options) {
+            selectOptions = options.options;
+        } else if (options.data) {
+            for (var i = 0; i < options.data.length; i++) {
+                var selected = false;
+                if (options.dataSelectedField) {
+                    selected = options.data[i][options.dataSelectedField];
                 }
-            } else if (config.options) {
-                optionsArray = config.options;
+
+                selectOptions[i] = {
+                    name: options.data[i][textField],
+                    selected: selected
+                };
             }
+        }
 
-            var selectBox = this, options = [], i;
 
-            //go through each option, and setup the select box
-            for (i = 0; i < optionsArray.length; i++) {
-                options[i] = document.createElement("option");
-                options[i].setAttribute("data-value", optionsArray[i].value);
-                options[i].innerHTML = optionsArray[i].name;
-                if (optionsArray[i].selected === true) {
-                    options[i].setAttribute("selected", "true");
-                }
+        var selectBox = this, selectElements = [];
+
+        //go through each option, and setup the select box
+        for (var i = 0; i < selectOptions.length; i++) {
+            selectElements[i] = document.createElement("option");
+            selectElements[i].innerHTML = selectOptions[i].name;
+            if (selectOptions[i].selected === true) {
+                selectElements[i].setAttribute("selected", "true");
             }
+        }
 
-            $(this).live('change', function (e) {
-                var i, optionsHTML = e.target.children;
+        //setup this element's html
+        var selectBox = document.createElement("select");
+        selectBox.setAttribute("class", "selectBox");
+        for (var i = 0; i < selectElements.length; i++) {
+            selectBox.appendChild(selectElements[i]);
+        }
+        element.append(selectBox);
 
-                //call the onSelect function with the selected item
-                for (i = 0; i < optionsHTML.length; i++) {
-                    var option = optionsHTML[i];
-                    option.value = optionsHTML[i].value;
+        $(selectBox).live('change', function (e) {
+            var selectOptions = e.target.children;
 
-                    var data = config.data[i];
-                    if (option.selected) {
-                        config.onSelect({index: option.index, name: option.text, data: data, value: option.value, selected: option.selected });
+            //call the onSelect function with the selected item
+            for (var i = 0; i < selectOptions.length; i++) {
+                var selectOption = selectOptions[i];
+                if (selectOption.selected) {
+                    var item = options.data ? options.data[i] : options.options[i];
+                    if (options.onSelect) {
+                        options.onSelect(item, i);
                     }
                 }
-            });
-
-            //setup this element's html
-            var sel = document.createElement("select");
-            sel.setAttribute("class", "selectBox");
-            for (i = 0; i < options.length; i++) {
-                sel.appendChild(options[i]);
             }
-            selectBox.appendChild(sel);
         });
-    };
+    },
+
+    /**
+     * Select the matching item
+     * @param item
+     */
+    select: function (item) {
+        var widget = this, isEqual = widget.options.isEqual, data = widget.options.data, optionsData = widget.options.options,
+            selectOptions = $(this.element).find("select").children("*");
+
+        for (var i = 0; i < data.length; i++) {
+            if ((data && isEqual(data[i], item)) || (optionsData && isEqual(optionsData[i], item))) {
+                selectOptions[i].selected = true;
+                break;
+            }
+        }
+    }
+});

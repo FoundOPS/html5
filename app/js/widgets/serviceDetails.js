@@ -91,27 +91,35 @@ define(["db/services", "db/session", "db/models", "tools/parameters", "tools/ken
                     return fieldElement;
                 },
                 "OptionsField": function (field, fieldIndex, elementToAppendTo) {
-                    var fieldElement, i;
+                    var fieldElement;
                     if (field.TypeInt === 0 || field.TypeInt === undefined) {
                         //Select Dropdown
-                        fieldElement = $('<div class="styled-select"></div>').selectBox({
+                        fieldElement = $('<div class="styled-select"></div>')
+                        fieldElement.appendTo(elementToAppendTo).wrap("<li>" + field.Name + "<br/></li>");
+                        var selectBox = fieldElement.selectBox({
                             data: field.Options,
                             dataTextField: "Name",
-                            dataSelectedIdentifier: "IsChecked",
-                            onSelect: function (selectedOption) {
+                            dataSelectedField: "IsChecked",
+                            onSelect: function (selectedOption, index) {
                                 //Clear previous selections.
-                                for (i = 0; i < field.Options.length; i++) {
+                                for (var i = 0; i < field.Options.length; i++) {
                                     field.Options[i].IsChecked = false;
                                 }
-                                field.set('Options[' + selectedOption.index + '].IsChecked', selectedOption.selected);
+                                field.set('Options[' + index + '].IsChecked', true);
                             }
-                        }).appendTo(elementToAppendTo).wrap("<li>" + field.Name + "<br/></li>");
+                        }).data("selectBox");
+                        var selected = field.Options[i];
+                        for (var i = 0; i < field.Options.length; i++) {
+                            if (field.Options[i].IsChecked) {
+                                selected = field.Options[i];
+                            }
+                        }
+                        selectBox.select(selected);
                     } else {
                         //Checkbox (1) or checklist (2)
                         fieldElement = $('<ul data-role="listview" data-style="inset">' + field.Name + '</ul>').appendTo(elementToAppendTo);
 
-                        var optionIndex;
-                        for (optionIndex = 0; optionIndex < field.Options.length; optionIndex++) {
+                        for (var optionIndex = 0; optionIndex < field.Options.length; optionIndex++) {
                             var optionElement = $(inputTemplate).attr("type", "checkbox");
 
                             var option = field.Options[optionIndex];

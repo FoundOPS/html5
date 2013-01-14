@@ -6,7 +6,7 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
     "widgets/selectBox", "widgets/servicesGrid"], function (session, dbServices, parameters, dateTools, saveHistory, kendoTools, analytics, models) {
     var services = {}, vm,
         servicesPage = $("#services"), clientSelector = $("#clientSelector"), locationSelector = $("#locationSelector"),
-        locationWidget, servicesGrid;
+        locationWidget, servicesGrid, serviceTypeSelectBox;
 
     //region UI initialization
 
@@ -160,13 +160,16 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
             services.serviceTypes = serviceTypes;
 
             //Setup selectBox
-            $("#serviceTypes").selectBox({
+            serviceTypeSelectBox = $("#serviceTypes").selectBox({
                 data: serviceTypes,
                 dataTextField: "Name",
+                isEqual: function (a, b) {
+                    return a.Name === b.Name;
+                },
                 onSelect: function (selectedOption) {
-                    vm.set("serviceType", selectedOption.data);
+                    vm.set("serviceType", selectedOption);
                 }
-            });
+            }).data("selectBox");
 
             //now that the service types are loaded,
             //setup the grid by re-parsing the hash
@@ -427,14 +430,7 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
                     //(although eventually new data manager should manage is loading)
                 });
 
-            //TODO move into ServiceSelector .select
-            //make sure the service type selector has the right one selected
-            var i, options = $("#serviceTypes > .selectBox").children("*");
-            for (i = 0; i < options.length; i++) {
-                if (options[i].value === serviceType.Name) {
-                    options[i].selected = true;
-                }
-            }
+            serviceTypeSelectBox.select(serviceType);
         }
     };
 

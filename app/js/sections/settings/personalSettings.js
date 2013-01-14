@@ -7,7 +7,7 @@
 "use strict";
 
 define(["db/services", "db/saveHistory", "tools/dateTools", "tools/parameters", "widgets/imageUpload", "widgets/selectBox"], function (dbServices, saveHistory, dateTools, parameters) {
-    var personalSettings = {}, imageUpload, vm = kendo.observable();
+    var personalSettings = {}, imageUpload, vm = kendo.observable(), timeZoneSelectBox;
 
     personalSettings.vm = vm;
 
@@ -55,6 +55,22 @@ define(["db/services", "db/saveHistory", "tools/dateTools", "tools/parameters", 
             }
         });
 
+        //updates the select box to the right time zone
+        var syncTimeZone = function () {
+            if (!timeZoneSelectBox) {
+                return;
+            }
+
+            var userAccount = vm.get("userAccount");
+            if (userAccount) {
+                var timeZone = userAccount.get("TimeZone");
+                if (!timeZone) {
+                    timeZone = dateTools.getLocalTimeZone();
+                }
+                timeZoneSelectBox.select(timeZone)
+            }
+        };
+
         //retrieve the settings and bind them to the form
         dbServices.userAccounts.read({excludeRoleId: true}).done(function (userAccounts) {
             if (!userAccounts || !userAccounts[0])
@@ -72,45 +88,28 @@ define(["db/services", "db/saveHistory", "tools/dateTools", "tools/parameters", 
 
             saveHistory.resetHistory();
 
-            if (vm.get("userAccount.TimeZone")) {
-                _.delay(function () {
-                    //set the correct timezone
-                    $("#TimeZone > .selectBox").children("*").each(function(index, element) {
-                        element.removeAttribute("selected");
-                    });
-                    $("#TimeZone > .selectBox").children("[data-value='"+vm.get("userAccount.TimeZone.Id")+"']").attr("selected", true);
-                }, 100);
-            }
+            syncTimeZone();
         });
-
-        var formatTimeZoneName = function (timeZone) {
-            return timeZone.DisplayName;
-        };
 
         if (initializeTimeZones) {
             //get the list of timezones
             dbServices.timeZones.read().done(function (timeZones) {
                 initializeTimeZones = false;
 
-                var save = function (selectedOption) {
-                    vm.set("userAccount.TimeZone", {DisplayName: selectedOption.name, Id: selectedOption.value});
-                    personalSettings.save();
-                }
-
                 //Setup the timezone dropdown
-                $("#TimeZone").selectBox({
+                timeZoneSelectBox = $("#TimeZone").selectBox({
                     data: timeZones,
                     dataTextField: "DisplayName",
-                    onSelect: save});
+                    isEqual: function (a, b) {
+                        return a.Id === b.Id;
+                    },
+                    onSelect: function (timeZone) {
+                        vm.set("userAccount.TimeZone", timeZone);
+                        personalSettings.save();
+                    }
+                }).data("selectBox");
 
-                if (!vm.get("userAccount.TimeZone")) {
-                    var timezone = dateTools.getLocalTimeZone().Id;
-                    //set the correct timezone
-                    $("#TimeZone > .selectBox").children("*").each(function(index, element) {
-                        element.removeAttribute("selected");
-                    });
-                    $("#TimeZone > .selectBox").children("[data-value='"+timezone+"']").attr("selected", true);
-                };
+                syncTimeZone();
             });
         }
     };
