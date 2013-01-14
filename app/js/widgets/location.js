@@ -88,17 +88,14 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
             //setup searchSelect
             element.find(".locationSearchSelect").searchSelect({
                 query: function (searchTerm, callback) {
-                    //get the list of location matches
-                    //if (searchTerm) {
-                        //show the loading image
-                        element.find(".locationSearchSelect input").css("background-image", "url('img/spinner.gif')").css("background-position", "98% 50%").css("background-repeat", "no-repeat");
-                        //get the search results
-                        dbServices.locations.read({params: {search: searchTerm, ClientId: widget.options.clientId}}).done(function (locations) {
-                            //hide the loading image
-                            element.find("input").css("background", "");
-                            callback(locations);
-                        });
-                    //}
+                    //show the loading image
+                    element.find(".locationSearchSelect input").css("background-image", "url('img/spinner.gif')").css("background-position", "98% 50%").css("background-repeat", "no-repeat");
+                    //get the search results
+                    dbServices.locations.read({params: {search: searchTerm, ClientId: widget.options.clientId}}).done(function (locations) {
+                        //hide the loading image
+                        element.find("input").css("background", "");
+                        callback(locations);
+                    });
                 },
                 formatOption: generalTools.getLocationDisplayString,
                 onSelect: function (e, selectedData) {
