@@ -20,13 +20,15 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
              *         should return text or a valid HTML string to display as an option (defaults to JSON.stringify())
              *     onSelect {function(e, selectedData)}
              *         A callback function triggered when an item is selected. The parameters are the triggered jQuery event and the selected data.
+             *     onClose {function()}
+             *         A callback function triggered when the list is closed.
              *     minimumInputLength {int}
              *         number of characters necessary search box to start a search (defaults to 1)
              *     showPreviousSelection {boolean}
              *         defines whether the previous selection should be attached at the end of the list or not (defaults to false)
              *         only works for predefined data, user must set this in their query function if they desire such behavior.
-         *         additionalListItem {string}
-         *             optionally add other items to the list (ex. "Manually Place Pin")
+             *     additionalListItem {string}
+             *         optionally add other items to the list (ex. "Manually Place Pin")
              *     dontCloseOn {string}
              *         A class from an element that the user would like to be able to click on without closing the optionList.
              * }
@@ -42,6 +44,7 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                         this._trigger("selected", event, selectedData);
                     }
                 },
+                onClose: null,
                 queryDelay: null,
                 minimumInputLength: 1,
                 showPreviousSelection: false,
@@ -124,6 +127,7 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
 //                            //Wait for listeners from other widgets to use the selected option before removing it from the DOM.
 //                            setTimeout(function () {
                                 widget.clearList();
+                                widget.options.onClose();
 //                            }, 200);
                             if (widget.isTouchDevice) {
                                 $(".km-scroll-wrapper").kendoMobileScroller("reset");
@@ -148,6 +152,7 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                             if (!_scrolling) {
                                 widget.selectedOptionTempText = element.find("input")[0].value;
                                 widget.clearList();
+                                widget.options.onClose();
                                 if (widget.isTouchDevice) {
                                     $(".km-scroll-wrapper").kendoMobileScroller("reset");
                                 }
