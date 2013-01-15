@@ -448,14 +448,16 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
          * @private
          */
         _colorMarkers: function (color) {
+            var widget = this;
             //wait for the markers to be loaded
             _.delay(function () {
                 //http://stackoverflow.com/questions/9303757/how-to-change-color-of-an-image-using-jquery
                 var i = 0;
-                $(".leaflet-marker-pane").find("img").each(function () {
-                    //prevent a canvas error
+                $(widget.element).find(".leaflet-marker-pane").find("img").each(function () {
+                    //prevent a canvas error because the widget isn't ready yet, try again
                     if (this.height === 0 || this.width === 0) {
-                        return;
+                        debugger;
+                        return false; //break the loop
                     }
 
                     var canvas = document.createElement("canvas");
