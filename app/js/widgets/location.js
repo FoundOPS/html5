@@ -44,6 +44,9 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
                 '<input class="lat locationInput" type="hidden" />' +
                 '<input class="lng locationInput" type="hidden" />' +
                 '<input class="id locationInput" type="hidden" />' +
+                '<div class="zipCodeWrapper">' +
+                '<label for="zipCode">Zip Code</label><br />' +
+                '<input name="zipCode" class="zipCode locationInput geocoded" type="text" />' +
                 '<div class="stateWrapper">' +
                 '<label for="state">State</label><br />' +
                 '<div class="styled-select">' +
@@ -52,9 +55,6 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
                 '</select>' +
                 '</div>' +
                 '</div>' +
-                '<div class="zipCodeWrapper">' +
-                '<label for="zipCode">Zip Code</label><br />' +
-                '<input name="zipCode" class="zipCode locationInput geocoded" type="text" />' +
                 '</div>' +
                 '</div>' +
                 '<div class="saveDeleteButtonWrapper">' +
@@ -94,6 +94,8 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
                     dbServices.locations.read({params: {search: searchTerm, ClientId: widget.options.clientId}}).done(function (locations) {
                         //hide the loading image
                         element.find("input").css("background", "");
+                        element.find("#addressWrapper")[0].style.opacity = 0.3;
+                        element.find(".optionList")[0].style.border = "1px solid #5bad52";
                         callback(locations);
                     });
                 },
@@ -104,8 +106,13 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
                     if (e.target.innerText === "Manually Place Pin") {
                         //allow the marker to move on map click
                         widget._allowMapClick = true;
-                        //disable the save button
-                        element.find(".saveBtn").attr("disabled", "disabled");
+                        //hide the save button
+                        element.find(".saveBtn")[0].style.display = "none";
+                        if (widget.options.delete) {
+                            element.find(".saveDeleteButtonWrapper")[0].style.width = "155px";
+                        } else {
+                            element.find(".saveDeleteButtonWrapper")[0].style.width = "80px";
+                        }
 
                         widget._clearMarkers();
                         widget._enableFields();
@@ -118,9 +125,12 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
                         widget._disableFields();
                         widget._populateFields(selectedData);
                         widget._showMarker(selectedData);
-                        //enable the save button
-                        element.find(".saveBtn").removeAttr("disabled");
+                        widget.showSaveButton();
                     }
+                },
+                onClose: function () {
+                    element.find("#addressWrapper")[0].style.opacity = 1;
+                    element.find(".optionList")[0].style.border = "none";
                 },
                 queryDelay: 750,
                 minimumInputLength: 0,
@@ -164,8 +174,7 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
                     element.find(".lat").val(e.latlng.lat);
                     element.find(".lng").val(e.latlng.lng);
 
-                    //enable the save button
-                    element.find(".saveBtn").removeAttr("disabled");
+                    widget.showSaveButton();
                 }
             });
 
@@ -236,8 +245,7 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
 
                 widget._allowMapClick = false;
 
-                //enable the save button
-                element.find(".saveBtn").removeAttr("disabled");
+                widget.showSaveButton();
             });
 
             //check there is at least one location
@@ -289,6 +297,8 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
             }
 
             widget._disableFields();
+
+            widget.invalidateMap(50);
 
             //TODO: add an option to do this, or just always do this if multiple locations
             //element.find(".locationSearchSelect").searchSelect("open", []);
@@ -536,9 +546,9 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
             var element = $(this.element);
             var newWidth = rightWidth - 57 - 280;
             var newHeight = element[0].clientWidth > 500 ? element.height() : element.height() - 150;
-            $("#locationWidgetMap").attr("style", "float: right; width:" + newWidth + "px; height:" + newHeight + "px; border-left: 2px solid #e6e6e6;");
-            element.find(".splitBtnList")[0].style.width = "278px";
-            element.find(".editPane")[0].style.width = "278px";
+            $("#locationWidgetMap").attr("style", "float: right; width:" + newWidth + "px; height:" + newHeight + "px; border-left: 4px solid #e6e6e6;");
+            element.find(".splitBtnList")[0].style.width = "276px";
+            element.find(".editPane")[0].style.width = "276px";
             element.find(".addButtonWrapper")[0].style.margin = "10px 0 0 92px";
         },
 
@@ -551,6 +561,17 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
                 element.find(".splitBtnList")[0].style.width = "100%";
                 element.find(".editPane")[0].style.width = "100%";
                 element.find(".addButtonWrapper")[0].style.margin = "10px auto 0 auto";
+            }
+        },
+
+        showSaveButton: function () {
+            var widget = this, element = $(widget.element);
+
+            element.find(".saveBtn")[0].style.display = "inline-block";
+            if (widget.options.delete) {
+                element.find(".saveDeleteButtonWrapper")[0].style.width = "220px";
+            } else {
+                element.find(".saveDeleteButtonWrapper")[0].style.width = "155px";
             }
         },
 

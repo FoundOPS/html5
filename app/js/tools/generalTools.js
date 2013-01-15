@@ -95,7 +95,7 @@ define(["developer", 'tools/dateTools'], function (developer, dateTools) {
         if (!location) {
             return "";
         }
-        var lineOne = location.AddressLineOne ? location.AddressLineOne + " " : "";
+        var lineOne = location.AddressLineOne ? location.AddressLineOne : "";
         var lineTwo = location.AddressLineTwo ? location.AddressLineTwo : "";
 
         var adminDistrictTwo = location.AdminDistrictTwo ? location.AdminDistrictTwo + ", " : "";
@@ -109,11 +109,17 @@ define(["developer", 'tools/dateTools'], function (developer, dateTools) {
             displayString = location.Name ? location.Name + "<br/>\n" : "";
         }
 
-        displayString += lineOne + lineTwo;
+        displayString += lineOne;
+
+        if (lineOne != "" && lineTwo != "") {
+            displayString += ", ";
+        }
+
+        displayString += lineTwo;
 
         if (displayString !== "") {
             //if name should be included, but there is no name(i.e. there are 2 lines available), put the second half of the address on the next line
-            if (includeName && location.Name == null) {
+            if (includeName && (location.Name == null || location.Name == "")) {
                 displayString += "<br/>\n";
             } else {
                 displayString += ", ";

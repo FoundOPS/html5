@@ -339,15 +339,29 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
         analytics.track("Export CSV");
     };
 
+    var optionMenuListening = false;
     services.showOptions = function () {
-        $("#serviceOptions").attr("style", "display:block");
-
-        $('html').on('click touchend', function (e) {
-            if (e.target.type !== "submit") {
-                $("#serviceOptions").attr("style", "display:none");
-                $('html').off('click');
-            }
-        });
+        //prevent double listeners
+        if (optionMenuListening) {
+            optionMenuListening = false;
+        } else {
+            //listen to any clicks
+            $('html').on('click touchend', function () {
+                //if the menu is open: close it
+                if ($("#serviceOptions")[0].style.display === "block") {
+                    $("#serviceOptions")[0].style.display = "none";
+                    $(".optionsMenu").attr("style", "");
+                    $('html').off('click');
+                    optionMenuListening = false;
+                }
+                //otherwise open the menu
+                else {
+                    $("#serviceOptions")[0].style.display = "block";
+                    $(".optionsMenu").attr("style", "border: 2px solid #c0c0c0; border-bottom: none; background-color: #fff;");
+                }
+            });
+            optionMenuListening = true;
+        }
     };
 
     //endregion
