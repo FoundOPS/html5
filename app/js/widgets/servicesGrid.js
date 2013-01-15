@@ -34,6 +34,7 @@ define(["db/services", "ui/ui", "tools/dateTools", "tools/generalTools", "tools/
             //set the initial start date to the first of the month and end date to the last of the month
             var firstMonth = session.today().date(1).toDate();
             var lastMonth = session.today().date(1).add('months', 1).subtract('days', 1).toDate();
+            widget._firstDataSourceLoad = true;
             widget._setDateRange(firstMonth, lastMonth);
 
             //for loading set of service holders
@@ -63,7 +64,8 @@ define(["db/services", "ui/ui", "tools/dateTools", "tools/generalTools", "tools/
                         data: setParams
                     }
                 },
-                pageSize: 50
+                pageSize: 50,
+                serverFiltering: false
             });
 
             widget._watchFiltersAndParameters();
@@ -140,6 +142,7 @@ define(["db/services", "ui/ui", "tools/dateTools", "tools/generalTools", "tools/
                     endDate.toDateString() !== endDateFilter.value.toDateString();
                 if (dateChanged) {
                     widget._setDateRange(startDateFilter.value, endDateFilter.value);
+                    filtersChanged = true;
                 }
 
                 //if the filtersChanged, return the new filters
@@ -243,7 +246,11 @@ define(["db/services", "ui/ui", "tools/dateTools", "tools/generalTools", "tools/
             widget.kendoGrid = element.kendoGrid({
                 autoBind: false,
                 dataBound: function () {
-                    widget.kendoGrid.select(widget.kendoGrid.table.find('tr:first'));
+                    //choose the first item when the services are reloaded
+                    if (widget._newLoad) {
+                        widget.kendoGrid.select(widget.kendoGrid.table.find('tr:first'));
+                        widget._newLoad = false;
+                    }
                 },
                 change: function () {
                     var selected = this.select();
@@ -336,6 +343,12 @@ define(["db/services", "ui/ui", "tools/dateTools", "tools/generalTools", "tools/
             var widget = this;
             widget.options.startDate = startDate;
             widget.options.endDate = endDate;
+
+            if (widget.dataSource) {
+                widget.dataSource.options.transport.read.data.startDate = dateTools.stripDate(widget.options.startDate);
+                widget.dataSource.options.transport.read.data.endDate = dateTools.stripDate(widget.options.endDate);
+            }
+
             widget.reloadServices();
         },
 
@@ -438,7 +451,7 @@ define(["db/services", "ui/ui", "tools/dateTools", "tools/generalTools", "tools/
                 serviceHolder.set(columnName, val);
             }
 
-            //reselect the row
+            //reselect the row since the grid has been altered
             widget._selectServiceHolder(serviceHolder);
         },
 
@@ -454,9 +467,15 @@ define(["db/services", "ui/ui", "tools/dateTools", "tools/generalTools", "tools/
             //clear selected service
             widget._clearSelection();
 
-            widget.dataSource.options.transport.read.data.startDate = dateTools.stripDate(widget.options.startDate);
-            widget.dataSource.options.transport.read.data.endDate = dateTools.stripDate(widget.options.endDate);
-            widget.dataSource.read();
+            //setting a filter automatically loads the dataSource if no data is available
+            //so ignore the first load
+            if (widget._firstDataSourceLoad) {
+                widget._firstDataSourceLoad = false;
+            } else {
+                widget.dataSource.read();
+            }
+
+            widget._newLoad = true;
         }, 250),
 
         /**
