@@ -54,6 +54,9 @@
         },
         closePopup: function () {
             Popup.closePopup();
+        },
+        getPopupClass: function(popup) {
+            return Popup;
         }
     };
 
@@ -92,6 +95,8 @@
 ////////////////////////////////////////////////////////////
 /**     Popup CONSTRUCTOR    **/
 function Popup(popupListener) {
+    this.constructor = Popup;
+
     //Set this popup's number and increment Popup count.
     this.popupNumber = ++Popup.popupNum;
     //Class added to detect clicks on primary buttons triggering popups.
@@ -114,6 +119,16 @@ Popup.prototype.disableHeader = function() {
 
 Popup.prototype.enableHeader = function() {
     this.isHeaderDisabled = false;
+};
+
+Popup.prototype.disablePopup = function() {
+    this.isDisabled = true;
+    //console.log("Popup disabled.");
+};
+
+Popup.prototype.enablePopup = function() {
+    this.isDisabled = false;
+    //console.log("Popup not disabled.");
 };
 
 Popup.prototype.toggleVisible = function (e, clicked) {
@@ -160,7 +175,7 @@ Popup.prototype.toggleVisible = function (e, clicked) {
     $("#popup").promise().done(function () {});
 
     //If popup is locked, don't continue actions.
-    if(Popup.isLocked)return;
+    if(Popup.isLocked||this.isDisabled)return;
     //Update content
     this.populate(identifierList);
 
@@ -553,6 +568,16 @@ Popup.prototype.setData = function (data) {
     Popup.setContent(data.contents);
 };
 
+Popup.prototype.replaceMenu = function (menu, newMenu){
+    var property;
+    for(property in menu){
+        delete menu[property];
+    }
+    for(property in newMenu){
+        menu[property] = newMenu[property];
+    }
+};
+
 //Public setter function for private var content and sets content of the html popup element.
 Popup.setContent = function (cont) {
     Popup.content = cont;
@@ -611,6 +636,8 @@ Popup.unlockPopup = function(){
 function OptionsPopup(popupListener){
     //Super constructor call.
     Popup.apply(this, [popupListener]);
+    this.constructor = OptionsPopup;
+    this.superConstructor = Popup;
 
     this.isHeaderDisabled = false;
     this.isBackEnabled = true;

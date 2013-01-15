@@ -144,6 +144,13 @@ require(["developer", "db/services", "db/session", "tools/parameters", "tools/si
             var initialSection = {name: developer.IS_MOBILE ? "routes" : "updates" };
             parameters.set({section: initialSection, replace: true});
         }
+
+        $("#nav").status({
+            undoLastFunction: function(){ saveHistory.undo(false)},
+            undoAllFunction: function(){ saveHistory.undo(true)}
+        });
+
+
     });
 
     //TODO make sectionSelected a navigator event
