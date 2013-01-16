@@ -89,7 +89,7 @@
             '<div id="navSearch" class="navElement">' +
             ' <input name="search" type="text" placeholder="Search..."/>' +
             '<a><img src="img/Search.png"/></a></div>' +
-            '<div id="navClient" class="navElement last">' +
+            '<div id="navClient" class="navElement">' +
             '<a><img class="navIcon profile" src="{{= it.profileImgUrl }}"/><img id="clientLogo" src="{{= it.clientLogoUrl }}"/></a></div>' +
             '</div>' +
             '<img id="logo" src="./img/Logo.png" alt="FoundOPS"/>');

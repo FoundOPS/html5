@@ -86,9 +86,9 @@
     //Image paths
     var statusImages =
         [
-            "../img/idleStatus.png", //State 0
-            "../img/busyStatus.png", //State 1
-            "../img/errorStatus.png" //State 2
+            "idleStatus", //State 0
+            "busyStatus", //State 1
+            "errorStatus" //State 2
         ];
 
     var INIT_STATUS_IMG = statusImages[states.idle];
@@ -139,11 +139,9 @@
 
         //Init
         //Add status to target.
-        var statusDiv = '<div id="statusesContainer">' +
-            '<div id="navStatus" class="navElement">' +
-            '<a><img class="navIcon" src="'+ INIT_STATUS_IMG +'"></img></a>' +
-            '</div>' +
-            '</div>';
+        var statusDiv = '<div id="navStatus" class="navElement">' +
+            '<a><div class="navIcon '+INIT_STATUS_IMG+'"></div></a>' +
+        '</div>';
         $(targetDiv).append(statusDiv);
 
         var menu = createStatusMenu(thisStatus.currentUndoMode);
@@ -187,19 +185,30 @@
         //Otherwise, just switch to the state passed.
         if( previousState === states.busy && (timeSince < MIN_TIME_VISIBLE) ){
             var thisStatus = this;
-            $("#navStatus .navIcon").attr("src", statusImages[states.busy]);
+            //$("#navStatus .navIcon").attr("src", statusImages[states.busy]);
+            this.changeStatusImage(statusImages[states.busy]);
             _.delay(function(){
                 thisStatus.setState(state);
             }, (MIN_TIME_VISIBLE-timeSince));
         }else{
             this.setState(state);
         }
+    };
 
+    Statuses.prototype.changeStatusImage = function(state){
+        for(var img in statusImages){
+            if(state === statusImages[img]){
+                $("#navStatus .navIcon").addClass(statusImages[img]);
+            }else{
+                $("#navStatus .navIcon").removeClass(statusImages[img]);
+            }
+        }
     };
 
     Statuses.prototype.setState = function(state){
         this.currentState = state;
-        $("#navStatus .navIcon").attr("src", statusImages[state]);
+        //$("#navStatus .navIcon").attr("src", statusImages[state]);
+        this.changeStatusImage(statusImages[state]);
         $(document).trigger("status.stateChange");
     };
 

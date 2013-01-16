@@ -193,18 +193,16 @@ zoom: 1;*/
     }
 }
 .roundedIcon {
-    border: @borderSize solid @navBorderColor;
-    border-radius: 0;
+    //border: @borderSize solid @navBorderColor;
+    border-radius: 2px;
 }
 
 .navElement {
     &:focus {
-        outline: white solid thin;
+        //outline: white solid thin;
     }
     -webkit-box-shadow: inset 0 0 5px #777779;
     box-shadow: inset 0 0 5px #777779;
-    .roundedIcon;
-    background: white;
     display: inline-block;
     vertical-align: middle;
     margin-right: 60px; /*Spacing between nav elements*/
@@ -217,7 +215,9 @@ zoom: 1;*/
 
     .navIcon {
         height: 28px;
+        width: 28px;
         //padding: @iconPadding;
+        .roundedIcon;
     }
 
     input {
@@ -246,7 +246,6 @@ zoom: 1;*/
     .navIcon {
         padding: 0;
         border-right: @borderSize solid @navBorderColor;
-        border-radius: @borderRadius;
         overflow: hidden;
     }
 }
@@ -696,6 +695,18 @@ zoom: 1;*/
 
 .statusPopupButton:active{
     background: @blue;
+}
+
+.idleStatus{
+    background: url("images/saveUndoSprite.png") no-repeat 0 -28px;
+}
+
+.busyStatus{
+    background: url("images/saveUndoSprite.png") no-repeat 0 -56px;
+}
+
+.errorStatus{
+    background: url("images/saveUndoSprite.png") no-repeat 0 0px;
 }
 
 //--------------------------------------------------------------------------------------------------------------------//
