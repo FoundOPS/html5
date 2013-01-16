@@ -78,7 +78,7 @@ define(['tools/generalTools'], function (generalTools) {
         });*/
 
         //Set status - done
-        $("#nav").status("setState", 0);
+        $("#nav").status("state", 0);
     };
 
     /**
@@ -100,7 +100,7 @@ define(['tools/generalTools'], function (generalTools) {
         });*/
 
         //Set status - error
-        $("#nav").status("setState", 2);
+        $("#nav").status("state", 2);
     };
 
     saveHistory.close = function () {
@@ -138,7 +138,7 @@ define(['tools/generalTools'], function (generalTools) {
 
     saveHistory.save = _.debounce(function () {
         //Set status - busy
-        $("#nav").status("setState", 1);
+        $("#nav").status("state", 1);
 
         //save the state (if there is a function to get it)
         if (saveHistory.options.state) {

@@ -4,20 +4,18 @@
     var status = null;
     var methods = {
         init: function (config) {
-            console.log("Init.");
+            var targetDiv = config.selector;
             var loadStatus = function(){
-                console.log("Status loaded.");
-                var navDiv = config.selector;
-
                 var undoLast = function(){};
                 if(config.undoLastFunction)undoLast = config.undoLastFunction;
 
                 var undoAll = function(){};
                 if(config.undoAllFunction)undoAll = config.undoAllFunction;
-
-                return status = new Statuses(navDiv, undoLast, undoAll);
+                status = new Statuses(targetDiv, undoLast, undoAll);
+                console.log("LOG: Status loaded.");
+                return status;
             };
-            if($("#nav").length===0){
+            if(targetDiv.length === 0){
                 $(document).on("navigator.loaded", function(){
                     return loadStatus();
                 });
@@ -25,12 +23,13 @@
                 return loadStatus();
             }
         },
-        setState: function(state){
-            //console.log("Setting state.");
-            status.setState(state);
+        state: function(state){
+            if(typeof(state) === "undefined"){
+                return status.state();
+            }
+            status.state(state);
         },
         setUndoMode: function(mode){
-            //console.log("Setting mode.");
             status.setUndoMode(mode);
         },
         setUndoLastFunction: function(callback){
@@ -67,9 +66,7 @@
     };
 
 
-    //////////////////////////
     //  Enums
-    //////////////////////////
     var states = {
         idle: 0,
         busy: 1,
@@ -92,8 +89,7 @@
 
     var INIT_STATUS_IMG = statusImages[states.idle];
 
-    var createStatusMenu = function(status){
-        var popupClass = $(document).popup("getPopupClass");
+    var createStatusMenu = function(mode){
         var contents = [];
         var menu = {
             id: "navStatus",
@@ -104,18 +100,16 @@
         var undoLastMenu = {"name": "Undo Last", id: "undoLast"};
         var undoAllMenu = {"name": "Undo All", id: "undoAll"};
 
-        if(status.currentUndoMode>=1){
+        if(mode >= 1){
             contents.push(undoLastMenu);
         }
-        if(status.currentUndoMode>=2){
+        if(mode >= 2){
             contents.push(undoAllMenu);
         }
         return menu;
     };
 
-    //////////////////////////
     //  Constructor
-    //////////////////////////
     function Statuses(targetDiv, undoLast, undoAll){
         var thisStatus = this;
         this.targetDiv = targetDiv;
@@ -139,10 +133,10 @@
         $(targetDiv).append(statusDiv);
 
         //Init Popup.
-        var menu = createStatusMenu(thisStatus);
+        var menu = createStatusMenu(thisStatus.currentUndoMode);
         thisStatus.statusPopup = $("#navStatus").optionsPopup(menu);
 
-        this.setState(INIT_STATE);
+        this.state(INIT_STATE);
         this.setUndoMode(INIT_UNDO_MODE);
 
         $(document).on("click", "#undoLast", function(){
@@ -154,12 +148,19 @@
             $(document).trigger("status.undoAll");
             thisStatus.onUndoAll();
         });
+        $(document).trigger("status.loaded");
     }
 
-    //////////////////////////
     //  Functions
-    //////////////////////////
-    Statuses.prototype.setState = function(state){
+    Statuses.prototype.state = function(state){
+        //If no argument passed, print state.
+        //Else, set state.
+        if(typeof(state) === "undefined"){
+            //console.log(this.currentState);
+            console.log("getState: "+state);
+            return this.currentState;
+        }
+        console.log("State: "+state);
         //Minimum time busy icon is visible.
         var MIN_TIME_VISIBLE = 800;
 
@@ -168,21 +169,25 @@
         //console.log("Time: "+ timeSince);
         this.lastStateChangeTime = timeNow;
         var previousState = this.currentState;
-        this.currentState = state;
 
         //If the last state was the busy state, and less than min time has passed; keep image as busy until delay fn.
         //Otherwise, just switch to the state passed.
         if( previousState === states.busy && (timeSince < MIN_TIME_VISIBLE) ){
+            var thisStatus = this;
             $("#navStatus .navIcon").attr("src", statusImages[states.busy]);
             _.delay(function(){
-                $("#navStatus .navIcon").attr("src", statusImages[state]);
-                $(document).trigger("status.stateChange");
+                thisStatus.setState(state);
             }, (MIN_TIME_VISIBLE-timeSince));
         }else{
-            $("#navStatus .navIcon").attr("src", statusImages[state]);
-            $(document).trigger("status.stateChange");
+            this.setState(state);
         }
 
+    };
+
+    Statuses.prototype.setState = function(state){
+        this.currentState = state;
+        $("#navStatus .navIcon").attr("src", statusImages[state]);
+        $(document).trigger("status.stateChange");
     };
 
     Statuses.prototype.setUndoMode = function(mode){
@@ -204,7 +209,7 @@
             this.statusPopup.enablePopup();
         }
 
-        newMenu = createStatusMenu(this, mode);
+        newMenu = createStatusMenu(this.currentUndoMode);
         //console.log("currentUndoMode: "+mode);
 
         //Replace menu in popup
