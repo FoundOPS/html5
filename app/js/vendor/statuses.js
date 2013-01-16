@@ -57,6 +57,10 @@
             return methods[ method ].apply(this, Array.prototype.slice.call(arguments, 1));
         } else if (typeof method === 'object' || !method) {
             arguments[0].selector = this.selector;
+            //var args = [];
+            //var config = {};
+            //config.selector = this.selector;
+            //args.push(config);
             return methods.init.apply(this, arguments);
         } else {
             $.error('Method ' + method + ' does not exist on jQuery.navigator');
@@ -90,22 +94,32 @@
     var INIT_STATUS_IMG = statusImages[states.idle];
 
     var createStatusMenu = function(mode){
-        var contents = [];
-        var menu = {
-            id: "navStatus",
-            contents: contents,
-            disableHeader: true
-        };
+        var buttons = "";
+        var undoLast = '<div id="undoLast" class="statusPopupButton">Undo Last</div>';
+        var undoAll = '<div id="undoAll" class="statusPopupButton">Undo All</div>';
 
-        var undoLastMenu = {"name": "Undo Last", id: "undoLast"};
-        var undoAllMenu = {"name": "Undo All", id: "undoAll"};
-
+        //Init Popup.
         if(mode >= 1){
-            contents.push(undoLastMenu);
+            buttons += undoLast;
         }
         if(mode >= 2){
-            contents.push(undoAllMenu);
+            buttons += undoAll;
         }
+
+        var menuHtml =
+            '<div id="statusPopup">' +
+                '<div class="statusPopupMessage">' +
+                    'Your changes to entity have been saved.' +
+                '</div>' +
+                '<div id="buttonContainer">' +
+                    buttons +
+                '</div>' +
+            '</div>';
+
+        var menu = {
+            id: "navStatus",
+            contents: menuHtml
+        };
         return menu;
     };
 
@@ -132,12 +146,13 @@
             '</div>';
         $(targetDiv).append(statusDiv);
 
-        //Init Popup.
         var menu = createStatusMenu(thisStatus.currentUndoMode);
-        thisStatus.statusPopup = $("#navStatus").optionsPopup(menu);
+        thisStatus.statusPopup = $("#navStatus").popup(menu);
 
         this.state(INIT_STATE);
         this.setUndoMode(INIT_UNDO_MODE);
+        this.onUndoAll();
+        this.onUndoLast();
 
         $(document).on("click", "#undoLast", function(){
             $(document).trigger("status.undoLast");
@@ -157,10 +172,8 @@
         //Else, set state.
         if(typeof(state) === "undefined"){
             //console.log(this.currentState);
-            console.log("getState: "+state);
             return this.currentState;
         }
-        console.log("State: "+state);
         //Minimum time busy icon is visible.
         var MIN_TIME_VISIBLE = 800;
 
@@ -193,7 +206,7 @@
     Statuses.prototype.setUndoMode = function(mode){
         var previousMode = this.currentUndoMode;
         this.currentUndoMode = mode;
-        var popupClass = this.statusPopup.superConstructor;
+        var popupClass = this.statusPopup.constructor;
         var menu = popupClass.getMenu("navStatus");
         var newMenu = null;
 
