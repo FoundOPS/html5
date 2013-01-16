@@ -101,11 +101,11 @@ html{
     height: @popupCarrotHeight;
     width: @popupCarrotWidth;
 
-    background: url('images/popupArrowTop.png') no-repeat;
+    background: url('images/popupSprite.png') no-repeat 0px 0px;
 }
 
 .flipArrow{
-    background: url('../img/popupArrowBot.png') no-repeat !important;
+    background: url('images/popupSprite.png') no-repeat 0px -20px !important;
     //-webkit-transform: rotate(180deg);
     //-moz-transform: rotate(180deg);
     //filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=2);
@@ -120,20 +120,20 @@ html{
 #popupBack, #popupClose{
     position: absolute;
     cursor: pointer;
-    height: @popupHeaderHeight;
-    width: @popupHeaderHeight;
-    top: 0;
+    height: 22px;
+    width: 21px;
+    top: 14px;
     .hover;
 }
 
 #popupBack {
-    left: 0;
-    background: url('images/popupBack.png') center center no-repeat;
+    left: 14px;
+    background: url('images/popupSprite.png') no-repeat -9px -116px;
 }
 
 #popupClose {
-    right: 0;
-    background: url('images/popupClose.png') center center no-repeat;
+    right: 14px;
+    background: url('images/popupSprite.png') no-repeat -5px -89px;
 }
 
 #popupTitle{
