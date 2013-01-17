@@ -133,6 +133,14 @@ require(["developer", "db/services", "db/session", "tools/parameters", "tools/si
 
         $(document).navigator(data);
         $(document).navigator('hideSearch');
+        window.statuses = $("#navContainer").statuses({
+            undoLast: function () {
+                saveHistory.undo(false);
+            },
+            undoAll: function () {
+                saveHistory.undo(true);
+            }
+        }).data("statuses");
 
         //reset the images 1.5 seconds after loading to workaround a shared access key bug
         _.delay(function () {
@@ -144,13 +152,6 @@ require(["developer", "db/services", "db/session", "tools/parameters", "tools/si
             var initialSection = {name: developer.IS_MOBILE ? "routes" : "updates" };
             parameters.set({section: initialSection, replace: true});
         }
-
-        $("#navContainer").status({
-            undoLastFunction: function(){ saveHistory.undo(false)},
-            undoAllFunction: function(){ saveHistory.undo(true)}
-        });
-
-
     });
 
     //TODO make sectionSelected a navigator event

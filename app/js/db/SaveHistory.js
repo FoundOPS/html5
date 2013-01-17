@@ -55,30 +55,30 @@ define(['tools/generalTools'], function (generalTools) {
 
             if (numChanges > 1) {
                 text += "&nbsp;&nbsp;&nbsp;<br/><a onclick='saveHistory.undo(true)' style='position:relative; top:3px;'>Undo All Changes to " + saveHistory.options.page + "</a>&nbsp;&nbsp;&nbsp;<br/><a onclick='saveHistory.undo(false)' style='position:relative; top:4px;'>Undo Last Change</a>";
-                $("#nav").status('setUndoMode', 2);
+                statuses.setUndoMode(2);
             } else {
                 text += "&nbsp;&nbsp;&nbsp;<a onclick='saveHistory.undo(true)'>Undo</a>";
-                $("#nav").status('setUndoMode', 1);
+                statuses.setUndoMode(1);
             }
 
             timeout = 5000;
         } else {
             timeout = 5000;
-            $("#nav").status('setUndoMode', 0);
+            statuses.setUndoMode(0);
         }
 
         /*$.noty({
-            type: 'success',
-            layout: 'topCenter',
-            easing: 'swing',
-            text: text,
-            speed: 300,
-            timeout: timeout,
-            closeOnSelfClick: false
-        });*/
+         type: 'success',
+         layout: 'topCenter',
+         easing: 'swing',
+         text: text,
+         speed: 300,
+         timeout: timeout,
+         closeOnSelfClick: false
+         });*/
 
         //Set status - done
-        $("#nav").status("state", 0);
+        statuses.state(0);
     };
 
     /**
@@ -92,15 +92,15 @@ define(['tools/generalTools'], function (generalTools) {
         }
 
         /*$.noty({
-            type: 'error',
-            layout: 'topCenter',
-            easing: 'swing',
-            text: text,
-            speed: 300
-        });*/
+         type: 'error',
+         layout: 'topCenter',
+         easing: 'swing',
+         text: text,
+         speed: 300
+         });*/
 
         //Set status - error
-        $("#nav").status("state", 2);
+        statuses.state(2);
     };
 
     saveHistory.close = function () {
@@ -125,6 +125,10 @@ define(['tools/generalTools'], function (generalTools) {
      */
     saveHistory.resetHistory = function () {
         saveHistory.states = [];
+        if (window.statuses) {
+            statuses.setUndoMode(0);
+        }
+
         if (saveHistory.options.state) {
             var state = saveHistory.options.state();
             if (!state) {
@@ -138,7 +142,7 @@ define(['tools/generalTools'], function (generalTools) {
 
     saveHistory.save = _.debounce(function () {
         //Set status - busy
-        $("#nav").status("state", 1);
+        statuses.state(1);
 
         //save the state (if there is a function to get it)
         if (saveHistory.options.state) {
