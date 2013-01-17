@@ -12,23 +12,25 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
             /**
              * options - {
              *     query {function(string, callback())}
-             *        This should be a function that uses a passed string to query results. It should pass these results to the callback function supplied.
+             *        This should be a function that uses a passed string to query results.
+             *        It should pass these results to the callback function supplied.
              *     data {Array.<*>}
              *         Used to define results immediately (independent of search term)
              *         array: data to display
              *     formatOption {function(data)}
              *         should return text or a valid HTML string to display as an option (defaults to toString)
              *     onSelect {function(e, selectedData)}
-             *         A callback function triggered when an item is selected. The parameters are the triggered jQuery event and the selected data.
+             *         A callback function triggered when an item is selected.
+             *         The parameters are the triggered jQuery event and the selected data.
              *     onClose {function()}
              *         A callback function triggered when the list is closed.
              *     minimumInputLength {int}
-             *         number of characters necessary search box to start a search (defaults to 1)
-             *     showPreviousSelection {boolean}
-             *         defines whether the previous selection should be attached at the end of the list or not (defaults to false)
-             *         only works for predefined data, user must set this in their query function if they desire such behavior.
+             *         Number of characters necessary search box to start a search (defaults to 1)
+             *     showPreviousSelection {boolean} (Default: false)
+             *         Defines whether the previous selection should be attached at the end of the list.
+             *         Only works for predefined data, user must set this in their query function if they desire such behavior.
              *     additionalListItem {string}
-             *         optionally add other items to the list (ex. "Manually Place Pin")
+             *         Optionally add other items to the list (ex. "Manually Place Pin")
              *     dontCloseOn {string}
              *         A class from an element that the user would like to be able to click on without closing the optionList.
              * }
@@ -40,9 +42,7 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                     return data ? data.toString() : "";
                 },
                 onSelect: function (event, selectedData) {
-                    if (this._trigger) {
-                        this._trigger("selected", event, selectedData);
-                    }
+                    console.log("selectedData: "+selectedData);
                 },
                 onClose: null,
                 queryDelay: null,
@@ -52,11 +52,16 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                 dontCloseOn: null
             },
 
+// Private functions
+
+            //_create() -
             _create: function () {
-                var widget = this, element = widget.element;
+                var widget = this,
+                    element = widget.element;
                 /**
                  * Model for searchSelect widget elements.
-                 * <div id="" class=""> <-- This is the element that searchSelect is created on (id/class can be whatever user desires).
+                 * searchSelect is created on the id/class below.
+                 * <div id="" class="">
                  *     <div>
                  *         <input type="text" />
                  *     </div>
@@ -71,9 +76,12 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                  *         <div class="km-touch-scrollbar km-vertical-scrollbar"></div>
                  *     </div>
                  * </div>
-                 */
-                var context = element.context;
+                 **/
 
+                //These variables act as flags in order to stop behavior from certain listeners when other listeners fire.
+                var _scrolling = false;
+
+                var context = element.context;
                 context.appendChild(document.createElement("div"));
                 context.children[0].appendChild(document.createElement("input"));
                 context.children[0].children[0].setAttribute("type", "text");
@@ -87,9 +95,13 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                 context.children[1].appendChild(document.createElement("ul"));
                 context.children[1].children[0].setAttribute("class", "optionList");
 
-                //Listen to input in search box and update the widget accordingly.
-                generalTools.observeInput(element.find("input"), $.proxy(widget._getOptions, widget), widget.options.queryDelay || 1);
+                var input = element.find("input");
 
+                //Listen to input in search box and update the widget accordingly.
+                generalTools.observeInput(input, widget._getOptions, widget.options.queryDelay || 1);
+
+                //Tests if touch device by checking for exceptions on TouchEvent creation.
+                //TODO: Check if this is compatible with all devices.
                 try {
                     document.createEvent("TouchEvent");
                     widget.isTouchDevice = true;
@@ -97,37 +109,31 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                     widget.isTouchDevice = false;
                 }
 
+                //If not touch, allow normal html div scrolling.
                 if (!widget.isTouchDevice) {
                     element.find(".optionList").css("overflow-y", "auto");
                 }
 
-                //These variables act as flags in order to stop behavior from certain listeners when other listeners fire.
-                var _scrolling;
-
                 //Event Listeners
-                element.find("input").on("click touchstart", element.find("input"), function () {
+                input.on("click touchstart", function () {
                     if (widget.selectedOptionTempText) {
-                        this.value = widget.selectedOptionTempText;
+                        input.val(widget.selectedOptionTempText);
                     }
-                    widget.selectedOptionTempText = element.find("input").val();
-                    widget._getOptions(this.value);
+                    widget.selectedOptionTempText = input.val();
+                    widget._getOptions(input.val());
                 });
+
                 //Select an option on click or touchend. Does not occur if user is scrolling instead of selecting.
-                element.find(".optionList").on("click touchend", element.find(".optionList li"), function (e) {
+                var optionsList = element.find(".optionList");
+                optionsList.on("click touchend", function (e) {
                     //Wait for scrolling flag to get set if user is scrolling.
                     setTimeout(function () {
                         if (!_scrolling) {
                             widget.selectedData = $(e.target).parent().data().selectedData || $(e.target).data().selectedData;
-                            if (e.target.nodeName === "SPAN") {
-                                //TODO ?
-                                widget.selectedOptionText = $(e.target).parent()[0].innerText;
-                            } else {
-                                //TODO ?
-                                widget.selectedOptionText = $(e.target)[0].innerText;
-                            }
-                            //TODO?
-                            element.find("input")[0].value = widget.selectedOptionText === "Manually Place Pin" ? "" : widget.selectedOptionText;
+
+                            element.find("input")[0].value = widget.options.formatOption(widget.selectedData);
                             widget.selectedOptionTempText = "";
+
                             if (widget.options.onSelect) {
                                 widget.options.onSelect(e, widget.selectedData);
                             }
@@ -146,13 +152,16 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                     }, 200);
                     _scrolling = false;
                 });
+
                 //Set the scrolling flag to on.
-                element.find(".optionList").on("touchmove", element.find(".optionList"), function () {
+                optionsList.on("touchmove", function () {
                     _scrolling = true;
                 });
+
                 $(document.body).on('touchmove', function () {
                     _scrolling = true;
                 });
+
                 //When clicking outside of the select widget, close the option list and handle text inside the textbox.
                 $(document.body).on('click touchend', function (e) {
                     //This if statement creates an xor logic gate
@@ -175,22 +184,6 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                         }, 200);
                     }
                 });
-            },
-
-            // Private functions
-            //Disable touch scrolling of the view when user is scrolling whatever element is passed.
-            _disableTouchScroll: function (element) {
-                if (this.isTouchDevice) {
-                    var scrollStartPos = 0;
-                    element.addEventListener("touchstart", function (event) {
-                        scrollStartPos = this.scrollTop + event.touches[0].pageY;
-                        event.preventDefault();
-                    }, false);
-                    element.addEventListener("touchmove", function (event) {
-                        this.scrollTop = scrollStartPos - event.touches[0].pageY;
-                        event.preventDefault();
-                    }, false);
-                }
             },
 
             _getOptions: function (searchTerm) {
@@ -220,26 +213,31 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                 }
             },
 
-            // Public functions
+// Public functions
+            //clearList() -
             clearList: function () {
-                var optionList = this.element.find(".optionList")[0];
+                var optionList = this.element.find(".optionList").first();
                 //Clear current list if there is one.
-                while (optionList.hasChildNodes()) {
-                    optionList.removeChild(optionList.lastChild);
-                }
+                optionList.children().remove();
+                /*while (optionList.hasChildNodes()) {
+                 optionList.removeChild(optionList.lastChild);
+                 }*/
             },
 
-            //Opens the list of items the user can select.
+            //open(options) - Opens the list of items the user can select.
             open: function (options) {
-                var widget = this, element = widget.element,
-                    optionList = element.find(".optionList"),
-                    i;
+                var widget = this,
+                    element = widget.element,
+                    optionList = element.find(".optionList");
+
                 widget.clearList();
                 //Set option list to same width as input box.
-                element.find("#optionListScroller").width(element.find("input").parent().width());
+                var inputParentWidth = element.find("input").parent().width();
+                element.find("#optionListScroller").width(inputParentWidth);
                 if (options) {
                     if (options.length) {
                         //Add each option item to the list.
+                        var i=0;
                         for (i = 0; i < options.length; i++) {
                             var className;
                             //use a different class for client locations
@@ -249,8 +247,14 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                                 className = "fromWeb";
                             }
 
-                            optionList.append($('<li id="' + i + '"><span class="' + className + '"></span><span class="name">' + widget.options.formatOption(options[i]) +
-                                '</span></li>').data("selectedData", options[i]));
+                            var listElement = $('' +
+                                '<li id="' + i + '">' +
+                                    '<span class="' + className + '"></span>' +
+                                    '<span class="name">' + widget.options.formatOption(options[i]) + '</span>' +
+                                '</li>');
+                            optionList.append(listElement);
+                            listElement.data("selectedData", options[i]);
+                            console.log("selectedData: "+ listElement.data("selectedData"))
                         }
                     } else {
                         //optionList.append($('<div id="noOptions"><span>No Options Found</span></div>'));
@@ -278,7 +282,8 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                 });
             },
 
-            //Returns the selected data. If a parameter is supplied it set the current selection to the corresponding data.
+            //data(selectData) - Returns the selected data.
+            // If a parameter is supplied it set the current selection to the corresponding data.
             data: function (selectData) {
                 var widget = this;
 
@@ -294,13 +299,12 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                 return widget.selectedData;
             },
 
-            //Returns the current selected data's text.
+            //text() - Returns the current selected data's text.
             text: function () {
                 var widget = this;
                 var data = widget.selectedData;
                 if (data) {
-                    //get the value directly from the input so that the value will be saved even if the user doesn't click on one of the options
-                    var text = widget.element.find("input").val();
+                    var text = widget.options.formatOption(data);
                     return text ? text : "";
                 }
 

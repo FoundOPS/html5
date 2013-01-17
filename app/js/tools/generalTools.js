@@ -143,6 +143,8 @@ define(["developer", 'tools/dateTools'], function (developer, dateTools) {
 
         if (displayString !== "") {
             return displayString;
+        } else if (displayString === "Manually Place Pin") {
+            return "";
         } else {
             return location.Latitude + ", " + location.Longitude;
         }
