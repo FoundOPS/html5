@@ -404,7 +404,7 @@ define(["db/services", "ui/ui", "tools/dateTools", "tools/generalTools", "tools/
                 //get the row that corresponds to the new item
                 var row = widget.kendoGrid.tbody.find('tr[data-uid="' + widget._selectedServiceHolder.uid + '"]');
 
-                //check for the row on thepage
+                //check for the row on the page
                 if (row[0]) {
                     //select the service holder in the grid
                     widget.kendoGrid.select(row);
