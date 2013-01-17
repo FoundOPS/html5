@@ -299,6 +299,7 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                 var widget = this;
                 var data = widget.selectedData;
                 if (data) {
+                    //get the value directly from the input so that the value will be saved even if the user doesn't click on one of the options
                     var text = widget.element.find("input").val();
                     return text ? text : "";
                 }
