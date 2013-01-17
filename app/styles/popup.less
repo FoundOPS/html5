@@ -64,7 +64,7 @@ html{
     visibility: visible !important;
     z-index: 10;
     -webkit-transform: translateZ(0);
-    border-top: 2px solid @darkGrey;
+    border-top: 1px solid @darkGrey;
 
     a {
         color: @charcoal;
@@ -77,14 +77,14 @@ html{
     .borderBox;
     width: 100%;
     overflow: hidden;
-    border-bottom: 1px solid @charcoal;
+    //border-bottom: 1px solid @charcoal;
     line-height: @popupHeaderHeight;
     font-size: 16/18em;
-    background: @lighterGrey;
-    border-bottom: 2px solid @darkGrey;
+    background: @white;
+    border-bottom: 1px solid @darkGrey;
     visibility: visible;
-    border-right: 2px solid @darkGrey;
-    border-left: 2px solid @darkGrey;
+    border-right: 1px solid @darkGrey;
+    border-left: 1px solid @darkGrey;
     height: 49px;
     pointer-events: auto;
 }
@@ -101,11 +101,11 @@ html{
     height: @popupCarrotHeight;
     width: @popupCarrotWidth;
 
-    background: url('images/popupArrowTop.png') no-repeat;
+    background: url('images/popupSprite.png') no-repeat 0px 0px;
 }
 
 .flipArrow{
-    background: url('../img/popupArrowBot.png') no-repeat !important;
+    background: url('images/popupSprite.png') no-repeat 0px -20px !important;
     //-webkit-transform: rotate(180deg);
     //-moz-transform: rotate(180deg);
     //filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=2);
@@ -120,20 +120,20 @@ html{
 #popupBack, #popupClose{
     position: absolute;
     cursor: pointer;
-    height: @popupHeaderHeight;
-    width: @popupHeaderHeight;
-    top: 0;
+    height: 22px;
+    width: 21px;
+    top: 14px;
     .hover;
 }
 
 #popupBack {
-    left: 0;
-    background: url('images/popupBack.png') center center no-repeat;
+    left: 14px;
+    background: url('images/popupSprite.png') no-repeat -9px -116px;
 }
 
 #popupClose {
-    right: 0;
-    background: url('images/popupClose.png') center center no-repeat;
+    right: 14px;
+    background: url('images/popupSprite.png') no-repeat -5px -89px;
 }
 
 #popupTitle{
@@ -161,17 +161,17 @@ html{
     position: relative;
     overflow: auto;
 
-    min-height: 65px;
+    min-height: 43px;
     max-height: 100%;
     width: 100%;
 
     text-align: left;
     font-size: 1em;
-    background: @lighterGrey;
+    background: @white;
 
-    border-right: 2px solid @darkGrey;
-    border-left: 2px solid @darkGrey;
-    border-bottom: 2px solid @darkGrey;
+    border-right: 1px solid @darkGrey;
+    border-left: 1px solid @darkGrey;
+    border-bottom: 1px solid @darkGrey;
     .borderBox;
 
     .last {
@@ -184,7 +184,7 @@ html{
     display: block;
     cursor: pointer;
     padding: 12px 23px;
-    border-bottom: 1px solid @darkGrey;
+    border-bottom: 1px solid @lightGrey;
 }
 
 .popupContentRow:hover{
