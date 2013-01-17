@@ -108,7 +108,7 @@
 
         var menuHtml =
             '<div id="statusPopup">' +
-                '<div class="statusPopupMessage">' +
+                '<div class="statusPopupMessage success">' +
                     'Your changes to entity have been saved.' +
                 '</div>' +
                 '<div id="buttonContainer">' +

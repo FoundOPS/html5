@@ -184,7 +184,7 @@ input:focus {
 /* ie 6/7 fix
 *display: inline;
 zoom: 1;*/
-    padding-left: 50px;
+    padding-left: 25px;
     font-size: 1em;
 //line-height: @navHeightMax - 4;
 
@@ -205,8 +205,9 @@ zoom: 1;*/
     box-shadow: inset 0 0 5px #777779;
     display: inline-block;
     vertical-align: middle;
-    margin-right: 60px; /*Spacing between nav elements*/
+    margin-right: 20px; /*Spacing between nav elements*/
     line-height: normal;
+    height: 28px;
 
     a {
         //Allows links to take up 100% of clickable space.
@@ -695,6 +696,14 @@ zoom: 1;*/
 
 .statusPopupButton:active{
     background: @blue;
+}
+
+.success{
+    color: @green;
+}
+
+.failure{
+    color: @red;
 }
 
 .idleStatus{
