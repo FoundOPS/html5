@@ -5,11 +5,6 @@
 //need to require kendo so it is loaded before this widget, otherwise funky stuff happens
 define(["tools/generalTools", "tools/parserTools", "tools/analytics", "widgets/searchSelect"], function (generalTools, parserTools, analytics) {
     //region Locals
-//   var sampleContacts = [
-//            {Entity: "Burger King", Data: "765-494-2786", Type: "Phone Number", Label: "Mobile"},
-//            {Entity: "Burger King", Data: "bk47906@gmail.com", Type: "Email Address", Label: "Personal"},
-//            {Entity: "Mary Lou's", Data: "http://www.marylousdonuts.com", Type: "Website", Label: "Business"}
-//        ];
 
     //labels for each category
     var phoneLabels = ["Mobile", "Work", "Home", "Fax"],
@@ -192,8 +187,9 @@ define(["tools/generalTools", "tools/parserTools", "tools/analytics", "widgets/s
             }
 
             element.find(".splitBtnList a").on("click touchend", function (e) {
-                //TODO get index and respective data instead of accessing directly
-                 var value = e.currentTarget.children[2].innerText;
+                //get the index of the contact that was clicked on
+                 var index = e.currentTarget.parentElement.id;
+                 var value = contacts[index].Data;
 
                 if (e.currentTarget.children[0].className === "Phone") {
                     analytics.track("Phone Contact Click");
@@ -369,11 +365,12 @@ define(["tools/generalTools", "tools/parserTools", "tools/analytics", "widgets/s
         },
 
         //remove the widget
-        removeWidget: function () {
+        destroy: function () {
             //TODO destroy inner select2's searchSelect other widgets
             //TODO de-register listeners
             var widget = this;
             $(widget.element)[0].innerHTML = "";
+            // widget._labelSearchSelect.destroy();
         }
     };
 
