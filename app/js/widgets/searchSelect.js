@@ -17,7 +17,7 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
              *         Used to define results immediately (independent of search term)
              *         array: data to display
              *     formatOption {function(data)}
-             *         should return text or a valid HTML string to display as an option (defaults to JSON.stringify())
+             *         should return text or a valid HTML string to display as an option (defaults to toString)
              *     onSelect {function(e, selectedData)}
              *         A callback function triggered when an item is selected. The parameters are the triggered jQuery event and the selected data.
              *     onClose {function()}
@@ -37,7 +37,7 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                 query: undefined,
                 data: undefined,
                 formatOption: function (data) {
-                    return JSON.stringify(data);
+                    return data ? data.toString() : "";
                 },
                 onSelect: function (event, selectedData) {
                     if (this._trigger) {
@@ -78,10 +78,12 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                 context.children[0].appendChild(document.createElement("input"));
                 context.children[0].children[0].setAttribute("type", "text");
                 context.appendChild(document.createElement("div"));
-                context.children[1].setAttribute("id", "optionListScroller");
-                context.children[1].setAttribute("data-role", "scroller");
-                context.children[1].setAttribute("data-elastic", "false");
-                context.children[1].setAttribute("class", "scroller-content");
+                $(context.children[1]).attr({
+                    id: "optionListScroller",
+                    "data-role": "scroller",
+                    "data-elastic": "false",
+                    "class": "scroller-content"
+                });
                 context.children[1].appendChild(document.createElement("ul"));
                 context.children[1].children[0].setAttribute("class", "optionList");
 
@@ -117,17 +119,25 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                         if (!_scrolling) {
                             widget.selectedData = $(e.target).parent().data().selectedData || $(e.target).data().selectedData;
                             if (e.target.nodeName === "SPAN") {
+                                //TODO ?
                                 widget.selectedOptionText = $(e.target).parent()[0].innerText;
                             } else {
+                                //TODO ?
                                 widget.selectedOptionText = $(e.target)[0].innerText;
                             }
+                            //TODO?
                             element.find("input")[0].value = widget.selectedOptionText === "Manually Place Pin" ? "" : widget.selectedOptionText;
                             widget.selectedOptionTempText = "";
-                            widget.options.onSelect(e, widget.selectedData);
+                            if (widget.options.onSelect) {
+                                widget.options.onSelect(e, widget.selectedData);
+                            }
 //                            //Wait for listeners from other widgets to use the selected option before removing it from the DOM.
 //                            setTimeout(function () {
-                                widget.clearList();
+                            widget.clearList();
+                            if (widget.options.onClose) {
                                 widget.options.onClose();
+                            }
+
 //                            }, 200);
                             if (widget.isTouchDevice) {
                                 $(".km-scroll-wrapper").kendoMobileScroller("reset");
@@ -145,14 +155,19 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                 });
                 //When clicking outside of the select widget, close the option list and handle text inside the textbox.
                 $(document.body).on('click touchend', function (e) {
-                    //This if statement creates an xor logic gate. If there is a dontCloseOn option provided by the user it will use it to check if it should clear the option list.
+                    //This if statement creates an xor logic gate
+                    //If there is a dontCloseOn option provided by the user it will use it to check if it should clear the option list.
                     //TODO: Find a way to do this without relying on searchSelect element's class name (element.context.className).
-                    if ($(e.target).parents().filter("." + element.context.className).length === 0 || widget.options.dontCloseOn && e.target.className ? e.target.className.indexOf(widget.options.dontCloseOn) === -1 : false) {
+                    if ($(e.target).parents().filter("." + element.context.className).length === 0 ||
+                        widget.options.dontCloseOn && e.target.className ? e.target.className.indexOf(widget.options.dontCloseOn) === -1 : false) {
                         setTimeout(function () {
                             if (!_scrolling) {
                                 widget.selectedOptionTempText = element.find("input")[0].value;
                                 widget.clearList();
-                                widget.options.onClose();
+                                if (widget.options.onClose) {
+                                    widget.options.onClose();
+                                }
+
                                 if (widget.isTouchDevice) {
                                     $(".km-scroll-wrapper").kendoMobileScroller("reset");
                                 }
@@ -197,9 +212,9 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                 }
 
                 if (widget.isTouchDevice) {
-                    $(".km-scroll-wrapper").kendoMobileScroller("scrollTo", 0, - (element.height()));
+                    $(".km-scroll-wrapper").kendoMobileScroller("scrollTo", 0, -(element.height()));
                     element.find(".optionList").css("-webkit-transform", "translate3d(0px, " +
-                        (element.height()) + "px, 0)").css("position", "relative").css("top", - element.height());
+                        (element.height()) + "px, 0)").css("position", "relative").css("top", -element.height());
                     $(".km-scroll-container").css("-webkit-transform", "translate3d(0px, -1px, 0)");
                 }
             },
@@ -240,6 +255,7 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                         //optionList.append($('<div id="noOptions"><span>No Options Found</span></div>'));
                     }
                 }
+
                 if (widget.options.showPreviousSelection && widget.selectedData) {
                     optionList.append($('<li><span class="previousSelection"></span><span id="previousSelection" class="name">' +
                         widget.options.formatOption(widget.selectedData) + '</span></li>').data("selectedData", widget.selectedData));
@@ -267,9 +283,7 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
 
                 if (selectData) {
                     widget.selectedData = selectData;
-                    widget.selectedOptionText = widget.options.formatOption(selectData);
-                    //TODO AP this should not be part of search select
-                    widget.element.find("input")[0].value = widget.selectedOptionText === "Manually Place Pin" ? "" : widget.selectedOptionText;
+                    widget.element.find("input")[0].value = widget.text();
                     //TODO private var
                     widget.selectedOptionTempText = "";
                     widget.options.onSelect(null, widget.selectedData);
@@ -282,7 +296,13 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
             //Returns the current selected data's text.
             text: function () {
                 var widget = this;
-                return widget.selectedOptionText ? widget.selectedOptionText : "";
+                var data = widget.selectedData;
+                if (data) {
+                    var text = widget.options.formatOption(data);
+                    return text ? text : "";
+                }
+
+                return "";
             }
         };
 

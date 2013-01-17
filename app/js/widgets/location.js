@@ -456,7 +456,6 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
                 $(widget.element).find(".leaflet-marker-pane").find("img").each(function () {
                     //prevent a canvas error because the widget isn't ready yet, try again
                     if (this.height === 0 || this.width === 0) {
-                        debugger;
                         return false; //break the loop
                     }
 

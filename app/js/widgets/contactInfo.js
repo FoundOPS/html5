@@ -12,37 +12,24 @@ define(["tools/generalTools", "tools/parserTools", "tools/analytics", "widgets/s
 //        ];
 
     //labels for each category
-    var phoneLabels = [
-            {value: "Mobile"},
-            {value: "Work"},
-            {value: "Home"},
-            {value: "Fax"}
-        ],
-        websiteLabels = [
-            {value: "Personal"},
-            {value: "Business"},
-            {value: "Blog"}
-        ],
-        emailLabels = [
-            {value: "Personal"},
-            {value: "Business"}
-        ],
+    var phoneLabels = ["Mobile", "Work", "Home", "Fax"],
+        websiteLabels = ["Personal", "Business", "Blog"],
+        emailLabels = ["Personal" , "Business"],
         otherLabels = [];
     //endregion
 
-    var widget =  {
+    var widget = {
         //Contacts is an array of the contacts for the widget to display.
         options: {
-            contacts: []
+            data: []
         },
-        _options: {
-            _isNew: null,
-            _editIndex: null,
-            _currentLabels: null
-        },
+        _isNew: null,
+        _editIndex: null,
+        //the currently selected category (phone / website / email) labels
+        _categoryLabels: null,
         _init: function () {
             var widget = this;
-            widget.renderContactList(widget.options.contacts);
+            widget._renderList();
         },
         _create: function () {
             var widget = this, element = $(widget.element);
@@ -50,30 +37,30 @@ define(["tools/generalTools", "tools/parserTools", "tools/analytics", "widgets/s
                 //list pane(first view)
                 '<ul class="splitBtnList"></ul>' +
                 '<div class="addButtonWrapper">' +
-                    '<button class="k-button k-button-icontext add"><span class="k-icon k-add"></span>Add New</button>' +
+                '<button class="k-button k-button-icontext add"><span class="k-icon k-add"></span>Add New</button>' +
                 '</div>' +
                 //edit pane
                 '<div class="editWrapper">' +
-                    '<label>Value</label><br />' +
-                    '<input class="value" type="text"/><br />' +
-                    '<label>Label</label><br />' +
-                    '<select class="labelIcon">' +
-                        '<option class="EmailSmall" value="Email">&nbsp;</option>' +
-                        '<option class="WebsiteSmall" value="Website">&nbsp;</option>' +
-                        '<option class="PhoneSmall" value="Phone">&nbsp;</option>' +
-                        '<option class="OtherSmall" value="Other">&nbsp;</option>' +
-                    '</select>' +
-                    '<div class="contactInfoSearchSelect" /></div>' +
-                    '<br />' +
+                '<label>Value</label><br />' +
+                '<input class="value" type="text"/><br />' +
+                '<label>Label</label><br />' +
+                '<select class="labelIcon">' +
+                '<option class="EmailSmall" value="Email">&nbsp;</option>' +
+                '<option class="WebsiteSmall" value="Website">&nbsp;</option>' +
+                '<option class="PhoneSmall" value="Phone">&nbsp;</option>' +
+                '<option class="OtherSmall" value="Other">&nbsp;</option>' +
+                '</select>' +
+                '<div class="contactInfoSearchSelect" /></div>' +
+                '<br />' +
                 '</div>' +
                 '<div class="saveDeleteButtonWrapper">' +
-                    '<button class="k-button k-button-icontext save"><span class="k-icon k-update"></span>Save</button>' +
-                    '<button class="k-button k-button-icontext delete"><span class="k-icon k-delete"></span>Delete</button>' +
+                '<button class="k-button k-button-icontext save"><span class="k-icon k-update"></span>Save</button>' +
+                '<button class="k-button k-button-icontext delete"><span class="k-icon k-delete"></span>Delete</button>' +
                 '</div>');
 
             widget.element.append(_contactInfo);
 
-            //setup the dropdown of category icons
+            //setup the drop down of category icons
             element.find(".labelIcon").select2({
                 placeholder: "",
                 width: "28px",
@@ -81,72 +68,70 @@ define(["tools/generalTools", "tools/parserTools", "tools/analytics", "widgets/s
                 minimumResultsForSearch: 15,
                 dropdownCssClass: "bigdrop iconDropdown"
             }).on("change", function (e) {
-                //change the label icon
-                widget._changeType(e.val, false);
-            });
+                    //change the label icon
+                    widget._changeType(e.val, false);
+                });
 
-            widget._setupLabelDropdown();
+            widget._setupLabelSelector();
 
             element.find(".add").on("click touchend", function () {
                 //add an empty contact to the list
-                widget.options.contacts.unshift({Entity: "New", Id: generalTools.newGuid(), Data: "", Type: "Other", Label: ""});
-                //refresh the list so it contains the new contact
-                widget.renderContactList(widget.options.contacts);
-                //set the edit index to the last item(the new item gets added to the end)
-                widget._options._editIndex = 0;
-                //move to edit mode with the new contact
-                widget._edit(widget.options.contacts[widget._options._editIndex]);
-                widget._options._isNew = true;
+                widget.options.data.unshift({Entity: "New", Id: generalTools.newGuid(), Data: "", Type: "Other", Label: ""});
+                widget._edit(0);
+                widget._isNew = true;
             });
+
             element.find(".save").on("click touchend", element, function () {
+                var contact = widget.select();
+
                 //save the old value to be used to check for changes
-                var oldContact = generalTools.deepClone(widget.options.contacts[widget._options._editIndex]);
+                var oldContact = generalTools.deepClone(contact);
+
                 //get the value of the selected label
-                var selectedLabel = element.find(".contactInfoSearchSelect input").val();
-                //set the value
-                widget.options.contacts[widget._options._editIndex].Data = element.find(".editWrapper .value").val();
-                //set the label
-                widget.options.contacts[widget._options._editIndex].Label = selectedLabel;
-                //set the category
-                widget.options.contacts[widget._options._editIndex].Type = element.find(".labelIcon").select2("val");
-                //refresh the list with the new values
-                widget.renderContactList(widget.options.contacts);
+                var selectedLabel = widget._labelSearchSelect.text();
 
-                //check if the label is one that was custon added
-                var isOldLabel = _.find(widget._options._currentLabels, function (label) {
-                    return label.value === selectedLabel;
+                //set the value, label, category
+                contact.Data = element.find(".editWrapper .value").val();
+                contact.Label = selectedLabel;
+                contact.Type = element.find(".labelIcon").select2("val");
+
+                //check if the label exists in the list of labels
+                //if new, add it to the corresponding list
+                var existingLabel = _.find(widget._categoryLabels, function (label) {
+                    return label === selectedLabel;
                 });
-
-                //if custom label, save it to the corresponding list
-                if (!isOldLabel) {
-                    widget._options._currentLabels.push({value: selectedLabel});
+                if (!existingLabel) {
+                    widget._categoryLabels.push(selectedLabel);
                 }
-                //save changes
-                //TODO
-                if (widget._options._isNew && widget.options.entity) {
-                    widget.options.entity.create(widget.options.contacts[widget._options._editIndex]);
+
+                //call the respective call back function
+                if (widget._isNew && widget.options.entity) {
+                    widget.options.entity.create(contact);
                 } else {
                     //check if contact changed
-                    var newContact = generalTools.deepClone(widget.options.contacts[widget._options._editIndex]);
+                    var newContact = generalTools.deepClone(contact);
                     if (!_.isEqual(newContact, oldContact) && widget.options.entity) {
                         widget.options.entity.update(newContact);
                     }
                 }
-                widget._options._isNew = false;
+
+                //open the list with the new values
+                widget._renderList();
             });
+
             element.find(".delete").on("click touchend", element, function () {
-                var id = widget.options.contacts[widget._options._editIndex].Id;
+                var id = widget.select().Id;
 
                 //remove the selected contact from the list
-                widget.options.contacts.splice(widget._options._editIndex, 1);
+                widget.options.data.splice(widget._editIndex, 1);
+
                 //refresh the list of contacts
-                widget.renderContactList(widget.options.contacts);
+                widget._renderList();
+
                 //submit the change
                 if (widget.options.entity) {
                     widget.options.entity.destroy(id);
                 }
-
-                widget._options._isNew = false;
             });
 
             //automatically update the category as the value changes
@@ -155,6 +140,7 @@ define(["tools/generalTools", "tools/parserTools", "tools/analytics", "widgets/s
                 //check what the value is(phone, email, website, or other)
                 if (parserTools.isEmail(string)) {
                     category = "Email";
+                    //TODO use suggestion instead https://github.com/Kicksend/mailcheck
                 } else if (parserTools.isUrl(string)) {
                     category = "Website";
                 } else if (parserTools.isPhone(string)) {
@@ -170,8 +156,14 @@ define(["tools/generalTools", "tools/parserTools", "tools/analytics", "widgets/s
                 widget._setLabelWidth(".editWrapper");
             });
         },
-        renderContactList: function (contacts) {
-            var widget = this, element = $(widget.element), list, category, label, value;
+
+        _renderList: function () {
+            var widget = this, element = $(widget.element), contacts = widget.options.data,
+                list, category, label, value;
+
+            //clear the edit info
+            widget._isNew = false;
+            widget._editIndex = -1;
 
             list = element.find(".splitBtnList");
             list[0].innerHTML = "";
@@ -200,64 +192,79 @@ define(["tools/generalTools", "tools/parserTools", "tools/analytics", "widgets/s
             }
 
             element.find(".splitBtnList a").on("click touchend", function (e) {
+                //TODO get index and respective data instead of accessing directly
+                 var value = e.currentTarget.children[2].innerText;
+
                 if (e.currentTarget.children[0].className === "Phone") {
                     analytics.track("Phone Contact Click");
-                    //TODO remove any non-numbers
-                    window.location.href = "tel:" + e.currentTarget.children[2].innerText;
+                    generalTools.call(value);
                 } else if (e.currentTarget.children[0].className === "Email") {
                     analytics.track("Email Contact Click");
-                    window.open("mailto:" + e.currentTarget.children[2].innerText, "_blank");
+                    generalTools.email(value);
                 } else if (e.currentTarget.children[0].className === "Website") {
                     analytics.track("Website Contact Click");
-                    generalTools.goToUrl(e.currentTarget.children[2].innerText);
+                    generalTools.openUrl(value);
                 }
             });
 
-            //on edit button click
+            //setup edit button click
             element.find(".splitEditBtn").on("click touchend", function (e) {
                 var index;
-                //get the id of the list item that was clicked on(need to check if the span or div element was clicked on)
+                //get the id of the list item that was clicked on (need to check if the span or div element was clicked on)
                 if (e.target.className === "splitEditBtn") {
                     index = e.target.parentNode.id;
                 } else {
                     index = e.target.parentNode.parentElement.id;
                 }
-                //set the edit index
-                widget._options._editIndex = index;
+
                 //move to edit mode
-                widget._edit(widget.options.contacts[index]);
+                widget._edit(index);
             });
 
             widget._changePane("");
         },
 
-        //creates a dropdown for the list of labels
-        _setupLabelDropdown: function () {
+        //creates a search select for the list of labels
+        _setupLabelSelector: function () {
             var widget = this;
 
-            $(widget.element).find(".contactInfoSearchSelect").searchSelect({
-                formatOption: function (item) {
-                    return item.value;
-                },
+            if (widget._labelSearchSelect) {
+                //TODO
+                // widget._labelSearchSelect.destroy();
+            }
+
+            widget._labelSearchSelect = $(widget.element).find(".contactInfoSearchSelect").searchSelect({
                 query: function (searchTerm, callback) {
-                    var data = widget._options._currentLabels.slice(); //clone the phone labels
+                    //clone the labels
+                    var categoryLabels = widget._categoryLabels.slice();
                     if (searchTerm !== "") {
-                        data.unshift({value: searchTerm});
+                        var labelExists = _.any(categoryLabels, function (label) {
+                            return label === searchTerm;
+                        });
+
+                        if (!labelExists) {
+                            categoryLabels.unshift(searchTerm);
+                        }
                     }
-                    callback(data);
+
+                    callback(categoryLabels);
                 },
                 minimumInputLength: 0
-            });
+            }).data("searchSelect");
         },
 
         /**
          * A function to setup edit mode
-         * @param {object} contact
+         * @param {Number} index Index of the item to edit
          * @private
          */
-        _edit: function (contact) {
+        _edit: function (index) {
             var widget = this, type;
-            //set the value in the textbox
+
+            widget._editIndex = index;
+            var contact = widget.options.data[index];
+
+            //set the value in the text box
             $(widget.element).find(".editWrapper .value").val(contact.Data);
 
             //set the category
@@ -271,22 +278,20 @@ define(["tools/generalTools", "tools/parserTools", "tools/analytics", "widgets/s
             widget._changeType(type, true);
 
             //set the label
-            $(widget.element).find(".contactInfoSearchSelect").searchSelect("data", {value: contact.Label});
+            widget._labelSearchSelect.data(contact.Label);
 
             //show the edit pane
             widget._changePane("edit");
         },
 
         /**
-         * Changes the category dropdown and sets up the correct label dropdown list
+         * Changes the category drop down and sets up the correct label drop down list
          * @param {string} category
-         * @param {boolean} manuallySelect If the icon dropdown needs to be changes manually
+         * @param {boolean} updateIcon If the icon drop down needs to be changed
          * @private
          */
-        _changeType: function (category, manuallySelect) {
+        _changeType: function (category, updateIcon) {
             var widget = this, element = $(widget.element), labels = [];
-            //remove the select2 from the label dropdown
-//            element.find(".contactInfoSearchSelect").searchSelect("destroy");
             //set the correct label list based on the category
             if (category === "Phone") {
                 labels = phoneLabels;
@@ -297,21 +302,10 @@ define(["tools/generalTools", "tools/parserTools", "tools/analytics", "widgets/s
             } else {
                 labels = otherLabels;
             }
+            widget._categoryLabels = labels;
 
-            //get the selected label
-            var label = element.find(".contactInfoSearchSelect").searchSelect("text");
-            var sameLabels;
-            if (widget._options._currentLabels === labels) {
-                sameLabels = true;
-            } else {
-                widget._options._currentLabels = labels;
-            }
             //set the correct list of labels
-            widget._setupLabelDropdown();
-            //if the labels are the same as before, reset to the original selected label
-            if (sameLabels) {
-                element.find(".contactInfoSearchSelect").searchSelect("data", label);
-            }
+            widget._setupLabelSelector();
 
             //change the selected category icon
             //get reference to the icon category dropdown
@@ -320,8 +314,8 @@ define(["tools/generalTools", "tools/parserTools", "tools/analytics", "widgets/s
             //replace the select2 container's class name with the new class
             $(container)[0].className = "select2-container iconContainer " + category.replace(/\s/g, "") + "Small";
 
-            //set the category in the icon dropdown
-            if (manuallySelect) {
+            //set the category in the icon drop down
+            if (updateIcon) {
                 element.find(".labelIcon").select2("val", category);
             }
         },
@@ -353,19 +347,31 @@ define(["tools/generalTools", "tools/parserTools", "tools/analytics", "widgets/s
                         height: 'show'
                     }, "swing");
                 });
-
             }
         },
 
-        //make sure the label dropdown is correct width
+        //make sure the label drop down is correct width
         _setLabelWidth: function (guideElement) {
             var widget = this;
             var containerWidth = $(widget.element).find(guideElement).width();
             $(widget.element).find(".contactInfoSearchSelect").width(containerWidth - 28);
         },
 
+        /**
+         * @return {*} The selected contact (only available in edit mode)
+         */
+        select: function () {
+            var widget = this;
+            if (widget._editIndex < 0) {
+                return null;
+            }
+            return widget.options.data[widget._editIndex];
+        },
+
         //remove the widget
         removeWidget: function () {
+            //TODO destroy inner select2's searchSelect other widgets
+            //TODO de-register listeners
             var widget = this;
             $(widget.element)[0].innerHTML = "";
         }

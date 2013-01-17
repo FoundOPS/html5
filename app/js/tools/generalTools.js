@@ -36,7 +36,7 @@ define(["developer", 'tools/dateTools'], function (developer, dateTools) {
         $(page + " .saveBtn").removeAttr("disabled");
     };
 
-     /**
+    /**
      * Finds the index based on a filter function
      * @param collection
      * @param filter {Function([element], [index], [collection]}
@@ -50,7 +50,7 @@ define(["developer", 'tools/dateTools'], function (developer, dateTools) {
         }
         return -1;
     };
-    
+
     generalTools.frequencyDetail = {
         OnDayInMonth: 8, //Ex. The 3rd of the month. Cannot be greater than 28 days
         LastOfMonth: 10, //Example Febuary 28th
@@ -319,8 +319,7 @@ define(["developer", 'tools/dateTools'], function (developer, dateTools) {
         element.css("height", newH + "px");
     };
 
-    generalTools.hexToRGB = function (Hex)
-    {
+    generalTools.hexToRGB = function (Hex) {
         var Long = parseInt(Hex.replace(/^#/, ""), 16);
         return {
             R: (Long >>> 16) & 0xff,
@@ -399,17 +398,43 @@ define(["developer", 'tools/dateTools'], function (developer, dateTools) {
         //get the user's location
         navigator.geolocation.getCurrentPosition(function (position) {
             // If geolocation is successful get directions to the location from current position.
-            generalTools.goToUrl("http://maps.google.com/maps?saddr=" + position.coords.latitude + "," + position.coords.longitude + "&daddr=" + navigateQuery);
+            generalTools.openUrl("http://maps.google.com/maps?saddr=" + position.coords.latitude + "," + position.coords.longitude + "&daddr=" + navigateQuery);
         }, function () {
             // If geolocation is NOT successful just show the location.
-            generalTools.goToUrl("http://maps.google.com/maps?q=" + navigateQuery);
+            generalTools.openUrl("http://maps.google.com/maps?q=" + navigateQuery);
         }, {timeout: 10000, enableHighAccuracy: true});
     };
 
-    generalTools.goToUrl = function (url) {
+    /**
+     * Attempt to call
+     * @param number
+     */
+    generalTools.call = function (number) {
+        //strip only numbers
+        number = number.match(/\d+/g).join("");
+
+        window.location.href = "tel:" + number;
+
+        //TODO in cordova use phone function? Maybe it will be better
+    };
+
+    /**
+     * Opens an email link
+     * @param address The email address
+     */
+    generalTools.email = function (address) {
+        window.open("mailto:" + address, "_self");
+    };
+
+    /**
+     * Opens a url in a new tab / window
+     * @param url The url to open
+     */
+    generalTools.openUrl = function (url) {
         if (url.substr(0, 7) !== "http://" && url.substr(0, 8) !== "https://") {
             url = "http://" + url;
         }
+
         if (generalTools.checkPlatform.isAndroid() && generalTools.checkPlatform.isCordova()) {
             window.plugins.childBrowser.showWebPage(url);
         } else {

@@ -302,7 +302,7 @@ define(["sections/importerUpload", "sections/importerSelect", "db/services", "to
         contactInfoWidget.on("click", function (e) {
             //initialize the contact info widget with the data from the grid dataSource
             var data = updateEditIndexes(e);
-            $("#popupContent").find(".contactInfoWidget").contactInfo({contacts: data.get("ContactInfo")});
+            $("#popupContent").find(".contactInfoWidget").contactInfo({data: data.get("ContactInfo")});
         });
 
         repeatWidget.on("click", function (e) {

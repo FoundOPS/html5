@@ -36,7 +36,7 @@ define(["sections/linkedEntitySection", "sections/routeDetails", "tools/paramete
 
                 //initiate the contactInfo widget
                 $("#routeDestinationDetails .contactInfoWidget").contactInfo({
-                    contacts: contacts,
+                    data: contacts,
                     entity: {
                         create: function (contactInfo) {
                             contactInfo.ClientId = vm.get("selectedEntity.Client.Id");
