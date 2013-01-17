@@ -418,7 +418,7 @@ define(["sections/importerUpload", "sections/importerSelect", "db/services", "to
                 locationWidget.removeWidget();
                 cell.popup({id:"Location", contents: $("<div class='locationWidget'></div>")});
             } else if (contactInfoWidget) {
-                contactInfoWidget.removeWidget();
+                contactInfoWidget.destroy();
             } else if (repeatWidget) {
                 repeatWidget.removeWidget();
             }

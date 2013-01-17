@@ -192,6 +192,7 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                     }, false);
                 }
             },
+
             _getOptions: function (searchTerm) {
                 var widget = this, element = widget.element, matches = [];
                 if (widget.options.data) {
@@ -298,7 +299,7 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                 var widget = this;
                 var data = widget.selectedData;
                 if (data) {
-                    var text = widget.options.formatOption(data);
+                    var text = widget.element.find("input").val();
                     return text ? text : "";
                 }
 
