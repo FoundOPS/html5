@@ -99,7 +99,7 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
                         callback(locations);
                     });
                 },
-                formatOption: generalTools.getLocationDisplayString,
+                formatItem: generalTools.getLocationDisplayString,
                 onSelect: function (e, selectedData) {
                     var element = $(widget.element);
                     //if "Manually Place Pin" was selected
