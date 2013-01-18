@@ -240,13 +240,13 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                                 matches.push(dataItem);
                             }
                         }
-                    }
 
-                    widget.open(matches);
-
-                    //Proxy is needed for widget 'this' context. 'this' is in caller's context otherwise.
-                    if (!data && options.query) {
-                        options.query(searchTerm, $.proxy(widget.open, widget));
+                        widget.open(matches);
+                    }else{
+                        //Proxy is needed for widget 'this' context. 'this' is in caller's context otherwise.
+                        if (options.query) {
+                            options.query(searchTerm, $.proxy(widget.open, widget));
+                        }
                     }
                 }
 
@@ -326,8 +326,7 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                              '<span id="previousSelection" class="name">' +
                                 widget.options.formatItem(widget.selectedData) +
                             '</span>' +
-                         '</li>'
-                     );
+                         '</li>');
 
                     //Attach selectedData to html and append to DOM.
                     $previousSelection.data("selectedData", widget.selectedData);
