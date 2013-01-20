@@ -210,7 +210,11 @@ define(["developer", "tools/dateTools", "db/saveHistory", "tools/parameters", "t
             read: {},
             update: {disableNotifications: true}
         },
-        locations: {},
+        locations: {
+            create: {},
+            read: {},
+            update: {}
+        },
         locationFields: {
             update: {}
         },

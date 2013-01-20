@@ -364,6 +364,34 @@ define(["db/services", "ui/ui", "tools/dateTools", "tools/generalTools", "tools/
 
             if (!reloadDetails) {
                 widget._skipLoad = true;
+                widget._scrollToSelected();
+            }
+        },
+
+        //scroll to the selected service holder
+        _scrollToSelected: function () {
+            var widget = this;
+            var content = widget.element.find(".k-grid-content");
+
+            //get the number of pages
+            var numPages = Math.floor(widget.dataSource.total() / widget.dataSource.pageSize()) + 1;
+
+            //check each page for the row with the UID of the selected service holder
+            for (var i = 0; i < numPages; i++) {
+                //move to the next page
+                widget.dataSource.page(i + 1);
+
+                //get the row that corresponds to the new item
+                var row = widget.kendoGrid.tbody.find('tr[data-uid="' + widget._selectedServiceHolder.uid + '"]');
+
+                //check for the row on the page
+                if (row[0]) {
+                    //select the service holder in the grid
+                    widget.kendoGrid.select(row);
+                    //scroll to that row
+                    content.scrollTop(row.offset().top - 200);
+                    break;
+                }
             }
         },
 
@@ -388,30 +416,6 @@ define(["db/services", "ui/ui", "tools/dateTools", "tools/generalTools", "tools/
 
             if (widget.options.add) {
                 widget.options.add(service);
-            }
-
-            //scroll to the new service
-            var content = widget.element.find(".k-grid-content");
-
-            //get the number of pages
-            var numPages = Math.floor(widget.dataSource.total() / widget.dataSource.pageSize()) + 1;
-
-            //check each page for the row with the UID of the new service
-            for (var i = 0; i < numPages; i++) {
-                //move to the next page
-                widget.dataSource.page(i + 1);
-
-                //get the row that corresponds to the new item
-                var row = widget.kendoGrid.tbody.find('tr[data-uid="' + widget._selectedServiceHolder.uid + '"]');
-
-                //check for the row on the page
-                if (row[0]) {
-                    //select the service holder in the grid
-                    widget.kendoGrid.select(row);
-                    //scroll to that row
-                    content.scrollTop(row.offset().top - 200);
-                    break;
-                }
             }
         },
 

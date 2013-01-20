@@ -26,6 +26,19 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
     //endregion
 
     //Location widget
+    /**
+     * Update and save the destination field
+     * @param location
+     */
+    var updateDestinationField = function (location) {
+        var destinationField = models.getDestinationField(vm.get("selectedService"));
+        destinationField.Value = location;
+
+        services.save(true, function () {
+            servicesGrid.invalidateSelectedService();
+        });
+    };
+
     var setupLocationWidget = function (service) {
         //remove the location widget if it exists
         if (locationWidget) {
@@ -41,36 +54,27 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
             clientId = client.Id;
         }
 
-        var addChangeLocation = function (location) {
-            //update and save the destination field
-            destinationField = models.getDestinationField(vm.get("selectedService"));
-            destinationField.Value = location;
-            var destinationField = models.getDestinationField(vm.get("selectedService"));
-
-            //wait until the service has been saved then
-            //trigger change to save the destination
-            services.save(true, function () {
-                dbServices.locationFields.update({
-                    body: destinationField,
-                    params: {
-                        serviceId: vm.get("selectedService.Id"),
-                        recurringServiceId: vm.get("selectedService.RecurringServiceId"),
-                        clientId: locationWidget.options.clientId,
-                        occurDate: vm.get("selectedService.ServiceDate")
-                    }
-                }).done(function () {
-                        destinationField.Value.IsNew = false;
-                    });
-
-                servicesGrid.invalidateSelectedService();
+        /**
+         * @param location The location to add or change
+         * @param action - create or update
+         */
+        var addChangeLocation = function (location, action) {
+            //add the location then
+            //save the service (which will update destination field)
+            dbServices.locations[action]({body: location}).done(function () {
+                updateDestinationField(location);
             });
         };
 
         locationSelector.location({
             data: [destination],
             clientId: clientId,
-            add: addChangeLocation,
-            change: addChangeLocation
+            add: function (loc) {
+                addChangeLocation(loc, "create");
+            },
+            change: function (loc) {
+                addChangeLocation(loc, "update");
+            }
         });
 
         locationWidget = locationSelector.data("location");
@@ -93,7 +97,7 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
     };
 
     //Client widget
-    var clientChanged = function () {
+    var clientChanged = _.debounce(function () {
         var client = clientSelector.select2("data");
 
         vm.get("selectedService").set("Client", client);
@@ -107,7 +111,7 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
                 //update the location widget with this new location
                 locationWidget.options.data = [locations[0]];
                 locationWidget.showList();
-                locationWidget.options.change(locations[0]);
+                updateDestinationField(locations[0]);
             } else {
                 //show the edit screen
                 locationWidget.options.data = [
@@ -117,7 +121,8 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
                 locationWidget.edit(0, true);
             }
         });
-    };
+    }, 250);
+
     var setupClientWidget = function () {
         var formatClientName = function (client) {
             return client.Name;
