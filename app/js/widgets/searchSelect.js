@@ -133,6 +133,9 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                     $optionList.css("overflow-y", "auto");
                 }
 
+                //NOTE: Can't add classes to element directly. Causes menu to clear.
+                $optionList.addClass("closed");
+
                 //Event Listeners
                 $input.on("click touchstart", function () {
                     /*if (widget.selectedOptionTempText) {
@@ -166,6 +169,10 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                                 widget.options.onClose();
                             }
 
+                            //NOTE: Can't add classes to element directly. Causes menu to clear.
+                            $optionList.removeClass("opened");
+                            $optionList.addClass("closed");
+
                             //}, 200);
                             if (widget.isTouchDevice) {
                                 $(".km-scroll-wrapper").kendoMobileScroller("reset");
@@ -197,7 +204,8 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                     var classNameNotInDontCloseOn = (className && dontCloseOn) ? className.indexOf(dontCloseOn) === -1 : false;
 
                     //Close list if clicked element is outside list.
-                    if ( parentClassesLen === 0 || classNameNotInDontCloseOn){
+                    //If not closed, do not clear.
+                    if ( $optionList.hasClass("opened") && (parentClassesLen === 0 || classNameNotInDontCloseOn) ){
                         setTimeout(function () {
                             if (!scrolling) {
                                 //widget.selectedOptionTempText = $input.val();
@@ -205,6 +213,10 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                                 if (widget.options.onClose) {
                                     widget.options.onClose();
                                 }
+
+                                //NOTE: Can't add classes to element directly. Causes menu to clear.
+                                $optionList.removeClass("opened");
+                                $optionList.addClass("closed");
 
                                 if (widget.isTouchDevice) {
                                     $(".km-scroll-wrapper").kendoMobileScroller("reset");
@@ -215,6 +227,7 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                 });
             },
 
+            //TODO: Pull open out of _getListItems.
             _getListItems: function (searchTerm) {
                 var widget = this,
                     element = widget.element,
@@ -268,8 +281,11 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
             clearList: function () {
                 var optionList = this.element.find(".optionList")[0];
 
-                //Faster
-                while (optionList.hasChildNodes()) {
+                //Fastest implementation http://jsperf.com/innerhtml-vs-removechild-yo/3
+                //Sets child to the last child in optionList, checks if it exists.
+                //Continues until all children are removed.
+                var child;
+                while (child = optionList.lastChild) {
                     optionList.removeChild(optionList.lastChild);
                 }
 
@@ -283,6 +299,10 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                     element = widget.element,
                     $optionList = $(element).find(".optionList"),
                     $optionListScroller = $(element).find("#optionListScroller");
+
+                //NOTE: Can't add classes to element directly. Causes menu to clear.
+                $optionList.addClass("opened");
+                $optionList.removeClass("closed");
 
                 //Clear list before setting data.
                 widget.clearList();
@@ -329,8 +349,8 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                          '</li>');
 
                     //Attach selectedData to html and append to DOM.
-                    $previousSelection.data("selectedData", widget.selectedData);
                     $optionList.append($previousSelection);
+                    $previousSelection.data("selectedData", widget.selectedData);
                 }
 
                 //If additionalItem is set, append it.
@@ -371,7 +391,6 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                     widget.options.onSelect(null, widget.selectedData);
                     //Wait for listeners from other widgets to use the selected option before removing it from the DOM.
                 }
-
                 return widget.selectedData;
             },
 
