@@ -292,7 +292,6 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                 //Slower, but cleaner
                 //optionList.empty();
             },
-
             //open(options) - Opens the list of items the user can select.
             open: function (items) {
                 var widget = this,
@@ -404,6 +403,14 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                 }
 
                 return "";
+            },
+
+            //TODO: Fix widget.selectedData to be set on when edited.
+            //inputText() - Returns the current value in the input box.
+            inputText: function (){
+                var element = this.element;
+                var $input = $(element).find("input");
+                return $input ? $input.val() : "";
             }
         };
 
