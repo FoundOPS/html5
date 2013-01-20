@@ -209,6 +209,8 @@ define(["db/services", "ui/ui", "tools/generalTools"], function (dbServices, fui
                         setTimeout(function () {
                             if (!scrolling) {
                                 //widget.selectedOptionTempText = $input.val();
+                                widget.selectedData = widget.inputText();
+
                                 widget.clearList();
                                 if (widget.options.onClose) {
                                     widget.options.onClose();

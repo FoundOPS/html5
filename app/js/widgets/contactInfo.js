@@ -83,7 +83,7 @@ define(["tools/generalTools", "tools/parserTools", "tools/analytics", "widgets/s
                 var oldContact = generalTools.deepClone(contact);
 
                 //get the value of the selected label
-                var selectedLabel = widget._labelSearchSelect.inputText();
+                var selectedLabel = widget._labelSearchSelect.text();
 
                 //set the value, label, category
                 contact.Data = element.find(".editWrapper .value").val();
