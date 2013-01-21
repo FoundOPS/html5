@@ -16,3 +16,6 @@ app/index.html
 app/compiledViews.html
 app/styles/login.css
 app/styles/requirements.css
+app/main.css
+app/requirements.css
+app/login.css

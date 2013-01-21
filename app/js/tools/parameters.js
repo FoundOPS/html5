@@ -9,12 +9,12 @@
 (function (root, factory) {
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
-        define(['vendor/signals', 'vendor/hasher'], factory);
+        define([], factory);
     } else {
         // Browser globals
-        root.parameters = factory(root.signals);
+        root.parameters = factory();
     }
-}(this, function (signals) {
+}(this, function () {
     var parameters = {
         //whenever the parameters, section, or roleId changes trigger changed
         changed: new signals.Signal(),

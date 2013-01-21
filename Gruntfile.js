@@ -11,15 +11,9 @@ module.exports = function (grunt) {
 
     //TODO figure out how to choose based on the current arg (all/dist/etc.)
     //may need to wait till v1 https://github.com/yeoman/yeoman/wiki/Customization
-    var deploying = deployment.local;
+    var deploying = deployment.server;
 
-    var resourcesRoot = "../"; //for local / mobile
-    if (deploying === deployment.server) {
-        resourcesRoot = "http://bp.foundops.com/app/";
-    }
-
-    var imgRoot = resourcesRoot + "img/";
-    var stylesRoot = "../" + resourcesRoot + "styles/";
+    var imgRoot = 'img/';
 
     var testingTag = "";
     if (deploying === deployment.local) {
@@ -48,9 +42,9 @@ module.exports = function (grunt) {
                     compile: true
                 },
                 files: {
-                    "app/styles/main.css": "app/styles/main.less",
-                    "app/styles/login.css": "app/styles/login.less",
-                    "app/styles/requirements.css": "app/styles/requirements.less"
+                    "app/main.css": "app/styles/main.less",
+                    "app/login.css": "app/styles/login.less",
+                    "app/requirements.css": "app/styles/requirements.less"
                 }
             }
         },
@@ -80,7 +74,7 @@ module.exports = function (grunt) {
             },
             reload: {
                 files: [
-                    'app/styles/**/*.css',
+                    'app/**/*.css',
                     'app/js/**/*.js',
                     'app/img/**/*'
                 ],
@@ -138,13 +132,13 @@ module.exports = function (grunt) {
 
         // concat css/**/*.css files, inline @import, output a single minified css
         css: {
-            'styles/main.css': ['styles/**/*.css']
+            'blank.css': ['styles/blank.css']
         },
 
         // fix css url references
         fixCss: {
             all: {
-                src: ['app/styles/main.css', 'app/styles/login.css', 'app/styles/requirements.css']
+                src: ['app/main.css', 'app/login.css', 'app/requirements.css']
             }
         },
 
@@ -152,7 +146,7 @@ module.exports = function (grunt) {
         // versioning
         rev: {
             js: 'scripts/**/*.js',
-            css: 'styles/**/*.css',
+            css: '**/*.css',
             img: 'images/**'
         },
 
@@ -370,7 +364,6 @@ module.exports = function (grunt) {
             contents = contents.replace(/Default\//g, imgRoot);
 
             contents = contents.replace(/images\//g, imgRoot);
-            contents = contents.replace(/styles\//g, stylesRoot);
 
             grunt.file.write(f, contents);
         });

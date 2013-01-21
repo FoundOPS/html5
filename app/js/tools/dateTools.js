@@ -9,12 +9,12 @@
 (function (root, factory) {
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
-        define(['vendor/moment'], factory);
+        define([], factory);
     } else {
         // Browser globals
-        root.dateTools = factory(root.moment);
+        root.dateTools = factory();
     }
-}(this, function (moment) {
+}(this, function () {
     var dateTools = {};
 
     /**

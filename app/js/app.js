@@ -14,12 +14,12 @@ require.config({
     }
 });
 
-require(["developer", "db/services", "db/session", "tools/parameters", "tools/silverlight", "tools/generalTools", "vendor/hasher", "db/models",
+require(["developer", "db/services", "db/session", "tools/parameters", "tools/silverlight", "tools/generalTools", "db/models",
     "sections/settings/personalSettings", "sections/settings/businessSettings", "sections/settings/usersSettings", "sections/settings/dispatcherSettings",
     "sections/settings/changePassword", "sections/settings/privacyPolicy", "sections/settings/termsOfService", "sections/services", "sections/routes", "sections/importerUpload",
     "sections/importerSelect", "sections/importerReview", "sections/routeDetails", "sections/routeDestinationDetails", "sections/routeTask", "sections/mapView",
     "sections/routes", "sections/routeDetails", "sections/routeDestinationDetails", "sections/routeTask", "sections/signature", "sections/mapView",
-    "widgets/serviceDetails"], function (developer, dbServices, session, parameters, silverlight, generalTools, hasher) {
+    "widgets/serviceDetails"], function (developer, dbServices, session, parameters, silverlight, generalTools) {
     /**
      * application = The app object.
      * navigator = The navigator object.
@@ -80,6 +80,9 @@ require(["developer", "db/services", "db/session", "tools/parameters", "tools/si
     session.load(function (data) {
         //setup local view url's
         data.settingsUrl = "#personalSettings";
+        if (!generalTools.checkPlatform.isCordova())
+            data.logOutUrl = "http://app.foundops.com/Account/LogOut";
+
         for (var s in data.sections) {
             var section = data.sections[s];
             if (!section.isSilverlight) {
@@ -190,10 +193,6 @@ require(["developer", "db/services", "db/session", "tools/parameters", "tools/si
             firstLoad = false;
             return;
         }
-        //clear previous views
-        $('div[data-role=view]').each(function (i, elem) {
-            $(elem).remove();
-        });
 
         var currentSection = parameters.getSection();
         //reload the current page: if there is a section (not silverlight)
