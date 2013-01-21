@@ -67,40 +67,112 @@ if (!UserVoice || !UserVoice.showPopupWidget) {
         var jsonStringify = null;
         //////
         (function () {
-            function f(n) { return n < 10 ? '0' + n : n; }
+            function f(n) {
+                return n < 10 ? '0' + n : n;
+            }
+
             if (typeof Date.prototype.toJSON !== 'function') {
                 Date.prototype.toJSON = function (key) {
                     return isFinite(this.valueOf()) ? this.getUTCFullYear() + '-' +
-  f(this.getUTCMonth() + 1) + '-' +
-  f(this.getUTCDate()) + 'T' +
-  f(this.getUTCHours()) + ':' +
-  f(this.getUTCMinutes()) + ':' +
-  f(this.getUTCSeconds()) + 'Z' : null;
-                }; String.prototype.toJSON = Number.prototype.toJSON = Boolean.prototype.toJSON = function (key) { return this.valueOf(); };
+                        f(this.getUTCMonth() + 1) + '-' +
+                        f(this.getUTCDate()) + 'T' +
+                        f(this.getUTCHours()) + ':' +
+                        f(this.getUTCMinutes()) + ':' +
+                        f(this.getUTCSeconds()) + 'Z' : null;
+                };
+                String.prototype.toJSON = Number.prototype.toJSON = Boolean.prototype.toJSON = function (key) {
+                    return this.valueOf();
+                };
             }
-            var cx = /[\u0000\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g, escapable = /[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g, gap, indent, meta = { '\b': '\\b', '\t': '\\t', '\n': '\\n', '\f': '\\f', '\r': '\\r', '"': '\\"', '\\': '\\\\' }, rep; function quote(string) { escapable.lastIndex = 0; return escapable.test(string) ? '"' + string.replace(escapable, function (a) { var c = meta[a]; return typeof c === 'string' ? c : '\\u' + ('0000' + a.charCodeAt(0).toString(16)).slice(-4); }) + '"' : '"' + string + '"'; }
+            var cx = /[\u0000\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g, escapable = /[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g, gap, indent, meta = { '\b': '\\b', '\t': '\\t', '\n': '\\n', '\f': '\\f', '\r': '\\r', '"': '\\"', '\\': '\\\\' }, rep;
+
+            function quote(string) {
+                escapable.lastIndex = 0;
+                return escapable.test(string) ? '"' + string.replace(escapable, function (a) {
+                    var c = meta[a];
+                    return typeof c === 'string' ? c : '\\u' + ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
+                }) + '"' : '"' + string + '"';
+            }
+
             function str(key, holder) {
-                var i, k, v, length, mind = gap, partial, value = holder[key]; if (value && typeof value === 'object' && typeof value.toJSON === 'function') { value = value.toJSON(key); }
-                if (typeof rep === 'function') { value = rep.call(holder, key, value); }
+                var i, k, v, length, mind = gap, partial, value = holder[key];
+                if (value && typeof value === 'object' && typeof value.toJSON === 'function') {
+                    value = value.toJSON(key);
+                }
+                if (typeof rep === 'function') {
+                    value = rep.call(holder, key, value);
+                }
                 switch (typeof value) {
-                    case 'string': return quote(value); case 'number': return isFinite(value) ? String(value) : 'null'; case 'boolean': case 'null': return String(value); case 'object': if (!value) { return 'null'; }
-                        gap += indent; partial = []; if (Object.prototype.toString.apply(value) === '[object Array]') {
-                            length = value.length; for (i = 0; i < length; i += 1) { partial[i] = str(i, value) || 'null'; }
-                            v = partial.length === 0 ? '[]' : gap ? '[\n' + gap +
-  partial.join(',\n' + gap) + '\n' +
-  mind + ']' : '[' + partial.join(',') + ']'; gap = mind; return v;
+                    case 'string':
+                        return quote(value);
+                    case 'number':
+                        return isFinite(value) ? String(value) : 'null';
+                    case 'boolean':
+                    case 'null':
+                        return String(value);
+                    case 'object':
+                        if (!value) {
+                            return 'null';
                         }
-                        if (rep && typeof rep === 'object') { length = rep.length; for (i = 0; i < length; i += 1) { k = rep[i]; if (typeof k === 'string') { v = str(k, value); if (v) { partial.push(quote(k) + (gap ? ': ' : ':') + v); } } } } else { for (k in value) { if (Object.hasOwnProperty.call(value, k)) { v = str(k, value); if (v) { partial.push(quote(k) + (gap ? ': ' : ':') + v); } } } }
+                        gap += indent;
+                        partial = [];
+                        if (Object.prototype.toString.apply(value) === '[object Array]') {
+                            length = value.length;
+                            for (i = 0; i < length; i += 1) {
+                                partial[i] = str(i, value) || 'null';
+                            }
+                            v = partial.length === 0 ? '[]' : gap ? '[\n' + gap +
+                                partial.join(',\n' + gap) + '\n' +
+                                mind + ']' : '[' + partial.join(',') + ']';
+                            gap = mind;
+                            return v;
+                        }
+                        if (rep && typeof rep === 'object') {
+                            length = rep.length;
+                            for (i = 0; i < length; i += 1) {
+                                k = rep[i];
+                                if (typeof k === 'string') {
+                                    v = str(k, value);
+                                    if (v) {
+                                        partial.push(quote(k) + (gap ? ': ' : ':') + v);
+                                    }
+                                }
+                            }
+                        } else {
+                            for (k in value) {
+                                if (Object.hasOwnProperty.call(value, k)) {
+                                    v = str(k, value);
+                                    if (v) {
+                                        partial.push(quote(k) + (gap ? ': ' : ':') + v);
+                                    }
+                                }
+                            }
+                        }
                         v = partial.length === 0 ? '{}' : gap ? '{\n' + gap + partial.join(',\n' + gap) + '\n' +
-  mind + '}' : '{' + partial.join(',') + '}'; gap = mind; return v;
-                } 
+                            mind + '}' : '{' + partial.join(',') + '}';
+                        gap = mind;
+                        return v;
+                }
             }
+
             jsonStringify = function (value, replacer, space) {
-                var i; gap = ''; indent = ''; if (typeof space === 'number') { for (i = 0; i < space; i += 1) { indent += ' '; } } else if (typeof space === 'string') { indent = space; }
-                rep = replacer; if (replacer && typeof replacer !== 'function' && (typeof replacer !== 'object' || typeof replacer.length !== 'number')) { throw new Error('JSON.stringify'); }
+                var i;
+                gap = '';
+                indent = '';
+                if (typeof space === 'number') {
+                    for (i = 0; i < space; i += 1) {
+                        indent += ' ';
+                    }
+                } else if (typeof space === 'string') {
+                    indent = space;
+                }
+                rep = replacer;
+                if (replacer && typeof replacer !== 'function' && (typeof replacer !== 'object' || typeof replacer.length !== 'number')) {
+                    throw new Error('JSON.stringify');
+                }
                 return str('', { '': value });
             };
-        } ());
+        }());
         //////
 
         //
@@ -111,13 +183,13 @@ if (!UserVoice || !UserVoice.showPopupWidget) {
         if (!window.requestAnimationFrame) {
             window.requestAnimationFrame = (function () {
                 return window.requestAnimationFrame ||
-              window.webkitRequestAnimationFrame ||
-              window.mozRequestAnimationFrame ||
-              window.oRequestAnimationFrame ||
-              window.msRequestAnimationFrame ||
-              function (/* function */callback, /* DOMElement */element) {
-                  window.setTimeout(callback, 1000 / 60);
-              };
+                    window.webkitRequestAnimationFrame ||
+                    window.mozRequestAnimationFrame ||
+                    window.oRequestAnimationFrame ||
+                    window.msRequestAnimationFrame ||
+                    function (/* function */callback, /* DOMElement */element) {
+                        window.setTimeout(callback, 1000 / 60);
+                    };
             })();
         }
 
@@ -234,11 +306,11 @@ if (!UserVoice || !UserVoice.showPopupWidget) {
         // Takes a template like "hi there, #{person}" and params {"person": "Dave"} and returns "hi there, Dave"
         var render = function (template, params) {
             return template.replace(/\#\{([^{}]*)\}/g,
-      function (a, b) {
-          var r = params[b];
-          return typeof r === 'string' || typeof r === 'number' ? r : a;
-      }
-    );
+                function (a, b) {
+                    var r = params[b];
+                    return typeof r === 'string' || typeof r === 'number' ? r : a;
+                }
+            );
         };
 
         var insertHtml = function (html) {
@@ -267,7 +339,8 @@ if (!UserVoice || !UserVoice.showPopupWidget) {
         // Adds the css string to the page
         var includeCss = function (cssString) {
             var styleElement = document.createElement('style');
-            styleElement.type = 'text/css'; styleElement.media = 'screen';
+            styleElement.type = 'text/css';
+            styleElement.media = 'screen';
             if (styleElement.styleSheet) {
                 styleElement.styleSheet.cssText = cssString;
             } else {
@@ -280,7 +353,8 @@ if (!UserVoice || !UserVoice.showPopupWidget) {
             // Don't show tab on printed pages
             var cssString = '#uvTab {display:none !important;}';
             var styleElement = document.createElement('style');
-            styleElement.type = 'text/css'; styleElement.media = 'print';
+            styleElement.type = 'text/css';
+            styleElement.media = 'print';
             if (styleElement.styleSheet) {
                 styleElement.styleSheet.cssText = cssString;
             } else {
@@ -347,10 +421,10 @@ if (!UserVoice || !UserVoice.showPopupWidget) {
         function getDocumentHeight() {
             var D = document;
             return Math.max(
-        Math.max(D.body.scrollHeight, D.documentElement.scrollHeight),
-        Math.max(D.body.offsetHeight, D.documentElement.offsetHeight),
-        Math.max(D.body.clientHeight, D.documentElement.clientHeight)
-    );
+                Math.max(D.body.scrollHeight, D.documentElement.scrollHeight),
+                Math.max(D.body.offsetHeight, D.documentElement.offsetHeight),
+                Math.max(D.body.clientHeight, D.documentElement.clientHeight)
+            );
         }
 
         var referrer = function () {
@@ -422,7 +496,7 @@ if (!UserVoice || !UserVoice.showPopupWidget) {
 
         var Tab = {
             template: '<div id="uvTab" style="#{tabStyle}">' +
-              '<a id="uvTabLabel" style="background-color: transparent; #{linkStyle}" href="javascript:return false;"><img src="#{imgSrc}" alt="#{label}" style="border:0; background-color: transparent; padding:0; margin:0;" /></a></div>',
+                '<a id="uvTabLabel" style="background-color: transparent; #{linkStyle}" href="javascript:return false;"><img src="#{imgSrc}" alt="#{label}" style="border:0; background-color: transparent; padding:0; margin:0;" /></a></div>',
 
             show: function (opts) {
                 this.setOptions(opts);
@@ -570,11 +644,17 @@ if (!UserVoice || !UserVoice.showPopupWidget) {
                 pos = (pos && pos[1]) || 'bottom';
 
                 if (pos === 'top') {
-                    getTop = function () { return (window.pageYOffset + 'px') };
+                    getTop = function () {
+                        return (window.pageYOffset + 'px')
+                    };
                 } else if (pos === 'middle') {
-                    getTop = function () { return Math.round(window.pageYOffset + (window.innerHeight / 2) - (tab.dimensions.width / 2)) + 'px' };
+                    getTop = function () {
+                        return Math.round(window.pageYOffset + (window.innerHeight / 2) - (tab.dimensions.width / 2)) + 'px'
+                    };
                 } else {
-                    getTop = function () { return (window.pageYOffset + window.innerHeight - tab.dimensions.height) + 'px' };
+                    getTop = function () {
+                        return (window.pageYOffset + window.innerHeight - tab.dimensions.height) + 'px'
+                    };
                 }
 
                 document.addEventListener('touchstart', onTouchStart, false);
@@ -609,12 +689,12 @@ if (!UserVoice || !UserVoice.showPopupWidget) {
             //iframeTemplate: '<iframe id="uservoice-dialog-iframe" src="#{url}?#{query}" frameborder="0" scrolling="no" allowtransparency="true" width="#{width}" height="#{height}" style="height: #{height}; width: #{width};"></iframe>',
             iframeTemplate: '<iframe id="uvw-dialog-iframe" src="#{url}?#{query}" frameBorder="0" name="uvw-iframe" style="display: block; background: #FAFBFC; border: none; -moz-border-radius: 3px; -webkit-border-radius: 3px; height: 100%; padding: none; position: absolute; top: 0; right: 0; bottom: 0; left: 0; width: 100%;"></iframe>',
             dialogTemplate: '<div class="uvOverlay1" id="#{overlay_id}" style="position: relative; visibility:hidden; z-index: 100003;"><div id="#{overlay_background_id}" style="background: #000; -ms-filter: alpha(opacity=75); filter: alpha(opacity=75); opacity: .75; position: fixed; top: 0; right: 0; bottom: 0; left: 0;"></div><div class="uvOverlay2" style="height: 100%; overflow: auto; position: fixed; top: 0; right: 0; bottom: 0; left: 0;"><div class="uvOverlay3" style="height: 100%; min-height: 550px; min-width: 900px; position: relative; width: 100%;"><div id="#{dialog_id}" style="-webkit-box-shadow: rgba(0,0,0,.5) 0 5px 5px; height: 500px; margin: -250px 0 0 -444px; position: absolute; top: 50%; left: 50%; width: 888px;">' +
-                      '<div onclick="return UserVoice.hidePopupWidget();" id="#{dialog_close_id}" title="Close Dialog" style="z-index: 100004; background: transparent url(' + assetHost + '/images/clients/widget2/close.png) 0 0 no-repeat; height: 48px; margin: 0; padding: 0; position: absolute; top: -22px; right: -24px; width: 48px;"><button style="background: none; border: none; -moz-box-shadow: none; -webkit-box-shadow: none; box-shadow: none; cursor: pointer; height: 30px; margin: 6px 0 0 9px; padding: 0; width: 30px; text-indent: -9000px;">Close Dialog</button></div>' +
-                      '<div id="#{dialog_content_id}" style="position:static; width:100%; height:100%"></div>' +
+                '<div onclick="return UserVoice.hidePopupWidget();" id="#{dialog_close_id}" title="Close Dialog" style="z-index: 100004; background: transparent url(' + assetHost + '/images/clients/widget2/close.png) 0 0 no-repeat; height: 48px; margin: 0; padding: 0; position: absolute; top: -22px; right: -24px; width: 48px;"><button style="background: none; border: none; -moz-box-shadow: none; -webkit-box-shadow: none; box-shadow: none; cursor: pointer; height: 30px; margin: 6px 0 0 9px; padding: 0; width: 30px; text-indent: -9000px;">Close Dialog</button></div>' +
+                '<div id="#{dialog_content_id}" style="position:static; width:100%; height:100%"></div>' +
 
-                      '<a id="#{dialog_powered_by_id}" href="http://uservoice.com/?utm_campaign=Powered By&amp;utm_medium=widget2&amp;utm_source=foundops.uservoice.com" target="_blank" style="background: url(' + assetHost + '/images/clients/widget2/powered_by.png) 0 0 no-repeat; font-size: 11px; height: 20px; position: absolute; bottom: -25px; right: 10px; text-indent: -9000px; width: 150px;">Powered by UserVoice</a>' +
+                '<a id="#{dialog_powered_by_id}" href="http://uservoice.com/?utm_campaign=Powered By&amp;utm_medium=widget2&amp;utm_source=foundops.uservoice.com" target="_blank" style="background: url(' + assetHost + '/images/clients/widget2/powered_by.png) 0 0 no-repeat; font-size: 11px; height: 20px; position: absolute; bottom: -25px; right: 10px; text-indent: -9000px; width: 150px;">Powered by UserVoice</a>' +
 
-                    '</div></div></div></div>',
+                '</div></div></div></div>',
 
             dialog_id: 'uvw-dialog',
             dialog_close_id: 'uvw-dialog-close',
@@ -760,8 +840,10 @@ if (!UserVoice || !UserVoice.showPopupWidget) {
         };
 
         UserVoice.showTab = function (opts) {
-            
-        };
-    })();
 
+        };
+
+        //FOUNDOPS Change, fixes closure
+        window.UserVoice = UserVoice;
+    })();
 }

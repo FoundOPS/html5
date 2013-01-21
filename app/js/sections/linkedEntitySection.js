@@ -31,7 +31,8 @@ define(["db/saveHistory", "tools/parameters"], function (saveHistory, parameters
          * Try to select the next entity if it is part of the query parameters
          */
         section._moveForward = function () {
-            if (parameters.getSection().name !== currentSectionName) {
+            var section = parameters.getSection();
+            if (!section || section.name !== currentSectionName) {
                 return;
             }
 

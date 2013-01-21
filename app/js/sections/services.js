@@ -33,6 +33,7 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
     var updateDestinationField = function (location) {
         var destinationField = models.getDestinationField(vm.get("selectedService"));
         destinationField.Value = location;
+        destinationField.LocationId = location.Id;
 
         services.save(true, function () {
             servicesGrid.invalidateSelectedService();
@@ -56,12 +57,16 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
 
         /**
          * @param location The location to add or change
-         * @param action - create or update
          */
-        var addChangeLocation = function (location, action) {
-            //add the location then
-            //save the service (which will update destination field)
+        var addChangeLocation = function (location) {
+            var action = "update";
+            if (location.IsNew) {
+                action = "create";
+            }
+
+            //add the location then updateDestinationField
             dbServices.locations[action]({body: location}).done(function () {
+                location.IsNew = false;
                 updateDestinationField(location);
             });
         };
@@ -69,11 +74,8 @@ require(["db/session", "db/services", "tools/parameters", "tools/dateTools", "db
         locationSelector.location({
             data: [destination],
             clientId: clientId,
-            add: function (loc) {
-                addChangeLocation(loc, "create");
-            },
             change: function (loc) {
-                addChangeLocation(loc, "update");
+                addChangeLocation(loc);
             }
         });
 

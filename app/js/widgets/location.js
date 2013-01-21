@@ -6,8 +6,8 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
     $.widget("ui.location", {
         options: {
             //Callback functions, each passed the location
-            add: null,
-            change: null,
+            add: null, //called after the add button was clicked, and a location is selected/saved
+            change: null, //called after the edit button was clicked, and a location is selected/saved
             delete: null,
             //Will return locations for this Client in queries
             clientId: null,
@@ -40,10 +40,6 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
                 '<input name="line2" class="line2 locationInput" type="text" /><br />' +
                 '<label for="city">City</label><br />' +
                 '<input name="city" class="city locationInput geocoded" type="text" /><br />' +
-                '<input class="countryCode locationInput" type="hidden" />' +
-                '<input class="lat locationInput" type="hidden" />' +
-                '<input class="lng locationInput" type="hidden" />' +
-                '<input class="id locationInput" type="hidden" />' +
                 '<div class="zipCodeWrapper">' +
                 '<label for="zipCode">Zip Code</label><br />' +
                 '<input name="zipCode" class="zipCode locationInput geocoded" type="text" />' +
@@ -102,6 +98,7 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
                 formatItem: generalTools.getLocationDisplayString,
                 onSelect: function (e, selectedData) {
                     var element = $(widget.element);
+
                     //if "Manually Place Pin" was selected
                     if (e.target.innerText === "Manually Place Pin") {
                         //allow the marker to move on map click
@@ -118,7 +115,7 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
                         widget._enableFields();
 
                         //generate a new guid
-                        element.find(".id").val(tools.newGuid());
+                        selectedData = {Id: tools.newGuid(), IsNew: true};
                     }
                     //if a location was selected
                     else {
@@ -127,6 +124,14 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
                         widget._showMarker(selectedData);
                         widget.showSaveButton();
                     }
+
+                    //update the selected data client id to the location ClientId
+                    if (selectedData.IsNew) {
+                        selectedData.ClientId = widget.options.clientId;
+                    }
+
+                    //update the item to the selected location
+                    widget.options.data[widget.editIndex] = selectedData;
                 },
                 onClose: function () {
                     element.find("#addressWrapper")[0].style.opacity = 1;
@@ -171,8 +176,10 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
                     widget._showMarker({Latitude: e.latlng.lat, Longitude: e.latlng.lng});
 
                     //save the lat/lng
-                    element.find(".lat").val(e.latlng.lat);
-                    element.find(".lng").val(e.latlng.lng);
+                    var location = widget.options.data[widget.editIndex];
+
+                    location.Latitude = e.latlng.lat;
+                    location.Longitude = e.latlng.lng;
 
                     widget.showSaveButton();
                 }
@@ -183,44 +190,35 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
             });
 
             element.find(".saveBtn").on("click", function () {
-                //create a location with the values from the inputs
-                var updatedLocation = {
-                    Id: element.find(".id").val(),
-                    ClientId: widget.options.clientId,
-                    Name: element.find(".nickname").val(),
-                    AddressLineOne: element.find(".line1").val(),
-                    AddressLineTwo: element.find(".line2").val(),
-                    AdminDistrictOne: element.find(".state").val(),
-                    AdminDistrictTwo: element.find(".city").val(),
-                    PostalCode: element.find(".zipCode").val(),
-                    CountryCode: element.find(".countryCode").val(),
-                    Latitude: element.find(".lat").val(),
-                    Longitude: element.find(".lng").val()
-                };
+                var location = widget.options.data[widget.editIndex];
+
+                //update values from the inputs
+                location.Name = element.find(".nickname").val();
+                location.AddressLineOne = element.find(".line1").val();
+                location.AddressLineTwo = element.find(".line2").val();
+                location.AdminDistrictOne = element.find(".state").val();
+                location.AdminDistrictTwo = element.find(".city").val();
+                location.PostalCode = element.find(".zipCode").val();
 
                 //if adding a new location
-                if (widget.newLocation) {
-                    updatedLocation.IsNew = true;
-
-                    //add the new location to the list
-                    widget.options.data.push(updatedLocation);
-
-                    widget.options.add(updatedLocation);
-                    //if editing an already existing location
-                } else {
-                    var location = widget.options.data[widget.editIndex];
-
+                if (widget.entityIsAdded) {
+                    widget.options.add(location);
+                }
+                //if editing the current location
+                else {
                     //update the properties of the existing location that could have changed
-                    location.Name = updatedLocation.Name;
-                    location.Id = updatedLocation.Id;
-                    location.AddressLineOne = updatedLocation.AddressLineOne;
-                    location.AddressLineTwo = updatedLocation.AddressLineTwo;
-                    location.AdminDistrictOne = updatedLocation.AdminDistrictOne;
-                    location.AdminDistrictTwo = updatedLocation.AdminDistrictTwo;
-                    location.PostalCode = updatedLocation.PostalCode;
-                    location.CountryCode = updatedLocation.CountryCode;
-                    location.Latitude = updatedLocation.Latitude;
-                    location.Longitude = updatedLocation.Longitude;
+                    if (location.Id === widget._selectedEntity.Id) {
+                        widget._selectedEntity.Name = location.Name;
+                        widget._selectedEntity.AddressLineOne = location.AddressLineOne;
+                        widget._selectedEntity.AddressLineTwo = location.AddressLineTwo;
+                        widget._selectedEntity.AdminDistrictOne = location.AdminDistrictOne;
+                        widget._selectedEntity.AdminDistrictTwo = location.AdminDistrictTwo;
+                        widget._selectedEntity.PostalCode = location.PostalCode;
+                        widget._selectedEntity.CountryCode = location.CountryCode;
+                        widget._selectedEntity.Latitude = location.Latitude;
+                        widget._selectedEntity.Longitude = location.Longitude;
+                        location = widget.options.data[widget.editIndex] = widget._selectedEntity;
+                    }
 
                     widget.options.change(location);
                 }
@@ -228,18 +226,23 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
                 widget.showList();
 
                 widget._allowMapClick = false;
+                widget.entityIsAdded = false;
             });
 
             element.find(".deleteBtn").on("click", function () {
                 var answer = confirm("Are you sure you want to delete this location?");
                 if (answer) {
                     widget.options.data.splice(widget.editIndex, 1);
-                    widget.options.delete(widget.options.data[widget.editIndex]);
+                    if (!widget.entityIsAdded)
+                        widget.options.delete(widget.options.data[widget.editIndex]);
                     widget.showList();
                 }
             });
 
             element.find(".cancelBtn").on("click", function () {
+                //reset to the initially selected entity
+                widget.options.data[widget.editIndex] = widget._selectedEntity;
+
                 //switch to the location list
                 widget.showList();
 
@@ -259,12 +262,21 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
         /**
          * Animate to the edit screen
          * @param {number} index
-         * @param {boolean} newLocation if this is a new location
+         * @param {boolean} isAdded if this is a newly added location
          */
-        edit: function (index, newLocation) {
+        edit: function (index, isAdded) {
             var widget = this, element = $(widget.element);
-            widget.newLocation = newLocation;
+            widget.entityIsAdded = isAdded;
+
+            if (isAdded) {
+                index = widget.options.data.length;
+                widget.options.data.push({});
+            }
+
             widget.editIndex = index;
+
+            //store the entity before it is changed
+            var location = widget._selectedEntity = widget.options.data[widget.editIndex];
 
             element.find(".locationSearchSelect input").val("");
 
@@ -286,7 +298,6 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
                 });
             }
 
-            var location = widget.options.data[index];
 
             if (location) {
                 widget._populateFields(location);
@@ -307,6 +318,11 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
         //repopulate the list, show it, and place the corresponding markers on the map
         showList: function () {
             var widget = this, element = $(this.element), li;
+
+            //clear selected
+            widget._selectedEntity = null;
+            widget.editIndex = null;
+
             var locations = widget.options.data;
             //clear current list
             element.find(".splitBtnList")[0].innerHTML = "";
@@ -510,7 +526,6 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
             element.find(".countryCode").val(location.CountryCode);
             element.find(".lat").val(location.Latitude);
             element.find(".lng").val(location.Longitude);
-            element.find(".id").val(location.Id);
         },
 
         //disable the address fields
@@ -591,12 +606,8 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
         //remove all traces of the map
         removeWidget: function () {
             var widget = this;
-            if (widget._map) {
-                widget._clearMarkers();
-                widget._map.removeLayer(widget._cloudmade);
-                widget._map = null;
-            }
-            $(widget.element)[0].innerHTML = "";
+            widget._map = null;
+            $(widget.element).empty();
         }
     });
 });
