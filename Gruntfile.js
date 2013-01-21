@@ -198,7 +198,7 @@ module.exports = function (grunt) {
         // update references in HTML/CSS to revved files
         usemin: {
             html: ['index.html'],
-            css: ['**/*.css']
+            css: ['styles/blank.css']
         },
 
         // HTML minification
@@ -313,9 +313,9 @@ module.exports = function (grunt) {
                             headerAttributes[c] = customAttributes[c];
                         }
 
-                        var newHeader =  "<div ";
+                        var newHeader = "<div ";
                         //setup the header from the object
-                        for (var c in headerAttributes){
+                        for (var c in headerAttributes) {
                             newHeader += c + "='" + headerAttributes[c] + "' ";
                         }
 
