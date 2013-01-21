@@ -178,31 +178,10 @@ require(["developer", "db/services", "db/session", "tools/parameters", "tools/si
     }
 
     //TODO make roleSelected a navigator event
-    //set the the roleId parameter whenever the navigator chooses one
+    //whenever a role is changed set the parameter and reload the page
     $(document).on("roleSelected", function (e, role) {
         parameters.setOne("roleId", role.id);
-    });
-
-    var firstLoad = true;
-    //whenever a role is changed
-    //1) clear the previous views
-    //2) reload the view (if it is not silverlight)
-    parameters.roleId.changed.add(function () {
-        //do not clear and reload for the first views
-        if (firstLoad) {
-            firstLoad = false;
-            return;
-        }
-
-        var currentSection = parameters.getSection();
-        //reload the current page: if there is a section (not silverlight)
-        if (currentSection && !currentSection.isSilverlight) {
-            var hash = hasher.getHash();
-            hasher.setHash('');
-            _.delay(function () {
-                hasher.replaceHash(hash);
-            }, 100);
-        }
+        window.location.reload();
     });
 
     //when the silverlight plugin loads hook into the silverlight click events, and hide the navigator popup

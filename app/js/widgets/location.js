@@ -553,7 +553,8 @@ define(["db/services", "ui/ui", "tools/generalTools", "tools/generalTools"], fun
         invalidateMap: function (delay) {
             var widget = this;
             _.delay(function () {
-                widget._map.invalidateSize(false);
+                if (widget._map)
+                    widget._map.invalidateSize(false);
             }, delay);
         },
 
