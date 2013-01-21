@@ -53,7 +53,7 @@ define(["tools/generalTools"], function (generalTools) {
     /**
      * The current silverlight version
      */
-    developer.CURRENT_SILVERLIGHT_VERSION = 0.251;
+    developer.CURRENT_SILVERLIGHT_VERSION = 0.252;
 
     /**
      * Set to true if deploying

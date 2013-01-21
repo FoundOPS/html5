@@ -6,7 +6,7 @@
 
 "use strict";
 
-define(['db/models', 'tools/generalTools', 'ui/ui'], function (_, models, generalTools, ui) {
+define(['db/models', 'tools/generalTools', 'ui/ui'], function (models, generalTools, ui) {
     var leaflet = {};
 
     /**

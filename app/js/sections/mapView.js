@@ -12,7 +12,7 @@
 
 'use strict';
 
-define(["db/session", "db/services", "tools/generalTools", "tools/dateTools", "tools/parameters", "ui/leaflet", "ui/ui"], function (session, dbServices, generalTools, dateTools, parameters, ui) {
+define(["db/session", "db/services", "tools/generalTools", "tools/dateTools", "tools/parameters", "ui/leaflet", "ui/ui"], function (session, dbServices, generalTools, dateTools, parameters, leaflet, ui) {
     var mapView = {}, map, center, resources, resourcesGroup, routesGroup, depotsGroup, trackPointsGroup, selectedDate = session.today(), selectedRouteId;
     //region Locals
     /**
